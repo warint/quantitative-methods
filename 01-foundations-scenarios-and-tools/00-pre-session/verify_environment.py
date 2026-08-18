@@ -1,0 +1,208 @@
+"""
+MATH60033A — environment verification.
+
+Run this BEFORE Session 1:
+
+    python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
+
+Five checks. All five must pass. Bring the output to class.
+"""
+
+import importlib
+import json
+import platform
+import sys
+import urllib.error
+import urllib.request
+
+PASS, FAIL, WARN = "PASS", "FAIL", "WARN"
+results = []
+
+
+def report(check, status, detail=""):
+    results.append((check, status, detail))
+    mark = {PASS: "[ok]  ", FAIL: "[FAIL]", WARN: "[warn]"}[status]
+    print(f"{mark} {check}")
+    if detail:
+        for line in detail.strip().splitlines():
+            print(f"        {line}")
+
+
+# ---------------------------------------------------------------- 1. Python
+def check_python():
+    major, minor = sys.version_info[:2]
+    detail = f"{platform.python_implementation()} {platform.python_version()} on {platform.platform()}"
+    if (major, minor) >= (3, 10):
+        report("1. Python 3.10+", PASS, detail)
+    else:
+        report("1. Python 3.10+", FAIL,
+               detail + "\nInstall Python 3.11 or 3.12 and recreate your virtual environment.")
+
+
+# ---------------------------------------------------------------- 2. Packages
+REQUIRED = [
+    ("numpy", "numerical arrays"),
+    ("pandas", "data frames"),
+    ("scipy", "scientific computing"),
+    ("sklearn", "scikit-learn"),
+    ("statsmodels", "econometrics"),
+    ("matplotlib", "plotting"),
+    ("pyarrow", "parquet caching"),
+]
+OPTIONAL = [
+    ("seaborn", "plotting (S8-S10)"),
+    ("shap", "model explanation (S8)"),
+    ("doubleml", "causal ML reference (S11)"),
+    ("econml", "causal forests (S11)"),
+]
+
+
+def check_packages():
+    missing = []
+    for mod, _ in REQUIRED:
+        try:
+            importlib.import_module(mod)
+        except ImportError:
+            missing.append(mod)
+    if missing:
+        report("2. Required packages", FAIL,
+               "Missing: " + ", ".join(missing) +
+               "\nRun: pip install -r requirements.txt")
+    else:
+        import numpy
+        import pandas
+        import sklearn
+        report("2. Required packages", PASS,
+               f"numpy {numpy.__version__} | pandas {pandas.__version__} | scikit-learn {sklearn.__version__}")
+
+    missing_opt = []
+    for mod, why in OPTIONAL:
+        try:
+            importlib.import_module(mod)
+        except ImportError:
+            missing_opt.append(f"{mod} ({why})")
+    if missing_opt:
+        report("2b. Optional packages", WARN,
+               "Not installed (fine for now): " + ", ".join(missing_opt))
+    else:
+        report("2b. Optional packages", PASS, "all present")
+
+
+# ---------------------------------------------------------------- 3. Numerics
+def check_numerics():
+    """A real (tiny) OLS problem — the Session 2 estimator, solved three ways."""
+    try:
+        import numpy as np
+        rng = np.random.default_rng(60033)
+        n, p = 200, 3
+        X = np.column_stack([np.ones(n), rng.normal(size=(n, p))])
+        beta = np.array([1.0, 2.0, -0.5, 0.25])
+        y = X @ beta + rng.normal(scale=0.3, size=n)
+
+        b_inv = np.linalg.inv(X.T @ X) @ X.T @ y          # normal equations
+        b_solve = np.linalg.solve(X.T @ X, X.T @ y)        # better
+        b_lstsq = np.linalg.lstsq(X, y, rcond=None)[0]     # best (QR/SVD)
+
+        spread = max(np.abs(b_inv - b_lstsq).max(),
+                     np.abs(b_solve - b_lstsq).max())
+        err = np.abs(b_lstsq - beta).max()
+
+        if spread < 1e-8 and err < 0.15:
+            report("3. Linear algebra", PASS,
+                   f"OLS recovered beta (max abs error {err:.4f});\n"
+                   f"three solvers agree to {spread:.2e}")
+        else:
+            report("3. Linear algebra", FAIL,
+                   f"solver spread {spread:.2e}, estimation error {err:.4f}")
+    except Exception as exc:
+        report("3. Linear algebra", FAIL, f"{type(exc).__name__}: {exc}")
+
+
+# ---------------------------------------------------------------- 4. Plot + parquet
+def check_io():
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import pandas as pd
+        import os
+        import tempfile
+
+        tmp = tempfile.mkdtemp()
+
+        fig, ax = plt.subplots(figsize=(4, 2))
+        ax.plot(np.linspace(0, 1, 50), np.sin(np.linspace(0, 6, 50)))
+        png = os.path.join(tmp, "check.png")
+        fig.savefig(png, dpi=80)
+        plt.close(fig)
+
+        df = pd.DataFrame({"a": range(5), "b": list("abcde")})
+        pq = os.path.join(tmp, "check.parquet")
+        df.to_parquet(pq)
+        back = pd.read_parquet(pq)
+
+        ok = os.path.getsize(png) > 0 and back.equals(df)
+        report("4. Plotting and parquet I/O", PASS if ok else FAIL,
+               f"wrote {os.path.getsize(png)} bytes of PNG; parquet round-trip {'ok' if back.equals(df) else 'FAILED'}")
+    except Exception as exc:
+        report("4. Plotting and parquet I/O", FAIL,
+               f"{type(exc).__name__}: {exc}\nIf this mentions pyarrow, run: pip install pyarrow")
+
+
+# ---------------------------------------------------------------- 5. Local LLM
+def check_ollama():
+    url = "http://localhost:11434/api/tags"
+    try:
+        with urllib.request.urlopen(url, timeout=4) as resp:
+            payload = json.loads(resp.read().decode())
+        names = [m.get("name", "?") for m in payload.get("models", [])]
+        if not names:
+            report("5. Local LLM (Ollama)", FAIL,
+                   "Ollama is running but no model is installed.\n"
+                   "Run: ollama pull qwen2.5-coder:7b")
+            return
+        has_embed = any("embed" in n for n in names)
+        detail = "Models available: " + ", ".join(names)
+        if not has_embed:
+            detail += "\nNote: no embedding model yet. Before Session 10: ollama pull nomic-embed-text"
+        report("5. Local LLM (Ollama)", PASS, detail)
+    except (urllib.error.URLError, OSError):
+        report("5. Local LLM (Ollama)", FAIL,
+               "Could not reach Ollama at localhost:11434.\n"
+               "Is it installed?  https://ollama.com/download\n"
+               "Is it running?    ollama serve\n"
+               "See setup-vscodium-local-llm.md, step 4.")
+    except Exception as exc:
+        report("5. Local LLM (Ollama)", FAIL, f"{type(exc).__name__}: {exc}")
+
+
+# ---------------------------------------------------------------- main
+def main():
+    print("=" * 68)
+    print("  MATH60033A — environment verification")
+    print("=" * 68)
+    print()
+
+    check_python()
+    check_packages()
+    check_numerics()
+    check_io()
+    check_ollama()
+
+    print()
+    print("=" * 68)
+    failed = [c for c, s, _ in results if s == FAIL]
+    warned = [c for c, s, _ in results if s == WARN]
+    if failed:
+        print(f"  {len(failed)} CHECK(S) FAILED: {', '.join(failed)}")
+        print("  Fix these before Session 1. See setup-vscodium-local-llm.md.")
+        print("=" * 68)
+        sys.exit(1)
+    print("  All required checks passed." + (f"  ({len(warned)} warning)" if warned else ""))
+    print("  Bring this output to Session 1.")
+    print("=" * 68)
+
+
+if __name__ == "__main__":
+    main()

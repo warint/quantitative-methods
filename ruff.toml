@@ -1,0 +1,74 @@
+# Ruff configuration — MATH60033A
+#
+#   pip install ruff        (or: pip install -r requirements.txt)
+#   ruff check .            lint the repository
+#   ruff check . --fix      apply the safe fixes
+#
+# The rule set is listed explicitly rather than relying on ruff's defaults,
+# because those defaults change between ruff releases and would silently
+# change what "clean" means for the course repository.
+#
+# `ruff check .` is expected to report nothing. Anything it does report is a
+# real finding — the point of the ignores below is that no one has to learn to
+# scroll past routine noise to reach a genuine one.
+
+target-version = "py310"        # verify_environment.py enforces Python 3.10+
+line-length = 100               # the house style; not enforced (E501 is not selected)
+
+[lint]
+select = [
+    "E4",    # imports — including E402, which the deliberate late imports in
+             #           scripts/build_spine/build.py suppress with an explicit noqa
+    "E7",    # statement-level mistakes: `== None`, `== True`, bare `except`
+    "E9",    # syntax and IO errors
+    "F",     # pyflakes: undefined names, unused imports and variables
+    "W",     # whitespace
+    "B",     # bugbear: mutable defaults, loop-variable capture, silent footguns
+    "C4",    # comprehension clarity
+    "UP",    # constructs superseded by the minimum Python version
+    "SIM",   # simplifications, including unclosed file handles
+    "PERF",  # avoidable per-iteration work
+    "EXE",   # shebang and executable-bit agreement
+    "RUF",   # ruff-specific, including noqa directives that no longer apply
+]
+
+ignore = [
+    # This is a European economics course: the prose, the column descriptions and
+    # the section rules use real typography — en dashes in "2010–2024", "×" in
+    # "country × sector × time", "·" as a separator. All three of these rules read
+    # that as a possible homoglyph attack. Here it is simply correct spelling.
+    "RUF001",  # ambiguous unicode in a string
+    "RUF002",  # ambiguous unicode in a docstring
+    "RUF003",  # ambiguous unicode in a comment
+
+    # Style, not substance. Each fires on code that is correct as written, and
+    # changing it would be churn on material students read.
+    "E702",    # `mix = np.exp(raw); mix = mix / mix.sum(...)` — deliberate pairing
+    "E741",    # `for a, l in failed` in verify_sources.py
+    "PERF203", # try/except inside a loop — unavoidable when probing sources
+    "PERF401", # manual loop where a comprehension would do
+
+    # zip() without strict=. Worth revisiting, but turning it on changes runtime
+    # behaviour (mismatched lengths would start raising), so it is a deliberate
+    # decision rather than a lint fix. See the zip() calls in make_fixtures.py.
+    "B905",
+]
+
+# Deliberately not selected at all:
+#
+#   I      import sorting — no isort convention is in use here
+#   E501   line length — documented above, not enforced
+#   ISC    implicit string concatenation — the tuple tables in spec.py and
+#          make_dictionaries.py wrap prose across lines on purpose
+#   BLE    blind except — verify_environment.py and verify_sources.py probe the
+#          environment and the network, and must report failures rather than raise
+#   DTZ    naive datetime — these timestamps are local and are only ever printed
+
+[lint.per-file-ignores]
+# The lab starters are scaffolds: they end in `raise NotImplementedError`, and
+# hand students an import and a seeded generator to use while completing the
+# exercise. Both are unused *by design* until the student writes the body.
+"**/02-lab/starter/*.py" = [
+    "F401",  # e.g. matplotlib.pyplot, provided for the plotting tasks
+    "F841",  # e.g. rng, the seeded generator the reproducibility rules require
+]
