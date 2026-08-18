@@ -1,0 +1,605 @@
+---
+title: "Welcome to MATH60033A"
+subtitle: "Machine Learning Methods for Economics — building your workstation"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    progress: true
+    controls: true
+    hash-type: number
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 01 pre-session · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Welcome {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you are walking into
+
+This course asks one question in ten different ways:
+
+> **When can a number about the past be used to make a claim about the future?**
+
+- The methods are standard: least squares, penalisation, trees, factors, causal ML.
+- The data are European, international, and messy on purpose.
+- The discipline is knowing **what your estimate does not entitle you to say.**
+
+::: {.muted}
+Ten sessions of method. One question throughout.
+:::
+
+## Three distinctions we will not let go of
+
+::: {.tight}
+1. **A scenario is not a forecast.**
+   *Europe 2031* is a conditional narrative — a stress test, not a prediction.
+   You will read it as a set of assumptions you can measure.
+
+2. **Prediction is not inference.**
+   "How well does this predict?" and "what is the effect of X?" are different
+   questions, answered by different estimators, with different guarantees.
+
+3. **A construct is not a measurement.**
+   An "AI exposure index" is something we built. Session 09 is about being
+   honest about that.
+:::
+
+## What this session's pre-work is
+
+Four things, before you arrive:
+
+| # | Task | Time |
+|---|---|---|
+| 0 | **Build your workstation** — these slides | 60–90 min |
+| 1 | Read *Europe 2031* | 30 min |
+| 2 | Review three concepts | 15 min |
+| 3 | Run the verification script | 5 min |
+
+::: {.warn}
+**Session 1 does not include installation time.** Arriving without a working
+environment means you cannot take part in the lab.
+:::
+
+# The stack {background-color="#16181A" style="color:#F7F6F3"}
+
+## What we install, and why
+
+| Tool | What it is | Why this one |
+|---|---|---|
+| **VS Codium** | VS Code with telemetry removed | Your work touches confidential and licensed data. The editor should not phone home. |
+| **Python 3.10+** | The analysis language | Everything in the course runs here. |
+| **Ollama** | Runs LLMs on *your* machine | No API key, no per-token cost, no data leaving your laptop. |
+| **Qwen 2.5 Coder** | The model Ollama serves | Small enough for a laptop, strong at code. |
+| **aider** | An AI agent in your terminal | Reads and edits your files, and commits. |
+| **Git + GitHub** | Version control | The record of who did what. |
+
+## The principle behind the stack
+
+Every piece runs **locally**.
+
+::: {.check}
+**The test that matters.** When your environment is finished, turn off your
+wifi and ask the model a question. If it still answers, your setup is
+genuinely local — and your data never left the room.
+:::
+
+::: {.muted}
+This is not ideology. In Session 09 you work with licensed text, and in the
+group project you may work with data you are not permitted to upload anywhere.
+:::
+
+## Before you start
+
+You need:
+
+- A laptop with **8 GB RAM minimum** (16 GB is much more comfortable)
+- **Administrator rights** to install software
+- About **10 GB free disk space** — the model files are large
+- 60–90 minutes, uninterrupted
+
+::: {.warn}
+Do this on the machine you will actually bring to class. A working setup on a
+desktop at home is of no use in the lab.
+:::
+
+# Step 1 — VS Codium {background-color="#16181A" style="color:#F7F6F3"}
+
+## Install VS Codium
+
+Go to **vscodium.com** and download the build for your operating system.
+
+::: {.cols}
+::: {}
+**macOS**
+
+Download the `.dmg`, open it, drag **VSCodium** to Applications.
+
+If macOS refuses to open it: right-click the app → **Open** → **Open**.
+:::
+::: {}
+**Windows**
+
+Download the *User Installer* `.exe` and run it.
+
+Tick **"Add to PATH"** when the installer offers it.
+:::
+:::
+
+**Linux:** use your package manager, or the `.deb` / `.rpm` from the same page.
+
+::: {.check}
+**Check.** VS Codium opens and shows the Welcome tab.
+:::
+
+## Meet the two panels you will live in
+
+::: {.shot}
+[ VS Codium window ]
+
+Left: **Explorer** (your files) · Bottom: **Terminal** · Right: **Continue** (chat)
+:::
+
+Two things to find right now:
+
+- **The Explorer** — `View → Explorer`, or `Ctrl/Cmd+Shift+E`
+- **The integrated Terminal** — ``View → Terminal``, or ``Ctrl+` `` (backtick)
+
+::: {.warn}
+The **Terminal** is where most of this course happens. If you have never used a
+command line, that is fine — every command you need is on these slides.
+:::
+
+## Step 2 — Extensions
+
+Open the Extensions panel: `Ctrl/Cmd+Shift+X`. Install three:
+
+| Extension | Search for | What it does |
+|---|---|---|
+| **Python** | `ms-python.python` | Syntax, linting, environment selection |
+| **Jupyter** | `ms-toolsai.jupyter` | Run notebooks inside the editor |
+| **Continue** | `Continue.continue` | The chat sidebar, wired to your local model |
+
+::: {.warn}
+VS Codium uses the Open VSX registry, not Microsoft's Marketplace. Most
+extensions are there. If one is missing, the course does not depend on it.
+:::
+
+# Step 3 — Python {background-color="#16181A" style="color:#F7F6F3"}
+
+## Create the environment
+
+Open the terminal in VS Codium (``Ctrl+` ``) and run, from the course folder:
+
+```bash
+python3 -m venv .venv
+```
+
+Then activate it:
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+```
+
+::: {.check}
+**Check.** Your prompt now starts with `(.venv)`.
+:::
+
+## Install the packages
+
+```bash
+pip install -r requirements.txt
+```
+
+This pulls numpy, pandas, scikit-learn, statsmodels, matplotlib and the rest.
+It takes a few minutes.
+
+::: {.check}
+**Check.** No red error text at the end, and:
+
+```bash
+python -c "import numpy, pandas, sklearn; print('ok')"
+```
+
+prints `ok`.
+:::
+
+# Step 4 — Ollama and Qwen {background-color="#16181A" style="color:#F7F6F3"}
+
+## Install Ollama
+
+::: {.cols}
+::: {}
+**macOS / Linux**
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+:::
+::: {}
+**Windows**
+
+Download the installer from
+**ollama.com/download** and run it.
+:::
+:::
+
+::: {.check}
+**Check.**
+
+```bash
+ollama --version
+```
+
+prints a version number.
+:::
+
+## Pull Qwen 2.5 Coder
+
+Choose by the RAM in your machine. Rough rule: **model size + 2 GB free**.
+
+| Your machine | Model | Command |
+|---|---|---|
+| 8 GB RAM | `qwen2.5-coder:3b` | `ollama pull qwen2.5-coder:3b` |
+| 16 GB RAM | `qwen2.5-coder:7b` | `ollama pull qwen2.5-coder:7b` |
+| 32 GB+ / Apple Silicon | `qwen2.5-coder:14b` | `ollama pull qwen2.5-coder:14b` |
+
+You also need the embedding model for Session 10:
+
+```bash
+ollama pull nomic-embed-text
+```
+
+::: {.warn}
+This downloads several gigabytes. Do it on a good connection, **not** ten
+minutes before class.
+:::
+
+## Verify the model
+
+```bash
+ollama list
+```
+
+You should see your model listed. Now talk to it:
+
+```bash
+ollama run qwen2.5-coder:7b "Explain the bias-variance tradeoff in three sentences."
+```
+
+Type `/bye` to leave the chat.
+
+::: {.check}
+**The real check.** Turn off your wifi and run that command again. It should
+still answer. That is what "local" means.
+:::
+
+# Step 5 — The CLI agent {background-color="#16181A" style="color:#F7F6F3"}
+
+## Talking to Qwen the way I talk to Claude
+
+The Continue sidebar is useful for questions about a selected block of code.
+
+But the way this course actually works — and the way I work in front of you —
+is an **agent in the terminal**: something that reads your files, edits them,
+and commits, while you steer it in prose.
+
+That tool is **aider**, and it runs against your local Qwen.
+
+::: {.muted}
+Same shape as the workflow you have seen me use. Different engine, and it is
+running on your laptop.
+:::
+
+## Install aider
+
+In the VS Codium terminal, with your `.venv` active:
+
+```bash
+python -m pip install aider-install
+aider-install
+```
+
+Then tell it where Ollama lives:
+
+```bash
+# macOS / Linux
+export OLLAMA_API_BASE=http://127.0.0.1:11434
+
+# Windows (PowerShell) — then restart the terminal
+setx OLLAMA_API_BASE http://127.0.0.1:11434
+```
+
+## Give Ollama a real context window
+
+::: {.warn}
+**This step is not optional.** Ollama defaults to a **2k** context window and
+then *silently discards* whatever does not fit. Your agent will appear to
+"forget" the file you just gave it.
+:::
+
+Start the server with a larger window:
+
+```bash
+OLLAMA_CONTEXT_LENGTH=8192 ollama serve
+```
+
+Leave that terminal running. Open a **second** terminal for aider.
+
+::: {.muted}
+In VS Codium: the `+` icon in the terminal panel splits off a new shell.
+:::
+
+## Run the agent
+
+```bash
+cd /path/to/your/repo
+aider --model ollama_chat/qwen2.5-coder:7b
+```
+
+::: {.warn}
+Note the prefix: **`ollama_chat/`**, not `ollama/`. The second one exists and
+behaves worse.
+:::
+
+Now you are in a prompt. Ask in plain language:
+
+```
+> add a function that loads data/spine/core.parquet and
+  prints the number of rows per country
+```
+
+aider writes the code, shows you a diff, and asks to apply it.
+
+## What aider does to your git history
+
+aider **commits automatically** after each change it applies.
+
+That is usually what you want — but this course counts commits as evidence of
+who did the work:
+
+```bash
+# see what it did
+git log --oneline
+
+# turn auto-commit off if you'd rather commit yourself
+aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+```
+
+::: {.warn}
+Commits made by the agent are attributed to **you**. That is correct — you
+directed it. But read the diff before you accept it: you are answerable for
+every line in your repository.
+:::
+
+# Step 6 — GitHub {background-color="#16181A" style="color:#F7F6F3"}
+
+## Create your account
+
+1. Go to **github.com** and choose **Sign up**.
+2. Use an email you will still have after you graduate.
+3. Pick a username you would put on a CV — this is a professional record.
+4. Verify the email GitHub sends you.
+5. Enable **two-factor authentication** when prompted. GitHub requires it.
+
+::: {.shot}
+[ github.com/signup — email, password, username, then a verification puzzle ]
+:::
+
+::: {.muted}
+Free accounts include unlimited private repositories. You do not need a paid plan.
+:::
+
+## Tell git who you are
+
+In the VS Codium terminal:
+
+```bash
+git --version                       # install from git-scm.com if missing
+git config --global user.name  "Your Full Name"
+git config --global user.email "your.name@hec.ca"
+```
+
+::: {.warn}
+**Use your real name and your university email.** Your commit history is one of
+four records this course uses to check that all three group members did the
+work. Commits from `unknown@localhost` cannot be attributed to you, and
+unattributed work counts as work you did not do.
+:::
+
+Report your exact `user.name` and `user.email` to me in Session 1.
+
+## Create your repository
+
+On github.com, click **+** (top right) → **New repository**.
+
+| Field | What to put |
+|---|---|
+| **Repository name** | `math60033a-gXX` (XX = your group number) |
+| **Description** | `MATH60033A group work` |
+| **Visibility** | **Private** |
+| **Initialize with README** | ✅ tick it |
+
+::: {.shot}
+[ github.com/new — owner, repository name, description, Public/Private, README checkbox ]
+:::
+
+Then **Settings → Collaborators** and add your two teammates and me.
+
+# Step 7 — Connect it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Clone your repo into VS Codium
+
+On your repository page, click the green **Code** button and copy the **HTTPS** URL.
+
+In the VS Codium terminal:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/math60033a-gXX.git
+cd math60033a-gXX
+```
+
+Then `File → Open Folder…` and choose that folder.
+
+::: {.check}
+**Check.** The Explorer shows `README.md`, and the bottom-left of the window
+shows the branch name `main`.
+:::
+
+## Authenticating the first time you push
+
+When you first push, GitHub asks for credentials. **Your account password will
+not work** — it wants a token.
+
+1. github.com → your avatar → **Settings**
+2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+3. **Generate new token**, tick the **`repo`** scope, set an expiry
+4. Copy the token — **it is shown once**
+5. Paste it when git asks for your *password*
+
+::: {.check}
+```bash
+git config --global credential.helper store
+```
+stores it so you are asked only once.
+:::
+
+## The round trip
+
+```bash
+echo "# Group XX — MATH60033A" >> README.md
+git add README.md
+git commit -m "Start the group log"
+git push
+```
+
+Refresh your repository page in the browser. Your line is there.
+
+::: {.check}
+**Check.** You have now completed the full loop: edit locally → commit → push →
+visible on GitHub. Everything else this term is a variation on that loop.
+:::
+
+# The worked example {background-color="#16181A" style="color:#F7F6F3"}
+
+## Putting all of it together
+
+Everything is installed. This is what a working session actually looks like.
+
+**Terminal 1** — the model server, left running:
+
+```bash
+OLLAMA_CONTEXT_LENGTH=8192 ollama serve
+```
+
+**Terminal 2** — inside your repository:
+
+```bash
+cd math60033a-gXX
+source .venv/bin/activate
+aider --model ollama_chat/qwen2.5-coder:7b
+```
+
+## Ask for something real
+
+```
+> create explore.py that loads data/spine/core.parquet with pandas,
+  prints the shape, and shows mean gdp_pc_eur by year
+```
+
+aider proposes a diff. You read it. You accept it.
+
+```bash
+python explore.py
+git log --oneline -1
+git push
+```
+
+::: {.check}
+**You have just:** run a model on your own hardware, had it write code against
+real data, reviewed the change, committed it under your name, and published it
+to your group's repository — **without sending one byte to anyone's API.**
+:::
+
+## Why we do it this way
+
+::: {.tight}
+- **The data stay put.** Some of what you use this term cannot legally be uploaded.
+- **The cost is zero.** No key, no quota, no bill at the end of the month.
+- **The record is honest.** Commits carry your name; the diff carries the reasoning.
+- **The skill transfers.** This is how the work is actually done now.
+:::
+
+::: {.warn}
+The model is a **junior collaborator with no accountability.** It will produce
+confident, wrong code. Every line you commit is a line you are claiming as
+correct. Read the diff.
+:::
+
+# If it breaks {background-color="#16181A" style="color:#F7F6F3"}
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `ollama: command not found` | Reopen the terminal; on Windows, restart VS Codium |
+| Model answers very slowly | Use a smaller model (`:3b`); close other applications |
+| aider "forgets" your file | You skipped `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
+| `connection refused` from aider | The `ollama serve` terminal is not running |
+| `git push` rejects your password | Use a personal access token, not the password |
+| `pip` fails on install | Check `(.venv)` is in your prompt |
+
+::: {.muted}
+Still stuck? Ask Qwen — that is itself a test of whether your setup works.
+:::
+
+## The last check
+
+From the repository root, with `.venv` active:
+
+```bash
+python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
+```
+
+You should see five checks pass.
+
+::: {.check}
+**Bring the output to class** — a screenshot or a paste into your notes.
+:::
+
+## Before Session 1
+
+::: {.tight}
+- ✅ VS Codium installed, Python environment built
+- ✅ Ollama running Qwen 2.5 Coder, verified **with the wifi off**
+- ✅ aider talking to your local model
+- ✅ GitHub account, private group repository, teammates added
+- ✅ One commit pushed from your machine
+- ✅ *Europe 2031* read as a stress test, not a prediction
+- ✅ `verify_environment.py` output in hand
+:::
+
+##  {background-color="#16181A" style="color:#F7F6F3"}
+
+::: {style="margin-top: 1.6em"}
+### See you in Session 1. {style="color:#F7F6F3"}
+
+::: {style="color:#9DA19E; font-size:0.8em"}
+Bring the machine you set up.
+Everything this term runs on it.
+:::
+:::

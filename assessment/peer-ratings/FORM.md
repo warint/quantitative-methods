@@ -63,14 +63,21 @@ Understanding                (1–5): ___
 
 One thing this person did that made the work better:
 ________________________________________________________________
+(If there is genuinely nothing to record, write "nothing".)
 
 (Optional) One thing that would have helped:
 ________________________________________________________________
 ```
 
-The first free-text box is **required**. Every member of every group did something; naming it
-takes thirty seconds and it makes the whole exercise fairer, because it forces a specific memory
-rather than a general impression.
+The first free-text box is **required**, and `nothing` is a permitted answer. Where there is a
+contribution, naming it takes thirty seconds and makes the whole exercise fairer, because it forces
+a specific memory rather than a general impression.
+
+Where there is not, say so plainly. Do not invent a sentence you do not mean in order to fill the
+box: a student who contributed nothing has nothing to record here, and the record should say that.
+Their mark does not depend on this form in any case — a student who did none of the work fails the
+individual participation bar and the Session 12 defence on their own evidence, which is a matter of
+what they did, not of how generously a teammate wrote about them.
 
 ---
 

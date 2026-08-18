@@ -1,0 +1,225 @@
+/*-- scss:defaults --*/
+//
+// MATH60033A — slide theme
+//
+// The palette and typography are taken from warin.ca, so the decks, the site
+// and the course read as one body of work. Hex values correspond to the CSS
+// custom properties published there; --accent is oklch(0.55 0.15 252), which
+// is #1C73C5 in sRGB.
+//
+// Fonts are declared with a system fallback and are never fetched over the
+// network: a deck must render identically in a classroom with no wifi.
+
+$warin-bg:      #F7F6F3 !default;   // warm off-white
+$warin-ink:     #16181A !default;   // near-black
+$warin-muted:   #6E7275 !default;
+$warin-line:    #DEDCD6 !default;
+$warin-tint:    #EFEDE7 !default;
+$warin-accent:  #1C73C5 !default;
+$warin-accent-lt: #8FB2FF !default; // the lighter blue used on dark ground
+$warin-dark:    #16181A !default;
+
+// No !default here: the `default` Quarto theme has already assigned these by the
+// time this file is read, so a !default assignment would be silently discarded
+// and the decks would fall back to the stock font.
+$font-family-sans-serif: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+$font-family-monospace:  'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+// reveal.js reads its own font variables, which Quarto does not always map from
+// the Bootstrap names above. Set both so the theme holds in either path.
+$mainFont:    $font-family-sans-serif;
+$headingFont: $font-family-sans-serif;
+$codeFont:    $font-family-monospace;
+
+$body-bg:    $warin-bg;
+$body-color: $warin-ink;
+$link-color: $warin-accent;
+
+$presentation-font-size-root: 32px;
+$presentation-heading-font: $font-family-sans-serif;
+$presentation-heading-color: $warin-ink;
+$presentation-heading-font-weight: 600;
+$presentation-h1-font-size: 1.9em;
+$presentation-h2-font-size: 1.35em;
+$presentation-h3-font-size: 1.1em;
+
+$code-block-font-size: 0.62em;
+$code-block-bg: $warin-dark;
+$code-color: $warin-accent;
+
+/*-- scss:rules --*/
+
+// ── Title slide ──────────────────────────────────────────────────────────────
+#title-slide {
+  text-align: left;
+
+  .title {
+    color: $warin-ink;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    color: $warin-muted;
+    font-weight: 400;
+    margin-top: 0.4em;
+  }
+  .author, .date, .institute {
+    color: $warin-muted;
+    font-size: 0.62em;
+  }
+  // the accent rule that anchors the title block
+  .title::after {
+    content: "";
+    display: block;
+    width: 3.4em;
+    height: 3px;
+    background: $warin-accent;
+    margin: 0.42em 0 0 0;
+  }
+}
+
+.reveal .slides section {
+  text-align: left;
+}
+
+// ── Headings ────────────────────────────────────────────────────────────────
+.reveal h2 {
+  border-bottom: 1px solid $warin-line;
+  padding-bottom: 0.22em;
+  margin-bottom: 0.62em;
+  letter-spacing: -0.01em;
+}
+
+.reveal h3 { color: $warin-ink; }
+
+// ── Body ────────────────────────────────────────────────────────────────────
+.reveal p, .reveal li { line-height: 1.42; }
+
+.reveal ul, .reveal ol { margin-left: 0.4em; }
+
+.reveal li::marker { color: $warin-accent; }
+
+.reveal strong { color: $warin-ink; font-weight: 600; }
+
+.reveal em { color: $warin-muted; font-style: italic; }
+
+// ── Code ────────────────────────────────────────────────────────────────────
+.reveal pre {
+  box-shadow: none;
+  border: 1px solid $warin-line;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.reveal pre code {
+  border-radius: 4px;
+  padding: 0.85em 1em;
+  max-height: 520px;
+  font-family: $font-family-monospace;
+}
+
+// inline code reads as a term, not as a block
+.reveal code:not(pre code) {
+  background: $warin-tint;
+  color: $warin-ink;
+  padding: 0.08em 0.32em;
+  border-radius: 3px;
+  font-size: 0.86em;
+}
+
+// ── Tables ──────────────────────────────────────────────────────────────────
+.reveal table {
+  font-size: 0.7em;
+  border-collapse: collapse;
+  margin: 0.5em 0;
+}
+
+.reveal table th {
+  background: $warin-tint;
+  border-bottom: 2px solid $warin-line;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.4em 0.7em;
+}
+
+.reveal table td {
+  border-bottom: 1px solid $warin-line;
+  padding: 0.36em 0.7em;
+}
+
+// ── Callouts ────────────────────────────────────────────────────────────────
+// Three semantic boxes, used consistently across every deck:
+//   .step     a numbered action the student performs
+//   .check    how the student knows the step worked
+//   .warn     a trap that costs time if missed
+.reveal .step, .reveal .check, .reveal .warn {
+  border-left: 3px solid $warin-accent;
+  background: $warin-tint;
+  padding: 0.55em 0.9em;
+  margin: 0.55em 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.88em;
+}
+
+.reveal .check {
+  border-left-color: #2E7D5B;
+  background: rgba(46, 125, 91, 0.07);
+}
+
+.reveal .warn {
+  border-left-color: #B4553A;
+  background: rgba(180, 85, 58, 0.07);
+}
+
+// ── Screenshot / UI placeholder ─────────────────────────────────────────────
+// A labelled frame standing in for a real capture. Drop a real screenshot in
+// by replacing the div with an image; the caption convention stays the same.
+.reveal .shot {
+  border: 1px dashed $warin-line;
+  background: repeating-linear-gradient(
+    45deg, $warin-bg, $warin-bg 8px, $warin-tint 8px, $warin-tint 16px
+  );
+  color: $warin-muted;
+  padding: 1.5em 1em;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 0.8em;
+  margin: 0.6em 0;
+}
+
+.reveal figcaption {
+  color: $warin-muted;
+  font-size: 0.68em;
+  margin-top: 0.3em;
+}
+
+// ── Footer and progress ─────────────────────────────────────────────────────
+.reveal .footer {
+  color: $warin-muted;
+  font-size: 0.52em;
+  border-top: 1px solid $warin-line;
+  padding-top: 0.3em;
+}
+
+.reveal .progress { color: $warin-accent; }
+
+.reveal .slide-number {
+  background: transparent;
+  color: $warin-muted;
+  font-size: 0.5em;
+  font-family: $font-family-monospace;
+}
+
+// ── Utility ─────────────────────────────────────────────────────────────────
+.reveal .muted { color: $warin-muted; }
+.reveal .accent { color: $warin-accent; }
+.reveal .small { font-size: 0.8em; }
+.reveal .tight li { margin-bottom: 0.14em; }
+
+// Two-column layout used for "command on the left, result on the right"
+.reveal .cols {
+  display: flex;
+  gap: 1.1em;
+  align-items: flex-start;
+}
+.reveal .cols > * { flex: 1; min-width: 0; }
