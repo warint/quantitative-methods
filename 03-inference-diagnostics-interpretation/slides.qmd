@@ -1,0 +1,255 @@
+---
+title: "Inference, Diagnostics, Interpretation"
+subtitle: "Session 03 · Standard errors that survive contact with panel data"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 03 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# The question {background-color="#16181A" style="color:#F7F6F3"}
+
+## Earnings and education across Europe
+
+> *"A higher tertiary-education share is associated with higher annual earnings."*
+
+Estimating that coefficient is the easy part. The hard part:
+
+::: {.tight}
+- How **precise** is it?
+- What is the **p-value** actually testing?
+- What would make the whole thing **wrong** rather than merely imprecise?
+:::
+
+::: {.muted}
+Session 02 gave you the point estimate. This session is about whether you are
+entitled to any confidence in it.
+:::
+
+## Three ways your standard errors lie
+
+::: {.tight}
+1. **Heteroskedasticity** — the error variance is not constant. In this panel it
+   scales with country size.
+2. **Within-country correlation** — Germany in 2019 and Germany in 2020 are not
+   independent draws.
+3. **Omitted variables** — no standard error can rescue you from a missing
+   confounder. That is a bias, not a variance.
+:::
+
+::: {.warn}
+The first two make your intervals **too narrow**. The third makes the estimate
+**wrong**. They require different responses.
+:::
+
+# The method {background-color="#16181A" style="color:#F7F6F3"}
+
+## What OLS assumes about $\varepsilon$
+
+Under $y = X\beta + \varepsilon$, the classical variance is
+
+$$\operatorname{Var}(\hat\beta) = \sigma^2 (X'X)^{-1}$$
+
+which requires $\operatorname{Var}(\varepsilon\mid X) = \sigma^2 I$ — constant
+variance, zero correlation.
+
+The general (sandwich) form makes no such promise:
+
+$$\operatorname{Var}(\hat\beta) = (X'X)^{-1}\,X'\Omega X\,(X'X)^{-1}$$
+
+::: {.check}
+Everything below is a different guess at $\Omega$. The estimate $\hat\beta$
+never changes — only your claimed precision.
+:::
+
+## Three estimators of $\Omega$
+
+| Assumption | $\Omega$ | Use when |
+|---|---|---|
+| Classical | $\sigma^2 I$ | Essentially never with real panels |
+| **HC (robust)** | $\operatorname{diag}(e_i^2)$ | Variance differs across units |
+| **Clustered** | Block-diagonal by group | Observations correlated within a unit |
+
+$$\hat\Omega_{\text{cluster}} = \sum_{g=1}^{G} X_g' e_g e_g' X_g$$
+
+::: {.muted}
+Clustering by country lets errors correlate freely **within** a country and
+assumes independence **across** countries.
+:::
+
+## The omitted-variable formula
+
+If the true model is $y = X_1\beta_1 + X_2\beta_2 + \varepsilon$ and you omit $X_2$:
+
+$$\operatorname{plim}\hat\beta_1 = \beta_1 + \underbrace{\delta}_{\substack{X_2 \text{ on } X_1}}\!\cdot\,\beta_2$$
+
+The bias has a **sign you can reason about** before you see any output:
+
+::: {.tight}
+- $\delta > 0$ and $\beta_2 > 0$ → upward bias
+- signs opposite → downward bias
+:::
+
+::: {.check}
+State the expected direction in writing *before* estimating. This is the single
+most useful discipline in applied work.
+:::
+
+# The data {background-color="#16181A" style="color:#F7F6F3"}
+
+## Building the panel
+
+```python
+import pandas as pd
+
+b    = pd.read_parquet("data/spine/angle_b_sector.parquet")
+core = pd.read_parquet("data/spine/core.parquet")
+
+df = b.merge(core[["geo", "time", "gdp_pc_eur", "productivity_idx"]],
+             on=["geo", "time"])
+print(df.shape)     # 3150 rows: 30 countries x 7 sectors x 15 years
+```
+
+| Column | Meaning |
+|---|---|
+| `annual_earnings_eur` | Mean annual earnings |
+| `tertiary_share` | Share of employment with tertiary education |
+| `vacancy_rate` | Job vacancy rate, % |
+| `nace_r2` | Sector (NACE Rev. 2 section) |
+
+## What is deliberately wrong with it
+
+::: {.tight}
+- **Variance scales with country size.** Small countries are noisier. That is
+  heteroskedasticity you can see.
+- **Repeated observations per country.** 105 rows per country — nowhere near
+  105 independent facts.
+- **`annual_earnings_eur` comes from a quadrennial source.** Annual variation is
+  partly interpolation, not measurement.
+:::
+
+::: {.warn}
+Treating 3,150 rows as 3,150 independent observations is how you get a
+t-statistic of 12 for an effect that is not there.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Fit, then look at the residuals
+
+```python
+import statsmodels.formula.api as smf
+
+m = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share + vacancy_rate "
+            "+ np.log(gdp_pc_eur) + C(nace_r2)", data=df).fit()
+
+import matplotlib.pyplot as plt
+plt.scatter(m.fittedvalues, m.resid, s=6, alpha=0.4)
+plt.axhline(0); plt.xlabel("fitted"); plt.ylabel("residual")
+```
+
+::: {.check}
+A fan opening to the right is heteroskedasticity. You are looking for a shape,
+not running a test yet.
+:::
+
+## The same model, three standard errors
+
+```python
+classical = m
+robust    = m.get_robustcov_results(cov_type="HC3")
+clustered = m.get_robustcov_results(cov_type="cluster",
+                                    groups=df.loc[m.model.data.row_labels, "geo"])
+
+for name, r in [("classical", classical), ("HC3", robust), ("cluster", clustered)]:
+    print(f"{name:10s} se(tertiary_share) = {r.bse[1]:.4f}")
+```
+
+::: {.check}
+The coefficient is identical in all three. Only the standard error moves — and
+clustered is typically **several times** the classical one.
+:::
+
+## Which one do you report?
+
+::: {.tight}
+- Cluster at the level at which **treatment varies** and shocks are shared — here, `geo`.
+- With 30 countries you are near the small-$G$ regime; clustered standard errors
+  are themselves noisy.
+- Report the clustered version, **say** you clustered, and say on what.
+:::
+
+::: {.warn}
+"Robust standard errors" in a table note without naming the cluster level tells
+the reader nothing. Two papers can write that sentence and mean different things.
+:::
+
+## The confounder you can sign
+
+Suppose you omit `productivity_idx`.
+
+::: {.tight}
+- Productive countries have **higher** earnings → $\beta_2 > 0$
+- Productive countries also have **higher** tertiary shares → $\delta > 0$
+- Therefore the omitted-variable bias on `tertiary_share` is **upward**
+:::
+
+```python
+short = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share", data=df).fit()
+long_ = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share "
+                "+ productivity_idx", data=df).fit()
+print(short.params["tertiary_share"], long_.params["tertiary_share"])
+```
+
+::: {.check}
+The short coefficient should exceed the long one. You predicted the direction
+before you ran it.
+:::
+
+## What to report
+
+::: {.tight}
+- The coefficient, its **clustered** standard error, and the cluster unit
+- The residual plot, or a sentence about what it showed
+- The confounder you worried about and **which way** it would bias you
+- Sample size **and** number of clusters — 3,150 and 30 are both true, and only one governs precision
+:::
+
+::: {.warn}
+A p-value answers "how surprising is this under the null?" — not "how large is
+the effect?" and not "is the model right?". Report the magnitude in euros.
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Default standard errors on panel data | Intervals far too narrow |
+| Clustering on the wrong level | Precision over- or under-stated |
+| "Controlling for everything" | Post-treatment bias; uninterpretable coefficients |
+| Reading significance from $n = 3150$ | You have 30 independent units |
+| Dropping `flag == "u"` rows | Coverage biased toward large economies |
+
+## In the lab
+
+Work through [`02-lab/README.md`](02-lab/README.md).
+
+::: {.tight}
+1. Fit the earnings model and inspect residuals against fitted values
+2. Compute classical, HC3 and clustered standard errors side by side
+3. Write down a confounder, sign its bias, then test your prediction
+4. Three sentences — with the cluster level named
+:::

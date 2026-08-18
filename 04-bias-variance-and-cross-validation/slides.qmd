@@ -1,0 +1,233 @@
+---
+title: "Bias, Variance, and Honest Validation"
+subtitle: "Session 04 · Why random K-fold is the wrong answer for a panel"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 04 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# The question {background-color="#16181A" style="color:#F7F6F3"}
+
+## How good is your model, really?
+
+You fit a model of European productivity growth. It explains 78% of the variance.
+
+Three different questions hide inside "how good is it?":
+
+::: {.tight}
+- How well does it fit **the data you used**? (Almost meaningless.)
+- How well would it do on **a new country**?
+- How well would it do **next year**?
+:::
+
+::: {.warn}
+Those last two are different questions, and they need **different splits**. Get
+the split wrong and every number that follows is optimistic.
+:::
+
+## The decomposition
+
+For squared loss, at a point $x_0$:
+
+$$\mathbb{E}\big[(y_0 - \hat{f}(x_0))^2\big] = \underbrace{\operatorname{Bias}^2(\hat f)}_{\text{too rigid}} + \underbrace{\operatorname{Var}(\hat f)}_{\text{too sensitive}} + \underbrace{\sigma^2}_{\text{irreducible}}$$
+
+::: {.tight}
+- **Bias** falls as the model gets more flexible
+- **Variance** rises as the model gets more flexible
+- $\sigma^2$ does not move. It is what the predictors do not observe.
+:::
+
+::: {.check}
+$\sigma^2$ is not a defect of your method. Reporting a validation error below it
+means you have leaked, not learned.
+:::
+
+# The trap {background-color="#16181A" style="color:#F7F6F3"}
+
+## Why random K-fold breaks here
+
+`core.parquet` is 30 countries observed over 15 years.
+
+Random K-fold puts **Germany 2019 in training and Germany 2020 in test**.
+
+::: {.tight}
+- Countries are highly persistent — productivity this year nearly determines next year
+- The model can effectively memorise the country, then "predict" it
+- Your validation error measures **interpolation within a country**, not forecasting
+:::
+
+::: {.warn}
+This is not a subtle statistical nicety. On this panel it is the difference
+between a model that looks excellent and one that is useful.
+:::
+
+## Three splits, three questions
+
+| Split | Answers | Use |
+|---|---|---|
+| **Random K-fold** | "New row from the same countries and years" | Almost never here |
+| **GroupKFold by `geo`** | "A country I have never seen" | Transfer across countries |
+| **TimeSeriesSplit** by `time` | "Next year" | Forecasting — Session 11 |
+
+::: {.check}
+Choose the split that matches the sentence you intend to write in your
+conclusion. Then say which you used.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## The data
+
+```python
+import pandas as pd
+
+core = pd.read_parquet("data/spine/core.parquet")
+d = core.dropna(subset=["prod_growth"]).copy()
+
+print(d.shape)                    # ~420 rows (first year per country has no growth)
+print(d.geo.nunique(), d.time.min(), d.time.max())   # 30 countries, 2010-2024
+```
+
+::: {.muted}
+`prod_growth` is NaN in each country's first year. That is arithmetic, not
+missing data — you cannot difference what has no predecessor.
+:::
+
+## Set up the comparison
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import (cross_val_score, KFold,
+                                     GroupKFold, TimeSeriesSplit)
+
+X = d[["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]].fillna(0)
+y = d["prod_growth"]
+m = RandomForestRegressor(n_estimators=300, random_state=60033)
+
+RMSE = "neg_root_mean_squared_error"
+```
+
+## Three schemes, three answers
+
+```python
+rand  = cross_val_score(m, X, y, scoring=RMSE,
+                        cv=KFold(5, shuffle=True, random_state=60033))
+
+group = cross_val_score(m, X, y, scoring=RMSE,
+                        cv=GroupKFold(5), groups=d["geo"])
+
+d_s = d.sort_values("time")
+time_ = cross_val_score(m, X.loc[d_s.index], y.loc[d_s.index],
+                        scoring=RMSE, cv=TimeSeriesSplit(5))
+
+for n, s in [("random", rand), ("by country", group), ("by time", time_)]:
+    print(f"{n:12s} RMSE {-s.mean():.3f}")
+```
+
+## What you should see
+
+::: {.check}
+Random K-fold reports the **best** error. It is also the only one answering a
+question nobody asked.
+:::
+
+The gap between random and grouped is a **direct measure of how much your model
+is leaning on country identity** rather than on the economics.
+
+::: {.muted}
+If grouped error is far worse, your model has learned "this is Germany", not
+"this is what raises productivity".
+:::
+
+## Flexibility, drawn
+
+```python
+from sklearn.tree import DecisionTreeRegressor
+
+rows = []
+for depth in range(1, 16):
+    t = DecisionTreeRegressor(max_depth=depth, random_state=60033)
+    cv = -cross_val_score(t, X, y, cv=GroupKFold(5), groups=d["geo"],
+                          scoring="neg_root_mean_squared_error").mean()
+    t.fit(X, y)
+    train = np.sqrt(((y - t.predict(X)) ** 2).mean())
+    rows.append((depth, train, cv))
+```
+
+Plot both curves against depth.
+
+::: {.check}
+Training error falls monotonically. Validation error falls, then turns. The turn
+is the bias–variance tradeoff, and it is the only one of the two curves that
+tells you anything.
+:::
+
+## Leakage, the practical form
+
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+#  WRONG — the scaler has already seen the test fold
+X_scaled = StandardScaler().fit_transform(X)
+cross_val_score(m, X_scaled, y, cv=GroupKFold(5), groups=d["geo"])
+
+#  RIGHT — every preprocessing step re-fits inside each fold
+pipe = make_pipeline(StandardScaler(), m)
+cross_val_score(pipe, X, y, cv=GroupKFold(5), groups=d["geo"])
+```
+
+::: {.warn}
+Any step that **learns from the data** — scaling, imputation, feature
+selection, target encoding — must live inside the pipeline. This is the single
+most common error in applied machine learning, and it always flatters you.
+:::
+
+## What to report
+
+::: {.tight}
+- **Which split** you used, and the sentence it licenses
+- Validation error in the **units of the outcome**, not just $R^2$
+- The gap between training and validation error
+- The gap between random and grouped CV — your leakage diagnostic
+:::
+
+::: {.warn}
+Never report a number computed on data the model was fit on. If you tuned on
+it, it is training data, whatever you called the variable.
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Random K-fold on a panel | Optimistic by a wide margin |
+| Scaling before splitting | Leakage; error understated |
+| Tuning on the test set | The test set is now training data |
+| Reporting $R^2$ only | No sense of magnitude |
+| One split, one number | No sense of variability |
+
+## In the lab
+
+Work through [`02-lab/README.md`](02-lab/README.md).
+
+::: {.tight}
+1. Reproduce the three CV schemes and tabulate the errors
+2. Explain, in writing, why they differ **in this direction**
+3. Draw the depth curve and mark where variance takes over
+4. Three sentences, naming your split and what it entitles you to claim
+:::

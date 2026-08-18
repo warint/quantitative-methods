@@ -443,7 +443,7 @@
 
   <meta name="author" content="Thierry Warin">
   <meta name="dcterms.date" content="2026-08-18">
-  <title>Welcome to MATH60033A</title>
+  <title>Inference, Diagnostics, Interpretation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -1052,9 +1052,9 @@ margin-right: 0; }
   <div class="reveal">
     <div class="slides">
 
-<section class="quarto-title-block center">
-  <h1 class="title">Welcome to MATH60033A</h1>
-  <p class="subtitle">Machine Learning Methods for Economics — building your workstation</p>
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Inference, Diagnostics, Interpretation</h1>
+  <p class="subtitle">Session 03 · Standard errors that survive contact with panel data</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -1070,80 +1070,58 @@ Thierry Warin
   <p class="date">18 August 2026</p>
 </section>
 <section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Welcome</h1>
+<section id="the-question" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
+<h1>The question</h1>
 
 </section>
-<section class="slide level2">
-<h2>What you are walking into</h2>
-<p>This course asks one question in ten different ways:</p>
+<section id="earnings-and-education-across-europe" class="slide level2">
+<h2>Earnings and education across Europe</h2>
 <blockquote>
-<p><strong>When can a number about the past be used to make a claim about the future?</strong></p>
+<p><em>“A higher tertiary-education share is associated with higher annual earnings.”</em></p>
 </blockquote>
+<p>Estimating that coefficient is the easy part. The hard part:</p>
+<div class="tight">
 <ul>
-<li>The methods are standard: least squares, penalisation, trees, factors, causal ML.</li>
-<li>The data are European, international, and messy on purpose.</li>
-<li>The discipline is knowing <strong>what your estimate does not entitle you to say.</strong></li>
+<li>How <strong>precise</strong> is it?</li>
+<li>What is the <strong>p-value</strong> actually testing?</li>
+<li>What would make the whole thing <strong>wrong</strong> rather than merely imprecise?</li>
 </ul>
+</div>
 <div class="muted">
-<p>Ten sessions of method. One question throughout.</p>
+<p>Session 02 gave you the point estimate. This session is about whether you are entitled to any confidence in it.</p>
 </div>
 </section>
-<section class="slide level2">
-<h2>Three distinctions we will not let go of</h2>
+<section id="three-ways-your-standard-errors-lie" class="slide level2">
+<h2>Three ways your standard errors lie</h2>
 <div class="tight">
 <ol type="1">
-<li><p><strong>A scenario is not a forecast.</strong> <em>Europe 2031</em> is a conditional narrative — a stress test, not a prediction. You will read it as a set of assumptions you can measure.</p></li>
-<li><p><strong>Prediction is not inference.</strong> “How well does this predict?” and “what is the effect of X?” are different questions, answered by different estimators, with different guarantees.</p></li>
-<li><p><strong>A construct is not a measurement.</strong> An “AI exposure index” is something we built. Session 09 is about being honest about that.</p></li>
+<li><strong>Heteroskedasticity</strong> — the error variance is not constant. In this panel it scales with country size.</li>
+<li><strong>Within-country correlation</strong> — Germany in 2019 and Germany in 2020 are not independent draws.</li>
+<li><strong>Omitted variables</strong> — no standard error can rescue you from a missing confounder. That is a bias, not a variance.</li>
 </ol>
 </div>
-</section>
-<section class="slide level2">
-<h2>What this session’s pre-work is</h2>
-<p>Four things, before you arrive:</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>#</th>
-<th>Task</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0</td>
-<td><strong>Build your workstation</strong> — these slides</td>
-<td>60–90 min</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>Read <em>Europe 2031</em></td>
-<td>30 min</td>
-</tr>
-<tr class="odd">
-<td>2</td>
-<td>Review three concepts</td>
-<td>15 min</td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td>Run the verification script</td>
-<td>5 min</td>
-</tr>
-</tbody>
-</table>
 <div class="warn">
-<p><strong>Session 1 does not include installation time.</strong> Arriving without a working environment means you cannot take part in the lab.</p>
+<p>The first two make your intervals <strong>too narrow</strong>. The third makes the estimate <strong>wrong</strong>. They require different responses.</p>
 </div>
 </section></section>
 <section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>The stack</h1>
+<section id="the-method" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
+<h1>The method</h1>
 
 </section>
-<section class="slide level2">
-<h2>What we install, and why</h2>
+<section id="what-ols-assumes-about-varepsilon" class="slide level2">
+<h2>What OLS assumes about <span class="math inline">\(\varepsilon\)</span></h2>
+<p>Under <span class="math inline">\(y = X\beta + \varepsilon\)</span>, the classical variance is</p>
+<p><span class="math display">\[\operatorname{Var}(\hat\beta) = \sigma^2 (X&#39;X)^{-1}\]</span></p>
+<p>which requires <span class="math inline">\(\operatorname{Var}(\varepsilon\mid X) = \sigma^2 I\)</span> — constant variance, zero correlation.</p>
+<p>The general (sandwich) form makes no such promise:</p>
+<p><span class="math display">\[\operatorname{Var}(\hat\beta) = (X&#39;X)^{-1}\,X&#39;\Omega X\,(X&#39;X)^{-1}\]</span></p>
+<div class="check">
+<p>Everything below is a different guess at <span class="math inline">\(\Omega\)</span>. The estimate <span class="math inline">\(\hat\beta\)</span> never changes — only your claimed precision.</p>
+</div>
+</section>
+<section id="three-estimators-of-omega" class="slide level2">
+<h2>Three estimators of <span class="math inline">\(\Omega\)</span></h2>
 <table class="caption-top">
 <colgroup>
 <col style="width: 33%">
@@ -1152,610 +1130,183 @@ Thierry Warin
 </colgroup>
 <thead>
 <tr class="header">
-<th>Tool</th>
-<th>What it is</th>
-<th>Why this one</th>
+<th>Assumption</th>
+<th><span class="math inline">\(\Omega\)</span></th>
+<th>Use when</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>VS Codium</strong></td>
-<td>VS Code with telemetry removed</td>
-<td>Your work touches confidential and licensed data. The editor should not phone home.</td>
+<td>Classical</td>
+<td><span class="math inline">\(\sigma^2 I\)</span></td>
+<td>Essentially never with real panels</td>
 </tr>
 <tr class="even">
-<td><strong>Python 3.10+</strong></td>
-<td>The analysis language</td>
-<td>Everything in the course runs here.</td>
+<td><strong>HC (robust)</strong></td>
+<td><span class="math inline">\(\operatorname{diag}(e_i^2)\)</span></td>
+<td>Variance differs across units</td>
 </tr>
 <tr class="odd">
-<td><strong>Ollama</strong></td>
-<td>Runs LLMs on <em>your</em> machine</td>
-<td>No API key, no per-token cost, no data leaving your laptop.</td>
-</tr>
-<tr class="even">
-<td><strong>Qwen 2.5 Coder</strong></td>
-<td>The model Ollama serves</td>
-<td>Small enough for a laptop, strong at code.</td>
-</tr>
-<tr class="odd">
-<td><strong>aider</strong></td>
-<td>An AI agent in your terminal</td>
-<td>Reads and edits your files, and commits.</td>
-</tr>
-<tr class="even">
-<td><strong>Git + GitHub</strong></td>
-<td>Version control</td>
-<td>The record of who did what.</td>
+<td><strong>Clustered</strong></td>
+<td>Block-diagonal by group</td>
+<td>Observations correlated within a unit</td>
 </tr>
 </tbody>
 </table>
-</section>
-<section class="slide level2">
-<h2>The principle behind the stack</h2>
-<p>Every piece runs <strong>locally</strong>.</p>
-<div class="check">
-<p><strong>The test that matters.</strong> When your environment is finished, turn off your wifi and ask the model a question. If it still answers, your setup is genuinely local — and your data never left the room.</p>
-</div>
+<p><span class="math display">\[\hat\Omega_{\text{cluster}} = \sum_{g=1}^{G} X_g&#39; e_g e_g&#39; X_g\]</span></p>
 <div class="muted">
-<p>This is not ideology. In Session 09 you work with licensed text, and in the group project you may work with data you are not permitted to upload anywhere.</p>
+<p>Clustering by country lets errors correlate freely <strong>within</strong> a country and assumes independence <strong>across</strong> countries.</p>
 </div>
 </section>
-<section id="where" class="slide level2">
-<h2>Where do I type this?</h2>
-<p><strong>Read this slide before you type anything.</strong> It is the single most common source of lost time.</p>
-<p>Two kinds of instruction appear in these slides, and they are always labelled:</p>
-<div class="get">
-<p>download</p>
-</div>
-<p>Go to a website in your browser and run an installer. No typing.</p>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<p>Type it in the terminal <strong>inside VS Codium</strong> — never the macOS Terminal app, never PowerShell on its own.</p>
-</section>
-<section class="slide level2">
-<h2>Why always the VS Codium terminal</h2>
+<section id="the-omitted-variable-formula" class="slide level2">
+<h2>The omitted-variable formula</h2>
+<p>If the true model is <span class="math inline">\(y = X_1\beta_1 + X_2\beta_2 + \varepsilon\)</span> and you omit <span class="math inline">\(X_2\)</span>:</p>
+<p><span class="math display">\[\operatorname{plim}\hat\beta_1 = \beta_1 + \underbrace{\delta}_{\substack{X_2 \text{ on } X_1}}\!\cdot\,\beta_2\]</span></p>
+<p>The bias has a <strong>sign you can reason about</strong> before you see any output:</p>
 <div class="tight">
 <ul>
-<li>It opens <strong>in your project folder</strong>, so <code>git</code> and <code>python</code> act on the right files</li>
-<li>It sees the <code>.venv</code> you activate; a separate Terminal window does not</li>
-<li>It is the same on macOS, Windows and Linux, so these slides work for everyone</li>
+<li><span class="math inline">\(\delta &gt; 0\)</span> and <span class="math inline">\(\beta_2 &gt; 0\)</span> → upward bias</li>
+<li>signs opposite → downward bias</li>
 </ul>
 </div>
 <div class="check">
-<p><strong>Open it now:</strong> <code>View → Terminal</code>, or <code>Ctrl+`</code> (the backtick key, above Tab). A panel appears at the bottom. That panel is where every command below goes.</p>
-</div>
-<div class="warn">
-<p>If a command fails, check <em>where you typed it</em> before you check anything else.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Before you start</h2>
-<p>You need:</p>
-<ul>
-<li>A laptop with <strong>8 GB RAM minimum</strong> (16 GB is much more comfortable)</li>
-<li><strong>Administrator rights</strong> to install software</li>
-<li>About <strong>10 GB free disk space</strong> — the model files are large</li>
-<li>60–90 minutes, uninterrupted</li>
-</ul>
-<div class="warn">
-<p>Do this on the machine you will actually bring to class. A working setup on a desktop at home is of no use in the lab.</p>
+<p>State the expected direction in writing <em>before</em> estimating. This is the single most useful discipline in applied work.</p>
 </div>
 </section></section>
 <section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 1 — VS Codium</h1>
+<section id="the-data" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
+<h1>The data</h1>
 
 </section>
-<section class="slide level2">
-<h2>Install VS Codium</h2>
-<div class="get">
-<p>download</p>
-</div>
-<p>Go to <strong>vscodium.com</strong> and download the build for your operating system.</p>
-<div class="muted">
-<p>This is the one step that cannot use the VS Codium terminal — you are installing the thing that provides it.</p>
-</div>
-<div class="cols">
-<div>
-<p><strong>macOS</strong></p>
-<p>Download the <code>.dmg</code>, open it, drag <strong>VSCodium</strong> to Applications.</p>
-<p>If macOS refuses to open it: right-click the app → <strong>Open</strong> → <strong>Open</strong>.</p>
-</div>
-<div>
-<p><strong>Windows</strong></p>
-<p>Download the <em>User Installer</em> <code>.exe</code> and run it.</p>
-<p>Tick <strong>“Add to PATH”</strong> when the installer offers it.</p>
-</div>
-</div>
-<p><strong>Linux:</strong> use your package manager, or the <code>.deb</code> / <code>.rpm</code> from the same page.</p>
-<div class="check">
-<p><strong>Check.</strong> VS Codium opens and shows the Welcome tab.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Meet the two panels you will live in</h2>
-<div class="shot">
-<p>[ VS Codium window ]</p>
-<p>Left: <strong>Explorer</strong> (your files) · Bottom: <strong>Terminal</strong> · Right: <strong>Continue</strong> (chat)</p>
-</div>
-<p>Two things to find right now:</p>
-<ul>
-<li><strong>The Explorer</strong> — <code>View → Explorer</code>, or <code>Ctrl/Cmd+Shift+E</code></li>
-<li><strong>The integrated Terminal</strong> — <code>View → Terminal</code>, or <code>Ctrl+`</code> (backtick)</li>
-</ul>
-<div class="warn">
-<p>The <strong>Terminal</strong> is where most of this course happens. If you have never used a command line, that is fine — every command you need is on these slides.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Step 2 — Extensions</h2>
-<p>Open the Extensions panel: <code>Ctrl/Cmd+Shift+X</code>. Install three:</p>
+<section id="building-the-panel" class="slide level2">
+<h2>Building the panel</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href></a></span>
+<span id="cb1-3"><a href></a>b    <span class="op">=</span> pd.read_parquet(<span class="st">&quot;data/spine/angle_b_sector.parquet&quot;</span>)</span>
+<span id="cb1-4"><a href></a>core <span class="op">=</span> pd.read_parquet(<span class="st">&quot;data/spine/core.parquet&quot;</span>)</span>
+<span id="cb1-5"><a href></a></span>
+<span id="cb1-6"><a href></a>df <span class="op">=</span> b.merge(core[[<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>]],</span>
+<span id="cb1-7"><a href></a>             on<span class="op">=</span>[<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>])</span>
+<span id="cb1-8"><a href></a><span class="bu">print</span>(df.shape)     <span class="co"># 3150 rows: 30 countries x 7 sectors x 15 years</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Extension</th>
-<th>Search for</th>
-<th>What it does</th>
+<th>Column</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>Python</strong></td>
-<td><code>ms-python.python</code></td>
-<td>Syntax, linting, environment selection</td>
+<td><code>annual_earnings_eur</code></td>
+<td>Mean annual earnings</td>
 </tr>
 <tr class="even">
-<td><strong>Jupyter</strong></td>
-<td><code>ms-toolsai.jupyter</code></td>
-<td>Run notebooks inside the editor</td>
+<td><code>tertiary_share</code></td>
+<td>Share of employment with tertiary education</td>
 </tr>
 <tr class="odd">
-<td><strong>Continue</strong></td>
-<td><code>Continue.continue</code></td>
-<td>The chat sidebar, wired to your local model</td>
+<td><code>vacancy_rate</code></td>
+<td>Job vacancy rate, %</td>
+</tr>
+<tr class="even">
+<td><code>nace_r2</code></td>
+<td>Sector (NACE Rev. 2 section)</td>
 </tr>
 </tbody>
 </table>
-<div class="warn">
-<p>VS Codium uses the Open VSX registry, not Microsoft’s Marketplace. Most extensions are there. If one is missing, the course does not depend on it.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 3 — Python</h1>
-
 </section>
-<section class="slide level2">
-<h2>Install Python</h2>
-<div class="get">
-<p>download</p>
-</div>
-<p>Go to <strong>python.org/downloads</strong> and install <strong>Python 3.11 or 3.12</strong>.</p>
-<div class="warn">
-<p><strong>Windows: tick “Add python.exe to PATH”</strong> on the first installer screen. It is easy to miss, and without it nothing below works.</p>
-</div>
-<div class="muted">
-<p>macOS ships an old Python that is not suitable. Install a current one anyway.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Check Python is there</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="ex">python3</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="check">
-<p>Prints <code>Python 3.11.x</code> or <code>3.12.x</code>.</p>
-<p>On Windows, if <code>python3</code> is not found, try <code>python --version</code>.</p>
-</div>
-<div class="warn">
-<p>If it says <em>command not found</em>, the PATH box was not ticked. Re-run the installer — do not try to work around it.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Create the environment</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<p>First <code>File → Open Folder…</code> and choose your course folder. Then:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This makes a private package folder for this course, so it cannot break your other work.</p>
-</section>
-<section class="slide level2">
-<h2>Activate it</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="co"># macOS / Linux</span></span>
-<span id="cb3-2"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
-<span id="cb3-3"><a href></a></span>
-<span id="cb3-4"><a href></a><span class="co"># Windows (PowerShell)</span></span>
-<span id="cb3-5"><a href></a><span class="ex">.venv\Scripts\Activate.ps1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="check">
-<p>Your prompt now starts with <code>(.venv)</code>. <strong>Every command from here on assumes you see that.</strong></p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Install the packages</h2>
-<div class="where">
-<p>VS Codium terminal · with <code>(.venv)</code> showing</p>
-</div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>numpy, pandas, scikit-learn, statsmodels, matplotlib and the rest. A few minutes.</p>
-<div class="check">
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">&quot;import numpy, pandas, sklearn; print(&#39;ok&#39;)&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>prints <code>ok</code>.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 4 — Ollama and Qwen</h1>
-
-</section>
-<section class="slide level2">
-<h2>Install Ollama</h2>
-<div class="get">
-<p>download</p>
-</div>
-<p>Go to <strong>ollama.com/download</strong>, choose your operating system, and run the installer. This works on macOS, Windows and Linux.</p>
-<div class="muted">
-<p>You may see a one-line <code>curl … | sh</code> command on the web. Ignore it — the installer does the same thing and there is nothing to mistype.</p>
-</div>
-<div class="warn">
-<p>On macOS, <strong>open the app once</strong> after installing. It puts the <code>ollama</code> command in place and starts the background service.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Check Ollama is there</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href></a><span class="ex">ollama</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="check">
-<p>Prints a version number.</p>
-</div>
-<div class="warn">
-<p><em>Command not found?</em> Close the terminal panel and open a new one — a new terminal picks up the changed PATH. On Windows, restart VS Codium.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Pull Qwen 2.5 Coder</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<p>Choose by the RAM in your machine. Rough rule: <strong>model size + 2 GB free</strong>.</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Your machine</th>
-<th>Model</th>
-<th>Command</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>8 GB RAM</td>
-<td><code>qwen2.5-coder:3b</code></td>
-<td><code>ollama pull qwen2.5-coder:3b</code></td>
-</tr>
-<tr class="even">
-<td>16 GB RAM</td>
-<td><code>qwen2.5-coder:7b</code></td>
-<td><code>ollama pull qwen2.5-coder:7b</code></td>
-</tr>
-<tr class="odd">
-<td>32 GB+ / Apple Silicon</td>
-<td><code>qwen2.5-coder:14b</code></td>
-<td><code>ollama pull qwen2.5-coder:14b</code></td>
-</tr>
-</tbody>
-</table>
-<p>You also need the embedding model for Session 10:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href></a><span class="ex">ollama</span> pull nomic-embed-text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p>This downloads several gigabytes. Do it on a good connection, <strong>not</strong> ten minutes before class.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Verify the model</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href></a><span class="ex">ollama</span> list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You should see your model listed. Now talk to it:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;Explain the bias-variance tradeoff in three sentences.&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Type <code>/bye</code> to leave the chat.</p>
-<div class="check">
-<p><strong>The real check.</strong> Turn off your wifi and run that command again. It should still answer. That is what “local” means.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 5 — The CLI agent</h1>
-
-</section>
-<section class="slide level2">
-<h2>Talking to Qwen the way I talk to Claude</h2>
-<p>The Continue sidebar is useful for questions about a selected block of code.</p>
-<p>But the way this course actually works — and the way I work in front of you — is an <strong>agent in the terminal</strong>: something that reads your files, edits them, and commits, while you steer it in prose.</p>
-<p>That tool is <strong>aider</strong>, and it runs against your local Qwen.</p>
-<div class="muted">
-<p>Same shape as the workflow you have seen me use. Different engine, and it is running on your laptop.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Install aider</h2>
-<div class="where">
-<p>VS Codium terminal · with <code>(.venv)</code> showing</p>
-</div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">python</span> <span class="at">-m</span> pip install aider-install</span>
-<span id="cb10-2"><a href></a><span class="ex">aider-install</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section class="slide level2">
-<h2>Point aider at Ollama</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href></a><span class="co"># macOS / Linux</span></span>
-<span id="cb11-2"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434</span>
-<span id="cb11-3"><a href></a></span>
-<span id="cb11-4"><a href></a><span class="co"># Windows (PowerShell) — then open a new terminal</span></span>
-<span id="cb11-5"><a href></a><span class="ex">setx</span> OLLAMA_API_BASE http://127.0.0.1:11434</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section class="slide level2">
-<h2>Give Ollama a real context window</h2>
-<div class="warn">
-<p><strong>This step is not optional.</strong> Ollama defaults to a <strong>2k</strong> context window and then <em>silently discards</em> whatever does not fit. Your agent will appear to “forget” the file you just gave it.</p>
-</div>
-<p>Start the server with a larger window:</p>
-<div class="where">
-<p>VS Codium terminal 1</p>
-</div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Leave that terminal running. Open a <strong>second</strong> terminal for aider.</p>
-<div class="muted">
-<p>In VS Codium: the <code>+</code> icon in the terminal panel splits off a new shell.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Run the agent</h2>
-<div class="where">
-<p>VS Codium terminal 2</p>
-</div>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="bu">cd</span> /path/to/your/repo</span>
-<span id="cb13-2"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p>Note the prefix: <strong><code>ollama_chat/</code></strong>, not <code>ollama/</code>. The second one exists and behaves worse.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Ask it for something</h2>
-<p>You are now at a prompt. Ask in plain language:</p>
-<pre><code>&gt; add a function that loads data/spine/core.parquet
-  and prints the number of rows per country</code></pre>
-<p>aider writes the code, shows you a <strong>diff</strong>, and asks to apply it.</p>
-<div class="check">
-<p>Read the diff before you accept. That habit is the whole skill.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>What aider does to your git history</h2>
-<p>aider <strong>commits automatically</strong> after each change it applies.</p>
-<p>That is usually what you want — but this course counts commits as evidence of who did the work:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href></a><span class="co"># see what it did</span></span>
-<span id="cb15-2"><a href></a><span class="fu">git</span> log <span class="at">--oneline</span></span>
-<span id="cb15-3"><a href></a></span>
-<span id="cb15-4"><a href></a><span class="co"># turn auto-commit off if you&#39;d rather commit yourself</span></span>
-<span id="cb15-5"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p>Commits made by the agent are attributed to <strong>you</strong>. That is correct — you directed it. But read the diff before you accept it: you are answerable for every line in your repository.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 6 — GitHub</h1>
-
-</section>
-<section class="slide level2">
-<h2>Create your account</h2>
-<ol type="1">
-<li>Go to <strong>github.com</strong> and choose <strong>Sign up</strong>.</li>
-<li>Use an email you will still have after you graduate.</li>
-<li>Pick a username you would put on a CV — this is a professional record.</li>
-<li>Verify the email GitHub sends you.</li>
-<li>Enable <strong>two-factor authentication</strong> when prompted. GitHub requires it.</li>
-</ol>
-<div class="shot">
-<p>[ github.com/signup — email, password, username, then a verification puzzle ]</p>
-</div>
-<div class="muted">
-<p>Free accounts include unlimited private repositories. You do not need a paid plan.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Install Git</h2>
-<div class="get">
-<p>download</p>
-</div>
-<p>Go to <strong>git-scm.com/downloads</strong> and run the installer for your system. Accept every default.</p>
-<div class="muted">
-<p>macOS may already have it. Check first — the next slide tells you how.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Tell git who you are</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="fu">git</span> <span class="at">--version</span></span>
-<span id="cb16-2"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.name  <span class="st">&quot;Your Full Name&quot;</span></span>
-<span id="cb16-3"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">&quot;your.name@hec.ca&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p><strong>Use your real name and your university email.</strong> Your commit history is one of four records this course uses to check that all three group members did the work. Commits from <code>unknown@localhost</code> cannot be attributed to you, and unattributed work counts as work you did not do.</p>
-</div>
-<p>Report your exact <code>user.name</code> and <code>user.email</code> to me in Session 1.</p>
-</section>
-<section class="slide level2">
-<h2>Create your repository</h2>
-<p>On github.com, click <strong>+</strong> (top right) → <strong>New repository</strong>.</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Field</th>
-<th>What to put</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Repository name</strong></td>
-<td><code>math60033a-gXX</code> (XX = your group number)</td>
-</tr>
-<tr class="even">
-<td><strong>Description</strong></td>
-<td><code>MATH60033A group work</code></td>
-</tr>
-<tr class="odd">
-<td><strong>Visibility</strong></td>
-<td><strong>Private</strong></td>
-</tr>
-<tr class="even">
-<td><strong>Initialize with README</strong></td>
-<td>✅ tick it</td>
-</tr>
-</tbody>
-</table>
-<div class="shot">
-<p>[ github.com/new — owner, repository name, description, Public/Private, README checkbox ]</p>
-</div>
-<div class="muted">
-<p>Keep it to yourself for now. We will sort out groups and access in class.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>Step 7 — Connect it</h1>
-
-</section>
-<section class="slide level2">
-<h2>Clone your repo into VS Codium</h2>
-<p>On your repository page, click the green <strong>Code</strong> button and copy the <strong>HTTPS</strong> URL.</p>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="fu">git</span> clone https://github.com/YOUR-USERNAME/math60033a-gXX.git</span>
-<span id="cb17-2"><a href></a><span class="bu">cd</span> math60033a-gXX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Then <code>File → Open Folder…</code> and choose that folder.</p>
-<div class="check">
-<p><strong>Check.</strong> The Explorer shows <code>README.md</code>, and the bottom-left of the window shows the branch name <code>main</code>.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Your password will not work</h2>
-<p>When you first push, GitHub asks for credentials — and <strong>rejects your account password</strong>. It wants a <em>token</em>.</p>
-<ol type="1">
-<li>github.com → your avatar → <strong>Settings</strong></li>
-<li><strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong></li>
-<li><strong>Generate new token</strong>, tick the <strong><code>repo</code></strong> scope, set an expiry</li>
-</ol>
-</section>
-<section class="slide level2">
-<h2>Using the token</h2>
-<ol start="4" type="1">
-<li>Copy the token — <strong>it is shown once</strong></li>
-<li>Paste it when git asks for your <em>password</em></li>
-</ol>
-<div class="check">
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href></a><span class="fu">git</span> config <span class="at">--global</span> credential.helper store</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Stores it, so you are asked only once.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>The round trip</h2>
-<div class="where">
-<p>VS Codium terminal</p>
-</div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href></a><span class="bu">echo</span> <span class="st">&quot;# Group XX — MATH60033A&quot;</span> <span class="op">&gt;&gt;</span> README.md</span>
-<span id="cb19-2"><a href></a><span class="fu">git</span> add README.md</span>
-<span id="cb19-3"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Start the group log&quot;</span></span>
-<span id="cb19-4"><a href></a><span class="fu">git</span> push</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Refresh your repository page in the browser. Your line is there.</p>
-<div class="check">
-<p><strong>Check.</strong> You have now completed the full loop: edit locally → commit → push → visible on GitHub. Everything else this term is a variation on that loop.</p>
-</div>
-</section></section>
-<section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>The worked example</h1>
-
-</section>
-<section class="slide level2">
-<h2>Two terminals</h2>
-<p><strong>Terminal 1</strong> — the model server, left running:</p>
-<div class="where">
-<p>VS Codium terminal 1</p>
-</div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Terminal 2</strong> — inside your repository:</p>
-<div class="where">
-<p>VS Codium terminal 2</p>
-</div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="bu">cd</span> math60033a-gXX</span>
-<span id="cb21-2"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
-<span id="cb21-3"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section class="slide level2">
-<h2>Ask for something real</h2>
-<div class="where">
-<p>At the aider prompt</p>
-</div>
-<pre><code>&gt; create explore.py that loads data/spine/core.parquet,
-  prints the shape, and shows mean gdp_pc_eur by year</code></pre>
-<p>aider proposes a diff. You read it. You accept it.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href></a><span class="ex">python</span> explore.py</span>
-<span id="cb23-2"><a href></a><span class="fu">git</span> push</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section class="slide level2">
-<h2>What just happened</h2>
-<div class="check">
-<p>You ran a model <strong>on your own hardware</strong>, had it write code against real data, reviewed the change, committed it under your name, and published it — <strong>without sending one byte to anyone’s API.</strong></p>
-</div>
-<div class="muted">
-<p>Every lab this term is a variation on those two terminals.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Why we do it this way</h2>
+<section id="what-is-deliberately-wrong-with-it" class="slide level2">
+<h2>What is deliberately wrong with it</h2>
 <div class="tight">
 <ul>
-<li><strong>The data stay put.</strong> Some of what you use this term cannot legally be uploaded.</li>
-<li><strong>The cost is zero.</strong> No key, no quota, no bill at the end of the month.</li>
-<li><strong>The record is honest.</strong> Commits carry your name; the diff carries the reasoning.</li>
-<li><strong>The skill transfers.</strong> This is how the work is actually done now.</li>
+<li><strong>Variance scales with country size.</strong> Small countries are noisier. That is heteroskedasticity you can see.</li>
+<li><strong>Repeated observations per country.</strong> 105 rows per country — nowhere near 105 independent facts.</li>
+<li><strong><code>annual_earnings_eur</code> comes from a quadrennial source.</strong> Annual variation is partly interpolation, not measurement.</li>
 </ul>
 </div>
 <div class="warn">
-<p>The model is a <strong>junior collaborator with no accountability.</strong> It will produce confident, wrong code. Every line you commit is a line you are claiming as correct. Read the diff.</p>
+<p>Treating 3,150 rows as 3,150 independent observations is how you get a t-statistic of 12 for an effect that is not there.</p>
 </div>
 </section></section>
 <section>
-<section class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
-<h1>If it breaks</h1>
+<section id="doing-it" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
+<h1>Doing it</h1>
 
 </section>
-<section class="slide level2">
-<h2>Troubleshooting</h2>
+<section id="fit-then-look-at-the-residuals" class="slide level2">
+<h2>Fit, then look at the residuals</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb2-2"><a href></a></span>
+<span id="cb2-3"><a href></a>m <span class="op">=</span> smf.ols(<span class="st">&quot;np.log(annual_earnings_eur) ~ tertiary_share + vacancy_rate &quot;</span></span>
+<span id="cb2-4"><a href></a>            <span class="st">&quot;+ np.log(gdp_pc_eur) + C(nace_r2)&quot;</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb2-5"><a href></a></span>
+<span id="cb2-6"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-7"><a href></a>plt.scatter(m.fittedvalues, m.resid, s<span class="op">=</span><span class="dv">6</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb2-8"><a href></a>plt.axhline(<span class="dv">0</span>)<span class="op">;</span> plt.xlabel(<span class="st">&quot;fitted&quot;</span>)<span class="op">;</span> plt.ylabel(<span class="st">&quot;residual&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>A fan opening to the right is heteroskedasticity. You are looking for a shape, not running a test yet.</p>
+</div>
+</section>
+<section id="the-same-model-three-standard-errors" class="slide level2">
+<h2>The same model, three standard errors</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a>classical <span class="op">=</span> m</span>
+<span id="cb3-2"><a href></a>robust    <span class="op">=</span> m.get_robustcov_results(cov_type<span class="op">=</span><span class="st">&quot;HC3&quot;</span>)</span>
+<span id="cb3-3"><a href></a>clustered <span class="op">=</span> m.get_robustcov_results(cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>,</span>
+<span id="cb3-4"><a href></a>                                    groups<span class="op">=</span>df.loc[m.model.data.row_labels, <span class="st">&quot;geo&quot;</span>])</span>
+<span id="cb3-5"><a href></a></span>
+<span id="cb3-6"><a href></a><span class="cf">for</span> name, r <span class="kw">in</span> [(<span class="st">&quot;classical&quot;</span>, classical), (<span class="st">&quot;HC3&quot;</span>, robust), (<span class="st">&quot;cluster&quot;</span>, clustered)]:</span>
+<span id="cb3-7"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:10s}</span><span class="ss"> se(tertiary_share) = </span><span class="sc">{</span>r<span class="sc">.</span>bse[<span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>The coefficient is identical in all three. Only the standard error moves — and clustered is typically <strong>several times</strong> the classical one.</p>
+</div>
+</section>
+<section id="which-one-do-you-report" class="slide level2">
+<h2>Which one do you report?</h2>
+<div class="tight">
+<ul>
+<li>Cluster at the level at which <strong>treatment varies</strong> and shocks are shared — here, <code>geo</code>.</li>
+<li>With 30 countries you are near the small-<span class="math inline">\(G\)</span> regime; clustered standard errors are themselves noisy.</li>
+<li>Report the clustered version, <strong>say</strong> you clustered, and say on what.</li>
+</ul>
+</div>
+<div class="warn">
+<p>“Robust standard errors” in a table note without naming the cluster level tells the reader nothing. Two papers can write that sentence and mean different things.</p>
+</div>
+</section>
+<section id="the-confounder-you-can-sign" class="slide level2">
+<h2>The confounder you can sign</h2>
+<p>Suppose you omit <code>productivity_idx</code>.</p>
+<div class="tight">
+<ul>
+<li>Productive countries have <strong>higher</strong> earnings → <span class="math inline">\(\beta_2 &gt; 0\)</span></li>
+<li>Productive countries also have <strong>higher</strong> tertiary shares → <span class="math inline">\(\delta &gt; 0\)</span></li>
+<li>Therefore the omitted-variable bias on <code>tertiary_share</code> is <strong>upward</strong></li>
+</ul>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a>short <span class="op">=</span> smf.ols(<span class="st">&quot;np.log(annual_earnings_eur) ~ tertiary_share&quot;</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb4-2"><a href></a>long_ <span class="op">=</span> smf.ols(<span class="st">&quot;np.log(annual_earnings_eur) ~ tertiary_share &quot;</span></span>
+<span id="cb4-3"><a href></a>                <span class="st">&quot;+ productivity_idx&quot;</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb4-4"><a href></a><span class="bu">print</span>(short.params[<span class="st">&quot;tertiary_share&quot;</span>], long_.params[<span class="st">&quot;tertiary_share&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>The short coefficient should exceed the long one. You predicted the direction before you ran it.</p>
+</div>
+</section>
+<section id="what-to-report" class="slide level2">
+<h2>What to report</h2>
+<div class="tight">
+<ul>
+<li>The coefficient, its <strong>clustered</strong> standard error, and the cluster unit</li>
+<li>The residual plot, or a sentence about what it showed</li>
+<li>The confounder you worried about and <strong>which way</strong> it would bias you</li>
+<li>Sample size <strong>and</strong> number of clusters — 3,150 and 30 are both true, and only one governs precision</li>
+</ul>
+</div>
+<div class="warn">
+<p>A p-value answers “how surprising is this under the null?” — not “how large is the effect?” and not “is the model right?”. Report the magnitude in euros.</p>
+</div>
+</section>
+<section id="common-mistakes" class="slide level2">
+<h2>Common mistakes</h2>
 <table class="caption-top">
 <colgroup>
 <col style="width: 50%">
@@ -1763,78 +1314,51 @@ Thierry Warin
 </colgroup>
 <thead>
 <tr class="header">
-<th>Symptom</th>
-<th>Fix</th>
+<th>Mistake</th>
+<th>Consequence</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>ollama: command not found</code></td>
-<td>Reopen the terminal; on Windows, restart VS Codium</td>
+<td>Default standard errors on panel data</td>
+<td>Intervals far too narrow</td>
 </tr>
 <tr class="even">
-<td>Model answers very slowly</td>
-<td>Use a smaller model (<code>:3b</code>); close other applications</td>
+<td>Clustering on the wrong level</td>
+<td>Precision over- or under-stated</td>
 </tr>
 <tr class="odd">
-<td>aider “forgets” your file</td>
-<td>You skipped <code>OLLAMA_CONTEXT_LENGTH=8192 ollama serve</code></td>
+<td>“Controlling for everything”</td>
+<td>Post-treatment bias; uninterpretable coefficients</td>
 </tr>
 <tr class="even">
-<td><code>connection refused</code> from aider</td>
-<td>The <code>ollama serve</code> terminal is not running</td>
+<td>Reading significance from <span class="math inline">\(n = 3150\)</span></td>
+<td>You have 30 independent units</td>
 </tr>
 <tr class="odd">
-<td><code>git push</code> rejects your password</td>
-<td>Use a personal access token, not the password</td>
-</tr>
-<tr class="even">
-<td><code>pip</code> fails on install</td>
-<td>Check <code>(.venv)</code> is in your prompt</td>
+<td>Dropping <code>flag == &quot;u&quot;</code> rows</td>
+<td>Coverage biased toward large economies</td>
 </tr>
 </tbody>
 </table>
-<div class="muted">
-<p>Still stuck? Ask Qwen — that is itself a test of whether your setup works.</p>
-</div>
 </section>
-<section class="slide level2">
-<h2>The last check</h2>
-<div class="where">
-<p>VS Codium terminal · with <code>(.venv)</code> showing</p>
-</div>
-<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You should see five checks pass.</p>
-<div class="check">
-<p><strong>Bring the output to class</strong> — a screenshot or a paste into your notes.</p>
-</div>
-</section>
-<section class="slide level2">
-<h2>Before Session 1</h2>
+<section id="in-the-lab" class="slide level2">
+<h2>In the lab</h2>
+<p>Work through <a href="02-lab/README.md"><code>02-lab/README.md</code></a>.</p>
 <div class="tight">
-<ul>
-<li>✅ VS Codium installed, Python environment built</li>
-<li>✅ Ollama running Qwen 2.5 Coder, verified <strong>with the wifi off</strong></li>
-<li>✅ aider talking to your local model</li>
-<li>✅ GitHub account, private group repository, teammates added</li>
-<li>✅ One commit pushed from your machine</li>
-<li>✅ <em>Europe 2031</em> read as a stress test, not a prediction</li>
-<li>✅ <code>verify_environment.py</code> output in hand</li>
-</ul>
-</div>
-</section>
-<section class="slide level2" data-background-color="#16181A" style="color:#F7F6F3">
-<h2></h2>
-<h3 style="color:#F7F6F3">See you in Session 1.</h3>
-<div style="color:#9DA19E; font-size:0.8em">
-<p>Bring the machine you set up. Everything this term runs on it.</p>
+<ol type="1">
+<li>Fit the earnings model and inspect residuals against fitted values</li>
+<li>Compute classical, HC3 and clustered standard errors side by side</li>
+<li>Write down a confounder, sign its bias, then test your prediction</li>
+<li>Three sentences — with the cluster level named</li>
+</ol>
 </div>
 
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
-<p>MATH60033A · Session 01 pre-session · Thierry Warin · HEC Montréal</p>
+<p>MATH60033A · Session 03 · Thierry Warin · HEC Montréal</p>
 </div>
 </div></div>
 
@@ -2820,7 +2344,7 @@ window.QuartoSupport = function () {
       // Full list of configuration options available at:
       // https://revealjs.com/config/
       Reveal.initialize({
-'controlsAuto': false,
+'controlsAuto': true,
 'previewLinksAuto': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
@@ -2831,7 +2355,7 @@ window.QuartoSupport = function () {
 'smaller': false,
  
         // Display controls in the bottom right corner
-        controls: true,
+        controls: false,
 
         // Help the user learn the controls by providing hints, for example by
         // bouncing the down arrow when they first encounter a vertical slide

@@ -99,6 +99,42 @@ This is not ideology. In Session 09 you work with licensed text, and in the
 group project you may work with data you are not permitted to upload anywhere.
 :::
 
+## Where do I type this? {#where}
+
+**Read this slide before you type anything.** It is the single most common
+source of lost time.
+
+Two kinds of instruction appear in these slides, and they are always labelled:
+
+::: {.get}
+download
+:::
+Go to a website in your browser and run an installer. No typing.
+
+::: {.where}
+VS Codium terminal
+:::
+Type it in the terminal **inside VS Codium** — never the macOS Terminal app,
+never PowerShell on its own.
+
+## Why always the VS Codium terminal
+
+::: {.tight}
+- It opens **in your project folder**, so `git` and `python` act on the right files
+- It sees the `.venv` you activate; a separate Terminal window does not
+- It is the same on macOS, Windows and Linux, so these slides work for everyone
+:::
+
+::: {.check}
+**Open it now:** ``View → Terminal``, or ``Ctrl+` `` (the backtick key, above
+Tab). A panel appears at the bottom. That panel is where every command below
+goes.
+:::
+
+::: {.warn}
+If a command fails, check *where you typed it* before you check anything else.
+:::
+
 ## Before you start
 
 You need:
@@ -117,7 +153,16 @@ desktop at home is of no use in the lab.
 
 ## Install VS Codium
 
+::: {.get}
+download
+:::
+
 Go to **vscodium.com** and download the build for your operating system.
+
+::: {.muted}
+This is the one step that cannot use the VS Codium terminal — you are installing
+the thing that provides it.
+:::
 
 ::: {.cols}
 ::: {}
@@ -177,15 +222,64 @@ extensions are there. If one is missing, the course does not depend on it.
 
 # Step 3 — Python {background-color="#16181A" style="color:#F7F6F3"}
 
+## Install Python
+
+::: {.get}
+download
+:::
+
+Go to **python.org/downloads** and install **Python 3.11 or 3.12**.
+
+::: {.warn}
+**Windows: tick "Add python.exe to PATH"** on the first installer screen. It is
+easy to miss, and without it nothing below works.
+:::
+
+::: {.muted}
+macOS ships an old Python that is not suitable. Install a current one anyway.
+:::
+
+## Check Python is there
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+python3 --version
+```
+
+::: {.check}
+Prints `Python 3.11.x` or `3.12.x`.
+
+On Windows, if `python3` is not found, try `python --version`.
+:::
+
+::: {.warn}
+If it says *command not found*, the PATH box was not ticked. Re-run the
+installer — do not try to work around it.
+:::
+
 ## Create the environment
 
-Open the terminal in VS Codium (``Ctrl+` ``) and run, from the course folder:
+::: {.where}
+VS Codium terminal
+:::
+
+First `File → Open Folder…` and choose your course folder. Then:
 
 ```bash
 python3 -m venv .venv
 ```
 
-Then activate it:
+This makes a private package folder for this course, so it cannot break your
+other work.
+
+## Activate it
+
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 # macOS / Linux
@@ -196,21 +290,23 @@ source .venv/bin/activate
 ```
 
 ::: {.check}
-**Check.** Your prompt now starts with `(.venv)`.
+Your prompt now starts with `(.venv)`. **Every command from here on assumes you
+see that.**
 :::
 
 ## Install the packages
+
+::: {.where}
+VS Codium terminal · with `(.venv)` showing
+:::
 
 ```bash
 pip install -r requirements.txt
 ```
 
-This pulls numpy, pandas, scikit-learn, statsmodels, matplotlib and the rest.
-It takes a few minutes.
+numpy, pandas, scikit-learn, statsmodels, matplotlib and the rest. A few minutes.
 
 ::: {.check}
-**Check.** No red error text at the end, and:
-
 ```bash
 python -c "import numpy, pandas, sklearn; print('ok')"
 ```
@@ -222,33 +318,47 @@ prints `ok`.
 
 ## Install Ollama
 
-::: {.cols}
-::: {}
-**macOS / Linux**
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-:::
-::: {}
-**Windows**
-
-Download the installer from
-**ollama.com/download** and run it.
-:::
+::: {.get}
+download
 :::
 
-::: {.check}
-**Check.**
+Go to **ollama.com/download**, choose your operating system, and run the
+installer. This works on macOS, Windows and Linux.
+
+::: {.muted}
+You may see a one-line `curl … | sh` command on the web. Ignore it — the
+installer does the same thing and there is nothing to mistype.
+:::
+
+::: {.warn}
+On macOS, **open the app once** after installing. It puts the `ollama` command
+in place and starts the background service.
+:::
+
+## Check Ollama is there
+
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 ollama --version
 ```
 
-prints a version number.
+::: {.check}
+Prints a version number.
+:::
+
+::: {.warn}
+*Command not found?* Close the terminal panel and open a new one — a new
+terminal picks up the changed PATH. On Windows, restart VS Codium.
 :::
 
 ## Pull Qwen 2.5 Coder
+
+::: {.where}
+VS Codium terminal
+:::
 
 Choose by the RAM in your machine. Rough rule: **model size + 2 GB free**.
 
@@ -270,6 +380,10 @@ minutes before class.
 :::
 
 ## Verify the model
+
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 ollama list
@@ -307,20 +421,26 @@ running on your laptop.
 
 ## Install aider
 
-In the VS Codium terminal, with your `.venv` active:
+::: {.where}
+VS Codium terminal · with `(.venv)` showing
+:::
 
 ```bash
 python -m pip install aider-install
 aider-install
 ```
 
-Then tell it where Ollama lives:
+## Point aider at Ollama
+
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 # macOS / Linux
 export OLLAMA_API_BASE=http://127.0.0.1:11434
 
-# Windows (PowerShell) — then restart the terminal
+# Windows (PowerShell) — then open a new terminal
 setx OLLAMA_API_BASE http://127.0.0.1:11434
 ```
 
@@ -334,6 +454,10 @@ then *silently discards* whatever does not fit. Your agent will appear to
 
 Start the server with a larger window:
 
+::: {.where}
+VS Codium terminal 1
+:::
+
 ```bash
 OLLAMA_CONTEXT_LENGTH=8192 ollama serve
 ```
@@ -346,6 +470,10 @@ In VS Codium: the `+` icon in the terminal panel splits off a new shell.
 
 ## Run the agent
 
+::: {.where}
+VS Codium terminal 2
+:::
+
 ```bash
 cd /path/to/your/repo
 aider --model ollama_chat/qwen2.5-coder:7b
@@ -356,14 +484,20 @@ Note the prefix: **`ollama_chat/`**, not `ollama/`. The second one exists and
 behaves worse.
 :::
 
-Now you are in a prompt. Ask in plain language:
+## Ask it for something
+
+You are now at a prompt. Ask in plain language:
 
 ```
-> add a function that loads data/spine/core.parquet and
-  prints the number of rows per country
+> add a function that loads data/spine/core.parquet
+  and prints the number of rows per country
 ```
 
-aider writes the code, shows you a diff, and asks to apply it.
+aider writes the code, shows you a **diff**, and asks to apply it.
+
+::: {.check}
+Read the diff before you accept. That habit is the whole skill.
+:::
 
 ## What aider does to your git history
 
@@ -404,12 +538,27 @@ every line in your repository.
 Free accounts include unlimited private repositories. You do not need a paid plan.
 :::
 
+## Install Git
+
+::: {.get}
+download
+:::
+
+Go to **git-scm.com/downloads** and run the installer for your system. Accept
+every default.
+
+::: {.muted}
+macOS may already have it. Check first — the next slide tells you how.
+:::
+
 ## Tell git who you are
 
-In the VS Codium terminal:
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
-git --version                       # install from git-scm.com if missing
+git --version
 git config --global user.name  "Your Full Name"
 git config --global user.email "your.name@hec.ca"
 ```
@@ -438,7 +587,9 @@ On github.com, click **+** (top right) → **New repository**.
 [ github.com/new — owner, repository name, description, Public/Private, README checkbox ]
 :::
 
-Then **Settings → Collaborators** and add your two teammates and me.
+::: {.muted}
+Keep it to yourself for now. We will sort out groups and access in class.
+:::
 
 # Step 7 — Connect it {background-color="#16181A" style="color:#F7F6F3"}
 
@@ -446,7 +597,9 @@ Then **Settings → Collaborators** and add your two teammates and me.
 
 On your repository page, click the green **Code** button and copy the **HTTPS** URL.
 
-In the VS Codium terminal:
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/math60033a-gXX.git
@@ -460,14 +613,17 @@ Then `File → Open Folder…` and choose that folder.
 shows the branch name `main`.
 :::
 
-## Authenticating the first time you push
+## Your password will not work
 
-When you first push, GitHub asks for credentials. **Your account password will
-not work** — it wants a token.
+When you first push, GitHub asks for credentials — and **rejects your account
+password**. It wants a *token*.
 
 1. github.com → your avatar → **Settings**
 2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
 3. **Generate new token**, tick the **`repo`** scope, set an expiry
+
+## Using the token
+
 4. Copy the token — **it is shown once**
 5. Paste it when git asks for your *password*
 
@@ -475,10 +631,15 @@ not work** — it wants a token.
 ```bash
 git config --global credential.helper store
 ```
-stores it so you are asked only once.
+
+Stores it, so you are asked only once.
 :::
 
 ## The round trip
+
+::: {.where}
+VS Codium terminal
+:::
 
 ```bash
 echo "# Group XX — MATH60033A" >> README.md
@@ -496,17 +657,23 @@ visible on GitHub. Everything else this term is a variation on that loop.
 
 # The worked example {background-color="#16181A" style="color:#F7F6F3"}
 
-## Putting all of it together
-
-Everything is installed. This is what a working session actually looks like.
+## Two terminals
 
 **Terminal 1** — the model server, left running:
+
+::: {.where}
+VS Codium terminal 1
+:::
 
 ```bash
 OLLAMA_CONTEXT_LENGTH=8192 ollama serve
 ```
 
 **Terminal 2** — inside your repository:
+
+::: {.where}
+VS Codium terminal 2
+:::
 
 ```bash
 cd math60033a-gXX
@@ -516,8 +683,12 @@ aider --model ollama_chat/qwen2.5-coder:7b
 
 ## Ask for something real
 
+::: {.where}
+At the aider prompt
+:::
+
 ```
-> create explore.py that loads data/spine/core.parquet with pandas,
+> create explore.py that loads data/spine/core.parquet,
   prints the shape, and shows mean gdp_pc_eur by year
 ```
 
@@ -525,14 +696,19 @@ aider proposes a diff. You read it. You accept it.
 
 ```bash
 python explore.py
-git log --oneline -1
 git push
 ```
 
+## What just happened
+
 ::: {.check}
-**You have just:** run a model on your own hardware, had it write code against
-real data, reviewed the change, committed it under your name, and published it
-to your group's repository — **without sending one byte to anyone's API.**
+You ran a model **on your own hardware**, had it write code against real data,
+reviewed the change, committed it under your name, and published it —
+**without sending one byte to anyone's API.**
+:::
+
+::: {.muted}
+Every lab this term is a variation on those two terminals.
 :::
 
 ## Why we do it this way
@@ -569,7 +745,9 @@ Still stuck? Ask Qwen — that is itself a test of whether your setup works.
 
 ## The last check
 
-From the repository root, with `.venv` active:
+::: {.where}
+VS Codium terminal · with `(.venv)` showing
+:::
 
 ```bash
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py

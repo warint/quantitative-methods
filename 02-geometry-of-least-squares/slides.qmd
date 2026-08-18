@@ -1,0 +1,251 @@
+---
+title: "The Geometry of Least Squares"
+subtitle: "Session 02 · Projection, partialling out, and why composition is not causation"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 02 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# The question {background-color="#16181A" style="color:#F7F6F3"}
+
+## Electricity prices across Europe
+
+Industrial electricity costs more in some European countries than others.
+
+A natural first claim:
+
+> *"Countries with more fossil generation have higher electricity prices."*
+
+Before we can defend that sentence, we have to separate two things:
+
+::: {.tight}
+- the **effect** of the generation mix on price
+- the **composition** of the countries that happen to have that mix
+:::
+
+::: {.muted}
+Rich countries differ from poor ones in more than their power stations.
+:::
+
+## Why this is a geometry problem
+
+Least squares is not a formula to memorise. It is a **projection**.
+
+$$\hat{y} = X(X'X)^{-1}X'y = P_X\,y$$
+
+$P_X$ projects $y$ onto the column space of $X$. The residual
+
+$$e = (I - P_X)\,y = M_X\,y$$
+
+is what is left **orthogonal** to everything $X$ can explain.
+
+::: {.check}
+Every result today follows from one fact: $M_X X = 0$. The residual carries no
+trace of the columns you controlled for.
+:::
+
+# The method {background-color="#16181A" style="color:#F7F6F3"}
+
+## Frisch–Waugh–Lovell
+
+Split the regressors: $y = X_1\beta_1 + X_2\beta_2 + \varepsilon$.
+
+The FWL theorem says $\hat{\beta}_1$ is identical whether you
+
+::: {.tight}
+1. regress $y$ on $X_1$ **and** $X_2$ together, or
+2. regress $M_{X_2}y$ on $M_{X_2}X_1$ — both **residualised** against $X_2$
+:::
+
+$$\hat{\beta}_1 = (X_1'M_{X_2}X_1)^{-1}X_1'M_{X_2}y$$
+
+::: {.muted}
+"Controlling for" a variable *means* projecting it out. Nothing more mystical
+than that.
+:::
+
+## Why you should care
+
+FWL is the reason a coefficient can **change sign** when you add a control.
+
+You are no longer estimating the same object:
+
+::: {.tight}
+- Without $X_2$: the association of $X_1$ with $y$, **including** whatever runs through $X_2$
+- With $X_2$: the association of the part of $X_1$ **unrelated** to $X_2$
+:::
+
+::: {.warn}
+If you cannot say which of those two your question asks for, you cannot
+interpret your own regression.
+:::
+
+# The data {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you are working with
+
+```python
+import pandas as pd
+
+core = pd.read_parquet("data/spine/core.parquet")
+a    = pd.read_parquet("data/spine/angle_a_country.parquet")
+
+df = core.merge(a, on=["geo", "time"])
+print(df.shape)          # 450 rows: 30 countries x 15 years, 2010-2024
+```
+
+| Column | Meaning |
+|---|---|
+| `elec_price_eur_kwh` | Non-household price, excl. tax, band IC |
+| `share_renew`, `share_fossil`, `share_nuclear` | Generation mix, shares of 1 |
+| `gdp_pc_eur`, `productivity_idx` | The composition variables |
+
+## The trap in this table
+
+The three generation shares **sum to one**, exactly:
+
+```python
+df[["share_renew", "share_fossil", "share_nuclear"]].sum(axis=1).max()
+# 1.0001  (rounding only)
+```
+
+::: {.warn}
+Include all three shares **and** an intercept and you have created exact
+collinearity. $X'X$ is singular. Some libraries error; others silently return
+one of infinitely many solutions.
+:::
+
+::: {.check}
+**Drop one share.** Every coefficient is then read *relative to the omitted
+category* — which you must state in your table note.
+:::
+
+## A price without its band is meaningless
+
+`elec_price_eur_kwh` is **band IC**: consumers using 500–2000 MWh a year.
+
+::: {.tight}
+- A different band is a different number for the same country and year.
+- There is a **structural break in 2022** — the energy shock.
+- `elec_price_incl_tax` minus the excl.-tax series is the **policy wedge**, not a measurement error.
+:::
+
+::: {.muted}
+Reporting "the electricity price in Germany" without the band is the kind of
+sentence this course is designed to stop you writing.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## The naive regression
+
+```python
+import statsmodels.formula.api as smf
+
+m1 = smf.ols("elec_price_eur_kwh ~ share_fossil + share_nuclear", data=df).fit()
+print(m1.summary().tables[1])
+```
+
+`share_renew` is omitted, so both coefficients are read **against renewables**.
+
+::: {.muted}
+Write down the sign you expect *before* you run it. You are allowed to be
+wrong; you are not allowed to decide afterwards what you predicted.
+:::
+
+## Now add composition
+
+```python
+m2 = smf.ols(
+    "elec_price_eur_kwh ~ share_fossil + share_nuclear "
+    "+ np.log(gdp_pc_eur) + productivity_idx",
+    data=df,
+).fit()
+```
+
+Compare `share_fossil` across `m1` and `m2`.
+
+::: {.check}
+If it moved, composition was doing part of the work. FWL tells you exactly how
+much — and the next slide proves it.
+:::
+
+## Verify FWL yourself
+
+```python
+import numpy as np
+import statsmodels.api as sm
+
+d = df.dropna(subset=["elec_price_eur_kwh", "share_fossil",
+                      "gdp_pc_eur", "productivity_idx"])
+
+Z = sm.add_constant(d[["gdp_pc_eur", "productivity_idx"]])
+
+# residualise BOTH the outcome and the regressor against Z
+y_r = sm.OLS(d["elec_price_eur_kwh"], Z).fit().resid
+x_r = sm.OLS(d["share_fossil"],       Z).fit().resid
+
+print(sm.OLS(y_r, sm.add_constant(x_r)).fit().params.iloc[1])
+# identical to share_fossil in the full multiple regression
+```
+
+::: {.check}
+Two routes, one number. That identity *is* what "controlling for" means.
+:::
+
+## What to report
+
+::: {.tight}
+- Which share you **omitted**, and therefore what the comparison is against
+- Whether the fossil coefficient **moved** when composition entered, and in which direction
+- $R^2$ **and** the residual standard error in price units — a share of variance is not a magnitude
+- That 2022 breaks the series, and what you did about it
+:::
+
+::: {.warn}
+Do not write "fossil generation raises prices by X". You have an association
+in a 30-country panel, not an experiment. Session 10 is where causal language
+becomes available, and it costs more than this.
+:::
+
+## Common mistakes
+
+| Mistake | What happens |
+|---|---|
+| All three shares + intercept | Singular $X'X$; meaningless coefficients |
+| Reading a coefficient without naming the omitted share | The number has no referent |
+| Pooling 2022 with earlier years silently | One structural break masquerades as an effect |
+| Dropping rows with `flag == "u"` | Coverage tilts toward large economies |
+| Reporting $R^2$ alone | No sense of magnitude |
+
+## In the lab
+
+Work through [`02-lab/README.md`](02-lab/README.md).
+
+You will:
+
+::: {.tight}
+1. Build the merged panel and confirm the collinearity for yourself
+2. Estimate the naive and the composition-adjusted specification
+3. Reproduce the coefficient by residualising, and show the two agree
+4. Write **three sentences** your group will defend if drawn
+:::
+
+::: {.check}
+The three sentences are the deliverable. The code is how you earn the right to
+write them.
+:::
