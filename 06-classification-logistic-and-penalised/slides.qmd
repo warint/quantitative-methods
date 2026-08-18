@@ -1,0 +1,388 @@
+---
+title: "Classification and the Threshold"
+subtitle: "Session 06 · Logistic regression, imbalance, and the decision nobody writes down"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 06 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Why squared loss is wrong for a binary outcome |
+| **10–30** | Logistic regression and the log-odds |
+| **30–45** | Penalised logistic regression |
+| **45–65** | Imbalance, and why accuracy lies |
+| **65–85** | The threshold is an economic choice |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Shukla**, *Credit Scoring of Thin File Consumers*.
+
+::: {.muted}
+Harvard Dataverse, DOI 10.7910/DVN/EGAIKO · CC BY 4.0 · includes Python code
+:::
+
+A "thin file" consumer has almost no credit history. The paper is about
+classifying people **the data barely describes** — which is exactly the
+situation where the threshold matters more than the model.
+
+::: {.check}
+This is one of the sessions where you work with the **authors' own data**, not
+a synthetic stand-in.
+:::
+
+## Today's question
+
+> *Which European countries will fall into the bottom decile of productivity
+> growth **next year**?*
+
+::: {.tight}
+- The outcome is binary
+- It is **rare** — about one country in ten
+- Getting it wrong in one direction costs more than the other
+:::
+
+# Why not least squares {background-color="#16181A" style="color:#F7F6F3"}
+
+## The linear probability model
+
+You *can* regress a 0/1 outcome on $X$ by OLS. Economists do it often, and it
+has real virtues — the coefficients are marginal effects, and it is robust.
+
+But:
+
+::: {.tight}
+- Fitted values go **below 0 and above 1**, which are not probabilities
+- The errors are heteroskedastic by construction
+- The fit is pulled around by points far from the boundary
+:::
+
+::: {.muted}
+The LPM is defensible for an average effect. It is a poor basis for a *decision*.
+:::
+
+## Model the log-odds instead
+
+$$\log\frac{p(x)}{1 - p(x)} = x'\beta \qquad\Longleftrightarrow\qquad p(x) = \frac{1}{1 + e^{-x'\beta}}$$
+
+::: {.check}
+The logistic function maps the whole real line into $(0,1)$. No fitted value can
+ever be an impossible probability.
+:::
+
+## What the coefficients mean
+
+$\beta_j$ is the change in **log-odds** for a one-unit change in $x_j$.
+
+::: {.tight}
+- $e^{\beta_j}$ is the **odds ratio** — multiplicative, not additive
+- The effect on the *probability* depends on where you are on the curve
+- Near $p = 0.5$ the curve is steepest; in the tails it is nearly flat
+:::
+
+::: {.warn}
+"A one-point rise in the barrier index raises the probability by $\beta$" is
+wrong. There is no single such number. Report the odds ratio, or a marginal
+effect evaluated at a stated point.
+:::
+
+## Fitting it
+
+There is no closed form. We maximise the log-likelihood
+
+$$\ell(\beta) = \sum_i \Big[ y_i \, x_i'\beta - \log\big(1 + e^{x_i'\beta}\big) \Big]$$
+
+which is **concave**, so the maximum is unique and the optimiser converges.
+
+::: {.muted}
+Concavity is why logistic regression is boring to fit and trees are not.
+:::
+
+## Separation
+
+If some predictor perfectly splits the classes, the likelihood is maximised by
+sending $\beta \to \infty$.
+
+::: {.tight}
+- Coefficients explode; standard errors explode faster
+- Software may report "convergence" anyway
+- It is *more* common in small samples — like a 30-country panel
+:::
+
+::: {.check}
+A penalty fixes it. Which is the next section.
+:::
+
+# Penalised logistic {background-color="#16181A" style="color:#F7F6F3"}
+
+## The same two penalties
+
+$$\min_\beta \; -\ell(\beta) + \lambda\left(\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\right)$$
+
+Everything from Session 05 carries over:
+
+::: {.tight}
+- $\ell_2$ shrinks and shares; $\ell_1$ selects
+- Standardise first, inside the pipeline
+- Choose $\lambda$ by cross-validation, grouped by country
+:::
+
+::: {.warn}
+In `scikit-learn` the logistic penalty is parameterised by `C`, which is
+**$1/\lambda$**. Larger `C` means *less* regularisation. This trips up everyone
+once.
+:::
+
+# The data {background-color="#16181A" style="color:#F7F6F3"}
+
+## The label
+
+```python
+import pandas as pd
+
+core = pd.read_parquet("data/spine/core.parquet")
+print(core.falling_behind_next.mean())      # 0.100
+print(core.falling_behind_next.isna().sum())  # 30
+```
+
+::: {.tight}
+- The rate is **exactly 10% by construction** — the threshold is the within-year
+  bottom decile
+- **30 rows are NaN**: the last year of each of 30 countries
+:::
+
+## That NaN is not a defect
+
+`falling_behind_next` is next year's outcome. For 2024 there is no next year.
+
+::: {.check}
+Dropping those 30 rows is **correct**. Imputing them would be inventing the
+future — the exact error this course exists to prevent.
+:::
+
+::: {.warn}
+Be equally careful the other way: if you build features from the *same* year as
+the label without lagging, you have used information that would not have been
+available when the prediction had to be made.
+:::
+
+## Base rate is a benchmark
+
+A model that predicts "never falls behind" for every country is **90% accurate**.
+
+::: {.warn}
+If your model reports 91% accuracy, it has added one percentage point over
+saying nothing at all. Accuracy on an imbalanced problem is not a measure of
+skill — it is a measure of the base rate.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Set up
+
+```python
+import numpy as np
+
+d = core.dropna(subset=["falling_behind_next"]).copy()
+d = d.sort_values(["geo", "time"])
+
+feat = ["gdp_pc_eur", "population", "employment_ths",
+        "productivity_idx", "gfcf_meur", "prod_growth"]
+X = d[feat].fillna(d[feat].median())
+y = d["falling_behind_next"].astype(int)
+
+print(X.shape, y.mean().round(3))     # (420, 6), 0.1
+```
+
+## Fit it
+
+```python
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GroupKFold
+
+clf = make_pipeline(
+    StandardScaler(),
+    LogisticRegressionCV(Cs=np.logspace(-3, 3, 30), penalty="l2",
+                         cv=5, scoring="neg_log_loss", max_iter=5000),
+)
+clf.fit(X, y)
+```
+
+::: {.check}
+Scored by **log loss**, not accuracy. Log loss rewards well-calibrated
+probabilities; accuracy rewards guessing the majority class.
+:::
+
+## Why the inner `cv` is just `5`
+
+::: {.warn}
+A precomputed `GroupKFold(...).split(...)` holds row positions for the
+**whole** dataset. Nest it inside the outer loop on the next slide and those
+positions point past the end of the training subset — an `IndexError`, if you
+are lucky enough to get one.
+:::
+
+::: {.check}
+The grouping belongs on the **outer** loop, which is where it protects you.
+:::
+
+## Out-of-sample probabilities
+
+```python
+from sklearn.model_selection import cross_val_predict
+
+p = cross_val_predict(clf, X, y, cv=GroupKFold(5).split(X, y, d["geo"]),
+                      method="predict_proba")[:, 1]
+
+print("mean predicted:", p.mean().round(3), " actual:", y.mean().round(3))
+```
+
+::: {.muted}
+Those two numbers should be close. If the mean predicted probability is far from
+the base rate, the model is miscalibrated before you have chosen any threshold.
+:::
+
+# Judging it {background-color="#16181A" style="color:#F7F6F3"}
+
+## ROC is the wrong picture here
+
+The ROC curve plots TPR against FPR. With 90% negatives, the FPR denominator is
+enormous, so a great many false positives barely move the curve.
+
+::: {.check}
+Use the **precision–recall** curve when the positive class is rare. Its baseline
+is the base rate — 0.10 here — not 0.5.
+:::
+
+```python
+from sklearn.metrics import average_precision_score, roc_auc_score
+print("ROC AUC :", round(roc_auc_score(y, p), 3))
+print("PR  AUC :", round(average_precision_score(y, p), 3), " baseline", round(y.mean(), 3))
+```
+
+## Calibration
+
+```python
+from sklearn.calibration import calibration_curve
+import matplotlib.pyplot as plt
+
+frac, mean_pred = calibration_curve(y, p, n_bins=8, strategy="quantile")
+plt.plot(mean_pred, frac, "o-"); plt.plot([0, 1], [0, 1], "--")
+plt.xlabel("predicted probability"); plt.ylabel("observed frequency")
+```
+
+::: {.check}
+On the diagonal, "0.3" means it happens 30% of the time. That is what makes a
+probability usable by somebody making a decision.
+:::
+
+# The threshold {background-color="#16181A" style="color:#F7F6F3"}
+
+## 0.5 is not a default. It is a claim.
+
+Classifying at $p > 0.5$ asserts that a false positive and a false negative cost
+the same.
+
+::: {.warn}
+For "which countries need policy attention?", they obviously do not. Missing a
+country that falls behind is not the same as sending an analyst to one that was
+fine.
+:::
+
+## Choose it with a loss
+
+Let $c_{FN}$ be the cost of a miss and $c_{FP}$ the cost of a false alarm. The
+threshold that minimises expected cost is
+
+$$t^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}$$
+
+::: {.tight}
+- Missing is 4× as costly → $t^\star = 0.2$
+- Equal costs → $t^\star = 0.5$
+:::
+
+::: {.check}
+You will not know these costs precisely. State the ratio you assumed, and show
+how the answer moves when it changes.
+:::
+
+## Sweep it
+
+```python
+from sklearn.metrics import precision_score, recall_score
+
+rows = []
+for t in np.arange(0.05, 0.65, 0.05):
+    yhat = (p >= t).astype(int)
+    rows.append((round(t, 2), yhat.sum(),
+                 round(precision_score(y, yhat, zero_division=0), 3),
+                 round(recall_score(y, yhat), 3)))
+
+print(pd.DataFrame(rows, columns=["threshold", "flagged", "precision", "recall"]))
+```
+
+::: {.muted}
+Read the "flagged" column as a workload: how many countries would you actually
+have to look at?
+:::
+
+## What to report
+
+::: {.tight}
+- The **base rate**, first, so accuracy can be read against it
+- PR AUC rather than ROC AUC, with the baseline stated
+- A calibration plot, or a sentence about what it showed
+- The **threshold you chose and the cost ratio implying it**
+- Precision and recall *at that threshold* — not the maximum over all thresholds
+:::
+
+::: {.warn}
+Reporting the best F1 over a swept threshold, chosen on the same data you
+evaluate on, is a leak. Choose the threshold on training folds.
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Reporting accuracy | 90% means nothing at a 10% base rate |
+| Threshold left at 0.5 | An economic assumption made silently |
+| ROC AUC on rare events | Looks strong, hides false positives |
+| Imputing the 30 NaN labels | Inventing the future |
+| `C` read as a penalty | Regularisation backwards |
+| Same-year features | Leakage from the prediction date |
+
+## In the lab
+
+::: {.tight}
+1. Download the Shukla thin-file package and read its Python code
+2. Fit penalised logistic on the spine label, grouped by country
+3. Produce the calibration plot and the threshold sweep
+4. State a cost ratio, derive $t^\star$, and report performance there
+5. Three sentences a policy reader could act on
+:::
+
+::: {.check}
+See [`REPLICATIONS.md`](../REPLICATIONS.md) for how to download the package.
+:::

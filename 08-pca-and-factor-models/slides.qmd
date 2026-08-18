@@ -1,0 +1,329 @@
+---
+title: "PCA, the SVD, and Factor Models"
+subtitle: "Session 08 · Finding the few things that move everything else"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 08 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | The macroeconomist's problem: many series, few forces |
+| **10–30** | The SVD, and PCA as its consequence |
+| **30–50** | How many factors? |
+| **50–70** | What a factor *is* — and is not |
+| **70–85** | Factor-augmented regression |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Koopman & Mesters**, *Empirical Bayes Methods for Dynamic Factor Models*.
+
+::: {.muted}
+Harvard Dataverse, DOI 10.7910/DVN/NKWMQM · CC0
+:::
+
+You are not expected to follow the empirical-Bayes machinery. Read it for the
+**setup**: why a macroeconomist wants a small number of unobserved factors
+behind a large number of observed series.
+
+## Today's question
+
+> *Do European economies move on a few common forces, and can you recover them
+> without being told what they are?*
+
+::: {.check}
+For once, we know the answer. The spine was generated from **three** latent
+factors. Today you try to find them — and you can check whether you did.
+:::
+
+# The SVD {background-color="#16181A" style="color:#F7F6F3"}
+
+## Every matrix factorises
+
+For any $n \times p$ matrix $X$:
+
+$$X = U D V'$$
+
+::: {.tight}
+- $U$ — $n \times r$, orthonormal: the observations' coordinates
+- $D$ — diagonal, $d_1 \ge d_2 \ge \dots \ge 0$: the strength of each direction
+- $V$ — $p \times r$, orthonormal: the **loadings**
+:::
+
+::: {.muted}
+This is not a statistical model. It is an identity, true of every matrix.
+:::
+
+## PCA is the SVD of centred data
+
+Centre each column, then take the SVD.
+
+::: {.tight}
+- The **principal components** are the columns of $UD$
+- The **loadings** are the columns of $V$
+- The variance explained by component $j$ is $d_j^2 / \sum_k d_k^2$
+:::
+
+$$\operatorname{Var}(X'X/n) \;=\; V \frac{D^2}{n} V'$$
+
+::: {.check}
+PCA is an eigendecomposition of the covariance matrix. The SVD gets you there
+without ever forming $X'X$, which is numerically better.
+:::
+
+## Why the truncation is optimal
+
+The Eckart–Young theorem: among all rank-$k$ matrices, the one minimising
+$\|X - \hat X\|_F$ is the SVD truncated to its first $k$ terms.
+
+::: {.check}
+Keeping the largest $k$ singular values is not a heuristic. It is provably the
+best rank-$k$ approximation there is.
+:::
+
+## Standardise, or measure in euros
+
+PCA maximises **variance**. A series measured in millions will dominate one
+measured in shares, purely through units.
+
+::: {.warn}
+On this panel, `population` and `gfcf_meur` are enormous next to
+`share_renew`. Without standardising, your first component is "country size"
+and nothing else.
+:::
+
+::: {.muted}
+Standardising means you are doing PCA on the **correlation** matrix rather than
+the covariance matrix. State which.
+:::
+
+# How many factors {background-color="#16181A" style="color:#F7F6F3"}
+
+## Four answers, none decisive
+
+::: {.tight}
+1. **Scree plot** — look for the elbow. Subjective, and often there isn't one.
+2. **Cumulative variance** — keep enough for 80%, 90%. Arbitrary threshold.
+3. **Kaiser rule** — eigenvalue > 1 on standardised data. Known to over-select.
+4. **Parallel analysis** — compare against eigenvalues from *shuffled* data.
+   Keep components that beat noise.
+:::
+
+::: {.check}
+Parallel analysis is the one with a defensible logic: it asks whether a
+component explains more than the same data with its structure destroyed.
+:::
+
+## Parallel analysis, in eight lines
+
+```python
+import numpy as np
+
+def parallel_analysis(Z, n_iter=200, seed=60033):
+    rng = np.random.default_rng(seed)
+    real = np.linalg.svd(Z, compute_uv=False) ** 2
+    null = np.zeros((n_iter, len(real)))
+    for b in range(n_iter):
+        S = np.column_stack([rng.permutation(col) for col in Z.T])
+        null[b] = np.linalg.svd(S, compute_uv=False) ** 2
+    return real, np.percentile(null, 95, axis=0)
+```
+
+::: {.muted}
+Shuffling each column independently keeps every marginal distribution and
+destroys every correlation. What survives is real structure.
+:::
+
+# What a factor is not {background-color="#16181A" style="color:#F7F6F3"}
+
+## Rotation indeterminacy
+
+For any orthogonal $R$:
+
+$$F\Lambda' = (FR)(\Lambda R)'$$
+
+::: {.warn}
+The factors and loadings are **not separately identified**. Any rotation fits
+exactly as well. "Factor 1" is a coordinate system, not a discovered object.
+:::
+
+## So what may you say?
+
+::: {.tight}
+- ✅ "Three components explain 71% of the common variation."
+- ✅ "The first component loads positively on all adoption series."
+- ❌ "Factor 1 **is** institutional capacity."
+:::
+
+::: {.check}
+Naming a factor is an **interpretation you are advancing**, on the evidence of
+the loadings. Present it as such, with the loadings visible so a reader can
+disagree.
+:::
+
+## Sign is arbitrary too
+
+The SVD is unique only up to sign: flip a column of $U$ and the matching column
+of $V$ and nothing changes.
+
+::: {.warn}
+Rerun on a different machine or library version and your factor may come out
+upside down. Fix the sign by convention — for example, force the largest loading
+positive — and say you did.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Build a wide matrix
+
+```python
+import pandas as pd
+
+core = pd.read_parquet("data/spine/core.parquet")
+a    = pd.read_parquet("data/spine/angle_a_country.parquet")
+
+df = core.merge(a.drop(columns=["flag"]), on=["geo", "time"])
+cols = ["gdp_pc_eur", "productivity_idx", "employment_ths", "gfcf_meur",
+        "share_renew", "share_fossil", "energy_intensity",
+        "elec_price_eur_kwh", "elec_industry_gwh"]
+
+W = df.pivot_table(index="time", columns="geo", values="productivity_idx")
+print(W.shape)      # 15 years x 30 countries
+```
+
+## Standardise and decompose
+
+```python
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+Z = StandardScaler().fit_transform(W.dropna(axis=1))
+p = PCA().fit(Z)
+
+ev = p.explained_variance_ratio_
+print((ev[:6] * 100).round(1))
+print((ev[:6].cumsum() * 100).round(1))
+```
+
+::: {.check}
+The spine was built from three factors. See how much of the variation the first
+three components recover before you look at any rule.
+:::
+
+## The scree plot
+
+```python
+import matplotlib.pyplot as plt
+
+real, null95 = parallel_analysis(Z)
+plt.plot(range(1, len(real) + 1), real, "o-", label="observed")
+plt.plot(range(1, len(null95) + 1), null95, "s--", label="95th pct of shuffled")
+plt.xlabel("component"); plt.ylabel("eigenvalue"); plt.legend()
+```
+
+::: {.muted}
+Keep the components whose eigenvalue sits above the dashed line. Count them
+before you read the next slide.
+:::
+
+## Read the loadings
+
+```python
+L = pd.DataFrame(p.components_[:3].T, index=W.dropna(axis=1).columns,
+                 columns=["PC1", "PC2", "PC3"])
+print(L.sort_values("PC1").head(6).round(2))
+print(L.sort_values("PC1").tail(6).round(2))
+```
+
+::: {.check}
+Look at which countries sit at each end of PC1. If the ordering is recognisable
+as an economic gradient, you have grounds for an interpretation — and you should
+still write it as an interpretation.
+:::
+
+# Using factors {background-color="#16181A" style="color:#F7F6F3"}
+
+## Factor-augmented regression
+
+Rather than choosing among 30 correlated series, regress on a few factors:
+
+$$y_{t} = \alpha + \beta' \hat F_{t} + \varepsilon_{t}$$
+
+::: {.tight}
+- Sidesteps the collinearity of Session 05 entirely
+- Costs you interpretability — $\beta$ is the effect of a *coordinate*
+- The factors are **estimated**, so their error propagates into $\beta$
+:::
+
+::: {.muted}
+This is the "factor augmentation" approach the Session 05 paper compared
+variable selection against. Now you have seen both.
+:::
+
+## Factors versus the lasso
+
+| | Factors | Lasso |
+|---|---|---|
+| Handles correlation | By combining | By choosing one |
+| Output | Dense coordinates | A short list |
+| Interpretable | Only after argument | Named variables |
+| Stable | Reasonably | Often not |
+
+::: {.check}
+When predictors move together for a real common reason, factors are the honest
+representation. When you believe a few specific things matter, the lasso is.
+:::
+
+## What to report
+
+::: {.tight}
+- Whether you used the **correlation or covariance** matrix
+- The variance explained, and how many components you kept **and why**
+- The loadings, so a reader can judge your naming
+- Your sign convention
+- That factors are coordinates, not objects
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| No standardising | PC1 is whichever series is largest |
+| Naming factors as facts | Rotation makes the name arbitrary |
+| Kaiser rule alone | Over-selects |
+| Ignoring sign flips | Results do not reproduce |
+| Fitting PCA before the CV split | Leakage — it learned from the test fold |
+
+## In the lab
+
+::: {.tight}
+1. Build the wide matrix and standardise it
+2. Run PCA and parallel analysis; decide how many factors, in writing, first
+3. Compare your answer to the **three** the spine was built from
+4. Interpret PC1 from its loadings — and flag it as interpretation
+5. Run one factor-augmented regression and compare with Session 05's lasso
+:::
+
+::: {.check}
+This is the only session where you can check your answer against the truth. Use
+it to calibrate how much to trust the same procedure when you cannot.
+:::

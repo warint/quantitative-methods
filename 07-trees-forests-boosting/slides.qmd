@@ -1,0 +1,340 @@
+---
+title: "Trees, Forests, and Boosting"
+subtitle: "Session 07 · Flexible prediction, and the importance measures that mislead you"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 07 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | What a tree actually does |
+| **10–25** | Why a single tree is unusable |
+| **25–45** | Bagging and random forests |
+| **45–65** | Boosting |
+| **65–85** | Interpretation: importance, PDP, SHAP |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Athey & Imbens**, *Machine Learning Methods That Economists Should Know
+About*, **Annual Review of Economics**, 2019.
+
+::: {.muted}
+DOI: 10.1146/annurev-economics-080217-053433
+:::
+
+The sentence to carry into today:
+
+> These methods are built to **predict**, and they are very good at it. They are
+> not built to give you a coefficient with a standard error, and using them as
+> if they were is the most common misuse in applied work.
+
+## Today's question
+
+> *What predicts a European country's productivity growth, and does the answer
+> depend on where the country already is?*
+
+The second clause is the one linear models handle badly and trees handle
+naturally.
+
+# One tree {background-color="#16181A" style="color:#F7F6F3"}
+
+## Recursive binary splitting
+
+At each node, choose the predictor $j$ and cut point $s$ minimising
+
+$$\sum_{i:\,x_{ij} \le s}(y_i - \bar y_L)^2 \; + \sum_{i:\,x_{ij} > s}(y_i - \bar y_R)^2$$
+
+then repeat inside each half.
+
+::: {.check}
+The prediction for a region is simply the **mean of the training outcomes in
+it**. A tree is a step function.
+:::
+
+## What trees give you free
+
+::: {.tight}
+- **Nonlinearity** — no functional form to specify
+- **Interactions** — a split below a split *is* an interaction
+- **Scale invariance** — no standardising; only the order matters
+- **Mixed types** — categorical and numeric together
+- **Missingness** — handled by surrogate splits or a branch of their own
+:::
+
+::: {.muted}
+This is why trees are the default on tabular data, and why they are worth the
+interpretive difficulty that follows.
+:::
+
+## What one tree costs you
+
+::: {.warn}
+**Variance.** Change a handful of rows and the first split can change, which
+changes every split beneath it. The tree you show in your appendix is one draw
+from a wide distribution of trees.
+:::
+
+::: {.tight}
+- Step functions cannot extrapolate — ever
+- Deep trees memorise; shallow trees underfit
+- The structure is readable but **not stable**, so reading it is a trap
+:::
+
+# Forests {background-color="#16181A" style="color:#F7F6F3"}
+
+## Bagging
+
+Fit $B$ trees on bootstrap resamples, average the predictions.
+
+$$\hat f_{\text{bag}}(x) = \frac{1}{B}\sum_{b=1}^{B} \hat f^{*b}(x)$$
+
+Averaging $B$ iid quantities with variance $\sigma^2$ gives variance
+$\sigma^2/B$ — but the trees are **not** independent, and that is the catch.
+
+## The random forest trick
+
+At each split, consider only a random subset of $m$ predictors.
+
+::: {.check}
+This **decorrelates** the trees. If one predictor dominates, every bagged tree
+splits on it first and they all look alike; forcing the algorithm to sometimes
+ignore it produces genuinely different trees, so averaging helps more.
+:::
+
+For correlated averages, variance falls to
+
+$$\rho\sigma^2 + \frac{1-\rho}{B}\sigma^2$$
+
+::: {.muted}
+More trees drive the second term to zero. Only decorrelation touches the first.
+:::
+
+## Out-of-bag error
+
+Each tree omits about 37% of the data. Predict each observation using only the
+trees that never saw it.
+
+::: {.tight}
+- A validation estimate for free
+- Roughly comparable to leave-one-out CV
+:::
+
+::: {.warn}
+On **this** panel, OOB is still optimistic: the omitted rows include other years
+of the same country. Group-aware CV remains the honest number.
+:::
+
+# Boosting {background-color="#16181A" style="color:#F7F6F3"}
+
+## Fit the residual, slowly
+
+$$\hat f_m(x) = \hat f_{m-1}(x) + \eta \cdot h_m(x)$$
+
+where $h_m$ is a small tree fit to what remains unexplained, and $\eta$ is the
+learning rate.
+
+::: {.tight}
+- Forests average **independent** trees, reducing variance
+- Boosting adds **dependent** trees, reducing bias
+:::
+
+## The three knobs
+
+| Knob | Effect |
+|---|---|
+| **Learning rate** $\eta$ | Smaller learns more slowly and generalises better |
+| **Number of trees** | Too many *will* overfit — unlike a forest |
+| **Depth** | Depth $d$ allows $d$-way interactions |
+
+::: {.warn}
+A random forest does not overfit as you add trees. **A boosted model does.**
+The stopping point must be chosen on validation data.
+:::
+
+## Which to reach for
+
+::: {.tight}
+- **Random forest** — few knobs, hard to break, a strong baseline in one line
+- **Boosting** — usually wins on tabular data, and demands tuning to do so
+:::
+
+::: {.muted}
+Start with a forest. If a tuned boosted model cannot beat it by a margin you
+would defend, report the forest and spend your time elsewhere.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Build the panel
+
+```python
+import pandas as pd
+
+core = pd.read_parquet("data/spine/core.parquet")
+c    = pd.read_parquet("data/spine/angle_c_country.parquet")
+
+df = core.merge(c.drop(columns=["flag"]), on=["geo", "time"], how="inner")
+d  = df.dropna(subset=["prod_growth"]).copy()
+print(d.shape)
+```
+
+::: {.muted}
+The merge restricts you to 2014–2024, because that is where the adoption module
+exists. Say so when you report $n$.
+:::
+
+## Forest, honestly validated
+
+```python
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import cross_val_score, GroupKFold
+
+feat = [c_ for c_ in d.columns
+        if c_ not in ("geo", "time", "flag", "prod_growth",
+                      "falling_behind", "falling_behind_next")]
+X, y, g = d[feat].fillna(d[feat].median(numeric_only=True)), d["prod_growth"], d["geo"]
+
+rf = RandomForestRegressor(n_estimators=500, min_samples_leaf=3, random_state=60033)
+sc = cross_val_score(rf, X, y, cv=GroupKFold(5).split(X, y, g),
+                     scoring="neg_root_mean_squared_error")
+print("grouped CV RMSE:", round(-sc.mean(), 3))
+```
+
+## Gradient boosting
+
+```python
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+hgb = HistGradientBoostingRegressor(
+    learning_rate=0.05, max_depth=3, max_iter=600,
+    early_stopping=True, validation_fraction=0.2, random_state=60033,
+)
+sc = cross_val_score(hgb, X, y, cv=GroupKFold(5).split(X, y, g),
+                     scoring="neg_root_mean_squared_error")
+print("boosted grouped CV RMSE:", round(-sc.mean(), 3))
+```
+
+::: {.check}
+`HistGradientBoosting` handles NaN natively, so you can drop the imputation and
+compare. Whether that *helps* is an empirical question — run it.
+:::
+
+# Interpretation {background-color="#16181A" style="color:#F7F6F3"}
+
+## Impurity importance is biased
+
+`feature_importances_` counts how much each split reduced impurity. It
+systematically favours:
+
+::: {.tight}
+- **high-cardinality** predictors — more cut points to try
+- **continuous** over binary
+- one member of a **correlated group**, arbitrarily
+:::
+
+::: {.warn}
+The `aux_*` columns in this panel are continuous and correlated. Impurity
+importance will flatter them. Do not report it.
+:::
+
+## Permutation importance instead
+
+```python
+from sklearn.inspection import permutation_importance
+
+rf.fit(X, y)
+r = permutation_importance(rf, X, y, n_repeats=20, random_state=60033)
+imp = pd.Series(r.importances_mean, index=X.columns).sort_values(ascending=False)
+print(imp.head(10).round(4))
+```
+
+::: {.check}
+This measures how much prediction **degrades** when a column is shuffled — a
+question about the fitted model, in the units of the loss.
+:::
+
+## Permutation importance is also not causal
+
+::: {.warn}
+Shuffling a column breaks its relationship with **everything**, including its
+correlations with other predictors. With correlated inputs, the importance is
+shared unpredictably and the shuffled rows may be economically impossible
+combinations.
+:::
+
+::: {.muted}
+It answers "what does this model lean on?" It does not answer "what would happen
+if this changed?" Session 10 answers the second, and it needs a different design.
+:::
+
+## Partial dependence
+
+```python
+from sklearn.inspection import PartialDependenceDisplay
+import matplotlib.pyplot as plt
+
+PartialDependenceDisplay.from_estimator(
+    rf, X, features=["gdp_pc_eur", "cloud_use"], kind="average")
+plt.tight_layout()
+```
+
+::: {.check}
+A PDP shows the average fitted relationship, holding the rest at their observed
+values. It is the honest way to show a nonlinearity you found.
+:::
+
+## What to report
+
+::: {.tight}
+- Grouped CV error for **both** models, and the baseline they beat
+- **Permutation** importance, never impurity importance
+- One or two partial-dependence plots for the relationships you claim
+- The tuning you did, and on which folds
+- That every statement is about **prediction**, not effect
+:::
+
+::: {.warn}
+Never write "cloud adoption drives productivity growth" from a forest. Write
+"cloud adoption is among the predictors the model relies on most."
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Impurity importance in a table | Biased toward continuous and correlated |
+| Importance read causally | The central error of applied ML |
+| OOB reported on a panel | Optimistic; countries repeat |
+| Boosting without early stopping | Overfits as trees accumulate |
+| Tuning and evaluating on one split | The estimate is training error |
+
+## In the lab
+
+::: {.tight}
+1. Fit the forest and the boosted model under grouped CV
+2. Compare both to the Session 03 linear specification — does flexibility pay?
+3. Produce permutation importance, and check whether `aux_*` columns rank highly
+4. Draw two PDPs and describe the shapes in words
+5. Three sentences, using prediction language throughout
+:::

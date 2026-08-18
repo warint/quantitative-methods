@@ -20,6 +20,38 @@ format:
     slide-level: 2
 ---
 
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Three questions hiding inside "how good is it?" |
+| **10–30** | The bias–variance decomposition |
+| **30–50** | Why random K-fold breaks on a panel |
+| **50–70** | Three splits, measured |
+| **70–85** | Leakage, and where it hides |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Mullainathan & Spiess**, *Machine Learning: An Applied Econometric Approach*,
+**JEP** 2017.
+
+::: {.muted}
+DOI: 10.1257/jep.31.2.87
+:::
+
+Their framing, which organises the whole course:
+
+> Machine learning solves $\hat y$ problems. Economics mostly asks $\hat\beta$
+> questions. Confusing the two is where the trouble starts.
+
+::: {.check}
+Today is entirely a $\hat y$ session. Session 10 is the $\hat\beta$ one, and it
+needs completely different machinery.
+:::
+
 # The question {background-color="#16181A" style="color:#F7F6F3"}
 
 ## How good is your model, really?
@@ -96,15 +128,16 @@ conclusion. Then say which you used.
 import pandas as pd
 
 core = pd.read_parquet("data/spine/core.parquet")
-d = core.dropna(subset=["prod_growth"]).copy()
+cols = ["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]
+d = core.dropna(subset=cols).copy()
 
-print(d.shape)                    # ~420 rows (first year per country has no growth)
-print(d.geo.nunique(), d.time.min(), d.time.max())   # 30 countries, 2010-2024
+print(d.shape, d.geo.nunique(), d.time.min(), d.time.max())
+# 30 countries, 2010-2024
 ```
 
 ::: {.muted}
-`prod_growth` is NaN in each country's first year. That is arithmetic, not
-missing data — you cannot difference what has no predecessor.
+We predict **`gdp_pc_eur` from the other levels**. Levels are highly persistent
+within a country, which is exactly the setting where the choice of split bites.
 :::
 
 ## Set up the comparison
@@ -114,8 +147,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import (cross_val_score, KFold,
                                      GroupKFold, TimeSeriesSplit)
 
-X = d[["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]].fillna(0)
-y = d["prod_growth"]
+X = d[["population", "employment_ths", "gfcf_meur"]]
+y = d["gdp_pc_eur"]
 m = RandomForestRegressor(n_estimators=300, random_state=60033)
 
 RMSE = "neg_root_mean_squared_error"
@@ -140,17 +173,38 @@ for n, s in [("random", rand), ("by country", group), ("by time", time_)]:
 
 ## What you should see
 
+Roughly:
+
+| Split | RMSE (EUR) |
+|---|---|
+| Random K-fold | ~3,200 |
+| **GroupKFold by country** | **~4,900** |
+| TimeSeriesSplit | ~2,800 |
+
 ::: {.check}
-Random K-fold reports the **best** error. It is also the only one answering a
-question nobody asked.
+Grouped error is about **1.5× larger** than random. Same data, same model, same
+day — and the honest number is half again the flattering one.
 :::
 
-The gap between random and grouped is a **direct measure of how much your model
-is leaning on country identity** rather than on the economics.
+## Read the gap
+
+That ratio is a **direct measure of how much the model leans on country
+identity** rather than on the economics.
 
 ::: {.muted}
-If grouped error is far worse, your model has learned "this is Germany", not
-"this is what raises productivity".
+Random K-fold let it see Germany 2019 while predicting Germany 2020. It learned
+"this is Germany", which is useless for a country it has never seen.
+:::
+
+::: {.warn}
+Publish the 3,200 and you have overstated your model's usefulness by half,
+without doing anything a referee would call wrong.
+:::
+
+::: {.muted}
+`TimeSeriesSplit` looks *best* of the three here — but it trains on early years
+and tests on later ones with a growing window, so it is answering a third
+question again. Low is not the same as right.
 :::
 
 ## Flexibility, drawn
@@ -209,6 +263,44 @@ most common error in applied machine learning, and it always flatters you.
 ::: {.warn}
 Never report a number computed on data the model was fit on. If you tuned on
 it, it is training data, whatever you called the variable.
+:::
+
+## Choosing $K$
+
+::: {.tight}
+- **$K = 5$ or $10$** — the usual choice, and a reasonable one
+- **Small $K$** — more bias (each model sees less data), less variance
+- **$K = n$** (leave-one-out) — nearly unbiased, high variance, expensive
+:::
+
+::: {.check}
+With 30 countries, `GroupKFold(5)` leaves 6 countries out per fold. Fewer folds
+would leave too few countries to train on; more would make each estimate noisy.
+:::
+
+## Nested CV, when you tune
+
+If you use CV to **choose** a hyperparameter, that CV error is no longer an
+honest estimate of performance — you selected on it.
+
+::: {.tight}
+- **Inner** loop chooses the hyperparameter
+- **Outer** loop estimates performance
+:::
+
+::: {.warn}
+Reporting the best inner-loop score as your result is the same error as
+reporting training error, one level up. It is extremely common.
+:::
+
+## The one-standard-error rule
+
+Among models within one standard error of the best CV score, take the
+**simplest**.
+
+::: {.muted}
+The CV curve is estimated with noise. The apparent minimum is partly luck, and
+the simpler model at the same score will usually generalise better.
 :::
 
 ## Common mistakes

@@ -20,6 +20,44 @@ format:
     slide-level: 2
 ---
 
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | The question, and why composition is in the way |
+| **10–30** | Least squares as a projection |
+| **30–50** | Frisch–Waugh–Lovell |
+| **50–70** | The data, and the collinearity in it |
+| **70–85** | Doing it, and verifying the identity |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Topalova & Khandelwal**, *Trade Liberalization and Firm Productivity: The
+Case of India*.
+
+::: {.muted}
+Harvard Dataverse, DOI 10.7910/DVN/8WEXYD · CC0 · 32,422 firm-years
+:::
+
+::: {.check}
+This is one of the sessions with the **authors' own data**. Their central
+problem is ours: tariffs fell where industries already differed, so the raw
+comparison confounds the policy with the composition of who received it.
+:::
+
+## Read it for one thing
+
+> How do they separate the effect of falling tariffs from the fact that
+> **liberalised industries were not like the others to begin with**?
+
+::: {.muted}
+Every control they add is a projection. Today you learn what that sentence
+means geometrically, and then you will see it in their tables.
+:::
+
 # The question {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Electricity prices across Europe
@@ -56,6 +94,46 @@ is what is left **orthogonal** to everything $X$ can explain.
 ::: {.check}
 Every result today follows from one fact: $M_X X = 0$. The residual carries no
 trace of the columns you controlled for.
+:::
+
+## Two properties of $P_X$ worth memorising
+
+$$P_X = X(X'X)^{-1}X', \qquad M_X = I - P_X$$
+
+::: {.tight}
+- **Idempotent**: $P_X P_X = P_X$. Projecting twice changes nothing — you are
+  already in the space.
+- **Symmetric**: $P_X' = P_X$.
+- **Orthogonal complements**: $P_X M_X = 0$. Fitted values and residuals share
+  no information at all.
+:::
+
+## $R^2$ is a cosine
+
+Because $y = \hat y + e$ with $\hat y \perp e$, Pythagoras applies:
+
+$$\|y\|^2 = \|\hat y\|^2 + \|e\|^2$$
+
+and
+
+$$R^2 = \frac{\|\hat y\|^2}{\|y\|^2} = \cos^2\theta$$
+
+::: {.check}
+$R^2$ is the squared cosine of the angle between your outcome and the space your
+regressors span. That is *all* it is — which is why it says nothing about
+whether the model is right.
+:::
+
+## Degrees of freedom, geometrically
+
+The residual lives in a space of dimension $n - k$: you started with $n$
+dimensions and spent $k$ of them fitting.
+
+$$\hat\sigma^2 = \frac{\|e\|^2}{n - k}$$
+
+::: {.muted}
+Add a regressor and the residual space shrinks by one. Add $n$ of them and it
+vanishes — a perfect fit that has learned nothing.
 :::
 
 # The method {background-color="#16181A" style="color:#F7F6F3"}
@@ -205,6 +283,39 @@ print(sm.OLS(y_r, sm.add_constant(x_r)).fit().params.iloc[1])
 
 ::: {.check}
 Two routes, one number. That identity *is* what "controlling for" means.
+:::
+
+## Multicollinearity, measured
+
+Perfect collinearity breaks the inverse. **Near**-collinearity merely inflates
+the variance — and it is much harder to notice.
+
+$$\operatorname{VIF}_j = \frac{1}{1 - R_j^2}$$
+
+where $R_j^2$ comes from regressing $x_j$ on every other regressor.
+
+```python
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import statsmodels.api as sm
+
+Z = sm.add_constant(d[["share_fossil", "share_nuclear",
+                       "gdp_pc_eur", "productivity_idx"]])
+for i, name in enumerate(Z.columns):
+    print(f"{name:18s} {variance_inflation_factor(Z.values, i):6.2f}")
+```
+
+## Reading a VIF
+
+::: {.tight}
+- $\operatorname{VIF} = 1$ — orthogonal to everything else
+- $> 5$ — worth a comment
+- $> 10$ — the coefficient is barely identified
+:::
+
+::: {.warn}
+A high VIF is **not** a reason to drop a variable. If the control belongs in the
+model, dropping it trades a variance problem for a bias problem. Report the wide
+interval instead.
 :::
 
 ## What to report

@@ -1,0 +1,341 @@
+---
+title: "Causal Machine Learning"
+subtitle: "Session 10 · Double/debiased ML, and the difference between predicting and intervening"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 10 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Nine sessions of prediction. Now the other question. |
+| **10–25** | What must be true to claim an effect |
+| **25–45** | Why naive ML controls make it worse |
+| **45–70** | Double/debiased ML |
+| **70–85** | Heterogeneous effects |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Huber**, *Evaluating (weighted) dynamic treatment effects by double machine
+learning*.
+
+::: {.muted}
+Harvard Dataverse, DOI 10.7910/DVN/FS0KBA · CC0 · includes R and Python code
+:::
+
+::: {.check}
+You work with the author's own replication files today. Read the setup section
+carefully: what he assumes, and where he says the method fails.
+:::
+
+## Today's question
+
+> *Does having a national AI strategy raise enterprise AI adoption?*
+
+::: {.warn}
+Countries with AI strategies are **not** a random sample. They are richer, more
+digital, with more ICT specialists. Everything that made them adopt a strategy
+also makes them adopt AI.
+:::
+
+# The estimand {background-color="#16181A" style="color:#F7F6F3"}
+
+## Say what you want before you estimate
+
+The **average treatment effect**:
+
+$$\tau = \mathbb{E}\big[Y(1) - Y(0)\big]$$
+
+::: {.warn}
+$Y(1)$ and $Y(0)$ are the outcomes for the *same* country in both states of the
+world. You observe **one**. This is the fundamental problem of causal inference,
+and no amount of data fixes it.
+:::
+
+## What makes it recoverable
+
+::: {.tight}
+1. **Unconfoundedness** — $\{Y(0),Y(1)\} \perp D \mid X$. Given the covariates,
+   treatment is as good as random.
+2. **Overlap** — $0 < e(X) < 1$. Every kind of country could have gone either way.
+3. **SUTVA** — one country's strategy does not change another's outcome.
+:::
+
+::: {.warn}
+Assumption 1 is **not testable**. It is an argument you make from institutional
+knowledge, and your reader is entitled to reject it.
+:::
+
+## SUTVA is doing real work here
+
+::: {.muted}
+EU member states coordinate. A national AI strategy in one country plausibly
+shifts adoption in its neighbours through the single market and through
+Commission programmes.
+:::
+
+::: {.check}
+If that is true, SUTVA fails, and *every* method today is biased — including the
+sophisticated ones. Say so in your limitations. A named, unfixed threat is
+scholarship; an unmentioned one is not.
+:::
+
+# Why naive ML fails {background-color="#16181A" style="color:#F7F6F3"}
+
+## The obvious thing to do
+
+Throw the covariates into a flexible model and read off the treatment
+coefficient:
+
+```python
+y ~ D + RandomForest(X)
+```
+
+::: {.warn}
+This is biased, and the bias does **not** vanish as $n$ grows. The problem is
+structural, not a small-sample issue.
+:::
+
+## Two sources of bias
+
+::: {.tight}
+1. **Regularisation bias.** Every ML estimator shrinks. Shrinkage in the
+   nuisance function $\mathbb{E}[Y|X]$ leaks directly into $\hat\tau$.
+2. **Overfitting bias.** If the same rows fit the nuisance model and estimate
+   the effect, the nuisance model has partly fitted the noise that $\hat\tau$ is
+   then computed from.
+:::
+
+::: {.check}
+DML fixes the first with **orthogonalisation** and the second with
+**cross-fitting**. Two problems, two devices.
+:::
+
+## Orthogonalisation: FWL returns
+
+Session 02's theorem, now doing causal work. Residualise both sides:
+
+$$\tilde{Y} = Y - \hat{\mathbb{E}}[Y \mid X], \qquad \tilde{D} = D - \hat{e}(X)$$
+
+then regress $\tilde Y$ on $\tilde D$:
+
+$$\hat\tau = \frac{\sum_i \tilde{Y}_i \tilde{D}_i}{\sum_i \tilde{D}_i^{\,2}}$$
+
+::: {.check}
+This score is **Neyman orthogonal**: small errors in either nuisance estimate
+have only second-order effect on $\hat\tau$. That is the whole trick.
+:::
+
+## Cross-fitting
+
+::: {.tight}
+1. Split into $K$ folds
+2. Fit the nuisance models on $K-1$ folds
+3. Predict the residuals on the **held-out** fold
+4. Rotate, then combine
+:::
+
+::: {.warn}
+Without this, the nuisance model has seen the rows you estimate the effect from,
+and the effect inherits its overfitting. With it, $\hat\tau$ is
+$\sqrt{n}$-consistent and asymptotically normal — so a confidence interval means
+something again.
+:::
+
+# The data {background-color="#16181A" style="color:#F7F6F3"}
+
+## Treatment and covariates
+
+```python
+import pandas as pd
+
+c = pd.read_parquet("data/spine/angle_c_country.parquet")
+d = c[c.time >= 2021].dropna(subset=["ai_use_any"]).copy()
+
+print(len(d), "rows |", d.has_ai_strategy.mean().round(3), "treated")
+```
+
+::: {.check}
+The spine was generated with treatment **assigned on covariates** and a known
+true effect. You are going to try to recover a number I already have.
+:::
+
+## Check overlap first
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+Xc = d.drop(columns=["geo", "time", "flag", "has_ai_strategy",
+                     "ai_use_any", "ai_use_ml", "ai_use_ge3"])
+Xc = Xc.fillna(Xc.median(numeric_only=True))
+ps = RandomForestClassifier(400, min_samples_leaf=5, random_state=60033)
+ps.fit(Xc, d.has_ai_strategy)
+e = ps.predict_proba(Xc)[:, 1]
+print("propensity range:", e.min().round(3), e.max().round(3))
+```
+
+::: {.warn}
+Propensities near 0 or 1 mean **no comparable counterfactual**. Those rows carry
+enormous weight and almost no information. Trim them, and report how many you
+dropped.
+:::
+
+## The naive estimate, for contrast
+
+```python
+import statsmodels.formula.api as smf
+naive = smf.ols("ai_use_any ~ has_ai_strategy", data=d).fit()
+print(naive.params["has_ai_strategy"].round(3))
+```
+
+::: {.muted}
+Write this number down. It is the number a careless analyst reports, and the gap
+between it and what follows is the lesson of the session.
+:::
+
+# DML {background-color="#16181A" style="color:#F7F6F3"}
+
+## By hand, so you see the mechanism
+
+```python
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.model_selection import GroupKFold
+
+Y, D, G = d["ai_use_any"].to_numpy(), d["has_ai_strategy"].to_numpy(), d["geo"]
+yres, dres = np.zeros(len(d)), np.zeros(len(d))
+
+for tr, te in GroupKFold(5).split(Xc, Y, G):
+    my = RandomForestRegressor(400, min_samples_leaf=5, random_state=60033).fit(Xc.iloc[tr], Y[tr])
+    md = RandomForestClassifier(400, min_samples_leaf=5, random_state=60033).fit(Xc.iloc[tr], D[tr])
+    yres[te] = Y[te] - my.predict(Xc.iloc[te])
+    dres[te] = D[te] - md.predict_proba(Xc.iloc[te])[:, 1]
+
+tau = (yres * dres).sum() / (dres ** 2).sum()
+se  = np.sqrt(((yres - tau * dres) ** 2 * dres ** 2).sum()) / (dres ** 2).sum()
+print(f"DML ATE = {tau:.3f}  (se {se:.3f})")
+```
+
+## Then with the library
+
+```python
+from doubleml import DoubleMLData, DoubleMLPLR
+
+dml_data = DoubleMLData.from_arrays(Xc.to_numpy(), Y, D)
+dml = DoubleMLPLR(dml_data,
+                  ml_l=RandomForestRegressor(400, min_samples_leaf=5, random_state=60033),
+                  ml_m=RandomForestClassifier(400, min_samples_leaf=5, random_state=60033),
+                  n_folds=5)
+dml.fit()
+print(dml.summary)
+```
+
+::: {.check}
+The two should agree closely. Writing it by hand once is how you stop treating
+`DoubleMLPLR` as a black box.
+:::
+
+## Compare the three numbers
+
+| Estimator | What it assumes |
+|---|---|
+| Naive OLS | Strategy adoption is unrelated to everything |
+| ML with controls | Regularisation bias is negligible — it is not |
+| **DML** | Unconfoundedness, overlap, and honest cross-fitting |
+
+::: {.check}
+Report all three. The movement between them *is* your evidence that
+confounding mattered.
+:::
+
+# Heterogeneity {background-color="#16181A" style="color:#F7F6F3"}
+
+## The average hides the policy question
+
+$$\tau(x) = \mathbb{E}\big[Y(1) - Y(0) \mid X = x\big]$$
+
+::: {.muted}
+"Does a strategy help?" is less useful than "where does it help?" — and only the
+second tells anyone what to do.
+:::
+
+## Causal forests
+
+```python
+from econml.dml import CausalForestDML
+
+cf = CausalForestDML(
+    model_y=RandomForestRegressor(400, min_samples_leaf=5, random_state=60033),
+    model_t=RandomForestClassifier(400, min_samples_leaf=5, random_state=60033),
+    discrete_treatment=True, n_estimators=800, random_state=60033,
+)
+cf.fit(Y, D, X=Xc)
+te = cf.effect(Xc)
+print("effect range:", te.min().round(3), "to", te.max().round(3))
+```
+
+::: {.warn}
+A spread of estimated effects is **not** evidence of heterogeneity. Noise
+produces spread. Test it — `cf.ate_inference()`, or compare high- and
+low-effect groups with proper inference.
+:::
+
+## What to report
+
+::: {.tight}
+- The **estimand**, stated before any estimation
+- The three assumptions, each argued or conceded — especially SUTVA here
+- Overlap evidence, and any trimming
+- Naive, controlled and DML estimates side by side
+- Confidence intervals from the cross-fitted score
+:::
+
+::: {.warn}
+DML does not manufacture identification. It removes regularisation and
+overfitting bias **given** unconfoundedness. If a confounder is missing, DML
+gives you a precisely estimated wrong answer.
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| ML controls, no orthogonalisation | Bias that does not vanish with $n$ |
+| No cross-fitting | Overfitting bias in $\hat\tau$ |
+| Overlap unchecked | A few rows dominate the estimate |
+| Heterogeneity read off raw spread | Noise mistaken for structure |
+| Causal words on Session 07 output | The error this session exists to end |
+
+## In the lab
+
+::: {.tight}
+1. Download Huber's package and run one of his specifications
+2. On the spine: naive, then controlled, then DML — record all three
+3. Check overlap and report trimming
+4. Fit a causal forest and test whether heterogeneity is real
+5. **Bring me your ATE.** I have the true value; we compare in class.
+:::
+
+::: {.check}
+That last step is the point of a synthetic replication. You will not get to
+check your answer against the truth again.
+:::

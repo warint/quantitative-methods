@@ -1,0 +1,365 @@
+---
+title: "Clustering, Embeddings, and Text as Data"
+subtitle: "Session 09 · Measuring what institutions talk about, and what that measurement is worth"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 09 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Clustering: structure without a label |
+| **10–30** | $k$-means, and choosing $k$ |
+| **30–45** | Turning text into numbers |
+| **45–60** | Embeddings, computed locally |
+| **60–85** | Validity: what does the number measure? |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Bennani & Romelli**, *Exploring the informativeness and drivers of tone during
+committee meetings*.
+
+::: {.muted}
+Harvard Dataverse, DOI 10.7910/DVN/TZEN38 · CC BY 4.0
+:::
+
+::: {.check}
+Read it for the **measurement argument**, not the results: how do they justify
+that their tone index measures tone? That question is today's real subject.
+:::
+
+## Today's question
+
+> *Do European economies fall into recognisable types, and does what central
+> banks say track what their economies do?*
+
+Two unsupervised problems: one on numbers, one on words.
+
+# Clustering {background-color="#16181A" style="color:#F7F6F3"}
+
+## $k$-means
+
+Choose centroids to minimise within-cluster sum of squares:
+
+$$\min_{C_1..C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2$$
+
+Iterate: assign each point to its nearest centroid, recompute centroids, repeat.
+
+::: {.warn}
+The objective is **non-convex**. You converge to a local optimum that depends on
+the initialisation. Always run multiple restarts — `n_init=20`, not the default.
+:::
+
+## What $k$-means assumes
+
+::: {.tight}
+- Clusters are **spherical** and of similar spread
+- Distance is meaningful — so **standardise first**
+- Every point belongs to exactly one cluster
+- $k$ is known
+:::
+
+::: {.muted}
+Economic data rarely satisfy the first. That is not fatal; it means the clusters
+are a summary, not a discovery.
+:::
+
+## Choosing $k$
+
+| Method | Reads |
+|---|---|
+| **Elbow** | Where WCSS stops falling fast. Often no elbow exists. |
+| **Silhouette** | How much closer a point is to its own cluster than the next. |
+| **Gap statistic** | Compares WCSS with that of uniform random data. |
+| **Stability** | Do the clusters survive resampling? |
+
+::: {.check}
+Stability is the one that matters for a claim. If a country changes cluster
+across bootstrap resamples, your typology is not a finding.
+:::
+
+## $k$-means will always return $k$ clusters
+
+::: {.warn}
+Even in data with no structure at all. The algorithm cannot tell you that the
+answer is "there are no types" — it will happily partition noise.
+:::
+
+::: {.check}
+The spine contains **four** country types by construction — and the silhouette
+score on the country profiles is **highest at $k=6$**, not at 4.
+:::
+
+::: {.warn}
+Read that again. On data where we *know* the answer is four, the standard
+diagnostic points to six, and does so with a perfectly respectable-looking
+score. This is not a trick example. It is the normal situation, and you would
+never have known.
+:::
+
+# Text {background-color="#16181A" style="color:#F7F6F3"}
+
+## The corpora
+
+```python
+import pandas as pd
+
+cb  = pd.read_parquet("data/spine/angle_e_centralbank.parquet")
+nat = pd.read_parquet("data/spine/angle_e_national.parquet")
+
+print(cb.shape, nat.shape)      # (1980, 7) and (1280, 7)
+print(cb.columns.tolist())
+# doc_id, date, institution, country, doc_type, n_words, text
+```
+
+## The trap, and it is a big one
+
+::: {.warn}
+**Corpus composition drives raw counts.** If a central bank publishes more
+documents in 2022 than in 2015, the raw frequency of *any* term rises — with no
+change whatsoever in how much attention it pays.
+:::
+
+::: {.check}
+Normalise. Per document, or per thousand words, or as a share of that period's
+corpus. Then **say in the caption which one you chose**, because the three give
+different pictures.
+:::
+
+## Bag of words, then TF-IDF
+
+Term frequency times inverse document frequency:
+
+$$\text{tfidf}(t, d) = \text{tf}(t,d) \cdot \log\frac{N}{\text{df}(t)}$$
+
+::: {.tight}
+- Common-everywhere terms are down-weighted
+- Distinctive terms are up-weighted
+- Word order is discarded entirely
+:::
+
+::: {.muted}
+"The bank will not raise rates" and "the bank will raise rates" are nearly
+identical documents to TF-IDF. Know what you have thrown away.
+:::
+
+## In code
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tf = TfidfVectorizer(max_features=5000, stop_words="english",
+                     ngram_range=(1, 2), min_df=5)
+Xt = tf.fit_transform(cb["text"])
+print(Xt.shape)
+```
+
+::: {.check}
+`ngram_range=(1,2)` keeps two-word phrases, which recovers a little of the
+negation TF-IDF otherwise loses.
+:::
+
+# Embeddings {background-color="#16181A" style="color:#F7F6F3"}
+
+## Why embeddings differ
+
+TF-IDF has one dimension per term; two documents sharing no vocabulary are
+orthogonal even if they say the same thing.
+
+An embedding maps a document to a dense vector where **proximity tracks
+meaning**.
+
+::: {.check}
+"Inflationary pressures persist" and "price growth remains elevated" share
+almost no words and sit close together in embedding space.
+:::
+
+## Computed on your machine
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+ollama pull nomic-embed-text
+```
+
+```python
+import requests, numpy as np
+
+def embed(text):
+    r = requests.post("http://localhost:11434/api/embeddings",
+                      json={"model": "nomic-embed-text", "prompt": text[:8000]})
+    return np.array(r.json()["embedding"])
+
+E = np.vstack([embed(t) for t in cb["text"].head(200)])
+print(E.shape)
+```
+
+::: {.muted}
+No API key, no cost, and the documents never leave your laptop — which for
+licensed text is not a convenience but a requirement.
+:::
+
+## What embeddings cost you
+
+::: {.tight}
+- **Opacity.** You cannot say which words drove a result.
+- **Model dependence.** A different embedding model gives different distances.
+- **Training baggage.** Whatever was in the training corpus is in your geometry.
+:::
+
+::: {.warn}
+Report the model and version. "We embedded the documents" is not reproducible;
+`nomic-embed-text` via Ollama is.
+:::
+
+# Validity {background-color="#16181A" style="color:#F7F6F3"}
+
+## The question that outranks the method
+
+You have built a number. **What does it measure?**
+
+::: {.tight}
+- **Face validity** — does it look right on documents you have read?
+- **Convergent** — does it agree with an independent measure?
+- **Predictive** — does it forecast something it should?
+- **Discriminant** — does it *fail* to correlate with things it should not?
+:::
+
+::: {.check}
+The last one is the one people skip, and it is the strongest evidence. A tone
+index that correlates with everything is measuring document length.
+:::
+
+## Check that immediately
+
+```python
+cb["tone_proxy"] = ...          # whatever you construct
+print(cb[["tone_proxy", "n_words"]].corr().iloc[0, 1].round(3))
+```
+
+::: {.warn}
+If your index correlates strongly with `n_words`, you have built a length
+detector with extra steps. This is the single most common failure in text-as-data
+work, and it is one line to test for.
+:::
+
+## A construct is not a measurement
+
+::: {.muted}
+The Session 01 distinction, returning with teeth.
+:::
+
+An "attention index" built from term frequencies is a **thing you constructed**.
+It may be useful. It is not an observation of institutional attention, and the
+gap between those two is where careless papers live.
+
+::: {.check}
+Say "our index of X", never "X". The extra three words are the whole discipline.
+:::
+
+# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Cluster the countries
+
+```python
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+
+core = pd.read_parquet("data/spine/core.parquet")
+prof = core.groupby("geo")[["gdp_pc_eur", "productivity_idx",
+                            "employment_ths", "gfcf_meur"]].mean()
+Z = StandardScaler().fit_transform(prof)
+
+for k in range(2, 8):
+    km = KMeans(k, n_init=20, random_state=60033).fit(Z)
+    print(k, round(silhouette_score(Z, km.labels_), 3))
+```
+
+## Test whether it is stable
+
+```python
+import numpy as np
+rng = np.random.default_rng(60033)
+base = KMeans(4, n_init=20, random_state=60033).fit_predict(Z)
+
+agree = []
+for _ in range(100):
+    idx = rng.choice(len(Z), len(Z), replace=True)
+    lab = KMeans(4, n_init=20, random_state=60033).fit_predict(Z[idx])
+    agree.append((lab == base[idx]).mean())
+print("mean agreement:", round(np.mean(agree), 3))
+```
+
+::: {.muted}
+Labels are arbitrary across runs, so this is a crude check — use the adjusted
+Rand index for a proper one. The point stands: measure stability, do not assume it.
+:::
+
+## Tie the words to the numbers
+
+```python
+cb["year"] = pd.to_datetime(cb["date"]).dt.year
+
+# normalise: share of that year's words, not raw counts
+per_year = (cb.assign(hits=cb.text.str.count(r"(?i)\bproductivit"))
+              .groupby("year")[["hits", "n_words"]].sum())
+per_year["rate_per_10k"] = per_year.hits / per_year.n_words * 10_000
+print(per_year.round(2))
+```
+
+::: {.check}
+Compare the raw `hits` column against `rate_per_10k`. If they tell different
+stories, the raw one was measuring publication volume.
+:::
+
+## What to report
+
+::: {.tight}
+- Your **normalisation**, in the caption of every text figure
+- $k$, how you chose it, and the stability evidence
+- The embedding model and version if you used one
+- The discriminant check against `n_words`
+- "Our index of X" phrasing throughout
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Raw term counts over time | Measures publication volume |
+| $k$ from the elbow alone | Elbow often absent; $k$ unjustified |
+| One $k$-means run | Local optimum |
+| Naming clusters as types | A summary presented as a discovery |
+| No length check | Index may just be document length |
+
+## In the lab
+
+::: {.tight}
+1. Download the Bennani & Romelli package; read how they justify their index
+2. Cluster the countries; choose $k$ with evidence and test stability
+3. Compare your $k$ with the **four** types the spine was built from
+4. Build one text index, normalised, and run the `n_words` check
+5. Three sentences using construct language, not measurement language
+:::

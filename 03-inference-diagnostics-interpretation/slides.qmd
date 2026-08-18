@@ -20,6 +20,52 @@ format:
     slide-level: 2
 ---
 
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Three ways a standard error lies |
+| **10–30** | The sandwich, and three guesses at $\Omega$ |
+| **30–45** | Omitted variables, and signing the bias |
+| **45–70** | Doing it: three standard errors, one coefficient |
+| **70–85** | What a p-value is and is not |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Bertrand, Duflo & Mullainathan**, *How Much Should We Trust
+Differences-in-Differences Estimates?*, **QJE** 2004.
+
+::: {.muted}
+DOI: 10.1162/003355304772839588
+:::
+
+Their result, which should alarm you:
+
+> Using placebo "treatments" that could have no effect, conventional standard
+> errors rejected the true null in **up to 45%** of cases — at a nominal 5%
+> level.
+
+::: {.warn}
+Not a modelling subtlety. An error rate nine times what was claimed, in a
+literature that was already published.
+:::
+
+## Where that came from
+
+::: {.tight}
+- Serially correlated outcomes
+- Repeated observations on the same unit
+- Standard errors computed as though each row were an independent draw
+:::
+
+::: {.check}
+Our panel has all three. 3,150 rows, 30 countries. Today is about not making
+their mistake.
+:::
+
 # The question {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Earnings and education across Europe
@@ -154,7 +200,7 @@ t-statistic of 12 for an effect that is not there.
 import statsmodels.formula.api as smf
 
 m = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share + vacancy_rate "
-            "+ np.log(gdp_pc_eur) + C(nace_r2)", data=df).fit()
+            "+ C(nace_r2)", data=df).fit()
 
 import matplotlib.pyplot as plt
 plt.scatter(m.fittedvalues, m.resid, s=6, alpha=0.4)
@@ -174,13 +220,52 @@ robust    = m.get_robustcov_results(cov_type="HC3")
 clustered = m.get_robustcov_results(cov_type="cluster",
                                     groups=df.loc[m.model.data.row_labels, "geo"])
 
+i = list(m.params.index).index("tertiary_share")
 for name, r in [("classical", classical), ("HC3", robust), ("cluster", clustered)]:
-    print(f"{name:10s} se(tertiary_share) = {r.bse[1]:.4f}")
+    print(f"{name:10s} se = {np.asarray(r.bse)[i]:.4f}")
+```
+
+::: {.warn}
+Index by **name**, not position. `m.bse` is a name-indexed Series while the
+robust results return a plain array, so `bse[1]` means different things — or
+raises — depending on which object you hand it.
+:::
+
+::: {.check}
+The coefficient is identical in all three. Only the standard error moves. On
+this specification the clustered one is about **3× the classical** — so a
+t-statistic of 6 was really a t-statistic of 2.
+:::
+
+## Clustering stops mattering — watch
+
+Add a country-level control and re-run:
+
+```python
+m2 = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share + vacancy_rate "
+             "+ np.log(gdp_pc_eur) + C(nace_r2)", data=df).fit()
 ```
 
 ::: {.check}
-The coefficient is identical in all three. Only the standard error moves — and
-clustered is typically **several times** the classical one.
+Now classical and clustered standard errors are **almost identical** — the
+ratio falls to about 1.0.
+:::
+
+## Why that happened
+
+`log(gdp_pc_eur)` varies at the country-year level. Putting it in the model
+**absorbs the common shock** that was making residuals correlate within a
+country. There is little correlation left for clustering to correct.
+
+::: {.tight}
+- Clustered SEs matter when a **shared, unmodelled** shock is in the residual
+- Model that shock explicitly and the correction shrinks
+- Neither route is cheating; they are the same fact handled in two places
+:::
+
+::: {.warn}
+Do **not** conclude "clustering never matters, just add controls". A control
+that absorbs the shock may also absorb the variation you wanted to study.
 :::
 
 ## Which one do you report?
@@ -231,6 +316,38 @@ before you ran it.
 ::: {.warn}
 A p-value answers "how surprising is this under the null?" — not "how large is
 the effect?" and not "is the model right?". Report the magnitude in euros.
+:::
+
+## What a p-value is
+
+$$p = \Pr\big(\,|T| \ge |t_{\text{obs}}| \;\big|\; H_0 \text{ true}\,\big)$$
+
+::: {.tight}
+- ✅ "If there were no effect, data this extreme would arise 3% of the time."
+- ❌ "There is a 97% chance the effect is real."
+- ❌ "The effect is large."
+- ❌ "The model is correct."
+:::
+
+::: {.warn}
+It is a statement about **data under an assumed null** — not about the
+hypothesis, and not about magnitude.
+:::
+
+## How many clusters is enough?
+
+The cluster-robust estimator is consistent as the number of **clusters** grows,
+not as the number of rows grows.
+
+::: {.tight}
+- 30 countries is on the edge — often cited as a rough minimum
+- Below that, intervals are too narrow again, for a new reason
+- The wild cluster bootstrap is the standard remedy
+:::
+
+::: {.check}
+Report your number of clusters next to $n$. A reader cannot judge your inference
+without it, and almost nobody prints it.
 :::
 
 ## Common mistakes

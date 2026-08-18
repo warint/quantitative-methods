@@ -1,0 +1,261 @@
+---
+title: "Forecasting, Drift, and Governance"
+subtitle: "Session 11 · What happens to a model after you publish it"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 11 · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+---
+
+# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+
+## The 90 minutes ahead
+
+| | |
+|---|---|
+| **0–10** | Forecasting is not cross-validation |
+| **10–30** | Backtesting with a rolling origin |
+| **30–50** | Distribution shift, and its three kinds |
+| **50–70** | Detecting drift before it costs you |
+| **70–85** | Governance: what you owe the next person |
+| **85–90** | Handoff to the lab |
+
+## Before class you read
+
+**Mullainathan & Spiess**, *Machine Learning: An Applied Econometric Approach*,
+JEP 2017 — **again**, and this time only the closing sections.
+
+::: {.muted}
+DOI: 10.1257/jep.31.2.87
+:::
+
+::: {.check}
+You read it in Session 04 for what ML does well. Read it now for what it
+assumes: that tomorrow resembles yesterday. Today is about when that fails.
+:::
+
+## Today's question
+
+> *Your group has a model. What is it worth in 2027?*
+
+::: {.warn}
+Every number you have produced this term describes a world that has already
+happened. Nothing you have done yet establishes that it will keep working.
+:::
+
+# Backtesting {background-color="#16181A" style="color:#F7F6F3"}
+
+## Rolling origin
+
+Train to time $t$, predict $t+h$, roll forward, repeat.
+
+::: {.tight}
+- **Expanding window** — training set grows; assumes the past stays relevant
+- **Rolling window** — fixed length; assumes the distant past is stale
+:::
+
+::: {.check}
+Which you choose is a claim about how fast the world changes. State it.
+:::
+
+## Respect the horizon
+
+If you will forecast one year ahead, evaluate at one year ahead.
+
+::: {.warn}
+A model evaluated at $h=1$ and deployed at $h=3$ has never been tested at the
+task it is doing. This is more common than it sounds, because the short horizon
+always looks better.
+:::
+
+## Set up
+
+```python
+import pandas as pd, numpy as np
+from sklearn.ensemble import RandomForestRegressor
+
+core = pd.read_parquet("data/spine/core.parquet")
+d = core.dropna(subset=["prod_growth"]).sort_values(["time", "geo"])
+feat = ["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]
+```
+
+## Roll the origin forward
+
+```python
+rows = []
+for cut in range(2016, 2024):
+    tr, te = d[d.time <= cut], d[d.time == cut + 1]
+    if len(te) == 0:
+        continue
+    m = RandomForestRegressor(300, random_state=60033).fit(
+        tr[feat].fillna(0), tr.prod_growth)
+    err = te.prod_growth - m.predict(te[feat].fillna(0))
+    rows.append((cut + 1, np.sqrt((err ** 2).mean())))
+
+print(pd.DataFrame(rows, columns=["year", "rmse"]).round(3))
+```
+
+## Read the sequence, not the average
+
+::: {.check}
+One RMSE over the whole backtest hides everything. Look at the **year-by-year
+series**: a model that was excellent until 2021 and poor after is a different
+object from one that is mediocre throughout.
+:::
+
+::: {.muted}
+The spine carries a deliberate shift after 2021. You should be able to see it in
+that table without being told where to look.
+:::
+
+# Drift {background-color="#16181A" style="color:#F7F6F3"}
+
+## Three things can change
+
+| Kind | What moves | Example |
+|---|---|---|
+| **Covariate shift** | $P(X)$ | Energy prices leave their historical range |
+| **Label shift** | $P(Y)$ | Downturn: more countries fall behind |
+| **Concept drift** | $P(Y \mid X)$ | The *relationship* changes |
+
+::: {.warn}
+The first two you can detect from data you already have. **Concept drift needs
+outcomes**, which arrive late — often after the decisions were made.
+:::
+
+## Detecting covariate shift
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+
+pre  = d[d.time <= 2020][feat].fillna(0)
+post = d[d.time >= 2021][feat].fillna(0)
+
+X = pd.concat([pre, post]); y = np.r_[np.zeros(len(pre)), np.ones(len(post))]
+auc = cross_val_score(RandomForestClassifier(300, random_state=60033),
+                      X, y, cv=5, scoring="roc_auc").mean()
+print("era-classifier AUC:", round(auc, 3))
+```
+
+::: {.check}
+If a classifier can tell **which era** a row came from, the covariate
+distribution has moved. AUC near 0.5 means no detectable shift; near 1 means the
+two periods are different worlds.
+:::
+
+## What to do about it
+
+::: {.tight}
+- **Retrain** on recent data — simple, and loses history
+- **Reweight** by the density ratio — principled, and unstable in the tails
+- **Restrict** the model to the region where it still has support
+- **Stop** — sometimes the honest answer
+:::
+
+::: {.warn}
+Never extrapolate a tree-based model outside its training range. It cannot
+extrapolate at all; it returns the nearest leaf's mean and gives no warning.
+:::
+
+# Governance {background-color="#16181A" style="color:#F7F6F3"}
+
+## The question behind this section
+
+Someone will use your model after you have graduated, without asking you
+anything.
+
+::: {.check}
+Everything they need must be written down, next to the model, by you.
+:::
+
+## The governance file
+
+Your group ships one. See
+[`02-lab/governance-file-template.md`](02-lab/governance-file-template.md).
+
+::: {.tight}
+- **Intended use** — and the uses you are ruling out
+- **Data** — provenance, coverage, known gaps, licence
+- **Estimand** — prediction or effect, stated once and plainly
+- **Validation** — the split, the horizon, the error, honestly
+- **Known failure modes** — where it breaks, in what direction
+- **Monitoring** — what to watch, and the trigger to retire it
+:::
+
+## The retirement trigger
+
+::: {.warn}
+A model with no stated retirement condition is never retired. It is used until
+something goes visibly wrong, and by then it has been wrong for a while.
+:::
+
+Write a specific one:
+
+> *"Retrain when the era-classifier AUC against the training period exceeds
+> 0.75, or when rolling 2-year RMSE exceeds 1.4× the backtest median. Retire if
+> retraining does not restore it."*
+
+::: {.check}
+Specific enough that someone who has never met you can execute it.
+:::
+
+## What you owe the reader
+
+::: {.tight}
+- The coverage gaps — for the spine, the pre-2021 absence of the adoption module
+- The flags you dropped, and which countries that biased against
+- Every construct labelled as a construct
+- The assumptions that would overturn your conclusion if wrong
+:::
+
+::: {.muted}
+This is not modesty. A limitation you name is a limitation you have controlled
+for in the reader's mind. One you omit is a hole someone else will find.
+:::
+
+## What to report
+
+::: {.tight}
+- Rolling-origin backtest, **year by year**, at the deployment horizon
+- Window choice, and the claim about the world it encodes
+- Drift evidence for $P(X)$, and what you concluded
+- The governance file, complete, with a numeric retirement trigger
+:::
+
+## Common mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Random CV on a forecast | Uses the future to predict the past |
+| One averaged backtest error | Hides the year everything changed |
+| Evaluating at the wrong horizon | Untested at the task it performs |
+| Extrapolating a forest | Silent nearest-leaf nonsense |
+| No retirement trigger | The model outlives its validity |
+
+## In the lab
+
+::: {.tight}
+1. Backtest **your group's own model** with a rolling origin
+2. Plot error by year and find the break
+3. Run the era classifier; report the AUC and read it
+4. Complete the governance file, including a numeric trigger
+5. Three sentences on what your model is worth in 2027, and why
+:::
+
+::: {.check}
+Session 12 is your defence. The governance file is what you will be asked about.
+:::
