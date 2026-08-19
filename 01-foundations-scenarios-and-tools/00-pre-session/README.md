@@ -16,8 +16,9 @@ Then read **[`reading-europe-2031.md`](reading-europe-2031.md)**.
 
 ## Step 1 — Reading
 
-**Europe 2031: a future scenario for Europe - reading brief**  
-Source: `00-pre-session/reading-europe-2031.md` (in this folder)  
+**Europe 2031: a future scenario for Europe**  
+Source: **<https://europe2031.ai>** — read online, or the PDF, or [in French](https://europe2031.ai/fr)  
+Then the critical brief: `00-pre-session/reading-europe-2031.md` (in this folder)  
 *Why:* The framing case for the whole course. Read it as a *stress test*, not a prediction.
 
 **Setup guide: VS Codium + local LLM**  

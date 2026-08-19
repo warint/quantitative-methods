@@ -123,7 +123,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
 | # | Session | Method | Theme of the second half |
 |---|---|---|---|
-| 01 | Foundations: scenarios, tools, the supervised learning problem | loss, risk, $\mathbb{E}[Y\mid X]$ | *(setup and Europe 2031)* |
+| 01 | Syllabus, and a conversation: *Europe 2031* and what AI is | — | *(no lab; discussion)* |
 | 02 | Data, vectors, and the geometry of least squares | OLS, projection, FWL, QR | How much of the gap is composition? |
 | 03 | Linear regression: inference, diagnostics, interpretation | Gauss–Markov, robust SEs, OVB | Which differences survive a referee? |
 | 04 | Bias–variance, overfitting, cross-validation | CV, optimism, effective df | Predicting, or describing the past? |
@@ -176,7 +176,7 @@ midterm, and never to the final exam. Default is
 You are entitled to know why you are asked to do everything you are asked to do. Here is the
 reasoning, in full.
 
-### Participation — pass/fail
+### Participation — 10%
 
 Attendance is assumed at HEC Montréal, so participation cannot mean turning up. It means
 contributing to the room: a question that changed how another group saw their result, a connection
@@ -186,18 +186,30 @@ between two angles, a correction that landed. After each lab the instructor reco
 > produce five perspectives on one question, and the value of the session comes from the collision
 > between them. A room where nobody challenges anybody produces ten monologues and learns a
 > fraction of what it could. Participation is graded because the collision is the point.
->
-> **Why pass/fail rather than a score.** Because a fine-grained participation score measures
-> confidence and extraversion as much as engagement, and ranking students against one another would
-> make helping another group personally costly — the exact opposite of what the course design
-> requires.
 
-The bar is absolute and published: a recorded contribution in at least **N of the ten lab
-sessions**, and no more than one failure to deliver the two-minute report when drawn. If you
-contribute mainly in writing or within your group, say so — being quiet is not being absent, and
-the record should reflect what you actually did.
+**How the 10% is earned.** Against an **absolute, published bar** — never against each other:
 
-### Midterm — 20%, individual, in class, calculator, no documents
+| | |
+|---|---|
+| Bar met | **10 / 10** |
+| Within one contribution of the bar | 7 / 10 |
+| Roughly half the bar | 5 / 10 |
+| Little or no recorded contribution | 0–3 / 10 |
+
+The bar is a recorded contribution in at least **N of the ten lab sessions**, and no more than one
+failure to deliver the two-minute report when drawn.
+
+> **Why an absolute bar rather than a ranking.** Because a participation score that ranks students
+> against one another measures confidence and extraversion as much as engagement, and it makes
+> helping another group personally costly — the exact opposite of what the course design requires.
+> Everyone who clears the bar gets the full 10. There is no curve and no quota.
+
+If you contribute mainly in writing or within your group, say so — being quiet is not being absent,
+and the record should reflect what you actually did. A student who delivered every time they were
+drawn and worked steadily is flagged for **review, never auto-zeroed**: the instructor's attention
+is the measuring instrument, and it is imperfect.
+
+### Midterm exam — 30%, individual, in class, calculator, no documents
 
 Covers Sessions 1–6: the supervised learning problem, least squares and its geometry, inference and
 diagnostics, bias–variance and cross-validation, ridge/lasso/elastic net, logistic regression and

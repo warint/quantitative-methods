@@ -2,9 +2,25 @@
 
 **Session 01 · pre-session reading**
 
-> Read this brief in full, then answer the self-check questions in
-> [`README.md`](README.md). Expect 45–60 minutes. Annotate as you go — you will be asked to defend
-> your annotations in the lab.
+## Read the scenario itself
+
+**<https://europe2031.ai>**
+
+| | |
+|---|---|
+| **Read online** | <https://europe2031.ai> — the full text, free |
+| **PDF** | <https://europe2031.ai/europe-2031.pdf> (~6 MB) |
+| **En français** | <https://europe2031.ai/fr> — one of ten translations |
+| **Audio** | linked from the site: Spotify, Apple Podcasts, web player |
+
+Published **11 June 2026** by the ARQ Foundation; written by Daan Juijn, Stan van Baarsen, Judith
+Dada and others, with copywriting by Tom Chivers. Twenty-three dated chapters following two
+protagonists — Caroline Dubois, an EU policy worker, and Christian Vogt, an AI entrepreneur in
+Silicon Valley.
+
+> **Read the scenario first, then this brief.** The brief is a critical apparatus for a text you
+> have already met, not a substitute for it. Expect 45–60 minutes for the scenario and 45–60 for
+> the brief. Annotate as you go — you will be asked to defend your annotations in class.
 
 ---
 

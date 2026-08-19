@@ -149,7 +149,7 @@ is what defeats both rating inflation and retaliation.
 
 ### Participation
 
-Pass/fail, separate from the group mark. Attendance is assumed, so participation means contributing
+**10% of the grade**, separate from the group mark. Attendance is assumed, so participation means contributing
 to the room. After each lab you tick the students who did — aim for about a fifth of the class,
 because a sparser record cannot support a decision. The bar is **absolute and published**; the class
 distribution is used to *calibrate* it, never to rank students against each other.
@@ -247,10 +247,14 @@ The lecture notes use LaTeX. GitHub renders `$...$` and `$$...$$` natively. In V
 
 ## A note on *Europe 2031*
 
-The course opens and closes with an independent scenario narrative published on 11 June 2026. It is
-**not** an official European Union forecast, and its figures are internal parameters of a story
-rather than measured predictions. It is used here as a **stress test** — a device for exposing
-assumptions — because that is also what a statistical model is.
+The course opens and closes with [**Europe 2031**](https://europe2031.ai), an independent scenario
+narrative published on 11 June 2026 by the ARQ Foundation. Read it free at
+**<https://europe2031.ai>** — online, as a [PDF](https://europe2031.ai/europe-2031.pdf), in
+[French](https://europe2031.ai/fr), or as audio.
+
+It is **not** an official European Union forecast, and its figures are internal parameters of a
+story rather than measured predictions. It is used here as a **stress test** — a device for
+exposing assumptions — because that is also what a statistical model is.
 
 ---
 

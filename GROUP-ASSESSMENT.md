@@ -198,7 +198,7 @@ anything the student brings. The point is to get it right, not to defend the ari
 
 ## The participation grade
 
-Separate from the group mark, and **pass/fail**. At HEC Montréal attendance is assumed, so
+Separate from the group mark, and worth **10%**. At HEC Montréal attendance is assumed, so
 participation cannot mean turning up. It means contributing to the room.
 
 ### The mechanism
@@ -218,7 +218,9 @@ Prints a numbered class list grouped by group. Type the numbers. Done.
 python scripts/assess.py participation --report
 ```
 
-Produces the distribution, the quartiles, a bar-calibration table, and the pass/fail verdicts.
+Produces the distribution, the quartiles, a bar-calibration table, and a verdict per student:
+`pass`, `REVIEW` or `fail`. Those map to the 10% as full marks, an instructor decision, and a
+partial mark respectively — the script reports the evidence, it does not compute the mark.
 
 ### The bar, and why it is absolute rather than relative
 
@@ -291,7 +293,7 @@ Same tick count. Completely different students. The verdict column knows the dif
 
 ### What students are told
 
-> Participation is pass/fail. It is not attendance. After each lab, the instructor records the
+> Participation is worth 10%, earned against an absolute published bar. It is not attendance. After each lab, the instructor records the
 > students who contributed something that helped the room — a question that changed how another
 > group saw their result, a connection between angles, a challenge that landed. To pass you need a
 > recorded contribution in at least **N** of the ten lab sessions.
