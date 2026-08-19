@@ -282,6 +282,10 @@ Setup, with troubleshooting:
 [Session 01 setup guide](01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
 Budget 60–90 minutes **before** Session 1; installation time is not part of class.
 
+Git, GitHub and the group repository are set up separately, before Session 2:
+[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
+Budget 45 minutes.
+
 > **Why local rather than hosted.** Partly governance — data sovereignty is a real constraint in
 > institutions and you should experience working inside it. Partly honesty — a frontier model
 > masks how much of your competence is yours. And partly because the final paper is written for

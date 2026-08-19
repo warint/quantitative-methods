@@ -164,42 +164,7 @@ still answers, your setup is genuinely local.
 
 ---
 
-## Step 6 — Git, and your identity
-
-```bash
-git --version                      # install from https://git-scm.com if missing
-git config --global user.name  "Your Full Name"
-git config --global user.email "your.name@hec.ca"
-```
-
-> **⚠️ Use your real name and your university email.** Your commit history is one of the four
-> records this course uses to check that all three members of a group did the work — see
-> [`GROUP-ASSESSMENT.md`](../../GROUP-ASSESSMENT.md). Commits under `unknown@localhost` cannot be
-> attributed to you, and unattributed work counts as work you did not do. Report your exact
-> `user.name` and `user.email` to the instructor in Session 1.
-
-Clone the course repository and create your branch:
-
-```bash
-git clone <course-repo-url> MATH60033A
-cd MATH60033A
-git checkout -b group-XX          # XX = your group number
-```
-
-**When you pair-program**, credit your partner so the history reflects reality:
-
-```bash
-git commit -m "Add stability bootstrap
-
-Co-authored-by: Partner Name <partner.name@hec.ca>"
-```
-
-The contribution report counts co-authors. Use it — one person typing does not mean one person
-working, and the record should say so.
-
----
-
-## Step 7 — Run the verification script
+## Step 6 — Run the verification script
 
 From the repository root, with your environment activated:
 

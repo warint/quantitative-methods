@@ -1,6 +1,22 @@
 # Session 02 — Pre-session preparation
 
-> Complete **all four steps** before class. Expect 90–120 minutes.
+> Complete **all four steps** before class. Expect 90–120 minutes, plus 45 for the setup below.
+
+---
+
+## ⚠️ Session 2 only — set up git and your group repository
+
+Before the four steps, work through
+**[`setup-git-and-github.md`](setup-git-and-github.md)**. Budget 45 minutes.
+
+From this session onward you are assessed as a group, and your commit history is one of the four
+records used to check that all three members did the work. That record only exists if git knows
+who you are.
+
+You must arrive with a private group repository that your teammates **and the instructor** can
+see, and with at least one commit pushed from your own machine.
+
+Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
 
 ---
 

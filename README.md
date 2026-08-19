@@ -90,7 +90,10 @@ python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
 ```
 
 Full instructions, including VS Codium and the local LLM:
-**[Setup guide](01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md)**
+**[Session 01 setup guide](01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md)**
+
+Git, GitHub and group working, needed from Session 02:
+**[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**
 
 ---
 
