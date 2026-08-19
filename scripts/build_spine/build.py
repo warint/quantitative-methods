@@ -1,5 +1,5 @@
 """
-MATH60033A — build the REAL data spine from the public sources.
+build the REAL data spine from the public sources.
 
     python scripts/verify_sources.py            # 1. confirm the codes still resolve
     python scripts/build_spine/build.py         # 2. fetch, clean, join, write
@@ -247,7 +247,7 @@ def main():
 
     os.makedirs(OUT, exist_ok=True)
     print("=" * 74)
-    print("  MATH60033A — building the data spine from live sources")
+    print("  building the data spine from live sources")
     print("=" * 74)
 
     builders = {"core": build_core, "a": build_angle_a, "b": build_angle_b,

@@ -1,4 +1,4 @@
-# Research mandates — MATH60033A
+# Research mandates
 
 **Ten groups of three · five angles · one question per session**
 

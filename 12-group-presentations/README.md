@@ -2,7 +2,7 @@
 
 > **Can you make a decision-maker act on this — and tell them honestly what would change your mind?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

@@ -1,5 +1,5 @@
 """
-MATH60033A — environment verification.
+environment verification.
 
 Run this BEFORE Session 1:
 
@@ -180,7 +180,7 @@ def check_ollama():
 # ---------------------------------------------------------------- main
 def main():
     print("=" * 68)
-    print("  MATH60033A — environment verification")
+    print("  environment verification")
     print("=" * 68)
     print()
 

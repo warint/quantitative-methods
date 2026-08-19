@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 05 lab starter
+Session 05 lab starter
 Elastic net on a wide macro panel
 
 Run from this folder:

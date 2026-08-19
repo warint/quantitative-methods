@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 09 lab starter
+Session 09 lab starter
 Building and validating an index from central bank language
 
 Run from this folder:

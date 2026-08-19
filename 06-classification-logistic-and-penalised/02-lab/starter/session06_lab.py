@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 06 lab starter
+Session 06 lab starter
 Credit scoring and bankruptcy prediction: from probability to decision
 
 Run from this folder:

@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 04 lab starter
+Session 04 lab starter
 Building a cross-validation harness that does not lie to you
 
 Run from this folder:

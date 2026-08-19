@@ -1,5 +1,5 @@
 """
-MATH60033A — generate the teaching fixtures for the data spine.
+generate the teaching fixtures for the data spine.
 
     python scripts/build_spine/make_fixtures.py
 
@@ -470,7 +470,7 @@ def main():
     frames = dict(zip(FILES, [core, a1, a2, b1, b2, c1, c2, d1, d2, e1, e2]))
 
     print("=" * 74)
-    print("  MATH60033A — teaching fixtures")
+    print("  teaching fixtures")
     print("=" * 74)
     rows = []
     for name, df in frames.items():

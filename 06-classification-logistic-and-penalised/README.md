@@ -2,7 +2,7 @@
 
 > **Your classifier is 97% accurate. Should anyone be impressed?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

@@ -1,4 +1,4 @@
-# MATH60033A — Midterm examination
+# Midterm examination
 
 **Quantitative Methods in International Business · Sessions 1–6**
 

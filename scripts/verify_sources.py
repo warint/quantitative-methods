@@ -1,5 +1,5 @@
 """
-MATH60033A — verify that every public data source in RESEARCH-MANDATES.md is still reachable.
+verify that every public data source in RESEARCH-MANDATES.md is still reachable.
 
 Run at the start of each term, and before rebuilding the data spine:
 
@@ -17,7 +17,7 @@ import urllib.error
 import urllib.request
 
 TIMEOUT = 20
-UA = {"User-Agent": "MATH60033A-course-check/1.0 (teaching material verification)"}
+UA = {"User-Agent": "qmib-course-check/1.0 (teaching material verification)"}
 
 EUROSTAT = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/{code}"
 
@@ -112,7 +112,7 @@ def check_url(angle, url, label, required):
 
 def main():
     print("=" * 74)
-    print("  MATH60033A — public data source verification")
+    print("  public data source verification")
     print("=" * 74)
     print()
     print("-- Eurostat dissemination API " + "-" * 43)

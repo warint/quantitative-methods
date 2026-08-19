@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 07 lab starter
+Session 07 lab starter
 Does flexibility pay? A controlled comparison
 
 Run from this folder:

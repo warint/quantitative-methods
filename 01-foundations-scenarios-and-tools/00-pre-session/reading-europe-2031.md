@@ -1,6 +1,6 @@
 # Reading brief — *Europe 2031: a future scenario for Europe*
 
-**MATH60033A · Session 01 · pre-session reading**
+**Session 01 · pre-session reading**
 
 > Read this brief in full, then answer the self-check questions in
 > [`README.md`](README.md). Expect 45–60 minutes. Annotate as you go — you will be asked to defend

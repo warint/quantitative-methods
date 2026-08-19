@@ -2,7 +2,7 @@
 
 > **Before we can model the future, what exactly are we claiming to know about it?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

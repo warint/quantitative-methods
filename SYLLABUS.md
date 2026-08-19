@@ -1,4 +1,4 @@
-# MATH60033A — Quantitative Methods in International Business
+# Quantitative Methods in International Business
 
 **HEC Montréal · Professor Thierry Warin, PhD**
 `thierry.warin@hec.ca`

@@ -1,4 +1,4 @@
-# Group assessment — MATH60033A
+# Group assessment
 
 **Ten groups of three. How the course checks that all three did the work.**
 

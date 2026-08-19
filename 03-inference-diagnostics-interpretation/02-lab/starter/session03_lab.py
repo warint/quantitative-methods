@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 03 lab starter
+Session 03 lab starter
 A Mincer equation, and an honest account of what it shows
 
 Run from this folder:

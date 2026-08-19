@@ -1,6 +1,6 @@
 # Setup guide — Git, GitHub, and working as a group
 
-**MATH60033A · complete this before Session 02 · budget 45 minutes**
+**complete this before Session 02 · budget 45 minutes**
 
 > This follows on from the [Session 01 setup guide](../../01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
 > You should already have VS Codium, a working Python environment, and Ollama serving a local

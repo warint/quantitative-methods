@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-`MATH60033A` · lecture 90 min · lab follows on
+lecture 90 min · lab follows on
 *Is the relationship non-linear — and can you still explain it to a minister?*
 
 ---

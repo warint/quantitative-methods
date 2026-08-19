@@ -2,7 +2,7 @@
 
 > **If we abandon linearity, what do we lose - and is interpretability recoverable?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

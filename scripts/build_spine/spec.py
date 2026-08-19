@@ -1,5 +1,5 @@
 """
-MATH60033A — declarative catalogue of every series in the data spine.
+declarative catalogue of every series in the data spine.
 
 One place to look when a dataset code changes. `build.py` reads this and nothing else.
 Verify the whole catalogue with:  python scripts/verify_sources.py

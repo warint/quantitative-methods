@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-`MATH60033A` · lecture 90 min · lab follows on
+lecture 90 min · lab follows on
 *Can we flag a country or sector falling behind one year ahead — and what does a false alarm cost?*
 
 ---

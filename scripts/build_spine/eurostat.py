@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 
 BASE = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
-UA = {"User-Agent": "MATH60033A-course-build/1.0"}
+UA = {"User-Agent": "qmib-course-build/1.0"}
 CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".raw")
 
 

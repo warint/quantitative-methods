@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 02 lab starter
+Session 02 lab starter
 OLS from scratch, and where it breaks
 
 Run from this folder:

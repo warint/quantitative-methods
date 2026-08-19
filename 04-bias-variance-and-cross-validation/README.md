@@ -2,7 +2,7 @@
 
 > **Your model fits the past perfectly. Why is that bad news?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

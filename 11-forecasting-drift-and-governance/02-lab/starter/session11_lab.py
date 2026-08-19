@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 11 lab starter
+Session 11 lab starter
 Final-project workshop: backtest, shift diagnostic, governance file
 
 Run from this folder:

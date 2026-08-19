@@ -2,7 +2,7 @@
 
 > **When is a deliberately biased estimator the better one?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

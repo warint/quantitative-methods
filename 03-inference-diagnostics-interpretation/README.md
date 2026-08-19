@@ -2,7 +2,7 @@
 
 > **Your coefficient has a standard error. Under what conditions does that number mean anything?**
 
-`MATH60033A` · Quantitative Methods in International Business · duration 3h00
+Quantitative Methods in International Business · duration 3h00
 
 ---
 

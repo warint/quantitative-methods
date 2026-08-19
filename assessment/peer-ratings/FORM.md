@@ -1,4 +1,4 @@
-# Confidential peer assessment — MATH60033A
+# Confidential peer assessment
 
 **Complete once, at the end of the semester. Five minutes.**
 

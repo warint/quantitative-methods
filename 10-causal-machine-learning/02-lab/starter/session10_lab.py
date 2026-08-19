@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 10 lab starter
+Session 10 lab starter
 Estimating a treatment effect three ways, and disagreeing productively
 
 Run from this folder:

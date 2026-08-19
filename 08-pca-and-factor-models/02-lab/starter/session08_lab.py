@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 08 lab starter
+Session 08 lab starter
 Building a diffusion index and nowcasting with it
 
 Run from this folder:

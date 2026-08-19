@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MATH60033A — group assessment toolkit.
+group assessment toolkit.
 
 One script, four jobs. Run from the repository root.
 

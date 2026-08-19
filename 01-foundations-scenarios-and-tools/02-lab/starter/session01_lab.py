@@ -1,5 +1,5 @@
 """
-MATH60033A — Session 01 lab starter
+Session 01 lab starter
 Stress-testing an assumption with a local LLM
 
 Run from this folder:

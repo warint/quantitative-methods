@@ -1,4 +1,4 @@
-# Final paper — MATH60033A
+# Final paper
 
 **40% of the final grade · teams of three · English · academic format**
 

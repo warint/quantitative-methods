@@ -1,4 +1,4 @@
-# MATH60033A — Quantitative Methods in International Business
+# Quantitative Methods in International Business
 
 A twelve-session course in which every method is **derived** before it is **used**, and every result
 is produced on the student's own machine with open tools.
@@ -79,8 +79,8 @@ split into a compulsory Track A (German Credit) and an extension Track B (bankru
 ## Getting started
 
 ```bash
-git clone <this-repo> MATH60033A
-cd MATH60033A
+git clone <this-repo> qmib
+cd qmib
 
 python3 -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
@@ -189,7 +189,7 @@ would falsify it.
 ## Repository layout
 
 ```
-MATH60033A/
+qmib/
 ├── README.md                          this file
 ├── RESEARCH-MANDATES.md               the five angles, ten groups, session themes
 ├── requirements.txt

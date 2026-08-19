@@ -1,6 +1,6 @@
 # Setup guide — VS Codium + Python + a local LLM
 
-**MATH60033A · complete this before Session 01 · budget 60–90 minutes**
+**complete this before Session 01 · budget 60–90 minutes**
 
 > Session 1 does **not** include installation time. Arrive with all five checks passing.
 
@@ -138,7 +138,7 @@ Open the Continue panel in VS Codium, then edit its config file
 (`~/.continue/config.yaml`, or `~/.continue/config.json` on older versions):
 
 ```yaml
-name: MATH60033A
+name: qmib
 version: 0.0.1
 models:
   - name: Local coder
