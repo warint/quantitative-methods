@@ -152,7 +152,7 @@ your work. Session 12 is where you defend it.
 | **Participation** | **10%** | individual, continuous | every session |
 | **Midterm exam** | **30%** | individual, in class, calculator, no documents | after Session 06 |
 | **Team work** | **20%** | groups of three (lab groups) | Session 12 |
-| **Final exam** | **40%** | individual | end of term |
+| **Final exam** | **40%** | paper in teams of three (25) + individual oral, 15 min (15) | end of term |
 
 **Team work, 20%**, broken down:
 
@@ -244,7 +244,7 @@ and a **presentation** to a decision-maker who will not read your code.
 
 Details and rubric: [Session 12](12-group-presentations/README.md).
 
-### Final paper — 40%, teams of three, English
+### Final exam — 40%: research paper (25) + individual oral (15)
 
 An academic paper that takes the method your group mastered on European data and **transfers it to a
 problem in francophone Africa**, written for a specific reader: a student in the
@@ -265,6 +265,14 @@ problem in francophone Africa**, written for a specific reader: a student in the
 >
 > **Why 40%.** Because it is the piece that asks the most: a literature review, a defensible design,
 > an honest evaluation, and prose that survives contact with a reader who did not take this course.
+
+**The oral, 15 minutes per student, examined individually.** No slides, no documents. Roughly half
+on the methods used in your own paper — derive the estimator, state the assumptions, say what would
+break the result — and half on the course, Sessions 02 to 11.
+
+> **Why an oral on top of a paper.** A paper written by three people cannot tell me which of the
+> three understood it. Fifteen minutes can. This is also why the individual multiplier does not
+> apply to the final: the oral measures the individual directly, so there is nothing to correct.
 
 Full brief: [`assessments/final-paper/`](assessments/final-paper/README.md).
 
@@ -336,7 +344,7 @@ citations — it will state plausible falsehoods with complete confidence. Recor
 **Attendance.** Assumed. Absence does not itself reduce a grade, but the participation record is
 built from what happens in the room, and you cannot contribute from elsewhere.
 
-**Late work.** Group project and final paper: 10% per day, to a maximum of three days, after which
+**Late work.** Team work and the final paper: 10% per day, to a maximum of three days, after which
 the component is not accepted. Extensions for documented circumstances, requested before the
 deadline.
 

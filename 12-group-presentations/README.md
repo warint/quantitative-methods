@@ -59,8 +59,9 @@ Team work is **20% of the course grade**. Within it:
 | **Presentation and defence** | 3 / 20 | Clarity of the recommendation; quality of answers under questioning. |
 
 The [individual multiplier](../GROUP-ASSESSMENT.md) applies to these 20 points only — never to the
-midterm or the final paper, which are assessed separately. The **final paper (40%)** is a distinct
-deliverable with its own teams and its own brief:
+midterm or the final exam, which are assessed separately. The **final exam (40%)** — a research
+paper in teams of three plus a 15-minute individual oral — is a distinct deliverable with its own
+brief:
 [`assessments/final-paper/`](../assessments/final-paper/README.md).
 
 Submit everything to `submissions/group-XX/`. Preparation checklist:

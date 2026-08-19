@@ -179,7 +179,7 @@ governance file, the analysis, the revised memo and the defence.**
 It does **not** touch:
 
 - the **midterm exam (30%)**, which is written alone under exam conditions;
-- the **final paper (40%)**, whose teams may be differently composed and which carries its own
+- the **final exam (40%)**, whose oral component examines each student individually and whose paper carries its own
   signed [CRediT authorship statement](assessments/final-paper/README.md#8-authorship-and-llm-statements)
   — a more honest instrument, because the attribution is published in the paper rather than
   collected in confidence afterwards;

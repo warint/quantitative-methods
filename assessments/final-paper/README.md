@@ -1,9 +1,15 @@
-# Final paper
+# Final exam — research paper and oral
 
-**40% of the final grade · teams of three · English · academic format**
+**40% of the final grade** · paper in teams of three, English, academic format · **oral examined
+individually, 15 minutes per student**
 
 > You will write for a reader who exists, who is not your professor, and who will use what you
-> write.
+> write — and then you will answer for it, alone.
+
+| Component | Weight | Form |
+|---|---|---|
+| **Research paper** | 25 | Teams of three |
+| **Oral examination** | 15 | Individual, 15 minutes |
 
 ---
 
@@ -17,8 +23,9 @@
 6. [Structure of the paper](#6-structure-of-the-paper)
 7. [The implementation note](#7-the-implementation-note)
 8. [Authorship and LLM statements](#8-authorship-and-llm-statements)
-9. [Rubric](#9-rubric)
-10. [Timeline and submission](#10-timeline-and-submission)
+9. [Rubric — the paper](#9-rubric--the-paper)
+10. [The oral examination](#10-the-oral-examination)
+11. [Timeline and submission](#11-timeline-and-submission)
 
 ---
 
@@ -293,7 +300,9 @@ assistant gives you against the actual publisher record. Report what you found.
 
 ---
 
-## 9. Rubric
+## 9. Rubric — the paper
+
+Out of 100, for the 25 points the paper carries.
 
 | Component | Weight | What earns full marks |
 |---|---|---|
@@ -324,7 +333,59 @@ assistant gives you against the actual publisher record. Report what you found.
 
 ---
 
-## 10. Timeline and submission
+## 10. The oral examination
+
+**15 minutes, one student at a time, no documents.**
+
+The paper is written by three people. The oral is where the course establishes what **each** of
+them understands. It is not a presentation and there are no slides — you sit down and answer
+questions.
+
+### What is examined
+
+Two things, roughly half the time each:
+
+1. **The methods used in your paper.** Why that estimator and not the obvious alternative. What
+   the assumptions are. What would break the result. Where the uncertainty comes from and what it
+   covers.
+2. **The course content.** Anything from Sessions 02 to 11. Derive something on paper if asked.
+
+### What this is designed to catch
+
+> A paper can be written by a team in which one person did the modelling, one wrote the prose and
+> one watched. The paper cannot tell me which. Fifteen minutes can.
+
+It is also the reason the individual multiplier does **not** apply here: the oral already measures
+the individual directly, so there is nothing to correct for.
+
+### Questions you should expect
+
+- *Derive the estimator you used. You may use the board.*
+- *Your paper reports X. What would have to be true about the data for that to be wrong?*
+- *You chose method A over method B. Defend that against someone who prefers B.*
+- *Where in your paper is a claim your design cannot support? There is usually one.*
+- *Explain [some result from Session 0N] and why it mattered for your paper — or why it did not.*
+
+### How it is marked
+
+| | What earns full marks |
+|---|---|
+| **Command of your own method** | Derives it, states the assumptions, knows what breaks it |
+| **Command of the course** | Connects your paper to the methods you did not use, and says why |
+| **Honesty under pressure** | Concedes precisely what cannot be claimed, and says how you would find out |
+
+> **Saying "I do not know" costs you very little.** Defending an indefensible claim costs you a
+> great deal. That has been true in every lab this term and it is true here.
+
+### Practical
+
+- Scheduled in the two weeks after the paper deadline; slots circulated in advance.
+- Bring nothing. Your paper is in front of the examiner.
+- Conducted in English or French, your choice — state it when you book.
+
+---
+
+## 11. Timeline and submission
 
 | When | What |
 |---|---|
@@ -332,7 +393,8 @@ assistant gives you against the actual publisher record. Report what you found.
 | **After Session 8** | One-page proposal: question, data sources with links, method, why it matters locally. Approved before you proceed. |
 | **After Session 10** | Literature review draft — the sources and the argument, not yet polished prose. Formative feedback returned. |
 | **Session 12 week** | Full draft optional, for comment. Take this up; it is free. |
-| **Two weeks after Session 12** | **Final submission.** |
+| **Two weeks after Session 12** | **Final submission** of the paper. |
+| **The two weeks following** | **Oral examinations**, 15 minutes per student. |
 
 **Submit:** the paper as PDF, and the repository as a link or archive. The repository must run from
 a clean clone. If it does not run, the analysis component cannot be marked.
