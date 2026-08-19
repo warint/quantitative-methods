@@ -12,7 +12,7 @@ We observe $n$ pairs $(x_i, y_i)$, with $x_i \in \mathbb{R}^p$ a vector of predi
 $y_i \in \mathbb{R}$ an outcome. We assume they are drawn from an unknown joint distribution
 $P(X, Y)$, and we posit
 
-$$ Y = f(X) + \varepsilon, \qquad \mathbb{E}[\varepsilon \mid X] = 0, \quad \operatorname{Var}(\varepsilon) = \sigma^2 . $$
+$$Y = f(X) + \varepsilon, \qquad \mathbb{E}[\varepsilon \mid X] = 0, \quad \operatorname{Var}(\varepsilon) = \sigma^2 .$$
 
 The function $f$ is the *systematic* part - what $X$ tells us about $Y$. The term $\varepsilon$ is
 everything else: measurement error, omitted causes, genuine randomness.
