@@ -42,7 +42,7 @@ The licence makes credit a legal condition; a citation makes it a scholarly one.
 [`CITATION.cff`](CITATION.cff) and renders a *Cite this repository* button with BibTeX and APA
 output. In text:
 
-> Warin, T. (2026). *MATH60033A — Machine Learning Methods for Economics* [Course materials].
+> Warin, T. (2026). *MATH60033A — Quantitative Methods in International Business* [Course materials].
 > CC BY 4.0. https://github.com/warint/quantitative-methods
 
 BibTeX:
@@ -50,7 +50,7 @@ BibTeX:
 ```bibtex
 @misc{warin2026math60033a,
   author       = {Warin, Thierry},
-  title        = {MATH60033A --- Machine Learning Methods for Economics},
+  title        = {MATH60033A --- Quantitative Methods in International Business},
   year         = {2026},
   howpublished = {Course materials, CC BY 4.0},
   url          = {https://github.com/warint/quantitative-methods}

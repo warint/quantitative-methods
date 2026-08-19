@@ -2,7 +2,7 @@
 
 > **Why is the most-used estimator in economics a right-angle triangle?**
 
-`MATH60033A` · Machine Learning Methods for Economics · duration 3h00
+`MATH60033A` · Quantitative Methods in International Business · duration 3h00
 
 ---
 

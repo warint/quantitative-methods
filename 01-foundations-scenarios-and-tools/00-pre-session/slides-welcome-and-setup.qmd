@@ -1,6 +1,6 @@
 ---
-title: "Welcome to MATH60033A"
-subtitle: "Machine Learning Methods for Economics — building your workstation"
+title: "Welcome"
+subtitle: "Quantitative Methods in International Business — building your workstation"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,6 +21,7 @@ format:
     footer: "MATH60033A · Session 01 pre-session · Thierry Warin · HEC Montréal"
   pptx:
     slide-level: 2
+    reference-doc: ../../slides/reference.pptx
 ---
 
 # Welcome {background-color="#16181A" style="color:#F7F6F3"}
@@ -82,7 +83,6 @@ environment means you cannot take part in the lab.
 | **Ollama** | Runs LLMs on *your* machine | No API key, no per-token cost, no data leaving your laptop. |
 | **Qwen 2.5 Coder** | The model Ollama serves | Small enough for a laptop, strong at code. |
 | **aider** | An AI agent in your terminal | Reads and edits your files, and commits. |
-| **Git + GitHub** | Version control | The record of who did what. |
 
 ## The principle behind the stack
 
@@ -499,162 +499,6 @@ aider writes the code, shows you a **diff**, and asks to apply it.
 Read the diff before you accept. That habit is the whole skill.
 :::
 
-## What aider does to your git history
-
-aider **commits automatically** after each change it applies.
-
-That is usually what you want — but this course counts commits as evidence of
-who did the work:
-
-```bash
-# see what it did
-git log --oneline
-
-# turn auto-commit off if you'd rather commit yourself
-aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
-```
-
-::: {.warn}
-Commits made by the agent are attributed to **you**. That is correct — you
-directed it. But read the diff before you accept it: you are answerable for
-every line in your repository.
-:::
-
-# Step 6 — GitHub {background-color="#16181A" style="color:#F7F6F3"}
-
-## Create your account
-
-1. Go to **github.com** and choose **Sign up**.
-2. Use an email you will still have after you graduate.
-3. Pick a username you would put on a CV — this is a professional record.
-4. Verify the email GitHub sends you.
-5. Enable **two-factor authentication** when prompted. GitHub requires it.
-
-::: {.shot}
-[ github.com/signup — email, password, username, then a verification puzzle ]
-:::
-
-::: {.muted}
-Free accounts include unlimited private repositories. You do not need a paid plan.
-:::
-
-## Install Git
-
-::: {.get}
-download
-:::
-
-Go to **git-scm.com/downloads** and run the installer for your system. Accept
-every default.
-
-::: {.muted}
-macOS may already have it. Check first — the next slide tells you how.
-:::
-
-## Tell git who you are
-
-::: {.where}
-VS Codium terminal
-:::
-
-```bash
-git --version
-git config --global user.name  "Your Full Name"
-git config --global user.email "your.name@hec.ca"
-```
-
-::: {.warn}
-**Use your real name and your university email.** Your commit history is one of
-four records this course uses to check that all three group members did the
-work. Commits from `unknown@localhost` cannot be attributed to you, and
-unattributed work counts as work you did not do.
-:::
-
-Report your exact `user.name` and `user.email` to me in Session 1.
-
-## Create your repository
-
-On github.com, click **+** (top right) → **New repository**.
-
-| Field | What to put |
-|---|---|
-| **Repository name** | `math60033a-gXX` (XX = your group number) |
-| **Description** | `MATH60033A group work` |
-| **Visibility** | **Private** |
-| **Initialize with README** | ✅ tick it |
-
-::: {.shot}
-[ github.com/new — owner, repository name, description, Public/Private, README checkbox ]
-:::
-
-::: {.muted}
-Keep it to yourself for now. We will sort out groups and access in class.
-:::
-
-# Step 7 — Connect it {background-color="#16181A" style="color:#F7F6F3"}
-
-## Clone your repo into VS Codium
-
-On your repository page, click the green **Code** button and copy the **HTTPS** URL.
-
-::: {.where}
-VS Codium terminal
-:::
-
-```bash
-git clone https://github.com/YOUR-USERNAME/math60033a-gXX.git
-cd math60033a-gXX
-```
-
-Then `File → Open Folder…` and choose that folder.
-
-::: {.check}
-**Check.** The Explorer shows `README.md`, and the bottom-left of the window
-shows the branch name `main`.
-:::
-
-## Your password will not work
-
-When you first push, GitHub asks for credentials — and **rejects your account
-password**. It wants a *token*.
-
-1. github.com → your avatar → **Settings**
-2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
-3. **Generate new token**, tick the **`repo`** scope, set an expiry
-
-## Using the token
-
-4. Copy the token — **it is shown once**
-5. Paste it when git asks for your *password*
-
-::: {.check}
-```bash
-git config --global credential.helper store
-```
-
-Stores it, so you are asked only once.
-:::
-
-## The round trip
-
-::: {.where}
-VS Codium terminal
-:::
-
-```bash
-echo "# Group XX — MATH60033A" >> README.md
-git add README.md
-git commit -m "Start the group log"
-git push
-```
-
-Refresh your repository page in the browser. Your line is there.
-
-::: {.check}
-**Check.** You have now completed the full loop: edit locally → commit → push →
-visible on GitHub. Everything else this term is a variation on that loop.
-:::
-
 # The worked example {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Two terminals
@@ -669,14 +513,13 @@ VS Codium terminal 1
 OLLAMA_CONTEXT_LENGTH=8192 ollama serve
 ```
 
-**Terminal 2** — inside your repository:
+**Terminal 2** — inside your course folder:
 
 ::: {.where}
 VS Codium terminal 2
 :::
 
 ```bash
-cd math60033a-gXX
 source .venv/bin/activate
 aider --model ollama_chat/qwen2.5-coder:7b
 ```
@@ -696,15 +539,14 @@ aider proposes a diff. You read it. You accept it.
 
 ```bash
 python explore.py
-git push
 ```
 
 ## What just happened
 
 ::: {.check}
 You ran a model **on your own hardware**, had it write code against real data,
-reviewed the change, committed it under your name, and published it —
-**without sending one byte to anyone's API.**
+reviewed the change, and accepted it — **without sending one byte to anyone's
+API.**
 :::
 
 ::: {.muted}
@@ -716,13 +558,13 @@ Every lab this term is a variation on those two terminals.
 ::: {.tight}
 - **The data stay put.** Some of what you use this term cannot legally be uploaded.
 - **The cost is zero.** No key, no quota, no bill at the end of the month.
-- **The record is honest.** Commits carry your name; the diff carries the reasoning.
+- **The record is honest.** The diff shows exactly what changed, and why.
 - **The skill transfers.** This is how the work is actually done now.
 :::
 
 ::: {.warn}
 The model is a **junior collaborator with no accountability.** It will produce
-confident, wrong code. Every line you commit is a line you are claiming as
+confident, wrong code. Every line you accept is a line you are claiming as
 correct. Read the diff.
 :::
 
@@ -736,8 +578,8 @@ correct. Read the diff.
 | Model answers very slowly | Use a smaller model (`:3b`); close other applications |
 | aider "forgets" your file | You skipped `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
 | `connection refused` from aider | The `ollama serve` terminal is not running |
-| `git push` rejects your password | Use a personal access token, not the password |
 | `pip` fails on install | Check `(.venv)` is in your prompt |
+| `python3` not found on Windows | Try `python`; if still missing, PATH was not ticked |
 
 ::: {.muted}
 Still stuck? Ask Qwen — that is itself a test of whether your setup works.
@@ -764,9 +606,7 @@ You should see five checks pass.
 ::: {.tight}
 - ✅ VS Codium installed, Python environment built
 - ✅ Ollama running Qwen 2.5 Coder, verified **with the wifi off**
-- ✅ aider talking to your local model
-- ✅ GitHub account, private group repository, teammates added
-- ✅ One commit pushed from your machine
+- ✅ aider talking to your local model, editing a real file
 - ✅ *Europe 2031* read as a stress test, not a prediction
 - ✅ `verify_environment.py` output in hand
 :::

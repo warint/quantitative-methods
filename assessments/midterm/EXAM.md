@@ -1,6 +1,6 @@
 # MATH60033A — Midterm examination
 
-**Machine Learning Methods for Economics · Sessions 1–6**
+**Quantitative Methods in International Business · Sessions 1–6**
 
 ---
 

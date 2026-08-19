@@ -1,0 +1,391 @@
+---
+title: "Git, GitHub, and Working as a Group"
+subtitle: "Session 02 pre-session · The record of who did what"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  revealjs:
+    theme: [default, ../../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    progress: true
+    controls: true
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "MATH60033A · Session 02 pre-session · Thierry Warin · HEC Montréal"
+  pptx:
+    slide-level: 2
+    reference-doc: ../../slides/reference.pptx
+---
+
+# Before you start {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you already have
+
+From the Session 01 pre-session, on the machine you are holding:
+
+::: {.tight}
+- VS Codium, with its integrated terminal
+- A Python environment that imports numpy, pandas and scikit-learn
+- Ollama serving Qwen 2.5 Coder, verified with the wifi off
+- aider, editing real files from the terminal
+:::
+
+::: {.warn}
+If any of those is missing, fix it before this. Everything below assumes a
+working workstation.
+:::
+
+## What this session adds
+
+You are about to start working **in a group of three**, on a shared codebase.
+
+::: {.tight}
+- A place to put the work where all three of you can reach it
+- A record of who contributed what, which the course uses in assessment
+- A way to disagree with each other's code without losing either version
+:::
+
+::: {.muted}
+Budget 45 minutes. Same conventions as before: **download** means a browser,
+**VS Codium terminal** means the panel inside the editor.
+:::
+
+## Why the record matters here
+
+Group marks reward the group. This course checks that the group mark reflects
+what each member did, using four records — and one of them is your commit
+history.
+
+::: {.check}
+See [`GROUP-ASSESSMENT.md`](../../GROUP-ASSESSMENT.md) for the full policy. The
+short version: work that cannot be attributed to you counts as work you did not
+do.
+:::
+
+# Git {background-color="#16181A" style="color:#F7F6F3"}
+
+## Install Git
+
+::: {.get}
+download
+:::
+
+Go to **git-scm.com/downloads** and run the installer for your system. Accept
+every default.
+
+::: {.muted}
+macOS may already have it. The next slide tells you how to check.
+:::
+
+## Tell git who you are
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+git --version
+git config --global user.name  "Your Full Name"
+git config --global user.email "your.name@hec.ca"
+```
+
+::: {.warn}
+**Use your real name and your university email.** Commits from
+`unknown@localhost` cannot be attributed to you, and unattributed work counts
+as work you did not do.
+:::
+
+## Report it to me
+
+Bring your exact `user.name` and `user.email` to Session 02.
+
+::: {.check}
+```bash
+git config --global user.name
+git config --global user.email
+```
+:::
+
+::: {.muted}
+If your git email differs from the one on the roster, your commits will not be
+matched to you, and the contribution report will show you as having done
+nothing. This takes ten seconds to prevent and is tedious to repair.
+:::
+
+## What a commit is
+
+A commit is a **labelled snapshot** of your work, with an author and a message.
+
+::: {.tight}
+- It is not a backup — it is a statement about what changed and why
+- The message is written for the person reading it in six weeks
+- That person is usually you
+:::
+
+::: {.warn}
+`git commit -m "update"` tells nobody anything. `"Fix leakage: move scaler
+inside the CV pipeline"` tells them everything.
+:::
+
+# GitHub {background-color="#16181A" style="color:#F7F6F3"}
+
+## Create your account
+
+1. Go to **github.com** and choose **Sign up**.
+2. Use an email you will still have after you graduate.
+3. Pick a username you would put on a CV — this is a professional record.
+4. Verify the email GitHub sends you.
+5. Enable **two-factor authentication** when prompted. GitHub requires it.
+
+::: {.shot}
+[ github.com/signup — email, password, username, then a verification step ]
+:::
+
+::: {.muted}
+Free accounts include unlimited private repositories.
+:::
+
+## Create your group repository
+
+**One person per group** does this. On github.com, click **+** → **New
+repository**.
+
+| Field | What to put |
+|---|---|
+| **Repository name** | `qmib-gXX` (XX = your group number) |
+| **Description** | `Group work` |
+| **Visibility** | **Private** |
+| **Initialize with README** | ✅ tick it |
+
+::: {.shot}
+[ github.com/new — owner, name, description, Public/Private, README checkbox ]
+:::
+
+## Add the other three people
+
+**Settings → Collaborators → Add people.**
+
+::: {.tight}
+- Your two teammates
+- Me
+:::
+
+::: {.warn}
+A private repository I cannot see is a repository I cannot mark. Do this in the
+same sitting — it is the step groups most often forget.
+:::
+
+# Connecting it {background-color="#16181A" style="color:#F7F6F3"}
+
+## Clone it into VS Codium
+
+On the repository page, click the green **Code** button and copy the **HTTPS**
+URL.
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+git clone https://github.com/OWNER/qmib-gXX.git
+cd qmib-gXX
+```
+
+Then `File → Open Folder…` and choose that folder.
+
+::: {.check}
+The Explorer shows `README.md`, and the bottom-left shows the branch `main`.
+:::
+
+## Your password will not work
+
+When you first push, GitHub asks for credentials and **rejects your account
+password**. It wants a *token*.
+
+1. github.com → your avatar → **Settings**
+2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+3. **Generate new token**, tick the **`repo`** scope, set an expiry
+
+## Using the token
+
+4. Copy the token — **it is shown once**
+5. Paste it when git asks for your *password*
+
+::: {.check}
+```bash
+git config --global credential.helper store
+```
+
+Stores it, so you are asked only once.
+:::
+
+## The round trip
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+echo "## Group XX" >> README.md
+git add README.md
+git commit -m "Add group heading"
+git push
+```
+
+Refresh the repository page in your browser. Your line is there.
+
+::: {.check}
+Edit locally → commit → push → visible to your group. Everything this term is a
+variation on that loop.
+:::
+
+## Getting other people's work
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+git pull
+```
+
+::: {.warn}
+**Pull before you start working, every time.** Most merge conflicts are caused
+by someone editing a stale copy of a file for two hours.
+:::
+
+# Working together {background-color="#16181A" style="color:#F7F6F3"}
+
+## Branches
+
+Work on a branch, not directly on `main`:
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+git checkout -b s02-fwl-analysis
+# ... work, commit ...
+git push -u origin s02-fwl-analysis
+```
+
+::: {.check}
+Then open a **pull request** on GitHub so a teammate reads the change before it
+joins `main`. That review *is* the group work.
+:::
+
+## When two of you edit the same lines
+
+Git stops and marks the conflict in the file:
+
+```
+<<<<<<< HEAD
+alpha = 0.05
+=======
+alpha = 0.01
+>>>>>>> their-branch
+```
+
+::: {.tight}
+- Delete the markers and keep the version you both agree on
+- `git add` the file, then `git commit`
+:::
+
+::: {.muted}
+A conflict is not a failure. It is git refusing to guess which of you was right.
+:::
+
+## What aider does to your history
+
+aider **commits automatically** after each change it applies — and this course
+counts commits as evidence of who did the work.
+
+::: {.where}
+VS Codium terminal
+:::
+
+```bash
+git log --oneline
+aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+```
+
+::: {.warn}
+Commits made by the agent are attributed to **you**. That is correct — you
+directed it. But read the diff before accepting: you are answerable for every
+line in your repository.
+:::
+
+## Rotate the roles
+
+Your group logs a Driver, an Analyst and a Reporter each session.
+
+::: {.tight}
+- **Driver** writes the code
+- **Analyst** decides the specification and owns the interpretation
+- **Reporter** writes the three sentences and presents *if drawn*
+:::
+
+::: {.check}
+Over ten sessions each of you should hold each role three or four times. Logged
+in `assessment/role-logs/gXX.md`, checked with
+`python scripts/assess.py roles`.
+:::
+
+## Why "if drawn" matters
+
+The presenter is **drawn at random** at the start of the slot.
+
+::: {.muted}
+A group where one person understands the model has not learned the material.
+The draw makes shared understanding the only viable strategy — and it is
+announced now, in week two, so nobody is surprised in week twelve.
+:::
+
+# Finishing {background-color="#16181A" style="color:#F7F6F3"}
+
+## If it breaks
+
+| Symptom | Fix |
+|---|---|
+| `git: command not found` | Reopen the terminal; on Windows restart VS Codium |
+| Password rejected on push | Use a personal access token, not the password |
+| `rejected — non-fast-forward` | `git pull` first, resolve, then push |
+| Committed under the wrong email | Fix `git config`, tell me; past commits stay wrong |
+| Conflict markers in a file | Delete them, keep the agreed version, add and commit |
+
+::: {.muted}
+Still stuck? Ask Qwen — it is good at git, and it runs on your laptop.
+:::
+
+## Before Session 02
+
+::: {.tight}
+- ✅ Git installed, `user.name` and `user.email` set to your real details
+- ✅ GitHub account with two-factor authentication
+- ✅ One private group repository, with both teammates **and me** added
+- ✅ Cloned to your machine and opened in VS Codium
+- ✅ One commit pushed **by you personally**, visible on github.com
+- ✅ Your exact `user.name` and `user.email` written down to report
+:::
+
+::: {.warn}
+"One commit pushed by you personally" means each of the three of you. Not one
+per group.
+:::
+
+##  {background-color="#16181A" style="color:#F7F6F3"}
+
+::: {style="margin-top: 1.6em"}
+### See you in Session 02. {style="color:#F7F6F3"}
+
+::: {style="color:#9DA19E; font-size:0.8em"}
+Bring your git identity.
+:::
+:::

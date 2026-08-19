@@ -1,4 +1,4 @@
-# MATH60033A — Machine Learning Methods for Economics
+# MATH60033A — Quantitative Methods in International Business
 
 **HEC Montréal · Professor Thierry Warin, PhD**
 `thierry.warin@hec.ca`

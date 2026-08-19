@@ -1,4 +1,4 @@
-# MATH60033A — Machine Learning Methods for Economics
+# MATH60033A — Quantitative Methods in International Business
 
 A twelve-session course in which every method is **derived** before it is **used**, and every result
 is produced on the student's own machine with open tools.

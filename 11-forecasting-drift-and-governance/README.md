@@ -2,7 +2,7 @@
 
 > **What are you responsible for when someone acts on your model?**
 
-`MATH60033A` · Machine Learning Methods for Economics · duration 3h00
+`MATH60033A` · Quantitative Methods in International Business · duration 3h00
 
 ---
 

@@ -2,7 +2,7 @@
 
 > **Two hundred macro series move together. How many things are actually happening?**
 
-`MATH60033A` · Machine Learning Methods for Economics · duration 3h00
+`MATH60033A` · Quantitative Methods in International Business · duration 3h00
 
 ---
 

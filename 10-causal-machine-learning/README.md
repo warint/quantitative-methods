@@ -2,7 +2,7 @@
 
 > **You have a superb predictive model. Why can you still not use it to choose a policy?**
 
-`MATH60033A` · Machine Learning Methods for Economics · duration 3h00
+`MATH60033A` · Quantitative Methods in International Business · duration 3h00
 
 ---
 
