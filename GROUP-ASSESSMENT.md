@@ -173,12 +173,12 @@ a group that rates strictly are treated identically. Only within-group differenc
 
 ### What it applies to
 
-**The multiplier scales the group project only — the 30% of the course grade covering the
+**The multiplier scales the team work only — the 20% of the course grade covering the
 governance file, the analysis, the revised memo and the defence.**
 
 It does **not** touch:
 
-- the **midterm (20%)**, which is written alone under exam conditions;
+- the **midterm exam (30%)**, which is written alone under exam conditions;
 - the **final paper (40%)**, whose teams may be differently composed and which carries its own
   signed [CRediT authorship statement](assessments/final-paper/README.md#8-authorship-and-llm-statements)
   — a more honest instrument, because the attribution is published in the paper rather than

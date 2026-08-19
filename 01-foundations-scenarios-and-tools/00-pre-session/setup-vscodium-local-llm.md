@@ -61,12 +61,40 @@ alternative: `ms-python.python` from the `.vsix` release**, or use **`charlierma
 
 ---
 
-## Step 3 — Python environment
+## Step 3 — The course materials
 
-We use Python 3.11 or 3.12.
+Everything below runs **inside the course folder**, so you need it on your machine first.
+
+You do not need a GitHub account or git for this. Download a snapshot:
+
+1. Go to <https://github.com/warint/quantitative-methods>
+2. Click the green **Code** button
+3. Choose **Download ZIP**
+4. Unzip it somewhere you will find again — Documents, not Downloads
+
+In VS Codium: `File → Open Folder…` and choose the unzipped folder. The Explorer should show
+`README.md`, `requirements.txt`, a `data/` folder and the numbered session folders. If you see a
+single folder you have to click into, you picked the level above — go one deeper.
+
+> **This is a snapshot.** It cannot receive corrections and it has no history. Before Session 02
+> you install git and **clone** the repository instead, which updates with `git pull` and is where
+> your group's own work will live. See the
+> [Session 02 setup guide](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
+> For today the snapshot is enough, and it saves you creating an account before you have seen the
+> course.
+
+---
+
+## Step 4 — Python environment
+
+We use Python 3.11 or 3.12. Download it from <https://www.python.org/downloads/> if you do not
+have it — on Windows, **tick "Add python.exe to PATH"** on the first installer screen.
+
+All commands below go in the **VS Codium integrated terminal** (``View → Terminal``, or
+``Ctrl+` ``), which already sits in the course folder you opened.
 
 ```bash
-# from the repository root
+# from the course folder
 python3 -m venv .venv
 
 # activate
@@ -85,7 +113,7 @@ In VS Codium: `Ctrl/Cmd+Shift+P` → **Python: Select Interpreter** → choose `
 
 ---
 
-## Step 4 — The local LLM
+## Step 5 — The local LLM
 
 We use **Ollama**, which runs models entirely on your machine.
 
@@ -132,7 +160,7 @@ Type `/bye` to exit.
 
 ---
 
-## Step 5 — Connect Continue to Ollama
+## Step 6 — Connect Continue to Ollama
 
 Open the Continue panel in VS Codium, then edit its config file
 (`~/.continue/config.yaml`, or `~/.continue/config.json` on older versions):
@@ -164,9 +192,9 @@ still answers, your setup is genuinely local.
 
 ---
 
-## Step 6 — Run the verification script
+## Step 7 — Run the verification script
 
-From the repository root, with your environment activated:
+From the course folder, with your environment activated:
 
 ```bash
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py

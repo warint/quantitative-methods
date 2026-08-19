@@ -149,23 +149,23 @@ your work. Session 12 is where you defend it.
 
 | Component | Weight | Form | When |
 |---|---|---|---|
-| **Participation** | pass/fail | individual | continuous |
-| **Midterm** | **20%** | individual, in class, calculator, no documents | after Session 06 |
-| **Group project** | **30%** | groups of three (lab groups) | Session 12 |
-| **Final paper** | **40%** | teams of three (may be re-formed) | end of term |
+| **Participation** | **10%** | individual, continuous | every session |
+| **Midterm exam** | **30%** | individual, in class, calculator, no documents | after Session 06 |
+| **Team work** | **20%** | groups of three (lab groups) | Session 12 |
+| **Final exam** | **40%** | individual | end of term |
 
-**Group project, 30%**, broken down:
+**Team work, 20%**, broken down:
 
 | | |
 |---|---|
-| Model governance file | 10 |
-| Reproducible analysis | 10 |
-| Revised Session 1 memo + change log | 5 |
-| Presentation and defence | 5 |
+| Model governance file | 7 |
+| Reproducible analysis | 7 |
+| Revised Session 1 memo + change log | 3 |
+| Presentation and defence | 3 |
 
 **Individual accountability.** An individual multiplier derived from confidential peer ratings,
-gated on the git contribution history, applies to the **group project 30% only** — never to the
-midterm, and never to the final paper, which carries its own authorship statement. Default is
+gated on the git contribution history, applies to the **team work 20% only** — never to the
+midterm, and never to the final exam. Default is
 ×1.00; a mark is reduced only when two independent records agree. Full policy:
 [`GROUP-ASSESSMENT.md`](GROUP-ASSESSMENT.md).
 

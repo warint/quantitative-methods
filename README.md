@@ -115,13 +115,13 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | pass/fail | individual, continuous |
-| **Midterm** | **20%** | individual, in class, calculator, no documents — after Session 06 |
-| **Group project** | **30%** | groups of three, presented Session 12 |
-| **Final paper** | **40%** | teams of three, English, written for [SDAfrique](https://sdafrique.org) |
+| **Participation** | **10%** | individual, continuous |
+| **Midterm exam** | **30%** | individual, in class, calculator, no documents — after Session 06 |
+| **Team work** | **20%** | groups of three, presented Session 12 |
+| **Final exam** | **40%** | individual, end of term |
 
-Group project (30) breaks down as governance file 10 · reproducible analysis 10 · revised Session 1
-memo 5 · presentation and defence 5. Session labs themselves are **formative** — commented on, not
+Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
+memo 3 · presentation and defence 3. Session labs themselves are **formative** — commented on, not
 marked.
 
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)

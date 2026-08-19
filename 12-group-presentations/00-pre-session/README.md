@@ -9,7 +9,7 @@
 Work through this in order. Items 1–3 were drafted in the
 [Session 11 lab](../../11-forecasting-drift-and-governance/02-lab/README.md); here you finish them.
 
-### 1. Model governance file  *(10 of the group project's 30)*
+### 1. Model governance file  *(7 of the team work's 20)*
 
 - [ ] All seven sections of [`governance-file-template.md`](../../11-forecasting-drift-and-governance/02-lab/governance-file-template.md) completed
 - [ ] Section 5 (Limitations) is specific and numerical — no "may not generalise"

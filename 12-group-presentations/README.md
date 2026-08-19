@@ -49,16 +49,16 @@ a group that overruns loses its question time, not the next group's.
 
 ## Deliverables and weighting
 
-The group project is **30% of the course grade**. Within it:
+Team work is **20% of the course grade**. Within it:
 
 | Component | Weight | What is assessed |
 |---|---|---|
-| **Model governance file** | 10 / 30 | The seven headings from Session 11.4. Sections 5 (Limitations) and 6 (Monitoring) carry the most weight. |
-| **Reproducible analysis** | 10 / 30 | Runs end-to-end from a clean clone plus `pip install -r requirements.txt`. Seeds set. Data cached, not downloaded at runtime. |
-| **Revised Session 1 memo + change log** | 5 / 30 | Original and revision submitted together, with a one-page account of what changed and which session changed it. |
-| **Presentation and defence** | 5 / 30 | Clarity of the recommendation; quality of answers under questioning. |
+| **Model governance file** | 7 / 20 | The seven headings from Session 11.4. Sections 5 (Limitations) and 6 (Monitoring) carry the most weight. |
+| **Reproducible analysis** | 7 / 20 | Runs end-to-end from a clean clone plus `pip install -r requirements.txt`. Seeds set. Data cached, not downloaded at runtime. |
+| **Revised Session 1 memo + change log** | 3 / 20 | Original and revision submitted together, with a one-page account of what changed and which session changed it. |
+| **Presentation and defence** | 3 / 20 | Clarity of the recommendation; quality of answers under questioning. |
 
-The [individual multiplier](../GROUP-ASSESSMENT.md) applies to these 30 points only — never to the
+The [individual multiplier](../GROUP-ASSESSMENT.md) applies to these 20 points only — never to the
 midterm or the final paper, which are assessed separately. The **final paper (40%)** is a distinct
 deliverable with its own teams and its own brief:
 [`assessments/final-paper/`](../assessments/final-paper/README.md).
