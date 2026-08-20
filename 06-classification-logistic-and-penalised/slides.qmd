@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,6 +25,32 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, C
+plt = setup()
+
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from sklearn.metrics import (roc_curve, precision_recall_curve, roc_auc_score,
+                             average_precision_score)
+from sklearn.calibration import calibration_curve
+
+loans = pd.read_parquet("../data/loans.parquet")
+wine  = pd.read_parquet("../data/redwines.parquet")
+
+m = smf.logit("default ~ fico + int_rate + np.log(revol_bal + 1)", data=loans).fit(disp=0)
+p = m.predict(loans).to_numpy()
+y = loans["default"].to_numpy()
+BASE = y.mean()
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
@@ -31,175 +61,232 @@ format:
 
 | | |
 |---|---|
-| **1** | Introduction — the decision, not the model |
+| **1** | Where we are, and what this adds |
 | **2** | An example: Lending Club |
-| **3** | The basics of logistic regression |
-| **4** | Reading the output |
-| **5** | Why accuracy is the wrong metric |
-| **6** | The threshold is an economic choice |
-| **7** | Another example: Portugal's red wines |
-| **8** | A third: falling behind in Europe |
+| **3** | Why a straight line fails |
+| **4** | The logistic curve |
+| **5** | Reading the output |
+| **6** | Why accuracy lies |
+| **7** | The threshold is an economic choice |
+| **8** | A second example: Portugal's red wines |
 | **9** | Key takeaways |
 
 ## Learning objectives
 
-By the end of this session you should be able to:
+By the end you should be able to:
 
 ::: {.tight}
-- Explain **why** a linear model is a poor basis for a binary decision
-- Fit and interpret a logistic regression in Python, and report an **odds ratio** and an **average
-  marginal effect** correctly
-- Say why **accuracy** is usually the wrong metric, and what to use instead
-- Derive the cost-optimal **threshold** and defend the cost ratio behind it
-- Recognise when a model is **miscalibrated**, and why that matters for a decision
+- Say **why** a linear model cannot support a binary decision, and show it on a plot
+- Fit a logistic regression in Python and report an **odds ratio** and an **average marginal effect**
+- Explain why **accuracy** is the wrong metric under imbalance, and what to use instead
+- Derive the cost-optimal **threshold**, and defend the cost ratio behind it
+- Recognise **miscalibration**, and why it breaks a cost calculation
 :::
+
+# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+
+## Where we have got to
+
+| Session | What you could do afterwards |
+|---|---|
+| **02** | Fit a line, and know what "controlling for" means geometrically |
+| **03** | Attach an honest standard error to it |
+| **04** | Say whether it will hold on data you have not seen |
+| **05** | Handle more predictors than you can defend individually |
 
 ::: {.muted}
-The derivations — the likelihood, the score, concavity, IRLS — are in
-[`01-lecture/README.md`](01-lecture/README.md), §6.1–6.9. These slides are the applied path.
+All four assume the thing you are predicting is a **number**.
 :::
 
-# 1 · Introduction {background-color="#16181A" style="color:#F7F6F3"}
+## What changes today
 
-## Two things people confuse
-
-Almost every applied mistake in this session comes from merging two separate acts.
-
-| | |
-|---|---|
-| **The model** | produces a probability, $\hat p_i \in (0,1)$ |
-| **The decision** | applies a threshold, and acts |
+The outcome is a **yes or no**, and somebody has to **act** on it.
 
 ::: {.check}
-The model is a statistical object. The threshold is an **economic** one. They are chosen by
-different people, on different evidence, and they are almost never reported together.
+That second half is new. Sessions 02–05 end with an estimate. This session ends with a
+**decision** — fund the loan or refuse it — and a decision needs something none of the earlier
+methods supplied: a **threshold**, which comes from economics, not from the data.
 :::
 
-## Why not just use least squares?
+## The one-sentence version
 
-You *can* regress a 0/1 outcome on $X$. Economists do, and it has real virtues — the coefficients
-are marginal effects, and it is robust.
-
-But for a **decision**:
-
-::: {.tight}
-- Fitted values go below 0 and above 1, which are not probabilities
-- The errors are heteroskedastic by construction
-- The fit is pulled around by points far from the boundary
-:::
+> Sessions 02–05 taught you to produce a number.
+> **Session 06 is the first time the number has to become an action.**
 
 ::: {.muted}
-Defensible for an average effect. A poor basis for acting on an individual case.
+Everything awkward in this session follows from that step — and almost every applied mistake comes
+from taking it without noticing.
 :::
 
 # 2 · An example {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Lending Club
 
-A peer-to-peer lending marketplace: individuals lend to individuals, and the platform prices the
-risk.
+A peer-to-peer marketplace: individuals lend to individuals, and the platform prices the risk.
 
 ::: {.tight}
 - **9,578** three-year loans funded through LendingClub.com
 - **May 2007 – February 2010**
-- Outcome: the loan was **not fully paid back** — the borrower defaulted, or the loan was charged off
+- Outcome: the loan was **not fully repaid** — default, or charged off
 :::
 
 > **The question a lender actually has:** *which of these applications should I fund?*
 
-## Load it
+## Get the data, once
 
 ::: {.where}
-VS Codium terminal · with `(.venv)` showing
+VS Codium terminal
 :::
 
 ```bash
-python scripts/fetch_teaching_data.py     # once, after cloning
+python scripts/fetch_teaching_data.py
 ```
 
 ```python
 import pandas as pd
-
 loans = pd.read_parquet("data/loans.parquet")
-print(loans.shape)                         # (9578, 14)
 ```
 
-::: {.warn}
-Fetch **once**, then read the parquet. Nothing in a practice session may require the internet — and
-the fetch script has already tidied the R-style column names for you.
+::: {.muted}
+The script downloads, tidies the R-style column names (`not.fully.paid` → `default`) and caches to
+parquet. **Run it once.** Nothing else in the course touches the network.
 :::
 
 ## Look before you model
 
 ```python
-print(loans["default"].mean())        # 0.160
-print(loans["purpose"].value_counts())
-loans[["fico", "int_rate", "dti", "log_annual_inc"]].describe()
+loans["default"].mean()          # 0.160
+loans["purpose"].value_counts()  # 7 categories
+```
+
+```{python}
+fig, ax = plt.subplots(figsize=(7.2, 2.2))
+ax.barh([0], [1 - BASE], color=C.muted, alpha=.35)
+ax.barh([0], [BASE], left=[1 - BASE], color=C.warn)
+ax.set_xlim(0, 1); ax.set_yticks([]); ax.grid(False)
+ax.set_xlabel("share of the 9,578 loans")
+ax.text(.42, 0, "84.0% repaid", va="center", ha="center", fontsize=11,
+        fontweight="600", color=C.ink)
+ax.text(.92, 0, "16.0%", va="center", ha="center", fontsize=11,
+        fontweight="600", color="white")
+plt.show()
 ```
 
 ::: {.check}
-**16% of loans default.** Write that number down — everything in section 5 depends on it, and a
-model that never predicts default is already 84% accurate.
+**16% default.** Hold that number — section 6 turns on it.
 :::
 
-## What the columns mean
+# 3 · Why a straight line fails {background-color="#16181A" style="color:#F7F6F3"}
 
-| Column | What it is |
-|---|---|
-| `fico` | FICO credit score — the lender's existing risk measure |
-| `int_rate` | the rate the platform charged, i.e. its own risk assessment |
-| `dti` | debt-to-income ratio |
-| `log_annual_inc` | log annual income, self-reported |
-| `revol_bal` | revolving balance outstanding |
-| `purpose` | stated reason for the loan, 7 categories |
+## Try it anyway
+
+Regress the 0/1 outcome on FICO by ordinary least squares — the Session 02 estimator, unchanged.
+
+```python
+import statsmodels.api as sm
+X   = sm.add_constant(loans[["fico"]])
+lpm = sm.OLS(loans["default"], X).fit()
+```
 
 ::: {.muted}
-Note `int_rate`: the platform's *price* is itself a prediction. Using it as a predictor asks a
-different question from using only borrower characteristics.
+This is the **linear probability model**. Economists use it, and for an average effect it is
+defensible.
 :::
 
-# 3 · The basics {background-color="#16181A" style="color:#F7F6F3"}
+## Look at what it predicts
 
-## Model the log-odds
+```{python}
+lpm = sm.OLS(y, sm.add_constant(loans[["fico"]])).fit()
+mlog = smf.logit("default ~ fico", data=loans).fit(disp=0)
+
+grid = np.linspace(loans.fico.min() - 40, loans.fico.max() + 40, 300)
+lin  = lpm.params.iloc[0] + lpm.params.iloc[1] * grid
+lg   = 1 / (1 + np.exp(-(mlog.params.iloc[0] + mlog.params.iloc[1] * grid)))
+
+fig, ax = plt.subplots()
+ax.axhspan(-0.18, 0, color=C.warn, alpha=.10)
+ax.axhspan(1, 1.18, color=C.warn, alpha=.10)
+ax.axhline(0, color=C.muted, lw=.9); ax.axhline(1, color=C.muted, lw=.9)
+ax.plot(grid, lin, color=C.warn, lw=2.4)
+ax.plot(grid, lg,  color=C.accent, lw=2.4)
+ax.text(grid[8], lin[8] + .07, "linear probability model", color=C.warn, fontweight="600")
+ax.text(grid[150], lg[150] + .12, "logistic", color=C.accent, fontweight="600")
+ax.text(grid[-105], -.13, "impossible: P < 0", color=C.warn, fontsize=8.5)
+ax.set_ylim(-.18, 1.18); ax.set_xlabel("FICO score"); ax.set_ylabel("P(default)")
+plt.show()
+```
+
+::: {.warn}
+The straight line crosses zero: for high-FICO applicants it predicts a **negative probability of
+default** — here as low as **−0.08**.
+:::
+
+## Why that is fatal for a decision
+
+::: {.tight}
+- A probability below 0 or above 1 **cannot be acted on** — you cannot multiply it by a cost
+- The errors are heteroskedastic **by construction**: the variance is $p(1-p)$
+- The fit is dragged by points far from the boundary, where nothing is being decided
+:::
+
+::: {.check}
+For an *average effect* the LPM survives. For an *individual decision* it does not — and this
+session is about decisions.
+:::
+
+# 4 · The logistic curve {background-color="#16181A" style="color:#F7F6F3"}
+
+## Bend the line into the unit interval
 
 $$\log\frac{p(x)}{1-p(x)} = x^\top\beta
 \quad\Longleftrightarrow\quad
 p(x) = \frac{1}{1 + e^{-x^\top\beta}}$$
 
 ::: {.check}
-The logistic function maps the whole real line into $(0,1)$, so **no fitted value can be an
-impossible probability**. That is the whole reason for the transformation.
+The **log-odds** on the left is free to run from $-\infty$ to $+\infty$, so a linear model is safe
+there. The probability on the right is then squeezed into $(0,1)$ automatically.
 :::
 
-## Where it comes from, in one line
+## What the squeeze looks like
 
-An unobserved index $y_i^* = x_i^\top\beta - u_i$, with $y_i = 1$ when $y_i^* > 0$.
+```{python}
+z = np.linspace(-6, 6, 400)
+sig = 1 / (1 + np.exp(-z))
+fig, ax = plt.subplots()
+ax.plot(z, sig, color=C.accent, lw=2.6)
+ax.axhline(0, color=C.line); ax.axhline(1, color=C.line)
+ax.axhline(.5, color=C.muted, ls=":", lw=1)
+ax.axvline(0, color=C.muted, ls=":", lw=1)
+ax.plot([0], [.5], "o", color=C.ink, ms=7)
+ax.text(-5.9, .72, "steepest here — a unit of $x^{\\top}\\beta$\nmoves $p$ a great deal",
+        color=C.ink, fontsize=8.5)
+ax.annotate("flat — the same unit\nbarely moves $p$", xy=(4.4, .988), xytext=(1.5, .55),
+            color=C.muted, fontsize=8.5,
+            arrowprops=dict(arrowstyle="->", color=C.muted, lw=.9))
+ax.set_xlabel("$x^{\\top}\\beta$   (the log-odds)"); ax.set_ylabel("$p$")
+ax.set_ylim(-.06, 1.12)
+plt.show()
+```
 
-::: {.tight}
-- $u_i$ standard **logistic** → logit
-- $u_i$ standard **normal** → probit
+::: {.warn}
+The slope is **not constant**. That is why one coefficient does not translate into one change in
+probability.
 :::
 
-::: {.muted}
-The economist's reading: $y^*$ is a latent utility difference and this is a random utility model.
-In practice logit and probit give nearly identical fitted probabilities — the choice is about the
-distribution of unobserved heterogeneity, not about fit.
-:::
+## Three ways to report one coefficient
 
-## Three ways to report a coefficient
-
-| Quantity | Formula | Use it when |
+| Quantity | Formula | Use when |
 |---|---|---|
 | Log-odds | $\beta_j$ | reporting the raw model |
 | **Odds ratio** | $e^{\beta_j}$ | a credit or clinical audience |
 | **Average marginal effect** | $\frac1n\sum_i \beta_j\, p_i(1-p_i)$ | **reporting to economists** |
 
-::: {.warn}
-The same $\beta_j$ implies a large probability change near $p = 0.5$ and almost none near
-$p = 0.01$. A bare odds ratio invites misreading.
+::: {.check}
+The odds ratio is constant everywhere; the probability change is not. Report the average marginal
+effect unless you have a reason not to.
 :::
 
-# 4 · Reading the output {background-color="#16181A" style="color:#F7F6F3"}
+# 5 · Reading the output {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Fit it
 
@@ -209,151 +296,185 @@ import statsmodels.formula.api as smf
 
 m = smf.logit("default ~ fico + int_rate + np.log(revol_bal + 1)",
               data=loans).fit()
-
 print(m.summary().tables[1])
 ```
 
-::: {.muted}
-`statsmodels` gives you the inference; `scikit-learn` gives you the pipeline. Use the first to
-understand a model and the second to validate one.
+Line by line:
+
+::: {.tight}
+- `smf.logit` — the formula interface; `default ~ ...` reads "default explained by"
+- `np.log(revol_bal + 1)` — transformed **inside** the formula, so the transformation is part of the
+  recorded model rather than a step you might forget
+- `+ 1` because balances of exactly zero exist, and $\log 0$ is undefined
 :::
 
 ## What it says
 
-```
-                          coef    std err        z     P>|z|
-Intercept               1.6886      0.923    1.829     0.067
-fico                   -0.0064      0.001   -5.833     0.000
-int_rate               10.5902      1.468    7.214     0.000
-np.log(revol_bal + 1)  -0.0162      0.013   -1.231     0.218
+```{python}
+tbl = pd.DataFrame({"coef": m.params, "std err": m.bse,
+                    "z": m.tvalues, "P>|z|": m.pvalues}).round(4)
+tbl.index = ["Intercept", "fico", "int_rate", "log(revol_bal+1)"]
+print(tbl.to_string())
 ```
 
 ::: {.check}
-`fico` is **negative** — a higher credit score lowers default. `int_rate` is strongly **positive**:
-the platform's own pricing already knows who is risky.
+`fico` is **negative** — a better score lowers default risk. `int_rate` is strongly **positive**:
+the platform's own pricing already encodes who is risky.
 :::
 
-## Turn it into something reportable
+## Make it reportable
 
 ```python
-print(np.exp(m.params["fico"]))        # 0.9936  odds ratio
-print(m.get_margeff().summary())       # average marginal effects
+np.exp(m.params["fico"])     # 0.9936  — odds ratio per FICO point
+m.get_margeff().summary()    # average marginal effects
 ```
 
 ::: {.check}
-An odds ratio of **0.9936** per FICO point sounds negligible. Per **100** points it is
-$0.9936^{100} \approx 0.52$ — the odds of default roughly halve.
+**0.9936** per point sounds like nothing. Per **100** points it is $0.9936^{100} \approx 0.52$ —
+the odds of default roughly **halve**.
 :::
 
 ::: {.warn}
-Scale matters in the reporting, not in the model. State the units you are quoting.
+The model does not care about units; your sentence does. Always say *per what*.
 :::
 
-# 5 · Why accuracy lies {background-color="#16181A" style="color:#F7F6F3"}
+# 6 · Why accuracy lies {background-color="#16181A" style="color:#F7F6F3"}
 
-## The base rate is your benchmark
+## The null model is already good
 
-16% of these loans default. So a model that says *"nobody defaults"*, for every applicant, is
+16% default. So the model *"nobody ever defaults"* — which uses no data at all — is
 
 > **84% accurate.**
 
 ::: {.warn}
-If your model reports 85% accuracy, it has bought you one percentage point over saying nothing at
-all. **Accuracy on an imbalanced problem measures the base rate, not skill.**
+Report 85% accuracy and you have bought **one point** over saying nothing. Under imbalance, accuracy
+measures the base rate, not skill.
 :::
 
-## What to use instead
+## Two curves, one model
 
-```python
-from sklearn.metrics import roc_auc_score, average_precision_score
+```{python}
+fpr, tpr, _ = roc_curve(y, p)
+pre, rec, _ = precision_recall_curve(y, p)
 
-print(roc_auc_score(y, p))            # ranks well?
-print(average_precision_score(y, p))  # baseline is the base rate, 0.16
+fig, axes = plt.subplots(1, 2, figsize=(7.8, 3.0))
+a = axes[0]
+a.plot(fpr, tpr, color=C.accent, lw=2.2)
+a.plot([0, 1], [0, 1], ls="--", color=C.muted, lw=1)
+a.text(.56, .30, "chance", color=C.muted, fontsize=8.5, rotation=30)
+a.set_title(f"ROC — AUC {roc_auc_score(y, p):.3f}")
+a.set_xlabel("false positive rate"); a.set_ylabel("true positive rate")
+
+b = axes[1]
+b.plot(rec, pre, color=C.accent, lw=2.2)
+b.axhline(BASE, ls="--", color=C.warn, lw=1.4)
+b.text(.30, BASE + .02, f"baseline = base rate  {BASE:.3f}", color=C.warn, fontsize=8.5)
+b.set_ylim(0, .6)
+b.set_title(f"Precision–Recall — AP {average_precision_score(y, p):.3f}")
+b.set_xlabel("recall"); b.set_ylabel("precision")
+plt.show()
 ```
 
-| | Reads |
-|---|---|
-| **ROC AUC** | probability a random defaulter is ranked above a random non-defaulter |
-| **PR AUC** | precision across recall levels; **its floor is the base rate** |
+## Read them against each other
 
-::: {.check}
-Under heavy imbalance, ROC AUC flatters. Report PR AUC **with its baseline** so a reader can see
-what you beat.
+::: {.tight}
+- **ROC AUC 0.627** — looks like a working model. Its reference line is *chance*, a low bar.
+- **PR AUC 0.232** — its reference line is the **base rate, 0.160**. The real gain is 0.232 against
+  0.160.
 :::
 
-# 6 · The threshold {background-color="#16181A" style="color:#F7F6F3"}
+::: {.check}
+Under heavy imbalance, **report PR with its baseline.** ROC flatters, because the false-positive
+denominator is enormous.
+:::
 
-## 0.5 is not a default. It is a claim.
+# 7 · The threshold {background-color="#16181A" style="color:#F7F6F3"}
 
-Classifying at $\hat p > 0.5$ asserts that a **false positive and a false negative cost the same.**
+## 0.5 is a claim, not a default
 
-For a lender they obviously do not: refusing a good borrower costs a margin; funding a defaulter
-costs the principal.
+Classifying at $\hat p > 0.5$ asserts that a **false positive and a false negative cost the same**.
+
+For a lender they do not: refusing a good borrower costs a **margin**; funding a defaulter costs the
+**principal**.
 
 ## The cost-optimal threshold
 
 $$\boxed{\;\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}\;}$$
 
-| Cost ratio $c_{FN}\!:\!c_{FP}$ | $\tau^\star$ |
-|---|---|
-| 1 : 1 | 0.50 |
-| **5 : 1** | **0.167** |
-| 10 : 1 | 0.091 |
-
-::: {.warn}
-**The default threshold in every software package is an unstated assumption about costs.** State
-yours.
-:::
-
-## Sweep it, and read the workload
-
-```python
-from sklearn.metrics import precision_score, recall_score
-
-for t in [0.1, 0.15, 0.2, 0.3, 0.5]:
-    yhat = (p >= t).astype(int)
-    print(f"{t:.2f}  flagged={yhat.sum():5d}  "
-          f"prec={precision_score(y, yhat, zero_division=0):.3f}  "
-          f"rec={recall_score(y, yhat):.3f}")
-```
-
-```
-0.10  flagged= 7625  prec=0.184  rec=0.915
-0.15  flagged= 5072  prec=0.202  rec=0.670
-0.20  flagged= 2440  prec=0.232  rec=0.369
-0.50  flagged=    0  prec=0.000  rec=0.000
+```{python}
+ratios = np.array([1, 2, 5, 10, 20])
+taus = 1 / (1 + ratios)
+fig, ax = plt.subplots(figsize=(7.2, 2.7))
+ax.plot(ratios, taus, "o-", color=C.accent, lw=2.2)
+ax.axhline(.5, ls=":", color=C.warn, lw=1.3)
+ax.text(11.5, .53, "the software default, 0.5", color=C.warn, fontsize=8.5)
+for r, t in zip(ratios, taus):
+    ax.annotate(f"{t:.2f}", (r, t), textcoords="offset points",
+                xytext=(0, 9), ha="center", fontsize=9, color=C.ink, fontweight="600")
+ax.set_xlabel("cost of a miss relative to a false alarm   $c_{FN}:c_{FP}$")
+ax.set_ylabel(r"$\tau^\star$"); ax.set_ylim(0, .64)
+plt.show()
 ```
 
 ::: {.warn}
-**At 0.50 the model flags nothing at all.** Every applicant is approved, recall is zero, and the
-software reported no error. This is what an unstated threshold does.
+At a 5:1 cost ratio the right threshold is **0.167**, not 0.5.
 :::
 
-## Read `flagged` as a workload
+## What the threshold does to the decision
 
-How many applications a human actually has to review — that is the number the business cares about.
+```{python}
+ths = np.linspace(0.02, 0.6, 140)
+flagged = np.array([(p >= t).mean() for t in ths])
+recall  = np.array([((p >= t) & (y == 1)).sum() / y.sum() for t in ths])
 
-::: {.check}
-At $\tau^\star = 0.167$ you flag roughly 5,000 of 9,578 and catch 67% of defaults. At 0.20 you
-flag 2,440 and catch 37%. **That trade is the decision**, and it is not the model's to make.
+fig, ax = plt.subplots()
+ax.plot(ths, flagged, color=C.warn, lw=2.3)
+ax.plot(ths, recall, color=C.good, lw=2.3)
+ax.axvline(1/6, color=C.accent, ls="--", lw=1.5)
+ax.text(1/6 + .01, .95, r"$\tau^\star = 0.167$  at 5:1", color=C.accent, fontsize=8.5)
+ax.text(.33, .20, "share of applications flagged", color=C.warn, fontsize=8.5, fontweight="600")
+ax.text(.33, .52, "share of defaults caught", color=C.good, fontsize=8.5, fontweight="600")
+ax.axvline(.5, color=C.muted, ls=":", lw=1.2)
+ax.text(.505, .06, "0.5 → nothing flagged", color=C.muted, fontsize=8.5)
+ax.set_xlabel("threshold"); ax.set_ylabel("share"); ax.set_ylim(0, 1.03)
+plt.show()
+```
+
+## The number that should alarm you
+
+```{python}
+rows = []
+for t in [0.10, 0.167, 0.20, 0.30, 0.50]:
+    yh = (p >= t).astype(int)
+    rows.append((t, int(yh.sum()), ((yh == 1) & (y == 1)).sum() / y.sum()))
+out = pd.DataFrame(rows, columns=["threshold", "flagged", "recall"])
+print(out.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+```
+
+::: {.warn}
+**At 0.50 the model flags nothing at all.** Every applicant approved, recall zero — and the software
+reported no error whatsoever.
 :::
 
-## Calibration — is 0.3 really 30%?
+## Is 0.3 really 30%?
 
-```python
-from sklearn.calibration import calibration_curve
-import matplotlib.pyplot as plt
-
+```{python}
 frac, mean_pred = calibration_curve(y, p, n_bins=8, strategy="quantile")
-plt.plot(mean_pred, frac, "o-"); plt.plot([0, 1], [0, 1], "--")
+fig, ax = plt.subplots(figsize=(5.4, 3.1))
+ax.plot([0, .5], [0, .5], ls="--", color=C.muted, lw=1.2)
+ax.plot(mean_pred, frac, "o-", color=C.accent, lw=2.2)
+ax.text(.28, .24, "perfectly calibrated", color=C.muted, fontsize=8.5, rotation=36)
+ax.set_xlabel("mean predicted probability"); ax.set_ylabel("observed frequency")
+ax.set_xlim(0, .5); ax.set_ylim(0, .5)
+plt.show()
 ```
 
 ::: {.check}
-Discrimination and calibration are **different properties**. A model can rank perfectly and still be
-badly miscalibrated — and a miscalibrated probability cannot be fed into a cost calculation.
+**Discrimination and calibration are different properties.** A model can rank perfectly and still be
+miscalibrated — and a miscalibrated probability cannot enter a cost calculation.
 :::
 
-# 7 · Another example {background-color="#16181A" style="color:#F7F6F3"}
+# 8 · A second example {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Portugal's red wines
 
@@ -361,78 +482,51 @@ badly miscalibrated — and a miscalibrated probability cannot be fed into a cos
 
 ```python
 wine = pd.read_parquet("data/redwines.parquet")
-print(wine.shape, wine["good"].mean())     # (1599, 9) 0.136
-```
-
-::: {.warn}
-In the raw CSV the outcome is the strings `"Yes"`/`"No"`. `astype(int)` on that **raises**, and a
-silent miscast would be worse — so the fetch script converts it, and records that it did.
-:::
-
-## Fit the same model type
-
-```python
-m_w = smf.logit("good ~ alcohol + volatile_acidity + sulphates",
-                data=wine).fit()
-print(m_w.summary().tables[1])
-print(np.exp(m_w.params["alcohol"]))    # 2.74
+m_w  = smf.logit("good ~ alcohol + volatile_acidity + sulphates",
+                 data=wine).fit()
+np.exp(m_w.params["alcohol"])     # 2.74
 ```
 
 ::: {.check}
-An odds ratio of **2.74** for alcohol: each extra percentage point of alcohol nearly **triples** the
-odds a taster calls the wine good. Compare the FICO odds ratio of 0.9936 — same method, wildly
-different effect sizes, because the units are different.
+An odds ratio of **2.74**: each extra percentage point of alcohol nearly **triples** the odds a
+taster calls the wine good.
 :::
 
 ## Same method, very different signal
+
+```{python}
+m_w = smf.logit("good ~ alcohol + volatile_acidity + sulphates", data=wine).fit(disp=0)
+pw = m_w.predict(wine).to_numpy(); yw = wine["good"].to_numpy()
+f1, t1, _ = roc_curve(y, p); f2, t2, _ = roc_curve(yw, pw)
+
+fig, ax = plt.subplots(figsize=(5.6, 3.2))
+ax.plot([0, 1], [0, 1], ls="--", color=C.muted, lw=1)
+ax.plot(f1, t1, color=C.warn, lw=2.4)
+ax.plot(f2, t2, color=C.good, lw=2.4)
+ax.text(.50, .36, f"Lending Club   {roc_auc_score(y, p):.3f}",
+        color=C.warn, fontsize=9, fontweight="600")
+ax.text(.26, .82, f"Red wines   {roc_auc_score(yw, pw):.3f}",
+        color=C.good, fontsize=9, fontweight="600")
+ax.set_xlabel("false positive rate"); ax.set_ylabel("true positive rate")
+plt.show()
+```
+
+## Why the difference is not the method
 
 | | Lending Club | Red wines |
 |---|---|---|
 | $n$ | 9,578 | 1,599 |
 | Base rate | 0.160 | 0.136 |
-| **ROC AUC** | **0.627** | **0.866** |
-| **PR AUC** | 0.232 | 0.475 |
+| ROC AUC | 0.627 | **0.866** |
 
 ::: {.check}
-Both are imbalanced. Both use the same estimator. One barely ranks better than chance; the other
-ranks well. **The method did not differ — the informativeness of the predictors did.**
-:::
-
-::: {.muted}
-Chemistry measures the thing being judged. A credit file measures a person's past, not their next
-three years.
-:::
-
-# 8 · A third example {background-color="#16181A" style="color:#F7F6F3"}
-
-## Falling behind in Europe
-
-The same machinery, a policy question, and the practice data:
-
-```python
-core = pd.read_parquet("data/spine/core.parquet")
-d = core.dropna(subset=["falling_behind_next"])
-
-print(len(d), d["falling_behind_next"].mean())   # 420, 0.10
-```
-
-::: {.tight}
-- Outcome: is this country in the **bottom decile** of productivity growth **next year**?
-- Base rate **10%** — by construction, since the threshold is the within-year decile
-- 30 rows are `NaN`: the last year of each country. There is no next year.
-:::
-
-## Two differences that change everything
-
-::: {.tight}
-1. **The rows are not independent.** 30 countries × 14 years. Germany 2019 and Germany 2020 are not
-   two draws — so cross-validate with `GroupKFold` on `geo`, not at random.
-2. **Dropping those 30 NaNs is correct.** Imputing them would be inventing the future.
+Same estimator, both imbalanced. **The predictors differ in how much they know.** Chemistry measures
+the thing being judged; a credit file measures a person's past, not their next three years.
 :::
 
 ::: {.warn}
-Lending Club rows are arguably exchangeable. Panel rows never are. The method is identical; the
-validation is not.
+When a model performs badly, ask what the features could possibly contain **before** reaching for a
+fancier algorithm.
 :::
 
 # 9 · Key takeaways {background-color="#16181A" style="color:#F7F6F3"}
@@ -440,24 +534,23 @@ validation is not.
 ## What to carry out of this session
 
 ::: {.tight}
-1. **A model gives a probability; a decision needs a threshold.** Separate acts, separate
-   justifications.
+1. **A model gives a probability; a decision needs a threshold.** Separate acts, separate evidence.
 2. **Report the base rate first.** Accuracy cannot be read without it.
-3. **Report an odds ratio or an average marginal effect**, with its units — not a bare coefficient.
-4. **Derive your threshold from a stated cost ratio**, and show how the answer moves if it is wrong.
+3. **Report an odds ratio or an average marginal effect**, with its units.
+4. **Derive the threshold from a stated cost ratio** — and show how the answer moves if it is wrong.
 5. **Check calibration** before any probability enters a cost calculation.
-6. **Match the validation to the data.** Exchangeable rows and panel rows are not the same problem.
+6. **A weak model may be a weak feature set.** Look there before changing algorithm.
 :::
 
 ## What loses marks reliably
 
 | | |
 |---|---|
-| Reporting accuracy on an imbalanced problem | It measures the base rate |
-| Leaving the threshold at 0.5 silently | An economic assumption, unstated |
+| Accuracy on an imbalanced problem | It measures the base rate |
+| Threshold silently left at 0.5 | An economic assumption, unstated |
 | ROC AUC alone under imbalance | Hides the false positives |
-| Random K-fold on the panel | Optimistic, for Session 04's reason |
-| "The model identified the drivers of default" | It did not. It found predictors. |
+| Random K-fold on a panel | Optimistic, for Session 04's reason |
+| "The model found the drivers of default" | It found predictors |
 
 ## In the practice session
 
@@ -465,11 +558,10 @@ validation is not.
 1. Fit penalised logistic on **your project**, grouped CV, base rate reported first
 2. Produce a reliability diagram — is $\hat p$ usable as a probability?
 3. State a cost ratio, derive $\tau^\star$, report precision and recall **there**
-4. Bootstrap the selection; report frequencies, not a single list
+4. Bootstrap the selection; report frequencies, not one list
 :::
 
 ::: {.check}
-Penalised logistic, IRLS and the imbalance table:
-[`01-lecture/README.md`](01-lecture/README.md) §6.6–6.9 · brief:
-[`02-practice/README.md`](02-practice/README.md)
+Derivations, penalised logistic and IRLS: [`01-lecture/README.md`](01-lecture/README.md) §6.1–6.9 ·
+brief: [`02-practice/README.md`](02-practice/README.md)
 :::

@@ -18,6 +18,23 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Decks execute Python to build their figures, so Quarto needs an interpreter
+# that has pandas, scikit-learn, statsmodels and matplotlib. Prefer the
+# project's own .venv; fall back to whatever QUARTO_PYTHON already names.
+if [ -z "${QUARTO_PYTHON:-}" ] && [ -x ".venv/bin/python" ]; then
+    export QUARTO_PYTHON="$PWD/.venv/bin/python"
+fi
+if [ -n "${QUARTO_PYTHON:-}" ]; then
+    echo "Executing deck code with: $QUARTO_PYTHON"
+    if ! "$QUARTO_PYTHON" -c "import pandas, sklearn, statsmodels, matplotlib" 2>/dev/null; then
+        echo "  WARNING: that interpreter is missing packages the figures need." >&2
+        echo "           Activate .venv and: pip install -r requirements.txt" >&2
+    fi
+else
+    echo "No .venv found — Quarto will use its default Python."
+    echo "If figures come out missing, create .venv per the Session 01 setup guide."
+fi
+
 if ! command -v quarto >/dev/null 2>&1; then
     echo "quarto not found — install from https://quarto.org/docs/download/" >&2
     exit 1
