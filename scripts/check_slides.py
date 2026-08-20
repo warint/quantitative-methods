@@ -24,6 +24,12 @@ import sys
 # Vertical cost of one line of each kind, in units of "one body line".
 COST = {"text": 1.0, "bullet": 1.0, "code": 1.15, "table": 1.35, "math": 1.6}
 
+# An executable cell — ```{python} — is not shown as code when the deck sets
+# `echo: false`; it renders as its OUTPUT, usually a single figure. Counting its
+# source lines would flag every figure slide as overflowing, so charge it a flat
+# cost for the space one figure occupies instead.
+FIGURE_COST = 7.0
+
 BUDGET = 15.0        # a slide above this is likely to overflow
 TIGHT = 12.5         # above this, worth a second look
 
@@ -59,10 +65,20 @@ def measure(path):
                 break
 
     slides, title, cost, raw, in_code = [], None, 0.0, 0, False
+    in_exec = False
     for line in lines[start:]:
         s = line.strip()
         if s.startswith("```"):
+            if in_code:                           # closing a fence
+                in_exec = False
+            else:                                 # opening a fence
+                in_exec = s.startswith("```{")    # executable, not displayed
+                if in_exec:
+                    cost += FIGURE_COST
+                    raw += 1
             in_code = not in_code
+            continue
+        if in_exec:                               # body is not rendered
             continue
         # a new slide begins at ## (level 2) or # (section divider)
         if not in_code and (s.startswith("## ") or s == "##" or s.startswith("# ")):
