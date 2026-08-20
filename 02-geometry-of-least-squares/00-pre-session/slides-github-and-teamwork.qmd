@@ -151,56 +151,70 @@ inside the CV pipeline"` tells them everything.
 Free accounts include unlimited private repositories.
 :::
 
-## Create your group repository
+## You do not create a repository
 
-**One person per group** does this. On github.com, click **+** → **New
-repository**.
-
-| Field | What to put |
-|---|---|
-| **Repository name** | `qmib-gXX` (XX = your group number) |
-| **Description** | `Group work` |
-| **Visibility** | **Private** |
-| **Initialize with README** | ✅ tick it |
-
-::: {.shot}
-[ github.com/new — owner, name, description, Public/Private, README checkbox ]
-:::
-
-## Add the other three people
-
-**Settings → Collaborators → Add people.**
+There is **one repository for the whole course** — the one you downloaded as a ZIP in Session 01.
 
 ::: {.tight}
-- Your two teammates
-- Me
+- `main` is the instructor's branch. You never push to it.
+- Your group gets **one branch**, `group-XX`.
+- Everything your group produces is committed there.
 :::
 
+::: {.check}
+**Send your GitHub username to me.** I add you as a collaborator by hand. You cannot push until I
+have.
+:::
+
+## Where your work goes
+
+```
+github.com/warint/quantitative-methods
+│
+├── main         ← mine
+├── group-01
+├── group-02
+└── group-XX     ← yours
+```
+
+Deliverables live in the session folder:
+
+```
+NN-session-name/02-lab/submissions/group-XX/
+```
+
+## Why one repository
+
 ::: {.warn}
-A private repository I cannot see is a repository I cannot mark. Do this in the
-same sitting — it is the step groups most often forget.
+Your commit history is one of four records used to check that all three of you did the work, and
+`scripts/assess.py contributions` reads it **from this repository**.
+:::
+
+::: {.muted}
+Work pushed anywhere else is invisible to it — and invisible work counts as work you did not do.
 :::
 
 # Connecting it {background-color="#16181A" style="color:#F7F6F3"}
 
-## Clone it into VS Codium
+## Clone the course repository
 
-On the repository page, click the green **Code** button and copy the **HTTPS**
-URL.
+This **replaces** the Session 01 ZIP. Delete the unzipped folder after, so you
+cannot edit the wrong copy.
 
 ::: {.where}
 VS Codium terminal
 :::
 
 ```bash
-git clone https://github.com/OWNER/qmib-gXX.git
-cd qmib-gXX
+git clone https://github.com/warint/quantitative-methods.git qmib
+cd qmib
 ```
 
-Then `File → Open Folder…` and choose that folder.
+Then `File → Open Folder…` and choose `qmib`.
 
 ::: {.check}
-The Explorer shows `README.md`, and the bottom-left shows the branch `main`.
+Rebuild the environment inside the clone — `python3 -m venv .venv`, activate,
+`pip install -r requirements.txt`.
 :::
 
 ## Your password will not work
@@ -271,9 +285,10 @@ VS Codium terminal
 :::
 
 ```bash
-git checkout -b s02-fwl-analysis
+git checkout group-XX      # your group's branch
+git pull                   # take teammates' work first
 # ... work, commit ...
-git push -u origin s02-fwl-analysis
+git push
 ```
 
 ::: {.check}
@@ -369,10 +384,11 @@ Still stuck? Ask Qwen — it is good at git, and it runs on your laptop.
 ::: {.tight}
 - ✅ Git installed, `user.name` and `user.email` set to your real details
 - ✅ GitHub account with two-factor authentication
-- ✅ One private group repository, with both teammates **and me** added
-- ✅ Cloned to your machine and opened in VS Codium
-- ✅ One commit pushed **by you personally**, visible on github.com
-- ✅ Your exact `user.name` and `user.email` written down to report
+- ✅ **GitHub username sent to me** — you cannot push until I add you
+- ✅ Course repository cloned; the Session 01 ZIP folder deleted
+- ✅ `group-XX` branch checked out
+- ✅ One commit pushed **by you personally** to `group-XX`
+- ✅ Your `user.name` and `user.email` written down to report
 :::
 
 ::: {.warn}

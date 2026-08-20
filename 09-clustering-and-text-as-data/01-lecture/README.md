@@ -10,8 +10,8 @@
 
 Partition observations into $k$ clusters $C_1,\dots,C_k$ minimising within-cluster sum of squares:
 
-$$ \min_{C_1,\dots,C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2, \qquad
-\mu_j = \frac{1}{|C_j|}\sum_{i\in C_j} x_i . $$
+$$\min_{C_1,\dots,C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2, \qquad
+\mu_j = \frac{1}{|C_j|}\sum_{i\in C_j} x_i .$$
 
 The problem is NP-hard. **Lloyd's algorithm** alternates two steps, each of which weakly decreases
 the objective:
@@ -67,8 +67,8 @@ at every resolution. The cost is $O(n^2)$ memory.
 
 **Bag of words / TF-IDF.** Document $d$, term $t$:
 
-$$ \mathrm{tf\text{-}idf}(t,d) = \underbrace{f_{t,d}}_{\text{term frequency}} \times
-\underbrace{\log\frac{N}{1 + n_t}}_{\text{inverse document frequency}} . $$
+$$\mathrm{tf\text{-}idf}(t,d) = \underbrace{f_{t,d}}_{\text{term frequency}} \times
+\underbrace{\log\frac{N}{1 + n_t}}_{\text{inverse document frequency}} .$$
 
 The idf factor downweights ubiquitous terms. Result: a very sparse, very high-dimensional matrix -
 exactly the $p \gg n$ setting of Sessions 5 and 6, so penalised regression is the natural supervised
@@ -79,7 +79,7 @@ a concern"* and *"a concern is not inflation"* are identical vectors.
 1024), trained so that semantically similar texts have similar vectors. Similarity is measured by
 cosine:
 
-$$ \cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\|v_b\|} \in [-1,1] . $$
+$$\cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\|v_b\|} \in [-1,1] .$$
 
 Cosine ignores magnitude, which is what you want when documents differ in length. You will generate
 embeddings **locally** in the lab - the corpus never leaves your machine, which is both a

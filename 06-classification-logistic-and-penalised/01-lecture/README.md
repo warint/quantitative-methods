@@ -18,8 +18,8 @@
 
 **Route A - the link function.** Model the log-odds as linear:
 
-$$ \log\frac{p(x)}{1-p(x)} = x^\top\beta \quad\Longleftrightarrow\quad
-p(x) = \frac{1}{1 + e^{-x^\top\beta}} = \sigma(x^\top\beta). $$
+$$\log\frac{p(x)}{1-p(x)} = x^\top\beta \quad\Longleftrightarrow\quad
+p(x) = \frac{1}{1 + e^{-x^\top\beta}} = \sigma(x^\top\beta).$$
 
 The logistic function satisfies $\sigma'(z) = \sigma(z)(1-\sigma(z))$ - an identity we use
 repeatedly.
@@ -34,19 +34,19 @@ heterogeneity, and in practice the two give nearly identical fitted probabilitie
 
 ### 6.2 The likelihood, the score, and concavity
 
-$$ \ell(\beta) = \sum_{i=1}^n \Big[ y_i x_i^\top\beta - \log\big(1 + e^{x_i^\top\beta}\big) \Big]. $$
+$$\ell(\beta) = \sum_{i=1}^n \Big[ y_i x_i^\top\beta - \log\big(1 + e^{x_i^\top\beta}\big) \Big].$$
 
 **Score.** Using $\sigma' = \sigma(1-\sigma)$:
 
-$$ \nabla \ell(\beta) = \sum_i \big(y_i - p(x_i)\big)x_i = X^\top (y - p). $$
+$$\nabla \ell(\beta) = \sum_i \big(y_i - p(x_i)\big)x_i = X^\top (y - p).$$
 
 Beautifully simple: *at the optimum, the residual $y - p$ is orthogonal to every regressor* -
 exactly the OLS condition from Session 2, with fitted probabilities in place of fitted values.
 
 **Hessian.**
 
-$$ \nabla^2\ell(\beta) = -\sum_i p_i(1-p_i)\,x_i x_i^\top = -X^\top W X, \qquad
-W = \operatorname{diag}\big(p_i(1-p_i)\big). $$
+$$\nabla^2\ell(\beta) = -\sum_i p_i(1-p_i)\,x_i x_i^\top = -X^\top W X, \qquad
+W = \operatorname{diag}\big(p_i(1-p_i)\big).$$
 
 Since $W \succeq 0$, we have $-X^\top W X \preceq 0$: **the log-likelihood is concave.** Any
 stationary point is a global maximum. There are no local optima.
@@ -55,8 +55,8 @@ stationary point is a global maximum. There are no local optima.
 
 The Newton step $\beta^{(t+1)} = \beta^{(t)} + (X^\top W X)^{-1}X^\top(y-p)$ rearranges to
 
-$$ \beta^{(t+1)} = (X^\top W X)^{-1} X^\top W z, \qquad
-z = X\beta^{(t)} + W^{-1}(y - p) . $$
+$$\beta^{(t+1)} = (X^\top W X)^{-1} X^\top W z, \qquad
+z = X\beta^{(t)} + W^{-1}(y - p) .$$
 
 This is exactly **weighted least squares** of the *adjusted response* $z$ on $X$ with weights $W$.
 Hence IRLS. Two consequences: you reuse all the linear algebra of Session 2, and the asymptotic
@@ -98,8 +98,8 @@ and conflating them is the most common applied error.
 | **Actual 1** | TP | FN |
 | **Actual 0** | FP | TN |
 
-$$ \text{Precision} = \frac{TP}{TP+FP}, \quad \text{Recall (TPR)} = \frac{TP}{TP+FN}, \quad
-\text{FPR} = \frac{FP}{FP+TN}. $$
+$$\text{Precision} = \frac{TP}{TP+FP}, \quad \text{Recall (TPR)} = \frac{TP}{TP+FN}, \quad
+\text{FPR} = \frac{FP}{FP+TN}.$$
 
 **ROC** plots TPR against FPR as $\tau$ sweeps $[0,1]$; **AUC** equals
 $P(\hat p_{\text{positive}} > \hat p_{\text{negative}})$ for a random pair. AUC is threshold-free
@@ -110,7 +110,7 @@ precision.
 **Choosing $\tau$ from costs.** If a false negative costs $c_{FN}$ and a false positive $c_{FP}$,
 the expected-cost-minimising threshold is
 
-$$ \boxed{\;\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}\;} $$
+$$\boxed{\;\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}\;}$$
 
 For German Credit's stated 5:1 ratio, $\tau^\star = 1/6 \approx 0.167$, not 0.5. **The default
 threshold in every software package is a modelling assumption about costs that almost nobody states
@@ -129,8 +129,8 @@ itself enters a decision.
 
 Combine Session 5's penalty with the likelihood above:
 
-$$ \hat\beta = \arg\min_\beta \left\{ -\frac{1}{n}\sum_{i}\Big[ y_i x_i^\top\beta - \log(1+e^{x_i^\top\beta})\Big]
-+ \lambda\Big[\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\Big] \right\}. $$
+$$\hat\beta = \arg\min_\beta \left\{ -\frac{1}{n}\sum_{i}\Big[ y_i x_i^\top\beta - \log(1+e^{x_i^\top\beta})\Big]
++ \lambda\Big[\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\Big] \right\}.$$
 
 The negative log-likelihood is convex (6.2) and both penalties are convex, so the objective is
 convex; for $\alpha < 1$ it is strictly convex and the minimiser is unique.
@@ -150,8 +150,8 @@ and $z_i = x_i^\top\tilde\beta + (y_i - \tilde p_i)/w_i$.
 **Inner loop.** Solve the penalised weighted least-squares problem by coordinate descent. The update
 is the Session 5 formula with weights inserted:
 
-$$ \beta_j \leftarrow \frac{S_{\lambda\alpha}\big(\frac1n\sum_i w_i x_{ij}(z_i - \tilde y_i^{(-j)})\big)}
-{\frac1n\sum_i w_i x_{ij}^2 + \lambda(1-\alpha)} , $$
+$$\beta_j \leftarrow \frac{S_{\lambda\alpha}\big(\frac1n\sum_i w_i x_{ij}(z_i - \tilde y_i^{(-j)})\big)}
+{\frac1n\sum_i w_i x_{ij}^2 + \lambda(1-\alpha)} ,$$
 
 with $S_\lambda(\rho) = \operatorname{sign}(\rho)(|\rho|-\lambda)_+$ the soft-thresholding operator
 you derived in Session 5. Iterate, recompute weights, repeat.
@@ -179,7 +179,7 @@ You keep an interpretable probability *and* an optimal decision.
 If you must resample, undo the prior shift analytically. With training positive rate $\pi'$ and
 population rate $\pi$, correct the intercept by
 
-$$ \beta_0 \leftarrow \beta_0 - \log\!\left(\frac{\pi'}{1-\pi'}\cdot\frac{1-\pi}{\pi}\right). $$
+$$\beta_0 \leftarrow \beta_0 - \log\!\left(\frac{\pi'}{1-\pi'}\cdot\frac{1-\pi}{\pi}\right).$$
 
 Very few practitioners do this. Be one who does.
 

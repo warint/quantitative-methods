@@ -1,37 +1,53 @@
-# Setup guide — Git, GitHub, and working as a group
+# Setup guide — Git, GitHub, and how you submit work
 
 **complete this before Session 02 · budget 45 minutes**
 
-> This follows on from the [Session 01 setup guide](../../01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
-> You should already have VS Codium, a working Python environment, and Ollama serving a local
-> model. If any of those is missing, fix it first — everything below assumes a working workstation.
+> Follows on from the [Session 01 setup guide](../../01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
+> You should already have VS Codium, a Python environment, and Ollama serving a local model.
 
-Slides for this material: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd).
+Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
 
 ---
 
-## Why this is a separate step
+## How submission works — read this first
 
-Session 01 got you a machine that works. This gets you a machine that works **with two other
-people**, which is a different problem.
+There is **one repository for the whole course**, and you already have a copy of it as a ZIP from
+Session 01. You are about to replace that snapshot with a real clone.
 
-From Session 02 onward you are assessed as a group. The course checks that a group mark reflects
-what each member did, and one of the four records it uses is your commit history. That record is
-only as good as the identity attached to it, which is why the very first thing below is telling git
-who you are.
+```
+github.com/warint/quantitative-methods        ← the course repository
+│
+├── main                    ← the instructor's branch. You never push to it.
+├── group-01                ← group 01 works here
+├── group-02                ← group 02 works here
+└── group-XX                ← your group works here
+```
 
-See [`GROUP-ASSESSMENT.md`](../../GROUP-ASSESSMENT.md) for the full policy.
+**Your group has one branch, named `group-XX`.** Everything your group produces is committed on
+that branch and pushed to it. Your lab deliverables go in the session folder:
+
+```
+NN-session-name/02-lab/submissions/group-XX/
+```
+
+::: note
+**Why one repository and not one per group.** Your commit history is one of the four records used
+to check that all three of you did the work, and `scripts/assess.py contributions` reads it from
+this repository. Work pushed somewhere else is invisible to it — and invisible work counts as work
+you did not do.
+:::
+
+**You do not need to create a repository.** You need an account, and the instructor adds you.
 
 ---
 
 ## Step 1 — Install Git
 
-Download it from <https://git-scm.com/downloads> and accept every default. macOS may already have
-it; the next step tells you.
+Download from <https://git-scm.com/downloads> and accept every default. macOS may already have it;
+Step 2 tells you.
 
 All commands below go in the **VS Codium integrated terminal** (``View → Terminal``, or
-``Ctrl+` ``), not the macOS Terminal app. The integrated terminal opens in your project folder and
-sees the virtual environment you activated.
+``Ctrl+` ``), never the macOS Terminal app.
 
 ---
 
@@ -43,10 +59,9 @@ git config --global user.name  "Your Full Name"
 git config --global user.email "your.name@hec.ca"
 ```
 
-> **⚠️ Use your real name and your university email.** Your commit history is one of the four
-> records this course uses to check that all three members of a group did the work. Commits under
-> `unknown@localhost` cannot be attributed to you, and unattributed work counts as work you did not
-> do.
+> **⚠️ Use your real name and your university email.** Commits under `unknown@localhost`, or under
+> an email not on the roster, cannot be attributed to you. The contribution report will show you as
+> having done nothing.
 
 Check what you set, and **report both values to the instructor in Session 02**:
 
@@ -55,88 +70,96 @@ git config --global user.name
 git config --global user.email
 ```
 
-If your git email differs from the one on the roster, the contribution report will show you as
-having done nothing. Ten seconds to prevent, tedious to repair afterwards.
-
 ---
 
 ## Step 3 — A GitHub account
 
 1. Go to <https://github.com> and choose **Sign up**.
 2. Use an email you will still have after you graduate.
-3. Choose a username you would put on a CV — this is a professional record.
+3. Choose a username you would put on a CV.
 4. Verify the email GitHub sends you.
 5. Enable **two-factor authentication** when prompted. GitHub requires it.
 
-Free accounts include unlimited private repositories.
+**Then send your GitHub username to the instructor.** You cannot push until you have been added as
+a collaborator, and that is done by hand from the list of usernames.
 
 ---
 
-## Step 4 — Your group repository
+## Step 4 — Clone the course repository
 
-**One person per group** creates it. On github.com: **+** → **New repository**.
-
-| Field | Value |
-|---|---|
-| Repository name | `qmib-gXX` — XX is your group number |
-| Description | `Group work` |
-| Visibility | **Private** |
-| Initialize with README | ✅ |
-
-Then **Settings → Collaborators → Add people**, and add:
-
-- your two teammates
-- the instructor
-
-> **⚠️ A private repository the instructor cannot see is one that cannot be marked.** Do this in
-> the same sitting. It is the step groups most often forget.
-
----
-
-## Step 5 — Clone it
-
-Copy the **HTTPS** URL from the green **Code** button, then:
+This replaces the Session 01 ZIP. Delete the unzipped folder afterwards so you do not edit the
+wrong copy.
 
 ```bash
-git clone https://github.com/OWNER/qmib-gXX.git
-cd qmib-gXX
+git clone https://github.com/warint/quantitative-methods.git qmib
+cd qmib
 ```
 
-`File → Open Folder…` and choose that folder. The Explorer should show `README.md`, and the
-bottom-left of the window should show the branch `main`.
+Then `File → Open Folder…` and choose `qmib`.
+
+Rebuild your environment inside the clone:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
 ### Authenticating
 
-On your first push GitHub asks for credentials and **rejects your account password**. It wants a
-personal access token:
+On your first push GitHub rejects your account password and asks for a token:
 
-1. github.com → your avatar → **Settings**
+1. github.com → avatar → **Settings**
 2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
 3. **Generate new token**, tick the **`repo`** scope, set an expiry
-4. Copy it — **it is shown once**
-5. Paste it when git asks for your *password*
+4. Copy it — **it is shown once** — and paste it when git asks for your *password*
 
 ```bash
 git config --global credential.helper store
 ```
 
-stores it so you are asked only once.
+stores it so you are asked once.
+
+---
+
+## Step 5 — Your group branch
+
+**One person per group** creates it; the others just check it out.
+
+```bash
+# the first person, once
+git checkout -b group-XX
+git push -u origin group-XX
+```
+
+```bash
+# everyone else, after that
+git fetch origin
+git checkout group-XX
+```
+
+> **⚠️ Never `git push` while on `main`.** `main` is protected, so the push will be refused rather
+> than cause damage — but check where you are before you commit:
+>
+> ```bash
+> git branch --show-current
+> ```
 
 ---
 
 ## Step 6 — The round trip
 
 ```bash
-echo "## Group XX" >> README.md
-git add README.md
-git commit -m "Add group heading"
+mkdir -p 02-geometry-of-least-squares/02-lab/submissions/group-XX
+echo "# Group XX — session 02" > 02-geometry-of-least-squares/02-lab/submissions/group-XX/NOTES.md
+
+git add 02-geometry-of-least-squares/02-lab/submissions/group-XX/
+git commit -m "Add group XX notes for session 02"
 git push
 ```
 
-Refresh the repository page in your browser. Your line is there.
-
-Edit locally → commit → push → visible to your group. Everything this term is a variation on that
-loop.
+Refresh the repository page in your browser, switch to the `group-XX` branch, and your file is
+there.
 
 **Each of the three of you does this at least once, from your own machine.** Not one per group.
 
@@ -150,37 +173,37 @@ loop.
 git pull
 ```
 
-Most merge conflicts are caused by somebody editing a stale copy of a file for two hours.
+Most conflicts come from someone editing a stale copy for two hours.
 
-### Work on a branch
+### Getting the instructor's corrections
+
+The course material lives on `main` and gets fixed during the term. To bring those fixes into your
+branch:
 
 ```bash
-git checkout -b s02-fwl-analysis
-# ... work, commit ...
-git push -u origin s02-fwl-analysis
+git fetch origin
+git merge origin/main
 ```
 
-Then open a **pull request** so a teammate reads the change before it joins `main`. That review is
-the group work, not an obstacle to it.
+Do this at the start of each session.
 
 ### Reading a conflict
-
-Git marks the disagreement in the file rather than guessing:
 
 ```
 <<<<<<< HEAD
 alpha = 0.05
 =======
 alpha = 0.01
->>>>>>> their-branch
+>>>>>>> origin/main
 ```
 
-Delete the markers, keep the version you agree on, then `git add` and `git commit`.
+Delete the markers, keep the version you agree on, then `git add` and `git commit`. A conflict is
+git refusing to guess which of you was right.
 
 ### Commit messages
 
-`git commit -m "update"` tells nobody anything. Write for the person reading it in six weeks —
-usually you:
+`git commit -m "update"` tells nobody anything. Write for whoever reads it in six weeks — usually
+you:
 
 ```
 Fix leakage: move scaler inside the CV pipeline
@@ -194,8 +217,7 @@ git commit -m "Add stability bootstrap
 Co-authored-by: Partner Name <partner.name@hec.ca>"
 ```
 
-The contribution report counts co-authors. Use it — one person typing does not mean one person
-working, and the record should say so.
+The contribution report counts co-authors. One person typing does not mean one person working.
 
 ### aider and your history
 
@@ -207,37 +229,34 @@ git log --oneline
 aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
 ```
 
-Commits made by the agent are attributed to **you**. That is correct — you directed it. But read
-the diff before accepting: you are answerable for every line in your repository.
+What the agent writes is attributed to **you**. Read the diff before accepting: you are answerable
+for every line on your branch.
 
 ---
 
 ## Roles
 
-Your group logs a Driver, an Analyst and a Reporter each session:
+Each session your group logs a **Driver** (writes the code), an **Analyst** (decides the
+specification, owns the interpretation) and a **Reporter** (writes the three sentences, presents if
+drawn). Over ten sessions each member should hold each role three or four times.
 
-- **Driver** writes the code
-- **Analyst** decides the specification, checks results, owns the interpretation
-- **Reporter** writes the three sentences and presents *if drawn*
+Logged in `assessment/role-logs/gXX.md`, checked with `python scripts/assess.py roles`.
 
-Over ten sessions each member should hold each role three or four times. Logged in
-`assessment/role-logs/gXX.md`, checked with `python scripts/assess.py roles`.
-
-The presenter is **drawn at random** at the start of the slot. A group where one person understands
-the model has not learned the material; the draw makes shared understanding the only viable
-strategy.
+The presenter is **drawn at random** when your group is called, which is why all three of you must
+understand everything.
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `git: command not found` | Not on PATH | Reopen the terminal; on Windows restart VS Codium |
-| Password rejected on push | GitHub wants a token | Use a personal access token, not your password |
-| `rejected — non-fast-forward` | Someone pushed first | `git pull`, resolve, then push |
-| Committed under the wrong email | `user.email` unset or wrong | Fix `git config`, tell the instructor; past commits stay wrong |
-| Conflict markers in a file | Two people edited the same lines | Delete them, keep the agreed version, add and commit |
+| Symptom | Fix |
+|---|---|
+| `git: command not found` | Reopen the terminal; on Windows restart VS Codium |
+| Password rejected on push | Use a personal access token, not your password |
+| `remote: Permission denied` | You have not been added as a collaborator yet — send your username |
+| `protected branch` on push | You are on `main`. `git checkout group-XX` |
+| `rejected — non-fast-forward` | `git pull` first, resolve, then push |
+| Committed under the wrong email | Fix `git config`, tell the instructor; past commits stay wrong |
 
 ---
 
@@ -245,10 +264,37 @@ strategy.
 
 - [ ] Git installed; `user.name` and `user.email` set to your real details
 - [ ] GitHub account with two-factor authentication
-- [ ] One **private** group repository, with both teammates **and the instructor** added
-- [ ] Cloned to your machine and opened in VS Codium
-- [ ] One commit pushed **by you personally**, visible on github.com
-- [ ] Your exact `user.name` and `user.email` written down to report in class
+- [ ] **GitHub username sent to the instructor**
+- [ ] Course repository cloned; the Session 01 ZIP folder deleted
+- [ ] `group-XX` branch checked out
+- [ ] One commit pushed **by you personally** to `group-XX`, visible on github.com
+- [ ] Your exact `user.name` and `user.email` written down to report
+
+---
+
+## For the instructor
+
+Once the usernames are in:
+
+1. **Settings → Collaborators → Add people** — add every student with **Write** access.
+2. **Settings → Branches → Add branch protection rule** for `main`: require a pull request, and
+   tick *"Do not allow bypassing"* off for yourself. Students then cannot push to `main`.
+3. Group branches need no protection — a group breaking its own branch is recoverable.
+4. To review a group's work:
+
+```bash
+git fetch origin
+git checkout group-07
+python scripts/assess.py contributions
+```
+
+`contributions` reads the history of whatever is checked out, so run it after fetching all
+branches:
+
+```bash
+git fetch --all
+python scripts/assess.py contributions
+```
 
 ---
 

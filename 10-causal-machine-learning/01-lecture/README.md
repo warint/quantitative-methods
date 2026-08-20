@@ -10,8 +10,8 @@
 
 Partially linear model:
 
-$$ Y = \theta_0 D + g_0(X) + U, \qquad \mathbb{E}[U \mid X, D] = 0, $$
-$$ D = m_0(X) + V, \qquad \mathbb{E}[V \mid X] = 0 . $$
+$$Y = \theta_0 D + g_0(X) + U, \qquad \mathbb{E}[U \mid X, D] = 0,$$
+$$D = m_0(X) + V, \qquad \mathbb{E}[V \mid X] = 0 .$$
 
 $\theta_0$ is the parameter of interest; $g_0$ and $m_0$ are **nuisance functions** we do not care
 about but must handle. In classical econometrics we would assume $g_0$ linear. The premise of DML
@@ -29,8 +29,8 @@ Suppose you estimate $\hat g_0$ by, say, a lasso or a random forest on the full 
 regress $Y - \hat g_0(X)$ on $D$. Decomposing the estimation error of the resulting $\hat\theta$
 yields, schematically,
 
-$$ \sqrt n(\hat\theta - \theta_0) = \underbrace{a}_{\to N(0,\Sigma)}
-+ \underbrace{b}_{\text{regularisation bias}} + \underbrace{c}_{\text{overfitting bias}} . $$
+$$\sqrt n(\hat\theta - \theta_0) = \underbrace{a}_{\to N(0,\Sigma)}
++ \underbrace{b}_{\text{regularisation bias}} + \underbrace{c}_{\text{overfitting bias}} .$$
 
 - Term $b$ scales like $\sqrt n \times \|\hat g_0 - g_0\|$. ML estimators converge at rates *slower*
   than $n^{-1/2}$ (that is the price of flexibility), so $b$ **diverges**. The estimator is not even
@@ -44,20 +44,20 @@ Two distinct problems requiring two distinct fixes.
 
 Instead of the naive score, use the **partialling-out** (FWL) score:
 
-$$ \psi(W; \theta, \eta) = \big(Y - \ell_0(X) - \theta\,(D - m_0(X))\big)\big(D - m_0(X)\big), $$
+$$\psi(W; \theta, \eta) = \big(Y - \ell_0(X) - \theta\,(D - m_0(X))\big)\big(D - m_0(X)\big),$$
 
 with nuisances $\eta = (\ell_0, m_0)$, $\ell_0(X) = \mathbb{E}[Y\mid X]$, $m_0(X)=\mathbb{E}[D\mid X]$.
 Solving $\mathbb{E}[\psi]=0$ gives
 
-$$ \theta_0 = \frac{\mathbb{E}\big[(Y-\ell_0(X))(D-m_0(X))\big]}{\mathbb{E}\big[(D-m_0(X))^2\big]}
-= \frac{\operatorname{Cov}(\tilde Y, \tilde D)}{\operatorname{Var}(\tilde D)} , $$
+$$\theta_0 = \frac{\mathbb{E}\big[(Y-\ell_0(X))(D-m_0(X))\big]}{\mathbb{E}\big[(D-m_0(X))^2\big]}
+= \frac{\operatorname{Cov}(\tilde Y, \tilde D)}{\operatorname{Var}(\tilde D)} ,$$
 
 which is precisely FWL: regress residualised $Y$ on residualised $D$.
 
 **The orthogonality property.** The Gateaux (directional) derivative of $\mathbb{E}[\psi]$ with
 respect to $\eta$, evaluated at the truth, is zero:
 
-$$ \partial_\eta \, \mathbb{E}\big[\psi(W;\theta_0,\eta_0)\big][\eta - \eta_0] = 0 . $$
+$$\partial_\eta \, \mathbb{E}\big[\psi(W;\theta_0,\eta_0)\big][\eta - \eta_0] = 0 .$$
 
 Consequently, small errors in $\hat\eta$ have only a **second-order** effect on $\hat\theta$. The
 bias term becomes of order $\sqrt n \times \|\hat\ell - \ell_0\| \times \|\hat m - m_0\|$, so it
@@ -75,9 +75,9 @@ Split the sample into $K$ folds. For each $k$:
 
 Then pool:
 
-$$ \hat\theta = \frac{\sum_{i} \tilde Y_i \tilde D_i}{\sum_{i} \tilde D_i^2}, \qquad
+$$\hat\theta = \frac{\sum_{i} \tilde Y_i \tilde D_i}{\sum_{i} \tilde D_i^2}, \qquad
 \hat\sigma^2 = \frac{\frac1n \sum_i \tilde D_i^2 (\tilde Y_i - \hat\theta \tilde D_i)^2}
-{\big(\frac1n\sum_i \tilde D_i^2\big)^2} . $$
+{\big(\frac1n\sum_i \tilde D_i^2\big)^2} .$$
 
 Because the nuisance was never fitted on the observation where it is evaluated, term $c$ vanishes.
 Repeat the whole procedure over several random splits and take the median of $\hat\theta$ to remove

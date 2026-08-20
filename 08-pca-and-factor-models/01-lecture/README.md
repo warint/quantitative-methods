@@ -11,7 +11,7 @@
 Let $X$ be $n \times p$, columns centred (and standardised). Seek a unit vector $v_1$ maximising
 the variance of the projection $Xv$:
 
-$$ v_1 = \arg\max_{\|v\|=1} \; v^\top \hat\Sigma\, v, \qquad \hat\Sigma = \tfrac{1}{n}X^\top X . $$
+$$v_1 = \arg\max_{\|v\|=1} \; v^\top \hat\Sigma\, v, \qquad \hat\Sigma = \tfrac{1}{n}X^\top X .$$
 
 Lagrangian: $\mathcal{L} = v^\top\hat\Sigma v - \phi(v^\top v - 1)$; first-order condition
 $\hat\Sigma v = \phi v$. So $v$ must be an **eigenvector**, and since the objective at an
@@ -42,7 +42,7 @@ the discarded singular values.
 Stock and Watson's insight: a large macro panel is well described by a few common shocks plus
 idiosyncratic noise.
 
-$$ X_{it} = \lambda_i^\top F_t + e_{it}, \qquad i = 1,\dots,N,\ t = 1,\dots,T, $$
+$$X_{it} = \lambda_i^\top F_t + e_{it}, \qquad i = 1,\dots,N,\ t = 1,\dots,T,$$
 
 with $F_t \in \mathbb{R}^r$ the common factors and $\lambda_i$ the loadings. The **approximate**
 factor model (Chamberlain-Rothschild) allows weak cross-sectional and serial correlation in $e_{it}$,
@@ -64,7 +64,7 @@ diagonal. This is a choice, not a discovery.
 - **Scree plot:** look for the elbow. Informal, and often ambiguous.
 - **Cumulative variance:** retain enough for 80-90%. Arbitrary but transparent.
 - **Bai-Ng criteria:** minimise
-  $$ IC_{p1}(k) = \log V(k, \hat F^k) + k\left(\frac{N+T}{NT}\right)\log\left(\frac{NT}{N+T}\right), $$
+  $$ IC_{p1}(k) = \log V(k, \hat F^k) + k\left(\frac{N+T}{NT}\right)\log\left(\frac{NT}{N+T}\right),$$
   where $V(k,\hat F^k)$ is the average residual sum of squares from a $k$-factor fit. The penalty
   must vanish slower than $\min(N,T)^{-1}$; $IC_{p2}$ and $IC_{p3}$ use alternative penalty forms.
   Report all three - if they disagree, say so.
@@ -77,7 +77,7 @@ Two stages:
 
 1. Extract $\hat F_t$ by PCA from the standardised, stationary panel of $N$ series.
 2. Forecast the target with a small regression on the factors:
-   $$ \hat y_{t+h} = \hat\alpha + \sum_{j=1}^{r}\hat\beta_j \hat F_{jt} + \sum_{\ell=0}^{L}\hat\gamma_\ell y_{t-\ell} . $$
+   $$ \hat y_{t+h} = \hat\alpha + \sum_{j=1}^{r}\hat\beta_j \hat F_{jt} + \sum_{\ell=0}^{L}\hat\gamma_\ell y_{t-\ell} .$$
 
 **The rule you must not break:** factors must be re-estimated at each forecast origin using only
 data available at that time. Extracting factors from the full sample and then backtesting is

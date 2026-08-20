@@ -8,15 +8,15 @@
 
 ### 5.1 Ridge regression
 
-$$ \hat\beta^{\text{ridge}} = \arg\min_\beta \Big\{ \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2 \Big\}
-= (X^\top X + \lambda I)^{-1} X^\top y . $$
+$$\hat\beta^{\text{ridge}} = \arg\min_\beta \Big\{ \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2 \Big\}
+= (X^\top X + \lambda I)^{-1} X^\top y .$$
 
 The added $\lambda I$ makes the matrix positive definite for any $\lambda > 0$, **even when $p > n$**.
 Regularisation is not only a bias-variance device; it is what makes the problem well-posed at all.
 
 **What ridge does, in the SVD basis.** With $X = UDV^\top$:
 
-$$ \hat y^{\text{ridge}} = \sum_{j=1}^{p} u_j \frac{d_j^2}{d_j^2 + \lambda} \, u_j^\top y . $$
+$$\hat y^{\text{ridge}} = \sum_{j=1}^{p} u_j \frac{d_j^2}{d_j^2 + \lambda} \, u_j^\top y .$$
 
 Compare OLS, which is the same sum with every factor equal to 1. Ridge multiplies the $j$-th
 principal component of the design by $d_j^2/(d_j^2+\lambda) \in (0,1)$. Directions with **large**
@@ -34,7 +34,7 @@ how you think about Gauss-Markov.
 
 ### 5.2 The lasso
 
-$$ \hat\beta^{\text{lasso}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y - X\beta\|_2^2 + \lambda\|\beta\|_1 \Big\} . $$
+$$\hat\beta^{\text{lasso}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y - X\beta\|_2^2 + \lambda\|\beta\|_1 \Big\} .$$
 
 No closed form. But in the equivalent constrained formulation, minimise RSS subject to
 $\|\beta\|_1 \le t$: the constraint region is a cross-polytope (a diamond in 2-D), which has
@@ -46,13 +46,13 @@ zeroes.
 **Coordinate descent and soft-thresholding.** Hold all $\beta_k$, $k\neq j$, fixed. With
 standardised columns ($\frac1n\sum_i x_{ij}^2 = 1$), the univariate problem is
 
-$$ \min_{\beta_j} \; \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|, \qquad
-\rho_j = \tfrac1n \textstyle\sum_i x_{ij}\big(y_i - \sum_{k\neq j} x_{ik}\beta_k\big). $$
+$$\min_{\beta_j} \; \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|, \qquad
+\rho_j = \tfrac1n \textstyle\sum_i x_{ij}\big(y_i - \sum_{k\neq j} x_{ik}\beta_k\big).$$
 
 The objective is convex but non-differentiable at $0$. Using the subgradient of $|\beta_j|$ (which
 is $[-1,1]$ at zero), the solution is the **soft-thresholding operator**
 
-$$ \hat\beta_j = S_\lambda(\rho_j) = \operatorname{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+ . $$
+$$\hat\beta_j = S_\lambda(\rho_j) = \operatorname{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+ .$$
 
 Read it directly: *if the partial correlation of $x_j$ with the residual is smaller in magnitude
 than $\lambda$, set the coefficient to exactly zero; otherwise shrink it toward zero by $\lambda$.*
@@ -66,8 +66,8 @@ path as if it identified the true model.
 
 ### 5.3 The elastic net
 
-$$ \hat\beta^{\text{EN}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y-X\beta\|_2^2
-+ \lambda\big[\alpha \|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\big] \Big\}, \qquad \alpha \in [0,1]. $$
+$$\hat\beta^{\text{EN}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y-X\beta\|_2^2
++ \lambda\big[\alpha \|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\big] \Big\}, \qquad \alpha \in [0,1].$$
 
 $\alpha = 1$ is the lasso, $\alpha = 0$ is ridge. The mixed penalty is **strictly convex** whenever
 $\alpha < 1$, which delivers the property Zou and Hastie call the *grouping effect*: for two

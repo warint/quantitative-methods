@@ -10,7 +10,7 @@
 
 Substituting $y = X\beta + \varepsilon$ into $\hat\beta = (X^\top X)^{-1}X^\top y$:
 
-$$ \hat\beta = \beta + (X^\top X)^{-1} X^\top \varepsilon . $$
+$$\hat\beta = \beta + (X^\top X)^{-1} X^\top \varepsilon .$$
 
 This decomposition is the whole of regression inference. Everything follows from what you are
 willing to assume about $\varepsilon$.
@@ -19,11 +19,11 @@ willing to assume about $\varepsilon$.
 
 **Variance.** Under homoskedasticity,
 
-$$ \operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} X^\top \operatorname{Var}(\varepsilon\mid X) X (X^\top X)^{-1} = \sigma^2 (X^\top X)^{-1} . $$
+$$\operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} X^\top \operatorname{Var}(\varepsilon\mid X) X (X^\top X)^{-1} = \sigma^2 (X^\top X)^{-1} .$$
 
 For a single coefficient this expands into a form worth memorising:
 
-$$ \operatorname{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \operatorname{Var}(x_j) \cdot (1 - R_j^2)}, $$
+$$\operatorname{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \operatorname{Var}(x_j) \cdot (1 - R_j^2)},$$
 
 where $R_j^2$ is the $R^2$ from regressing $x_j$ on all other regressors. Read off the four levers:
 noise, sample size, variation in the regressor, and **redundancy**. The factor $1/(1-R_j^2)$ is the
@@ -48,7 +48,7 @@ this; it simply does not apply.
 
 The **sandwich** form is always correct:
 
-$$ \operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X \Big) (X^\top X)^{-1}, \qquad \Omega = \operatorname{Var}(\varepsilon \mid X). $$
+$$\operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X \Big) (X^\top X)^{-1}, \qquad \Omega = \operatorname{Var}(\varepsilon \mid X).$$
 
 - **Heteroskedasticity-robust (White / HC1):** estimate $\Omega$ by $\operatorname{diag}(\hat\varepsilon_i^2)$, with a small-sample correction $n/(n-p)$.
 - **Cluster-robust:** if errors are correlated within groups $g$ (firms, regions, countries), use $\hat\Omega = \sum_g \hat\varepsilon_g \hat\varepsilon_g^\top$. Requires *many* clusters; with fewer than roughly 40, inference is unreliable.
@@ -59,14 +59,14 @@ $$ \operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X 
 Suppose the true model is $y = X_1\beta_1 + X_2\beta_2 + u$ but you estimate $y$ on $X_1$ alone.
 Let $\delta$ be the coefficient matrix from regressing $X_2$ on $X_1$. Then
 
-$$ \mathbb{E}[\hat\beta_1] = \beta_1 + \delta \beta_2 . $$
+$$\mathbb{E}[\hat\beta_1] = \beta_1 + \delta \beta_2 .$$
 
 **Sign the bias with two questions:** (i) how does the omitted variable relate to my regressor
 ($\delta$)? (ii) how does it relate to the outcome ($\beta_2$)? Same sign in both: upward bias.
 
 ### 3.5 What a Mincer coefficient identifies
 
-$$ \log w_i = \alpha + \rho\, S_i + \gamma_1 X_i + \gamma_2 X_i^2 + \varepsilon_i $$
+$$\log w_i = \alpha + \rho\, S_i + \gamma_1 X_i + \gamma_2 X_i^2 + \varepsilon_i$$
 
 $\rho$ is often read as "the return to a year of schooling". Strictly, it is the mean log-wage
 difference associated with an additional year of schooling **among people who are otherwise

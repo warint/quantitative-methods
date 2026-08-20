@@ -11,10 +11,10 @@
 Fix a test point $x_0$. Let $\hat f$ be estimated on a random training sample. The expected
 squared error at $x_0$, averaging over training samples and over the new noise draw, is
 
-$$ \mathbb{E}\big[(y_0 - \hat f(x_0))^2\big]
+$$\mathbb{E}\big[(y_0 - \hat f(x_0))^2\big]
 = \underbrace{\operatorname{Var}\big(\hat f(x_0)\big)}_{\text{variance}}
 + \underbrace{\big(\mathbb{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
-+ \underbrace{\sigma^2}_{\text{irreducible}} . $$
++ \underbrace{\sigma^2}_{\text{irreducible}} .$$
 
 *Derivation.* Write $y_0 = f(x_0) + \varepsilon_0$ and add and subtract $\mathbb{E}[\hat f(x_0)]$
 inside the square. Three cross terms vanish: one because $\mathbb{E}[\varepsilon_0]=0$ and
@@ -31,16 +31,16 @@ that optimum deliberately rather than by accident.
 Let $\operatorname{err} = \frac1n\sum_i (y_i - \hat f(x_i))^2$ be training error and
 $\operatorname{Err}_{\text{in}}$ the error on new outcomes at the *same* $x_i$. Then
 
-$$ \mathbb{E}[\operatorname{Err}_{\text{in}}] - \mathbb{E}[\operatorname{err}]
-= \frac{2}{n}\sum_{i=1}^n \operatorname{Cov}(\hat y_i, y_i) . $$
+$$\mathbb{E}[\operatorname{Err}_{\text{in}}] - \mathbb{E}[\operatorname{err}]
+= \frac{2}{n}\sum_{i=1}^n \operatorname{Cov}(\hat y_i, y_i) .$$
 
 The **optimism** is exactly twice the average covariance between fitted value and its own outcome:
 the degree to which the model chases its own training labels. For a linear fit with $p$ parameters
 this covariance sum equals $p\sigma^2$, giving optimism $2p\sigma^2/n$ and motivating
 
-$$ C_p = \operatorname{err} + \frac{2p\hat\sigma^2}{n}, \qquad
+$$C_p = \operatorname{err} + \frac{2p\hat\sigma^2}{n}, \qquad
 \mathrm{AIC} = -\frac{2}{n}\log\mathcal{L} + \frac{2p}{n}, \qquad
-\mathrm{BIC} = -2\log\mathcal{L} + p\log n . $$
+\mathrm{BIC} = -2\log\mathcal{L} + p\log n .$$
 
 Note that BIC penalises more heavily for $n > e^2 \approx 7.4$; it is consistent for model
 selection, whereas AIC is efficient for prediction. They answer different questions.
@@ -54,7 +54,7 @@ counting parameters makes no sense - which we need from Session 5 onward.
 Partition the data into $K$ folds. For each $k$, fit on the complement and predict the held-out
 fold:
 
-$$ \mathrm{CV}_K = \frac{1}{n}\sum_{k=1}^{K}\sum_{i \in \mathcal{F}_k} L\big(y_i, \hat f^{-k}(x_i)\big). $$
+$$\mathrm{CV}_K = \frac{1}{n}\sum_{k=1}^{K}\sum_{i \in \mathcal{F}_k} L\big(y_i, \hat f^{-k}(x_i)\big).$$
 
 - $K = n$ (LOOCV): nearly unbiased for $\operatorname{Err}$, but high variance (the $n$ training
   sets are almost identical, so the errors are highly correlated) and usually expensive - except

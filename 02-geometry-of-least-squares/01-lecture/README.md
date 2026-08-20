@@ -11,18 +11,18 @@
 Stack the data: $y \in \mathbb{R}^n$, $X \in \mathbb{R}^{n \times p}$ (first column a vector of
 ones), $\beta \in \mathbb{R}^p$, $\varepsilon \in \mathbb{R}^n$:
 
-$$ y = X\beta + \varepsilon. $$
+$$y = X\beta + \varepsilon.$$
 
 We seek $\hat\beta$ minimising the residual sum of squares
 
-$$ S(\beta) = \|y - X\beta\|_2^2 = (y - X\beta)^\top (y - X\beta). $$
+$$S(\beta) = \|y - X\beta\|_2^2 = (y - X\beta)^\top (y - X\beta).$$
 
 ### 2.2 Route 1 - calculus
 
 Expand: $S(\beta) = y^\top y - 2\beta^\top X^\top y + \beta^\top X^\top X \beta$. Differentiate:
 
-$$ \frac{\partial S}{\partial \beta} = -2X^\top y + 2X^\top X\beta \stackrel{!}{=} 0
-\quad\Longrightarrow\quad \boxed{X^\top X \hat\beta = X^\top y} $$
+$$\frac{\partial S}{\partial \beta} = -2X^\top y + 2X^\top X\beta \stackrel{!}{=} 0
+\quad\Longrightarrow\quad \boxed{X^\top X \hat\beta = X^\top y}$$
 
 - the **normal equations**. If $X$ has full column rank, $\hat\beta = (X^\top X)^{-1} X^\top y$.
 The Hessian is $2X^\top X \succeq 0$, so the stationary point is a global minimum. $S$ is convex.
@@ -34,13 +34,13 @@ $\|y - X\beta\|$ means: **find the point in $\mathcal{C}(X)$ closest to $y$.** B
 theorem, that point is the orthogonal projection of $y$ onto $\mathcal{C}(X)$, and it is
 characterised by the residual being orthogonal to the subspace:
 
-$$ X^\top (y - X\hat\beta) = 0, $$
+$$X^\top (y - X\hat\beta) = 0,$$
 
 which *is* the normal equations. The two routes are the same statement in different clothes.
 
 Define the **hat matrix** $H = X(X^\top X)^{-1}X^\top$. Then
 
-$$ \hat y = Hy, \qquad \hat\varepsilon = (I - H)y, \qquad H(I-H) = 0 . $$
+$$\hat y = Hy, \qquad \hat\varepsilon = (I - H)y, \qquad H(I-H) = 0 .$$
 
 Consequences worth internalising:
 
@@ -64,7 +64,7 @@ Never compute $(X^\top X)^{-1}$. Forming $X^\top X$ squares the condition number
 $\kappa(X^\top X) = \kappa(X)^2$, so you lose roughly twice as many digits of precision. Use the
 QR decomposition $X = QR$ with $Q^\top Q = I$ and $R$ upper triangular; then
 
-$$ R\hat\beta = Q^\top y $$
+$$R\hat\beta = Q^\top y$$
 
 is solved by back-substitution. This is what `numpy.linalg.lstsq` and `statsmodels` do internally.
 You will verify the precision difference yourself in the lab.

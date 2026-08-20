@@ -79,7 +79,7 @@ split into a compulsory Track A (German Credit) and an extension Track B (bankru
 ## Getting started
 
 ```bash
-git clone <this-repo> qmib
+git clone https://github.com/warint/quantitative-methods.git qmib
 cd qmib
 
 python3 -m venv .venv
@@ -91,6 +91,39 @@ python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
 
 Full instructions, including VS Codium and the local LLM:
 **[Session 01 setup guide](01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md)**
+
+---
+
+## How students submit work
+
+**One repository, one branch per group.** There are no separate student repositories.
+
+```
+github.com/warint/quantitative-methods
+│
+├── main            ← instructor only; protected, nobody else pushes to it
+├── group-01
+├── group-02
+└── group-XX        ← each group commits and pushes here all term
+```
+
+Lab deliverables go in the session folder, on the group's own branch:
+
+```
+NN-session-name/02-lab/submissions/group-XX/
+```
+
+**Why one repository.** `python scripts/assess.py contributions` reads the git history *of this
+repository* to produce the per-member contribution table. Work pushed anywhere else is invisible to
+it, and invisible work cannot be credited.
+
+| Who | What they do once, before Session 02 |
+|---|---|
+| **Student** | Create a GitHub account, send the username to the instructor, clone the repo, check out `group-XX` |
+| **Instructor** | Add every student as a collaborator with **Write**; protect `main` so only they can push to it |
+
+Students never need to create, own or configure a repository. Full walkthrough, including the
+instructor's steps: **[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**
 
 Git, GitHub and group working, needed from Session 02:
 **[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**
