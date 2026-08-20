@@ -1,6 +1,6 @@
 ---
-title: "The Geometry of Least Squares"
-subtitle: "Session 02 · Projection, partialling out, and why composition is not causation"
+title: "Data, Vectors, and the Geometry of Least Squares"
+subtitle: "Session 02 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,343 +21,235 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### Why is the most-used estimator in economics a right-angle triangle? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | The question, and why composition is in the way |
-| **10–30** | Least squares as a projection |
-| **30–50** | Frisch–Waugh–Lovell |
-| **50–70** | The data, and the collinearity in it |
-| **70–85** | Doing it, and verifying the identity |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Topalova & Khandelwal**, *Trade Liberalization and Firm Productivity: The
-Case of India*.
+| **2.1** | The model in matrix form |
+| **2.2** | Route 1 — calculus |
+| **2.3** | Route 2 — geometry *(the one worth remembering)* |
+| **2.4** | Adding a regressor: Frisch–Waugh–Lovell |
+| **2.5** | Numerical warning |
 
 ::: {.muted}
-Harvard Dataverse, DOI 10.7910/DVN/8WEXYD · CC0 · 32,422 firm-years
+Same numbering, same notation as [`01-lecture/README.md`](01-lecture/README.md). The notes are the
+reference; these slides are the walk-through.
 :::
+
+## Notation
+
+| Symbol | Meaning |
+|---|---|
+| $n$, $p$ | number of observations, number of predictors |
+| $X$ | $n \times p$ design matrix (first column ones) |
+| $y$ | $n$-vector of outcomes |
+| $\hat\beta$ | estimated coefficient vector |
+| $\hat y = X\hat\beta$ | fitted values |
+| $H = X(X^\top X)^{-1}X^\top$ | hat (projection) matrix |
+
+::: {.muted}
+This table is in every session's notes. Learn it once.
+:::
+
+# 2.1 The model in matrix form {background-color="#16181A" style="color:#F7F6F3"}
+
+## Stack the data
+
+$y \in \mathbb{R}^n$, $X \in \mathbb{R}^{n \times p}$ (first column a vector of ones),
+$\beta \in \mathbb{R}^p$, $\varepsilon \in \mathbb{R}^n$:
+
+$$y = X\beta + \varepsilon$$
+
+We seek $\hat\beta$ minimising the residual sum of squares
+
+$$S(\beta) = \|y - X\beta\|_2^2 = (y - X\beta)^\top (y - X\beta)$$
 
 ::: {.check}
-This is one of the sessions with the **authors' own data**. Their central
-problem is ours: tariffs fell where industries already differed, so the raw
-comparison confounds the policy with the composition of who received it.
+Two routes to the minimum. They turn out to be the same statement.
 :::
 
-## Read it for one thing
+# 2.2 Route 1 — calculus {background-color="#16181A" style="color:#F7F6F3"}
 
-> How do they separate the effect of falling tariffs from the fact that
-> **liberalised industries were not like the others to begin with**?
+## Expand, then differentiate
 
-::: {.muted}
-Every control they add is a projection. Today you learn what that sentence
-means geometrically, and then you will see it in their tables.
-:::
+$$S(\beta) = y^\top y - 2\beta^\top X^\top y + \beta^\top X^\top X \beta$$
 
-# The question {background-color="#16181A" style="color:#F7F6F3"}
+$$\frac{\partial S}{\partial \beta} = -2X^\top y + 2X^\top X\beta \stackrel{!}{=} 0$$
 
-## Electricity prices across Europe
+## The normal equations
 
-Industrial electricity costs more in some European countries than others.
+$$\boxed{\,X^\top X \hat\beta = X^\top y\,}$$
 
-A natural first claim:
+If $X$ has full column rank,
 
-> *"Countries with more fossil generation have higher electricity prices."*
-
-Before we can defend that sentence, we have to separate two things:
-
-::: {.tight}
-- the **effect** of the generation mix on price
-- the **composition** of the countries that happen to have that mix
-:::
-
-::: {.muted}
-Rich countries differ from poor ones in more than their power stations.
-:::
-
-## Why this is a geometry problem
-
-Least squares is not a formula to memorise. It is a **projection**.
-
-$$\hat{y} = X(X'X)^{-1}X'y = P_X\,y$$
-
-$P_X$ projects $y$ onto the column space of $X$. The residual
-
-$$e = (I - P_X)\,y = M_X\,y$$
-
-is what is left **orthogonal** to everything $X$ can explain.
+$$\hat\beta = (X^\top X)^{-1} X^\top y$$
 
 ::: {.check}
-Every result today follows from one fact: $M_X X = 0$. The residual carries no
-trace of the columns you controlled for.
+The Hessian is $2X^\top X \succeq 0$, so the stationary point is a **global** minimum. $S$ is
+convex.
 :::
 
-## Two properties of $P_X$ worth memorising
+::: {.muted}
+Convexity is why there is one answer. Session 07 abandons it.
+:::
 
-$$P_X = X(X'X)^{-1}X', \qquad M_X = I - P_X$$
+# 2.3 Route 2 — geometry {background-color="#16181A" style="color:#F7F6F3"}
+
+## The projection theorem
+
+$X\beta$ ranges over $\mathcal{C}(X)$, a $p$-dimensional subspace of $\mathbb{R}^n$.
+
+Minimising $\|y - X\beta\|$ means: **find the point in $\mathcal{C}(X)$ closest to $y$.**
+
+By the projection theorem that point is the orthogonal projection of $y$ onto $\mathcal{C}(X)$,
+characterised by the residual being orthogonal to the subspace:
+
+$$X^\top (y - X\hat\beta) = 0$$
+
+::: {.check}
+Which *is* the normal equations. The two routes are the same statement in different clothes.
+:::
+
+## The hat matrix
+
+$$H = X(X^\top X)^{-1}X^\top$$
+
+$$\hat y = Hy, \qquad \hat\varepsilon = (I - H)y, \qquad H(I-H) = 0$$
+
+::: {.muted}
+$H$ puts the hat on $y$. The last identity says fitted values and residuals share no information.
+:::
+
+## Consequences worth internalising
 
 ::: {.tight}
-- **Idempotent**: $P_X P_X = P_X$. Projecting twice changes nothing — you are
-  already in the space.
-- **Symmetric**: $P_X' = P_X$.
-- **Orthogonal complements**: $P_X M_X = 0$. Fitted values and residuals share
-  no information at all.
+- $\operatorname{tr}(H) = p$ — the projection uses exactly $p$ degrees of freedom
+- $h_{ii} \in [0,1]$ is observation $i$'s **leverage**: how much $\hat y_i$ moves when $y_i$ moves
+- $\|y\|^2 = \|\hat y\|^2 + \|\hat\varepsilon\|^2$ is Pythagoras
 :::
 
-## $R^2$ is a cosine
+## $R^2$ is a squared cosine
 
-Because $y = \hat y + e$ with $\hat y \perp e$, Pythagoras applies:
-
-$$\|y\|^2 = \|\hat y\|^2 + \|e\|^2$$
-
-and
+The decomposition is a right-angle triangle, so
 
 $$R^2 = \frac{\|\hat y\|^2}{\|y\|^2} = \cos^2\theta$$
 
+with $\theta$ the angle between $y$ and the space the regressors span.
+
+::: {.warn}
+That is *all* $R^2$ is — a statement about an angle. Not about whether the model is right, and not
+about whether anything causes anything.
+:::
+
+# 2.4 Frisch–Waugh–Lovell {background-color="#16181A" style="color:#F7F6F3"}
+
+## Adding a regressor
+
+Partition $X = [X_1 \; X_2]$. Then $\hat\beta_2$ from the full regression equals the coefficient
+from regressing $M_1 y$ on $M_1 X_2$, where
+
+$$M_1 = I - X_1(X_1^\top X_1)^{-1}X_1^\top$$
+
+::: {.muted}
+$M_1$ is the residual-maker for $X_1$: it strips out everything $X_1$ explains.
+:::
+
+## In words
+
+> A multiple-regression coefficient is a **simple** regression coefficient on the part of the
+> variable that is orthogonal to everything else.
+
+This single theorem:
+
+::: {.tight}
+- explains what "controlling for" means
+- explains why collinearity inflates variance
+- returns later as the foundation of **double machine learning**
+:::
+
 ::: {.check}
-$R^2$ is the squared cosine of the angle between your outcome and the space your
-regressors span. That is *all* it is — which is why it says nothing about
-whether the model is right.
+Learn it now. It is the most reused result in the course.
 :::
 
-## Degrees of freedom, geometrically
+# 2.5 Numerical warning {background-color="#16181A" style="color:#F7F6F3"}
 
-The residual lives in a space of dimension $n - k$: you started with $n$
-dimensions and spent $k$ of them fitting.
+## Never compute $(X^\top X)^{-1}$
 
-$$\hat\sigma^2 = \frac{\|e\|^2}{n - k}$$
+Forming $X^\top X$ **squares the condition number**:
+
+$$\kappa(X^\top X) = \kappa(X)^2$$
+
+so you lose roughly twice as many digits of precision.
+
+::: {.warn}
+Slide 2.2 shows how to *state* the estimator. It is not how to *compute* it.
+:::
+
+## Use QR
+
+$X = QR$ with $Q^\top Q = I$ and $R$ upper triangular. Then
+
+$$R\hat\beta = Q^\top y$$
+
+solved by back-substitution.
+
+::: {.check}
+This is what `numpy.linalg.lstsq` and `statsmodels` do internally. You verify the precision
+difference yourself in the lab.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## The theme
+
+> ## How much of the measured gap is real, and how much is composition?
+
+All ten groups attack it, each on **its own angle**. The last twenty minutes assemble the answers.
 
 ::: {.muted}
-Add a regressor and the residual space shrinks by one. Add $n$ of them and it
-vanishes — a perfect fit that has learned nothing.
+Your angle and data are fixed for the semester:
+[`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md).
 :::
 
-# The method {background-color="#16181A" style="color:#F7F6F3"}
-
-## Frisch–Waugh–Lovell
-
-Split the regressors: $y = X_1\beta_1 + X_2\beta_2 + \varepsilon$.
-
-The FWL theorem says $\hat{\beta}_1$ is identical whether you
+## What you build
 
 ::: {.tight}
-1. regress $y$ on $X_1$ **and** $X_2$ together, or
-2. regress $M_{X_2}y$ on $M_{X_2}X_1$ — both **residualised** against $X_2$
+1. `ols_normal_equations` with an explicit inverse, `ols_qr` with `numpy.linalg.qr` — both against
+   `statsmodels`
+2. The hat-matrix diagonal; leverage against residual
+3. Verify Pythagoras numerically, then drop the intercept
+4. **Break it** — add a near-duplicate column; see which route survives
+5. **FWL check** — residualise, re-regress, confirm the match
 :::
 
-$$\hat{\beta}_1 = (X_1'M_{X_2}X_1)^{-1}X_1'M_{X_2}y$$
+## The two-minute report
 
-::: {.muted}
-"Controlling for" a variable *means* projecting it out. Nothing more mystical
-than that.
-:::
-
-## Why you should care
-
-FWL is the reason a coefficient can **change sign** when you add a control.
-
-You are no longer estimating the same object:
+**One slide. Three sentences.**
 
 ::: {.tight}
-- Without $X_2$: the association of $X_1$ with $y$, **including** whatever runs through $X_2$
-- With $X_2$: the association of the part of $X_1$ **unrelated** to $X_2$
+1. **What I did.** *"We regressed X on Y for our unit, partialling out Z."*
+2. **The number.** One estimate, with its uncertainty or benchmark.
+3. **The catch.** What you cannot claim, or where the data failed you.
 :::
 
 ::: {.warn}
-If you cannot say which of those two your question asks for, you cannot
-interpret your own regression.
+The presenter is **drawn at random**. No method exposition. **Sentence 3 earns the slot.**
 :::
 
-# The data {background-color="#16181A" style="color:#F7F6F3"}
+## Before you leave
 
-## What you are working with
-
-```python
-import pandas as pd
-
-core = pd.read_parquet("data/spine/core.parquet")
-a    = pd.read_parquet("data/spine/angle_a_country.parquet")
-
-df = core.merge(a, on=["geo", "time"])
-print(df.shape)          # 450 rows: 30 countries x 15 years, 2010-2024
-```
-
-| Column | Meaning |
-|---|---|
-| `elec_price_eur_kwh` | Non-household price, excl. tax, band IC |
-| `share_renew`, `share_fossil`, `share_nuclear` | Generation mix, shares of 1 |
-| `gdp_pc_eur`, `productivity_idx` | The composition variables |
-
-## The trap in this table
-
-The three generation shares **sum to one**, exactly:
-
-```python
-df[["share_renew", "share_fossil", "share_nuclear"]].sum(axis=1).max()
-# 1.0001  (rounding only)
-```
-
-::: {.warn}
-Include all three shares **and** an intercept and you have created exact
-collinearity. $X'X$ is singular. Some libraries error; others silently return
-one of infinitely many solutions.
+::: {.tight}
+- Commit to your group branch as you go
+- Fill in this session's row of `assessment/role-logs/gNN.md`
+- One documented instance where you caught the LLM being wrong
 :::
 
 ::: {.check}
-**Drop one share.** Every coefficient is then read *relative to the omitted
-category* — which you must state in your table note.
-:::
-
-## A price without its band is meaningless
-
-`elec_price_eur_kwh` is **band IC**: consumers using 500–2000 MWh a year.
-
-::: {.tight}
-- A different band is a different number for the same country and year.
-- There is a **structural break in 2022** — the energy shock.
-- `elec_price_incl_tax` minus the excl.-tax series is the **policy wedge**, not a measurement error.
-:::
-
-::: {.muted}
-Reporting "the electricity price in Germany" without the band is the kind of
-sentence this course is designed to stop you writing.
-:::
-
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
-
-## The naive regression
-
-```python
-import statsmodels.formula.api as smf
-
-m1 = smf.ols("elec_price_eur_kwh ~ share_fossil + share_nuclear", data=df).fit()
-print(m1.summary().tables[1])
-```
-
-`share_renew` is omitted, so both coefficients are read **against renewables**.
-
-::: {.muted}
-Write down the sign you expect *before* you run it. You are allowed to be
-wrong; you are not allowed to decide afterwards what you predicted.
-:::
-
-## Now add composition
-
-```python
-m2 = smf.ols(
-    "elec_price_eur_kwh ~ share_fossil + share_nuclear "
-    "+ np.log(gdp_pc_eur) + productivity_idx",
-    data=df,
-).fit()
-```
-
-Compare `share_fossil` across `m1` and `m2`.
-
-::: {.check}
-If it moved, composition was doing part of the work. FWL tells you exactly how
-much — and the next slide proves it.
-:::
-
-## Verify FWL yourself
-
-```python
-import numpy as np
-import statsmodels.api as sm
-
-d = df.dropna(subset=["elec_price_eur_kwh", "share_fossil",
-                      "gdp_pc_eur", "productivity_idx"])
-
-Z = sm.add_constant(d[["gdp_pc_eur", "productivity_idx"]])
-
-# residualise BOTH the outcome and the regressor against Z
-y_r = sm.OLS(d["elec_price_eur_kwh"], Z).fit().resid
-x_r = sm.OLS(d["share_fossil"],       Z).fit().resid
-
-print(sm.OLS(y_r, sm.add_constant(x_r)).fit().params.iloc[1])
-# identical to share_fossil in the full multiple regression
-```
-
-::: {.check}
-Two routes, one number. That identity *is* what "controlling for" means.
-:::
-
-## Multicollinearity, measured
-
-Perfect collinearity breaks the inverse. **Near**-collinearity merely inflates
-the variance — and it is much harder to notice.
-
-$$\operatorname{VIF}_j = \frac{1}{1 - R_j^2}$$
-
-where $R_j^2$ comes from regressing $x_j$ on every other regressor.
-
-```python
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-import statsmodels.api as sm
-
-Z = sm.add_constant(d[["share_fossil", "share_nuclear",
-                       "gdp_pc_eur", "productivity_idx"]])
-for i, name in enumerate(Z.columns):
-    print(f"{name:18s} {variance_inflation_factor(Z.values, i):6.2f}")
-```
-
-## Reading a VIF
-
-::: {.tight}
-- $\operatorname{VIF} = 1$ — orthogonal to everything else
-- $> 5$ — worth a comment
-- $> 10$ — the coefficient is barely identified
-:::
-
-::: {.warn}
-A high VIF is **not** a reason to drop a variable. If the control belongs in the
-model, dropping it trades a variance problem for a bias problem. Report the wide
-interval instead.
-:::
-
-## What to report
-
-::: {.tight}
-- Which share you **omitted**, and therefore what the comparison is against
-- Whether the fossil coefficient **moved** when composition entered, and in which direction
-- $R^2$ **and** the residual standard error in price units — a share of variance is not a magnitude
-- That 2022 breaks the series, and what you did about it
-:::
-
-::: {.warn}
-Do not write "fossil generation raises prices by X". You have an association
-in a 30-country panel, not an experiment. Session 10 is where causal language
-becomes available, and it costs more than this.
-:::
-
-## Common mistakes
-
-| Mistake | What happens |
-|---|---|
-| All three shares + intercept | Singular $X'X$; meaningless coefficients |
-| Reading a coefficient without naming the omitted share | The number has no referent |
-| Pooling 2022 with earlier years silently | One structural break masquerades as an effect |
-| Dropping rows with `flag == "u"` | Coverage tilts toward large economies |
-| Reporting $R^2$ alone | No sense of magnitude |
-
-## In the lab
-
-Work through [`02-lab/README.md`](02-lab/README.md).
-
-You will:
-
-::: {.tight}
-1. Build the merged panel and confirm the collinearity for yourself
-2. Estimate the naive and the composition-adjusted specification
-3. Reproduce the coefficient by residualising, and show the two agree
-4. Write **three sentences** your group will defend if drawn
-:::
-
-::: {.check}
-The three sentences are the deliverable. The code is how you earn the right to
-write them.
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::

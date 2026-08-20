@@ -9,6 +9,30 @@ Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
 
 ---
 
+## ⚠️ `XX` is a placeholder — replace it
+
+Wherever you see **`XX`** in a command on this page, or anywhere else in the course, it means
+**your group's two-digit number**. Type your own; do not type the letters `XX`.
+
+| If you are | you type |
+|---|---|
+| Group 1 | `group-01` |
+| Group 7 | `group-07` |
+| Group 10 | `group-10` |
+
+So a student in **group 7** running the branch command types:
+
+```bash
+git checkout group-07
+```
+
+not `git checkout group-XX`. Same for folder paths:
+`02-lab/submissions/group-07/`.
+
+If you do not know your group number yet, you get it in Session 01. Do not guess.
+
+---
+
 ## How submission works — read this first
 
 There is **one repository for the whole course**, and you already have a copy of it as a ZIP from
@@ -127,15 +151,15 @@ stores it so you are asked once.
 **One person per group** creates it; the others just check it out.
 
 ```bash
-# the first person, once
-git checkout -b group-XX
-git push -u origin group-XX
+# the first person, once   — group 7 shown; use your own number
+git checkout -b group-07
+git push -u origin group-07
 ```
 
 ```bash
 # everyone else, after that
 git fetch origin
-git checkout group-XX
+git checkout group-07
 ```
 
 > **⚠️ Never `git push` while on `main`.** `main` is protected, so the push will be refused rather
@@ -150,15 +174,16 @@ git checkout group-XX
 ## Step 6 — The round trip
 
 ```bash
-mkdir -p 02-geometry-of-least-squares/02-lab/submissions/group-XX
-echo "# Group XX — session 02" > 02-geometry-of-least-squares/02-lab/submissions/group-XX/NOTES.md
+# group 7 shown throughout — substitute your own number everywhere
+mkdir -p 02-geometry-of-least-squares/02-lab/submissions/group-07
+echo "# Group 07 — session 02" > 02-geometry-of-least-squares/02-lab/submissions/group-07/NOTES.md
 
-git add 02-geometry-of-least-squares/02-lab/submissions/group-XX/
-git commit -m "Add group XX notes for session 02"
+git add 02-geometry-of-least-squares/02-lab/submissions/group-07/
+git commit -m "Add group 07 notes for session 02"
 git push
 ```
 
-Refresh the repository page in your browser, switch to the `group-XX` branch, and your file is
+Refresh the repository page in your browser, switch to your group's branch, and your file is
 there.
 
 **Each of the three of you does this at least once, from your own machine.** Not one per group.
@@ -254,7 +279,7 @@ understand everything.
 | `git: command not found` | Reopen the terminal; on Windows restart VS Codium |
 | Password rejected on push | Use a personal access token, not your password |
 | `remote: Permission denied` | You have not been added as a collaborator yet — send your username |
-| `protected branch` on push | You are on `main`. `git checkout group-XX` |
+| `protected branch` on push | You are on `main`. Check out your group branch |
 | `rejected — non-fast-forward` | `git pull` first, resolve, then push |
 | Committed under the wrong email | Fix `git config`, tell the instructor; past commits stay wrong |
 
@@ -266,8 +291,8 @@ understand everything.
 - [ ] GitHub account with two-factor authentication
 - [ ] **GitHub username sent to the instructor**
 - [ ] Course repository cloned; the Session 01 ZIP folder deleted
-- [ ] `group-XX` branch checked out
-- [ ] One commit pushed **by you personally** to `group-XX`, visible on github.com
+- [ ] Your `group-NN` branch checked out — your own number, not `XX`
+- [ ] One commit pushed **by you personally** to your group branch, visible on github.com
 - [ ] Your exact `user.name` and `user.email` written down to report
 
 ---
