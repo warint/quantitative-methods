@@ -1,6 +1,6 @@
 ---
-title: "Ridge, Lasso, and the Elastic Net"
-subtitle: "Session 05 · Choosing among many correlated predictors, and admitting how unstable that choice is"
+title: "Regularisation: Ridge, Lasso, and the Elastic Net"
+subtitle: "Session 05 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,459 +21,260 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### When is a deliberately biased estimator the better one? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | Why OLS breaks when predictors multiply |
-| **10–30** | Ridge: shrinking without choosing |
-| **30–55** | Lasso: choosing, and what it costs |
-| **55–70** | Elastic net: the correlated case |
-| **70–85** | The instability nobody reports |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Wang, Zhu & Yu**, *Variable Selection in Macroeconomic Forecasting with Many
-Predictors*, **Econometrics and Statistics**.
+| **5.1** | Ridge regression |
+| **5.2** | The lasso |
+| **5.3** | The elastic net |
+| **5.4** | Choosing the tuning parameters |
 
 ::: {.muted}
-DOI: 10.1016/j.ecosta.2023.01.003
+Same numbering and notation as [`01-lecture/README.md`](01-lecture/README.md).
 :::
 
-The finding to hold on to:
+# 5.1 Ridge regression {background-color="#16181A" style="color:#F7F6F3"}
 
-> Across their comparisons, **classical forward selection was competitive with
-> far more sophisticated methods.** Sophistication is not the point. Knowing
-> what your selection is sensitive to is the point.
+## The estimator
 
-## The question for today
+$$\hat\beta^{\text{ridge}} = \arg\min_\beta \Big\{ \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2 \Big\}
+= (X^\top X + \lambda I)^{-1} X^\top y$$
 
-Thirty European countries. Eleven years. And **thirty-odd candidate predictors**
-of whether a country's AI adoption translates into anything measurable.
+The added $\lambda I$ makes the matrix positive definite for **any** $\lambda > 0$, even when
+$p > n$.
+
+::: {.check}
+Regularisation is not only a bias–variance device. It is what makes the problem **well-posed at
+all**.
+:::
+
+## What ridge does, in the SVD basis
+
+With $X = UDV^\top$:
+
+$$\hat y^{\text{ridge}} = \sum_{j=1}^{p} u_j \frac{d_j^2}{d_j^2 + \lambda} \, u_j^\top y$$
+
+Compare OLS — the same sum with **every factor equal to 1**.
+
+## Targeted, not blunt
+
+Ridge multiplies the $j$-th principal component of the design by
+$d_j^2/(d_j^2+\lambda) \in (0,1)$.
 
 ::: {.tight}
-- Which predictors matter?
-- How confident are you in that list?
-- Would a slightly different sample give you a different list?
-:::
-
-::: {.warn}
-That last question is the one this session is really about, and it is the one
-almost never asked in published work.
-:::
-
-# Why OLS breaks {background-color="#16181A" style="color:#F7F6F3"}
-
-## The variance of $\hat\beta$
-
-$$\operatorname{Var}(\hat\beta_{\text{OLS}}) = \sigma^2 (X'X)^{-1}$$
-
-As predictors become numerous or correlated, $X'X$ approaches singularity, its
-inverse explodes, and so does the variance.
-
-::: {.tight}
-- $p > n$: $(X'X)^{-1}$ does not exist at all
-- $p$ close to $n$: it exists and is useless
-- Correlated columns: individually unidentified, jointly fine
-:::
-
-## What that looks like
-
-You get coefficients that are:
-
-::: {.tight}
-- **large**, with alternating signs
-- **unstable** — drop three rows and they move substantially
-- **individually insignificant** while the model as a whole fits well
+- **Large** $d_j$ — where the data vary a lot — barely touched
+- **Small** $d_j$ — where the data are nearly collinear and the OLS coefficient is wildly unstable — shrunk hard
 :::
 
 ::: {.check}
-That last combination is the classic signature. An $F$-test that rejects while
-no single $t$-test does means your predictors are fighting over the same
-variance.
+A *targeted* damping of exactly the directions in which your data carry little information.
 :::
 
-## The bias–variance bargain
+## Effective degrees of freedom
 
-OLS is the **best linear unbiased** estimator. Note the middle word.
+$$\mathrm{df}(\lambda) = \sum_j \frac{d_j^2}{d_j^2+\lambda}$$
 
-If we accept a little bias, we can buy a lot of variance reduction:
-
-$$\mathbb{E}\big[(\hat\beta - \beta)^2\big] = \operatorname{Bias}^2 + \operatorname{Var}$$
-
-::: {.check}
-Every method today deliberately introduces bias. That is not a flaw being
-tolerated — it is the mechanism.
-:::
-
-# Ridge {background-color="#16181A" style="color:#F7F6F3"}
-
-## The ridge problem
-
-$$\hat\beta_{\text{ridge}} = \arg\min_\beta \; \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2$$
-
-which has a closed form:
-
-$$\hat\beta_{\text{ridge}} = (X'X + \lambda I)^{-1}X'y$$
-
-::: {.check}
-Adding $\lambda$ down the diagonal makes the matrix invertible **by
-construction**. Ridge works when $p > n$; OLS does not exist there.
-:::
-
-## What ridge does to correlated predictors
-
-Ridge **shares** a coefficient among correlated predictors rather than picking
-one.
-
-::: {.tight}
-- Two identical columns → each gets half the coefficient
-- Nothing is ever set exactly to zero
-- Every predictor stays in the model
-:::
+decreasing smoothly from $p$ to $0$.
 
 ::: {.muted}
-This is the right behaviour when you believe many small effects exist, and the
-wrong behaviour when you want a short list.
+The Session 04 quantity, made concrete. There is no "number of parameters" here — there is a dial.
 :::
 
-## Ridge shrinks unevenly
+## Bias–variance, explicitly
 
-In the basis of the singular vectors of $X$, ridge multiplies each direction by
+$\operatorname{Var}(\hat\beta^{\text{ridge}})$ is **decreasing** in $\lambda$ while
+$\operatorname{Bias}^2$ is **increasing**.
 
-$$\frac{d_j^2}{d_j^2 + \lambda}$$
-
-where $d_j$ is the $j$-th singular value.
-
-::: {.tight}
-- Large $d_j$ — high-variance directions — barely shrink
-- Small $d_j$ — the poorly determined directions — shrink hard
-:::
+> There always exists $\lambda > 0$ whose MSE is **strictly lower than OLS**.
 
 ::: {.check}
-Ridge shrinks *exactly where the data are least informative*. That is why it
-works, and it is the same decomposition you will meet again in Session 08.
+A result that surprised the profession in 1970, and it should still shape how you think about
+Gauss–Markov. BLUE was never a promise about total error.
 :::
 
-## Scaling is not optional
+# 5.2 The lasso {background-color="#16181A" style="color:#F7F6F3"}
 
-The penalty $\lambda\|\beta\|_2^2$ treats every coefficient identically.
+## The estimator
 
-A predictor measured in euros and one measured in shares get the same penalty
-for wildly different economic magnitudes.
+$$\hat\beta^{\text{lasso}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y - X\beta\|_2^2 + \lambda\|\beta\|_1 \Big\}$$
 
-::: {.warn}
-**Always standardise before penalising** — and do it *inside* the
-cross-validation pipeline, or you have leaked the test fold's mean and variance
-into training. Session 04's rule applies with full force here.
-:::
-
-# Lasso {background-color="#16181A" style="color:#F7F6F3"}
-
-## The lasso problem
-
-$$\hat\beta_{\text{lasso}} = \arg\min_\beta \; \|y - X\beta\|_2^2 + \lambda\|\beta\|_1$$
-
-One character changed — $\|\cdot\|_2^2$ became $\|\cdot\|_1$ — and the
-behaviour changes completely.
-
-::: {.check}
-There is **no closed form**. Coefficients are found by coordinate descent, and
-some arrive at exactly zero.
-:::
-
-## Why $\ell_1$ sets things to zero
-
-Picture the constraint region:
-
-::: {.tight}
-- $\ell_2$ is a **sphere** — smooth, no corners
-- $\ell_1$ is a **diamond** — corners on the axes
-:::
-
-The solution is where the residual contours first touch the region. A diamond
-is most likely to be touched **at a corner**, and a corner is a point where some
-coefficients are exactly zero.
+No closed form.
 
 ::: {.muted}
-Sparsity is a geometric accident of the shape of the constraint, not a
-statistical principle.
+Note the $\tfrac{1}{2n}$ scaling — it is what makes $\lambda$ comparable across sample sizes, and
+it is the convention `glmnet` and scikit-learn use.
 :::
 
-## Soft thresholding
+## Why the corners matter
 
-With orthonormal predictors the lasso has a clean form:
+In the equivalent constrained form — minimise RSS subject to $\|\beta\|_1 \le t$ — the constraint
+region is a **cross-polytope** (a diamond in 2-D), which has **corners on the axes**.
 
-$$\hat\beta_j = \operatorname{sign}(\hat\beta_j^{\text{OLS}})\left(|\hat\beta_j^{\text{OLS}}| - \lambda\right)_+$$
-
-::: {.tight}
-- Below $\lambda$ → set to **exactly zero**
-- Above $\lambda$ → shrunk **toward** zero by $\lambda$
-:::
-
-::: {.warn}
-Note the second line. Surviving coefficients are still biased toward zero. The
-lasso is a selector *and* a shrinker, and people routinely forget the second
-part when interpreting magnitudes.
-:::
-
-## What the lasso does badly
-
-::: {.tight}
-1. **Correlated groups.** Among ten correlated predictors it picks roughly one,
-   near-arbitrarily, and zeroes the rest.
-2. **$p > n$.** It selects at most $n$ predictors, whatever the truth.
-3. **Inference.** Standard errors after selection are not valid — the data chose
-   the model, and the usual formulas do not know that.
-:::
-
-::: {.warn}
-"The lasso selected these six variables, and here are their p-values" is not a
-sentence you may write. Session 10 is where valid post-selection inference
-appears.
-:::
-
-# Elastic net {background-color="#16181A" style="color:#F7F6F3"}
-
-## Both penalties at once
-
-$$\hat\beta_{\text{EN}} = \arg\min_\beta \|y - X\beta\|_2^2 + \lambda\left(\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\right)$$
-
-::: {.tight}
-- $\alpha = 1$ → lasso
-- $\alpha = 0$ → ridge
-- in between → both
-:::
+The elliptical RSS contours expanding outward from $\hat\beta^{OLS}$ meet this region, generically,
+**at a corner** — and a corner is a point where some coordinates are exactly zero.
 
 ::: {.check}
-The $\ell_2$ part restores the **grouping effect**: correlated predictors are
-selected or dropped *together* rather than arbitrarily one-of-ten.
+The $\ell_2$ ball is smooth. It has no corners, so ridge shrinks but never zeroes. Sparsity is a
+property of the *shape*.
 :::
 
-## Two parameters to choose
+## Coordinate descent
 
-You are now cross-validating over a **grid**: $\lambda$ and $\alpha$ together.
+Hold all $\beta_k$, $k\neq j$, fixed. With standardised columns
+($\frac1n\sum_i x_{ij}^2 = 1$), the univariate problem is
 
-::: {.tight}
-- Do it in one pipeline, one CV scheme
-- Report the chosen pair, not just $\lambda$
-- Expect a flat region rather than a sharp optimum
-:::
+$$\min_{\beta_j} \; \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|$$
+
+$$\rho_j = \tfrac1n \textstyle\sum_i x_{ij}\big(y_i - \sum_{k\neq j} x_{ik}\beta_k\big)$$
 
 ::: {.muted}
-A flat CV surface is information: it means the data do not strongly prefer one
-degree of sparsity. Say so.
+$\rho_j$ is the partial correlation of $x_j$ with the current residual.
 :::
 
-# The data {background-color="#16181A" style="color:#F7F6F3"}
+## Soft-thresholding
 
-## What you are working with
+The objective is convex but **non-differentiable at 0**. Using the subgradient of $|\beta_j|$ —
+which is $[-1,1]$ at zero — the solution is
 
-```python
-import pandas as pd
+$$\hat\beta_j = S_\lambda(\rho_j) = \operatorname{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+$$
 
-c = pd.read_parquet("data/spine/angle_c_country.parquet")
-print(c.shape)        # (330, 33) — 30 countries x 11 years, 2014-2024
-```
+## Read it directly
 
-::: {.tight}
-- `ai_use_any`, `ai_use_ml`, `cloud_use`, `ict_specialists`, `digital_intensity`
-- `barrier_cost`, `barrier_skills`, `barrier_data`, `barrier_legal`
-- `rd_pct_gdp`, `has_ai_strategy`
-- **`aux_00` … `aux_14`** — fifteen further candidate predictors
-:::
-
-## The trap, stated plainly
-
-::: {.warn}
-**`ai_use_any` does not exist before 2021.** Not "is missing" — *does not
-exist*. The survey module did not run.
-:::
-
-```python
-c.groupby("time").ai_use_any.apply(lambda s: s.notna().sum())
-# 2014-2020: 0    2021: 28    2022: 28    2023: 27    2024: 29
-```
+> If the partial correlation of $x_j$ with the residual is smaller in magnitude than $\lambda$, set
+> the coefficient to **exactly zero**; otherwise **shrink it toward zero by $\lambda$**.
 
 ::: {.check}
-Seven years of your panel have no outcome. A method that silently drops them
-has quietly changed your research question from 2014–2024 to 2021–2024.
+Cycling this update over $j$ converges — and it is why `glmnet` and scikit-learn are fast.
 :::
 
-## The second trap
+::: {.warn}
+Note the second clause. Surviving coefficients are still **biased toward zero**. The lasso selects
+*and* shrinks, and people routinely forget the second part when reading magnitudes.
+:::
 
-The `aux_*` columns are **correlated with each other and with the real
-predictors**.
-
-That is the situation the whole session is about:
+## Limitations you must know
 
 ::: {.tight}
-- The lasso will pick a handful
-- A slightly different sample will make it pick a *different* handful
-- Both lists will look convincing in a table
+1. With $p > n$, the lasso selects **at most $n$** variables.
+2. Among a group of highly correlated predictors it tends to pick **one arbitrarily** and zero the
+   rest — unstable across samples, and often economically absurd.
+3. Its selected set is consistent only under strong conditions (the **irrepresentable condition**).
 :::
+
+::: {.warn}
+**Do not present a lasso path as if it identified the true model.**
+:::
+
+# 5.3 The elastic net {background-color="#16181A" style="color:#F7F6F3"}
+
+## Both penalties
+
+$$\hat\beta^{\text{EN}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y-X\beta\|_2^2
++ \lambda\big[\alpha \|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\big] \Big\}, \qquad \alpha \in [0,1]$$
+
+$\alpha = 1$ is the lasso; $\alpha = 0$ is ridge.
+
+## The grouping effect
+
+The mixed penalty is **strictly convex** whenever $\alpha < 1$. That delivers what Zou and Hastie
+call the *grouping effect*:
+
+::: {.tight}
+- for two **identical** predictors, the elastic net assigns them **identical** coefficients — the lasso must choose
+- more generally, the difference in coefficients is bounded by a function of
+  $1 - \operatorname{corr}(x_j, x_k)$
+:::
+
+## Why this is not a technicality
+
+For macroeconomic panels — where dozens of series measure nearly the same underlying construct —
+this is the difference between a model that says
+
+> *"industrial production matters"*
+
+and one that says
+
+> *"industrial production of durable goods excluding motor vehicles, specifically, and none of its
+> neighbours."*
+
+## The coordinate update
+
+$$\hat\beta_j = \frac{S_{\lambda\alpha}(\rho_j)}{1 + \lambda(1-\alpha)}$$
 
 ::: {.muted}
-Nobody publishes the second list. You are going to compute it.
+Soft-threshold, then divide. One extra line of arithmetic over the lasso.
 :::
 
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+# 5.4 Choosing the tuning parameters {background-color="#16181A" style="color:#F7F6F3"}
 
-## Build the design matrix
+## The grid
 
-```python
-import numpy as np
+Fit over a **decreasing** grid of $\lambda$ from
 
-d = c[c.time >= 2021].dropna(subset=["ai_use_any"]).copy()
+$$\lambda_{\max} = \frac{\max_j |x_j^\top y|}{n\alpha}$$
 
-drop = ["geo", "time", "flag", "ai_use_any", "ai_use_ml", "ai_use_ge3"]
-X = d.drop(columns=drop).fillna(d.median(numeric_only=True))
-y = d["ai_use_any"]
+— the smallest $\lambda$ giving the null model — down to $\varepsilon\lambda_{\max}$, using **warm
+starts**.
 
-print(X.shape, y.shape)     # about 112 rows, 27 predictors
-```
+Cross-validate **jointly** over $(\alpha, \lambda)$.
 
-::: {.warn}
-`n` is now roughly **112** with **27** predictors. That ratio is the whole
-problem — and it was 330 rows before the outcome's availability was checked.
-:::
+## Two conventions
 
-## Ridge and lasso, cross-validated
-
-```python
-from sklearn.linear_model import RidgeCV, LassoCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GroupKFold
-
-cv = GroupKFold(5)
-g  = d["geo"]
-
-ridge = make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-3, 3, 60)))
-lasso = make_pipeline(StandardScaler(),
-                      LassoCV(cv=list(cv.split(X, y, g)), max_iter=50_000))
-
-ridge.fit(X, y)
-lasso.fit(X, y)
-```
-
-::: {.check}
-Grouped by country, because two years of the same country are not independent.
-Session 04's argument has not gone away.
-:::
-
-## Who survived?
-
-```python
-coef = pd.Series(lasso[-1].coef_, index=X.columns)
-kept = coef[coef != 0].sort_values(key=abs, ascending=False)
-print(f"{(coef != 0).sum()} of {len(coef)} predictors kept")
-print(kept.round(3))
-```
-
-::: {.muted}
-Look at whether any `aux_*` columns are in that list. They are noise-adjacent by
-construction — if they beat a real predictor, that tells you something about how
-much evidence 112 rows contains.
-:::
-
-## Elastic net over a grid
-
-```python
-from sklearn.linear_model import ElasticNetCV
-
-en = make_pipeline(
-    StandardScaler(),
-    ElasticNetCV(l1_ratio=[0.1, 0.3, 0.5, 0.7, 0.9, 0.95, 1.0],
-                 cv=list(GroupKFold(5).split(X, y, g)), max_iter=50_000),
-)
-en.fit(X, y)
-print("chosen l1_ratio:", en[-1].l1_ratio_, "| alpha:", round(en[-1].alpha_, 4))
-```
-
-::: {.check}
-Report both chosen values. A chosen `l1_ratio` near 1 says the data wanted
-sparsity; near 0 says they wanted sharing.
-:::
-
-# The part nobody reports {background-color="#16181A" style="color:#F7F6F3"}
-
-## Selection stability
-
-Resample the data. Refit. Record which predictors survive. Repeat.
-
-```python
-from sklearn.linear_model import LassoCV
-from collections import Counter
-
-rng = np.random.default_rng(60033)
-counts = Counter()
-B = 200
-
-for _ in range(B):
-    idx = rng.choice(len(X), len(X), replace=True)
-    m = make_pipeline(StandardScaler(), LassoCV(cv=5, max_iter=50_000))
-    m.fit(X.iloc[idx], y.iloc[idx])
-    counts.update(X.columns[m[-1].coef_ != 0])
-
-freq = pd.Series(counts).reindex(X.columns).fillna(0) / B
-print(freq.sort_values(ascending=False).head(12).round(2))
-```
-
-## Read the selection frequencies
-
-::: {.tight}
-- **> 0.90** — robust. Reportable as "selected".
-- **0.40–0.90** — genuinely uncertain. Say so.
-- **< 0.40** — appeared in your one fit by luck.
-:::
-
-::: {.warn}
-If your headline predictor is selected in 55% of bootstrap replicates, then a
-different sample would have given you a different paper. That belongs in your
-results, not in a footnote.
-:::
-
-## What to report
-
-::: {.tight}
-- The **CV scheme** and why it is grouped
-- The chosen $\lambda$, and $\alpha$ if elastic net
-- The selected set, **with selection frequencies**
-- That coefficients are shrunk, so magnitudes are biased toward zero
-- That the outcome does not exist before 2021, and what that did to $n$
-:::
-
-::: {.warn}
-No p-values on lasso-selected coefficients. The data chose the model; the
-standard formulas assume you did.
-:::
-
-## Common mistakes
-
-| Mistake | Consequence |
+| | |
 |---|---|
-| Not standardising | The penalty tracks units, not importance |
-| Scaling outside the CV fold | Leakage; CV error too low |
-| Random K-fold on this panel | Optimistic, for Session 04's reason |
-| Reporting one selected set | Hides that it was near-arbitrary |
-| p-values after selection | Invalid |
-| Ignoring the pre-2021 gap | Silently changes the question |
+| $\lambda_{\min}$ | the value minimising CV error |
+| $\lambda_{1\text{se}}$ | the **largest** $\lambda$ within one standard error of the minimum |
 
-## In the lab
+$\lambda_{1\text{se}}$ gives a simpler model whose performance is statistically indistinguishable.
+
+::: {.check}
+**Prefer it when the model must be explained to someone.** Which, in this course, it must.
+:::
+
+## Inference warning
+
+::: {.warn}
+Standard errors reported **after** lasso selection are **not valid**, because selection used the
+same data. Naive post-selection $p$-values are badly anti-conservative.
+:::
+
+::: {.muted}
+This is what motivates the debiased methods later in the course.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you do
 
 ::: {.tight}
-1. Rebuild the design matrix and **confirm the 2021 cliff yourself**
-2. Fit ridge, lasso and elastic net under grouped CV
-3. Run the bootstrap and produce the selection-frequency table
-4. Compare against Wang, Zhu & Yu: does forward selection do as well here?
-5. Three sentences on what your selected set does and does not license
+1. Build the design matrix on your angle; standardise **inside** the pipeline
+2. Fit ridge, lasso and elastic net under **grouped** CV
+3. Report the chosen $(\alpha, \lambda)$, and compare $\lambda_{\min}$ with $\lambda_{1\text{se}}$
+4. Bootstrap the selection: how often does each predictor survive?
 :::
 
 ::: {.check}
-The deliverable is the **frequency table**, not the coefficient table. Anyone
-can produce the second one.
+The **selection-frequency table** is the deliverable, not the coefficient table. Anyone can produce
+the second.
+:::
+
+## The two-minute report
+
+**One slide. Three sentences.**
+
+::: {.tight}
+1. **What I did** — the penalty, the CV scheme, the chosen parameters
+2. **The number** — the selected set, with selection frequencies
+3. **The catch** — that coefficients are shrunk, and that no p-value follows
+:::
+
+::: {.check}
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::

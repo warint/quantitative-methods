@@ -1,6 +1,6 @@
 ---
-title: "Classification and the Threshold"
-subtitle: "Session 06 · Logistic regression, imbalance, and the decision nobody writes down"
+title: "Classification: Logistic Regression, Regularisation, Thresholds"
+subtitle: "Session 06 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,369 +21,342 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### Your classifier is 97% accurate. Should anyone be impressed? {style="color:#F7F6F3"}
+:::
+
+## Structure of this lecture
 
 | | |
 |---|---|
-| **0–10** | Why squared loss is wrong for a binary outcome |
-| **10–30** | Logistic regression and the log-odds |
-| **30–45** | Penalised logistic regression |
-| **45–65** | Imbalance, and why accuracy lies |
-| **65–85** | The threshold is an economic choice |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Shukla**, *Credit Scoring of Thin File Consumers*.
+| **Part A** (~50 min) | 6.1–6.5 — the logistic model and its estimation |
+| **Part B** (~40 min) | 6.6–6.9 — adding the Session 05 penalty, and imbalance |
 
 ::: {.muted}
-Harvard Dataverse, DOI 10.7910/DVN/EGAIKO · CC BY 4.0 · includes Python code
+Part B is short **precisely because** Part A and Session 05 have done the work. Same numbering as
+[`01-lecture/README.md`](01-lecture/README.md).
 :::
 
-A "thin file" consumer has almost no credit history. The paper is about
-classifying people **the data barely describes** — which is exactly the
-situation where the threshold matters more than the model.
+# Part A — Logistic regression {background-color="#16181A" style="color:#F7F6F3"}
+
+## 6.1 Route A — the link function
+
+Model the log-odds as linear:
+
+$$\log\frac{p(x)}{1-p(x)} = x^\top\beta \quad\Longleftrightarrow\quad
+p(x) = \frac{1}{1 + e^{-x^\top\beta}} = \sigma(x^\top\beta)$$
 
 ::: {.check}
-This is one of the sessions where you work with the **authors' own data**, not
-a synthetic stand-in.
+The logistic function satisfies $\sigma'(z) = \sigma(z)(1-\sigma(z))$ — an identity we use
+repeatedly today.
 :::
 
-## Today's question
+## 6.1 Route B — a latent variable
 
-> *Which European countries will fall into the bottom decile of productivity
-> growth **next year**?*
-
-::: {.tight}
-- The outcome is binary
-- It is **rare** — about one country in ten
-- Getting it wrong in one direction costs more than the other
-:::
-
-# Why not least squares {background-color="#16181A" style="color:#F7F6F3"}
-
-## The linear probability model
-
-You *can* regress a 0/1 outcome on $X$ by OLS. Economists do it often, and it
-has real virtues — the coefficients are marginal effects, and it is robust.
-
-But:
+Suppose an unobserved index $y_i^* = x_i^\top\beta - u_i$ with $y_i = \mathbb{1}\{y_i^* > 0\}$.
 
 ::: {.tight}
-- Fitted values go **below 0 and above 1**, which are not probabilities
-- The errors are heteroskedastic by construction
-- The fit is pulled around by points far from the boundary
+- $u_i$ standard **logistic** → $P(y_i = 1\mid x_i) = \sigma(x_i^\top\beta)$ exactly
+- $u_i$ standard **normal** → probit
 :::
 
 ::: {.muted}
-The LPM is defensible for an average effect. It is a poor basis for a *decision*.
+Route B is the economist's route: $y^*$ is a latent utility difference, and the model is a random
+utility model. The logit/probit choice is a choice about the distribution of unobserved
+heterogeneity — and in practice the two give nearly identical fitted probabilities.
 :::
 
-## Model the log-odds instead
+## 6.2 The likelihood
 
-$$\log\frac{p(x)}{1 - p(x)} = x'\beta \qquad\Longleftrightarrow\qquad p(x) = \frac{1}{1 + e^{-x'\beta}}$$
+$$\ell(\beta) = \sum_{i=1}^n \Big[ y_i x_i^\top\beta - \log\big(1 + e^{x_i^\top\beta}\big) \Big]$$
+
+**Score**, using $\sigma' = \sigma(1-\sigma)$:
+
+$$\nabla \ell(\beta) = \sum_i \big(y_i - p(x_i)\big)x_i = X^\top (y - p)$$
+
+## Read the score
+
+> At the optimum, the residual $y - p$ is **orthogonal to every regressor**.
 
 ::: {.check}
-The logistic function maps the whole real line into $(0,1)$. No fitted value can
-ever be an impossible probability.
+Exactly the OLS condition from Session 02, with fitted *probabilities* in place of fitted values.
 :::
 
-## What the coefficients mean
+## 6.2 The Hessian, and concavity
 
-$\beta_j$ is the change in **log-odds** for a one-unit change in $x_j$.
+$$\nabla^2\ell(\beta) = -\sum_i p_i(1-p_i)\,x_i x_i^\top = -X^\top W X$$
+
+$$W = \operatorname{diag}\big(p_i(1-p_i)\big)$$
+
+Since $W \succeq 0$, we have $-X^\top W X \preceq 0$:
+
+::: {.check}
+**The log-likelihood is concave.** Any stationary point is a global maximum. There are no local
+optima.
+:::
+
+## 6.3 Newton–Raphson is IRLS
+
+The Newton step $\beta^{(t+1)} = \beta^{(t)} + (X^\top W X)^{-1}X^\top(y-p)$ rearranges to
+
+$$\beta^{(t+1)} = (X^\top W X)^{-1} X^\top W z, \qquad z = X\beta^{(t)} + W^{-1}(y - p)$$
+
+which is exactly **weighted least squares** of the *adjusted response* $z$ on $X$ with weights $W$.
+
+## Two consequences
 
 ::: {.tight}
-- $e^{\beta_j}$ is the **odds ratio** — multiplicative, not additive
-- The effect on the *probability* depends on where you are on the curve
-- Near $p = 0.5$ the curve is steepest; in the tails it is nearly flat
+- You reuse **all** the linear algebra of Session 02
+- The asymptotic covariance is
+  $\widehat{\operatorname{Var}}(\hat\beta) = (X^\top W X)^{-1}$ — the inverse observed information
 :::
+
+## Perfect separation
+
+If a hyperplane separates the classes exactly, the likelihood increases without bound as
+$\|\beta\| \to \infty$: **the MLE does not exist.**
 
 ::: {.warn}
-"A one-point rise in the barrier index raises the probability by $\beta$" is
-wrong. There is no single such number. Report the odds ratio, or a marginal
-effect evaluated at a stated point.
+Symptoms: enormous coefficients with enormous standard errors. More common with small samples and
+many dummies than students expect.
 :::
-
-## Fitting it
-
-There is no closed form. We maximise the log-likelihood
-
-$$\ell(\beta) = \sum_i \Big[ y_i \, x_i'\beta - \log\big(1 + e^{x_i'\beta}\big) \Big]$$
-
-which is **concave**, so the maximum is unique and the optimiser converges.
 
 ::: {.muted}
-Concavity is why logistic regression is boring to fit and trees are not.
+Hold that thought — Part B disposes of it in one line.
 :::
 
-## Separation
+## 6.4 Three quantities, three uses
 
-If some predictor perfectly splits the classes, the likelihood is maximised by
-sending $\beta \to \infty$.
+| Quantity | Formula | Use it when |
+|---|---|---|
+| Log-odds change | $\beta_j$ | Reporting the raw model |
+| Odds ratio | $e^{\beta_j}$ | A clinical or credit audience |
+| Marginal effect at $x$ | $\beta_j\, p(x)(1-p(x))$ | You need a probability change |
+| **Average marginal effect** | $\frac1n\sum_i \beta_j\, p_i(1-p_i)$ | **Reporting to economists** |
 
-::: {.tight}
-- Coefficients explode; standard errors explode faster
-- Software may report "convergence" anyway
-- It is *more* common in small samples — like a 30-country panel
-:::
+## Why the average marginal effect
 
-::: {.check}
-A penalty fixes it. Which is the next section.
-:::
-
-# Penalised logistic {background-color="#16181A" style="color:#F7F6F3"}
-
-## The same two penalties
-
-$$\min_\beta \; -\ell(\beta) + \lambda\left(\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\right)$$
-
-Everything from Session 05 carries over:
-
-::: {.tight}
-- $\ell_2$ shrinks and shares; $\ell_1$ selects
-- Standardise first, inside the pipeline
-- Choose $\lambda$ by cross-validation, grouped by country
-:::
+The same $\beta_j$ implies a large probability change near $p=0.5$ and almost none near $p=0.01$.
 
 ::: {.warn}
-In `scikit-learn` the logistic penalty is parameterised by `C`, which is
-**$1/\lambda$**. Larger `C` means *less* regularisation. This trips up everyone
-once.
+**Report average marginal effects** unless you have a reason not to. A bare odds ratio invites
+misreading.
 :::
 
-# The data {background-color="#16181A" style="color:#F7F6F3"}
+## Aside — more than two classes
 
-## The label
+$$P(y=k\mid x) = \frac{e^{x^\top\beta_k}}{\sum_\ell e^{x^\top\beta_\ell}}$$
 
-```python
-import pandas as pd
-
-core = pd.read_parquet("data/spine/core.parquet")
-print(core.falling_behind_next.mean())      # 0.100
-print(core.falling_behind_next.isna().sum())  # 30
-```
-
-::: {.tight}
-- The rate is **exactly 10% by construction** — the threshold is the within-year
-  bottom decile
-- **30 rows are NaN**: the last year of each of 30 countries
-:::
-
-## That NaN is not a defect
-
-`falling_behind_next` is next year's outcome. For 2024 there is no next year.
-
-::: {.check}
-Dropping those 30 rows is **correct**. Imputing them would be inventing the
-future — the exact error this course exists to prevent.
-:::
-
-::: {.warn}
-Be equally careful the other way: if you build features from the *same* year as
-the label without lagging, you have used information that would not have been
-available when the prediction had to be made.
-:::
-
-## Base rate is a benchmark
-
-A model that predicts "never falls behind" for every country is **90% accurate**.
-
-::: {.warn}
-If your model reports 91% accuracy, it has added one percentage point over
-saying nothing at all. Accuracy on an imbalanced problem is not a measure of
-skill — it is a measure of the base rate.
-:::
-
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
-
-## Set up
-
-```python
-import numpy as np
-
-d = core.dropna(subset=["falling_behind_next"]).copy()
-d = d.sort_values(["geo", "time"])
-
-feat = ["gdp_pc_eur", "population", "employment_ths",
-        "productivity_idx", "gfcf_meur", "prod_growth"]
-X = d[feat].fillna(d[feat].median())
-y = d["falling_behind_next"].astype(int)
-
-print(X.shape, y.mean().round(3))     # (420, 6), 0.1
-```
-
-## Fit it
-
-```python
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GroupKFold
-
-clf = make_pipeline(
-    StandardScaler(),
-    LogisticRegressionCV(Cs=np.logspace(-3, 3, 30), penalty="l2",
-                         cv=5, scoring="neg_log_loss", max_iter=5000),
-)
-clf.fit(X, y)
-```
-
-::: {.check}
-Scored by **log loss**, not accuracy. Log loss rewards well-calibrated
-probabilities; accuracy rewards guessing the majority class.
-:::
-
-## Why the inner `cv` is just `5`
-
-::: {.warn}
-A precomputed `GroupKFold(...).split(...)` holds row positions for the
-**whole** dataset. Nest it inside the outer loop on the next slide and those
-positions point past the end of the training subset — an `IndexError`, if you
-are lucky enough to get one.
-:::
-
-::: {.check}
-The grouping belongs on the **outer** loop, which is where it protects you.
-:::
-
-## Out-of-sample probabilities
-
-```python
-from sklearn.model_selection import cross_val_predict
-
-p = cross_val_predict(clf, X, y, cv=GroupKFold(5).split(X, y, d["geo"]),
-                      method="predict_proba")[:, 1]
-
-print("mean predicted:", p.mean().round(3), " actual:", y.mean().round(3))
-```
+Parameters are identified only up to adding a constant vector to every $\beta_k$ — hence the
+convention $\beta_K = 0$. The likelihood is again concave.
 
 ::: {.muted}
-Those two numbers should be close. If the mean predicted probability is far from
-the base rate, the model is miscalibrated before you have chosen any threshold.
+Multinomial logit imposes **independence of irrelevant alternatives** — which matters greatly for
+discrete-choice work and much less for pure classification.
 :::
 
-# Judging it {background-color="#16181A" style="color:#F7F6F3"}
+## 6.5 A model, then a decision
 
-## ROC is the wrong picture here
+A model produces $\hat p_i$. A **decision** requires a threshold $\tau$.
 
-The ROC curve plots TPR against FPR. With 90% negatives, the FPR denominator is
-enormous, so a great many false positives barely move the curve.
+::: {.warn}
+These are separate acts, and conflating them is the most common applied error in this session.
+:::
+
+| | Predicted 1 | Predicted 0 |
+|---|---|---|
+| **Actual 1** | TP | FN |
+| **Actual 0** | FP | TN |
+
+$$\text{Precision} = \frac{TP}{TP+FP}, \quad \text{Recall} = \frac{TP}{TP+FN}, \quad
+\text{FPR} = \frac{FP}{FP+TN}$$
+
+## ROC and its vice
+
+**ROC** plots TPR against FPR as $\tau$ sweeps $[0,1]$; **AUC** equals
+$P(\hat p_{\text{positive}} > \hat p_{\text{negative}})$ for a random pair.
+
+::: {.tight}
+- Threshold-free and invariant to class balance — a **virtue** for comparing models
+- A **vice** for judging usefulness under heavy imbalance
+:::
 
 ::: {.check}
-Use the **precision–recall** curve when the positive class is rare. Its baseline
-is the base rate — 0.10 here — not 0.5.
+With 2% positives, prefer the **precision–recall curve** and average precision.
 :::
 
-```python
-from sklearn.metrics import average_precision_score, roc_auc_score
-print("ROC AUC :", round(roc_auc_score(y, p), 3))
-print("PR  AUC :", round(average_precision_score(y, p), 3), " baseline", round(y.mean(), 3))
-```
+## Choosing $\tau$ from costs
+
+If a false negative costs $c_{FN}$ and a false positive $c_{FP}$:
+
+$$\boxed{\;\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}\;}$$
+
+For German Credit's stated **5:1** ratio, $\tau^\star = 1/6 \approx 0.167$, not 0.5.
+
+::: {.warn}
+**The default threshold in every software package is a modelling assumption about costs that almost
+nobody states out loud.**
+:::
 
 ## Calibration
 
-```python
-from sklearn.calibration import calibration_curve
-import matplotlib.pyplot as plt
-
-frac, mean_pred = calibration_curve(y, p, n_bins=8, strategy="quantile")
-plt.plot(mean_pred, frac, "o-"); plt.plot([0, 1], [0, 1], "--")
-plt.xlabel("predicted probability"); plt.ylabel("observed frequency")
-```
+A model is calibrated if, among cases where $\hat p \approx 0.3$, about 30% are positive.
 
 ::: {.check}
-On the diagonal, "0.3" means it happens 30% of the time. That is what makes a
-probability usable by somebody making a decision.
+Discrimination (AUC) and calibration are **different properties**. A model can rank perfectly and
+still be badly miscalibrated.
 :::
-
-# The threshold {background-color="#16181A" style="color:#F7F6F3"}
-
-## 0.5 is not a default. It is a claim.
-
-Classifying at $p > 0.5$ asserts that a false positive and a false negative cost
-the same.
-
-::: {.warn}
-For "which countries need policy attention?", they obviously do not. Missing a
-country that falls behind is not the same as sending an analyst to one that was
-fine.
-:::
-
-## Choose it with a loss
-
-Let $c_{FN}$ be the cost of a miss and $c_{FP}$ the cost of a false alarm. The
-threshold that minimises expected cost is
-
-$$t^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}$$
-
-::: {.tight}
-- Missing is 4× as costly → $t^\star = 0.2$
-- Equal costs → $t^\star = 0.5$
-:::
-
-::: {.check}
-You will not know these costs precisely. State the ratio you assumed, and show
-how the answer moves when it changes.
-:::
-
-## Sweep it
-
-```python
-from sklearn.metrics import precision_score, recall_score
-
-rows = []
-for t in np.arange(0.05, 0.65, 0.05):
-    yhat = (p >= t).astype(int)
-    rows.append((round(t, 2), yhat.sum(),
-                 round(precision_score(y, yhat, zero_division=0), 3),
-                 round(recall_score(y, yhat), 3)))
-
-print(pd.DataFrame(rows, columns=["threshold", "flagged", "precision", "recall"]))
-```
 
 ::: {.muted}
-Read the "flagged" column as a workload: how many countries would you actually
-have to look at?
+Plot a reliability diagram whenever the probability itself enters a decision.
 :::
 
-## What to report
+# Part B — Adding the penalty {background-color="#16181A" style="color:#F7F6F3"}
+
+## 6.6 The composition
+
+Combine Session 05's penalty with the likelihood:
+
+$$\hat\beta = \arg\min_\beta \left\{ -\frac{1}{n}\sum_{i}\Big[ y_i x_i^\top\beta - \log(1+e^{x_i^\top\beta})\Big]
++ \lambda\Big[\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\Big] \right\}$$
+
+::: {.check}
+The negative log-likelihood is convex (6.2) and both penalties are convex, so the objective is
+convex. For $\alpha < 1$ it is **strictly** convex and the minimiser is unique.
+:::
+
+## The penalty cures separation
+
+The likelihood's drive toward $\|\beta\|\to\infty$ is dominated by the penalty's growth, so a
+**finite minimiser always exists**.
+
+::: {.check}
+Regularisation is here a *regularity* device, not merely a variance-reduction device.
+:::
+
+::: {.muted}
+Firth's bias-reduced logistic regression is an alternative. Dropping the offending variable, once
+you recognise it as a proxy for the outcome, is usually the honest answer.
+:::
+
+## 6.7 Two nested loops
+
+**Outer.** At the current $\tilde\beta$, take the second-order Taylor expansion of the
+log-likelihood. By 6.3 this *is* a weighted least-squares problem, with
+
+$$w_i = \tilde p_i(1-\tilde p_i), \qquad z_i = x_i^\top\tilde\beta + (y_i - \tilde p_i)/w_i$$
+
+## The inner loop
+
+Coordinate descent — the Session 05 formula with weights inserted:
+
+$$\beta_j \leftarrow \frac{S_{\lambda\alpha}\big(\frac1n\sum_i w_i x_{ij}(z_i - \tilde y_i^{(-j)})\big)}
+{\frac1n\sum_i w_i x_{ij}^2 + \lambda(1-\alpha)}$$
+
+with $S_\lambda(\rho) = \operatorname{sign}(\rho)(|\rho|-\lambda)_+$, the soft-thresholding
+operator you derived in Session 05. Iterate, recompute weights, repeat.
+
+## Three practical points
 
 ::: {.tight}
-- The **base rate**, first, so accuracy can be read against it
-- PR AUC rather than ROC AUC, with the baseline stated
-- A calibration plot, or a sentence about what it showed
-- The **threshold you chose and the cost ratio implying it**
-- Precision and recall *at that threshold* — not the maximum over all thresholds
+1. **Warm starts** down a decreasing $\lambda$ grid make the whole path cost little more than one fit.
+2. An **active set** strategy cycles only over currently non-zero coefficients, checking the full set
+   occasionally via the KKT conditions.
+3. **Clamp $w_i$ away from zero** (e.g. at $10^{-5}$) or $z_i$ explodes for well-classified points.
 :::
 
 ::: {.warn}
-Reporting the best F1 over a swept threshold, chosen on the same data you
-evaluate on, is a leak. Choose the threshold on training folds.
+That third one is the bug you will hit in the lab.
 :::
 
-## Common mistakes
+## 6.8 Imbalance — three distinct interventions
 
-| Mistake | Consequence |
-|---|---|
-| Reporting accuracy | 90% means nothing at a 10% base rate |
-| Threshold left at 0.5 | An economic assumption made silently |
-| ROC AUC on rare events | Looks strong, hides false positives |
-| Imputing the 30 NaN labels | Inventing the future |
-| `C` read as a penalty | Regularisation backwards |
-| Same-year features | Leakage from the prediction date |
+| Intervention | What it changes | Effect on calibration |
+|---|---|---|
+| **Resampling** (SMOTE, over/under) | the empirical distribution | **Destroys** it — $\hat p$ estimates the resampled prior |
+| **Class weights** in the loss | the objective | Distorts it similarly; equivalent to a prior shift |
+| **Threshold adjustment** | only the decision rule | **Preserves** it completely |
 
-## In the lab
+## The recommendation
+
+> Fit an **unweighted**, well-regularised model, verify **calibration**, then move the **threshold**
+> using $\tau^\star$ from 6.5.
+
+::: {.check}
+You keep an interpretable probability *and* an optimal decision. Unambiguous for most economic
+applications.
+:::
+
+## If you must resample, undo it
+
+With training positive rate $\pi'$ and population rate $\pi$, correct the intercept:
+
+$$\beta_0 \leftarrow \beta_0 - \log\!\left(\frac{\pi'}{1-\pi'}\cdot\frac{1-\pi}{\pi}\right)$$
+
+::: {.muted}
+Very few practitioners do this. Be one who does.
+:::
+
+## On SMOTE
+
+::: {.warn}
+It interpolates between minority neighbours, so synthetic points lie in the **convex hull** of
+observed minority cases. With correlated financial ratios in high dimensions, those interpolants
+can be economically impossible firms.
+:::
+
+::: {.muted}
+Treat with scepticism.
+:::
+
+## 6.9 Selection stability
+
+When $p \gg n$ with correlated predictors, the selected variable set is a **high-variance object** —
+you saw this for the lasso in Session 05; it is worse here.
 
 ::: {.tight}
-1. Download the Shukla thin-file package and read its Python code
-2. Fit penalised logistic on the spine label, grouped by country
-3. Produce the calibration plot and the threshold sweep
-4. State a cost ratio, derive $t^\star$, and report performance there
-5. Three sentences a policy reader could act on
+- **Stability selection** (Meinshausen & Bühlmann): many subsamples of size $n/2$, retain variables
+  selected in at least $\pi_{\text{thr}}$ (e.g. 0.6) of them. Comes with a bound on the expected
+  number of false selections.
+- **Bootstrap selection frequencies:** simpler, and enough for a report.
+:::
+
+## How to write it up
+
+::: {.warn}
+**Never:** *"the model identified X, Y and Z as the drivers of bankruptcy."*
 :::
 
 ::: {.check}
-See [`REPLICATIONS.md`](../REPLICATIONS.md) for how to download the package.
+Report the selected set **with its selection frequencies**, and say that a different sample would
+plausibly have produced a different list.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you do
+
+::: {.tight}
+1. Fit penalised logistic on your angle under grouped CV; report the base rate first
+2. Produce a reliability diagram — is $\hat p$ usable as a probability?
+3. State a cost ratio, derive $\tau^\star$, and report precision and recall **there**
+4. Bootstrap the selection and report frequencies
+:::
+
+::: {.warn}
+Report the **base rate** before any accuracy figure, so it can be read against something.
+:::
+
+## The two-minute report
+
+::: {.tight}
+1. **What I did** — the model, the CV scheme, the cost ratio you assumed
+2. **The number** — performance at *your* threshold, not the best over all thresholds
+3. **The catch** — calibration, and the instability of the selected set
+:::
+
+::: {.check}
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::
