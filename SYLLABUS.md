@@ -88,7 +88,7 @@ Before class                First half (~90 min)          Second half (~90 min)
   · reading                   · the mathematics             · your group's research angle
   · concepts to review        · derivations                 · implement, then break it
   · data already cached       · what the method assumes     · 2-minute report
-  · written self-check        · what it cannot do           · role log before you leave
+  · written self-check        · what it cannot do           · everyone pushes before leaving
 ```
 
 The second half is **collective research**. Every session poses one big question. Ten groups of

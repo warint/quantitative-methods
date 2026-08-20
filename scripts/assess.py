@@ -2,7 +2,7 @@
 """
 group assessment toolkit.
 
-One script, four jobs. Run from the repository root.
+One script, five jobs. Run from the repository root.
 
     python scripts/assess.py draw --session 5
         Draw this week's presenter for each group. Balanced (whoever has
@@ -11,9 +11,6 @@ One script, four jobs. Run from the repository root.
     python scripts/assess.py contributions
         Per-group git contribution table from the commit history.
         Flags students whose activity is far below their group's.
-
-    python scripts/assess.py roles
-        Check that the role log rotated. Prints who did what, how often.
 
     python scripts/assess.py participation --session 5
         Tick who made a substantive cross-group contribution today.
@@ -34,7 +31,6 @@ Files it reads and writes, all under assessment/:
     roster.csv              you fill this in once
     presenter_log.csv       written by `draw`
     participation_log.csv   written by `participation`
-    role-logs/group-XX.md   students fill these in each week
     peer-ratings/ratings.csv  collected once at term end
     multipliers.csv         written by `multipliers`
 """
@@ -55,13 +51,11 @@ A = os.path.join(ROOT, "assessment")
 ROSTER = os.path.join(A, "roster.csv")
 PRESENTER_LOG = os.path.join(A, "presenter_log.csv")
 PARTICIPATION_LOG = os.path.join(A, "participation_log.csv")
-ROLE_DIR = os.path.join(A, "role-logs")
 RATINGS = os.path.join(A, "peer-ratings", "ratings.csv")
 MULTIPLIERS = os.path.join(A, "multipliers.csv")
 PARTICIPATION_OUT = os.path.join(A, "participation.csv")
 
 DIMENSIONS = ["preparation", "contribution", "reliability", "understanding"]
-ROLES = ["Driver", "Analyst", "Reporter"]
 
 # ── Participation ────────────────────────────────────────────────────────────
 # After each lab you tick the students who made a real contribution. Those ticks
@@ -273,6 +267,30 @@ def contribution_flags(roster, stats):
     return flags
 
 
+def lab_grid(members, stats):
+    """Per-member x per-week attendance grid, derived from commits.
+
+    The course asks every member to commit and push in every lab. That is not
+    self-reported: it is in the history. This prints one row per member and one
+    column per week in which the group did anything at all, so a member who was
+    carried shows up as a row of gaps rather than as a total that looks fine.
+    """
+    weeks = sorted({w for m in members for w in stats[m["student_id"]]["weeks"]})
+    if not weeks:
+        print("      no commits yet")
+        return []
+    labels = [w.split("-W")[-1] for w in weeks]
+    print(f"      {'student':<26s} " + " ".join(f"{x:>3s}" for x in labels) + "   pushed")
+    silent = []
+    for m in members:
+        active = stats[m["student_id"]]["weeks"]
+        cells = " ".join(f"{'  x' if w in active else '  .'}" for w in weeks)
+        n = sum(1 for w in weeks if w in active)
+        if n < len(weeks):
+            silent.append((m, len(weeks) - n))
+        print(f"      {m['name'][:26]:<26s} {cells}   {n}/{len(weeks)}")
+    return silent
+
 def cmd_contributions(args):
     roster = load_roster()
     stats, unmatched = attribute(roster, git_log())
@@ -280,8 +298,9 @@ def cmd_contributions(args):
 
     head("GIT CONTRIBUTION REPORT")
     print("  Evidence for a conversation, not a verdict. Commit counts are noisy and")
-    print("  gameable; pair programming legitimately concentrates them. Read alongside")
-    print("  the role log before drawing any conclusion.")
+    print("  gameable; pair programming legitimately concentrates them. The per-week")
+    print("  grid is the more useful half: the course asks every member to push in")
+    print("  every lab, and a row of gaps says more than a low total.")
     print()
 
     for gid, members in by_group(roster).items():
@@ -295,6 +314,10 @@ def cmd_contributions(args):
             print(f"      {m['name'][:26]:<26s} {s['commits']:>8d} "
                   f"{s['commits']/total:>6.0%} {s['added']:>9d} {s['removed']:>8d} "
                   f"{len(s['weeks']):>6d}{mark}")
+        print()
+        silent = lab_grid(members, stats)
+        for m, missed in silent:
+            print(f"      note: {m['name']} pushed nothing in {missed} active week(s)")
         print()
 
     if flags:
@@ -317,61 +340,6 @@ def cmd_contributions(args):
         for who, n in unmatched.most_common(12):
             print(f"    {n:>4d} commits   {who}")
     return flags
-
-
-# ─────────────────────────────────────────────────────────────── roles
-def parse_role_log(path):
-    """Read | session | Driver | Analyst | Reporter | rows from a group's markdown log."""
-    rows = []
-    if not os.path.exists(path):
-        return rows
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            if len(cells) >= 4 and re.fullmatch(r"0?\d{1,2}", cells[0]):
-                names = list(cells[1:4])
-                if any(n and not set(n) <= set("- ") for n in names):
-                    rows.append((int(cells[0]), names))
-    return rows
-
-
-def cmd_roles(args):
-    roster = load_roster()
-    head("ROLE LOG — DID THE ROLES ROTATE?")
-    print("  Each week one member drives (writes code), one analyses (owns the")
-    print("  specification and the interpretation), one reports (writes the three")
-    print("  sentences and presents). Over ten sessions everyone should do each")
-    print("  role three or four times.")
-    print()
-
-    any_missing = False
-    for gid, members in by_group(roster).items():
-        path = os.path.join(ROLE_DIR, f"{gid.lower()}.md")
-        rows = parse_role_log(path)
-        if not rows:
-            print(f"  {gid}   no role log submitted yet")
-            any_missing = True
-            continue
-        tally = defaultdict(Counter)
-        for _, names in rows:
-            for role, name in zip(ROLES, names):
-                if name and not set(name) <= set("- "):
-                    tally[name][role] += 1
-        print(f"  {gid}   {len(rows)} session(s) logged")
-        print(f"      {'member':<26s} {'Driver':>8s} {'Analyst':>8s} {'Reporter':>9s}  balance")
-        for m in members:
-            t = tally.get(m["name"], Counter())
-            vals = [t[r] for r in ROLES]
-            spread = max(vals) - min(vals) if sum(vals) else 0
-            note = "ok" if spread <= 2 and sum(vals) else ("NOT ROTATING" if sum(vals) else "absent")
-            print(f"      {m['name'][:26]:<26s} {vals[0]:>8d} {vals[1]:>8d} {vals[2]:>9d}  {note}")
-        stray = set(tally) - {m["name"] for m in members}
-        if stray:
-            print(f"      names not on the roster: {', '.join(sorted(stray))}")
-        print()
-    if any_missing:
-        rule()
-        print("  Missing logs are themselves a signal. Chase them in week 4, not week 11.")
 
 
 # ─────────────────────────────────────────────────────────────── participation
@@ -794,10 +762,6 @@ def cmd_status(args):
         print(f"  students who have never presented: {len(never)}")
         for r in never[:10]:
             print(f"      {r['group']}  {r['name']}")
-    logs = sum(1 for gid in groups
-               if os.path.exists(os.path.join(ROLE_DIR, f"{gid.lower()}.md"))
-               and parse_role_log(os.path.join(ROLE_DIR, f"{gid.lower()}.md")))
-    print(f"  role logs with entries: {logs}/{len(groups)}")
     plog = read_participation_log()
     psess = sorted({int(r["session"]) for r in plog})
     print(f"  participation ticks recorded: {len(plog)} across "
@@ -828,8 +792,6 @@ def main():
     c = sub.add_parser("contributions", help="git contribution table with flags")
     c.set_defaults(func=cmd_contributions)
 
-    r = sub.add_parser("roles", help="check the role logs rotated")
-    r.set_defaults(func=cmd_roles)
 
     pa = sub.add_parser("participation", help="record a session, or report pass/fail")
     pa.add_argument("--session", type=int, help="record cross-group contributions for this session")

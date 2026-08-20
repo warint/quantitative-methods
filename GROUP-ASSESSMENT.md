@@ -25,7 +25,7 @@ the term.
 |---|---|---|---|---|
 | 1 | **Random presenter draw** | Every lab | Must be ready | 30 seconds |
 | 2 | **Git contribution report** | Automatic | Commit under your own name | One command |
-| 3 | **Rotating role log** | Every lab | One line | One glance |
+| 3 | **Everyone pushes** | Every lab | Nothing — it is in the history | One glance |
 | 4 | **Confidential peer ratings** | Once, at term end | Five minutes | ~20 minutes |
 
 Mechanisms 1–3 are **deterrents**. They mostly work by existing. Mechanism 4 is the only one that
@@ -90,31 +90,41 @@ measurement artefact.
 
 ---
 
-### 3. The rotating role log
+### 3. Everyone pushes, every lab
 
-Each week, the three members hold three roles:
+There are **no assigned roles**. All three members work on the lab together, and all three are
+expected to **commit and push from their own machine** before they leave the room.
 
-| Role | Owns |
-|---|---|
-| **Driver** | writes the code |
-| **Analyst** | decides the specification, checks the results, owns the interpretation |
-| **Reporter** | writes the three sentences, builds the slide, presents *if drawn* |
-
-Roles **must rotate**. Over ten labs each member should hold each role three or four times.
-
-The log is one row per session in `assessment/role-logs/gXX.md`, filled in before the group leaves
-the room.
+That is not self-reported. It is in the history:
 
 ```bash
-python scripts/assess.py roles
+python scripts/assess.py contributions
 ```
 
-Prints each member's role counts and flags a group where someone is always the Driver — or, more
-tellingly, never is.
+Alongside the commit table, this prints a per-member × per-week grid:
 
-> The role log's function is less surveillance than **structure**. Groups of three left to
-> themselves reliably produce one person who types, one who talks, and one who watches. Naming the
-> roles and forcing rotation makes that pattern impossible to fall into by accident.
+```
+  G07  (angle C)
+      student                     commits   share    +lines   -lines  weeks
+      A. Dubois                        24    41%      1840      310      9
+      B. Vogt                          21    36%      1502      260      9
+      C. Mensah                        13    23%       690      120      5
+
+      student                     36  37  38  39  40  41  42  43  44   pushed
+      A. Dubois                    x   x   x   x   x   x   x   x   x   9/9
+      B. Vogt                      x   x   x   x   x   x   x   x   x   9/9
+      C. Mensah                    x   x   .   .   x   x   .   .   x   5/9
+      note: C. Mensah pushed nothing in 4 active week(s)
+```
+
+> **Why the grid rather than the total.** A total can look acceptable while hiding that someone
+> stopped contributing in week three. A row of gaps in the weeks when the group was demonstrably
+> working is a specific, dated, checkable observation — and it is the one worth raising in week
+> four rather than week eleven.
+
+Groups of three left to themselves do tend to produce one person who types, one who talks and one
+who watches. The requirement that **everyone pushes** is what makes that pattern visible, without
+anyone having to fill in a form.
 
 ---
 
@@ -191,7 +201,7 @@ recognised rather than merely endured.
 ### Appeals
 
 Any student whose multiplier is not 1.00 is told the basis and may request review within seven
-days. The review considers all three records together — ratings, git history, role log — plus
+days. The review considers all three records together — ratings, git history, the per-week push grid — plus
 anything the student brings. The point is to get it right, not to defend the arithmetic.
 
 ---
@@ -334,7 +344,7 @@ If someone drawn could not deliver, put `y` in their `no_show` column in
 **Twice a term — 5 minutes (week 6 and week 11)**
 
 ```bash
-python scripts/assess.py status               # contributions + role logs + draws + participation
+python scripts/assess.py status               # contributions + draws + participation
 ```
 
 Week 6 is the one that matters. A passenger identified in week 6 can still be turned around; one
@@ -358,7 +368,7 @@ All of it, in Session 1. Every mechanism here works better when it is known abou
 
 - The draw only changes preparation if students know it is coming.
 - The commit history only encourages individual commits if students know it is read.
-- The role log only prevents the type-talk-watch pattern if students know why it exists.
+- The push requirement only prevents the type-talk-watch pattern if students know why it exists.
 - The peer ratings only avoid inflation if students understand that the default is no change and
   that rating everyone 5 is a choice to let a free-rider take their mark.
 
@@ -384,7 +394,7 @@ Stated honestly, because the limits matter:
 
 ```
 GROUP-ASSESSMENT.md            this document
-scripts/assess.py              draw · participation · contributions · roles · multipliers · status
+scripts/assess.py              draw · participation · contributions · multipliers · status
 assessment/
 ├── roster.template.csv        copy to roster.csv and fill in
 ├── roster.csv                 (git-ignored — student data)
@@ -392,7 +402,6 @@ assessment/
 ├── participation_log.csv      written by `participation --session N`
 ├── participation.csv          written by `participation --report` (git-ignored)
 ├── multipliers.csv            written by `multipliers` (git-ignored)
-├── role-logs/g01.md … g10.md  students fill these in weekly
 └── peer-ratings/
     ├── FORM.md                the student-facing form
     ├── ratings.template.csv   the entry format

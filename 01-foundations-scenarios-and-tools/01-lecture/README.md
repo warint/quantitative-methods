@@ -73,7 +73,7 @@ Four mechanisms, three of which cost you nothing if you are doing the work.
 |---|---|
 | **Random presenter draw** | every lab — the two-minute report is given by a member drawn live |
 | **Git contribution report** | automatic — commits, share, weeks active |
-| **Rotating role log** | every lab — Driver / Analyst / Reporter must rotate |
+| **Everyone pushes** | every lab — all three members commit from their own machine |
 | **Confidential peer ratings** | once, at term end |
 
 A mark is reduced only when **two independent records agree**. One signal opens a conversation; it

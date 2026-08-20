@@ -11,17 +11,27 @@ student in 2026 will reach for a language model on the first line of code. The q
 whether they use one, but whether they can tell when it is wrong — and that is a skill you have to
 teach on purpose.
 
-So this course does three unusual things:
+So this course does four unusual things:
 
 | | |
 |---|---|
 | **The model runs on your machine** | Ollama + Qwen 2.5 Coder. No API key, no per-token bill, no data leaving the room. You also learn what is achievable *without* a frontier system, which is the realistic institutional constraint. |
 | **You work in a real IDE, from the terminal** | VS Codium, git, and an agent (`aider`) that reads and edits your files while you steer it in prose. Not notebooks; the workflow you will actually be hired into. |
 | **Catching the model is graded** | Every lab deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
+| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY 4.0 / MIT). Published articles with their replication data, cited by DOI. The labs are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
 
 Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Markov, the bias–variance
 decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
 The tooling is modern; the standards are not new.
+
+**Research-oriented, not exercise-oriented.** Each session is built on a published paper, with the
+authors' own replication package where one exists — see [`REPLICATIONS.md`](REPLICATIONS.md), where
+every DOI has been resolved. The term ends in a research paper written for a real reader, and an
+oral defence of it. Nothing here is a toy problem with a number at the back of the book.
+
+**Open by construction.** No proprietary software, no API keys, no cloud accounts, no per-token
+bills — and no dependency that stops the course working in a room with no internet. The whole
+repository is licensed for reuse, including commercially: take it, translate it, teach it.
 
 **Who it is for.** Graduate students in economics and international business who will be expected to
 produce a defensible number, on real European data, and say out loud what it does not license.
@@ -196,7 +206,7 @@ Four mechanisms, three of which cost nothing during the term. Full policy:
 |---|---|---|
 | **Random presenter draw** | every lab | the 2-minute report is delivered by a member drawn live — so all three must understand everything |
 | **Git contribution report** | automatic | commits, share, and weeks active per member; flags the extremes |
-| **Rotating role log** | every lab | Driver / Analyst / Reporter must rotate; one row per session |
+| **Everyone pushes** | every lab | all three members commit from their own machine; a per-week grid makes gaps visible |
 | **Confidential peer ratings** | once, at term end | four dimensions, 1–5, computing an individual multiplier |
 
 **The default multiplier is 1.00, and a mark is reduced only when the peer ratings and the git

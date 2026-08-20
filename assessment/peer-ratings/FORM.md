@@ -110,7 +110,7 @@ that carrying a group is recognised rather than merely endured.
 
 If your multiplier is not 1.00 you will be told why, and you may ask for a review within seven
 days. The review looks at all three records together: the peer ratings, the git history, and the
-role log. Bring anything else you think is relevant — the point is to get it right, not to defend
+push grid. Bring anything else you think is relevant — the point is to get it right, not to defend
 the arithmetic.
 
 ---

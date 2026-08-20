@@ -71,7 +71,7 @@ The second half is the groups' own. Remind them:
 
 - the presenter is **drawn at random** when their group is called — `python scripts/assess.py draw --session 2`
 - the report is **one slide, three sentences**, and sentence three is the one that earns the slot
-- the **role log** is filled in before they leave the room
+- **every member has pushed** before they leave the room
 
 ---
 

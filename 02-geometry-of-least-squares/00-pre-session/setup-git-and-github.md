@@ -259,16 +259,20 @@ for every line on your branch.
 
 ---
 
-## Roles
+## Everyone pushes
 
-Each session your group logs a **Driver** (writes the code), an **Analyst** (decides the
-specification, owns the interpretation) and a **Reporter** (writes the three sentences, presents if
-drawn). Over ten sessions each member should hold each role three or four times.
+There are **no assigned roles**. All three of you work on the lab together — and all three commit
+and push from your own machine, every week.
 
-Logged in `assessment/role-logs/gXX.md`, checked with `python scripts/assess.py roles`.
+```bash
+git add -A && git commit -m "..." && git push
+```
 
-The presenter is **drawn at random** when your group is called, which is why all three of you must
-understand everything.
+`python scripts/assess.py contributions` prints a per-member, per-week grid built from the history.
+A week in which you pushed nothing is visible to everyone, including you.
+
+The presenter for the two-minute report is **drawn at random** when your group is called, which is
+why all three of you must understand the whole analysis.
 
 ---
 

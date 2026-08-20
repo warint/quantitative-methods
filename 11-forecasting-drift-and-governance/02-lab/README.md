@@ -97,10 +97,16 @@ earns the slot:** a result plus what would undermine it is worth more than a res
 
 ## Before you leave the room
 
-Fill in this session's row of your group's role log
-(`assessment/role-logs/gXX.md`): who was **Driver** (wrote the code), **Analyst** (decided the
-specification and owns the interpretation), **Reporter** (wrote the three sentences). Roles rotate
-every week.
+**Every member commits and pushes from their own machine.** There are no assigned roles — work on
+it together — but all three of you appear in the history, every week:
+
+```bash
+git add -A && git commit -m "..." && git push
+```
+
+`python scripts/assess.py contributions` prints a per-member, per-week grid. A week where you
+pushed nothing is visible, and it is the kind of thing worth fixing in week four rather than week
+eleven.
 
 ---
 
