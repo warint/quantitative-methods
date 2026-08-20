@@ -37,8 +37,9 @@ format:
 | **4** | Reading the output |
 | **5** | Why accuracy is the wrong metric |
 | **6** | The threshold is an economic choice |
-| **7** | Another example: falling behind in Europe |
-| **8** | Key takeaways |
+| **7** | Another example: Portugal's red wines |
+| **8** | A third: falling behind in Europe |
+| **9** | Key takeaways |
 
 ## Learning objectives
 
@@ -112,22 +113,20 @@ risk.
 VS Codium terminal · with `(.venv)` showing
 :::
 
+```bash
+python scripts/fetch_teaching_data.py     # once, after cloning
+```
+
 ```python
 import pandas as pd
 
-URL = ("https://www.warin.ca/datalake/courses_data/"
-       "qmibr/session7/loans.csv")
-
-loans = pd.read_csv(URL)
-loans.columns = [c.replace(".", "_") for c in loans.columns]
-loans = loans.rename(columns={"not_fully_paid": "default"})
-
-loans.to_parquet("data/loans.parquet")     # cache it once
-print(loans.shape)                          # (9578, 14)
+loans = pd.read_parquet("data/loans.parquet")
+print(loans.shape)                         # (9578, 14)
 ```
 
 ::: {.warn}
-Download **once**, then read the parquet. Nothing in a practice session may require the internet.
+Fetch **once**, then read the parquet. Nothing in a practice session may require the internet — and
+the fetch script has already tidied the R-style column names for you.
 :::
 
 ## Look before you model
@@ -356,6 +355,56 @@ badly miscalibrated — and a miscalibrated probability cannot be fed into a cos
 
 # 7 · Another example {background-color="#16181A" style="color:#F7F6F3"}
 
+## Portugal's red wines
+
+1,599 red *vinho verde* wines, chemically assayed, each rated by at least three blind tasters.
+
+```python
+wine = pd.read_parquet("data/redwines.parquet")
+print(wine.shape, wine["good"].mean())     # (1599, 9) 0.136
+```
+
+::: {.warn}
+In the raw CSV the outcome is the strings `"Yes"`/`"No"`. `astype(int)` on that **raises**, and a
+silent miscast would be worse — so the fetch script converts it, and records that it did.
+:::
+
+## Fit the same model type
+
+```python
+m_w = smf.logit("good ~ alcohol + volatile_acidity + sulphates",
+                data=wine).fit()
+print(m_w.summary().tables[1])
+print(np.exp(m_w.params["alcohol"]))    # 2.74
+```
+
+::: {.check}
+An odds ratio of **2.74** for alcohol: each extra percentage point of alcohol nearly **triples** the
+odds a taster calls the wine good. Compare the FICO odds ratio of 0.9936 — same method, wildly
+different effect sizes, because the units are different.
+:::
+
+## Same method, very different signal
+
+| | Lending Club | Red wines |
+|---|---|---|
+| $n$ | 9,578 | 1,599 |
+| Base rate | 0.160 | 0.136 |
+| **ROC AUC** | **0.627** | **0.866** |
+| **PR AUC** | 0.232 | 0.475 |
+
+::: {.check}
+Both are imbalanced. Both use the same estimator. One barely ranks better than chance; the other
+ranks well. **The method did not differ — the informativeness of the predictors did.**
+:::
+
+::: {.muted}
+Chemistry measures the thing being judged. A credit file measures a person's past, not their next
+three years.
+:::
+
+# 8 · A third example {background-color="#16181A" style="color:#F7F6F3"}
+
 ## Falling behind in Europe
 
 The same machinery, a policy question, and the practice data:
@@ -386,7 +435,7 @@ Lending Club rows are arguably exchangeable. Panel rows never are. The method is
 validation is not.
 :::
 
-# 8 · Key takeaways {background-color="#16181A" style="color:#F7F6F3"}
+# 9 · Key takeaways {background-color="#16181A" style="color:#F7F6F3"}
 
 ## What to carry out of this session
 
