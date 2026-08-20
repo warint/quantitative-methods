@@ -1,6 +1,6 @@
 ---
-title: "Clustering, Embeddings, and Text as Data"
-subtitle: "Session 09 · Measuring what institutions talk about, and what that measurement is worth"
+title: "Unsupervised II: Clustering, Embeddings, Text as Data"
+subtitle: "Session 09 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,346 +21,253 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### How do you measure something that only exists as words? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | Clustering: structure without a label |
-| **10–30** | $k$-means, and choosing $k$ |
-| **30–45** | Turning text into numbers |
-| **45–60** | Embeddings, computed locally |
-| **60–85** | Validity: what does the number measure? |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Bennani & Romelli**, *Exploring the informativeness and drivers of tone during
-committee meetings*.
+| **9.1** | $k$-means |
+| **9.2** | Hierarchical clustering |
+| **9.3** | Choosing $k$ |
+| **9.4** | Representing text |
+| **9.5** | Validity — the part that is actually hard |
 
 ::: {.muted}
-Harvard Dataverse, DOI 10.7910/DVN/TZEN38 · CC BY 4.0
+Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
 :::
 
-::: {.check}
-Read it for the **measurement argument**, not the results: how do they justify
-that their tone index measures tone? That question is today's real subject.
-:::
+# 9.1 $k$-means {background-color="#16181A" style="color:#F7F6F3"}
 
-## Today's question
+## The objective
 
-> *Do European economies fall into recognisable types, and does what central
-> banks say track what their economies do?*
+Partition observations into $k$ clusters minimising within-cluster sum of squares:
 
-Two unsupervised problems: one on numbers, one on words.
-
-# Clustering {background-color="#16181A" style="color:#F7F6F3"}
-
-## $k$-means
-
-Choose centroids to minimise within-cluster sum of squares:
-
-$$\min_{C_1..C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2$$
-
-Iterate: assign each point to its nearest centroid, recompute centroids, repeat.
-
-::: {.warn}
-The objective is **non-convex**. You converge to a local optimum that depends on
-the initialisation. Always run multiple restarts — `n_init=20`, not the default.
-:::
-
-## What $k$-means assumes
-
-::: {.tight}
-- Clusters are **spherical** and of similar spread
-- Distance is meaningful — so **standardise first**
-- Every point belongs to exactly one cluster
-- $k$ is known
-:::
+$$\min_{C_1,\dots,C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2, \qquad
+\mu_j = \frac{1}{|C_j|}\sum_{i\in C_j} x_i$$
 
 ::: {.muted}
-Economic data rarely satisfy the first. That is not fatal; it means the clusters
-are a summary, not a discovery.
+The problem is **NP-hard**.
 :::
 
-## Choosing $k$
+## Lloyd's algorithm
 
-| Method | Reads |
-|---|---|
-| **Elbow** | Where WCSS stops falling fast. Often no elbow exists. |
-| **Silhouette** | How much closer a point is to its own cluster than the next. |
-| **Gap statistic** | Compares WCSS with that of uniform random data. |
-| **Stability** | Do the clusters survive resampling? |
-
-::: {.check}
-Stability is the one that matters for a claim. If a country changes cluster
-across bootstrap resamples, your typology is not a finding.
-:::
-
-## $k$-means will always return $k$ clusters
-
-::: {.warn}
-Even in data with no structure at all. The algorithm cannot tell you that the
-answer is "there are no types" — it will happily partition noise.
-:::
-
-::: {.check}
-The spine contains **four** country types by construction — and the silhouette
-score on the country profiles is **highest at $k=6$**, not at 4.
-:::
-
-::: {.warn}
-Read that again. On data where we *know* the answer is four, the standard
-diagnostic points to six, and does so with a perfectly respectable-looking
-score. This is not a trick example. It is the normal situation, and you would
-never have known.
-:::
-
-# Text {background-color="#16181A" style="color:#F7F6F3"}
-
-## The corpora
-
-```python
-import pandas as pd
-
-cb  = pd.read_parquet("data/spine/angle_e_centralbank.parquet")
-nat = pd.read_parquet("data/spine/angle_e_national.parquet")
-
-print(cb.shape, nat.shape)      # (1980, 7) and (1280, 7)
-print(cb.columns.tolist())
-# doc_id, date, institution, country, doc_type, n_words, text
-```
-
-## The trap, and it is a big one
-
-::: {.warn}
-**Corpus composition drives raw counts.** If a central bank publishes more
-documents in 2022 than in 2015, the raw frequency of *any* term rises — with no
-change whatsoever in how much attention it pays.
-:::
-
-::: {.check}
-Normalise. Per document, or per thousand words, or as a share of that period's
-corpus. Then **say in the caption which one you chose**, because the three give
-different pictures.
-:::
-
-## Bag of words, then TF-IDF
-
-Term frequency times inverse document frequency:
-
-$$\text{tfidf}(t, d) = \text{tf}(t,d) \cdot \log\frac{N}{\text{df}(t)}$$
+Two steps, each weakly decreasing the objective:
 
 ::: {.tight}
-- Common-everywhere terms are down-weighted
-- Distinctive terms are up-weighted
-- Word order is discarded entirely
+1. **Assign:** $c_i \leftarrow \arg\min_j \|x_i - \mu_j\|^2$
+2. **Update:** $\mu_j \leftarrow$ mean of points assigned to $j$
+:::
+
+Step 2 is optimal given assignments (differentiate in $\mu_j$, set to zero); step 1 is optimal given
+centroids.
+
+## Why it terminates — and where
+
+The objective decreases monotonically and there are finitely many partitions, so the algorithm
+terminates — **at a local minimum**.
+
+::: {.warn}
+Run it many times from different starts (`n_init`), or use **k-means++**, which seeds centroids with
+probability proportional to squared distance from the nearest existing centroid and gives an
+$O(\log k)$-competitive guarantee in expectation.
+:::
+
+## What the Euclidean objective assumes
+
+Because clusters are defined by nearest-centroid, the decision boundaries are the perpendicular
+bisectors between centroids — a **Voronoi tessellation**.
+
+::: {.check}
+This *forces* convex, roughly spherical, similarly-sized clusters. Elongated or nested structures
+will be cut incorrectly **no matter how well you optimise.**
 :::
 
 ::: {.muted}
-"The bank will not raise rates" and "the bank will raise rates" are nearly
-identical documents to TF-IDF. Know what you have thrown away.
+If that assumption is wrong: a Gaussian mixture (covariance structure, soft assignments via EM), or
+DBSCAN / spectral clustering for non-convex shapes.
 :::
 
-## In code
+# 9.2 Hierarchical clustering {background-color="#16181A" style="color:#F7F6F3"}
 
-```python
-from sklearn.feature_extraction.text import TfidfVectorizer
+## Linkage defines "closest"
 
-tf = TfidfVectorizer(max_features=5000, stop_words="english",
-                     ngram_range=(1, 2), min_df=5)
-Xt = tf.fit_transform(cb["text"])
-print(Xt.shape)
-```
+Build a dendrogram bottom-up, merging the two closest clusters at each step.
 
-::: {.check}
-`ngram_range=(1,2)` keeps two-word phrases, which recovers a little of the
-negation TF-IDF otherwise loses.
-:::
+| Linkage | $d(A,B)$ | Behaviour |
+|---|---|---|
+| Single | $\min_{a,b}\|a-b\|$ | Chaining; elongated shapes; unstable |
+| Complete | $\max_{a,b}\|a-b\|$ | Compact, similar-diameter clusters |
+| Average | mean pairwise distance | Compromise; not invariant to monotone transforms |
+| **Ward** | increase in within-cluster SS | Same criterion as $k$-means; the default to try |
 
-# Embeddings {background-color="#16181A" style="color:#F7F6F3"}
-
-## Why embeddings differ
-
-TF-IDF has one dimension per term; two documents sharing no vocabulary are
-orthogonal even if they say the same thing.
-
-An embedding maps a document to a dense vector where **proximity tracks
-meaning**.
-
-::: {.check}
-"Inflationary pressures persist" and "price growth remains elevated" share
-almost no words and sit close together in embedding space.
-:::
-
-## Computed on your machine
-
-::: {.where}
-VS Codium terminal
-:::
-
-```bash
-ollama pull nomic-embed-text
-```
-
-```python
-import requests, numpy as np
-
-def embed(text):
-    r = requests.post("http://localhost:11434/api/embeddings",
-                      json={"model": "nomic-embed-text", "prompt": text[:8000]})
-    return np.array(r.json()["embedding"])
-
-E = np.vstack([embed(t) for t in cb["text"].head(200)])
-print(E.shape)
-```
-
-::: {.muted}
-No API key, no cost, and the documents never leave your laptop — which for
-licensed text is not a convenience but a requirement.
-:::
-
-## What embeddings cost you
+## The trade
 
 ::: {.tight}
-- **Opacity.** You cannot say which words drove a result.
-- **Model dependence.** A different embedding model gives different distances.
-- **Training baggage.** Whatever was in the training corpus is in your geometry.
+- **Advantage:** you need not fix $k$ in advance — the dendrogram shows structure at every resolution
+- **Cost:** $O(n^2)$ memory
+:::
+
+# 9.3 Choosing $k$ {background-color="#16181A" style="color:#F7F6F3"}
+
+## Elbow
+
+Plot within-cluster SS against $k$. It **always** decreases, so look for a kink.
+
+::: {.warn}
+Often no kink exists. A single elbow plot is not evidence.
+:::
+
+## Silhouette
+
+For observation $i$:
+
+$$s_i = \frac{b_i - a_i}{\max(a_i,b_i)}$$
+
+with $a_i$ the mean distance to its own cluster and $b_i$ to the nearest other cluster.
+
+::: {.tight}
+- near **1** — well clustered
+- near **0** — on a boundary
+- **negative** — probably misassigned
+:::
+
+Average over $i$, maximise over $k$.
+
+## Gap statistic
+
+Compare $\log W_k$ to its expectation under a null reference distribution — uniform over the data's
+bounding box, or a PCA-aligned box. Choose the smallest $k$ where the gap exceeds the next $k$'s gap
+minus one standard error.
+
+::: {.check}
+This one **can return $k=1$** — "no cluster structure". Which is why it is worth the extra effort:
+it is the only one of the three that can tell you to stop.
+:::
+
+## Report at least two
+
+::: {.warn}
+**And report disagreement.** On the course spine — built from **four** country types — the
+silhouette score on the country profiles peaks at **six**. The diagnostic is confidently wrong, on
+data where we happen to know the answer.
+:::
+
+::: {.muted}
+You will not have that luxury with real data. Which is the point of noticing it here.
+:::
+
+# 9.4 Representing text {background-color="#16181A" style="color:#F7F6F3"}
+
+## Bag of words / TF-IDF
+
+$$\mathrm{tf\text{-}idf}(t,d) = \underbrace{f_{t,d}}_{\text{term frequency}} \times
+\underbrace{\log\frac{N}{1 + n_t}}_{\text{inverse document frequency}}$$
+
+The idf factor downweights ubiquitous terms.
+
+::: {.check}
+The result is a very sparse, very high-dimensional matrix — exactly the $p \gg n$ setting of
+Sessions 05 and 06, so **penalised regression is the natural supervised tool on top of it.**
+:::
+
+## What bag-of-words throws away
+
+Word order, entirely.
+
+> *"Inflation is not a concern"* and *"a concern is not inflation"* are **identical vectors**.
+
+::: {.muted}
+Two-word n-grams recover a little of the negation. Not all of it.
+:::
+
+## Dense embeddings
+
+A model maps each document to $v_d \in \mathbb{R}^m$ (typically $m$ = 384 to 1024), trained so that
+semantically similar texts have similar vectors. Similarity by cosine:
+
+$$\cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\|v_b\|} \in [-1,1]$$
+
+::: {.check}
+Cosine ignores magnitude — which is what you want when documents differ in length.
+:::
+
+## Generated locally
+
+You will generate embeddings **on your own machine** in the lab.
+
+::: {.muted}
+The corpus never leaves it. That is both a methodological and a governance point, and it is worth
+saying out loud in a paper.
+:::
+
+## Do not assume sophistication is progress
+
+**Dictionary methods** — counting terms from a pre-specified list — remain widely used in economics
+precisely because they are **transparent and auditable**.
+
+::: {.warn}
+An embedding-based index that nobody can interrogate may be *less* useful for policy than a word
+count anyone can check.
+:::
+
+# 9.5 Validity {background-color="#16181A" style="color:#F7F6F3"}
+
+## Four questions about any text-derived measure
+
+::: {.tight}
+1. **Face validity** — read a random sample of high- and low-scoring documents. Do they look like
+   what you claim to measure?
+2. **Convergent validity** — does the index correlate with independent measures of the same
+   construct?
+3. **Predictive validity** — does it forecast something it should?
+4. **Robustness** — does it survive changes in preprocessing, vocabulary and model?
+:::
+
+## On the first one
+
+::: {.check}
+**Do this. Actually read them.** It takes twenty minutes and it has killed more bad indices than any
+statistic.
+:::
+
+## On the fourth
+
+> If your finding depends on a stemming choice, **you do not have a finding.**
+
+::: {.warn}
+Also check your index against document length. An index that correlates strongly with word count is
+a length detector with extra steps — and that is one line to test.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you do
+
+::: {.tight}
+1. Cluster your angle's units; report **two** criteria for $k$ and any disagreement
+2. Test stability under resampling — do units change cluster?
+3. Build one text measure, normalised per thousand words, not raw counts
+4. Run all four validity checks, including the length correlation
 :::
 
 ::: {.warn}
-Report the model and version. "We embedded the documents" is not reproducible;
-`nomic-embed-text` via Ollama is.
+Corpus composition drives raw counts. If more documents are published, term frequency rises with no
+change in attention. **Normalise, and say how in the caption.**
 :::
 
-# Validity {background-color="#16181A" style="color:#F7F6F3"}
-
-## The question that outranks the method
-
-You have built a number. **What does it measure?**
+## The two-minute report
 
 ::: {.tight}
-- **Face validity** — does it look right on documents you have read?
-- **Convergent** — does it agree with an independent measure?
-- **Predictive** — does it forecast something it should?
-- **Discriminant** — does it *fail* to correlate with things it should not?
+1. **What I did** — the representation, the normalisation, the model and version
+2. **The number** — your index, and what it correlates with
+3. **The catch** — say "our index of X", never "X"
 :::
 
 ::: {.check}
-The last one is the one people skip, and it is the strongest evidence. A tone
-index that correlates with everything is measuring document length.
-:::
-
-## Check that immediately
-
-```python
-cb["tone_proxy"] = ...          # whatever you construct
-print(cb[["tone_proxy", "n_words"]].corr().iloc[0, 1].round(3))
-```
-
-::: {.warn}
-If your index correlates strongly with `n_words`, you have built a length
-detector with extra steps. This is the single most common failure in text-as-data
-work, and it is one line to test for.
-:::
-
-## A construct is not a measurement
-
-::: {.muted}
-The Session 01 distinction, returning with teeth.
-:::
-
-An "attention index" built from term frequencies is a **thing you constructed**.
-It may be useful. It is not an observation of institutional attention, and the
-gap between those two is where careless papers live.
-
-::: {.check}
-Say "our index of X", never "X". The extra three words are the whole discipline.
-:::
-
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
-
-## Cluster the countries
-
-```python
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
-
-core = pd.read_parquet("data/spine/core.parquet")
-prof = core.groupby("geo")[["gdp_pc_eur", "productivity_idx",
-                            "employment_ths", "gfcf_meur"]].mean()
-Z = StandardScaler().fit_transform(prof)
-
-for k in range(2, 8):
-    km = KMeans(k, n_init=20, random_state=60033).fit(Z)
-    print(k, round(silhouette_score(Z, km.labels_), 3))
-```
-
-## Test whether it is stable
-
-```python
-import numpy as np
-rng = np.random.default_rng(60033)
-base = KMeans(4, n_init=20, random_state=60033).fit_predict(Z)
-
-agree = []
-for _ in range(100):
-    idx = rng.choice(len(Z), len(Z), replace=True)
-    lab = KMeans(4, n_init=20, random_state=60033).fit_predict(Z[idx])
-    agree.append((lab == base[idx]).mean())
-print("mean agreement:", round(np.mean(agree), 3))
-```
-
-::: {.muted}
-Labels are arbitrary across runs, so this is a crude check — use the adjusted
-Rand index for a proper one. The point stands: measure stability, do not assume it.
-:::
-
-## Tie the words to the numbers
-
-```python
-cb["year"] = pd.to_datetime(cb["date"]).dt.year
-
-# normalise: share of that year's words, not raw counts
-per_year = (cb.assign(hits=cb.text.str.count(r"(?i)\bproductivit"))
-              .groupby("year")[["hits", "n_words"]].sum())
-per_year["rate_per_10k"] = per_year.hits / per_year.n_words * 10_000
-print(per_year.round(2))
-```
-
-::: {.check}
-Compare the raw `hits` column against `rate_per_10k`. If they tell different
-stories, the raw one was measuring publication volume.
-:::
-
-## What to report
-
-::: {.tight}
-- Your **normalisation**, in the caption of every text figure
-- $k$, how you chose it, and the stability evidence
-- The embedding model and version if you used one
-- The discriminant check against `n_words`
-- "Our index of X" phrasing throughout
-:::
-
-## Common mistakes
-
-| Mistake | Consequence |
-|---|---|
-| Raw term counts over time | Measures publication volume |
-| $k$ from the elbow alone | Elbow often absent; $k$ unjustified |
-| One $k$-means run | Local optimum |
-| Naming clusters as types | A summary presented as a discovery |
-| No length check | Index may just be document length |
-
-## In the lab
-
-::: {.tight}
-1. Download the Bennani & Romelli package; read how they justify their index
-2. Cluster the countries; choose $k$ with evidence and test stability
-3. Compare your $k$ with the **four** types the spine was built from
-4. Build one text index, normalised, and run the `n_words` check
-5. Three sentences using construct language, not measurement language
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::
