@@ -27,8 +27,8 @@ Ridge is therefore not a blunt instrument. It is a *targeted* damping of exactly
 which your data carry little information. The effective degrees of freedom are
 $\mathrm{df}(\lambda) = \sum_j d_j^2/(d_j^2+\lambda)$, decreasing smoothly from $p$ to $0$.
 
-**Bias-variance, explicitly.** $\operatorname{Var}(\hat\beta^{\text{ridge}})$ is decreasing in
-$\lambda$ while $\operatorname{Bias}^2$ is increasing. There always exists $\lambda > 0$ whose MSE
+**Bias-variance, explicitly.** $\mathrm{Var}(\hat\beta^{\text{ridge}})$ is decreasing in
+$\lambda$ while $\mathrm{Bias}^2$ is increasing. There always exists $\lambda > 0$ whose MSE
 is strictly lower than OLS - a result that surprised the profession in 1970 and should still shape
 how you think about Gauss-Markov.
 
@@ -52,7 +52,7 @@ $$\min_{\beta_j} \; \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|, \qquad
 The objective is convex but non-differentiable at $0$. Using the subgradient of $|\beta_j|$ (which
 is $[-1,1]$ at zero), the solution is the **soft-thresholding operator**
 
-$$\hat\beta_j = S_\lambda(\rho_j) = \operatorname{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+ .$$
+$$\hat\beta_j = S_\lambda(\rho_j) = \mathrm{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+ .$$
 
 Read it directly: *if the partial correlation of $x_j$ with the residual is smaller in magnitude
 than $\lambda$, set the coefficient to exactly zero; otherwise shrink it toward zero by $\lambda$.*
@@ -73,7 +73,7 @@ $\alpha = 1$ is the lasso, $\alpha = 0$ is ridge. The mixed penalty is **strictl
 $\alpha < 1$, which delivers the property Zou and Hastie call the *grouping effect*: for two
 identical predictors, the elastic net assigns them identical coefficients, whereas the lasso must
 choose. More generally, the difference in coefficients is bounded by a function of
-$1 - \operatorname{corr}(x_j, x_k)$.
+$1 - \mathrm{corr}(x_j, x_k)$.
 
 For macroeconomic panels - where dozens of series measure nearly the same underlying construct -
 this is not a technicality. It is the difference between a model that says *"industrial production

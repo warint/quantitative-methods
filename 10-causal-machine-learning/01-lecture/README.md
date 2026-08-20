@@ -50,7 +50,7 @@ with nuisances $\eta = (\ell_0, m_0)$, $\ell_0(X) = \mathbb{E}[Y\mid X]$, $m_0(X
 Solving $\mathbb{E}[\psi]=0$ gives
 
 $$\theta_0 = \frac{\mathbb{E}\big[(Y-\ell_0(X))(D-m_0(X))\big]}{\mathbb{E}\big[(D-m_0(X))^2\big]}
-= \frac{\operatorname{Cov}(\tilde Y, \tilde D)}{\operatorname{Var}(\tilde D)} ,$$
+= \frac{\mathrm{Cov}(\tilde Y, \tilde D)}{\mathrm{Var}(\tilde D)} ,$$
 
 which is precisely FWL: regress residualised $Y$ on residualised $D$.
 

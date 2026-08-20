@@ -19,11 +19,11 @@ willing to assume about $\varepsilon$.
 
 **Variance.** Under homoskedasticity,
 
-$$\operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} X^\top \operatorname{Var}(\varepsilon\mid X) X (X^\top X)^{-1} = \sigma^2 (X^\top X)^{-1} .$$
+$$\mathrm{Var}(\hat\beta \mid X) = (X^\top X)^{-1} X^\top \mathrm{Var}(\varepsilon\mid X) X (X^\top X)^{-1} = \sigma^2 (X^\top X)^{-1} .$$
 
 For a single coefficient this expands into a form worth memorising:
 
-$$\operatorname{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \operatorname{Var}(x_j) \cdot (1 - R_j^2)},$$
+$$\mathrm{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \mathrm{Var}(x_j) \cdot (1 - R_j^2)},$$
 
 where $R_j^2$ is the $R^2$ from regressing $x_j$ on all other regressors. Read off the four levers:
 noise, sample size, variation in the regressor, and **redundancy**. The factor $1/(1-R_j^2)$ is the
@@ -37,7 +37,7 @@ linear unbiased estimators.
 
 *Proof sketch.* Let $\tilde\beta = Cy$ be any linear unbiased estimator; write $C = (X^\top X)^{-1}X^\top + D$.
 Unbiasedness forces $DX = 0$. Then
-$\operatorname{Var}(\tilde\beta) = \sigma^2\big[(X^\top X)^{-1} + DD^\top\big] \succeq \operatorname{Var}(\hat\beta)$,
+$\mathrm{Var}(\tilde\beta) = \sigma^2\big[(X^\top X)^{-1} + DD^\top\big] \succeq \mathrm{Var}(\hat\beta)$,
 since $DD^\top \succeq 0$. $\blacksquare$
 
 **The crucial caveat.** BLUE is a guarantee *within the class of unbiased estimators*. Sessions 4
@@ -48,9 +48,9 @@ this; it simply does not apply.
 
 The **sandwich** form is always correct:
 
-$$\operatorname{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X \Big) (X^\top X)^{-1}, \qquad \Omega = \operatorname{Var}(\varepsilon \mid X).$$
+$$\mathrm{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X \Big) (X^\top X)^{-1}, \qquad \Omega = \mathrm{Var}(\varepsilon \mid X).$$
 
-- **Heteroskedasticity-robust (White / HC1):** estimate $\Omega$ by $\operatorname{diag}(\hat\varepsilon_i^2)$, with a small-sample correction $n/(n-p)$.
+- **Heteroskedasticity-robust (White / HC1):** estimate $\Omega$ by $\mathrm{diag}(\hat\varepsilon_i^2)$, with a small-sample correction $n/(n-p)$.
 - **Cluster-robust:** if errors are correlated within groups $g$ (firms, regions, countries), use $\hat\Omega = \sum_g \hat\varepsilon_g \hat\varepsilon_g^\top$. Requires *many* clusters; with fewer than roughly 40, inference is unreliable.
 - **Practical rule:** cluster at the level at which treatment is assigned.
 

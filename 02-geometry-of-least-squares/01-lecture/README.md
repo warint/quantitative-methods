@@ -44,7 +44,7 @@ $$\hat y = Hy, \qquad \hat\varepsilon = (I - H)y, \qquad H(I-H) = 0 .$$
 
 Consequences worth internalising:
 
-- $\operatorname{tr}(H) = p$: the projection uses exactly $p$ degrees of freedom.
+- $\mathrm{tr}(H) = p$: the projection uses exactly $p$ degrees of freedom.
 - $h_{ii} \in [0,1]$ is observation $i$'s **leverage** - how much $\hat y_i$ moves when $y_i$ moves.
 - $\|y\|^2 = \|\hat y\|^2 + \|\hat\varepsilon\|^2$ is Pythagoras. $R^2$ is a squared cosine.
 

@@ -46,7 +46,7 @@ exactly the OLS condition from Session 2, with fitted probabilities in place of 
 **Hessian.**
 
 $$\nabla^2\ell(\beta) = -\sum_i p_i(1-p_i)\,x_i x_i^\top = -X^\top W X, \qquad
-W = \operatorname{diag}\big(p_i(1-p_i)\big).$$
+W = \mathrm{diag}\big(p_i(1-p_i)\big).$$
 
 Since $W \succeq 0$, we have $-X^\top W X \preceq 0$: **the log-likelihood is concave.** Any
 stationary point is a global maximum. There are no local optima.
@@ -60,7 +60,7 @@ z = X\beta^{(t)} + W^{-1}(y - p) .$$
 
 This is exactly **weighted least squares** of the *adjusted response* $z$ on $X$ with weights $W$.
 Hence IRLS. Two consequences: you reuse all the linear algebra of Session 2, and the asymptotic
-covariance is $\widehat{\operatorname{Var}}(\hat\beta) = (X^\top W X)^{-1}$, the inverse observed
+covariance is $\widehat{\mathrm{Var}}(\hat\beta) = (X^\top W X)^{-1}$, the inverse observed
 information.
 
 **Perfect separation.** If a hyperplane separates the classes exactly, the likelihood increases
@@ -153,7 +153,7 @@ is the Session 5 formula with weights inserted:
 $$\beta_j \leftarrow \frac{S_{\lambda\alpha}\big(\frac1n\sum_i w_i x_{ij}(z_i - \tilde y_i^{(-j)})\big)}
 {\frac1n\sum_i w_i x_{ij}^2 + \lambda(1-\alpha)} ,$$
 
-with $S_\lambda(\rho) = \operatorname{sign}(\rho)(|\rho|-\lambda)_+$ the soft-thresholding operator
+with $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ the soft-thresholding operator
 you derived in Session 5. Iterate, recompute weights, repeat.
 
 **Three practical points.** (i) Warm starts down a decreasing $\lambda$ grid make the whole path

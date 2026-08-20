@@ -22,7 +22,7 @@ Plot 20 points from a smooth function with noise. Fit a degree-19 polynomial thr
 |---|---|
 | **0–08** | The hook, and the framing: **this session is the hinge of the course.** Before today, in-sample fit was evidence. After today it is not. |
 | **08–35** | Derive the bias–variance decomposition in full. Add and subtract $\mathbb{E}[\hat f(x_0)]$, expand, kill the three cross terms one at a time and say why each vanishes. Do not rush; this is the most quoted and least understood result in the field. |
-| **35–55** | Optimism. $\mathbb{E}[\mathrm{Err_{in}}] - \mathbb{E}[\mathrm{err}] = \frac{2}{n}\sum_i \operatorname{Cov}(\hat y_i, y_i)$. Read it aloud in words: *twice the degree to which the model chases its own labels.* Then $C_p$, AIC, BIC, and effective degrees of freedom as the generalisation of 'number of parameters' — needed from Session 05 on. |
+| **35–55** | Optimism. $\mathbb{E}[\mathrm{Err_{in}}] - \mathbb{E}[\mathrm{err}] = \frac{2}{n}\sum_i \mathrm{Cov}(\hat y_i, y_i)$. Read it aloud in words: *twice the degree to which the model chases its own labels.* Then $C_p$, AIC, BIC, and effective degrees of freedom as the generalisation of 'number of parameters' — needed from Session 05 on. |
 | **55–72** | Cross-validation. The estimator, the bias–variance tradeoff in $K$, LOOCV and the hat-matrix shortcut $\frac1n\sum_i((y_i-\hat y_i)/(1-h_{ii}))^2$ — callback to Session 02. |
 | **72–90** | **The three leaks.** Preprocessing, selection, dependence. Spend real time here: this is the content students most need and least expect. |
 

@@ -35,7 +35,7 @@ forecast. A lower RMSE without a significance statement is an anecdote.
 $d_t = L(e_{1t}) - L(e_{2t})$ the loss differential. Under the null of equal predictive accuracy,
 $\mathbb{E}[d_t] = 0$, and
 
-$$\mathrm{DM} = \frac{\bar d}{\sqrt{\widehat{\operatorname{Var}}(\bar d)}} \;\xrightarrow{d}\; N(0,1),$$
+$$\mathrm{DM} = \frac{\bar d}{\sqrt{\widehat{\mathrm{Var}}(\bar d)}} \;\xrightarrow{d}\; N(0,1),$$
 
 where the variance must be estimated with a **HAC** (Newey-West) estimator because $d_t$ is
 serially correlated at multi-step horizons — use a lag truncation of at least $h-1$.

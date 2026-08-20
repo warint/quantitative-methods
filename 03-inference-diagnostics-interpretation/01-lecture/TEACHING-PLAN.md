@@ -22,7 +22,7 @@ Project a regression table with three stars on a coefficient. Ask: *"under what 
 |---|---|
 | **0–05** | The hook. |
 | **05–20** | $\hat\beta = \beta + (X^\top X)^{-1}X^\top\varepsilon$. Write it large. Say: *everything in regression inference follows from what you assume about $\varepsilon$.* Unbiasedness needs only exogeneity. |
-| **20–42** | Variance. Derive $\sigma^2(X^\top X)^{-1}$, then expand to $\sigma^2 / (n \operatorname{Var}(x_j)(1 - R_j^2))$ and **read off the four levers** — noise, sample size, variation, redundancy. This single expression explains collinearity, and it motivates Session 05. |
+| **20–42** | Variance. Derive $\sigma^2(X^\top X)^{-1}$, then expand to $\sigma^2 / (n \mathrm{Var}(x_j)(1 - R_j^2))$ and **read off the four levers** — noise, sample size, variation, redundancy. This single expression explains collinearity, and it motivates Session 05. |
 | **42–56** | Gauss–Markov. Sketch the proof. Then the caveat that matters: BLUE is a guarantee *within unbiased estimators*, and Session 05 will deliberately leave that class. |
 | **56–75** | The sandwich. Robust (HC1), cluster-robust, and the rule: cluster at the level at which treatment is assigned. Warn about few clusters. |
 | **75–90** | Omitted variable bias. Derive $\mathbb{E}[\hat\beta_1] = \beta_1 + \delta\beta_2$ and give the two-question recipe for signing it. |
@@ -55,7 +55,7 @@ reappear in the deliverable.
 
 ## Leave on the board for the practice
 
-$\operatorname{Var}(\hat\beta_j) = \sigma^2 / (n\operatorname{Var}(x_j)(1-R_j^2))$ and the OVB formula.
+$\mathrm{Var}(\hat\beta_j) = \sigma^2 / (n\mathrm{Var}(x_j)(1-R_j^2))$ and the OVB formula.
 
 ---
 

@@ -34,7 +34,7 @@ Two further preliminaries.
 **Why not just run OLS on a 0/1 outcome?** The linear probability model is not absurd - its
 coefficients are directly interpretable as marginal effects, and it is still widely used in applied
 economics. Its defects are: fitted values outside $[0,1]$, inherent heteroskedasticity
-($\operatorname{Var}(y|x) = p(x)(1-p(x))$), and a functional form that cannot respect the natural
+($\mathrm{Var}(y|x) = p(x)(1-p(x))$), and a functional form that cannot respect the natural
 compression of probabilities near the boundaries. Come with an opinion on when you would use it
 anyway.
 

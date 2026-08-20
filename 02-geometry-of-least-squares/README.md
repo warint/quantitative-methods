@@ -22,7 +22,7 @@ By the end of this session you should be able to:
 
 - Derive the OLS estimator from first-order conditions **and** from an orthogonal projection argument.
 - Interpret the hat matrix, fitted values, and residuals geometrically.
-- Explain the role of $\operatorname{rank}(X)$ and diagnose multicollinearity as near-rank-deficiency.
+- Explain the role of $\mathrm{rank}(X)$ and diagnose multicollinearity as near-rank-deficiency.
 - Implement OLS from scratch in NumPy and reconcile it, to numerical precision, with `statsmodels`.
 - Explain why the normal equations are numerically dangerous and what QR decomposition does instead.
 

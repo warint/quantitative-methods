@@ -23,8 +23,8 @@ Come to class able to state, without notes, the five classical assumptions:
 
 1. **Linearity in parameters:** $y = X\beta + \varepsilon$.
 2. **Strict exogeneity:** $\mathbb{E}[\varepsilon \mid X] = 0$.
-3. **No perfect collinearity:** $\operatorname{rank}(X) = p$.
-4. **Homoskedasticity and no autocorrelation:** $\operatorname{Var}(\varepsilon \mid X) = \sigma^2 I_n$.
+3. **No perfect collinearity:** $\mathrm{rank}(X) = p$.
+4. **Homoskedasticity and no autocorrelation:** $\mathrm{Var}(\varepsilon \mid X) = \sigma^2 I_n$.
 5. **(For exact inference)** $\varepsilon \mid X \sim \mathcal{N}(0, \sigma^2 I_n)$.
 
 Note carefully which results need which assumption. Unbiasedness needs 1-3. Efficiency needs 4.

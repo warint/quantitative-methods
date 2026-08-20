@@ -24,7 +24,7 @@ Source: https://hastie.su.domains/ElemStatLearn/
 ## Step 2 — Concepts to review
 
 You need the **singular value decomposition** at your fingertips: any $X \in \mathbb{R}^{n\times p}$
-can be written $X = UDV^\top$ with $U^\top U = V^\top V = I$ and $D = \operatorname{diag}(d_1 \ge \dots \ge d_p \ge 0)$.
+can be written $X = UDV^\top$ with $U^\top U = V^\top V = I$ and $D = \mathrm{diag}(d_1 \ge \dots \ge d_p \ge 0)$.
 
 Convince yourself before class that $X^\top X = VD^2V^\top$, so the eigenvalues of $X^\top X$ are
 the squared singular values of $X$. This one fact makes the entire lecture transparent.

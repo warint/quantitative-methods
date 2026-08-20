@@ -23,7 +23,7 @@ Write on the board: *"OLS is the best linear unbiased estimator."* Then: *"today
 | **0–06** | The hook and the Gauss–Markov callback. |
 | **06–32** | Ridge. Closed form, existence for $p > n$, then **the SVD reading**: $\hat y = \sum_j u_j \frac{d_j^2}{d_j^2+\lambda}u_j^\top y$. Make the point that ridge is *targeted*: it damps exactly the directions where the data carry least information. Effective df. |
 | **32–52** | Lasso. Draw the diamond and the ellipse. The corner argument. Then contrast with the smooth $\ell_2$ ball — no corners, no zeros. |
-| **52–70** | **Derive soft-thresholding** from the subgradient condition at zero. This is the derivation of the session; do it properly. Land on $S_\lambda(\rho) = \operatorname{sign}(\rho)(|\rho|-\lambda)_+$ and read it aloud in words. |
+| **52–70** | **Derive soft-thresholding** from the subgradient condition at zero. This is the derivation of the session; do it properly. Land on $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ and read it aloud in words. |
 | **70–82** | Elastic net. Strict convexity, the grouping effect, why it matters for macro panels where a dozen series measure one construct. |
 | **82–90** | Choosing $\lambda$: the path, $\lambda_{\min}$ vs $\lambda_{1se}$, and the warning that post-selection standard errors are invalid. |
 

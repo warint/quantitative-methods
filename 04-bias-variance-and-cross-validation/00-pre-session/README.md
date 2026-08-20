@@ -87,7 +87,7 @@ The result you report must come from **your project**.
 Answer these **in writing** before class. You will not hand them in, but the lecture assumes you
 have attempted them. If you cannot answer one, bring the question.
 
-1. In the decomposition $\mathbb{E}[(y_0 - \hat f(x_0))^2] = \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2 + \sigma^2$, which term can you drive to zero, and which can you not?
+1. In the decomposition $\mathbb{E}[(y_0 - \hat f(x_0))^2] = \mathrm{Var}(\hat f(x_0)) + [\mathrm{Bias}(\hat f(x_0))]^2 + \sigma^2$, which term can you drive to zero, and which can you not?
 2. For LOOCV, is the bias of the error estimate high or low? What about its variance? Explain the tradeoff in K.
 3. You standardise your features using the full dataset, then run 5-fold CV. What exactly has gone wrong?
 4. Why is random K-fold CV inappropriate for quarterly GDP data?

@@ -10,7 +10,7 @@
 
 Partition the feature space into $M$ regions $R_1,\dots,R_M$ and predict a constant in each:
 $\hat f(x) = \sum_m c_m \mathbb{1}\{x \in R_m\}$. Under squared loss the optimal constant is the
-region mean, $\hat c_m = \operatorname{ave}(y_i \mid x_i \in R_m)$.
+region mean, $\hat c_m = \mathrm{ave}(y_i \mid x_i \in R_m)$.
 
 Finding the optimal partition is computationally infeasible, so we proceed **greedily**. At each
 node, search over splitting variable $j$ and split point $s$ to solve
@@ -49,7 +49,7 @@ noticing: *every* method in this course has a complexity dial and a CV procedure
 Average $B$ trees fitted on bootstrap samples. If each has variance $\sigma^2$ and any two have
 correlation $\rho$, the average has variance
 
-$$\operatorname{Var}\Big(\frac1B\sum_b \hat f_b\Big) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
+$$\mathrm{Var}\Big(\frac1B\sum_b \hat f_b\Big) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
 \;\xrightarrow[B\to\infty]{}\; \rho\sigma^2 .$$
 
 Increasing $B$ kills the second term but leaves $\rho\sigma^2$ untouched. **This is the entire

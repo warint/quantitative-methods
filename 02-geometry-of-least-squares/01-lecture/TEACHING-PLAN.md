@@ -23,7 +23,7 @@ Draw $\mathbb{R}^3$ on the board. Draw a plane through the origin — that is $\
 | **0–05** | The picture. Leave it up all session. |
 | **05–20** | Matrix setup, $S(\beta) = \|y - X\beta\|^2$, differentiate, normal equations. Quick — this is the route they have seen. |
 | **20–45** | The geometric route. Projection theorem, orthogonality of the residual, $X^\top(y - X\hat\beta) = 0$. **Make the point explicitly: these are the same equation.** Students who see this once stop being confused by 'controlling for'. |
-| **45–65** | Hat matrix. $\hat y = Hy$, idempotence, $\operatorname{tr}(H) = p$, leverage, Pythagoras and $R^2$ as a squared cosine. |
+| **45–65** | Hat matrix. $\hat y = Hy$, idempotence, $\mathrm{tr}(H) = p$, leverage, Pythagoras and $R^2$ as a squared cosine. |
 | **65–82** | **Frisch–Waugh–Lovell.** Derive it, then say the sentence they should remember: *a multiple-regression coefficient is a simple regression coefficient on the part of the variable orthogonal to everything else.* Flag that it returns in Session 10 as the foundation of double ML. |
 | **82–90** | Numerical warning: $\kappa(X^\top X) = \kappa(X)^2$. Never invert. |
 

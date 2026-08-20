@@ -12,7 +12,7 @@ Fix a test point $x_0$. Let $\hat f$ be estimated on a random training sample. T
 squared error at $x_0$, averaging over training samples and over the new noise draw, is
 
 $$\mathbb{E}\big[(y_0 - \hat f(x_0))^2\big]
-= \underbrace{\operatorname{Var}\big(\hat f(x_0)\big)}_{\text{variance}}
+= \underbrace{\mathrm{Var}\big(\hat f(x_0)\big)}_{\text{variance}}
 + \underbrace{\big(\mathbb{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
 + \underbrace{\sigma^2}_{\text{irreducible}} .$$
 
@@ -28,24 +28,24 @@ that optimum deliberately rather than by accident.
 
 ### 4.2 In-sample error is optimistic - by how much?
 
-Let $\operatorname{err} = \frac1n\sum_i (y_i - \hat f(x_i))^2$ be training error and
-$\operatorname{Err}_{\text{in}}$ the error on new outcomes at the *same* $x_i$. Then
+Let $\mathrm{err} = \frac1n\sum_i (y_i - \hat f(x_i))^2$ be training error and
+$\mathrm{Err}_{\text{in}}$ the error on new outcomes at the *same* $x_i$. Then
 
-$$\mathbb{E}[\operatorname{Err}_{\text{in}}] - \mathbb{E}[\operatorname{err}]
-= \frac{2}{n}\sum_{i=1}^n \operatorname{Cov}(\hat y_i, y_i) .$$
+$$\mathbb{E}[\mathrm{Err}_{\text{in}}] - \mathbb{E}[\mathrm{err}]
+= \frac{2}{n}\sum_{i=1}^n \mathrm{Cov}(\hat y_i, y_i) .$$
 
 The **optimism** is exactly twice the average covariance between fitted value and its own outcome:
 the degree to which the model chases its own training labels. For a linear fit with $p$ parameters
 this covariance sum equals $p\sigma^2$, giving optimism $2p\sigma^2/n$ and motivating
 
-$$C_p = \operatorname{err} + \frac{2p\hat\sigma^2}{n}, \qquad
+$$C_p = \mathrm{err} + \frac{2p\hat\sigma^2}{n}, \qquad
 \mathrm{AIC} = -\frac{2}{n}\log\mathcal{L} + \frac{2p}{n}, \qquad
 \mathrm{BIC} = -2\log\mathcal{L} + p\log n .$$
 
 Note that BIC penalises more heavily for $n > e^2 \approx 7.4$; it is consistent for model
 selection, whereas AIC is efficient for prediction. They answer different questions.
 
-The quantity $\mathrm{df}(\hat f) = \frac{1}{\sigma^2}\sum_i \operatorname{Cov}(\hat y_i, y_i)$ is
+The quantity $\mathrm{df}(\hat f) = \frac{1}{\sigma^2}\sum_i \mathrm{Cov}(\hat y_i, y_i)$ is
 the **effective degrees of freedom**, and it generalises "number of parameters" to methods where
 counting parameters makes no sense - which we need from Session 5 onward.
 
@@ -56,7 +56,7 @@ fold:
 
 $$\mathrm{CV}_K = \frac{1}{n}\sum_{k=1}^{K}\sum_{i \in \mathcal{F}_k} L\big(y_i, \hat f^{-k}(x_i)\big).$$
 
-- $K = n$ (LOOCV): nearly unbiased for $\operatorname{Err}$, but high variance (the $n$ training
+- $K = n$ (LOOCV): nearly unbiased for $\mathrm{Err}$, but high variance (the $n$ training
   sets are almost identical, so the errors are highly correlated) and usually expensive - except
   for linear smoothers, where the shortcut
   $\mathrm{CV}_{(n)} = \frac1n\sum_i \left(\frac{y_i - \hat y_i}{1 - h_{ii}}\right)^2$

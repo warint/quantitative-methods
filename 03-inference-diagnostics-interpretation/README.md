@@ -21,7 +21,7 @@ See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of 
 By the end of this session you should be able to:
 
 - State the Gauss-Markov assumptions and prove that OLS is BLUE under them.
-- Derive $\operatorname{Var}(\hat\beta)$ and explain each term's economic content.
+- Derive $\mathrm{Var}(\hat\beta)$ and explain each term's economic content.
 - Explain heteroskedasticity- and cluster-robust standard errors, and know when each is required.
 - Quantify omitted variable bias and sign it in a real application.
 - Estimate and interpret a Mincer earnings equation, distinguishing what the coefficients do and do not identify.
