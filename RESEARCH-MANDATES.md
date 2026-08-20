@@ -84,11 +84,11 @@ very different data** — which is where its assumptions become visible.
 
 Three goals, and they are not only technical.
 
-**1. Experiential learning through international collaboration.** Pairing students in Montréal with
-participants from *Science des données au féminin en Afrique* situates data science education in
-real-world application and intercultural exchange. You are not working on a hypothetical problem, or
-one the instructor invented for you: you are working on a project that emerged from the lived
-experience and professional aspirations of your African peers. That raises the motivation, and it
+**1. Experiential learning through international collaboration.** Working for a client team in the
+*Science des données au féminin en Afrique* programme situates data science education in real-world
+application and intercultural exchange. You are not working on a hypothetical problem, or one the
+instructor invented for you: you are working on a project that emerged from the lived experience and
+professional aspirations of your African counterparts. That raises the motivation, and it
 puts the ethical and social dimensions of the practice in front of you rather than in a footnote.
 
 **2. Scientific writing and research communication.** The deliverable is modelled on a scientific
@@ -96,20 +96,32 @@ article, which forces you to articulate a clear research question, situate it in
 present findings with methodological transparency. The point is to bridge applied data analysis and
 scholarly knowledge production — the gap most applied courses leave open.
 
-**3. Teamwork, inclusivity and reflexivity.** Mixed teams mean negotiating different perspectives,
-different levels of expertise, and different cultural contexts. Those are the collaboration skills
-that globalised research actually requires. Data science is not only a technical discipline; it is a
+**3. Teamwork, inclusivity and reflexivity.** Working for a client in another country means
+negotiating different perspectives, different levels of expertise and different cultural contexts —
+inside your group of three, and across the two continents. Those are the collaboration skills that
+globalised research actually requires. Data science is not only a technical discipline; it is a
 social practice, and it can advance equity and development or fail to.
 
-### The teams are joint
+### They are your client, not your co-authors
 
-The deliverable is **co-authored**: Team Montréal and Team Africa. Your African counterparts are not
-clients who hand you a specification and wait — they are co-authors who know the context you do not.
+The SDAfrique team **commissions** the work. They identified the problem and they will use what you
+produce. They are not co-authors, and their names do not go on the paper.
 
-- Agree early how you will communicate, and how often.
-- Ask them what they already know about the problem. It will be more than you do.
-- Send them drafts, not only the final version.
-- Their names go on the paper.
+That is a real relationship, not a simulated one, and it carries obligations:
+
+- **Ask them questions.** They know the context; you do not. What has been tried? What data exists
+  locally? What would actually be useful to them?
+- **Agree how you will communicate**, and how often, in the first week.
+- **Send them a draft**, not only the final version. A client who first sees the work at the end
+  cannot correct a misunderstanding that started in week four.
+- **Write the conclusion for them.** Practical implications in *their* context, in language they can
+  use.
+- **Acknowledge them by name** in the paper, as the source of the problem.
+
+> **What being a client does not mean.** They are not a source of requirements you satisfy
+> mechanically, and they are not a decoration on an exercise you would have done anyway. The reason
+> this is harder than an instructor-set problem is that you cannot quietly redefine the question to
+> suit the data you happened to find.
 
 ---
 
