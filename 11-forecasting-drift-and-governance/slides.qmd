@@ -1,6 +1,6 @@
 ---
-title: "Forecasting, Drift, and Governance"
-subtitle: "Session 11 · What happens to a model after you publish it"
+title: "Forecasting, Distribution Shift, and Model Governance"
+subtitle: "Session 11 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,240 +21,279 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### What are you responsible for when someone acts on your model? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | Forecasting is not cross-validation |
-| **10–30** | Backtesting with a rolling origin |
-| **30–50** | Distribution shift, and its three kinds |
-| **50–70** | Detecting drift before it costs you |
-| **70–85** | Governance: what you owe the next person |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Mullainathan & Spiess**, *Machine Learning: An Applied Econometric Approach*,
-JEP 2017 — **again**, and this time only the closing sections.
+| **11.1** | Backtesting time-dependent models |
+| **11.2** | Comparing forecasts honestly |
+| **11.3** | Distribution shift |
+| **11.4** | Model governance |
+| **11.5** | The arc, in one table |
+| **11.6** | Returning to *Europe 2031* |
 
 ::: {.muted}
-DOI: 10.1257/jep.31.2.87
+Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
 :::
 
-::: {.check}
-You read it in Session 04 for what ML does well. Read it now for what it
-assumes: that tomorrow resembles yesterday. Today is about when that fails.
-:::
+# 11.1 Backtesting {background-color="#16181A" style="color:#F7F6F3"}
 
-## Today's question
+## Three valid designs
 
-> *Your group has a model. What is it worth in 2027?*
-
-::: {.warn}
-Every number you have produced this term describes a world that has already
-happened. Nothing you have done yet establishes that it will keep working.
-:::
-
-# Backtesting {background-color="#16181A" style="color:#F7F6F3"}
-
-## Rolling origin
-
-Train to time $t$, predict $t+h$, roll forward, repeat.
+Random K-fold CV is invalid whenever observations are ordered in time.
 
 ::: {.tight}
-- **Expanding window** — training set grows; assumes the past stays relevant
-- **Rolling window** — fixed length; assumes the distant past is stale
+- **Rolling origin, expanding window** — train on $1..t$, predict $t+h$, increment $t$. Uses all
+  history; training size grows, so early and late errors are not comparable.
+- **Rolling origin, fixed window** — train on $t-w..t$. Constant training size; adapts to structural
+  change; discards old information.
+- **Blocked CV with a purge and an embargo** — leave a gap of at least $h$ observations between train
+  and test.
 :::
+
+## Why the purge matters
+
+A gap prevents leakage through **overlapping horizons** or through **serially correlated features**.
 
 ::: {.check}
-Which you choose is a claim about how fast the world changes. State it.
+Essential whenever features are constructed from rolling windows — which, in macro work, is almost
+always.
 :::
 
-## Respect the horizon
+## Two rules violated constantly
 
-If you will forecast one year ahead, evaluate at one year ahead.
+**1. Point-in-time data.** Macroeconomic series are **revised**. A backtest using today's vintage of
+GDP gives your model information no forecaster had at the time.
+
+::: {.check}
+Use real-time vintages — ALFRED, or the Philadelphia Fed's real-time dataset — or **state clearly
+that you have not**.
+:::
+
+## The second rule
+
+**2. Every preprocessing step must be inside the loop.**
+
+::: {.tight}
+- standardisation
+- **factor extraction** — Session 08
+- feature selection
+- hyperparameter choice
+:::
 
 ::: {.warn}
-A model evaluated at $h=1$ and deployed at $h=3$ has never been tested at the
-task it is doing. This is more common than it sounds, because the short horizon
-always looks better.
+Extracting factors from the full sample and then backtesting is look-ahead bias. It is the single
+most common flaw in student factor-model projects.
 :::
 
-## Set up
+# 11.2 Comparing honestly {background-color="#16181A" style="color:#F7F6F3"}
 
-```python
-import pandas as pd, numpy as np
-from sklearn.ensemble import RandomForestRegressor
+## Against a benchmark that is hard to beat
 
-core = pd.read_parquet("data/spine/core.parquet")
-d = core.dropna(subset=["prod_growth"]).sort_values(["time", "geo"])
-feat = ["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]
-```
+A random walk, an AR($p$), or the consensus forecast.
 
-## Roll the origin forward
+::: {.warn}
+**A lower RMSE without a significance statement is an anecdote.**
+:::
 
-```python
-rows = []
-for cut in range(2016, 2024):
-    tr, te = d[d.time <= cut], d[d.time == cut + 1]
-    if len(te) == 0:
-        continue
-    m = RandomForestRegressor(300, random_state=60033).fit(
-        tr[feat].fillna(0), tr.prod_growth)
-    err = te.prod_growth - m.predict(te[feat].fillna(0))
-    rows.append((cut + 1, np.sqrt((err ** 2).mean())))
+## Diebold–Mariano
 
-print(pd.DataFrame(rows, columns=["year", "rmse"]).round(3))
-```
+Let $e_{1t}, e_{2t}$ be the forecast errors of two models and
+$d_t = L(e_{1t}) - L(e_{2t})$ the loss differential. Under the null of equal predictive accuracy,
+$\mathbb{E}[d_t] = 0$, and
 
-## Read the sequence, not the average
+$$\mathrm{DM} = \frac{\bar d}{\sqrt{\widehat{\operatorname{Var}}(\bar d)}} \;\xrightarrow{d}\; N(0,1)$$
+
+## The variance must be HAC
+
+Estimate $\widehat{\operatorname{Var}}(\bar d)$ with a **Newey–West** estimator, because $d_t$ is
+serially correlated at multi-step horizons.
 
 ::: {.check}
-One RMSE over the whole backtest hides everything. Look at the **year-by-year
-series**: a model that was excellent until 2021 and poor after is a different
-object from one that is mediocre throughout.
+Use a lag truncation of at least $h-1$.
 :::
 
-::: {.muted}
-The spine carries a deliberate shift after 2021. You should be able to see it in
-that table without being told where to look.
+## Two cautions
+
+::: {.tight}
+- The test is **not valid for nested models** estimated on the same sample — use **Clark–West**.
+- With small samples, the **Harvey–Leybourne–Newbold** correction is advisable.
 :::
 
-# Drift {background-color="#16181A" style="color:#F7F6F3"}
+# 11.3 Distribution shift {background-color="#16181A" style="color:#F7F6F3"}
 
-## Three things can change
+## Four kinds
 
-| Kind | What moves | Example |
+| Type | What changes | Fix |
 |---|---|---|
-| **Covariate shift** | $P(X)$ | Energy prices leave their historical range |
-| **Label shift** | $P(Y)$ | Downturn: more countries fall behind |
-| **Concept drift** | $P(Y \mid X)$ | The *relationship* changes |
+| **Covariate shift** | $P(X)$; $P(Y\mid X)$ stable | Importance weighting, or just retrain |
+| **Label shift** | $P(Y)$; $P(X\mid Y)$ stable | Reweight, or correct the intercept (Session 06) |
+| **Concept drift** | $P(Y\mid X)$ | Retraining necessary but not sufficient — the form may be wrong |
+| **Feedback** | your model changes the world it predicts | Redesign |
 
-::: {.warn}
-The first two you can detect from data you already have. **Concept drift needs
-outcomes**, which arrive late — often after the decisions were made.
-:::
+## How to detect them
 
-## Detecting covariate shift
+| Type | Detection |
+|---|---|
+| Covariate shift | Train a classifier to distinguish train from deploy |
+| Label shift | Compare predicted marginal to observed |
+| Concept drift | **Only** detectable once outcomes arrive |
+| Feedback | Requires causal reasoning, not monitoring |
 
-```python
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+## The classifier diagnostic
 
-pre  = d[d.time <= 2020][feat].fillna(0)
-post = d[d.time >= 2021][feat].fillna(0)
+Pool training and deployment features, label them by period, and try to predict the label.
 
-X = pd.concat([pre, post]); y = np.r_[np.zeros(len(pre)), np.ones(len(post))]
-auc = cross_val_score(RandomForestClassifier(300, random_state=60033),
-                      X, y, cv=5, scoring="roc_auc").mean()
-print("era-classifier AUC:", round(auc, 3))
-```
+> **If a classifier can tell your two periods apart, so can your model's errors.**
 
 ::: {.check}
-If a classifier can tell **which era** a row came from, the covariate
-distribution has moved. AUC near 0.5 means no detectable shift; near 1 means the
-two periods are different worlds.
+AUC near 0.5 is reassuring. Near 1.0 is an alarm.
 :::
 
-## What to do about it
+## Goodhart's law, stated precisely
 
-::: {.tight}
-- **Retrain** on recent data — simple, and loses history
-- **Reweight** by the density ratio — principled, and unstable in the tails
-- **Restrict** the model to the region where it still has support
-- **Stop** — sometimes the honest answer
+> When a measure becomes a target, the relationship the model learned between measure and outcome is
+> exactly the relationship agents have an incentive to break.
+
+::: {.muted}
+A credit-scoring feature that predicts default only until applicants learn it is used is not a
+stable feature.
 :::
 
 ::: {.warn}
-Never extrapolate a tree-based model outside its training range. It cannot
-extrapolate at all; it returns the nearest leaf's mean and gives no warning.
+This is a **causal** problem (Session 10), not a monitoring problem. **No amount of retraining
+solves it.**
 :::
 
-# Governance {background-color="#16181A" style="color:#F7F6F3"}
+# 11.4 Model governance {background-color="#16181A" style="color:#F7F6F3"}
 
-## The question behind this section
+## Seven headings
 
-Someone will use your model after you have graduated, without asking you
-anything.
+A deployable model is accompanied by a document a competent successor could act on.
+
+::: {.tight}
+1. **Intended use** — and out-of-scope uses
+2. **Data lineage** — sources, vintages, dates, licences, quality issues, checksums
+3. **Preprocessing** — every transformation, in order, with the code
+4. **Validation** — design, why the CV scheme matches deployment, metrics, benchmark, subgroups
+5. **Limitations** — where it performs worst, who is under-represented, what is load-bearing
+6. **Monitoring plan** — what is tracked, how often, what threshold triggers review
+7. **Ownership** — who is accountable, and the **retirement criterion**
+:::
+
+## Not bureaucracy
 
 ::: {.check}
-Everything they need must be written down, next to the model, by you.
+Sections **5** and **6** are where the intellectual content of the whole course finally has to be
+written down for someone else.
 :::
 
-## The governance file
-
-Your group ships one. See
-[`02-lab/governance-file-template.md`](02-lab/governance-file-template.md).
-
-::: {.tight}
-- **Intended use** — and the uses you are ruling out
-- **Data** — provenance, coverage, known gaps, licence
-- **Estimand** — prediction or effect, stated once and plainly
-- **Validation** — the split, the horizon, the error, honestly
-- **Known failure modes** — where it breaks, in what direction
-- **Monitoring** — what to watch, and the trigger to retire it
+::: {.muted}
+Template: [`02-lab/governance-file-template.md`](02-lab/governance-file-template.md)
 :::
 
-## The retirement trigger
+## Write a specific retirement trigger
 
 ::: {.warn}
-A model with no stated retirement condition is never retired. It is used until
-something goes visibly wrong, and by then it has been wrong for a while.
+A model with no stated retirement condition is never retired. It is used until something goes
+visibly wrong — and by then it has been wrong for a while.
 :::
 
-Write a specific one:
-
-> *"Retrain when the era-classifier AUC against the training period exceeds
-> 0.75, or when rolling 2-year RMSE exceeds 1.4× the backtest median. Retire if
-> retraining does not restore it."*
+> *"Retrain when the era-classifier AUC against the training period exceeds 0.75, or when rolling
+> 2-year RMSE exceeds 1.4× the backtest median. Retire if retraining does not restore it."*
 
 ::: {.check}
 Specific enough that someone who has never met you can execute it.
 :::
 
-## What you owe the reader
+# 11.5 The arc {background-color="#16181A" style="color:#F7F6F3"}
 
-::: {.tight}
-- The coverage gaps — for the spine, the pre-2021 absence of the adoption module
-- The flags you dropped, and which countries that biased against
-- Every construct labelled as a construct
-- The assumptions that would overturn your conclusion if wrong
+## The dial, and the self-deception it prevents
+
+| Session | The dial | The self-deception |
+|---|---|---|
+| 2–3 | Which variables enter, how errors are modelled | "My standard errors are correct because the software printed them" |
+| 4 | Model complexity, via CV | "It fits the data well" |
+| 5–6 | $\lambda$ and $\alpha$ | "The model identified the true drivers" |
+| 6 | The decision threshold | "It is 97% accurate" |
+
+## Continued
+
+| Session | The dial | The self-deception |
+|---|---|---|
+| 7 | Depth, learning rate, $m$ | "The important feature is the cause" |
+| 8 | The number of factors | "I extracted factors, then backtested" |
+| 9 | $k$, and the representation of text | "The algorithm found clusters, so clusters exist" |
+| **10** | **Nothing — identification is not a dial** | "A better predictor is a better policy guide" |
+| 11 | The monitoring threshold | "It worked last year" |
+
+## The exception that defines the course
+
+> **No tuning parameter buys you identification.**
+
+::: {.check}
+Session 10 is the one week with nothing to tune. That is not an omission — it is the point.
 :::
 
-::: {.muted}
-This is not modesty. A limitation you name is a limitation you have controlled
-for in the reader's mind. One you omit is a hole someone else will find.
-:::
+# 11.6 Returning to *Europe 2031* {background-color="#16181A" style="color:#F7F6F3"}
 
-## What to report
+## Sharper questions than in week one
 
-::: {.tight}
-- Rolling-origin backtest, **year by year**, at the deployment horizon
-- Window choice, and the claim about the world it encodes
-- Drift evidence for $P(X)$, and what you concluded
-- The governance file, complete, with a numeric retirement trigger
-:::
-
-## Common mistakes
-
-| Mistake | Consequence |
-|---|---|
-| Random CV on a forecast | Uses the future to predict the past |
-| One averaged backtest error | Hides the year everything changed |
-| Evaluating at the wrong horizon | Untested at the task it performs |
-| Extrapolating a forest | Silent nearest-leaf nonsense |
-| No retirement trigger | The model outlives its validity |
-
-## In the lab
+The scenario's numbers were introduced in Session 01 as **parameters of a narrative**. You can now
+interrogate them.
 
 ::: {.tight}
-1. Backtest **your group's own model** with a rolling origin
-2. Plot error by year and find the break
+- What would a **factor model** (S08) say about how many independent dimensions "technological
+  capacity" actually has? Is compute one factor, or a proxy for several?
+- Is the labour-displacement mechanism a **prediction** or a **causal** claim (S10)? Which would you
+  need to justify the narrative's policy responses?
+:::
+
+## And two more
+
+::: {.tight}
+- Its policy menu implies **decisions under cost asymmetry**. What are $c_{FP}$ and $c_{FN}$ for
+  acting on a false signal of European decline versus missing a true one (S06)?
+- Its indicators would be **monitored over years**. Which are vulnerable to **Goodhart**, and which
+  to **concept drift** (S11)?
+:::
+
+## Why a stress test
+
+> The purpose of a stress test is not to be right. It is to make you specify **what you would need
+> to know.**
+
+::: {.check}
+That is also the purpose of a model — and it is what you will be examined on next week.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you do
+
+::: {.tight}
+1. Backtest **your project's** model with a rolling origin, at the deployment horizon
+2. Plot error by period and find the break
 3. Run the era classifier; report the AUC and read it
-4. Complete the governance file, including a numeric trigger
-5. Three sentences on what your model is worth in 2027, and why
+4. Complete the governance file, including a **numeric** retirement trigger
+:::
+
+::: {.warn}
+Every preprocessing step inside the loop — including factor extraction.
+:::
+
+## The two-minute report
+
+::: {.tight}
+1. **What I did** — the backtest design, the window, the horizon
+2. **The number** — error against a hard benchmark, with a DM statement
+3. **The catch** — what would make you retire this model
 :::
 
 ::: {.check}
