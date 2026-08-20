@@ -11,7 +11,7 @@ Quantitative Methods in International Business · duration 3h00
 > ### If this were a monitoring dashboard for a European agency, would you sign it?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
-See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your angle, unit of analysis and data.
+See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 

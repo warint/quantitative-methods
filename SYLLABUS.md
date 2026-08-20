@@ -91,11 +91,15 @@ Before class                First half (~90 min)          Second half (~90 min)
   · written self-check        · what it cannot do           · everyone pushes before leaving
 ```
 
-The second half is **collective research**. Every session poses one big question. Ten groups of
-three answer it from **five fixed angles** — compute and energy, work and skills, AI adoption,
-trade dependence, policy language — two groups per angle at different units of analysis. The last
-twenty minutes are ten two-minute reports and a synthesis. Five different lights on the same
-question, every week.
+The second half is **real research**. Each group of three is paired with a project defined by
+students in [Science des Données au Féminin en Afrique](https://sdafrique.org), whose teams identify
+a societal problem in their own community. The group's job is to turn that problem into an
+answerable research question, find the data, and answer it with the method taught that week.
+
+Every session poses one big methodological question; each group attacks it on its own project. The
+last twenty minutes are ten two-minute reports and a synthesis — ten different problems, one method,
+which is where the method's assumptions become visible. **Projects are assigned in class, in Session
+02.**
 
 Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
@@ -238,7 +242,7 @@ Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/
 
 ### Group project — 30%, Session 12
 
-Eleven weeks of work on your angle, presented and defended. Three parts: a **model governance file**
+Eleven weeks of work on your project, presented and defended. Three parts: a **model governance file**
 that a competent stranger could act on, a **reproducible analysis** that runs from a clean clone,
 and a **presentation** to a decision-maker who will not read your code.
 
@@ -403,7 +407,7 @@ Per-session readings, including the journal articles, are listed in each session
 |---|---|
 | [`README.md`](README.md) | Course overview and repository layout |
 | **`SYLLABUS.md`** | This document |
-| [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md) | The five angles, ten groups, session themes, data sources |
+| [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md) | The ten projects, ten groups, session themes, data sources |
 | [`GROUP-ASSESSMENT.md`](GROUP-ASSESSMENT.md) | Participation, presenter draw, contribution report, peer ratings |
 | [`assessments/midterm/`](assessments/midterm/) | Example paper and full solutions |
 | [`assessments/final-paper/`](assessments/final-paper/README.md) | The SDAfrique brief and rubric |

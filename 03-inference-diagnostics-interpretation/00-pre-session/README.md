@@ -87,7 +87,7 @@ url = "https://raw.githubusercontent.com/JeffSackmann/.../cps85.csv"  # replace 
 lab has no network dependency. Verify with `md5sum` against the value in `data/CHECKSUMS.txt`.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your angle**.
+The result you report must come from **your project**.
 
 </details>
 

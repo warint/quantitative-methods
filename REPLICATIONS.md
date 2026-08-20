@@ -1,9 +1,13 @@
 # Session replications — the article behind each lab
 
-Every session's 90-minute practice block is built on a **published article**. You
-read it before class; the lab reproduces a piece of it.
+Every session has a **published article** attached to it. You read it before class: it is
+what competent practice with that week's method looks like, done by people who had to defend it.
 
-There are two kinds of lab, and the table says which you are getting:
+Your *reported* result each week comes from **your own SDAfrique project** — see
+[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md). The article and the data below are how you get the
+method working on known ground first, before turning it on data whose truth you do not know.
+
+There are two kinds of package, and the table says which you are getting:
 
 | Kind | What it means |
 |---|---|
@@ -33,7 +37,7 @@ method recovered it. You cannot do that with real data, ever.
 | 08 | PCA and factor models | Koopman & Mesters, *Empirical Bayes Methods for Dynamic Factor Models* | **Real** — [10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM) · CC0 |
 | 09 | Clustering and text | Bennani & Romelli, *Exploring the informativeness and drivers of tone during committee meetings* | **Real** — [10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38) · CC BY 4.0 |
 | 10 | Causal machine learning | Huber, *Evaluating (weighted) dynamic treatment effects by double machine learning* | **Real** — [10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA) · CC0 |
-| 11 | Forecasting and governance | Mullainathan & Spiess (above), read a second time for its last section | Your group's own project data |
+| 11 | Forecasting and governance | Mullainathan & Spiess (above), read a second time for its last section | Your project data |
 
 ---
 
@@ -101,15 +105,11 @@ industry = pd.read_stata("data/topalova/industrydata.dta")
 print(industry.shape)     # (138, 20)
 ```
 
-::: note
 If a `.dta` is too old or too new for pandas, ask Dataverse for the archival
 copy instead by appending `&format=tab` to a single-file download URL.
-:::
 
-::: note
 Download **once**, into `data/`, which is git-ignored for anything large. Never
 put a download inside a lab script — the lab must run with the wifi off.
-:::
 
 ---
 

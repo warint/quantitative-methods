@@ -32,12 +32,12 @@ The organising question, in one line:
 |---|---|
 | **Before class** | `00-pre-session/` — reading, concepts, data, a written self-check |
 | **First half** | `01-lecture/` — the mathematics of the method |
-| **Second half** | `02-lab/` — group work on your angle, then two-minute reports |
+| **Second half** | `02-lab/` — group work on your project, then two-minute reports |
 
 Session 01 is the exception: syllabus, then a conversation. Session 12 is the other: presentations
 fill both halves.
 
-## 1.3 The five angles
+## 1.3 The ten projects
 
 Ten groups of three. Five fixed angles, two groups each, at different units of analysis. Angles are
 **fixed for the semester** so that expertise accumulates; the weekly theme rotates so each method

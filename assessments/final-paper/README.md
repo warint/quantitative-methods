@@ -150,7 +150,7 @@ Your paper takes **the method from your semester angle** and applies it to **an 
 Each angle has a natural counterpart. These are starting points, not a menu you must choose from —
 a proposed alternative is welcome and often better.
 
-| Your angle | Method you own | Natural African counterpart | Illustrative question |
+| Your project | Method you own | Natural African counterpart | Illustrative question |
 |---|---|---|---|
 | **A** Compute & energy | regression on structure; forecasting | Electricity access and reliability | What predicts grid reliability across sub-Saharan regions, and how much of the variation is composition? |
 | **B** Work & skills | task-based exposure; classification | Labour, education, gender gaps | Which occupational or educational transitions predict women's labour force participation? |

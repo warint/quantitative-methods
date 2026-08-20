@@ -76,7 +76,7 @@ The synthetic part lets you *see* bias and variance separately, because you know
 The Ames part shows you what it looks like when you do not.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your angle**.
+The result you report must come from **your project**.
 
 </details>
 

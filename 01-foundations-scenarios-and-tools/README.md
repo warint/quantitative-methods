@@ -11,7 +11,7 @@ Quantitative Methods in International Business · duration 3h00
 
 By the end of this session you should be able to:
 
-- Explain how the course is structured and assessed, and what your angle commits you to for the semester.
+- Explain how the course is structured and assessed, and what your project commits you to for the semester.
 - Distinguish a **scenario** from a **forecast**, and explain why the difference matters for any quantitative model you build.
 - Locate, in *Europe 2031*, where the evidence stops and the construction begins.
 - Say what the model on your laptop is and what it is doing when it answers — and where its competence stops.

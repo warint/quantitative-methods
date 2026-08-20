@@ -54,12 +54,10 @@ that branch and pushed to it. Your lab deliverables go in the session folder:
 NN-session-name/02-lab/submissions/group-XX/
 ```
 
-::: note
 **Why one repository and not one per group.** Your commit history is one of the four records used
 to check that all three of you did the work, and `scripts/assess.py contributions` reads it from
 this repository. Work pushed somewhere else is invisible to it — and invisible work counts as work
 you did not do.
-:::
 
 **You do not need to create a repository.** You need an account, and the instructor adds you.
 

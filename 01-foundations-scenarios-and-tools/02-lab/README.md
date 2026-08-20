@@ -88,7 +88,7 @@ recorded from Session 02, when the labs begin.
 ## What happens next
 
 Session 02 begins the mathematics — least squares, as a right-angle triangle — and the labs start
-with your angle and your group.
+with your project and your group.
 
 Before then, complete the
 **[Session 02 setup guide](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**:

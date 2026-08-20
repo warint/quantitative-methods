@@ -8,15 +8,15 @@
 
 > # Did the policy do anything, or did we just measure the countries that were already ahead?
 
-All ten groups attack this question. Each answers it with **its own angle** and its own slice of the
-data spine, and the last twenty minutes assemble the five answers into one.
+All ten groups attack this question, each on **its own project**, and the last twenty minutes
+assemble the answers.
 
 Nominate a plausible treatment with a date and run DML with your columns as controls. **Most groups will find identification fails or the estimate is too imprecise to act on. Demonstrating that clearly, with the overlap diagnostic and a named unmeasured confounder, is a full-credit answer.**
 
-Your angle, your unit of analysis and your data are fixed for the semester:
+Your project, its unit of analysis and the data you found for it are fixed for the semester:
 **[RESEARCH-MANDATES.md](../../RESEARCH-MANDATES.md)**.
 
-> **If your angle cannot answer the theme this week, say so and show why.** That is a contribution,
+> **If your project cannot answer the theme this week, say so and show why.** That is a contribution,
 > not a failure — and it is graded as one.
 
 ---
@@ -24,8 +24,8 @@ Your angle, your unit of analysis and your data are fixed for the semester:
 ## Method exercise
 
 The tasks below build the machinery. Do them on the teaching dataset if you need to see the method
-work on known ground first, then turn it on your own angle. The reported result must be from **your
-angle**.
+work on known ground first, then turn it on your own project. The reported result must be from **your
+project**.
 
 ## Brief
 
@@ -114,7 +114,7 @@ eleven.
 | Minutes | Activity |
 |---|---|
 | 0–10 | Theme, brief, split the work |
-| 10–65 | Analysis on your angle |
+| 10–65 | Analysis on your project |
 | 65–70 | Build the slide, agree the three sentences |
 | 70–90 | Ten reports (2 min each) + instructor synthesis |
 

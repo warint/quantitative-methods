@@ -17,7 +17,7 @@ data/spine/
 └── angle_e_centralbank.parquet    G09   angle_e_national.parquet      G10
 ```
 
-`core.parquet` is shared: every angle joins to it, so outcomes and controls are common across the
+`core.parquet` is shared: every group joins to it, so outcomes and controls are common across the
 class and results are comparable.
 
 ## For students
@@ -27,7 +27,7 @@ These files are **already built**. Read them, do not rebuild them:
 ```python
 import pandas as pd
 core = pd.read_parquet("data/spine/core.parquet")
-mine = pd.read_parquet("data/spine/angle_c_country.parquet")   # your angle (see your dictionary)
+mine = pd.read_parquet("data/spine/angle_c_country.parquet")   # your project (see your dictionary)
 df   = core.merge(mine, on=["geo", "time"], how="inner")
 ```
 

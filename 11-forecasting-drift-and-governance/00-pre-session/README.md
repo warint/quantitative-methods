@@ -89,7 +89,7 @@ If your project is time-dependent, you will also want a **real-time vintage** so
 (ALFRED, or the Philadelphia Fed's real-time dataset) — see section 11.1 on why.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your angle**.
+The result you report must come from **your project**.
 
 </details>
 

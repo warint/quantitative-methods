@@ -78,7 +78,7 @@ The latent factors, the true cluster labels and the true treatment effect are in
 
 | From | To | What | Affects |
 |---|---|---|---|
-| 2020 | 2021 | COVID-19 | employment, energy demand — every angle |
+| 2020 | 2021 | COVID-19 | employment, energy demand — every group |
 | 2021 | — | AI module begins | angle C has no AI observations before 2021 |
 | 2022 | — | European energy price shock | angle A; dominates any model that ignores it |
 | 2012 | 2022 | HS classification revisions | angle D; concordances are imperfect |

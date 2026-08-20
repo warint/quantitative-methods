@@ -242,7 +242,7 @@ saying plainly why this course does not do that.
 - **It is weak on appeal.** *"You failed because eleven classmates were ticked more often"* is
   much harder to defend than *"you have no recorded contribution in ten sessions; the published bar
   is one."*
-- **It is zero-sum, and this course is not.** The second half of every session is five angles
+- **It is zero-sum, and this course is not.** The second half of every session is ten projects
   illuminating one theme, cross-group questions, peer review, disagreement treated as contribution.
   Rank-based participation gives a student a reason not to make another group look good. That cuts
   directly against the architecture.

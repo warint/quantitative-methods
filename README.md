@@ -57,26 +57,34 @@ Nothing in a lab requires an internet connection.
 
 **Session 12** is different: group presentations fill both halves. No lecture, no lab.
 
-### The second half is collective research
+### The second half is real research, from Africa
 
-Every session has a **big theme** — one question the whole class attacks. Ten groups of three answer
-it from **five fixed angles** (two groups each, at different units of analysis), then report for two
-minutes each. Five different lights on the same question, every week.
+Each group of three is paired with a project defined by students in
+[**Science des Données au Féminin en Afrique**](https://sdafrique.org) — a programme training one
+hundred young women from francophone Africa each year, whose teams each identify a societal problem
+in their own community.
 
-| Angle | Owns | Interrogates |
-|---|---|---|
-| **A** Compute & energy | electricity prices, generation mix, industrial demand | Is power really the binding constraint? |
-| **B** Work & skills | employment by occupation, earnings, task exposure | Does exposure predict what happened to jobs? |
-| **C** AI adoption | enterprise AI use, barriers, R&D, productivity | Is diffusion happening, and where does it stall? |
-| **D** Trade & dependence | bilateral flows in semiconductors, equipment, robots | How concentrated is Europe's input dependence? |
-| **E** Policy language | ECB, EUR-Lex, national strategies | Does policy text lead, lag, or track the economy? |
+```
+   SDAfrique team (Africa)                HEC group of three (Montréal)
+   ───────────────────────                ────────────────────────────
+   identifies a problem     ─────────►    formulates a research question
+   in their own community                 finds the data
+   and a project around it                answers it with a method from class
+```
 
-Angles are fixed for the semester so expertise accumulates; themes rotate so each method is used to
-answer something real. Data are **cleaned and cached before class** — lab time goes to analysis, not
-wrangling.
+Every session has a **big theme** — one methodological question the whole class attacks. Each group
+attacks it **on its own project**, then reports for two minutes. Ten different problems, one method
+per week; the synthesis is about how the method behaves across very different data, which is where
+its assumptions become visible.
 
-**Full brief: [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)** — research questions, goals, group
-allocation, data sources with dataset codes, and what each angle does in each session.
+This is the same commission as the final paper. The term is not eleven exercises followed by an
+unrelated assignment — **it is one project, approached with a new method every week.**
+
+**Full brief: [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)** — how to turn a problem into an
+answerable question, where to find data, and what each session asks of you.
+
+> **Projects are assigned in class**, in Session 02. They do not exist until the SDAfrique teams
+> define them.
 
 ---
 
@@ -257,7 +265,7 @@ would falsify it.
 ```
 qmib/
 ├── README.md                          this file
-├── RESEARCH-MANDATES.md               the five angles, ten groups, session themes
+├── RESEARCH-MANDATES.md               the ten projects, ten groups, session themes
 ├── requirements.txt
 ├── .gitignore
 ├── data/spine/                        the shared panel — cleaned, cached, committed

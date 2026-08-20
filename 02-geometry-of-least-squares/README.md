@@ -11,7 +11,7 @@ Quantitative Methods in International Business · duration 3h00
 > ### How much of the measured gap is real, and how much is composition?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
-See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your angle, unit of analysis and data.
+See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 

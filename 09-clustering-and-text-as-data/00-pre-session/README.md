@@ -86,7 +86,7 @@ terms of use and record your collection date - provenance is part of the deliver
 The regional panel (Eurostat `nama_10r_2gdp`, `lfst_r_lfu3rt`) supports the clustering half.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your angle**.
+The result you report must come from **your project**.
 
 </details>
 

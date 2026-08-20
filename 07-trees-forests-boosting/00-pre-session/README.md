@@ -81,7 +81,7 @@ Reusing Ames lets you compare directly against your Session 2-5 linear results o
 folds - which is the point of the lab. Keep the same random seed and the same CV splits.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your angle**.
+The result you report must come from **your project**.
 
 </details>
 
