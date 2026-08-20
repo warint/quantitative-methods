@@ -1,6 +1,6 @@
 ---
-title: "Trees, Forests, and Boosting"
-subtitle: "Session 07 · Flexible prediction, and the importance measures that mislead you"
+title: "Trees, Forests, and Gradient Boosting"
+subtitle: "Session 07 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,321 +21,263 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### If we abandon linearity, is interpretability recoverable? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | What a tree actually does |
-| **10–25** | Why a single tree is unusable |
-| **25–45** | Bagging and random forests |
-| **45–65** | Boosting |
-| **65–85** | Interpretation: importance, PDP, SHAP |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Athey & Imbens**, *Machine Learning Methods That Economists Should Know
-About*, **Annual Review of Economics**, 2019.
+| **7.1** | Regression trees |
+| **7.2** | Cost-complexity pruning |
+| **7.3** | Bagging and the variance argument |
+| **7.4** | Gradient boosting as functional gradient descent |
+| **7.5** | Recovering interpretation |
 
 ::: {.muted}
-DOI: 10.1146/annurev-economics-080217-053433
+Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
 :::
 
-The sentence to carry into today:
+# 7.1 Regression trees {background-color="#16181A" style="color:#F7F6F3"}
 
-> These methods are built to **predict**, and they are very good at it. They are
-> not built to give you a coefficient with a standard error, and using them as
-> if they were is the most common misuse in applied work.
+## The model
 
-## Today's question
+Partition the feature space into $M$ regions and predict a constant in each:
 
-> *What predicts a European country's productivity growth, and does the answer
-> depend on where the country already is?*
+$$\hat f(x) = \sum_m c_m \mathbb{1}\{x \in R_m\}$$
 
-The second clause is the one linear models handle badly and trees handle
-naturally.
+Under squared loss the optimal constant is the region mean:
 
-# One tree {background-color="#16181A" style="color:#F7F6F3"}
-
-## Recursive binary splitting
-
-At each node, choose the predictor $j$ and cut point $s$ minimising
-
-$$\sum_{i:\,x_{ij} \le s}(y_i - \bar y_L)^2 \; + \sum_{i:\,x_{ij} > s}(y_i - \bar y_R)^2$$
-
-then repeat inside each half.
+$$\hat c_m = \operatorname{ave}(y_i \mid x_i \in R_m)$$
 
 ::: {.check}
-The prediction for a region is simply the **mean of the training outcomes in
-it**. A tree is a step function.
+A tree is a step function. That is the whole model.
 :::
 
-## What trees give you free
+## Greedy splitting
 
-::: {.tight}
-- **Nonlinearity** — no functional form to specify
-- **Interactions** — a split below a split *is* an interaction
-- **Scale invariance** — no standardising; only the order matters
-- **Mixed types** — categorical and numeric together
-- **Missingness** — handled by surrogate splits or a branch of their own
-:::
+Finding the optimal partition is computationally infeasible, so we proceed **greedily**. At each
+node, search over splitting variable $j$ and split point $s$:
+
+$$\min_{j,s}\ \Big[ \min_{c_1}\sum_{x_i \in R_1(j,s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x_i \in R_2(j,s)}(y_i - c_2)^2 \Big]$$
+
+with $R_1(j,s) = \{x : x_j \le s\}$, $R_2(j,s) = \{x: x_j > s\}$.
 
 ::: {.muted}
-This is why trees are the default on tabular data, and why they are worth the
-interpretive difficulty that follows.
+The inner minimisations are just means, so one scan over sorted values of each feature suffices:
+$O(p\, n \log n)$ per node.
 :::
 
-## What one tree costs you
+## Impurity, for classification
+
+Replace variance with a measure on the node class proportions $\hat p_{mk}$:
+
+$$\text{Gini} = \sum_{k} \hat p_{mk}(1-\hat p_{mk}), \qquad
+\text{Entropy} = -\sum_k \hat p_{mk}\log \hat p_{mk}$$
+
+$$\text{Misclassification} = 1 - \max_k \hat p_{mk}$$
+
+## Which to grow with
+
+Gini and entropy are differentiable and strictly concave, so they reward splits producing *purer*
+nodes **even when the majority class does not change**.
 
 ::: {.warn}
-**Variance.** Change a handful of rows and the first split can change, which
-changes every split beneath it. The tree you show in your appendix is one draw
-from a wide distribution of trees.
+Misclassification error is insensitive to that and makes a poor **growing** criterion — though it is
+the right criterion for **pruning**.
 :::
 
-::: {.tight}
-- Step functions cannot extrapolate — ever
-- Deep trees memorise; shallow trees underfit
-- The structure is readable but **not stable**, so reading it is a trap
-:::
+# 7.2 Cost-complexity pruning {background-color="#16181A" style="color:#F7F6F3"}
 
-# Forests {background-color="#16181A" style="color:#F7F6F3"}
+## Grow, then cut back
 
-## Bagging
+Grow a large tree $T_0$, then choose a subtree minimising
 
-Fit $B$ trees on bootstrap resamples, average the predictions.
+$$C_\gamma(T) = \sum_{m=1}^{|T|} \sum_{x_i \in R_m}(y_i - \hat c_m)^2 + \gamma|T|$$
 
-$$\hat f_{\text{bag}}(x) = \frac{1}{B}\sum_{b=1}^{B} \hat f^{*b}(x)$$
+## Weakest-link pruning
 
-Averaging $B$ iid quantities with variance $\sigma^2$ gives variance
-$\sigma^2/B$ — but the trees are **not** independent, and that is the catch.
+As $\gamma$ increases from 0, the sequence of optimal subtrees is **nested**, obtained by
+successively collapsing the internal node with the smallest per-leaf increase in error.
 
-## The random forest trick
-
-At each split, consider only a random subset of $m$ predictors.
+That gives a **one-dimensional family** indexed by $\gamma$ — selected by cross-validation, exactly
+as we selected $\lambda$ in Session 05.
 
 ::: {.check}
-This **decorrelates** the trees. If one predictor dominates, every bagged tree
-splits on it first and they all look alike; forcing the algorithm to sometimes
-ignore it produces genuinely different trees, so averaging helps more.
+The structural parallel is worth noticing: *every* method in this course has a complexity dial and a
+CV procedure for setting it.
 :::
 
-For correlated averages, variance falls to
+# 7.3 Bagging {background-color="#16181A" style="color:#F7F6F3"}
 
-$$\rho\sigma^2 + \frac{1-\rho}{B}\sigma^2$$
+## The variance argument
 
-::: {.muted}
-More trees drive the second term to zero. Only decorrelation touches the first.
+Average $B$ trees fitted on bootstrap samples. If each has variance $\sigma^2$ and any two have
+correlation $\rho$:
+
+$$\operatorname{Var}\Big(\frac1B\sum_b \hat f_b\Big) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
+\;\xrightarrow[B\to\infty]{}\; \rho\sigma^2$$
+
+## Read that limit
+
+Increasing $B$ kills the second term but leaves $\rho\sigma^2$ **untouched**.
+
+::: {.check}
+**This is the entire motivation for random forests.**
 :::
 
-## Out-of-bag error
+If one predictor is strongly dominant, every bagged tree splits on it first and the trees are nearly
+identical: $\rho \approx 1$, and bagging buys almost nothing.
 
-Each tree omits about 37% of the data. Predict each observation using only the
-trees that never saw it.
+## Random forests decorrelate
+
+Restrict each split to a random subset of $m$ features.
 
 ::: {.tight}
-- A validation estimate for free
-- Roughly comparable to leave-one-out CV
+- $m = \lfloor \sqrt p \rfloor$ for classification
+- $m = \lfloor p/3\rfloor$ for regression
 :::
+
+Lower $m$ lowers $\rho$ but **raises individual-tree bias** — a bias–variance tradeoff *within* the
+ensemble, tuned by CV.
+
+## Out-of-bag error, free
+
+Each observation is out-of-bag for roughly
+
+$$(1 - 1/n)^n \to e^{-1} \approx 36.8\%$$
+
+of trees, so the **OOB error** approximates CV error at no extra cost.
 
 ::: {.warn}
-On **this** panel, OOB is still optimistic: the omitted rows include other years
-of the same country. Group-aware CV remains the honest number.
+On a panel it is still optimistic — the omitted rows include other years of the same country.
+Group-aware CV remains the honest number.
 :::
 
-# Boosting {background-color="#16181A" style="color:#F7F6F3"}
+# 7.4 Gradient boosting {background-color="#16181A" style="color:#F7F6F3"}
 
-## Fit the residual, slowly
+## Functional gradient descent
 
-$$\hat f_m(x) = \hat f_{m-1}(x) + \eta \cdot h_m(x)$$
+Instead of averaging independent trees, build them **sequentially**, each correcting its
+predecessor.
 
-where $h_m$ is a small tree fit to what remains unexplained, and $\eta$ is the
-learning rate.
+Think of minimising $\sum_i L(y_i, F(x_i))$ over the *function* $F$, by gradient descent **in
+function space**.
+
+## The pseudo-residual
+
+At stage $m$, the negative gradient at the current fit:
+
+$$r_{im} = -\left[\frac{\partial L(y_i, F(x_i))}{\partial F(x_i)}\right]_{F = F_{m-1}}$$
 
 ::: {.tight}
-- Forests average **independent** trees, reducing variance
-- Boosting adds **dependent** trees, reducing bias
+- **Squared loss:** $r_{im} = y_i - F_{m-1}(x_i)$ — literally the residual
+- **Logistic loss:** $r_{im} = y_i - p_{m-1}(x_i)$ — the same probability residual as Session 06
 :::
 
-## The three knobs
+## The update
 
-| Knob | Effect |
+Fit a small tree $h_m$ to the pseudo-residuals:
+
+$$F_m(x) = F_{m-1}(x) + \nu\, \gamma_m h_m(x), \qquad 0 < \nu \le 1$$
+
+::: {.check}
+The **shrinkage** $\nu$ is essential: small $\nu$ (0.01–0.1) with many trees generalises far better
+than large $\nu$ with few. Halving $\nu$ roughly doubles the required $M$.
+:::
+
+## Three interacting knobs
+
+| Knob | Controls |
 |---|---|
-| **Learning rate** $\eta$ | Smaller learns more slowly and generalises better |
-| **Number of trees** | Too many *will* overfit — unlike a forest |
-| **Depth** | Depth $d$ allows $d$-way interactions |
+| $\nu$ | learning rate — smaller generalises better |
+| $M$ | number of trees — **too many overfits**, unlike a forest |
+| $d$ | tree depth — maximum interaction order: $d=1$ additive, $d=2$ two-way |
 
 ::: {.warn}
-A random forest does not overfit as you add trees. **A boosted model does.**
-The stopping point must be chosen on validation data.
+A random forest does not overfit as you add trees. **A boosted model does.** The stopping point must
+be chosen on validation data.
 :::
 
-## Which to reach for
+## What XGBoost and LightGBM add
 
-::: {.tight}
-- **Random forest** — few knobs, hard to break, a strong baseline in one line
-- **Boosting** — usually wins on tabular data, and demands tuning to do so
-:::
+A second-order expansion and an explicit penalty:
 
-::: {.muted}
-Start with a forest. If a tuned boosted model cannot beat it by a margin you
-would defend, report the forest and spend your time elsewhere.
-:::
+$$\mathcal{L}^{(m)} \approx \sum_i \Big[g_i h_m(x_i) + \tfrac12 h_i h_m(x_i)^2\Big] + \Omega(h_m)$$
 
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+$$\Omega(h) = \gamma |T| + \tfrac12 \lambda \|w\|^2$$
 
-## Build the panel
+Solving for the optimal leaf weights gives
 
-```python
-import pandas as pd
-
-core = pd.read_parquet("data/spine/core.parquet")
-c    = pd.read_parquet("data/spine/angle_c_country.parquet")
-
-df = core.merge(c.drop(columns=["flag"]), on=["geo", "time"], how="inner")
-d  = df.dropna(subset=["prod_growth"]).copy()
-print(d.shape)
-```
-
-::: {.muted}
-The merge restricts you to 2014–2024, because that is where the adoption module
-exists. Say so when you report $n$.
-:::
-
-## Forest, honestly validated
-
-```python
-import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_score, GroupKFold
-
-feat = [c_ for c_ in d.columns
-        if c_ not in ("geo", "time", "flag", "prod_growth",
-                      "falling_behind", "falling_behind_next")]
-X, y, g = d[feat].fillna(d[feat].median(numeric_only=True)), d["prod_growth"], d["geo"]
-
-rf = RandomForestRegressor(n_estimators=500, min_samples_leaf=3, random_state=60033)
-sc = cross_val_score(rf, X, y, cv=GroupKFold(5).split(X, y, g),
-                     scoring="neg_root_mean_squared_error")
-print("grouped CV RMSE:", round(-sc.mean(), 3))
-```
-
-## Gradient boosting
-
-```python
-from sklearn.ensemble import HistGradientBoostingRegressor
-
-hgb = HistGradientBoostingRegressor(
-    learning_rate=0.05, max_depth=3, max_iter=600,
-    early_stopping=True, validation_fraction=0.2, random_state=60033,
-)
-sc = cross_val_score(hgb, X, y, cv=GroupKFold(5).split(X, y, g),
-                     scoring="neg_root_mean_squared_error")
-print("boosted grouped CV RMSE:", round(-sc.mean(), 3))
-```
+$$w_j^\star = -\frac{G_j}{H_j+\lambda}$$
 
 ::: {.check}
-`HistGradientBoosting` handles NaN natively, so you can drop the imputation and
-compare. Whether that *helps* is an empirical question — run it.
+Regularisation reappearing, in a third guise.
 :::
 
-# Interpretation {background-color="#16181A" style="color:#F7F6F3"}
+# 7.5 Recovering interpretation {background-color="#16181A" style="color:#F7F6F3"}
 
-## Impurity importance is biased
+## The five tools
 
-`feature_importances_` counts how much each split reduced impurity. It
-systematically favours:
-
-::: {.tight}
-- **high-cardinality** predictors — more cut points to try
-- **continuous** over binary
-- one member of a **correlated group**, arbitrarily
-:::
-
-::: {.warn}
-The `aux_*` columns in this panel are continuous and correlated. Impurity
-importance will flatter them. Do not report it.
-:::
-
-## Permutation importance instead
-
-```python
-from sklearn.inspection import permutation_importance
-
-rf.fit(X, y)
-r = permutation_importance(rf, X, y, n_repeats=20, random_state=60033)
-imp = pd.Series(r.importances_mean, index=X.columns).sort_values(ascending=False)
-print(imp.head(10).round(4))
-```
-
-::: {.check}
-This measures how much prediction **degrades** when a column is shuffled — a
-question about the fitted model, in the units of the loss.
-:::
-
-## Permutation importance is also not causal
-
-::: {.warn}
-Shuffling a column breaks its relationship with **everything**, including its
-correlations with other predictors. With correlated inputs, the importance is
-shared unpredictably and the shuffled rows may be economically impossible
-combinations.
-:::
-
-::: {.muted}
-It answers "what does this model lean on?" It does not answer "what would happen
-if this changed?" Session 10 answers the second, and it needs a different design.
-:::
-
-## Partial dependence
-
-```python
-from sklearn.inspection import PartialDependenceDisplay
-import matplotlib.pyplot as plt
-
-PartialDependenceDisplay.from_estimator(
-    rf, X, features=["gdp_pc_eur", "cloud_use"], kind="average")
-plt.tight_layout()
-```
-
-::: {.check}
-A PDP shows the average fitted relationship, holding the rest at their observed
-values. It is the honest way to show a nonlinearity you found.
-:::
-
-## What to report
-
-::: {.tight}
-- Grouped CV error for **both** models, and the baseline they beat
-- **Permutation** importance, never impurity importance
-- One or two partial-dependence plots for the relationships you claim
-- The tuning you did, and on which folds
-- That every statement is about **prediction**, not effect
-:::
-
-::: {.warn}
-Never write "cloud adoption drives productivity growth" from a forest. Write
-"cloud adoption is among the predictors the model relies on most."
-:::
-
-## Common mistakes
-
-| Mistake | Consequence |
+| Method | What it answers |
 |---|---|
-| Impurity importance in a table | Biased toward continuous and correlated |
-| Importance read causally | The central error of applied ML |
-| OOB reported on a panel | Optimistic; countries repeat |
-| Boosting without early stopping | Overfits as trees accumulate |
-| Tuning and evaluating on one split | The estimate is training error |
+| Impurity importance | how often and how usefully a feature was split on |
+| **Permutation importance** | how much test error rises when the feature is scrambled |
+| Partial dependence | average marginal relationship |
+| ICE curves | the per-observation version of a PDP |
+| **SHAP** | additive attribution per prediction, from cooperative game theory |
 
-## In the lab
+## And their caveats
+
+| Method | Caveat |
+|---|---|
+| Impurity importance | Biased toward high-cardinality features; computed **in-sample** |
+| **Permutation importance** | **Breaks down under correlated features** — creates impossible data points |
+| Partial dependence | Assumes $x_S \perp x_C$; hides heterogeneity |
+| ICE curves | Reveals the heterogeneity a PDP averages away |
+| **SHAP** | Unique under efficiency/symmetry/dummy/additivity; costly; assumes a value function |
+
+## The honest summary
+
+> These tools describe the **model**, not the world.
+
+::: {.warn}
+A large SHAP value means the model **relies on** that feature — not that the feature **causes** the
+outcome.
+:::
+
+::: {.check}
+Session 10 is where we finally take causality seriously. Until then, every sentence you write is
+about prediction.
+:::
+
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
+
+## What you do
 
 ::: {.tight}
-1. Fit the forest and the boosted model under grouped CV
-2. Compare both to the Session 03 linear specification — does flexibility pay?
-3. Produce permutation importance, and check whether `aux_*` columns rank highly
-4. Draw two PDPs and describe the shapes in words
-5. Three sentences, using prediction language throughout
+1. Fit a pruned tree, a forest and a boosted model on your angle, under grouped CV
+2. Compare against the Session 03 linear specification — does flexibility pay?
+3. Produce **permutation** importance, never impurity importance
+4. Draw one PDP and one set of ICE curves; describe the shapes in words
+:::
+
+::: {.warn}
+Report the tuning you did and on which folds. A boosted model tuned and evaluated on one split is
+reporting training error.
+:::
+
+## The two-minute report
+
+::: {.tight}
+1. **What I did** — the models, the CV scheme, the baseline they beat
+2. **The number** — error in the units of the outcome
+3. **The catch** — that every statement is about prediction, not effect
+:::
+
+::: {.check}
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::
