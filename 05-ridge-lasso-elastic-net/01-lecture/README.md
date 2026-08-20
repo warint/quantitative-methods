@@ -120,4 +120,4 @@ motivates the debiased methods of Session 11.
 
 ---
 
-[Back to session 05](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 05](../README.md) · [On to the practice ->](../02-practice/README.md)

@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 *Do European countries fall into types — and does the language of policy track them?*
 
 ---
@@ -26,7 +26,7 @@ Run k-means with $k=4$ on 200 draws from a uniform square, projected live. Four 
 | **40–50** | Hierarchical clustering and the linkage table. Ward as the k-means criterion in agglomerative form. |
 | **50–65** | Choosing $k$: elbow, silhouette, gap statistic. Stress that the gap statistic can return $k=1$, which is why it is worth the extra effort. |
 | **65–82** | Text. TF-IDF and the fact that it is the $p \gg n$ setting of Session 05, so penalised regression is the natural supervised tool on top. Embeddings and cosine similarity. Dictionary methods and why transparency often wins. |
-| **82–90** | **Validity.** The four criteria. This is what the lab is graded on. |
+| **82–90** | **Validity.** The four criteria. This is what the practice is graded on. |
 
 ---
 
@@ -47,14 +47,14 @@ Compute one silhouette by hand: a point with $a_i = 1.2$ to its own cluster and 
 
 ## Misconception to pre-empt
 
-> That clustering discovers structure. It imposes a structure and reports how well the data tolerate it. The permuted-data comparison in the lab exists to make this visceral.
+> That clustering discovers structure. It imposes a structure and reports how well the data tolerate it. The permuted-data comparison in the practice session exists to make this visceral.
 
 Say it explicitly, early, and once more at the end. Misconceptions that go unnamed in the lecture
 reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
 The four validity criteria and the Voronoi picture.
 
@@ -76,4 +76,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 09](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 09](../README.md) · [Practice](../02-practice/README.md)

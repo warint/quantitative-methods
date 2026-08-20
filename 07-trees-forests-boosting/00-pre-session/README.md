@@ -16,7 +16,7 @@ Source: https://hastie.su.domains/ElemStatLearn/
 
 **Molnar, *Interpretable Machine Learning*, ch. on PDP, permutation importance and SHAP**  
 Source: https://christophm.github.io/interpretable-ml-book/  
-*Why:* The interpretation half of the lab.
+*Why:* The interpretation half of the practice.
 
 
 ---
@@ -78,7 +78,7 @@ Source: OpenML / UCI
 URL: <https://archive.ics.uci.edu/dataset/222/bank+marketing>
 
 Reusing Ames lets you compare directly against your Session 2-5 linear results on identical
-folds - which is the point of the lab. Keep the same random seed and the same CV splits.
+folds - which is the point of the practice. Keep the same random seed and the same CV splits.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
 The result you report must come from **your project**.

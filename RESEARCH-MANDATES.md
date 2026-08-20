@@ -7,7 +7,7 @@
 ## Contents
 
 1. [How this works](#1-how-this-works)
-1b. [What this laboratory is for](#1b-what-this-laboratory-is-for)
+1b. [What this practice session is for](#1b-what-this-practice session-is-for)
 2. [What you receive](#2-what-you-receive)
 3. [The three moves](#3-the-three-moves)
 4. [Allocation](#4-allocation)
@@ -80,7 +80,7 @@ very different data** — which is where its assumptions become visible.
 
 ---
 
-## 1b. What this laboratory is for
+## 1b. What this practice session is for
 
 Three goals, and they are not only technical.
 
@@ -187,7 +187,7 @@ exist until the SDAfrique teams define them.
 
 ### What happens in sessions 02 and 03
 
-The methods start before the projects do. In those two labs you work on the **data spine** — the
+The methods start before the projects do. In those two practice sessions you work on the **data spine** — the
 synthetic European panel described in [§7](#7-the-data-spine--your-practice-ground) — which exists
 precisely so you can learn a method on ground whose truth is known.
 
@@ -256,7 +256,7 @@ Some weeks the honest answer is *"not with these data"*. Expect this in particul
 ### What is required of you
 
 1. **Provenance.** Institution, dataset name, version or wave, access date, licence. In a table.
-2. **A cached local copy.** Download once, save as parquet, read from the cache. No lab may require
+2. **A cached local copy.** Download once, save as parquet, read from the cache. No practice may require
    an internet connection.
 3. **Coverage, stated honestly.** Which years, which regions, which population — and who is missing.
 4. **Missingness confronted.** Not dropped silently. Say who disappears when you drop rows, and in
@@ -293,8 +293,8 @@ turning it on data whose truth you do not know.
 
 ## 7b. The deliverable — a scientific article
 
-Each session's lab produces a short section; by Session 12 you have a paper. Use
-[`assessment/lab-report-template.qmd`](assessment/lab-report-template.qmd) — Quarto with Python.
+Each session's practice produces a short section; by Session 12 you have a paper. Use
+[`assessment/practice-report-template.qmd`](assessment/practice-report-template.qmd) — Quarto with Python.
 
 | Section | What goes in it |
 |---|---|
@@ -318,7 +318,7 @@ coefficients.
 
 ## 8. The two-minute report
 
-At the end of every lab, one member — **drawn at random** — gives the report.
+At the end of every practice session, one member — **drawn at random** — gives the report.
 
 **One slide. Three sentences.**
 
@@ -336,7 +336,7 @@ No method exposition — everyone learned it ninety minutes ago. No code on the 
 ## 9. Rules that always apply
 
 **On data.** Never commit data you are not licensed to redistribute. Download once, cache as
-parquet, read from the cache, record provenance and a checksum. Every lab must run offline.
+parquet, read from the cache, record provenance and a checksum. Every practice session must run offline.
 
 **On reproducibility.** One virtual environment, one committed `requirements.txt`, every seed set
 explicitly. If your result does not reproduce from a clean clone, it does not reproduce.

@@ -132,7 +132,7 @@ spot once you look for it.
 
 ---
 
-## 6. Critical reading — the table you will use in the lab
+## 6. Critical reading — the table you will use in the practice session
 
 This is the heart of the pre-session work. Each row states a premise of the narrative and the
 question a decision-maker should put to it.
@@ -145,7 +145,7 @@ question a decision-maker should put to it.
 | **Assumption D** | US–China bloc dynamics dominate. | Test India, Gulf states, Japan, Korea, Canada and issue-specific coalitions. |
 | **Value** | Makes interdependence and social-contract risks vivid. | Use it to design indicators, trigger points and no-regret actions. |
 
-**In the lab, each group is assigned one row.** Your task will be to convert the premise into
+**In the practice session, each group is assigned one row.** Your task will be to convert the premise into
 something a statistician could actually test — an observable indicator, a direction, a trigger
 point and a falsifier. Come having thought about which row you would want.
 
@@ -171,7 +171,7 @@ These are the questions the class will open with. Prepare a position on at least
 - Your written answers to the self-check questions in [`README.md`](README.md).
 - A one-paragraph position on **one** of the discussion questions above.
 - A working environment (see [`setup-vscodium-local-llm.md`](setup-vscodium-local-llm.md)) — this is
-  not negotiable, as the lab begins immediately.
+  not negotiable, as the practice begins immediately.
 
 ---
 

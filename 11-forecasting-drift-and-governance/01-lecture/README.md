@@ -79,7 +79,7 @@ contents:
 
 This is not bureaucracy. Sections 5 and 6 are where the intellectual content of the whole course
 finally has to be written down for someone else. A template is provided in
-[`governance-file-template.md`](../02-lab/governance-file-template.md).
+[`governance-file-template.md`](../02-practice/governance-file-template.md).
 
 ### 11.5 The arc, in one table
 
@@ -136,4 +136,4 @@ know. That is also the purpose of a model — and it is what you will be examine
 
 ---
 
-[Back to session 11](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 11](../README.md) · [On to the practice ->](../02-practice/README.md)

@@ -58,7 +58,7 @@ PARTICIPATION_OUT = os.path.join(A, "participation.csv")
 DIMENSIONS = ["preparation", "contribution", "reliability", "understanding"]
 
 # ── Participation ────────────────────────────────────────────────────────────
-# After each lab you tick the students who made a real contribution. Those ticks
+# After each practice session you tick the students who made a real contribution. Those ticks
 # are the measurement. The distribution is then used to LOCATE the bar — not to
 # rank students against one another. See GROUP-ASSESSMENT.md for why.
 LAB_SESSIONS = list(range(2, 12))          # 02..11  -> 10 sessions
@@ -270,7 +270,7 @@ def contribution_flags(roster, stats):
 def lab_grid(members, stats):
     """Per-member x per-week attendance grid, derived from commits.
 
-    The course asks every member to commit and push in every lab. That is not
+    The course asks every member to commit and push in every practice session. That is not
     self-reported: it is in the history. This prints one row per member and one
     column per week in which the group did anything at all, so a member who was
     carried shows up as a row of gaps rather than as a total that looks fine.
@@ -300,7 +300,7 @@ def cmd_contributions(args):
     print("  Evidence for a conversation, not a verdict. Commit counts are noisy and")
     print("  gameable; pair programming legitimately concentrates them. The per-week")
     print("  grid is the more useful half: the course asks every member to push in")
-    print("  every lab, and a row of gaps says more than a low total.")
+    print("  every practice session, and a row of gaps says more than a low total.")
     print()
 
     for gid, members in by_group(roster).items():
@@ -372,7 +372,7 @@ def credit_matrix(roster):
     """
     weeks = session_weeks()
     stats, _ = attribute(roster, git_log())
-    labs = set(LAB_SESSIONS)
+    lab_sessions = set(LAB_SESSIONS)
 
     drawn, delivered = defaultdict(set), defaultdict(set)
     for r in read_presenter_log():
@@ -396,8 +396,8 @@ def credit_matrix(roster):
     for m in roster:
         sid = m["student_id"]
         commits = {s for s in LAB_SESSIONS if near(weeks.get(s), stats[sid]["weeks"])}
-        out[sid] = {"ticks": ticks[sid] & labs,
-                    "delivered": delivered[sid] & labs,
+        out[sid] = {"ticks": ticks[sid] & lab_sessions,
+                    "delivered": delivered[sid] & lab_sessions,
                     "commits": commits,
                     "drawn": drawn[sid],
                     "missed": drawn[sid] - delivered[sid]}
@@ -556,7 +556,7 @@ def participation_report(roster, args):
     print()
     rule()
     print(f"  BAR = {bar}: a pass requires a recorded contribution in at least {bar}")
-    print(f"  of {n_sessions} lab sessions, with no more than {MAX_MISSED_DRAWS} failure")
+    print(f"  of {n_sessions} practice sessions, with no more than {MAX_MISSED_DRAWS} failure")
     print("  to deliver when drawn.")
     print()
     print("  The quartiles are for CALIBRATING this bar, not for assigning outcomes.")

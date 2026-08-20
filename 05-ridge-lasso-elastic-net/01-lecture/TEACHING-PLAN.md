@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 *Of two hundred indicators, which few actually carry the signal?*
 
 ---
@@ -40,7 +40,7 @@ Soft-threshold $\rho = (0.42, -0.18, 0.09, 0.31)$ at $\lambda = 0.20$: $(0.22, 0
 
 ## Put this to the room
 
-*"Two predictors are correlated at 0.99 and both matter. What does the lasso do?"* It picks one, roughly arbitrarily, and a different one on a resampled dataset. That instability is the lab.
+*"Two predictors are correlated at 0.99 and both matter. What does the lasso do?"* It picks one, roughly arbitrarily, and a different one on a resampled dataset. That instability is the practice.
 
 ---
 
@@ -53,7 +53,7 @@ reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
 $S_\lambda(\rho)$ and the two constraint regions side by side.
 
@@ -75,4 +75,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 05](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 05](../README.md) · [Practice](../02-practice/README.md)

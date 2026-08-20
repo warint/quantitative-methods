@@ -12,7 +12,7 @@ Source: https://www.statlearning.com/
 
 **Stock & Watson (2002), 'Forecasting Using Principal Components from a Large Number of Predictors', JASA 97(460)**  
 Source: https://doi.org/10.1198/016214502388618960  
-*Why:* The diffusion-index method the lab reproduces.
+*Why:* The diffusion-index method the practice reproduces.
 
 **Bai & Ng (2002), 'Determining the Number of Factors in Approximate Factor Models', Econometrica 70(1)**  
 Source: https://doi.org/10.1111/1468-0262.00273  

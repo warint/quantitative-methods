@@ -102,4 +102,4 @@ $$\mathrm{CV}_K = \frac{1}{n}\sum_{k=1}^{K}\sum_{i \in \mathcal{F}_k} L\big(y_i,
 
 ---
 
-[Back to session 04](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 04](../README.md) · [On to the practice ->](../02-practice/README.md)

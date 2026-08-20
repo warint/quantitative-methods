@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 *How many independent things are we actually measuring?*
 
 ---
@@ -46,14 +46,14 @@ Eigendecompose $\begin{pmatrix}2&1\\1&2\end{pmatrix}$ by hand: eigenvalues 3 and
 
 ## Misconception to pre-empt
 
-> That factors are identified. They are identified only up to rotation, so 'Factor 1 is the business cycle' is an interpretation, never an estimate. Require the self-critique in the lab.
+> That factors are identified. They are identified only up to rotation, so 'Factor 1 is the business cycle' is an interpretation, never an estimate. Require the self-critique in the practice session.
 
 Say it explicitly, early, and once more at the end. Misconceptions that go unnamed in the lecture
 reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
 The rotation-indeterminacy statement and the Bai–Ng criterion.
 
@@ -75,4 +75,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 08](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 08](../README.md) · [Practice](../02-practice/README.md)

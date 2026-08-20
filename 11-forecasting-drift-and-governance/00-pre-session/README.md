@@ -15,7 +15,7 @@ Source: https://doi.org/10.1080/07350015.1995.10524599
 *Why:* The test that turns 'lower RMSE' into a statement you can defend.
 
 **Your own Session 1 memo**  
-Source: `../01-foundations-scenarios-and-tools/02-lab/submissions/`  
+Source: `../01-foundations-scenarios-and-tools/02-practice/submissions/`  
 *Why:* You revise it for the Session 12 deliverable. Re-read it now, before the governance material.
 
 
@@ -61,7 +61,7 @@ mine = pd.read_parquet("data/spine/<your file>.parquet")
 df   = mine.merge(core, on=["geo", "time"], how="left")   # not for angle E
 ```
 
-**Before class:** Bring a working draft of your final analysis. This lab is a workshop on it, not a new exercise, and groups arriving without one will spend the session catching up.
+**Before class:** Bring a working draft of your final analysis. This practice is a workshop on it, not a new exercise, and groups arriving without one will spend the session catching up.
 
 > Read your [data dictionary](../../data/spine/dictionaries/) first. Its **Traps** section lists
 > the things that have cost somebody a week, and its **First look** items take ten minutes. Knowing

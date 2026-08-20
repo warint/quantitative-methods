@@ -160,7 +160,7 @@ you derived in Session 5. Iterate, recompute weights, repeat.
 cost little more than one fit. (ii) An *active set* strategy cycles only over currently non-zero
 coefficients, checking the full set occasionally via the KKT conditions. (iii) **Clamp $w_i$ away
 from zero** (e.g. at $10^{-5}$) or $z_i$ explodes for well-classified points - this is the bug you
-will hit in the lab.
+will hit in the practice session.
 
 ### 6.8 Class imbalance: three distinct interventions
 
@@ -223,4 +223,4 @@ The second sentence is the one a referee will respect.
 
 ---
 
-[Back to session 06](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 06](../README.md) · [On to the practice ->](../02-practice/README.md)

@@ -82,7 +82,7 @@ cosine:
 $$\cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\|v_b\|} \in [-1,1] .$$
 
 Cosine ignores magnitude, which is what you want when documents differ in length. You will generate
-embeddings **locally** in the lab - the corpus never leaves your machine, which is both a
+embeddings **locally** in the practice session - the corpus never leaves your machine, which is both a
 methodological and a governance point worth noting.
 
 **Dictionary methods** (count terms from a pre-specified list) remain widely used in economics
@@ -123,4 +123,4 @@ Four questions to answer about any text-derived measure:
 
 ---
 
-[Back to session 09](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 09](../README.md) · [On to the practice ->](../02-practice/README.md)

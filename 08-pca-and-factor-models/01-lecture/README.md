@@ -105,4 +105,4 @@ rolling-origin discipline applies to *every* step, including the unsupervised on
 
 ---
 
-[Back to session 08](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 08](../README.md) · [On to the practice ->](../02-practice/README.md)

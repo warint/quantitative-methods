@@ -16,14 +16,14 @@ ames.frame.to_parquet("data/ames.parquet")
 ```
 
 Everything after the first run reads the local parquet file. **No network access is needed during
-the lab.**
+the practice.**
 
 ---
 
 ## Rules for this folder
 
 - Data files are **git-ignored**. Never commit raw data.
-- Download **once**, cache as parquet, and read from the cache. The lab must run offline.
+- Download **once**, cache as parquet, and read from the cache. The practice must run offline.
 - Record your download date and, where available, a checksum in `PROVENANCE.md`.
 - If you extend the dataset yourself, document the source and respect its licence.
 

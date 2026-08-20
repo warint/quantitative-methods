@@ -23,9 +23,9 @@ the term.
 
 | # | Mechanism | When | Student cost | Instructor cost |
 |---|---|---|---|---|
-| 1 | **Random presenter draw** | Every lab | Must be ready | 30 seconds |
+| 1 | **Random presenter draw** | Every practice session | Must be ready | 30 seconds |
 | 2 | **Git contribution report** | Automatic | Commit under your own name | One command |
-| 3 | **Everyone pushes** | Every lab | Nothing — it is in the history | One glance |
+| 3 | **Everyone pushes** | Every practice session | Nothing — it is in the history | One glance |
 | 4 | **Confidential peer ratings** | Once, at term end | Five minutes | ~20 minutes |
 
 Mechanisms 1–3 are **deterrents**. They mostly work by existing. Mechanism 4 is the only one that
@@ -35,7 +35,7 @@ moves a mark, and it can only do so with mechanism 2's agreement.
 
 ### 1. The random presenter draw
 
-The two-minute report at the end of every lab is delivered by **a member drawn at random when the
+The two-minute report at the end of every practice session is delivered by **a member drawn at random when the
 group is called**.
 
 ```bash
@@ -90,9 +90,9 @@ measurement artefact.
 
 ---
 
-### 3. Everyone pushes, every lab
+### 3. Everyone pushes, every practice session
 
-There are **no assigned roles**. All three members work on the lab together, and all three are
+There are **no assigned roles**. All three members work on the practice together, and all three are
 expected to **commit and push from their own machine** before they leave the room.
 
 That is not self-reported. It is in the history:
@@ -213,7 +213,7 @@ participation cannot mean turning up. It means contributing to the room.
 
 ### The mechanism
 
-After each lab — sixty seconds — the instructor records the students who made a **real
+After each practice session — sixty seconds — the instructor records the students who made a **real
 contribution**: a question that changed how another group thought about their result, a connection
 between two angles, a challenge that landed, a correction. Not their own two-minute report; that is
 already logged.
@@ -303,10 +303,10 @@ Same tick count. Completely different students. The verdict column knows the dif
 
 ### What students are told
 
-> Participation is worth 10%, earned against an absolute published bar. It is not attendance. After each lab, the instructor records the
+> Participation is worth 10%, earned against an absolute published bar. It is not attendance. After each practice session, the instructor records the
 > students who contributed something that helped the room — a question that changed how another
 > group saw their result, a connection between angles, a challenge that landed. To pass you need a
-> recorded contribution in at least **N** of the ten lab sessions.
+> recorded contribution in at least **N** of the ten practice sessions.
 >
 > If you are drawn to present, deliver. Failing to deliver when drawn is the clearest participation
 > failure there is.
@@ -331,7 +331,7 @@ The `git_name` and `git_email` columns must match what students set in Session 1
 (`git config user.name` / `user.email`). The report tells you about any unmatched identity, so
 mistakes surface in week 2 rather than week 12.
 
-**Every lab — 90 seconds**
+**Every practice session — 90 seconds**
 
 ```bash
 python scripts/assess.py draw --session 5           # before the reports: project it, call the groups

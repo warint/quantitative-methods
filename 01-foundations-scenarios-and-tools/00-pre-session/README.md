@@ -88,9 +88,9 @@ Session 01, which has no mathematics in it.
 | Half | What happens |
 |---|---|
 | **First** (~90 min) | [The syllabus](../01-lecture/README.md) — how the course works, how you are judged |
-| **Second** (~90 min) | [A conversation](../02-lab/README.md) — *Europe 2031*, and what AI actually is |
+| **Second** (~90 min) | [A conversation](../02-practice/README.md) — *Europe 2031*, and what AI actually is |
 
-No lab, no code, no deliverable. The methods begin in Session 02 — for which you need
+No practice session, no code, no deliverable. The methods begin in Session 02 — for which you need
 [git and a GitHub account](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
 
 ---

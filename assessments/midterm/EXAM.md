@@ -6,11 +6,20 @@
 
 |  |  |
 |---|---|
+| **Format** | **Paper. Handwritten, in pen.** |
 | **Duration** | 2 hours |
 | **Total** | 100 points |
-| **Permitted** | a non-programmable calculator |
-| **Not permitted** | notes, textbooks, phones, laptops, any networked device |
+| **Permitted** | a pen, and a **non-programmable calculator** |
+| **Not permitted** | any computer, phone, tablet or smartwatch · any networked device · **no internet** · notes, textbooks, formula sheets |
 | **Answer** | in the spaces provided; show your working |
+
+> **No machine, and no assistant.** Every other assessment in this course assumes you have a
+> language model beside you, because that is how the work is now done. This one deliberately does
+> not. It is the only instrument that isolates what **you** can derive, unaided, on paper — which is
+> the thing that lets you tell when the assistant is wrong for the rest of your career.
+>
+> Working is marked. A correct final answer with no derivation earns part marks; a correct
+> derivation with an arithmetic slip earns most of them.
 
 ---
 

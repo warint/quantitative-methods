@@ -130,4 +130,4 @@ finally take causality seriously.
 
 ---
 
-[Back to session 07](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 07](../README.md) · [On to the practice ->](../02-practice/README.md)

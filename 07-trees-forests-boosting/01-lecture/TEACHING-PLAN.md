@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 *Is the relationship non-linear — and can you still explain it to a minister?*
 
 ---
@@ -53,7 +53,7 @@ reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
 The bagging variance formula and the interpretation-tools table.
 
@@ -75,4 +75,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 07](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 07](../README.md) · [Practice](../02-practice/README.md)

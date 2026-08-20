@@ -44,7 +44,7 @@ will derive, implement, break, and defend eleven methods.
 > you derived, and — more importantly — you will recognise the situations where its assumptions
 > fail. A method you cannot derive is a method you cannot audit.
 >
-> **Break what you build.** Every lab includes a task that deliberately damages your own analysis:
+> **Break what you build.** Every practice session includes a task that deliberately damages your own analysis:
 > introduce collinearity, leak the test set, induce perfect separation. Knowing how a method fails
 > is a different and more useful knowledge than knowing how it succeeds. Most professional errors
 > are failures you did not know were possible.
@@ -84,7 +84,7 @@ Sessions 1–11 have the same three-part shape. Session 12 is presentations.
 ```
 Before class                First half (~90 min)          Second half (~90 min)
 ─────────────────────────   ───────────────────────────   ────────────────────────────
-00-pre-session/             01-lecture/                   02-lab/
+00-pre-session/             01-lecture/                   02-practice/
   · reading                   · the mathematics             · your group's research angle
   · concepts to review        · derivations                 · implement, then break it
   · data already cached       · what the method assumes     · 2-minute report
@@ -127,7 +127,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
 | # | Session | Method | Theme of the second half |
 |---|---|---|---|
-| 01 | Syllabus, and a conversation: *Europe 2031* and what AI is | — | *(no lab; discussion)* |
+| 01 | Syllabus, and a conversation: *Europe 2031* and what AI is | — | *(no practice; discussion)* |
 | 02 | Data, vectors, and the geometry of least squares | OLS, projection, FWL, QR | How much of the gap is composition? |
 | 03 | Linear regression: inference, diagnostics, interpretation | Gauss–Markov, robust SEs, OVB | Which differences survive a referee? |
 | 04 | Bias–variance, overfitting, cross-validation | CV, optimism, effective df | Predicting, or describing the past? |
@@ -154,8 +154,8 @@ your work. Session 12 is where you defend it.
 | Component | Weight | Form | When |
 |---|---|---|---|
 | **Participation** | **10%** | individual, continuous | every session |
-| **Midterm exam** | **30%** | individual, in class, calculator, no documents | after Session 06 |
-| **Team work** | **20%** | groups of three (lab groups) | Session 12 |
+| **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | after Session 06 |
+| **Team work** | **20%** | groups of three (practice groups) | Session 12 |
 | **Final exam** | **40%** | paper in teams of three (25) + individual oral, 15 min (15) | end of term |
 
 **Team work, 20%**, broken down:
@@ -184,7 +184,7 @@ reasoning, in full.
 
 Attendance is assumed at HEC Montréal, so participation cannot mean turning up. It means
 contributing to the room: a question that changed how another group saw their result, a connection
-between two angles, a correction that landed. After each lab the instructor records who did that.
+between two angles, a correction that landed. After each practice session the instructor records who did that.
 
 > **Why it is graded at all.** The second half of this course is a joint enterprise. Ten groups
 > produce five perspectives on one question, and the value of the session comes from the collision
@@ -200,7 +200,7 @@ between two angles, a correction that landed. After each lab the instructor reco
 | Roughly half the bar | 5 / 10 |
 | Little or no recorded contribution | 0–3 / 10 |
 
-The bar is a recorded contribution in at least **N of the ten lab sessions**, and no more than one
+The bar is a recorded contribution in at least **N of the ten practice sessions**, and no more than one
 failure to deliver the two-minute report when drawn.
 
 > **Why an absolute bar rather than a ranking.** Because a participation score that ranks students
@@ -213,7 +213,7 @@ and the record should reflect what you actually did. A student who delivered eve
 drawn and worked steadily is flagged for **review, never auto-zeroed**: the instructor's attention
 is the measuring instrument, and it is imperfect.
 
-### Midterm exam — 30%, individual, in class, calculator, no documents
+### Midterm exam — 30%, individual, on paper, closed book
 
 Covers Sessions 1–6: the supervised learning problem, least squares and its geometry, inference and
 diagnostics, bias–variance and cross-validation, ridge/lasso/elastic net, logistic regression and
@@ -453,7 +453,7 @@ Per-session readings, including the journal articles, are listed in each session
 | [`GROUP-ASSESSMENT.md`](GROUP-ASSESSMENT.md) | Participation, presenter draw, contribution report, peer ratings |
 | [`assessments/midterm/`](assessments/midterm/) | Example paper and full solutions |
 | [`assessments/final-paper/`](assessments/final-paper/README.md) | The SDAfrique brief and rubric |
-| `NN-session-slug/` | Per-session pre-session, lecture, and lab |
+| `NN-session-slug/` | Per-session pre-session, lecture, and practice |
 
 ---
 

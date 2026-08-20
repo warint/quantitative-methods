@@ -26,9 +26,9 @@ By the end of this session you should be able to:
 |---|---|---|---|
 | **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | The syllabus: how the course works and how you are judged | [`01-lecture/`](01-lecture/README.md) |
-| **Second half** (~90 min) | In class | A conversation: *Europe 2031*, and what AI actually is | [`02-lab/`](02-lab/README.md) |
+| **Second half** (~90 min) | In class | A conversation: *Europe 2031*, and what AI actually is | [`02-practice/`](02-practice/README.md) |
 
-**Session 01 has no lab and no deliverable.** It is the one session with no mathematics: the first
+**Session 01 has no practice and no deliverable.** It is the one session with no mathematics: the first
 half walks through the syllabus, the second is a discussion. The methods begin in Session 02.
 
 The pre-session work is still **not optional** — arrive with a working environment and with
@@ -49,7 +49,7 @@ Download instructions: [`data/README.md`](data/README.md)
 
 ## Deliverable
 
-A one-page memo (`02-lab/submissions/group-XX.md`) containing: the assumption,
+A one-page memo (`02-practice/submissions/group-XX.md`) containing: the assumption,
 its negation, two indicators with sources and frequencies, two trigger points with horizons, one
 falsifier, the LLM's strongest objection with your reply, and one flagged unverifiable claim.
 Attach your indicator plot. **Five minutes of oral presentation** in the last 20 minutes of class.

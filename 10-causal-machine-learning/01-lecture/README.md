@@ -131,4 +131,4 @@ Session 3's OVB formula: it still governs everything.
 
 ---
 
-[Back to session 10](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 10](../README.md) · [On to the practice ->](../02-practice/README.md)

@@ -34,10 +34,10 @@ By the end of this session you should be able to:
 |---|---|---|---|
 | **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
-| **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-lab/`](02-lab/README.md) |
+| **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the lab assumes you arrive with the data already downloaded.
+a working environment; the practice session assumes you arrive with the data already downloaded.
 
 ---
 
@@ -54,7 +54,7 @@ Download instructions: [`data/README.md`](data/README.md)
 
 ## Deliverable
 
-A commented script or notebook `02-lab/submissions/group-XX/` that runs
+A commented script or notebook `02-practice/submissions/group-XX/` that runs
 end-to-end from the cached parquet file, plus a 250-word note answering: *why did the QR route
 survive the collinearity you introduced, and what does that tell you about interpreting
 coefficients when predictors are nearly redundant?*

@@ -1,4 +1,4 @@
-# Session replications — the article behind each lab
+# Session replications — the article behind each practice session
 
 Every session has a **published article** attached to it. You read it before class: it is
 what competent practice with that week's method looks like, done by people who had to defend it.
@@ -109,7 +109,7 @@ If a `.dta` is too old or too new for pandas, ask Dataverse for the archival
 copy instead by appending `&format=tab` to a single-file download URL.
 
 Download **once**, into `data/`, which is git-ignored for anything large. Never
-put a download inside a lab script — the lab must run with the wifi off.
+put a download inside a practice script — it must run with the wifi off.
 
 ---
 

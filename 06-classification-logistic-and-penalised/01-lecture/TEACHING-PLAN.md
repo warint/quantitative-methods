@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 *Can we flag a country or sector falling behind one year ahead — and what does a false alarm cost?*
 
 ---
@@ -55,7 +55,7 @@ reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
 $\tau^\star = c_{FP}/(c_{FP}+c_{FN})$ and the three-interventions table.
 
@@ -77,4 +77,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 06](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 06](../README.md) · [Practice](../02-practice/README.md)

@@ -100,7 +100,7 @@ ames.frame.to_parquet("data/ames.parquet")
 ```
 
 Everything after the first run reads the local parquet file. **No network access is needed during
-the lab.**
+the practice.**
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
 The result you report must come from **your project**.

@@ -20,7 +20,7 @@ Twelve sessions, each 90 minutes of teaching and 90 minutes of group work.
 
 Every method is **derived before it is used**, and every result is produced on your own machine
 with open tools. Nothing in this course requires an API key, a subscription, or an internet
-connection during a lab.
+connection during a practice.
 
 The organising question, in one line:
 
@@ -32,7 +32,7 @@ The organising question, in one line:
 |---|---|
 | **Before class** | `00-pre-session/` — reading, concepts, data, a written self-check |
 | **First half** | `01-lecture/` — the mathematics of the method |
-| **Second half** | `02-lab/` — group work on your project, then two-minute reports |
+| **Second half** | `02-practice/` — group work on your project, then two-minute reports |
 
 Session 01 is the exception: syllabus, then a conversation. Session 12 is the other: presentations
 fill both halves.
@@ -71,9 +71,9 @@ Four mechanisms, three of which cost you nothing if you are doing the work.
 
 | Mechanism | When |
 |---|---|
-| **Random presenter draw** | every lab — the two-minute report is given by a member drawn live |
+| **Random presenter draw** | every practice session — the two-minute report is given by a member drawn live |
 | **Git contribution report** | automatic — commits, share, weeks active |
-| **Everyone pushes** | every lab — all three members commit from their own machine |
+| **Everyone pushes** | every practice session — all three members commit from their own machine |
 | **Confidential peer ratings** | once, at term end |
 
 A mark is reduced only when **two independent records agree**. One signal opens a conversation; it
@@ -85,13 +85,13 @@ paper and on the course. Full policy: [`GROUP-ASSESSMENT.md`](../../GROUP-ASSESS
 ## 1.6 The standing rules
 
 **On data.** Never committed. Download once, cache as parquet, read from the cache. Record
-provenance. Every lab must run offline.
+provenance. Every practice session must run offline.
 
 **On reproducibility.** One virtual environment, one committed `requirements.txt`, every seed set
 explicitly. If your result does not reproduce from a clean clone, it does not reproduce.
 
 **On the local LLM.** Use it freely, as a sparring partner and never as an oracle. Ask it to argue
-against you. Verify every factual claim. Every lab deliverable documents at least one instance
+against you. Verify every factual claim. Every practice session deliverable documents at least one instance
 where you caught it being wrong or unverifiable. You are never penalised for using it; you are
 penalised for using it uncritically.
 
@@ -112,4 +112,4 @@ Bring these to the room rather than to email in week nine.
 
 ---
 
-[Back to session 01](../README.md) · [On to the conversation ->](../02-lab/README.md)
+[Back to session 01](../README.md) · [On to the conversation ->](../02-practice/README.md)

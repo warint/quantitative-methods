@@ -6,7 +6,7 @@ Quantitative Methods in International Business · duration 3h00
 
 ---
 
-**Presentations fill both halves of the session.** There is no lecture and no lab.
+**Presentations fill both halves of the session.** There is no lecture and no practice.
 
 Twelve groups × **13 minutes** each: **8 minutes** of presentation, **5 minutes** of questions from
 the other groups and the instructor. Two short breaks. The schedule is tight and will be kept to;
@@ -68,7 +68,7 @@ Submit everything to `submissions/group-XX/`. Preparation checklist:
 [`00-pre-session/README.md`](00-pre-session/README.md).
 
 The governance file, backtest and shift diagnostic were drafted in the
-[Session 11 lab](../11-forecasting-drift-and-governance/02-lab/README.md) — this session assesses
+[Session 11 practice](../11-forecasting-drift-and-governance/02-practice/README.md) — this session assesses
 the finished versions.
 
 ---

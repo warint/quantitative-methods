@@ -10,7 +10,7 @@ WHY FIXTURES EXIST
 The real spine is built by `build.py` from Eurostat, Comtrade and the ECB, and must be
 run somewhere with network access to those hosts. These fixtures are the same schema,
 the same country and year coverage, the same flags and the same missingness patterns —
-generated from a known latent structure so that the pipeline, the labs and the
+generated from a known latent structure so that the pipeline, the practice sessions and the
 solutions can be tested before, or instead of, the real download.
 
 They are NOT real data and every file says so in its own provenance row.

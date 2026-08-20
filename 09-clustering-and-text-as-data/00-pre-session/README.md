@@ -16,7 +16,7 @@ Source: https://doi.org/10.1257/jel.20181020
 
 **Baker, Bloom & Davis (2016), 'Measuring Economic Policy Uncertainty', QJE 131(4)**  
 Source: https://doi.org/10.1093/qje/qjw024  
-*Why:* The lab replicates the logic of this index. Note especially the *validation* section.
+*Why:* The practice replicates the logic of this index. Note especially the *validation* section.
 
 
 ---
@@ -80,7 +80,7 @@ Source: ECB press releases; Eurostat regional accounts
 URL: <https://www.ecb.europa.eu/press/pr/date/html/index.en.html>
 
 The instructor will supply `data/cb_statements.parquet` (date, institution, text) so
-that the lab has no scraping dependency. If you extend the corpus yourself, respect each site's
+that the practice has no scraping dependency. If you extend the corpus yourself, respect each site's
 terms of use and record your collection date - provenance is part of the deliverable.
 
 The regional panel (Eurostat `nama_10r_2gdp`, `lfst_r_lfu3rt`) supports the clustering half.

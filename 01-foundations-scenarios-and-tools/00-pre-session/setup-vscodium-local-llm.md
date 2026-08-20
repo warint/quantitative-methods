@@ -105,7 +105,7 @@ The local model is a **sparring partner**, not an oracle.
 1. **Ask it to argue against you.** Its most useful output is an objection you had not considered.
 2. **Verify every factual claim.** It states plausible falsehoods with complete confidence,
    especially about library APIs, statistical results and citations.
-3. **Record what you checked.** Every lab deliverable requires at least one documented instance
+3. **Record what you checked.** Every practice deliverable requires at least one documented instance
    where you caught the model being wrong or unverifiable. This is graded.
 
 You are never penalised for using the model. You are penalised for using it uncritically.

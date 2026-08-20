@@ -375,7 +375,7 @@ the individual directly, so there is nothing to correct for.
 | **Honesty under pressure** | Concedes precisely what cannot be claimed, and says how you would find out |
 
 > **Saying "I do not know" costs you very little.** Defending an indefensible claim costs you a
-> great deal. That has been true in every lab this term and it is true here.
+> great deal. That has been true in every practice session this term and it is true here.
 
 ### Practical
 
@@ -389,7 +389,7 @@ the individual directly, so there is nothing to correct for.
 
 | When | What |
 |---|---|
-| **After Session 7** | Teams formed (three authors; they need not be your lab group). Registered with the instructor. |
+| **After Session 7** | Teams formed (three authors; they need not be your practice group). Registered with the instructor. |
 | **After Session 8** | One-page proposal: question, data sources with links, method, why it matters locally. Approved before you proceed. |
 | **After Session 10** | Literature review draft — the sources and the argument, not yet polished prose. Formative feedback returned. |
 | **Session 12 week** | Full draft optional, for comment. Take this up; it is free. |

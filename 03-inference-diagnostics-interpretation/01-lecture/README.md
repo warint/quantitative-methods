@@ -95,4 +95,4 @@ Today, the discipline is simply to say precisely what we have estimated.
 
 ---
 
-[Back to session 03](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 03](../README.md) · [On to the practice ->](../02-practice/README.md)

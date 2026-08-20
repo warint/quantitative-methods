@@ -12,7 +12,7 @@ Source: https://www.statlearning.com/
 
 **Mincer (1974), *Schooling, Experience and Earnings* - concept summary**  
 Source: Any labour economics text; or ask your local LLM for the functional form and check it  
-*Why:* The lab estimates this equation. Know why log wages and why experience enters as a quadratic.
+*Why:* The practice estimates this equation. Know why log wages and why experience enters as a quadratic.
 
 
 ---
@@ -84,7 +84,7 @@ url = "https://raw.githubusercontent.com/JeffSackmann/.../cps85.csv"  # replace 
 ```
 
 **Recommended:** the instructor will place `data/wages.csv` in the shared repo before class so the
-lab has no network dependency. Verify with `md5sum` against the value in `data/CHECKSUMS.txt`.
+practice has no network dependency. Verify with `md5sum` against the value in `data/CHECKSUMS.txt`.
 
 Use this if you want to see the method work on known ground before turning it on your own angle.
 The result you report must come from **your project**.

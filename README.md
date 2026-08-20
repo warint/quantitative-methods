@@ -17,8 +17,8 @@ So this course does four unusual things:
 |---|---|
 | **The model runs on your machine** | Ollama + Qwen 2.5 Coder. No API key, no per-token bill, no data leaving the room. You also learn what is achievable *without* a frontier system, which is the realistic institutional constraint. |
 | **You work in a real IDE, from the terminal** | VS Codium, git, and an agent (`aider`) that reads and edits your files while you steer it in prose. Not notebooks; the workflow you will actually be hired into. |
-| **Catching the model is graded** | Every lab deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
-| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY 4.0 / MIT). Published articles with their replication data, cited by DOI. The labs are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
+| **Catching the model is graded** | Every practice session deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
+| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY 4.0 / MIT). Published articles with their replication data, cited by DOI. The practice sessions are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
 
 Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Markov, the bias–variance
 decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
@@ -45,17 +45,17 @@ produce a defensible number, on real European data, and say out loud what it doe
 ```
 Before class                First half (~90 min)          Second half (~90 min)
 ─────────────────────────   ───────────────────────────   ────────────────────────────
-00-pre-session/             01-lecture/                   02-lab/
+00-pre-session/             01-lecture/                   02-practice/
   · reading                   · the mathematics             · group work in VS Codium
   · concepts to review        · derivations                 · implement it yourself
   · download the data         · what the method assumes     · then break it deliberately
   · written self-check        · what it cannot do           · a written deliverable
 ```
 
-The lecture assumes the pre-session work is done. The lab assumes the data are already downloaded.
-Nothing in a lab requires an internet connection.
+The lecture assumes the pre-session work is done. The practice assumes the data are already downloaded.
+Nothing in a practice session requires an internet connection.
 
-**Session 12** is different: group presentations fill both halves. No lecture, no lab.
+**Session 12** is different: group presentations fill both halves. No lecture, no practice.
 
 ### The second half is real research, from Africa
 
@@ -113,7 +113,7 @@ sessions licences a policy claim. Session 11 asks what you owe the person who ac
 and returns to the scenario the course opened with. Session 12 is where you defend it.
 
 **Session 6 is deliberately dense.** It composes the Session 5 penalty with the logistic likelihood,
-which is why the second half can be short: by then you have derived both halves yourself. Its lab is
+which is why the second half can be short: by then you have derived both halves yourself. Its practice is
 split into a compulsory Track A (German Credit) and an extension Track B (bankruptcy data).
 
 ---
@@ -149,10 +149,10 @@ github.com/warint/quantitative-methods
 └── group-XX        ← each group commits and pushes here all term
 ```
 
-Lab deliverables go in the session folder, on the group's own branch:
+Practice deliverables go in the session folder, on the group's own branch:
 
 ```
-NN-session-name/02-lab/submissions/group-XX/
+NN-session-name/02-practice/submissions/group-XX/
 ```
 
 **Why one repository.** `python scripts/assess.py contributions` reads the git history *of this
@@ -191,12 +191,12 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 | Component | Weight | Form |
 |---|---|---|
 | **Participation** | **10%** | individual, continuous |
-| **Midterm exam** | **30%** | individual, in class, calculator, no documents — after Session 06 |
+| **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet — after Session 06 |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | research paper in teams of three (25) + individual oral, 15 min (15) |
 
 Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
-memo 3 · presentation and defence 3. Session labs themselves are **formative** — commented on, not
+memo 3 · presentation and defence 3. Session practice sessions themselves are **formative** — commented on, not
 marked.
 
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)
@@ -204,7 +204,7 @@ marked.
 - Session 12 rubric: [`12-group-presentations/`](12-group-presentations/README.md)
 
 Groups confirm their project dataset by Session 10 and draft three of the four components in the
-[Session 11 lab](11-forecasting-drift-and-governance/02-lab/README.md).
+[Session 11 practice](11-forecasting-drift-and-governance/02-practice/README.md).
 
 ### Individual accountability inside groups
 
@@ -213,9 +213,9 @@ Four mechanisms, three of which cost nothing during the term. Full policy:
 
 | Mechanism | When | Effect |
 |---|---|---|
-| **Random presenter draw** | every lab | the 2-minute report is delivered by a member drawn live — so all three must understand everything |
+| **Random presenter draw** | every practice session | the 2-minute report is delivered by a member drawn live — so all three must understand everything |
 | **Git contribution report** | automatic | commits, share, and weeks active per member; flags the extremes |
-| **Everyone pushes** | every lab | all three members commit from their own machine; a per-week grid makes gaps visible |
+| **Everyone pushes** | every practice session | all three members commit from their own machine; a per-week grid makes gaps visible |
 | **Confidential peer ratings** | once, at term end | four dimensions, 1–5, computing an individual multiplier |
 
 **The default multiplier is 1.00, and a mark is reduced only when the peer ratings and the git
@@ -225,7 +225,7 @@ is what defeats both rating inflation and retaliation.
 ### Participation
 
 **10% of the grade**, separate from the group mark. Attendance is assumed, so participation means contributing
-to the room. After each lab you tick the students who did — aim for about a fifth of the class,
+to the room. After each practice session you tick the students who did — aim for about a fifth of the class,
 because a sparser record cannot support a decision. The bar is **absolute and published**; the class
 distribution is used to *calibrate* it, never to rank students against each other.
 
@@ -245,14 +245,14 @@ python scripts/assess.py multipliers                 # once, at the end
 ## Standing rules
 
 **On data.** Never committed. Download once, cache as parquet, read from the cache. Record
-provenance and a checksum. Every lab must run offline.
+provenance and a checksum. Every practice session must run offline.
 
 **On reproducibility.** One virtual environment, one committed `requirements.txt`, every seed set
 explicitly. If your result does not reproduce from a clean clone, it does not reproduce.
 
 **On the local LLM.** Use it freely — as a sparring partner, never as an oracle. Ask it to argue
 against you. Verify every factual claim, especially about library APIs and statistical results.
-**Every lab deliverable must document at least one instance where you caught the model being wrong,
+**Every practice session deliverable must document at least one instance where you caught the model being wrong,
 unverifiable, or misleading.** You are never penalised for using it; you are penalised for using it
 uncritically.
 
@@ -279,7 +279,7 @@ qmib/
 │   │   └── README.md                  reading, concepts, data, self-check
 │   ├── 01-lecture/
 │   │   └── README.md                  the mathematics (first half)
-│   ├── 02-lab/
+│   ├── 02-practice/
 │   │   ├── README.md                  the group brief (second half)
 │   │   ├── starter/                   scaffolded code
 │   │   └── submissions/               group-XX/ — your work goes here
@@ -296,7 +296,7 @@ Two files sit outside that pattern:
   brief](01-foundations-scenarios-and-tools/00-pre-session/reading-europe-2031.md), the setup guide,
   and `verify_environment.py`.
 - Session 11 contains the [model governance file
-  template](11-forecasting-drift-and-governance/02-lab/governance-file-template.md), which is the
+  template](11-forecasting-drift-and-governance/02-practice/governance-file-template.md), which is the
   largest single component of the final mark.
 
 ---

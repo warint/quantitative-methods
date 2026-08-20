@@ -27,7 +27,7 @@ git checkout group-07
 ```
 
 not `git checkout group-XX`. Same for folder paths:
-`02-lab/submissions/group-07/`.
+`02-practice/submissions/group-07/`.
 
 If you do not know your group number yet, you get it in Session 01. Do not guess.
 
@@ -48,10 +48,10 @@ github.com/warint/quantitative-methods        ← the course repository
 ```
 
 **Your group has one branch, named `group-XX`.** Everything your group produces is committed on
-that branch and pushed to it. Your lab deliverables go in the session folder:
+that branch and pushed to it. Your practice deliverables go in the session folder:
 
 ```
-NN-session-name/02-lab/submissions/group-XX/
+NN-session-name/02-practice/submissions/group-XX/
 ```
 
 **Why one repository and not one per group.** Your commit history is one of the four records used
@@ -173,10 +173,10 @@ git checkout group-07
 
 ```bash
 # group 7 shown throughout — substitute your own number everywhere
-mkdir -p 02-geometry-of-least-squares/02-lab/submissions/group-07
-echo "# Group 07 — session 02" > 02-geometry-of-least-squares/02-lab/submissions/group-07/NOTES.md
+mkdir -p 02-geometry-of-least-squares/02-practice/submissions/group-07
+echo "# Group 07 — session 02" > 02-geometry-of-least-squares/02-practice/submissions/group-07/NOTES.md
 
-git add 02-geometry-of-least-squares/02-lab/submissions/group-07/
+git add 02-geometry-of-least-squares/02-practice/submissions/group-07/
 git commit -m "Add group 07 notes for session 02"
 git push
 ```
@@ -259,7 +259,7 @@ for every line on your branch.
 
 ## Everyone pushes
 
-There are **no assigned roles**. All three of you work on the lab together — and all three commit
+There are **no assigned roles**. All three of you work on the practice together — and all three commit
 and push from your own machine, every week.
 
 ```bash

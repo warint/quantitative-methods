@@ -6,7 +6,7 @@
 #     scripts/render_slides.sh 05           # just the sessions matching 05
 #
 # Only files named slides*.qmd are treated as decks. Other .qmd files in the
-# repository — the lab report template, for instance — are documents, not
+# repository — the practice report template, for instance — are documents, not
 # presentations, and are deliberately skipped.
 #
 # Requires Quarto: https://quarto.org/docs/download/  (`quarto --version`)

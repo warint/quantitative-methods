@@ -16,7 +16,7 @@ Source: https://doi.org/10.1146/annurev-economics-080217-053433
 
 **Wager & Athey (2018), 'Estimation and Inference of Heterogeneous Treatment Effects using Random Forests', JASA 113(523)**  
 Source: https://doi.org/10.1080/01621459.2017.1319839  
-*Why:* Causal forests, for the second half of the lab.
+*Why:* Causal forests, for the second half of the practice.
 
 
 ---

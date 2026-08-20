@@ -5,7 +5,7 @@
 > **Instructor page.** The student-facing derivations are in
 > [`README.md`](README.md); this is how to deliver them.
 
-lecture 90 min · lab follows on
+lecture 90 min · practice follows on
 the research mandates
 
 ---
@@ -25,7 +25,7 @@ Put the two numbers on the board: **255.1 GW** and **20.9 GW**. Ask the room wha
 | **20–40** | The supervised learning problem. $Y = f(X) + \varepsilon$. Define each term slowly; students conflate $f$ and $\hat f$ all semester if you rush. |
 | **40–65** | **Derive** that $\mathbb{E}[Y\mid X]$ minimises squared-error risk. Do the add-and-subtract trick on the board and show the cross term vanishing by the tower property. Land on $R(g) = \sigma^2 + \mathbb{E}[(\mathbb{E}[Y|X]-g)^2]$. |
 | **65–80** | Prediction vs inference. Build the four-row table WITH the room — ask for the economic examples rather than supplying them. |
-| **80–90** | Narrative claim → indicator → direction → trigger → falsifier. This is the lab brief, so do it once on the board with an example they did not choose. |
+| **80–90** | Narrative claim → indicator → direction → trigger → falsifier. This is the practice brief, so do it once on the board with an example they did not choose. |
 
 ---
 
@@ -53,9 +53,9 @@ reappear in the deliverable.
 
 ---
 
-## Leave on the board for the lab
+## Leave on the board for the practice
 
-The prediction/inference table, and the five-part indicator template. Both are used immediately in the lab.
+The prediction/inference table, and the five-part indicator template. Both are used immediately in the practice session.
 
 ---
 
@@ -75,4 +75,4 @@ The second half is the groups' own. Remind them:
 
 ---
 
-[Student notes](README.md) · [Session 01](../README.md) · [Lab](../02-lab/README.md)
+[Student notes](README.md) · [Session 01](../README.md) · [Practice](../02-practice/README.md)

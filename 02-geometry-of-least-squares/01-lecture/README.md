@@ -67,7 +67,7 @@ QR decomposition $X = QR$ with $Q^\top Q = I$ and $R$ upper triangular; then
 $$R\hat\beta = Q^\top y$$
 
 is solved by back-substitution. This is what `numpy.linalg.lstsq` and `statsmodels` do internally.
-You will verify the precision difference yourself in the lab.
+You will verify the precision difference yourself in the practice session.
 
 ---
 
@@ -90,4 +90,4 @@ You will verify the precision difference yourself in the lab.
 
 ---
 
-[Back to session 02](../README.md) · [On to the lab ->](../02-lab/README.md)
+[Back to session 02](../README.md) · [On to the practice ->](../02-practice/README.md)

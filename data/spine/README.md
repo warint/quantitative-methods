@@ -58,4 +58,4 @@ python scripts/build_spine/make_dictionaries.py
 ```
 
 The parquet fixtures **are committed** — a deliberate exception to the rule that data are never
-committed, made so that labs have zero download friction. The `.gitignore` allows `data/spine/*.parquet`.
+committed, made so that practice sessions have zero download friction. The `.gitignore` allows `data/spine/*.parquet`.
