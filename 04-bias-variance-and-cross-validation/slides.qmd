@@ -1,6 +1,6 @@
 ---
-title: "Bias, Variance, and Honest Validation"
-subtitle: "Session 04 · Why random K-fold is the wrong answer for a panel"
+title: "Bias–Variance, Overfitting, Cross-Validation"
+subtitle: "Session 04 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
@@ -21,306 +21,224 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
-# Where we are {background-color="#16181A" style="color:#F7F6F3"}
+# {background-color="#16181A" style="color:#F7F6F3"}
 
-## The 90 minutes ahead
+::: {style="margin-top: 1.2em"}
+### Your model fits the past perfectly. Why is that bad news? {style="color:#F7F6F3"}
+:::
+
+## These slides follow the notes
 
 | | |
 |---|---|
-| **0–10** | Three questions hiding inside "how good is it?" |
-| **10–30** | The bias–variance decomposition |
-| **30–50** | Why random K-fold breaks on a panel |
-| **50–70** | Three splits, measured |
-| **70–85** | Leakage, and where it hides |
-| **85–90** | Handoff to the lab |
-
-## Before class you read
-
-**Mullainathan & Spiess**, *Machine Learning: An Applied Econometric Approach*,
-**JEP** 2017.
+| **4.1** | The decomposition |
+| **4.2** | In-sample error is optimistic — by how much? |
+| **4.3** | Cross-validation |
+| **4.4** | Three ways to get cross-validation wrong |
 
 ::: {.muted}
-DOI: 10.1257/jep.31.2.87
-:::
-
-Their framing, which organises the whole course:
-
-> Machine learning solves $\hat y$ problems. Economics mostly asks $\hat\beta$
-> questions. Confusing the two is where the trouble starts.
-
-::: {.check}
-Today is entirely a $\hat y$ session. Session 10 is the $\hat\beta$ one, and it
-needs completely different machinery.
-:::
-
-# The question {background-color="#16181A" style="color:#F7F6F3"}
-
-## How good is your model, really?
-
-You fit a model of European productivity growth. It explains 78% of the variance.
-
-Three different questions hide inside "how good is it?":
-
-::: {.tight}
-- How well does it fit **the data you used**? (Almost meaningless.)
-- How well would it do on **a new country**?
-- How well would it do **next year**?
-:::
-
-::: {.warn}
-Those last two are different questions, and they need **different splits**. Get
-the split wrong and every number that follows is optimistic.
-:::
-
-## The decomposition
-
-For squared loss, at a point $x_0$:
-
-$$\mathbb{E}\big[(y_0 - \hat{f}(x_0))^2\big] = \underbrace{\operatorname{Bias}^2(\hat f)}_{\text{too rigid}} + \underbrace{\operatorname{Var}(\hat f)}_{\text{too sensitive}} + \underbrace{\sigma^2}_{\text{irreducible}}$$
-
-::: {.tight}
-- **Bias** falls as the model gets more flexible
-- **Variance** rises as the model gets more flexible
-- $\sigma^2$ does not move. It is what the predictors do not observe.
+Same numbering and notation as [`01-lecture/README.md`](01-lecture/README.md).
 :::
 
 ::: {.check}
-$\sigma^2$ is not a defect of your method. Reporting a validation error below it
-means you have leaked, not learned.
+This is the hinge of the course. After today, in-sample fit stops being evidence.
 :::
 
-# The trap {background-color="#16181A" style="color:#F7F6F3"}
+# 4.1 The decomposition {background-color="#16181A" style="color:#F7F6F3"}
 
-## Why random K-fold breaks here
+## Expected squared error at a test point
 
-`core.parquet` is 30 countries observed over 15 years.
+Fix $x_0$; let $\hat f$ be estimated on a random training sample. Averaging over training samples
+and over the new noise draw:
 
-Random K-fold puts **Germany 2019 in training and Germany 2020 in test**.
+$$\mathbb{E}\big[(y_0 - \hat f(x_0))^2\big]
+= \underbrace{\operatorname{Var}\big(\hat f(x_0)\big)}_{\text{variance}}
++ \underbrace{\big(\mathbb{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
++ \underbrace{\sigma^2}_{\text{irreducible}}$$
+
+## The derivation
+
+Write $y_0 = f(x_0) + \varepsilon_0$ and add and subtract $\mathbb{E}[\hat f(x_0)]$ inside the
+square.
+
+Three cross terms vanish:
 
 ::: {.tight}
-- Countries are highly persistent — productivity this year nearly determines next year
-- The model can effectively memorise the country, then "predict" it
-- Your validation error measures **interpolation within a country**, not forecasting
+- one because $\mathbb{E}[\varepsilon_0]=0$ and $\varepsilon_0$ is independent of the training sample
+- two because $\mathbb{E}\big[\hat f(x_0) - \mathbb{E}[\hat f(x_0)]\big] = 0$
 :::
 
-::: {.warn}
-This is not a subtle statistical nicety. On this panel it is the difference
-between a model that looks excellent and one that is useful.
+$\blacksquare$
+
+## The economics of this equation
+
+::: {.tight}
+- **Bias** is what you get for imposing structure you believe in.
+- **Variance** is what you pay for letting the data speak.
 :::
 
-## Three splits, three questions
-
-| Split | Answers | Use |
-|---|---|---|
-| **Random K-fold** | "New row from the same countries and years" | Almost never here |
-| **GroupKFold by `geo`** | "A country I have never seen" | Transfer across countries |
-| **TimeSeriesSplit** by `time` | "Next year" | Forecasting — Session 11 |
+Flexibility trades one for the other, and there is generally an **interior optimum**.
 
 ::: {.check}
-Choose the split that matches the sentence you intend to write in your
-conclusion. Then say which you used.
+The rest of the course is a catalogue of ways to sit at that optimum deliberately rather than by
+accident.
 :::
 
-# Doing it {background-color="#16181A" style="color:#F7F6F3"}
+# 4.2 Optimism {background-color="#16181A" style="color:#F7F6F3"}
 
-## The data
+## How optimistic is training error?
 
-```python
-import pandas as pd
+Let $\operatorname{err} = \frac1n\sum_i (y_i - \hat f(x_i))^2$ be training error and
+$\operatorname{Err}_{\text{in}}$ the error on new outcomes at the *same* $x_i$. Then
 
-core = pd.read_parquet("data/spine/core.parquet")
-cols = ["gdp_pc_eur", "population", "employment_ths", "gfcf_meur"]
-d = core.dropna(subset=cols).copy()
+$$\mathbb{E}[\operatorname{Err}_{\text{in}}] - \mathbb{E}[\operatorname{err}]
+= \frac{2}{n}\sum_{i=1}^n \operatorname{Cov}(\hat y_i, y_i)$$
 
-print(d.shape, d.geo.nunique(), d.time.min(), d.time.max())
-# 30 countries, 2010-2024
-```
+## Read that quantity
+
+The **optimism** is exactly twice the average covariance between a fitted value and its own
+outcome — *the degree to which the model chases its own training labels.*
+
+For a linear fit with $p$ parameters that covariance sum equals $p\sigma^2$, giving optimism
+
+$$\frac{2p\sigma^2}{n}$$
+
+## Which motivates the classical criteria
+
+$$C_p = \operatorname{err} + \frac{2p\hat\sigma^2}{n}$$
+
+$$\mathrm{AIC} = -\frac{2}{n}\log\mathcal{L} + \frac{2p}{n}, \qquad
+\mathrm{BIC} = -2\log\mathcal{L} + p\log n$$
+
+::: {.check}
+BIC penalises more heavily once $n > e^2 \approx 7.4$. It is **consistent for model selection**;
+AIC is **efficient for prediction**. They answer different questions.
+:::
+
+## Effective degrees of freedom
+
+$$\mathrm{df}(\hat f) = \frac{1}{\sigma^2}\sum_i \operatorname{Cov}(\hat y_i, y_i)$$
 
 ::: {.muted}
-We predict **`gdp_pc_eur` from the other levels**. Levels are highly persistent
-within a country, which is exactly the setting where the choice of split bites.
+This generalises "number of parameters" to methods where counting parameters makes no sense — which
+we need from Session 05 onward, where a penalty makes $p$ meaningless.
 :::
 
-## Set up the comparison
+# 4.3 Cross-validation {background-color="#16181A" style="color:#F7F6F3"}
 
-```python
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import (cross_val_score, KFold,
-                                     GroupKFold, TimeSeriesSplit)
+## The estimator
 
-X = d[["population", "employment_ths", "gfcf_meur"]]
-y = d["gdp_pc_eur"]
-m = RandomForestRegressor(n_estimators=300, random_state=60033)
+Partition into $K$ folds; for each $k$, fit on the complement and predict the held-out fold:
 
-RMSE = "neg_root_mean_squared_error"
-```
+$$\mathrm{CV}_K = \frac{1}{n}\sum_{k=1}^{K}\sum_{i \in \mathcal{F}_k} L\big(y_i, \hat f^{-k}(x_i)\big)$$
 
-## Three schemes, three answers
+## $K = n$ — leave-one-out
 
-```python
-rand  = cross_val_score(m, X, y, scoring=RMSE,
-                        cv=KFold(5, shuffle=True, random_state=60033))
+::: {.tight}
+- Nearly **unbiased** for $\operatorname{Err}$
+- **High variance** — the $n$ training sets are almost identical, so the errors are highly correlated
+- Usually expensive
+:::
 
-group = cross_val_score(m, X, y, scoring=RMSE,
-                        cv=GroupKFold(5), groups=d["geo"])
+For linear smoothers it is free once you have the hat matrix:
 
-d_s = d.sort_values("time")
-time_ = cross_val_score(m, X.loc[d_s.index], y.loc[d_s.index],
-                        scoring=RMSE, cv=TimeSeriesSplit(5))
+$$\mathrm{CV}_{(n)} = \frac1n\sum_i \left(\frac{y_i - \hat y_i}{1 - h_{ii}}\right)^2$$
 
-for n, s in [("random", rand), ("by country", group), ("by time", time_)]:
-    print(f"{n:12s} RMSE {-s.mean():.3f}")
-```
+::: {.muted}
+$h_{ii}$ is the leverage from Session 02. The pieces accumulate.
+:::
 
-## What you should see
+## $K = 5$ or $10$
 
-Roughly:
+The standard compromise:
+
+::: {.tight}
+- some **upward bias** — each model trains on less data
+- much **lower variance**
+:::
+
+::: {.check}
+With 30 countries, `GroupKFold(5)` leaves six countries out per fold. Fewer folds leaves too little
+to train on; more makes each estimate noisy.
+:::
+
+# 4.4 Three ways to get it wrong {background-color="#16181A" style="color:#F7F6F3"}
+
+## 1. Leakage through preprocessing
+
+Any step using the outcome or the **full** feature distribution — standardisation, imputation,
+feature selection, target encoding — must be fitted **inside** each training fold.
+
+Use a `Pipeline`.
+
+::: {.warn}
+The single most common serious error in applied machine learning papers. It always flatters you.
+:::
+
+## 2. Leakage through selection
+
+Choosing a model by CV and then reporting **that same CV error** as its performance is optimistic.
+
+You need a **nested** design:
+
+::: {.tight}
+- an **outer** loop for evaluation
+- an **inner** loop for tuning
+:::
+
+::: {.muted}
+Reporting the best inner-loop score is the same error as reporting training error, one level up.
+:::
+
+## 3. Ignoring dependence
+
+Random folds assume exchangeability. Economic data rarely are.
+
+| Structure | Use |
+|---|---|
+| **Time series** | rolling-origin / expanding-window. Never train on the future. |
+| **Panel or clustered** | `GroupKFold` — all observations of a unit stay together |
+| **Spatial** | blocked CV — neighbours are correlated |
+
+## What that costs on this panel
+
+Predicting `gdp_pc_eur` from the other levels, 30 countries × 15 years:
 
 | Split | RMSE (EUR) |
 |---|---|
 | Random K-fold | ~3,200 |
 | **GroupKFold by country** | **~4,900** |
-| TimeSeriesSplit | ~2,800 |
-
-::: {.check}
-Grouped error is about **1.5× larger** than random. Same data, same model, same
-day — and the honest number is half again the flattering one.
-:::
-
-## Read the gap
-
-That ratio is a **direct measure of how much the model leans on country
-identity** rather than on the economics.
-
-::: {.muted}
-Random K-fold let it see Germany 2019 while predicting Germany 2020. It learned
-"this is Germany", which is useless for a country it has never seen.
-:::
 
 ::: {.warn}
-Publish the 3,200 and you have overstated your model's usefulness by half,
+Grouped error is about **1.5× larger**. Publish the 3,200 and you have overstated the model by half
 without doing anything a referee would call wrong.
 :::
 
-::: {.muted}
-`TimeSeriesSplit` looks *best* of the three here — but it trains on early years
-and tests on later ones with a growing window, so it is answering a third
-question again. Low is not the same as right.
-:::
+# The lab {background-color="#16181A" style="color:#F7F6F3"}
 
-## Flexibility, drawn
-
-```python
-from sklearn.tree import DecisionTreeRegressor
-
-rows = []
-for depth in range(1, 16):
-    t = DecisionTreeRegressor(max_depth=depth, random_state=60033)
-    cv = -cross_val_score(t, X, y, cv=GroupKFold(5), groups=d["geo"],
-                          scoring="neg_root_mean_squared_error").mean()
-    t.fit(X, y)
-    train = np.sqrt(((y - t.predict(X)) ** 2).mean())
-    rows.append((depth, train, cv))
-```
-
-Plot both curves against depth.
-
-::: {.check}
-Training error falls monotonically. Validation error falls, then turns. The turn
-is the bias–variance tradeoff, and it is the only one of the two curves that
-tells you anything.
-:::
-
-## Leakage, the practical form
-
-```python
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-
-#  WRONG — the scaler has already seen the test fold
-X_scaled = StandardScaler().fit_transform(X)
-cross_val_score(m, X_scaled, y, cv=GroupKFold(5), groups=d["geo"])
-
-#  RIGHT — every preprocessing step re-fits inside each fold
-pipe = make_pipeline(StandardScaler(), m)
-cross_val_score(pipe, X, y, cv=GroupKFold(5), groups=d["geo"])
-```
-
-::: {.warn}
-Any step that **learns from the data** — scaling, imputation, feature
-selection, target encoding — must live inside the pipeline. This is the single
-most common error in applied machine learning, and it always flatters you.
-:::
-
-## What to report
+## What you do
 
 ::: {.tight}
-- **Which split** you used, and the sentence it licenses
-- Validation error in the **units of the outcome**, not just $R^2$
-- The gap between training and validation error
-- The gap between random and grouped CV — your leakage diagnostic
-:::
-
-::: {.warn}
-Never report a number computed on data the model was fit on. If you tuned on
-it, it is training data, whatever you called the variable.
-:::
-
-## Choosing $K$
-
-::: {.tight}
-- **$K = 5$ or $10$** — the usual choice, and a reasonable one
-- **Small $K$** — more bias (each model sees less data), less variance
-- **$K = n$** (leave-one-out) — nearly unbiased, high variance, expensive
+1. Reproduce the three CV schemes on your angle and tabulate the errors
+2. Explain, in writing, why they differ **in that direction**
+3. Draw the flexibility curve and mark where variance takes over
+4. Build one deliberately leaking pipeline, then fix it, and report both numbers
 :::
 
 ::: {.check}
-With 30 countries, `GroupKFold(5)` leaves 6 countries out per fold. Fewer folds
-would leave too few countries to train on; more would make each estimate noisy.
+The gap between random and grouped CV **is** your leakage diagnostic. Report it.
 :::
 
-## Nested CV, when you tune
+## The two-minute report
 
-If you use CV to **choose** a hyperparameter, that CV error is no longer an
-honest estimate of performance — you selected on it.
+**One slide. Three sentences.**
 
 ::: {.tight}
-- **Inner** loop chooses the hyperparameter
-- **Outer** loop estimates performance
+1. **What I did** — the split, and the sentence it licenses
+2. **The number** — error in the units of the outcome, not $R^2$
+3. **The catch** — what the split still cannot tell you
 :::
 
-::: {.warn}
-Reporting the best inner-loop score as your result is the same error as
-reporting training error, one level up. It is extremely common.
-:::
-
-## The one-standard-error rule
-
-Among models within one standard error of the best CV score, take the
-**simplest**.
-
-::: {.muted}
-The CV curve is estimated with noise. The apparent minimum is partly luck, and
-the simpler model at the same score will usually generalise better.
-:::
-
-## Common mistakes
-
-| Mistake | Consequence |
-|---|---|
-| Random K-fold on a panel | Optimistic by a wide margin |
-| Scaling before splitting | Leakage; error understated |
-| Tuning on the test set | The test set is now training data |
-| Reporting $R^2$ only | No sense of magnitude |
-| One split, one number | No sense of variability |
-
-## In the lab
-
-Work through [`02-lab/README.md`](02-lab/README.md).
-
-::: {.tight}
-1. Reproduce the three CV schemes and tabulate the errors
-2. Explain, in writing, why they differ **in this direction**
-3. Draw the depth curve and mark where variance takes over
-4. Three sentences, naming your split and what it entitles you to claim
+::: {.check}
+Full brief: [`02-lab/README.md`](02-lab/README.md)
 :::

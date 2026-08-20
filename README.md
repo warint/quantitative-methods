@@ -1,7 +1,30 @@
 # Quantitative Methods in International Business
 
-A twelve-session course in which every method is **derived** before it is **used**, and every result
-is produced on the student's own machine with open tools.
+### Econometrics and machine learning, taught the way the work is now done — in an IDE, with an LLM beside you, on your own machine.
+
+A twelve-session graduate course in which every method is **derived** before it is **used**, every
+result is produced on the student's own laptop, and the AI assistant is treated as what it is: a
+fast, confident, unaccountable collaborator whose output you are answerable for.
+
+**The premise.** You can no longer learn quantitative methods as if the tooling were neutral. A
+student in 2026 will reach for a language model on the first line of code. The question is not
+whether they use one, but whether they can tell when it is wrong — and that is a skill you have to
+teach on purpose.
+
+So this course does three unusual things:
+
+| | |
+|---|---|
+| **The model runs on your machine** | Ollama + Qwen 2.5 Coder. No API key, no per-token bill, no data leaving the room. You also learn what is achievable *without* a frontier system, which is the realistic institutional constraint. |
+| **You work in a real IDE, from the terminal** | VS Codium, git, and an agent (`aider`) that reads and edits your files while you steer it in prose. Not notebooks; the workflow you will actually be hired into. |
+| **Catching the model is graded** | Every lab deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
+
+Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Markov, the bias–variance
+decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
+The tooling is modern; the standards are not new.
+
+**Who it is for.** Graduate students in economics and international business who will be expected to
+produce a defensible number, on real European data, and say out loud what it does not license.
 
 ---
 
