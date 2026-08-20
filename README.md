@@ -83,7 +83,8 @@ unrelated assignment — **it is one project, approached with a new method every
 **Full brief: [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)** — how to turn a problem into an
 answerable question, where to find data, and what each session asks of you.
 
-> **Projects are assigned in class**, in Session 02. They do not exist until the SDAfrique teams
+> **Projects are assigned in class**, in Session 04 — sessions 02 and 03 build the estimator on the
+> practice data first. They do not exist until the SDAfrique teams
 > define them.
 
 ---

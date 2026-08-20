@@ -7,12 +7,14 @@
 ## Contents
 
 1. [How this works](#1-how-this-works)
+1b. [What this laboratory is for](#1b-what-this-laboratory-is-for)
 2. [What you receive](#2-what-you-receive)
 3. [The three moves](#3-the-three-moves)
 4. [Allocation](#4-allocation)
 5. [The session themes](#5-the-session-themes)
 6. [Finding your data](#6-finding-your-data)
 7. [The data spine — your practice ground](#7-the-data-spine--your-practice-ground)
+7b. [The deliverable — a scientific article](#7b-the-deliverable--a-scientific-article)
 8. [The two-minute report](#8-the-two-minute-report)
 9. [Rules that always apply](#9-rules-that-always-apply)
 
@@ -78,9 +80,42 @@ very different data** — which is where its assumptions become visible.
 
 ---
 
+## 1b. What this laboratory is for
+
+Three goals, and they are not only technical.
+
+**1. Experiential learning through international collaboration.** Pairing students in Montréal with
+participants from *Science des données au féminin en Afrique* situates data science education in
+real-world application and intercultural exchange. You are not working on a hypothetical problem, or
+one the instructor invented for you: you are working on a project that emerged from the lived
+experience and professional aspirations of your African peers. That raises the motivation, and it
+puts the ethical and social dimensions of the practice in front of you rather than in a footnote.
+
+**2. Scientific writing and research communication.** The deliverable is modelled on a scientific
+article, which forces you to articulate a clear research question, situate it in the literature, and
+present findings with methodological transparency. The point is to bridge applied data analysis and
+scholarly knowledge production — the gap most applied courses leave open.
+
+**3. Teamwork, inclusivity and reflexivity.** Mixed teams mean negotiating different perspectives,
+different levels of expertise, and different cultural contexts. Those are the collaboration skills
+that globalised research actually requires. Data science is not only a technical discipline; it is a
+social practice, and it can advance equity and development or fail to.
+
+### The teams are joint
+
+The deliverable is **co-authored**: Team Montréal and Team Africa. Your African counterparts are not
+clients who hand you a specification and wait — they are co-authors who know the context you do not.
+
+- Agree early how you will communicate, and how often.
+- Ask them what they already know about the problem. It will be more than you do.
+- Send them drafts, not only the final version.
+- Their names go on the paper.
+
+---
+
 ## 2. What you receive
 
-From your SDAfrique counterparts, in Session 02:
+From your SDAfrique counterparts, in **Session 04**:
 
 | | |
 |---|---|
@@ -135,15 +170,26 @@ not.
 
 ## 4. Allocation
 
-**Projects are assigned in class, in Session 02.** They are not listed here, because they do not
+**Projects are assigned in class, in Session 04.** They are not listed here, because they do not
 exist until the SDAfrique teams define them.
+
+### What happens in sessions 02 and 03
+
+The methods start before the projects do. In those two labs you work on the **data spine** — the
+synthetic European panel described in [§7](#7-the-data-spine--your-practice-ground) — which exists
+precisely so you can learn a method on ground whose truth is known.
+
+That is not filler. Sessions 02 and 03 build the estimator and its inference, and you will reuse
+both every week afterwards. It also means that when your project arrives in Session 04, you already
+know how to run least squares and how to get its standard errors right.
 
 - Ten HEC groups of three
 - One SDAfrique project each
 - Fixed for the semester — expertise accumulates, and so does your understanding of the context
 
-Groups are formed in Session 02 and registered with the instructor. Once fixed, your project is
-your project: eleven weeks of accumulated work, not eleven disconnected exercises.
+Groups are formed in Session 02 and registered with the instructor; projects arrive in Session 04.
+Once fixed, your project is your project: eight weeks of accumulated work, not eight disconnected
+exercises.
 
 ---
 
@@ -164,8 +210,9 @@ The theme is the same for everyone; the execution is yours, on your project.
 | 10 | Double machine learning | **Did the intervention do anything, or did we measure who was already ahead?** |
 | 11 | Forecasting, drift, governance | **If this became a monitoring tool for your SDAfrique team, would you sign it?** |
 
-Session 01 has no project work — it is the syllabus and the *Europe 2031* conversation. Session 12
-is the presentation of accumulated work.
+Session 01 has no project work — it is the syllabus and the *Europe 2031* conversation. Sessions 02
+and 03 run on the practice data, because projects arrive in Session 04. Session 12 is the
+presentation of accumulated work.
 
 ### Where the method may not fit
 
@@ -229,6 +276,31 @@ turning it on data whose truth you do not know.
 
 > **⚠️ These are teaching fixtures, not observed data.** Do not cite any number from them as a fact
 > about Europe. See [`data/spine/PROVENANCE.md`](data/spine/PROVENANCE.md).
+
+---
+
+## 7b. The deliverable — a scientific article
+
+Each session's lab produces a short section; by Session 12 you have a paper. Use
+[`assessment/lab-report-template.qmd`](assessment/lab-report-template.qmd) — Quarto with Python.
+
+| Section | What goes in it |
+|---|---|
+| **Introduction** | The collaboration, the project, and what the paper does |
+| **Research question** | One sentence, with its unit and period. See [§3](#3-the-three-moves). |
+| **Literature review** | **3–5** relevant articles or reports: prior approaches, and the gap you address |
+| **Methods** | The technique, *why this one*, and the expected outcome |
+| **Data** | Source, main variables, preprocessing, missingness |
+| **Results and discussion** | Tables and figures, plus what they mean — and how they sit against the literature |
+| **Conclusion** | Findings, practical implications **for the context the project came from**, and a reflection on the collaboration |
+| **References** | Every one verified against the publisher record |
+
+> **Three to five articles here, not fifteen.** The heavier review belongs to the
+> [final exam paper](assessments/final-paper/README.md). This is the working draft that grows into it.
+
+**On the conclusion.** It is the one section that must speak to the people who gave you the problem.
+Practical implications for *their* context, in language they can use — not a restatement of your
+coefficients.
 
 ---
 

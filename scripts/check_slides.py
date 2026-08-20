@@ -5,6 +5,9 @@ Flag slides that will overflow the frame.
     python scripts/check_slides.py                 # every deck
     python scripts/check_slides.py path/to/x.qmd   # one deck
 
+With no argument it checks files named slides*.qmd. Other .qmd files are
+documents rather than presentations and have no frame to overflow.
+
 Slides overflow silently: reveal.js scales them down until they are unreadable,
 and PowerPoint simply runs the text off the bottom of the sheet. Neither tells
 you. This script counts what is on each slide and reports the ones that are too
@@ -78,7 +81,7 @@ def measure(path):
 
 
 def main(argv):
-    targets = argv[1:] or sorted(glob.glob("**/*.qmd", recursive=True))
+    targets = argv[1:] or sorted(glob.glob("**/slides*.qmd", recursive=True))
     if not targets:
         print("no .qmd files found")
         return 0

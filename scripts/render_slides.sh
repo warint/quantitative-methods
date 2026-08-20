@@ -5,6 +5,10 @@
 #     scripts/render_slides.sh              # all decks
 #     scripts/render_slides.sh 05           # just the sessions matching 05
 #
+# Only files named slides*.qmd are treated as decks. Other .qmd files in the
+# repository — the lab report template, for instance — are documents, not
+# presentations, and are deliberately skipped.
+#
 # Requires Quarto: https://quarto.org/docs/download/  (`quarto --version`)
 #
 # The .html is the real presentation — the theme, the two-column layouts and
@@ -35,7 +39,7 @@ while IFS= read -r deck; do
         echo "  FAILED: $deck" >&2
         failed=$((failed + 1))
     fi
-done < <(find . -name '*.qmd' -not -path './.git/*' | sort)
+done < <(find . -name 'slides*.qmd' -not -path './.git/*' | sort)
 
 printf '\n%d deck(s) rendered, %d failed.\n' "$found" "$failed"
 

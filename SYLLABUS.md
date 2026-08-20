@@ -99,7 +99,7 @@ answerable research question, find the data, and answer it with the method taugh
 Every session poses one big methodological question; each group attacks it on its own project. The
 last twenty minutes are ten two-minute reports and a synthesis — ten different problems, one method,
 which is where the method's assumptions become visible. **Projects are assigned in class, in Session
-02.**
+04**; sessions 02 and 03 build least squares and its inference on the practice data first.
 
 Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
@@ -352,6 +352,48 @@ You are never penalised for using the model. You are penalised for using it uncr
 **Practical guidance.** Ask it to argue against you; its most useful output is an objection you had
 not considered. Verify every factual claim, especially about library APIs, statistical results and
 citations — it will state plausible falsehoods with complete confidence. Record what you checked.
+
+---
+
+### The rule, stated as a publisher would state it
+
+This course applies the same standard that **Elsevier** and **Emerald** apply to submitted
+manuscripts. It is not stricter, and it is not vaguer.
+
+**1. Generative AI is a research assistant. It is not an author and it does not do the work.**
+
+An assistant may improve how you say something. It may not decide what you say.
+
+| Permitted — assistance | Not permitted — substitution |
+|---|---|
+| Improving readability, grammar, phrasing, translation | Writing sections you then submit as your reasoning |
+| Explaining a method or a library you are learning | Choosing your specification, or your estimand |
+| Debugging code you wrote and can explain | Producing analysis you cannot derive or defend |
+| Suggesting search terms; summarising a paper **you have read** | Generating a literature review from papers you have not read |
+| Drafting boilerplate you then verify line by line | Interpreting your results, or drawing your conclusions |
+| Reformatting references you have checked | Inventing, extrapolating or "cleaning" data |
+
+**2. AI cannot be an author or a co-author.** Authorship carries responsibility and accountability
+for the work, and a model can hold neither. It is credited in a statement, never in a byline. Nor
+may it be cited as a source: if you learned something from it, find and cite the actual source.
+
+**3. Every use must be disclosed.** Each deliverable carries an LLM statement naming the tool, the
+version, and what it was used for. *"We used AI for assistance"* is not a disclosure. For the final
+paper the requirement is set out in
+[`assessments/final-paper/`](assessments/final-paper/README.md#llm-use-statement).
+
+**4. You are fully responsible for every word and every number you submit** — including the ones the
+assistant produced. "The model wrote it" is not a defence, in this course or after it. If you cannot
+derive it, do not submit it.
+
+**5. Undisclosed substitution is academic misconduct**, handled under HEC Montréal's regulations —
+not as a course-level matter. The distinction is between an assistant that helped you do your work
+and an assistant that did it instead of you.
+
+> **Why the framing is generous rather than restrictive.** The oral examination in the final exam
+> exists partly for this reason. Fifteen minutes of questions on your own methods will establish
+> what you understand far more reliably than any policing of drafts. A student who let a model do
+> the thinking will discover it there, and the honest use of a research assistant costs nothing.
 
 ---
 
