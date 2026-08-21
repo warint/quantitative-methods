@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,263 +25,652 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import roc_auc_score
+from sklearn.inspection import permutation_importance, PartialDependenceDisplay
+
+loans = pd.read_parquet("../data/loans.parquet")
+X = pd.get_dummies(loans.drop(columns=["default"]),
+                   columns=["purpose"], drop_first=True).astype(float)
+y = loans["default"].to_numpy()
+FEAT = list(X.columns)
+
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=7, stratify=y)
+
+def auc(model, Xa=Xte):
+    return roc_auc_score(yte, model.predict_proba(Xa)[:, 1])
+
+LOGIT = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(Xtr, ytr)
+AUC_LOGIT = auc(LOGIT)
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
-### If we abandon linearity, is interpretability recoverable? {style="color:#F7F6F3"}
+### If we abandon linearity, what do we lose — and can we get the interpretation back? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **7.1** | Regression trees |
-| **7.2** | Cost-complexity pruning |
-| **7.3** | Bagging and the variance argument |
-| **7.4** | Gradient boosting as functional gradient descent |
-| **7.5** | Recovering interpretation |
+| **1** | Where we are, and what this adds |
+| **2** | One tree: how a split is chosen |
+| **3** | Pruning — the same dial again |
+| **4** | Why averaging works, and when it stops |
+| **5** | Boosting: gradient descent in function space |
+| **6** | Getting the interpretation back |
+| **7** | Key takeaways |
 
-::: {.muted}
-Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
+## Learning objectives
+
+::: {.tight}
+- Write the greedy splitting objective and say why the **global** problem is infeasible
+- Explain why misclassification error is a poor *growing* criterion but the right *pruning* one
+- **Derive** the bagging variance formula and read off why random forests subsample features
+- Describe boosting as gradient descent on a loss, in function space
+- Choose an interpretation tool, and state precisely **what it does not tell you**
 :::
 
-# 7.1 Regression trees {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+
+## Everything so far has been one straight line
+
+| Session | What it assumed |
+|---|---|
+| **02–03** | $\mathbb{E}[y \mid x] = x^\top\beta$ — additive, linear, no interactions |
+| **05** | Still linear. The penalty changed *which* $\beta$, not the functional form |
+| **06** | Still linear — **in the log-odds** |
+
+::: {.warn}
+Every interaction and every non-linearity so far had to be **typed by hand**: a squared term, a
+product, a spline. You had to know it was there.
+:::
+
+## What today adds
+
+> A model class that finds the non-linearity and the interactions **for you**, from the data.
+
+::: {.tight}
+- Trees: no functional form at all, just a **partition** of the predictor space
+- Forests: a variance-reduction device with a formula that tells you exactly when it stops working
+- Boosting: the same idea run **sequentially**, which turns out to be gradient descent
+:::
+
+::: {.warn}
+And what it costs: no coefficients, no standard errors, no $t$-statistics. Section 6 is about how
+much of that we can recover — and it is less than the software suggests.
+:::
+
+## A tree is a partition, not a curve
+
+```{python}
+TWO = ["fico", "int_rate"]
+x2tr = Xtr[TWO].to_numpy(); x2te = Xte[TWO].to_numpy()
+t2 = DecisionTreeClassifier(max_depth=3, min_samples_leaf=60, random_state=0).fit(x2tr, ytr)
+l2 = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(x2tr, ytr)
+
+gx = np.linspace(x2tr[:, 0].min(), x2tr[:, 0].max(), 320)
+gy = np.linspace(x2tr[:, 1].min(), x2tr[:, 1].max(), 320)
+GX, GY = np.meshgrid(gx, gy)
+grid = np.c_[GX.ravel(), GY.ravel()]
+
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 3.0), sharey=True)
+for ax, mod, ttl in [(axes[0], t2, "depth-3 tree — rectangles"),
+                     (axes[1], l2, "logistic regression — one line")]:
+    Zp = mod.predict_proba(grid)[:, 1].reshape(GX.shape)
+    ax.contourf(GX, GY, Zp, levels=12, cmap="RdYlBu_r", alpha=.55)
+    sub = np.random.default_rng(3).choice(len(x2tr), 900, replace=False)
+    ax.scatter(x2tr[sub, 0], x2tr[sub, 1], s=5, c=np.where(ytr[sub] == 1, CL.warn, CL.ink),
+               alpha=.45, edgecolor="none")
+    ax.set_title(ttl, fontsize=9.5); ax.set_xlabel("FICO score"); ax.grid(visible=False)
+axes[0].set_ylabel("interest rate")
+plt.show()
+```
+
+::: {.muted}
+Same two predictors, same data. Colour is the fitted default probability. The tree can only produce
+axis-aligned blocks; the logistic model can only produce parallel bands.
+:::
+
+## Which of those is right?
+
+::: {.step}
+Neither, always. The tree captures a **threshold** — "below 660 FICO everything changes" — that the
+line cannot. The line captures a **smooth gradient** that the tree can only approximate in steps.
+:::
+
+::: {.check}
+So the question is never "are trees better than regression". It is: *is the relationship I am
+modelling more like a threshold, or more like a gradient?* Draw the picture before you choose.
+:::
+
+# 2 · One tree {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The model
 
-Partition the feature space into $M$ regions and predict a constant in each:
+Partition the predictor space into $M$ regions and predict a **constant** in each:
 
-$$\hat f(x) = \sum_m c_m \mathbb{1}\{x \in R_m\}$$
+$$\hat f(x) = \sum_{m=1}^{M} c_m \,\mathbb{1}\{x \in R_m\}$$
 
-Under squared loss the optimal constant is the region mean:
-
-$$\hat c_m = \mathrm{ave}(y_i \mid x_i \in R_m)$$
-
-::: {.check}
-A tree is a step function. That is the whole model.
+::: {.step}
+Under squared loss the optimal constant is just the region mean,
+$\hat c_m = \mathrm{ave}(y_i \mid x_i \in R_m)$. So the whole problem is **choosing the regions**.
 :::
 
-## Greedy splitting
+::: {.warn}
+And that is where it gets hard: the number of partitions is astronomically large. Finding the best
+one is infeasible.
+:::
 
-Finding the optimal partition is computationally infeasible, so we proceed **greedily**. At each
-node, search over splitting variable $j$ and split point $s$:
+## So we are greedy
 
-$$\min_{j,s}\ \Big[ \min_{c_1}\sum_{x_i \in R_1(j,s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x_i \in R_2(j,s)}(y_i - c_2)^2 \Big]$$
+At each node, search over splitting variable $j$ and split point $s$:
 
-with $R_1(j,s) = \{x : x_j \le s\}$, $R_2(j,s) = \{x: x_j > s\}$.
+$$\min_{j,s}\Big[\min_{c_1}\!\!\sum_{x_i \in R_1(j,s)}\!\!(y_i-c_1)^2
++ \min_{c_2}\!\!\sum_{x_i \in R_2(j,s)}\!\!(y_i-c_2)^2\Big]$$
+
+with $R_1 = \{x: x_j \le s\}$ and $R_2 = \{x: x_j > s\}$.
+
+::: {.step}
+The inner minimisations are **means**, so one sorted scan per feature suffices. Cost per node:
+$O(p\,n\log n)$ — cheap, which is why trees scale.
+:::
+
+## Watch the scan happen
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+
+f = Xtr["fico"].to_numpy()
+cuts = np.quantile(f, np.linspace(.03, .97, 90))
+def gini_after(s):
+    L, R = ytr[f <= s], ytr[f > s]
+    if len(L) < 30 or len(R) < 30:
+        return np.nan
+    g = lambda a: 2 * a.mean() * (1 - a.mean())
+    return (len(L) * g(L) + len(R) * g(R)) / len(ytr)
+
+vals = np.array([gini_after(s) for s in cuts])
+ax = axes[0]
+ax.plot(cuts, vals, color=CL.accent, lw=2.2)
+k = int(np.nanargmin(vals))
+ax.scatter(cuts[k], vals[k], s=60, color=CL.warn, zorder=5, marker="X")
+ax.text(cuts[k] + 6, vals[k] + .0012, f"best split\nFICO ≤ {cuts[k]:.0f}",
+        color=CL.warn, fontsize=8.5, fontweight="600")
+ax.axhline(2 * ytr.mean() * (1 - ytr.mean()), color=CL.muted, ls=":", lw=1.2)
+ax.text(cuts[3], 2 * ytr.mean() * (1 - ytr.mean()) + .0006, "no split at all",
+        color=CL.muted, fontsize=8)
+ax.set_xlabel("candidate split point $s$ on FICO")
+ax.set_ylabel("weighted Gini after the split")
+
+p = np.linspace(.001, .999, 300)
+ax = axes[1]
+ax.plot(p, 2 * p * (1 - p), color=CL.accent, lw=2.3, label="Gini")
+ax.plot(p, -(p * np.log(p) + (1 - p) * np.log(1 - p)) / (2 * np.log(2)),
+        color=CL.good, lw=2.3, ls="--", label="entropy (scaled)")
+ax.plot(p, np.minimum(p, 1 - p), color=CL.warn, lw=2.3, ls="-.", label="misclassification")
+ax.set_xlabel(r"node class proportion  $\hat p$")
+ax.set_ylabel("impurity"); ax.legend(fontsize=7.5, loc="lower center")
+plt.show()
+```
 
 ::: {.muted}
-The inner minimisations are just means, so one scan over sorted values of each feature suffices:
-$O(p\, n \log n)$ per node.
+Left: the actual scan on our data — one number per candidate cut. Right: the three impurity measures.
 :::
 
-## Impurity, for classification
+## Why the right-hand panel matters
 
-Replace variance with a measure on the node class proportions $\hat p_{mk}$:
+$$\text{Gini} = \sum_k \hat p_{mk}(1-\hat p_{mk}), \quad
+\text{Entropy} = -\sum_k \hat p_{mk}\log\hat p_{mk}, \quad
+\text{Miscl.} = 1-\max_k \hat p_{mk}$$
 
-$$\text{Gini} = \sum_{k} \hat p_{mk}(1-\hat p_{mk}), \qquad
-\text{Entropy} = -\sum_k \hat p_{mk}\log \hat p_{mk}$$
-
-$$\text{Misclassification} = 1 - \max_k \hat p_{mk}$$
-
-## Which to grow with
-
-Gini and entropy are differentiable and strictly concave, so they reward splits producing *purer*
-nodes **even when the majority class does not change**.
-
-::: {.warn}
-Misclassification error is insensitive to that and makes a poor **growing** criterion — though it is
-the right criterion for **pruning**.
+::: {.step}
+Gini and entropy are **strictly concave**: they reward a split that makes a node purer *even when
+the majority class does not change*. Misclassification is piecewise linear — it registers nothing.
 :::
-
-# 7.2 Cost-complexity pruning {background-color="#16181A" style="color:#F7F6F3"}
-
-## Grow, then cut back
-
-Grow a large tree $T_0$, then choose a subtree minimising
-
-$$C_\gamma(T) = \sum_{m=1}^{|T|} \sum_{x_i \in R_m}(y_i - \hat c_m)^2 + \gamma|T|$$
-
-## Weakest-link pruning
-
-As $\gamma$ increases from 0, the sequence of optimal subtrees is **nested**, obtained by
-successively collapsing the internal node with the smallest per-leaf increase in error.
-
-That gives a **one-dimensional family** indexed by $\gamma$ — selected by cross-validation, exactly
-as we selected $\lambda$ in Session 05.
 
 ::: {.check}
-The structural parallel is worth noticing: *every* method in this course has a complexity dial and a
-CV procedure for setting it.
+So: grow with **Gini or entropy**, prune with **misclassification** (or whatever loss you will
+actually be judged on). Different jobs, different criteria.
 :::
 
-# 7.3 Bagging {background-color="#16181A" style="color:#F7F6F3"}
+# 3 · Pruning {background-color="#16181A" style="color:#F7F6F3"}
 
-## The variance argument
+## Cost-complexity
 
-Average $B$ trees fitted on bootstrap samples. If each has variance $\sigma^2$ and any two have
-correlation $\rho$:
+Grow a large tree $T_0$, then choose the subtree minimising
 
-$$\mathrm{Var}\Big(\frac1B\sum_b \hat f_b\Big) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
-\;\xrightarrow[B\to\infty]{}\; \rho\sigma^2$$
+$$C_\gamma(T) = \sum_{m=1}^{|T|}\sum_{x_i \in R_m}(y_i - \hat c_m)^2 + \gamma\,|T|$$
 
-## Read that limit
-
-Increasing $B$ kills the second term but leaves $\rho\sigma^2$ **untouched**.
+::: {.step}
+**Weakest-link pruning:** as $\gamma$ rises from 0, the optimal subtrees are **nested** — obtained
+by repeatedly collapsing the internal node with the smallest per-leaf increase in error.
+:::
 
 ::: {.check}
-**This is the entire motivation for random forests.**
+That nesting is what makes it tractable: a one-dimensional family indexed by $\gamma$, which you
+then select by cross-validation — exactly as you selected $\lambda$ last week.
 :::
 
-If one predictor is strongly dominant, every bagged tree splits on it first and the trees are nearly
-identical: $\rho \approx 1$, and bagging buys almost nothing.
+## The same picture as Session 05
 
-## Random forests decorrelate
+```{python}
+big = DecisionTreeClassifier(random_state=0, min_samples_leaf=5).fit(Xtr, ytr)
+path = big.cost_complexity_pruning_path(Xtr, ytr)
+gam = path.ccp_alphas[::max(1, len(path.ccp_alphas) // 26)]
+gam = gam[gam > 0]
 
-Restrict each split to a random subset of $m$ features.
+rows = []
+for g in gam:
+    t = DecisionTreeClassifier(random_state=0, ccp_alpha=g).fit(Xtr, ytr)
+    rows.append((t.get_n_leaves(),
+                 cross_val_score(DecisionTreeClassifier(random_state=0, ccp_alpha=g),
+                                 Xtr, ytr, cv=4, scoring="roc_auc").mean(),
+                 auc(t)))
+res = pd.DataFrame(rows, columns=["leaves", "cv", "test"]).sort_values("leaves")
+
+fig, ax = plt.subplots(figsize=(6.4, 2.95))
+ax.semilogx(res.leaves, res.cv, "o-", color=CL.accent, lw=2.2, ms=4, label="4-fold CV AUC")
+ax.semilogx(res.leaves, res.test, "s--", color=CL.muted, lw=1.6, ms=3.5, label="test AUC")
+best = res.loc[res.cv.idxmax()]
+ax.axvline(best.leaves, color=CL.good, ls="--", lw=1.5)
+ax.text(best.leaves * 1.15, res.cv.min() + .004,
+        f"CV picks {int(best.leaves)} leaves", color=CL.good, fontsize=8.5, fontweight="600")
+ax.set_xlabel("number of leaves  |T|  (log scale)"); ax.set_ylabel("AUC")
+ax.legend(fontsize=8, loc="lower left")
+plt.show()
+```
+
+::: {.muted}
+An interior optimum, found by CV, on a one-dimensional complexity family. Session 04's figure with
+different axis labels.
+:::
+
+## The structural point
+
+::: {.step}
+$\lambda$ in ridge. $\lambda$ in lasso. $\gamma$ here. Tree depth. Number of components in
+Session 08. Number of clusters in Session 09.
+:::
+
+::: {.check}
+**Every method in this course has a complexity dial and a cross-validation procedure for setting
+it.** Once you see that, a new method is only ever two questions: *what is the dial, and what is
+the loss?*
+:::
+
+# 4 · Why averaging works {background-color="#16181A" style="color:#F7F6F3"}
+
+## A single tree is a high-variance estimator
 
 ::: {.tight}
-- $m = \lfloor \sqrt p \rfloor$ for classification
-- $m = \lfloor p/3\rfloor$ for regression
+- Change 5% of the rows and the **first split** can change
+- Change the first split and every region below it changes
+- So the whole partition is unstable — low bias, **very** high variance
 :::
 
-Lower $m$ lowers $\rho$ but **raises individual-tree bias** — a bias–variance tradeoff *within* the
-ensemble, tuned by CV.
+::: {.step}
+Session 04's decomposition says: average many high-variance, low-bias estimators and the variance
+term falls while the bias term does not. That is **bagging** — fit $B$ trees on bootstrap resamples
+and average.
+:::
 
-## Out-of-bag error, free
+## But how far does that go? Do the algebra
 
-Each observation is out-of-bag for roughly
+If each tree has variance $\sigma^2$ and any two have correlation $\rho$:
 
-$$(1 - 1/n)^n \to e^{-1} \approx 36.8\%$$
-
-of trees, so the **OOB error** approximates CV error at no extra cost.
+$$\mathrm{Var}\Big(\tfrac1B\textstyle\sum_b \hat f_b\Big)
+= \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
+\;\xrightarrow[B\to\infty]{}\; \rho\sigma^2$$
 
 ::: {.warn}
-On a panel it is still optimistic — the omitted rows include other years of the same country.
-Group-aware CV remains the honest number.
+Increasing $B$ kills the **second** term only. The first term does not move. Buying more trees past
+a point buys nothing at all.
 :::
 
-# 7.4 Gradient boosting {background-color="#16181A" style="color:#F7F6F3"}
+## Read it off the graph
 
-## Functional gradient descent
+```{python}
+B = np.arange(1, 401)
+fig, ax = plt.subplots(figsize=(6.4, 2.95))
+for rho, c in [(0.6, CL.warn), (0.3, CL.accent), (0.1, CL.good)]:
+    v = rho + (1 - rho) / B
+    ax.plot(B, v, color=c, lw=2.3)
+    ax.axhline(rho, color=c, ls=":", lw=1.2)
+    ax.text(405, rho, rf"$\rho\sigma^2={rho}$", color=c, fontsize=8.5,
+            va="center", fontweight="600")
+ax.set_xlim(1, 400); ax.set_ylim(0, 1.05)
+ax.set_xlabel("number of trees  B"); ax.set_ylabel(r"variance of the average  ($\sigma^2=1$)")
+ax.set_title("more trees cannot get you below the floor", fontsize=9.5)
+plt.show()
+```
 
-Instead of averaging independent trees, build them **sequentially**, each correcting its
-predecessor.
+::: {.check}
+$\rho = 0.6$, $B = 100$ gives $0.604$; $B = \infty$ gives $0.600$. **The whole gain is in lowering
+$\rho$, not in raising $B$.**
+:::
 
-Think of minimising $\sum_i L(y_i, F(x_i))$ over the *function* $F$, by gradient descent **in
-function space**.
+## So lower $\rho$: that is a random forest
 
-## The pseudo-residual
+::: {.step}
+Restrict each split to a random subset of $m$ features. Defaults: $m = \lfloor\sqrt p\rfloor$ for
+classification, $\lfloor p/3\rfloor$ for regression.
+:::
 
-At stage $m$, the negative gradient at the current fit:
+::: {.tight}
+- Lower $m$ → lower $\rho$ → lower ensemble variance
+- Lower $m$ → **higher** bias in each individual tree
+- So $m$ is itself a bias–variance dial, tuned by CV
+:::
+
+::: {.muted}
+One free bonus: each row is out-of-bag for about $(1-1/n)^n \to e^{-1} \approx 36.8\%$ of trees, so
+the **OOB error** approximates CV error at no extra cost.
+:::
+
+## Does it actually happen? Measure $\rho$
+
+```{python}
+#| echo: true
+def fit_and_measure(max_features, depth=4, B=200):
+    """Fit an ensemble, then measure how correlated its trees' predictions are."""
+    m = RandomForestClassifier(n_estimators=B, max_depth=depth,
+                               max_features=max_features, random_state=0, n_jobs=-1).fit(Xtr, ytr)
+    # each tree's predicted probability on the test rows, stacked into a matrix
+    P = np.array([t.predict_proba(Xte.to_numpy())[:, 1] for t in m.estimators_[:80]])
+    C = np.corrcoef(P)
+    rho = C[np.triu_indices(len(C), 1)].mean()
+    root = pd.Series([FEAT[t.tree_.feature[0]] for t in m.estimators_]).value_counts(normalize=True)
+    return m, rho, root
+
+bag_m, rho_bag, root_bag = fit_and_measure(None)     # all features at every split = bagging
+rf_m,  rho_rf,  root_rf  = fit_and_measure("sqrt")   # sqrt(p) features = random forest
+```
+
+::: {.muted}
+`max_features=None` means *consider every feature at every split* — that is plain bagging.
+`"sqrt"` is the forest. Everything else about the two fits is identical.
+:::
+
+## The mechanism, and the payoff
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.95))
+
+ax = axes[0]
+top = root_bag.head(4).index.tolist()
+w = .38; pos = np.arange(len(top))
+ax.bar(pos - w/2, [root_bag.get(t, 0) for t in top], w, color=CL.warn, label="bagging")
+ax.bar(pos + w/2, [root_rf.get(t, 0) for t in top], w, color=CL.good, label="random forest")
+ax.set_xticks(pos); ax.set_xticklabels([t[:13] for t in top], fontsize=7.5, rotation=18)
+ax.set_ylabel("share of trees splitting here first")
+ax.set_title("which feature is the root?", fontsize=9.5)
+ax.legend(fontsize=7.5); ax.grid(axis="x", visible=False)
+
+ax = axes[1]
+lab = [f"bagging\nρ={rho_bag:.2f}", f"forest\nρ={rho_rf:.2f}"]
+v = [auc(bag_m), auc(rf_m)]
+b = ax.bar(lab, v, color=[CL.warn, CL.good], width=.5)
+ax.axhline(AUC_LOGIT, color=CL.ink, ls="--", lw=1.4)
+ax.text(1.42, AUC_LOGIT, f"logistic\n{AUC_LOGIT:.3f}", color=CL.ink, fontsize=8, va="center")
+for r, vv in zip(b, v):
+    ax.text(r.get_x() + r.get_width()/2, vv + .002, f"{vv:.3f}", ha="center",
+            fontsize=9, fontweight="600")
+ax.set_ylim(min(v + [AUC_LOGIT]) - .02, max(v + [AUC_LOGIT]) + .012)
+ax.set_ylabel("test AUC"); ax.grid(axis="x", visible=False)
+plt.show()
+```
+
+::: {.check}
+Bagging puts the **same** feature at the root of 80% of its trees. The forest, forbidden from seeing
+it most of the time, uses it in a quarter. $\rho$ falls, and the AUC rises.
+:::
+
+## The honest scoreboard
+
+```{python}
+#| echo: true
+tuned = RandomForestClassifier(n_estimators=500, min_samples_leaf=40,
+                               random_state=0, n_jobs=-1).fit(Xtr, ytr)
+print(f"logistic regression (Session 06)  {AUC_LOGIT:.4f}")
+print(f"bagging, depth 4                  {auc(bag_m):.4f}")
+print(f"random forest, depth 4            {auc(rf_m):.4f}")
+print(f"random forest, tuned              {auc(tuned):.4f}")
+```
+
+::: {.warn}
+A tuned forest, on 9,578 loans and 19 features, beats a linear model in the log-odds by **0.002
+AUC**. Report that honestly. Flexibility is not a free win.
+:::
+
+# 5 · Boosting {background-color="#16181A" style="color:#F7F6F3"}
+
+## A different idea entirely
+
+::: {.step}
+Bagging fits $B$ trees **independently** and averages. Boosting fits them **sequentially**, each one
+correcting what its predecessors got wrong.
+:::
+
+Think of minimising $\sum_i L\big(y_i, F(x_i)\big)$ by gradient descent — not over parameters, but
+over the **function** $F$ itself.
+
+::: {.muted}
+That reframing is the whole derivation. Everything below follows from taking it literally.
+:::
+
+## Gradient descent in function space
+
+At stage $m$, the negative gradient at the current fit is the **pseudo-residual**:
 
 $$r_{im} = -\left[\frac{\partial L(y_i, F(x_i))}{\partial F(x_i)}\right]_{F = F_{m-1}}$$
 
-::: {.tight}
-- **Squared loss:** $r_{im} = y_i - F_{m-1}(x_i)$ — literally the residual
-- **Logistic loss:** $r_{im} = y_i - p_{m-1}(x_i)$ — the same probability residual as Session 06
-:::
-
-## The update
-
-Fit a small tree $h_m$ to the pseudo-residuals:
-
-$$F_m(x) = F_{m-1}(x) + \nu\, \gamma_m h_m(x), \qquad 0 < \nu \le 1$$
+| Loss | $r_{im}$ becomes |
+|---|---|
+| squared error | $y_i - F_{m-1}(x_i)$ — literally the residual |
+| logistic | $y_i - p_{m-1}(x_i)$ — the probability residual from Session 06 |
 
 ::: {.check}
-The **shrinkage** $\nu$ is essential: small $\nu$ (0.01–0.1) with many trees generalises far better
-than large $\nu$ with few. Halving $\nu$ roughly doubles the required $M$.
+Fit a small tree $h_m$ to those pseudo-residuals, then step:
+$F_m = F_{m-1} + \nu\,\gamma_m h_m$.
 :::
 
-## Three interacting knobs
+## Shrinkage is not optional
 
-| Knob | Controls |
-|---|---|
-| $\nu$ | learning rate — smaller generalises better |
-| $M$ | number of trees — **too many overfits**, unlike a forest |
-| $d$ | tree depth — maximum interaction order: $d=1$ additive, $d=2$ two-way |
-
-::: {.warn}
-A random forest does not overfit as you add trees. **A boosted model does.** The stopping point must
-be chosen on validation data.
-:::
-
-## What XGBoost and LightGBM add
-
-A second-order expansion and an explicit penalty:
-
-$$\mathcal{L}^{(m)} \approx \sum_i \Big[g_i h_m(x_i) + \tfrac12 h_i h_m(x_i)^2\Big] + \Omega(h_m)$$
-
-$$\Omega(h) = \gamma |T| + \tfrac12 \lambda \|w\|^2$$
-
-Solving for the optimal leaf weights gives
-
-$$w_j^\star = -\frac{G_j}{H_j+\lambda}$$
-
-::: {.check}
-Regularisation reappearing, in a third guise.
-:::
-
-# 7.5 Recovering interpretation {background-color="#16181A" style="color:#F7F6F3"}
-
-## The five tools
-
-| Method | What it answers |
-|---|---|
-| Impurity importance | how often and how usefully a feature was split on |
-| **Permutation importance** | how much test error rises when the feature is scrambled |
-| Partial dependence | average marginal relationship |
-| ICE curves | the per-observation version of a PDP |
-| **SHAP** | additive attribution per prediction, from cooperative game theory |
-
-## And their caveats
-
-| Method | Caveat |
-|---|---|
-| Impurity importance | Biased toward high-cardinality features; computed **in-sample** |
-| **Permutation importance** | **Breaks down under correlated features** — creates impossible data points |
-| Partial dependence | Assumes $x_S \perp x_C$; hides heterogeneity |
-| ICE curves | Reveals the heterogeneity a PDP averages away |
-| **SHAP** | Unique under efficiency/symmetry/dummy/additivity; costly; assumes a value function |
-
-## The honest summary
-
-> These tools describe the **model**, not the world.
-
-::: {.warn}
-A large SHAP value means the model **relies on** that feature — not that the feature **causes** the
-outcome.
-:::
-
-::: {.check}
-Session 10 is where we finally take causality seriously. Until then, every sentence you write is
-about prediction.
-:::
-
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
-
-## What you do
+$$F_m(x) = F_{m-1}(x) + \nu\,\gamma_m h_m(x), \qquad 0 < \nu \le 1$$
 
 ::: {.tight}
-1. Fit a pruned tree, a forest and a boosted model on your project, under grouped CV
-2. Compare against the Session 03 linear specification — does flexibility pay?
-3. Produce **permutation** importance, never impurity importance
-4. Draw one PDP and one set of ICE curves; describe the shapes in words
+- Small $\nu$ (0.01–0.1) with **many** trees generalises far better than large $\nu$ with few
+- Halving $\nu$ roughly **doubles** the $M$ you need
+- Three dials interact: $\nu$, $M$, and depth $d$ — where $d$ caps the **interaction order**
+  ($d=1$ is additive, $d=2$ allows two-way interactions)
 :::
+
+## The learning-rate picture
+
+```{python}
+fig, ax = plt.subplots(figsize=(6.6, 2.95))
+M = 400
+for lr, c in [(0.5, CL.warn), (0.1, CL.accent), (0.02, CL.good)]:
+    g = GradientBoostingClassifier(n_estimators=M, learning_rate=lr, max_depth=2,
+                                   min_samples_leaf=60, subsample=.8,
+                                   random_state=0).fit(Xtr, ytr)
+    stage = np.array([roc_auc_score(yte, s.ravel())
+                      for s in g.staged_decision_function(Xte)])
+    ax.plot(np.arange(1, M + 1), stage, color=c, lw=1.9, label=rf"$\nu={lr}$")
+    ax.scatter(np.argmax(stage) + 1, stage.max(), s=34, color=c, zorder=5)
+ax.axhline(AUC_LOGIT, color=CL.ink, ls="--", lw=1.3)
+ax.text(M * .62, AUC_LOGIT + .0015, "logistic regression", color=CL.ink, fontsize=8)
+ax.set_xlabel("number of boosting stages  M"); ax.set_ylabel("test AUC")
+ax.legend(fontsize=8, loc="lower right")
+plt.show()
+```
+
+::: {.muted}
+Dots mark each curve's peak. The fast learner ($\nu=0.5$) peaks early and then **decays** — it is
+overfitting one stage at a time.
+:::
+
+## What the modern libraries add
+
+XGBoost and LightGBM expand the loss to second order and penalise the tree explicitly:
+
+$$\mathcal{L}^{(m)} \approx \sum_i\Big[g_i h_m(x_i) + \tfrac12 h_i h_m(x_i)^2\Big] + \Omega(h_m),
+\qquad \Omega(h) = \gamma|T| + \tfrac12\lambda\|w\|^2$$
+
+Solving for the optimal leaf weight:
+
+$$w_j^\star = -\frac{G_j}{H_j + \lambda}$$
+
+::: {.check}
+Look at that denominator. **That is ridge**, in a third guise — the same $+\lambda$ that made
+$X^\top X$ invertible in Session 05, now stabilising a leaf.
+:::
+
+# 6 · Recovering interpretation {background-color="#16181A" style="color:#F7F6F3"}
+
+## Five tools, and what each is for
+
+| Tool | What it answers | The caveat |
+|---|---|---|
+| Impurity importance | how often, and how usefully, a feature was split on | **biased** toward high-cardinality features; in-sample |
+| Permutation importance | how much test error rises when it is scrambled | breaks under **correlated** features |
+| Partial dependence | the average marginal relationship | assumes $x_S \perp x_C$; hides heterogeneity |
+| ICE curves | the per-observation version | reveals what PDP averages away |
+| SHAP | additive attribution, per prediction | axiomatically unique, costly, still a model summary |
+
+## The impurity bias is not theoretical
+
+```{python}
+imp = pd.Series(rf_m.feature_importances_, index=FEAT)
+pi = permutation_importance(rf_m, Xte, yte, n_repeats=5, random_state=0,
+                            scoring="roc_auc", n_jobs=-1)
+per = pd.Series(pi.importances_mean, index=FEAT)
+card = Xtr.nunique()
+
+show = sorted(set(imp.nlargest(5).index) | set(per.nlargest(5).index))
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 3.0), sharey=True)
+order = per[show].sort_values().index
+axes[0].barh(range(len(order)), imp[order].to_numpy(), color=CL.warn, height=.6)
+axes[0].set_title("impurity importance (in-sample)", fontsize=9.5)
+axes[1].barh(range(len(order)), per[order].to_numpy(), color=CL.good, height=.6)
+axes[1].set_title("permutation importance (test AUC drop)", fontsize=9.5)
+for ax in axes:
+    ax.set_yticks(range(len(order)))
+    ax.set_yticklabels([f"{c[:16]}  ({card[c]} values)" for c in order], fontsize=7.5)
+    ax.grid(axis="y", visible=False)
+plt.show()
+```
 
 ::: {.warn}
-Report the tuning you did and on which folds. A boosted model tuned and evaluated on one split is
-reporting training error.
+Impurity importance rewards features with **thousands of candidate split points**. Permutation
+importance, scored out of sample, puts FICO first — which is what a credit analyst would have told
+you before you started.
 :::
 
-## The two-minute report
+## Why that happens
+
+::: {.step}
+A continuous feature with 7,000 distinct values offers 7,000 chances to reduce impurity **by
+noise**. A binary flag offers one. Impurity importance never corrects for that.
+:::
 
 ::: {.tight}
-1. **What I did** — the models, the CV scheme, the baseline they beat
-2. **The number** — error in the units of the outcome
-3. **The catch** — that every statement is about prediction, not effect
+- Never report impurity importance as "which variables matter"
+- Report **permutation** importance, computed on **held-out** rows
+- And state which features are correlated, because permutation breaks there too
+:::
+
+## The relationship itself: PDP and ICE
+
+```{python}
+fig, ax = plt.subplots(figsize=(6.4, 2.95))
+PartialDependenceDisplay.from_estimator(
+    rf_m, Xte, ["fico"], kind="both", subsample=45, random_state=0,
+    ax=ax, line_kw={"color": CL.accent, "linewidth": 2.8},
+    ice_lines_kw={"color": CL.muted, "alpha": .30, "linewidth": .8})
+ax.set_xlabel("FICO score"); ax.set_ylabel("predicted P(default)")
+ax.set_title("thick line: partial dependence · thin lines: individual rows", fontsize=9)
+ax.get_legend().remove() if ax.get_legend() else None
+plt.show()
+```
+
+::: {.check}
+The thick line is the average. The thin lines are **individual borrowers** — and they are not
+parallel. A single PDP curve would have hidden that.
+:::
+
+## The sentence to remember
+
+::: {.warn}
+These tools describe **the model**, not the world. A large SHAP value means the model relies on that
+feature. It does not mean the feature causes the outcome.
+:::
+
+::: {.step}
+Your model learned that low FICO predicts default. It did not learn that *raising* someone's FICO
+score would lower their default probability. Those are different claims requiring different
+evidence.
 :::
 
 ::: {.check}
-Full brief: [`02-practice/README.md`](02-practice/README.md)
+That distinction is the entire subject of **Session 10**. Notice how uncomfortable it is now.
+:::
+
+# 7 · Takeaways {background-color="#16181A" style="color:#F7F6F3"}
+
+## Key takeaways
+
+::: {.tight}
+1. A tree is a **partition**, not a curve — good for thresholds, clumsy for gradients
+2. Grow with Gini or entropy; **prune** with the loss you will be judged on
+3. $\rho\sigma^2 + \frac{1-\rho}{B}\sigma^2$: more trees hit a floor, so **decorrelate** instead
+4. Boosting is gradient descent in function space; small $\nu$ and many trees
+5. Regularisation reappears inside every leaf: $w^\star = -G/(H+\lambda)$
+6. Interpretation tools describe the model. Causality is Session 10
+:::
+
+## What loses marks
+
+::: {.tight}
+- Reporting **impurity** importance as evidence about the world
+- Reporting importances computed **in sample**
+- A partial-dependence plot with no note on whether the features are independent
+- Tuning $\nu$, $M$ and depth one at a time, as if they did not interact
+- Claiming the ensemble "beat the linear model" without showing both numbers
+:::
+
+::: {.warn}
+On this dataset the tuned forest beats logistic regression by roughly **0.002 AUC**. Flexibility is
+not a free win, and saying so is a sign of judgment, not weakness.
+:::
+
+## Now, the practice
+
+::: {.get}
+Ninety minutes, in your groups. You will fit a tree, a forest and a boosted ensemble on the same
+target, tune each honestly, and — the part that carries the marks — say what the importances do and
+do not license you to claim.
+:::
+
+::: {.muted}
+Notes: [`01-lecture/README.md`](01-lecture/README.md) · practice brief:
+[`02-practice/README.md`](02-practice/README.md)
 :::
