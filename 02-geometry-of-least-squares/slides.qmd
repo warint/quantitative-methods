@@ -30,7 +30,7 @@ format:
 import sys, warnings
 sys.path.insert(0, "../slides")
 warnings.filterwarnings("ignore")
-from plotstyle import setup, C
+from plotstyle import setup, CL
 plt = setup()
 
 import numpy as np
@@ -141,11 +141,11 @@ $2X^\top X \succeq 0$, so the stationary point is a **global** minimum and $S$ i
 b = np.linspace(-1.2, 3.2, 200)
 S = (b - 1.0) ** 2 + 0.35
 fig, ax = plt.subplots(figsize=(6.4, 2.5))
-ax.plot(b, S, color=C.accent, lw=2.4)
-ax.plot([1.0], [0.35], "o", color=C.ink, ms=7)
+ax.plot(b, S, color=CL.accent, lw=2.4)
+ax.plot([1.0], [0.35], "o", color=CL.ink, ms=7)
 ax.annotate(r"$\hat\beta$ — one minimum, and any optimiser finds it",
-            xy=(1.0, .35), xytext=(1.30, 2.1), color=C.ink, fontsize=8.5,
-            arrowprops=dict(arrowstyle="->", color=C.muted, lw=.9))
+            xy=(1.0, .35), xytext=(1.30, 2.1), color=CL.ink, fontsize=8.5,
+            arrowprops=dict(arrowstyle="->", color=CL.muted, lw=.9))
 ax.set_xlabel(r"$\beta$"); ax.set_ylabel(r"$S(\beta)$")
 plt.show()
 ```
@@ -169,24 +169,24 @@ So minimising $\|y - X\beta\|$ asks:
 ```{python}
 fig, ax = plt.subplots(figsize=(6.2, 3.3))
 t = np.linspace(-0.4, 3.1, 10)
-ax.plot(t, 0.42 * t, color=C.muted, lw=1.8)
-ax.text(2.72, 0.42 * 2.9 - .32, r"$\mathcal{C}(X)$", color=C.muted, fontsize=11)
+ax.plot(t, 0.42 * t, color=CL.muted, lw=1.8)
+ax.text(2.72, 0.42 * 2.9 - .32, r"$\mathcal{C}(X)$", color=CL.muted, fontsize=11)
 
 y_pt = np.array([1.55, 2.15])
 u = np.array([1, 0.42]); u = u / np.linalg.norm(u)
 yhat = (y_pt @ u) * u
 
-ax.annotate("", xy=y_pt, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=C.ink, lw=2.2))
-ax.annotate("", xy=yhat, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=C.accent, lw=2.2))
-ax.annotate("", xy=y_pt, xytext=yhat, arrowprops=dict(arrowstyle="->", color=C.warn, lw=2.2))
+ax.annotate("", xy=y_pt, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=CL.ink, lw=2.2))
+ax.annotate("", xy=yhat, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=CL.accent, lw=2.2))
+ax.annotate("", xy=y_pt, xytext=yhat, arrowprops=dict(arrowstyle="->", color=CL.warn, lw=2.2))
 
-ax.text(*(y_pt + [.06, .08]), r"$y$", color=C.ink, fontsize=12)
-ax.text(*(yhat + [.12, -.28]), r"$\hat y = Hy$", color=C.accent, fontsize=11)
-ax.text(1.70, 1.60, r"$\hat\varepsilon$", color=C.warn, fontsize=12)
+ax.text(*(y_pt + [.06, .08]), r"$y$", color=CL.ink, fontsize=12)
+ax.text(*(yhat + [.12, -.28]), r"$\hat y = Hy$", color=CL.accent, fontsize=11)
+ax.text(1.70, 1.60, r"$\hat\varepsilon$", color=CL.warn, fontsize=12)
 
 sq = 0.13
 perp = np.array([-u[1], u[0]])
-ax.plot(*zip(yhat + sq*u, yhat + sq*u + sq*perp, yhat + sq*perp), color=C.warn, lw=1.2)
+ax.plot(*zip(yhat + sq*u, yhat + sq*u + sq*perp, yhat + sq*perp), color=CL.warn, lw=1.2)
 ax.set_xlim(-.35, 3.3); ax.set_ylim(-.35, 2.6)
 ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
 ax.spines["left"].set_visible(False); ax.spines["bottom"].set_visible(False)
@@ -229,11 +229,11 @@ res = fit.resid
 p_, n_ = X.shape[1], X.shape[0]
 
 fig, ax = plt.subplots()
-ax.scatter(h, res, s=16, color=C.accent, alpha=.55, edgecolor="none")
-ax.axhline(0, color=C.muted, lw=1)
-ax.axvline(2 * p_ / n_, color=C.warn, ls="--", lw=1.4)
+ax.scatter(h, res, s=16, color=CL.accent, alpha=.55, edgecolor="none")
+ax.axhline(0, color=CL.muted, lw=1)
+ax.axvline(2 * p_ / n_, color=CL.warn, ls="--", lw=1.4)
 ax.text(2 * p_ / n_ + .002, res.max() * .80,
-        f"rule of thumb  $2p/n$ = {2*p_/n_:.3f}", color=C.warn, fontsize=8.5)
+        f"rule of thumb  $2p/n$ = {2*p_/n_:.3f}", color=CL.warn, fontsize=8.5)
 ax.set_xlabel("leverage  $h_{ii}$"); ax.set_ylabel("residual")
 plt.show()
 ```
@@ -247,15 +247,15 @@ $\hat y_i$ a lot. High leverage **and** a large residual is what deserves a look
 
 ```{python}
 fig, ax = plt.subplots(figsize=(6.0, 3.0))
-for th, col, lab in [(22, C.good, r"small angle $\rightarrow$ high $R^2$"),
-                     (62, C.warn, r"large angle $\rightarrow$ low $R^2$")]:
+for th, col, lab in [(22, CL.good, r"small angle $\rightarrow$ high $R^2$"),
+                     (62, CL.warn, r"large angle $\rightarrow$ low $R^2$")]:
     r = np.deg2rad(th)
     ax.annotate("", xy=(2.7 * np.cos(r), 2.7 * np.sin(r)), xytext=(0, 0),
                 arrowprops=dict(arrowstyle="->", color=col, lw=2.2))
     ax.text(2.7 * np.cos(r) + .07, 2.7 * np.sin(r), lab, color=col, fontsize=8.5)
     ax.text(0.95 * np.cos(r/2) + .22, 0.95 * np.sin(r/2), r"$\theta$", color=col, fontsize=11)
-ax.plot([0, 3.1], [0, 0], color=C.muted, lw=1.8)
-ax.text(2.85, -.24, r"$\mathcal{C}(X)$", color=C.muted, fontsize=11)
+ax.plot([0, 3.1], [0, 0], color=CL.muted, lw=1.8)
+ax.text(2.85, -.24, r"$\mathcal{C}(X)$", color=CL.muted, fontsize=11)
 ax.set_xlim(-.2, 4.0); ax.set_ylim(-.42, 2.9)
 ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
 ax.spines["left"].set_visible(False); ax.spines["bottom"].set_visible(False)
@@ -303,10 +303,10 @@ full = sm.OLS(yv, sm.add_constant(
     d[["share_fossil", "gdp_pc_eur", "productivity_idx"]].to_numpy())).fit()
 
 fig, ax = plt.subplots(figsize=(6.6, 3.0))
-ax.scatter(x_r, y_r, s=16, color=C.accent, alpha=.5, edgecolor="none")
+ax.scatter(x_r, y_r, s=16, color=CL.accent, alpha=.5, edgecolor="none")
 xx = np.linspace(x_r.min(), x_r.max(), 50)
-ax.plot(xx, slope * xx, color=C.warn, lw=2.4)
-ax.axhline(0, color=C.line, lw=1); ax.axvline(0, color=C.line, lw=1)
+ax.plot(xx, slope * xx, color=CL.warn, lw=2.4)
+ax.axhline(0, color=CL.line, lw=1); ax.axvline(0, color=CL.line, lw=1)
 ax.set_xlabel("share_fossil, residualised on GDP and productivity")
 ax.set_ylabel("price, residualised on the same")
 ax.set_title(f"slope here = {slope:.4f}      "
@@ -338,13 +338,13 @@ for e in eps:
     kx.append(np.linalg.cond(Xe)); kxx.append(np.linalg.cond(Xe.T @ Xe))
 
 fig, ax = plt.subplots(figsize=(6.6, 2.9))
-ax.loglog(eps, kx, "o-", color=C.accent, lw=2.2)
-ax.loglog(eps, kxx, "s-", color=C.warn, lw=2.2)
-ax.text(eps[1], kx[1] * 2.6, r"$\kappa(X)$", color=C.accent, fontsize=10, fontweight="600")
-ax.text(eps[1], kxx[1] * 2.6, r"$\kappa(X^{\top}X)$", color=C.warn, fontsize=10, fontweight="600")
-ax.axhline(1 / np.finfo(float).eps, color=C.muted, ls=":", lw=1.2)
+ax.loglog(eps, kx, "o-", color=CL.accent, lw=2.2)
+ax.loglog(eps, kxx, "s-", color=CL.warn, lw=2.2)
+ax.text(eps[1], kx[1] * 2.6, r"$\kappa(X)$", color=CL.accent, fontsize=10, fontweight="600")
+ax.text(eps[1], kxx[1] * 2.6, r"$\kappa(X^{\top}X)$", color=CL.warn, fontsize=10, fontweight="600")
+ax.axhline(1 / np.finfo(float).eps, color=CL.muted, ls=":", lw=1.2)
 ax.text(eps[-1], 1 / np.finfo(float).eps * 2.0,
-        "past here, double precision is exhausted", color=C.muted, fontsize=8)
+        "past here, double precision is exhausted", color=CL.muted, fontsize=8)
 ax.set_xlabel("how nearly duplicated the added column is")
 ax.set_ylabel("condition number")
 plt.show()

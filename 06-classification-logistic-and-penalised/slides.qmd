@@ -31,7 +31,7 @@ import sys, warnings
 sys.path.insert(0, "../slides")
 warnings.filterwarnings("ignore")
 
-from plotstyle import setup, C
+from plotstyle import setup, CL
 plt = setup()
 
 import numpy as np
@@ -161,12 +161,12 @@ loans["purpose"].value_counts()  # 7 categories
 
 ```{python}
 fig, ax = plt.subplots(figsize=(7.2, 2.2))
-ax.barh([0], [1 - BASE], color=C.muted, alpha=.35)
-ax.barh([0], [BASE], left=[1 - BASE], color=C.warn)
+ax.barh([0], [1 - BASE], color=CL.muted, alpha=.35)
+ax.barh([0], [BASE], left=[1 - BASE], color=CL.warn)
 ax.set_xlim(0, 1); ax.set_yticks([]); ax.grid(False)
 ax.set_xlabel("share of the 9,578 loans")
 ax.text(.42, 0, "84.0% repaid", va="center", ha="center", fontsize=11,
-        fontweight="600", color=C.ink)
+        fontweight="600", color=CL.ink)
 ax.text(.92, 0, "16.0%", va="center", ha="center", fontsize=11,
         fontweight="600", color="white")
 plt.show()
@@ -204,14 +204,14 @@ lin  = lpm.params.iloc[0] + lpm.params.iloc[1] * grid
 lg   = 1 / (1 + np.exp(-(mlog.params.iloc[0] + mlog.params.iloc[1] * grid)))
 
 fig, ax = plt.subplots()
-ax.axhspan(-0.18, 0, color=C.warn, alpha=.10)
-ax.axhspan(1, 1.18, color=C.warn, alpha=.10)
-ax.axhline(0, color=C.muted, lw=.9); ax.axhline(1, color=C.muted, lw=.9)
-ax.plot(grid, lin, color=C.warn, lw=2.4)
-ax.plot(grid, lg,  color=C.accent, lw=2.4)
-ax.text(grid[8], lin[8] + .07, "linear probability model", color=C.warn, fontweight="600")
-ax.text(grid[150], lg[150] + .12, "logistic", color=C.accent, fontweight="600")
-ax.text(grid[-105], -.13, "impossible: P < 0", color=C.warn, fontsize=8.5)
+ax.axhspan(-0.18, 0, color=CL.warn, alpha=.10)
+ax.axhspan(1, 1.18, color=CL.warn, alpha=.10)
+ax.axhline(0, color=CL.muted, lw=.9); ax.axhline(1, color=CL.muted, lw=.9)
+ax.plot(grid, lin, color=CL.warn, lw=2.4)
+ax.plot(grid, lg,  color=CL.accent, lw=2.4)
+ax.text(grid[8], lin[8] + .07, "linear probability model", color=CL.warn, fontweight="600")
+ax.text(grid[150], lg[150] + .12, "logistic", color=CL.accent, fontweight="600")
+ax.text(grid[-105], -.13, "impossible: P < 0", color=CL.warn, fontsize=8.5)
 ax.set_ylim(-.18, 1.18); ax.set_xlabel("FICO score"); ax.set_ylabel("P(default)")
 plt.show()
 ```
@@ -253,16 +253,16 @@ there. The probability on the right is then squeezed into $(0,1)$ automatically.
 z = np.linspace(-6, 6, 400)
 sig = 1 / (1 + np.exp(-z))
 fig, ax = plt.subplots()
-ax.plot(z, sig, color=C.accent, lw=2.6)
-ax.axhline(0, color=C.line); ax.axhline(1, color=C.line)
-ax.axhline(.5, color=C.muted, ls=":", lw=1)
-ax.axvline(0, color=C.muted, ls=":", lw=1)
-ax.plot([0], [.5], "o", color=C.ink, ms=7)
+ax.plot(z, sig, color=CL.accent, lw=2.6)
+ax.axhline(0, color=CL.line); ax.axhline(1, color=CL.line)
+ax.axhline(.5, color=CL.muted, ls=":", lw=1)
+ax.axvline(0, color=CL.muted, ls=":", lw=1)
+ax.plot([0], [.5], "o", color=CL.ink, ms=7)
 ax.text(-5.9, .72, "steepest here — a unit of $x^{\\top}\\beta$\nmoves $p$ a great deal",
-        color=C.ink, fontsize=8.5)
+        color=CL.ink, fontsize=8.5)
 ax.annotate("flat — the same unit\nbarely moves $p$", xy=(4.4, .988), xytext=(1.5, .55),
-            color=C.muted, fontsize=8.5,
-            arrowprops=dict(arrowstyle="->", color=C.muted, lw=.9))
+            color=CL.muted, fontsize=8.5,
+            arrowprops=dict(arrowstyle="->", color=CL.muted, lw=.9))
 ax.set_xlabel("$x^{\\top}\\beta$   (the log-odds)"); ax.set_ylabel("$p$")
 ax.set_ylim(-.06, 1.12)
 plt.show()
@@ -359,16 +359,16 @@ pre, rec, _ = precision_recall_curve(y, p)
 
 fig, axes = plt.subplots(1, 2, figsize=(7.8, 3.0))
 a = axes[0]
-a.plot(fpr, tpr, color=C.accent, lw=2.2)
-a.plot([0, 1], [0, 1], ls="--", color=C.muted, lw=1)
-a.text(.56, .30, "chance", color=C.muted, fontsize=8.5, rotation=30)
+a.plot(fpr, tpr, color=CL.accent, lw=2.2)
+a.plot([0, 1], [0, 1], ls="--", color=CL.muted, lw=1)
+a.text(.56, .30, "chance", color=CL.muted, fontsize=8.5, rotation=30)
 a.set_title(f"ROC — AUC {roc_auc_score(y, p):.3f}")
 a.set_xlabel("false positive rate"); a.set_ylabel("true positive rate")
 
 b = axes[1]
-b.plot(rec, pre, color=C.accent, lw=2.2)
-b.axhline(BASE, ls="--", color=C.warn, lw=1.4)
-b.text(.30, BASE + .02, f"baseline = base rate  {BASE:.3f}", color=C.warn, fontsize=8.5)
+b.plot(rec, pre, color=CL.accent, lw=2.2)
+b.axhline(BASE, ls="--", color=CL.warn, lw=1.4)
+b.text(.30, BASE + .02, f"baseline = base rate  {BASE:.3f}", color=CL.warn, fontsize=8.5)
 b.set_ylim(0, .6)
 b.set_title(f"Precision–Recall — AP {average_precision_score(y, p):.3f}")
 b.set_xlabel("recall"); b.set_ylabel("precision")
@@ -405,12 +405,12 @@ $$\boxed{\;\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}\;}$$
 ratios = np.array([1, 2, 5, 10, 20])
 taus = 1 / (1 + ratios)
 fig, ax = plt.subplots(figsize=(7.2, 2.7))
-ax.plot(ratios, taus, "o-", color=C.accent, lw=2.2)
-ax.axhline(.5, ls=":", color=C.warn, lw=1.3)
-ax.text(11.5, .53, "the software default, 0.5", color=C.warn, fontsize=8.5)
+ax.plot(ratios, taus, "o-", color=CL.accent, lw=2.2)
+ax.axhline(.5, ls=":", color=CL.warn, lw=1.3)
+ax.text(11.5, .53, "the software default, 0.5", color=CL.warn, fontsize=8.5)
 for r, t in zip(ratios, taus):
     ax.annotate(f"{t:.2f}", (r, t), textcoords="offset points",
-                xytext=(0, 9), ha="center", fontsize=9, color=C.ink, fontweight="600")
+                xytext=(0, 9), ha="center", fontsize=9, color=CL.ink, fontweight="600")
 ax.set_xlabel("cost of a miss relative to a false alarm   $c_{FN}:c_{FP}$")
 ax.set_ylabel(r"$\tau^\star$"); ax.set_ylim(0, .64)
 plt.show()
@@ -428,14 +428,14 @@ flagged = np.array([(p >= t).mean() for t in ths])
 recall  = np.array([((p >= t) & (y == 1)).sum() / y.sum() for t in ths])
 
 fig, ax = plt.subplots()
-ax.plot(ths, flagged, color=C.warn, lw=2.3)
-ax.plot(ths, recall, color=C.good, lw=2.3)
-ax.axvline(1/6, color=C.accent, ls="--", lw=1.5)
-ax.text(1/6 + .01, .95, r"$\tau^\star = 0.167$  at 5:1", color=C.accent, fontsize=8.5)
-ax.text(.33, .20, "share of applications flagged", color=C.warn, fontsize=8.5, fontweight="600")
-ax.text(.33, .52, "share of defaults caught", color=C.good, fontsize=8.5, fontweight="600")
-ax.axvline(.5, color=C.muted, ls=":", lw=1.2)
-ax.text(.505, .06, "0.5 → nothing flagged", color=C.muted, fontsize=8.5)
+ax.plot(ths, flagged, color=CL.warn, lw=2.3)
+ax.plot(ths, recall, color=CL.good, lw=2.3)
+ax.axvline(1/6, color=CL.accent, ls="--", lw=1.5)
+ax.text(1/6 + .01, .95, r"$\tau^\star = 0.167$  at 5:1", color=CL.accent, fontsize=8.5)
+ax.text(.33, .20, "share of applications flagged", color=CL.warn, fontsize=8.5, fontweight="600")
+ax.text(.33, .52, "share of defaults caught", color=CL.good, fontsize=8.5, fontweight="600")
+ax.axvline(.5, color=CL.muted, ls=":", lw=1.2)
+ax.text(.505, .06, "0.5 → nothing flagged", color=CL.muted, fontsize=8.5)
 ax.set_xlabel("threshold"); ax.set_ylabel("share"); ax.set_ylim(0, 1.03)
 plt.show()
 ```
@@ -461,9 +461,9 @@ reported no error whatsoever.
 ```{python}
 frac, mean_pred = calibration_curve(y, p, n_bins=8, strategy="quantile")
 fig, ax = plt.subplots(figsize=(5.4, 3.1))
-ax.plot([0, .5], [0, .5], ls="--", color=C.muted, lw=1.2)
-ax.plot(mean_pred, frac, "o-", color=C.accent, lw=2.2)
-ax.text(.28, .24, "perfectly calibrated", color=C.muted, fontsize=8.5, rotation=36)
+ax.plot([0, .5], [0, .5], ls="--", color=CL.muted, lw=1.2)
+ax.plot(mean_pred, frac, "o-", color=CL.accent, lw=2.2)
+ax.text(.28, .24, "perfectly calibrated", color=CL.muted, fontsize=8.5, rotation=36)
 ax.set_xlabel("mean predicted probability"); ax.set_ylabel("observed frequency")
 ax.set_xlim(0, .5); ax.set_ylim(0, .5)
 plt.show()
@@ -500,13 +500,13 @@ pw = m_w.predict(wine).to_numpy(); yw = wine["good"].to_numpy()
 f1, t1, _ = roc_curve(y, p); f2, t2, _ = roc_curve(yw, pw)
 
 fig, ax = plt.subplots(figsize=(5.6, 3.2))
-ax.plot([0, 1], [0, 1], ls="--", color=C.muted, lw=1)
-ax.plot(f1, t1, color=C.warn, lw=2.4)
-ax.plot(f2, t2, color=C.good, lw=2.4)
+ax.plot([0, 1], [0, 1], ls="--", color=CL.muted, lw=1)
+ax.plot(f1, t1, color=CL.warn, lw=2.4)
+ax.plot(f2, t2, color=CL.good, lw=2.4)
 ax.text(.50, .36, f"Lending Club   {roc_auc_score(y, p):.3f}",
-        color=C.warn, fontsize=9, fontweight="600")
+        color=CL.warn, fontsize=9, fontweight="600")
 ax.text(.26, .82, f"Red wines   {roc_auc_score(yw, pw):.3f}",
-        color=C.good, fontsize=9, fontweight="600")
+        color=CL.good, fontsize=9, fontweight="600")
 ax.set_xlabel("false positive rate"); ax.set_ylabel("true positive rate")
 plt.show()
 ```

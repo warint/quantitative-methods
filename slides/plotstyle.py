@@ -4,27 +4,31 @@ Shared matplotlib style for the lecture figures.
 Import it at the top of a deck's first code cell:
 
     import sys; sys.path.insert(0, "../slides")
-    from plotstyle import setup, C
+    from plotstyle import setup, CL
     setup()
 
 Every figure in the course then shares one palette and one set of defaults, so a
 student reading four decks in a row is not re-learning what the colours mean.
 
+The palette class is called `CL`, not `C`: patsy reserves the name `C` for
+categorical terms in a model formula, so a deck that imported `C` could not
+then write `C(nace_r2)`.
+
 The palette is the one used by the slide theme, which is in turn the palette of
 warin.ca — see `warin.scss`. Colours carry consistent meaning across the course:
 
-    C.ink      the data, or the thing being estimated
-    C.accent   the fitted model, the estimate, the thing you computed
-    C.warn     the trap, the wrong answer, the naive baseline
-    C.good     the correct answer, the honest number
-    C.muted    reference lines, benchmarks, chance
+    CL.ink     the data, or the thing being estimated
+    CL.accent  the fitted model, the estimate, the thing you computed
+    CL.warn    the trap, the wrong answer, the naive baseline
+    CL.good    the correct answer, the honest number
+    CL.muted   reference lines, benchmarks, chance
 """
 
 import matplotlib
 from typing import ClassVar
 
 
-class C:
+class CL:
     """Course palette. Same hex values as slides/warin.scss."""
 
     bg = "#F7F6F3"
@@ -71,9 +75,9 @@ def setup(width=7.2, height=3.6):
         "figure.figsize": (width, height),
         "figure.dpi": 160,
         "savefig.dpi": 160,
-        "figure.facecolor": C.bg,
-        "axes.facecolor": C.bg,
-        "savefig.facecolor": C.bg,
+        "figure.facecolor": CL.bg,
+        "axes.facecolor": CL.bg,
+        "savefig.facecolor": CL.bg,
 
         "font.family": family,
         "font.size": 9,
@@ -83,18 +87,18 @@ def setup(width=7.2, height=3.6):
         "xtick.labelsize": 8,
         "ytick.labelsize": 8,
 
-        "axes.edgecolor": C.line,
-        "axes.labelcolor": C.ink,
-        "axes.titlecolor": C.ink,
-        "text.color": C.ink,
-        "xtick.color": C.muted,
-        "ytick.color": C.muted,
+        "axes.edgecolor": CL.line,
+        "axes.labelcolor": CL.ink,
+        "axes.titlecolor": CL.ink,
+        "text.color": CL.ink,
+        "xtick.color": CL.muted,
+        "ytick.color": CL.muted,
 
         # Only the left and bottom spines. Chart junk competes with the point.
         "axes.spines.top": False,
         "axes.spines.right": False,
         "axes.grid": True,
-        "grid.color": C.line,
+        "grid.color": CL.line,
         "grid.linewidth": 0.6,
         "grid.alpha": 0.8,
 
@@ -113,4 +117,4 @@ def annotate(ax, x, y, text, color=None, dx=0, dy=0):
     that costs more than it saves, so label the line where it is.
     """
     ax.annotate(text, xy=(x, y), xytext=(x + dx, y + dy),
-                color=color or C.ink, fontsize=8.5, fontweight="600")
+                color=color or CL.ink, fontsize=8.5, fontweight="600")

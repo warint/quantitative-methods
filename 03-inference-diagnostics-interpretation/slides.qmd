@@ -30,7 +30,7 @@ format:
 import sys, warnings
 sys.path.insert(0, "../slides")
 warnings.filterwarnings("ignore")
-from plotstyle import setup, C
+from plotstyle import setup, CL
 plt = setup()
 
 import numpy as np
@@ -156,10 +156,10 @@ $$\mathrm{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \mathrm{Var}(x_j) \cdot (1
 ```{python}
 r2 = np.linspace(0, 0.985, 300)
 fig, ax = plt.subplots(figsize=(6.6, 2.8))
-ax.plot(r2, 1 / (1 - r2), color=C.accent, lw=2.4)
+ax.plot(r2, 1 / (1 - r2), color=CL.accent, lw=2.4)
 for v, lab in [(5, "VIF 5 — worth a comment"), (10, "VIF 10 — barely identified")]:
-    ax.axhline(v, color=C.warn, ls=":", lw=1.2)
-    ax.text(0.02, v + 1.8, lab, color=C.warn, fontsize=8.5)
+    ax.axhline(v, color=CL.warn, ls=":", lw=1.2)
+    ax.text(0.02, v + 1.8, lab, color=CL.warn, fontsize=8.5)
 ax.set_xlabel(r"$R_j^2$ — how well the other regressors explain $x_j$")
 ax.set_ylabel("variance inflation factor"); ax.set_ylim(0, 45)
 plt.show()
@@ -197,8 +197,8 @@ does not apply.
 
 ```{python}
 fig, ax = plt.subplots()
-ax.scatter(m.fittedvalues, m.resid, s=9, color=C.accent, alpha=.35, edgecolor="none")
-ax.axhline(0, color=C.muted, lw=1.2)
+ax.scatter(m.fittedvalues, m.resid, s=9, color=CL.accent, alpha=.35, edgecolor="none")
+ax.axhline(0, color=CL.muted, lw=1.2)
 ax.set_xlabel("fitted values"); ax.set_ylabel("residual")
 ax.set_title("earnings model — is the spread constant?")
 plt.show()
@@ -231,12 +231,12 @@ $\hat\beta$ never changes. Only your claimed **precision** does.
 ```{python}
 labels = ["classical", "HC1", "cluster by country"]
 ses    = [cls, hcs, clu]
-cols   = [C.muted, C.accent, C.warn]
+cols   = [CL.muted, CL.accent, CL.warn]
 fig, ax = plt.subplots(figsize=(6.8, 2.5))
 for i, (lab, s, col) in enumerate(zip(labels, ses, cols)):
     ax.errorbar(coef, i, xerr=1.96 * s, fmt="o", color=col, capsize=5, lw=2.4, ms=7)
     ax.text(coef + 1.96 * s + .012, i, f"±{1.96*s:.3f}", color=col, va="center", fontsize=9)
-ax.axvline(0, color=C.ink, ls=":", lw=1.2)
+ax.axvline(0, color=CL.ink, ls=":", lw=1.2)
 ax.set_yticks(range(3)); ax.set_yticklabels(labels)
 ax.set_xlabel("coefficient on tertiary_share, with 95% interval")
 ax.set_ylim(-.6, 2.6); ax.grid(axis="y", alpha=0)
@@ -260,10 +260,10 @@ Add one country-level control — $\log$ GDP per capita:
 fig, ax = plt.subplots(figsize=(6.8, 2.4))
 pairs = [("without GDP control", cls, clu, coef), ("with GDP control", cls2, clu2, coef2)]
 for i, (lab, sc, sk, cf) in enumerate(pairs):
-    ax.errorbar(cf, i + .13, xerr=1.96 * sc, fmt="o", color=C.muted, capsize=4, lw=2)
-    ax.errorbar(cf, i - .13, xerr=1.96 * sk, fmt="o", color=C.warn, capsize=4, lw=2)
+    ax.errorbar(cf, i + .13, xerr=1.96 * sc, fmt="o", color=CL.muted, capsize=4, lw=2)
+    ax.errorbar(cf, i - .13, xerr=1.96 * sk, fmt="o", color=CL.warn, capsize=4, lw=2)
     ax.text(cf + 1.96 * max(sc, sk) + .015, i, f"ratio {sk/sc:.2f}x",
-            color=C.ink, va="center", fontsize=9.5, fontweight="600")
+            color=CL.ink, va="center", fontsize=9.5, fontweight="600")
 ax.set_yticks([0, 1]); ax.set_yticklabels([p[0] for p in pairs])
 ax.set_title("grey = classical      red = clustered", fontsize=9)
 ax.set_xlabel("coefficient on tertiary_share")
@@ -313,14 +313,14 @@ $$\mathbb{E}[\hat\beta_1] = \beta_1 + \delta\beta_2$$
 ```{python}
 fig, ax = plt.subplots(figsize=(6.6, 2.3))
 ax.axis("off")
-cells = [(r"$\delta>0,\ \beta_2>0$", "upward", C.warn),
-         (r"$\delta<0,\ \beta_2<0$", "upward", C.warn),
-         (r"$\delta>0,\ \beta_2<0$", "downward", C.good),
-         (r"$\delta<0,\ \beta_2>0$", "downward", C.good)]
+cells = [(r"$\delta>0,\ \beta_2>0$", "upward", CL.warn),
+         (r"$\delta<0,\ \beta_2<0$", "upward", CL.warn),
+         (r"$\delta>0,\ \beta_2<0$", "downward", CL.good),
+         (r"$\delta<0,\ \beta_2>0$", "downward", CL.good)]
 for i, (cond, direction, col) in enumerate(cells):
     x  = .04 + (i % 2) * .50
     yy = .66 - (i // 2) * .45
-    ax.text(x, yy, cond, fontsize=11.5, color=C.ink)
+    ax.text(x, yy, cond, fontsize=11.5, color=CL.ink)
     ax.annotate("", xy=(x + .29, yy + (.06 if direction == "upward" else -.06)),
                 xytext=(x + .23, yy), arrowprops=dict(arrowstyle="->", color=col, lw=2.6))
     ax.text(x + .32, yy, direction, fontsize=10.5, color=col, fontweight="600")
@@ -338,11 +338,11 @@ nothing, and it is the most useful discipline in applied work.
 short = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share", data=df).fit()
 lng   = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share + productivity_idx", data=df).fit()
 fig, ax = plt.subplots(figsize=(6.2, 2.1))
-ax.barh([1], [short.params["tertiary_share"]], color=C.warn, height=.45)
-ax.barh([0], [lng.params["tertiary_share"]], color=C.good, height=.45)
+ax.barh([1], [short.params["tertiary_share"]], color=CL.warn, height=.45)
+ax.barh([0], [lng.params["tertiary_share"]], color=CL.good, height=.45)
 ax.set_yticks([0, 1]); ax.set_yticklabels(["with productivity", "omitting productivity"])
 for yy, v in [(1, short.params["tertiary_share"]), (0, lng.params["tertiary_share"])]:
-    ax.text(v + .03, yy, f"{v:.3f}", va="center", fontsize=10.5, fontweight="600", color=C.ink)
+    ax.text(v + .03, yy, f"{v:.3f}", va="center", fontsize=10.5, fontweight="600", color=CL.ink)
 ax.set_xlabel("coefficient on tertiary_share"); ax.grid(axis="y", alpha=0)
 plt.show()
 ```
