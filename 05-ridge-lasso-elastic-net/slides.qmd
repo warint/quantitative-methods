@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,260 +25,745 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import (LinearRegression, Ridge, Lasso, ElasticNet,
+                                  RidgeCV, LassoCV, ElasticNetCV, lasso_path)
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.metrics import mean_squared_error
+
+raw = pd.read_parquet("../data/spine/angle_c_country.parquet")
+YCOL = "rd_pct_gdp"
+XCOLS = [c for c in raw.columns if c not in ("geo", "time", "flag", YCOL)]
+d = raw.dropna(subset=[YCOL] + XCOLS).reset_index(drop=True)
+
+X = d[XCOLS].to_numpy(float)
+y = d[YCOL].to_numpy(float)
+N, P = X.shape
+
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=7)
+sc = StandardScaler().fit(Xtr)
+Ztr, Zte = sc.transform(Xtr), sc.transform(Xte)
+Z = StandardScaler().fit_transform(X)
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
 ### When is a deliberately biased estimator the better one? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **5.1** | Ridge regression |
-| **5.2** | The lasso |
-| **5.3** | The elastic net |
-| **5.4** | Choosing the tuning parameters |
+| **1** | Where we are, and what this adds |
+| **2** | The problem, on real data |
+| **3** | Ridge — shrink everything, a little |
+| **4** | Lasso — shrink some things to nothing |
+| **5** | Elastic net — when predictors come in families |
+| **6** | Choosing $\lambda$ honestly |
+| **7** | Key takeaways |
 
-::: {.muted}
-Same numbering and notation as [`01-lecture/README.md`](01-lecture/README.md).
+## Learning objectives
+
+::: {.tight}
+- State the ridge and lasso objectives and say **what each penalty buys**
+- Explain, in the SVD basis, why ridge shrinkage is **targeted** rather than blunt
+- Derive **soft-thresholding** and use it to explain why the lasso produces exact zeros
+- Choose between lasso and elastic net by looking at the **correlation structure**
+- Report $\lambda$ by cross-validation, and know why the standard errors afterwards are **not valid**
 :::
 
-# 5.1 Ridge regression {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+
+## Where we are
+
+| Session | What it gave you |
+|---|---|
+| **02** | The least-squares fit, and the geometry that produces it |
+| **03** | An honest interval, and the diagnostics that decide which one |
+| **04** | A number for out-of-sample error, and how to get it honestly |
+
+::: {.check}
+Session 04 gave you a **measuring instrument**. It did not give you a way to *improve* the number
+it measures. Today is the first session that does.
+:::
+
+## The opening claim, and why it is wrong
+
+> OLS is the **best linear unbiased** estimator.
+
+::: {.step}
+True. And useless, when the variance of "best unbiased" is enormous.
+:::
+
+Session 04's decomposition says total error is $\text{bias}^2 + \text{variance} + \sigma^2$.
+Gauss–Markov fixes $\text{bias} = 0$ and then minimises variance **within that constraint**.
+
+::: {.warn}
+Nobody asked whether $\text{bias} = 0$ was the right constraint. Accept a little bias, buy a large
+reduction in variance, and total error falls. That trade is what regularisation is.
+:::
+
+## What today adds, in one line
+
+::: {.tight}
+- A **dial** — $\lambda$ — that moves you along the bias–variance curve of Session 04 *on purpose*
+- A method that still works when $p > n$, where OLS has **no unique solution at all**
+- A method that performs **variable selection** as part of fitting, not as a separate ritual
+:::
+
+::: {.check}
+Sessions 06 through 11 all reuse this dial. Penalised logistic regression, tree depth, the number of
+principal components, the number of clusters — every one of them is a $\lambda$ under another name.
+:::
+
+# 2 · The problem, on real data {background-color="#16181A" style="color:#F7F6F3"}
+
+## A situation you will actually meet
+
+We want to explain **R&D intensity** (R&D as % of GDP) across European countries from digital and
+AI-adoption indicators.
+
+::: {.tight}
+- 30 countries × 11 years in the file
+- but the AI-use survey **only exists from 2021**, so those columns are two-thirds missing
+- 15 of the columns are auxiliary series of unknown value — nobody has vetted them
+:::
+
+::: {.muted}
+This is the ordinary condition of applied macro work: a wide table, a short usable window, and no
+prior about which columns matter.
+:::
+
+## What complete-case analysis leaves you
+
+```{python}
+#| echo: true
+raw = pd.read_parquet("../data/spine/angle_c_country.parquet")
+YCOL  = "rd_pct_gdp"
+XCOLS = [c for c in raw.columns if c not in ("geo", "time", "flag", YCOL)]
+
+d = raw.dropna(subset=[YCOL] + XCOLS)          # keep only fully observed rows
+print(f"usable rows n = {len(d)},  candidate predictors p = {len(XCOLS)}")
+```
+
+::: {.warn}
+$n = 37$, $p = 29$. Eight degrees of freedom. This is not an exotic case — it is what happens every
+time a new survey wave meets an old panel.
+:::
+
+## Why OLS cannot cope here
+
+```{python}
+#| echo: true
+print(f"condition number of the standardised design: {np.linalg.cond(Ztr):.1e}")
+```
+
+::: {.tight}
+- Session 02: $\kappa(X)$ near $10^{16}$ means the design is **numerically singular**
+- Session 03: the variance of $\hat\beta_j$ is $\sigma^2 / [(1-R_j^2)\,\mathrm{SS}_j]$ — and
+  $R_j^2 \to 1$ here
+- So the coefficients exist, but they are noise amplified
+:::
+
+::: {.check}
+The diagnostic you learned in Session 03 does not just warn you. It tells you **which tool to reach
+for next**.
+:::
+
+## Four estimators, one held-out test set
+
+```{python}
+#| echo: true
+def test_rmse(model):
+    """Fit on the training split, score on the untouched 30%."""
+    model.fit(Xtr, ytr)
+    return np.sqrt(mean_squared_error(yte, model.predict(Xte)))
+
+ALPHAS = np.logspace(-3, 3, 60)
+L1S    = [0.1, 0.5, 0.7, 0.9, 0.95, 1.0]
+
+scores = {
+    "predict the mean": np.sqrt(mean_squared_error(yte, np.full_like(yte, ytr.mean()))),
+    "OLS":         test_rmse(make_pipeline(StandardScaler(), LinearRegression())),
+    "ridge (CV)":  test_rmse(make_pipeline(StandardScaler(), RidgeCV(alphas=ALPHAS))),
+    "lasso (CV)":  test_rmse(make_pipeline(StandardScaler(), LassoCV(cv=5, random_state=0, max_iter=50_000))),
+    "elastic net": test_rmse(make_pipeline(StandardScaler(), ElasticNetCV(l1_ratio=L1S, cv=5, random_state=0, max_iter=50_000))),
+}
+```
+
+::: {.muted}
+`make_pipeline(StandardScaler(), …)` matters: the scaler is refitted **inside** each CV fold, so no
+test-fold information leaks into the standardisation. Session 04, leakage #1.
+:::
+
+## The result
+
+```{python}
+fig, ax = plt.subplots(figsize=(7.2, 3.1))
+names = list(scores); vals = [scores[k] for k in names]
+cols = [CL.muted, CL.warn, CL.accent, CL.good, CL.ink]
+b = ax.barh(names, vals, color=cols, height=.62)
+for r, v in zip(b, vals):
+    ax.text(v + .008, r.get_y() + r.get_height() / 2, f"{v:.3f}",
+            va="center", fontsize=9, fontweight="600")
+ax.axvline(scores["predict the mean"], color=CL.muted, ls=":", lw=1.3)
+ax.set_xlabel("test RMSE  (percentage points of GDP)  — lower is better")
+ax.set_xlim(0, max(vals) * 1.22)
+ax.invert_yaxis(); ax.grid(axis="y", visible=False)
+plt.show()
+```
+
+::: {.warn}
+OLS beats *predicting the mean* by 9%. Ridge beats it by 57%.
+:::
+
+## Read that again
+
+::: {.tight}
+- With 29 predictors and 37 rows, **OLS is worth almost nothing** — it is fitting noise
+- The penalised fits cut the error by **more than half**, using the *same* columns
+- Nothing was added. Something was **restrained**
+:::
+
+::: {.check}
+This is the entire argument for regularisation, and it took four lines of code to make. The rest of
+the session is about *why* it works and *how* to set the dial.
+:::
+
+# 3 · Ridge {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The estimator
 
 $$\hat\beta^{\text{ridge}} = \arg\min_\beta \Big\{ \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2 \Big\}
 = (X^\top X + \lambda I)^{-1} X^\top y$$
 
-The added $\lambda I$ makes the matrix positive definite for **any** $\lambda > 0$, even when
-$p > n$.
+::: {.step}
+Adding $\lambda I$ lifts every eigenvalue of $X^\top X$ by $\lambda$. A matrix with all eigenvalues
+positive is invertible — **for any** $\lambda > 0$, **even when** $p > n$.
+:::
 
 ::: {.check}
 Regularisation is not only a bias–variance device. It is what makes the problem **well-posed at
-all**.
+all**. That is why it appears in every high-dimensional method you will meet.
 :::
 
-## What ridge does, in the SVD basis
+## Ridge in the SVD basis
 
-With $X = UDV^\top$:
+With $X = UDV^\top$ — Session 02's singular value decomposition:
 
-$$\hat y^{\text{ridge}} = \sum_{j=1}^{p} u_j \frac{d_j^2}{d_j^2 + \lambda} \, u_j^\top y$$
+$$\hat y^{\text{ridge}} = \sum_{j=1}^{p} u_j \, \frac{d_j^2}{d_j^2 + \lambda} \, u_j^\top y$$
 
-Compare OLS — the same sum with **every factor equal to 1**.
+OLS is the same sum with **every factor equal to 1**.
 
-## Targeted, not blunt
-
-Ridge multiplies the $j$-th principal component of the design by
-$d_j^2/(d_j^2+\lambda) \in (0,1)$.
-
-::: {.tight}
-- **Large** $d_j$ — where the data vary a lot — barely touched
-- **Small** $d_j$ — where the data are nearly collinear and the OLS coefficient is wildly unstable — shrunk hard
+::: {.step}
+So ridge does not scale coefficients down uniformly. It multiplies the $j$-th principal direction of
+the design by a factor that depends on **how much the data vary in that direction**.
 :::
 
-::: {.check}
-A *targeted* damping of exactly the directions in which your data carry little information.
-:::
+## The shrinkage factor, drawn
 
-## Effective degrees of freedom
+```{python}
+lam = np.logspace(-3, 3, 300)
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 2.9))
 
-$$\mathrm{df}(\lambda) = \sum_j \frac{d_j^2}{d_j^2+\lambda}$$
+ax = axes[0]
+for dj, c, lab in [(6.0, CL.good, "$d_j=6$  well-measured"),
+                   (1.5, CL.accent, "$d_j=1.5$"),
+                   (0.3, CL.warn, "$d_j=0.3$  nearly collinear")]:
+    ax.semilogx(lam, dj**2 / (dj**2 + lam), color=c, lw=2.4, label=lab)
+ax.axhline(1, color=CL.muted, ls=":", lw=1.1)
+ax.set_xlabel(r"penalty  $\lambda$")
+ax.set_ylabel(r"shrinkage factor  $d_j^2/(d_j^2+\lambda)$")
+ax.set_ylim(-.03, 1.08); ax.legend(loc="lower left", fontsize=7.5)
 
-decreasing smoothly from $p$ to $0$.
+svals = np.linalg.svd(Ztr, compute_uv=False)
+ax = axes[1]
+df = [(svals**2 / (svals**2 + L)).sum() for L in lam]
+ax.semilogx(lam, df, color=CL.ink, lw=2.4)
+ax.axhline(len(svals), color=CL.muted, ls=":", lw=1.1)
+ax.text(2e-3, len(svals) - 2.2, f"$p = {P}$ (OLS)", color=CL.muted, fontsize=8)
+ax.set_xlabel(r"penalty  $\lambda$")
+ax.set_ylabel(r"effective df$(\lambda)$")
+plt.show()
+```
 
 ::: {.muted}
-The Session 04 quantity, made concrete. There is no "number of parameters" here — there is a dial.
+Left: the same $\lambda$ barely touches a well-measured direction and crushes a collinear one.
+Right: on our actual design, effective df slides smoothly from 29 down toward 0.
+:::
+
+## Why that shape is the whole point
+
+::: {.step}
+Directions where the data **vary a lot** carry real information — ridge leaves them alone.
+Directions where the data are **nearly collinear** are where OLS goes insane — ridge crushes them.
+:::
+
+$$\mathrm{df}(\lambda) = \sum_j \frac{d_j^2}{d_j^2+\lambda} \quad\text{falls smoothly from } p
+\text{ to } 0$$
+
+::: {.check}
+Ridge is a **targeted damping of exactly the directions in which your data carry least information**.
+It is not a blunt instrument, and describing it as "shrinking the coefficients" undersells it.
+:::
+
+## Ridge in three lines, explained
+
+```{python}
+#| echo: true
+mod = make_pipeline(
+    StandardScaler(),                       # 1. penalty is scale-dependent: standardise first
+    RidgeCV(alphas=np.logspace(-3, 3, 60))  # 2. pick lambda by leave-one-out CV over a log grid
+).fit(Xtr, ytr)                             # 3. refit on all training rows at the chosen lambda
+
+print(f"chosen lambda = {mod[-1].alpha_:.3f}")
+print(f"largest |coef|:  OLS {np.abs(LinearRegression().fit(Ztr, ytr).coef_).max():.3f}"
+      f"   ridge {np.abs(mod[-1].coef_).max():.3f}")
+```
+
+::: {.muted}
+Line 1 is not optional. A penalty on $\|\beta\|_2^2$ punishes a coefficient measured in euros
+differently from one measured in thousands of euros. **Standardise, or the penalty is arbitrary.**
 :::
 
 ## Bias–variance, explicitly
 
-$\mathrm{Var}(\hat\beta^{\text{ridge}})$ is **decreasing** in $\lambda$ while
-$\mathrm{Bias}^2$ is **increasing**.
-
-> There always exists $\lambda > 0$ whose MSE is **strictly lower than OLS**.
-
-::: {.check}
-A result that surprised the profession in 1970, and it should still shape how you think about
-Gauss–Markov. BLUE was never a promise about total error.
+::: {.tight}
+- $\mathrm{Var}(\hat\beta^{\text{ridge}})$ is **decreasing** in $\lambda$
+- $\text{Bias}^2$ is **increasing** in $\lambda$
+- There always exists some $\lambda > 0$ whose MSE is **strictly lower** than OLS
 :::
 
-# 5.2 The lasso {background-color="#16181A" style="color:#F7F6F3"}
+::: {.check}
+That last line is Hoerl and Kennard, 1970, and it genuinely surprised the profession. It should
+change how you hear the phrase "best unbiased estimator" for the rest of your career.
+:::
+
+# 4 · Lasso {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The estimator
 
-$$\hat\beta^{\text{lasso}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y - X\beta\|_2^2 + \lambda\|\beta\|_1 \Big\}$$
+$$\hat\beta^{\text{lasso}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y - X\beta\|_2^2
++ \lambda\|\beta\|_1 \Big\}$$
 
-No closed form.
+One change from ridge: $\|\beta\|_1 = \sum_j |\beta_j|$ instead of $\sum_j \beta_j^2$.
 
-::: {.muted}
-Note the $\tfrac{1}{2n}$ scaling — it is what makes $\lambda$ comparable across sample sizes, and
-it is the convention `glmnet` and scikit-learn use.
+::: {.step}
+No closed form. But that single change makes some coefficients **exactly zero** — not small, zero —
+and that is a qualitative difference, not a quantitative one.
 :::
 
-## Why the corners matter
+::: {.muted}
+To see why, look at the equivalent constrained problem: minimise RSS subject to
+$\|\beta\|_1 \le t$.
+:::
 
-In the equivalent constrained form — minimise RSS subject to $\|\beta\|_1 \le t$ — the constraint
-region is a **cross-polytope** (a diamond in 2-D), which has **corners on the axes**.
+## The picture that explains the zeros
 
-The elliptical RSS contours expanding outward from $\hat\beta^{OLS}$ meet this region, generically,
-**at a corner** — and a corner is a point where some coordinates are exactly zero.
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.15))
+bols = np.array([2.1, 1.35])
+A = np.array([[1.0, 0.72], [0.72, 1.0]])      # RSS quadratic form: correlated predictors
+
+g = np.linspace(-1.2, 3.6, 320)
+G1, G2 = np.meshgrid(g, g)
+dev = np.stack([G1 - bols[0], G2 - bols[1]])
+Q = A[0, 0]*dev[0]**2 + 2*A[0, 1]*dev[0]*dev[1] + A[1, 1]*dev[1]**2
+
+for ax, kind in zip(axes, ["lasso", "ridge"]):
+    ax.contour(G1, G2, Q, levels=[.35, 1.1, 2.4, 4.4, 7.2],
+               colors=CL.muted, linewidths=.9, alpha=.85)
+    t = 1.25
+    if kind == "lasso":
+        ax.fill([t, 0, -t, 0], [0, t, 0, -t], color=CL.accent, alpha=.22, zorder=2)
+        ax.plot([t, 0, -t, 0, t], [0, t, 0, -t, 0], color=CL.accent, lw=2.0, zorder=3)
+        sol = np.array([t, 0.0])
+        ttl = r"lasso:  $|\beta_1|+|\beta_2| \leq t$"
+    else:
+        th = np.linspace(0, 2*np.pi, 240)
+        ax.fill(t*np.cos(th), t*np.sin(th), color=CL.good, alpha=.20, zorder=2)
+        ax.plot(t*np.cos(th), t*np.sin(th), color=CL.good, lw=2.0, zorder=3)
+        u = bols / np.linalg.norm(bols); sol = t * u
+        ttl = r"ridge:  $\beta_1^2+\beta_2^2 \leq t^2$"
+    ax.scatter(*bols, s=42, color=CL.ink, zorder=5)
+    ax.text(bols[0]+.12, bols[1]+.10, r"$\hat\beta^{\,OLS}$", fontsize=9, color=CL.ink)
+    ax.scatter(*sol, s=70, color=CL.warn, zorder=6, marker="X")
+    ax.text(sol[0]+.14, sol[1]-.28, r"$\hat\beta$", fontsize=9.5, color=CL.warn, fontweight="600")
+    ax.axhline(0, color=CL.line, lw=1.0); ax.axvline(0, color=CL.line, lw=1.0)
+    ax.set_title(ttl, fontsize=9.5)
+    ax.set_xlim(-1.2, 3.6); ax.set_ylim(-1.2, 3.0)
+    ax.set_aspect("equal"); ax.grid(visible=False)
+    ax.set_xlabel(r"$\beta_1$")
+axes[0].set_ylabel(r"$\beta_2$")
+plt.show()
+```
+
+::: {.muted}
+Grey ellipses: contours of equal RSS, expanding from the OLS solution. Shaded region: what the
+budget $t$ allows. The estimate is where they first touch.
+:::
+
+## Corners produce zeros
+
+::: {.step}
+The $\ell_1$ region is a **diamond**: it has corners, and every corner sits **on an axis**, where one
+coordinate is exactly zero. Ellipses expanding from an arbitrary direction generically hit a corner.
+:::
+
+::: {.step}
+The $\ell_2$ region is a **disc**: perfectly smooth, no corners. The touch point almost never has a
+zero coordinate. Ridge shrinks; it never selects.
+:::
 
 ::: {.check}
-The $\ell_2$ ball is smooth. It has no corners, so ridge shrinks but never zeroes. Sparsity is a
-property of the *shape*.
+In $p$ dimensions the diamond has $2^p$ vertices and a whole lattice of edges and faces, each with
+some coordinates zero. Sparsity is not a trick — it is the **shape of the constraint**.
 :::
 
-## Coordinate descent
+## Where the zeros come from, algebraically
 
-Hold all $\beta_k$, $k\neq j$, fixed. With standardised columns
-($\frac1n\sum_i x_{ij}^2 = 1$), the univariate problem is
+Hold every $\beta_k$, $k \neq j$, fixed. With standardised columns the univariate problem is
 
-$$\min_{\beta_j} \; \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|$$
-
-$$\rho_j = \tfrac1n \textstyle\sum_i x_{ij}\big(y_i - \sum_{k\neq j} x_{ik}\beta_k\big)$$
+$$\min_{\beta_j} \tfrac{1}{2}(\beta_j - \rho_j)^2 + \lambda|\beta_j|, \qquad
+\rho_j = \tfrac{1}{n}\sum_i x_{ij}\Big(y_i - \sum_{k \neq j} x_{ik}\beta_k\Big)$$
 
 ::: {.muted}
-$\rho_j$ is the partial correlation of $x_j$ with the current residual.
+$\rho_j$ is just the correlation of $x_j$ with **what the other predictors have not explained**.
 :::
+
+Convex, but not differentiable at $0$. The subgradient of $|\beta_j|$ there is the whole interval
+$[-1, 1]$ — which is exactly what allows a *flat spot* at zero.
 
 ## Soft-thresholding
 
-The objective is convex but **non-differentiable at 0**. Using the subgradient of $|\beta_j|$ —
-which is $[-1,1]$ at zero — the solution is
+$$\hat\beta_j = S_\lambda(\rho_j) = \mathrm{sign}(\rho_j)\big(|\rho_j| - \lambda\big)_+$$
 
-$$\hat\beta_j = S_\lambda(\rho_j) = \mathrm{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+$$
+Read it in words:
 
-## Read it directly
-
-> If the partial correlation of $x_j$ with the residual is smaller in magnitude than $\lambda$, set
-> the coefficient to **exactly zero**; otherwise **shrink it toward zero by $\lambda$**.
+> if the partial correlation of $x_j$ with the residual is **smaller in magnitude than** $\lambda$,
+> set the coefficient to **exactly zero**; otherwise shrink it toward zero **by** $\lambda$.
 
 ::: {.check}
-Cycling this update over $j$ converges — and it is why `glmnet` and scikit-learn are fast.
+Cycling this update over $j$ until convergence is *coordinate descent*. It is why `scikit-learn`
+fits a 200-predictor lasso path faster than you can type the command.
 :::
 
-::: {.warn}
-Note the second clause. Surviving coefficients are still **biased toward zero**. The lasso selects
-*and* shrinks, and people routinely forget the second part when reading magnitudes.
+## The operator, drawn
+
+```{python}
+rho = np.linspace(-1.0, 1.0, 400)
+LAM = 0.30
+soft = np.sign(rho) * np.clip(np.abs(rho) - LAM, 0, None)
+
+fig, ax = plt.subplots(figsize=(5.4, 2.9))
+ax.plot(rho, rho, color=CL.muted, ls="--", lw=1.4)
+ax.text(.72, .86, "OLS: keep $\\rho$", color=CL.muted, fontsize=8.5)
+ax.plot(rho, soft, color=CL.accent, lw=2.8)
+ax.plot(rho, rho / (1 + 0.8), color=CL.good, lw=1.8, ls="-.")
+ax.text(-.98, -.42, "ridge: scale by\n$1/(1+\\lambda)$", color=CL.good, fontsize=8)
+ax.axvspan(-LAM, LAM, color=CL.warn, alpha=.12)
+ax.text(0, .10, "dead zone\n$|\\rho|\\leq\\lambda$", ha="center", color=CL.warn,
+        fontsize=8, fontweight="600")
+ax.axhline(0, color=CL.line, lw=1.0); ax.axvline(0, color=CL.line, lw=1.0)
+ax.set_xlabel(r"$\rho_j$  (partial correlation with the residual)")
+ax.set_ylabel(r"$\hat\beta_j$")
+ax.set_aspect("equal"); ax.grid(visible=False)
+plt.show()
+```
+
+::: {.muted}
+Ridge (dash-dot) passes through the origin with a shallower slope — it approaches zero but reaches it
+only when $\lambda = \infty$. The lasso (solid) has a flat interval **at** zero.
 :::
 
-## Limitations you must know
+## Do it by hand, once
+
+Soft-threshold $\rho = (0.42,\; -0.18,\; 0.09,\; 0.31)$ at $\lambda = 0.20$:
+
+| $\rho_j$ | $\lvert\rho_j\rvert - \lambda$ | $\hat\beta_j$ |
+|---|---|---|
+| $0.42$ | $0.22$ | $\mathbf{0.22}$ |
+| $-0.18$ | $-0.02 \to 0$ | $\mathbf{0}$ |
+| $0.09$ | $-0.11 \to 0$ | $\mathbf{0}$ |
+| $0.31$ | $0.11$ | $\mathbf{0.11}$ |
+
+::: {.check}
+Two of four survive. **You can compute a lasso solution with a pen** — and you will be asked to on
+the midterm.
+:::
+
+## The coefficient path
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.95), sharey=True)
+grid = np.logspace(-3.1, 0.4, 90)
+
+ax = axes[0]
+Bs = np.array([Ridge(alpha=a * len(ytr)).fit(Ztr, ytr).coef_ for a in grid])
+for k in range(P):
+    aux = XCOLS[k].startswith("aux")
+    ax.plot(grid, Bs[:, k], lw=1.0 if aux else 1.9,
+            color=CL.muted if aux else CL.accent, alpha=.55 if aux else .95)
+ax.set_xscale("log"); ax.set_title("ridge — nothing ever reaches zero", fontsize=9.5)
+ax.set_ylabel(r"$\hat\beta_j$"); ax.set_xlabel(r"$\lambda$")
+ax.axhline(0, color=CL.ink, lw=.9)
+
+ax = axes[1]
+alphas_l, coefs_l, _ = lasso_path(Ztr, ytr, alphas=grid)
+for k in range(P):
+    aux = XCOLS[k].startswith("aux")
+    ax.plot(alphas_l, coefs_l[k], lw=1.0 if aux else 1.9,
+            color=CL.muted if aux else CL.accent, alpha=.55 if aux else .95)
+ax.set_xscale("log"); ax.set_title("lasso — they drop out one by one", fontsize=9.5)
+ax.set_xlabel(r"$\lambda$"); ax.axhline(0, color=CL.ink, lw=.9)
+nz = (np.abs(coefs_l) > 1e-8).sum(axis=0)
+ax.text(.9 * grid[-1], coefs_l.max() * .92, f"{nz[-1]} nonzero", ha="right",
+        color=CL.ink, fontsize=8)
+plt.show()
+```
+
+::: {.muted}
+Blue: the 14 named indicators. Grey: the 15 unvetted auxiliary series. Read right to left —
+increasing penalty.
+:::
+
+## What survived, on our data
+
+```{python}
+#| echo: true
+lcv = LassoCV(cv=5, random_state=0, max_iter=50_000).fit(Ztr, ytr)
+kept = [(c, b) for c, b in zip(XCOLS, lcv.coef_) if abs(b) > 1e-8]
+
+print(f"lambda = {lcv.alpha_:.4f}   kept {len(kept)} of {P}")
+for c, b in sorted(kept, key=lambda t: -abs(t[1])):
+    print(f"   {c:<20s} {b:+.3f}")
+print(f"auxiliary series kept: {sum(c.startswith('aux') for c, _ in kept)} of 15")
+```
+
+::: {.check}
+Every one of the 15 unvetted series was set to zero. The lasso did the screening you would otherwise
+have done by hand, by eye, and by prejudice.
+:::
+
+## Three limitations you must state out loud
 
 ::: {.tight}
-1. With $p > n$, the lasso selects **at most $n$** variables.
-2. Among a group of highly correlated predictors it tends to pick **one arbitrarily** and zero the
-   rest — unstable across samples, and often economically absurd.
-3. Its selected set is consistent only under strong conditions (the **irrepresentable condition**).
+1. With $p > n$, the lasso can select **at most $n$** variables — a hard ceiling, not a finding
+2. Among **highly correlated** predictors it picks one and zeroes the rest, near-arbitrarily
+3. Its selected set is consistent only under strong conditions (the *irrepresentable condition*)
 :::
 
 ::: {.warn}
-**Do not present a lasso path as if it identified the true model.**
+So do **not** present a lasso path as if it had identified the true model. It identified *a* set of
+columns that predicts well at one value of $\lambda$, on one sample.
 :::
 
-# 5.3 The elastic net {background-color="#16181A" style="color:#F7F6F3"}
+# 5 · Elastic net {background-color="#16181A" style="color:#F7F6F3"}
 
-## Both penalties
+## Limitation 2 is not academic
+
+Our five AI-adoption columns are all measuring roughly the same thing:
+
+```{python}
+#| echo: true
+GRP = ["ai_use_any", "ai_use_ml", "ai_use_ge3", "ai_text_mining", "ai_image_reco"]
+C = d[GRP].corr().to_numpy()
+print(f"pairwise correlations within the group: {C[np.triu_indices(5, 1)].min():.2f}"
+      f" to {C[np.triu_indices(5, 1)].max():.2f}")
+```
+
+::: {.warn}
+The lasso must choose one. So your paper says *"text mining, specifically, and none of its
+neighbours"* — a claim the data cannot support and a referee will not believe.
+:::
+
+## The estimator
 
 $$\hat\beta^{\text{EN}} = \arg\min_\beta \Big\{ \tfrac{1}{2n}\|y-X\beta\|_2^2
-+ \lambda\big[\alpha \|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\big] \Big\}, \qquad \alpha \in [0,1]$$
++ \lambda\big[\alpha\|\beta\|_1 + \tfrac{1-\alpha}{2}\|\beta\|_2^2\big] \Big\}$$
 
-$\alpha = 1$ is the lasso; $\alpha = 0$ is ridge.
+| $\alpha$ | what you get |
+|---|---|
+| $1$ | the lasso |
+| $0$ | ridge |
+| $(0,1)$ | sparse **and** strictly convex |
 
-## The grouping effect
-
-The mixed penalty is **strictly convex** whenever $\alpha < 1$. That delivers what Zou and Hastie
-call the *grouping effect*:
-
-::: {.tight}
-- for two **identical** predictors, the elastic net assigns them **identical** coefficients — the lasso must choose
-- more generally, the difference in coefficients is bounded by a function of
-  $1 - \mathrm{corr}(x_j, x_k)$
+::: {.step}
+Strict convexity for any $\alpha < 1$ is what buys the **grouping effect**: two identical predictors
+receive **identical** coefficients, where the lasso had to pick.
 :::
 
-## Why this is not a technicality
+## The grouping effect, measured
 
-For macroeconomic panels — where dozens of series measure nearly the same underlying construct —
-this is the difference between a model that says
+```{python}
+def sel_freq(l1_ratio, alpha=0.03, B=300, seed=11):
+    """How often is each group member selected, across bootstrap resamples?"""
+    idx = [XCOLS.index(c) for c in GRP]
+    rng = np.random.default_rng(seed)
+    hits = np.zeros(len(GRP)); size = []
+    for _ in range(B):
+        k = rng.integers(0, N, N)
+        m = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=50_000).fit(Z[k], y[k])
+        on = np.abs(m.coef_[idx]) > 1e-8
+        hits += on; size.append(on.sum())
+    return hits / B, np.mean(size)
 
-> *"industrial production matters"*
+fL, szL = sel_freq(1.0)
+fE, szE = sel_freq(0.3)
 
-and one that says
+fig, ax = plt.subplots(figsize=(7.2, 2.95))
+w = .38; pos = np.arange(len(GRP))
+ax.bar(pos - w/2, fL, w, color=CL.warn, label=f"lasso — keeps {szL:.2f} of 5 on average")
+ax.bar(pos + w/2, fE, w, color=CL.good, label=f"elastic net $\\alpha=0.3$ — keeps {szE:.2f}")
+ax.set_xticks(pos); ax.set_xticklabels([g.replace("ai_", "") for g in GRP], fontsize=8.5)
+ax.set_ylabel("selected in x% of 300 bootstraps"); ax.set_ylim(0, 1.12)
+ax.legend(fontsize=8, loc="upper right"); ax.grid(axis="x", visible=False)
+plt.show()
+```
 
-> *"industrial production of durable goods excluding motor vehicles, specifically, and none of its
-> neighbours."*
+::: {.muted}
+Same data, same $\lambda$, 300 resamples. The lasso keeps the group leader and discards its
+neighbours; the elastic net admits them.
+:::
 
-## The coordinate update
+## Why this matters for a paper
+
+::: {.step}
+For a macro panel where a dozen series measure one construct, this is the difference between a model
+that says *"AI adoption matters"* and one that says *"industrial production of durable goods
+excluding motor vehicles, specifically."*
+:::
+
+The coordinate update is soft-threshold, **then divide**:
 
 $$\hat\beta_j = \frac{S_{\lambda\alpha}(\rho_j)}{1 + \lambda(1-\alpha)}$$
 
-::: {.muted}
-Soft-threshold, then divide. One extra line of arithmetic over the lasso.
+::: {.check}
+Same worked example, $\lambda = 0.2$, $\alpha = 0.5$: threshold at $0.10$, divide by $1.10$ →
+$(0.291,\, -0.073,\, 0,\, 0.191)$. **Three survive instead of two.**
 :::
 
-# 5.4 Choosing the tuning parameters {background-color="#16181A" style="color:#F7F6F3"}
+# 6 · Choosing $\lambda$ {background-color="#16181A" style="color:#F7F6F3"}
 
-## The grid
+## The path, and where it starts
 
-Fit over a **decreasing** grid of $\lambda$ from
+Fit over a **decreasing** grid from
 
-$$\lambda_{\max} = \frac{\max_j |x_j^\top y|}{n\alpha}$$
+$$\lambda_{\max} = \max_j \frac{|x_j^\top y|}{n\alpha}$$
 
-— the smallest $\lambda$ giving the null model — down to $\varepsilon\lambda_{\max}$, using **warm
-starts**.
-
-Cross-validate **jointly** over $(\alpha, \lambda)$.
-
-## Two conventions
-
-| | |
-|---|---|
-| $\lambda_{\min}$ | the value minimising CV error |
-| $\lambda_{1\text{se}}$ | the **largest** $\lambda$ within one standard error of the minimum |
-
-$\lambda_{1\text{se}}$ gives a simpler model whose performance is statistically indistinguishable.
+— the smallest penalty that still gives the null model — down to $\varepsilon\lambda_{\max}$, with
+**warm starts** (each fit begins from the previous solution).
 
 ::: {.check}
-**Prefer it when the model must be explained to someone.** Which, in this course, it must.
+Then cross-validate **jointly** over $(\alpha, \lambda)$. Not sequentially: the best $\lambda$
+depends on $\alpha$.
 :::
 
-## Inference warning
+## The CV curve
+
+```{python}
+folds = KFold(n_splits=5, shuffle=True, random_state=0)
+grid2 = np.logspace(-3, 0.2, 60)
+lc = LassoCV(alphas=grid2, cv=folds, random_state=0, max_iter=50_000).fit(Z, y)
+mse = lc.mse_path_.mean(axis=1)
+se = lc.mse_path_.std(axis=1) / np.sqrt(lc.mse_path_.shape[1])
+
+i_min = int(np.argmin(mse))
+thresh = mse[i_min] + se[i_min]
+i_1se = int(np.max(np.where(mse <= thresh)[0]))   # alphas are descending: largest lambda
+nzs = [(np.abs(Lasso(alpha=a, max_iter=50_000).fit(Z, y).coef_) > 1e-8).sum() for a in lc.alphas_]
+
+fig, ax = plt.subplots(figsize=(7.2, 3.0))
+ax.errorbar(lc.alphas_, mse, yerr=se, fmt="o", ms=3, lw=.9,
+            color=CL.accent, ecolor=CL.line, capsize=2)
+ax.set_xscale("log")
+for i, c, lab in [(i_min, CL.warn, r"$\lambda_{\min}$"), (i_1se, CL.good, r"$\lambda_{1se}$")]:
+    ax.axvline(lc.alphas_[i], color=c, ls="--", lw=1.6)
+    ax.text(lc.alphas_[i] * 1.06, mse.max() * .92,
+            f"{lab}\n{nzs[i]} predictors", color=c, fontsize=8.5, fontweight="600")
+ax.axhline(thresh, color=CL.muted, ls=":", lw=1.2)
+ax.set_xlabel(r"$\lambda$"); ax.set_ylabel("5-fold CV mean squared error")
+plt.show()
+```
+
+::: {.muted}
+Dotted line: one standard error above the minimum. Everything below it is statistically
+indistinguishable from the best.
+:::
+
+## Two conventions, and when to use which
+
+| | definition | use it when |
+|---|---|---|
+| $\lambda_{\min}$ | minimises CV error | prediction is the deliverable |
+| $\lambda_{1se}$ | **largest** $\lambda$ within one SE of the minimum | the model must be explained |
+
+::: {.check}
+$\lambda_{1se}$ costs you nothing detectable in accuracy and buys a much smaller model. Prefer it
+whenever a human has to read the coefficient table — which, in this course, is always.
+:::
+
+## The warning that ends the session
 
 ::: {.warn}
-Standard errors reported **after** lasso selection are **not valid**, because selection used the
-same data. Naive post-selection $p$-values are badly anti-conservative.
+Standard errors and $p$-values reported **after** lasso selection are **not valid**. Selection used
+the same data that the inference then conditions on, so naive $p$-values are badly
+anti-conservative.
+:::
+
+::: {.tight}
+- You may report the selected model and its out-of-sample error
+- You may **not** report `summary()` from an OLS refit on the selected columns as if it were an
+  ordinary regression
+- Honest post-selection inference needs the debiasing machinery of **Session 10**
+:::
+
+# 7 · Takeaways {background-color="#16181A" style="color:#F7F6F3"}
+
+## Key takeaways
+
+::: {.tight}
+1. Leaving the unbiased class is a **choice with a payoff** — here, half the test error
+2. Ridge damps the directions where the data are least informative; it never selects
+3. The lasso's zeros come from the **corners** of the $\ell_1$ ball, and from soft-thresholding
+4. When predictors come in families, the elastic net keeps the family; the lasso keeps a member
+5. Choose $\lambda$ by CV — $\lambda_{1se}$ when the model must be explained
+6. Post-selection inference is a different problem, and it is not solved by ignoring it
+:::
+
+## What loses marks
+
+::: {.tight}
+- Penalising **unstandardised** predictors — the penalty is then in arbitrary units
+- Standardising **before** the CV split, so the folds see test information
+- Reporting the lasso's selected set as "the variables that matter"
+- Reporting post-lasso $p$-values with no caveat
+- Choosing $\lambda$ on the test set, then reporting the test error
+:::
+
+## Now, the practice
+
+::: {.get}
+Ninety minutes, in your groups. You will fit a full elastic-net path on a wide panel, choose
+$(\alpha, \lambda)$ honestly, and report what survives — and what that does and does not license you
+to claim.
 :::
 
 ::: {.muted}
-This is what motivates the debiased methods later in the course.
-:::
-
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
-
-## What you do
-
-::: {.tight}
-1. Build the design matrix on your project; standardise **inside** the pipeline
-2. Fit ridge, lasso and elastic net under **grouped** CV
-3. Report the chosen $(\alpha, \lambda)$, and compare $\lambda_{\min}$ with $\lambda_{1\text{se}}$
-4. Bootstrap the selection: how often does each predictor survive?
-:::
-
-::: {.check}
-The **selection-frequency table** is the deliverable, not the coefficient table. Anyone can produce
-the second.
-:::
-
-## The two-minute report
-
-**One slide. Three sentences.**
-
-::: {.tight}
-1. **What I did** — the penalty, the CV scheme, the chosen parameters
-2. **The number** — the selected set, with selection frequencies
-3. **The catch** — that coefficients are shrunk, and that no p-value follows
-:::
-
-::: {.check}
-Full brief: [`02-practice/README.md`](02-practice/README.md)
+Notes: [`01-lecture/README.md`](01-lecture/README.md) · practice brief:
+[`02-practice/README.md`](02-practice/README.md)
 :::
