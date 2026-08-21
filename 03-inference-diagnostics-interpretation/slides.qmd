@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,212 +25,387 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+from plotstyle import setup, C
+plt = setup()
+
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+b    = pd.read_parquet("../data/spine/angle_b_sector.parquet")
+core = pd.read_parquet("../data/spine/core.parquet")
+df   = b.merge(core[["geo", "time", "gdp_pc_eur", "productivity_idx"]], on=["geo", "time"])
+
+BARE = "np.log(annual_earnings_eur) ~ tertiary_share + vacancy_rate + C(nace_r2)"
+CTRL = BARE + " + np.log(gdp_pc_eur)"
+
+m  = smf.ols(BARE, data=df).fit()
+m2 = smf.ols(CTRL, data=df).fit()
+g  = df.loc[m.model.data.row_labels, "geo"]
+g2 = df.loc[m2.model.data.row_labels, "geo"]
+
+def parts(fit, groups, name):
+    i  = list(fit.params.index).index(name)
+    cl = fit.get_robustcov_results(cov_type="cluster", groups=groups)
+    hc = fit.get_robustcov_results(cov_type="HC1")
+    return (float(np.asarray(fit.bse)[i]), float(np.asarray(hc.bse)[i]),
+            float(np.asarray(cl.bse)[i]), float(fit.params.iloc[i]))
+
+cls, hcs, clu, coef = parts(m, g, "tertiary_share")
+cls2, _, clu2, coef2 = parts(m2, g2, "tertiary_share")
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
 ### Your coefficient has a standard error. When does it mean anything? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **3.1** | Sampling distribution of the OLS estimator |
-| **3.2** | Gauss–Markov |
-| **3.3** | When assumption 4 fails |
-| **3.4** | Omitted variable bias |
-| **3.5** | What a Mincer coefficient identifies |
+| **1** | Where we are, and what this adds |
+| **2** | The sampling distribution of $\hat\beta$ |
+| **3** | Gauss–Markov, and its caveat |
+| **4** | When homoskedasticity fails |
+| **5** | Three standard errors, one coefficient |
+| **6** | Omitted variable bias — signed in advance |
+| **7** | What a coefficient identifies |
+| **8** | Key takeaways |
 
-::: {.muted}
-Same numbering and notation as [`01-lecture/README.md`](01-lecture/README.md).
+## Learning objectives
+
+::: {.tight}
+- Decompose $\hat\beta$ into truth plus noise, and see what each assumption buys
+- Read the **four levers** in the variance of a single coefficient
+- State **Gauss–Markov** and say precisely where it stops applying
+- Compute classical, **HC1** and **cluster-robust** standard errors, and choose between them
+- **Sign an omitted-variable bias before estimating**, then check the prediction
 :::
 
-# 3.1 Sampling distribution {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+
+## Session 02 gave you a number
+
+You can now fit a line and say exactly what it optimises.
+
+::: {.warn}
+What you cannot yet say is whether that number would survive a different sample — and therefore
+whether it means anything at all.
+:::
+
+## What today adds
+
+| Session 02 | Session 03 |
+|---|---|
+| $\hat\beta$ | a standard error that is actually correct |
+| The projection | the *sampling distribution* of the projection |
+| "Controlling for" as geometry | what happens when you control for the **wrong** things |
+| One dataset | the thought experiment of many datasets |
+
+::: {.check}
+Session 02 was deterministic linear algebra. **Session 03 is where randomness enters** — and almost
+everything that goes wrong in applied work goes wrong here.
+:::
+
+# 2 · The sampling distribution {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The decomposition that is all of inference
 
 Substitute $y = X\beta + \varepsilon$ into $\hat\beta = (X^\top X)^{-1}X^\top y$:
 
-$$\hat\beta = \beta + (X^\top X)^{-1} X^\top \varepsilon$$
+$$\hat\beta = \beta + (X^\top X)^{-1}X^\top\varepsilon$$
 
 ::: {.check}
-Everything that follows depends only on what you are willing to assume about $\varepsilon$.
+Truth, plus a term that is pure noise. Everything that follows depends **only** on what you are
+willing to assume about $\varepsilon$.
 :::
 
-## Unbiasedness
+## Unbiasedness is cheap
 
-$$\mathbb{E}[\hat\beta \mid X] = \beta + (X^\top X)^{-1}X^\top \mathbb{E}[\varepsilon \mid X] = \beta$$
+$$\mathbb{E}[\hat\beta \mid X] = \beta + (X^\top X)^{-1}X^\top\mathbb{E}[\varepsilon\mid X] = \beta$$
 
 using only **strict exogeneity**.
 
 ::: {.muted}
-Note what is *not* needed: no homoskedasticity, no normality, no independence.
+Note what is *not* needed: no homoskedasticity, no normality, no independence. Unbiasedness is a
+weak requirement — which is why it is a weak reassurance.
 :::
 
-## Variance, under homoskedasticity
+## The variance, and its four levers
 
-$$\mathrm{Var}(\hat\beta \mid X) = (X^\top X)^{-1} X^\top \mathrm{Var}(\varepsilon\mid X) X (X^\top X)^{-1} = \sigma^2 (X^\top X)^{-1}$$
-
-## The form worth memorising
-
-For a single coefficient:
+Under homoskedasticity, for one coefficient:
 
 $$\mathrm{Var}(\hat\beta_j) = \frac{\sigma^2}{n \cdot \mathrm{Var}(x_j) \cdot (1 - R_j^2)}$$
 
-where $R_j^2$ is the $R^2$ from regressing $x_j$ on all other regressors.
-
-## Four levers
-
 ::: {.tight}
-- $\sigma^2$ — **noise**
+- $\sigma^2$ — **noise** you cannot reduce
 - $n$ — **sample size**
-- $\mathrm{Var}(x_j)$ — **variation in the regressor**
-- $1/(1-R_j^2)$ — **redundancy**: the variance inflation factor
+- $\mathrm{Var}(x_j)$ — **variation in the regressor**: no variation, no estimate
+- $1/(1-R_j^2)$ — **redundancy**, the variance inflation factor
 :::
+
+## What redundancy costs
+
+```{python}
+r2 = np.linspace(0, 0.985, 300)
+fig, ax = plt.subplots(figsize=(6.6, 2.8))
+ax.plot(r2, 1 / (1 - r2), color=C.accent, lw=2.4)
+for v, lab in [(5, "VIF 5 — worth a comment"), (10, "VIF 10 — barely identified")]:
+    ax.axhline(v, color=C.warn, ls=":", lw=1.2)
+    ax.text(0.02, v + 1.8, lab, color=C.warn, fontsize=8.5)
+ax.set_xlabel(r"$R_j^2$ — how well the other regressors explain $x_j$")
+ax.set_ylabel("variance inflation factor"); ax.set_ylim(0, 45)
+plt.show()
+```
 
 ::: {.check}
-That last factor is the price of collinearity — and precisely what regularisation in Session 05
-proposes to pay differently.
+This is the price of collinearity — and exactly what regularisation in Session 05 proposes to pay
+**differently**.
 :::
 
-# 3.2 Gauss–Markov {background-color="#16181A" style="color:#F7F6F3"}
+# 3 · Gauss–Markov {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The theorem
 
-> Under assumptions 1–4, $\hat\beta_{OLS}$ has the **smallest variance in the class of linear
-> unbiased estimators**.
+> Under assumptions 1–4, $\hat\beta_{OLS}$ has the **smallest variance among linear unbiased
+> estimators**.
 
-## Proof sketch
+*Sketch.* Any linear unbiased $\tilde\beta = Cy$ has $C = (X^\top X)^{-1}X^\top + D$ with $DX = 0$;
+then $\mathrm{Var}(\tilde\beta) = \sigma^2[(X^\top X)^{-1} + DD^\top] \succeq \mathrm{Var}(\hat\beta)$.
+$\blacksquare$
 
-Let $\tilde\beta = Cy$ be any linear unbiased estimator; write
+## Read the middle word
 
-$$C = (X^\top X)^{-1}X^\top + D$$
-
-Unbiasedness forces $DX = 0$. Then
-
-$$\mathrm{Var}(\tilde\beta) = \sigma^2\big[(X^\top X)^{-1} + DD^\top\big] \succeq \mathrm{Var}(\hat\beta)$$
-
-since $DD^\top \succeq 0$. $\blacksquare$
-
-## The crucial caveat
-
-BLUE is a guarantee **within the class of unbiased estimators**.
+**B**est **L**inear **U**nbiased **E**stimator.
 
 ::: {.warn}
-Sessions 04 and 05 show that deliberately accepting bias can lower total error. Gauss–Markov does
-not forbid this. It simply does not apply.
+The guarantee holds only **within the class of unbiased estimators**. Sessions 04 and 05 show that
+accepting bias deliberately can lower total error. Gauss–Markov does not forbid that — it simply
+does not apply.
 :::
 
-# 3.3 When assumption 4 fails {background-color="#16181A" style="color:#F7F6F3"}
+# 4 · When assumption 4 fails {background-color="#16181A" style="color:#F7F6F3"}
+
+## Look at the residuals first
+
+```{python}
+fig, ax = plt.subplots()
+ax.scatter(m.fittedvalues, m.resid, s=9, color=C.accent, alpha=.35, edgecolor="none")
+ax.axhline(0, color=C.muted, lw=1.2)
+ax.set_xlabel("fitted values"); ax.set_ylabel("residual")
+ax.set_title("earnings model — is the spread constant?")
+plt.show()
+```
+
+::: {.check}
+You are looking for a **shape**, not running a test. In this panel the error variance scales with
+country size.
+:::
 
 ## The sandwich is always correct
 
-$$\mathrm{Var}(\hat\beta \mid X) = (X^\top X)^{-1} \Big( X^\top \Omega X \Big) (X^\top X)^{-1}$$
+$$\mathrm{Var}(\hat\beta\mid X) = (X^\top X)^{-1}\big(X^\top \Omega X\big)(X^\top X)^{-1},
+\qquad \Omega = \mathrm{Var}(\varepsilon\mid X)$$
 
-with $\Omega = \mathrm{Var}(\varepsilon \mid X)$.
+| Guess at $\Omega$ | When |
+|---|---|
+| $\sigma^2 I$ — classical | essentially never with a real panel |
+| $\mathrm{diag}(\hat\varepsilon_i^2)$ — **HC1** | variance differs across units |
+| $\sum_g \hat\varepsilon_g\hat\varepsilon_g^\top$ — **cluster** | errors correlated within a unit |
 
 ::: {.check}
-$\hat\beta$ never changes. Only your claimed precision does.
+$\hat\beta$ never changes. Only your claimed **precision** does.
 :::
 
-## Heteroskedasticity-robust — White / HC1
+# 5 · Three standard errors {background-color="#16181A" style="color:#F7F6F3"}
 
-Estimate $\Omega$ by
+## The same coefficient, three intervals
 
-$$\mathrm{diag}(\hat\varepsilon_i^2)$$
+```{python}
+labels = ["classical", "HC1", "cluster by country"]
+ses    = [cls, hcs, clu]
+cols   = [C.muted, C.accent, C.warn]
+fig, ax = plt.subplots(figsize=(6.8, 2.5))
+for i, (lab, s, col) in enumerate(zip(labels, ses, cols)):
+    ax.errorbar(coef, i, xerr=1.96 * s, fmt="o", color=col, capsize=5, lw=2.4, ms=7)
+    ax.text(coef + 1.96 * s + .012, i, f"±{1.96*s:.3f}", color=col, va="center", fontsize=9)
+ax.axvline(0, color=C.ink, ls=":", lw=1.2)
+ax.set_yticks(range(3)); ax.set_yticklabels(labels)
+ax.set_xlabel("coefficient on tertiary_share, with 95% interval")
+ax.set_ylim(-.6, 2.6); ax.grid(axis="y", alpha=0)
+plt.show()
+```
 
-with a small-sample correction $n/(n-p)$.
-
-## Cluster-robust
-
-If errors are correlated within groups $g$ — firms, regions, countries:
-
-$$\hat\Omega = \sum_g \hat\varepsilon_g \hat\varepsilon_g^\top$$
+```{python}
+print(f"  classical {cls:.4f}    HC1 {hcs:.4f}    cluster {clu:.4f}"
+      f"    →  cluster/classical = {clu/cls:.2f}x")
+```
 
 ::: {.warn}
-Requires **many** clusters. With fewer than roughly **40**, inference is unreliable — and a
-30-country panel sits below that line.
+The clustered interval is about **3× wider**. A $t$-statistic of 6 was really a $t$ of 2.
 :::
 
-## The practical rule
+## Now watch it disappear
 
-> **Cluster at the level at which treatment is assigned.**
+Add one country-level control — $\log$ GDP per capita:
 
-::: {.muted}
-Not at the level that gives the smallest standard error. State the level in your table note: two
-papers can both write "robust standard errors" and mean different things.
+```{python}
+fig, ax = plt.subplots(figsize=(6.8, 2.4))
+pairs = [("without GDP control", cls, clu, coef), ("with GDP control", cls2, clu2, coef2)]
+for i, (lab, sc, sk, cf) in enumerate(pairs):
+    ax.errorbar(cf, i + .13, xerr=1.96 * sc, fmt="o", color=C.muted, capsize=4, lw=2)
+    ax.errorbar(cf, i - .13, xerr=1.96 * sk, fmt="o", color=C.warn, capsize=4, lw=2)
+    ax.text(cf + 1.96 * max(sc, sk) + .015, i, f"ratio {sk/sc:.2f}x",
+            color=C.ink, va="center", fontsize=9.5, fontweight="600")
+ax.set_yticks([0, 1]); ax.set_yticklabels([p[0] for p in pairs])
+ax.set_title("grey = classical      red = clustered", fontsize=9)
+ax.set_xlabel("coefficient on tertiary_share")
+ax.set_ylim(-.7, 1.7); ax.grid(axis="y", alpha=0)
+plt.show()
+```
+
+## Why it disappeared
+
+$\log(\text{GDP per capita})$ varies at the **country-year** level, so including it **absorbs the
+common shock** that was making residuals correlate within a country.
+
+::: {.tight}
+- Clustering matters when a **shared, unmodelled** shock sits in the residual
+- Model that shock explicitly and the correction shrinks
+- Neither route is cheating — the same fact, handled in two places
 :::
 
-# 3.4 Omitted variable bias {background-color="#16181A" style="color:#F7F6F3"}
+::: {.warn}
+Do **not** conclude "clustering never matters, just add controls". A control that absorbs the shock
+may also absorb the variation you wanted to study.
+:::
+
+## Which one do you report?
+
+::: {.tight}
+- Cluster **at the level at which treatment varies** and shocks are shared — here, `geo`
+- Report the number of **clusters** alongside $n$: 3,150 rows, **30 countries**
+- Below roughly **40 clusters**, cluster-robust inference is itself unreliable
+:::
+
+::: {.warn}
+"Robust standard errors" in a table note, with no cluster level named, tells the reader nothing.
+:::
+
+# 6 · Omitted variable bias {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The formula
 
-True model $y = X_1\beta_1 + X_2\beta_2 + u$, but you estimate on $X_1$ alone. Let $\delta$ be the
-coefficient matrix from regressing $X_2$ on $X_1$. Then
+True model $y = X_1\beta_1 + X_2\beta_2 + u$, estimated on $X_1$ alone. With $\delta$ from
+regressing $X_2$ on $X_1$:
 
-$$\mathbb{E}[\hat\beta_1] = \beta_1 + \delta \beta_2$$
+$$\mathbb{E}[\hat\beta_1] = \beta_1 + \delta\beta_2$$
 
-## Sign the bias with two questions
+## Sign it with two questions
 
-::: {.tight}
-1. How does the omitted variable relate to **my regressor**? → $\delta$
-2. How does it relate to the **outcome**? → $\beta_2$
-:::
-
-**Same sign in both → upward bias.**
+```{python}
+fig, ax = plt.subplots(figsize=(6.6, 2.3))
+ax.axis("off")
+cells = [(r"$\delta>0,\ \beta_2>0$", "upward", C.warn),
+         (r"$\delta<0,\ \beta_2<0$", "upward", C.warn),
+         (r"$\delta>0,\ \beta_2<0$", "downward", C.good),
+         (r"$\delta<0,\ \beta_2>0$", "downward", C.good)]
+for i, (cond, direction, col) in enumerate(cells):
+    x  = .04 + (i % 2) * .50
+    yy = .66 - (i // 2) * .45
+    ax.text(x, yy, cond, fontsize=11.5, color=C.ink)
+    ax.annotate("", xy=(x + .29, yy + (.06 if direction == "upward" else -.06)),
+                xytext=(x + .23, yy), arrowprops=dict(arrowstyle="->", color=col, lw=2.6))
+    ax.text(x + .32, yy, direction, fontsize=10.5, color=col, fontweight="600")
+plt.show()
+```
 
 ::: {.check}
-Answer both in writing *before* you estimate. The single most useful discipline in applied work,
-and it is free.
+**Same sign in both → upward bias.** Answer both questions in writing *before* estimating. It costs
+nothing, and it is the most useful discipline in applied work.
 :::
 
-# 3.5 A Mincer coefficient {background-color="#16181A" style="color:#F7F6F3"}
+## Then test the prediction
 
-## What it identifies
+```{python}
+short = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share", data=df).fit()
+lng   = smf.ols("np.log(annual_earnings_eur) ~ tertiary_share + productivity_idx", data=df).fit()
+fig, ax = plt.subplots(figsize=(6.2, 2.1))
+ax.barh([1], [short.params["tertiary_share"]], color=C.warn, height=.45)
+ax.barh([0], [lng.params["tertiary_share"]], color=C.good, height=.45)
+ax.set_yticks([0, 1]); ax.set_yticklabels(["with productivity", "omitting productivity"])
+for yy, v in [(1, short.params["tertiary_share"]), (0, lng.params["tertiary_share"])]:
+    ax.text(v + .03, yy, f"{v:.3f}", va="center", fontsize=10.5, fontweight="600", color=C.ink)
+ax.set_xlabel("coefficient on tertiary_share"); ax.grid(axis="y", alpha=0)
+plt.show()
+```
 
-$$\log w_i = \alpha + \rho\, S_i + \gamma_1 X_i + \gamma_2 X_i^2 + \varepsilon_i$$
+::: {.check}
+Productive countries have higher earnings ($\beta_2>0$) **and** higher tertiary shares
+($\delta>0$), so the bias should be **upward** — the short coefficient should exceed the long one.
+It does.
+:::
 
-$\rho$ is often read as "the return to a year of schooling".
+# 7 · What it identifies {background-color="#16181A" style="color:#F7F6F3"}
 
-## Strictly
+## The Mincer example
 
-> The mean log-wage difference associated with an additional year of schooling **among people who
-> are otherwise identical on the included covariates**.
+$$\log w_i = \alpha + \rho S_i + \gamma_1 X_i + \gamma_2 X_i^2 + \varepsilon_i$$
+
+$\rho$ is often read as "the return to a year of schooling". Strictly, it is
+
+> the mean log-wage difference associated with an additional year of schooling **among people
+> otherwise identical on the included covariates.**
 
 ::: {.warn}
-Unobserved ability, selection into schooling and measurement error all break the causal reading.
-Session 10 gives tools that take this seriously.
+Unobserved ability, selection into schooling and measurement error each break the causal reading.
+Session 10 supplies tools that take this seriously.
 :::
 
 ::: {.check}
-Today the discipline is simply to **say precisely what you have estimated**.
+Today the discipline is simply to **say precisely what you have estimated.**
 :::
 
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
+# 8 · Key takeaways {background-color="#16181A" style="color:#F7F6F3"}
 
-## What you do
+## What to carry out of this session
 
 ::: {.tight}
-1. Fit the specification on the practice data; inspect residuals against fitted values
+1. $\hat\beta = \beta + (X^\top X)^{-1}X^\top\varepsilon$ — **everything follows from the second term**
+2. Unbiasedness is cheap; **precision is where the assumptions bite**
+3. The sandwich is always right; classical, HC1 and cluster are three guesses at $\Omega$
+4. **Cluster where treatment varies**, name the level, report the cluster count
+5. **Sign the omitted-variable bias before estimating**, then check
+6. A $p$-value answers "how surprising under the null" — not "how large", not "is the model right"
+:::
+
+## What loses marks reliably
+
+| | |
+|---|---|
+| Default standard errors on panel data | intervals far too narrow |
+| "Robust SEs" with no cluster level named | unreproducible |
+| Reading significance off $n=3{,}150$ | you have 30 independent units |
+| Controlling for everything | post-treatment bias; uninterpretable coefficients |
+| A $p$-value reported as an effect size | give the magnitude, in units |
+
+## In the practice session
+
+::: {.tight}
+1. Fit the specification; inspect residuals against fitted values
 2. Compute classical, HC1 and cluster-robust standard errors side by side
-3. Name a confounder, **sign its bias**, then test your prediction
-4. Report the coefficient with the cluster level named
-:::
-
-::: {.warn}
-Report $n$ **and** the number of clusters. Both are true; only one governs precision.
-:::
-
-## The two-minute report
-
-**One slide. Three sentences.**
-
-::: {.tight}
-1. **What I did** — the specification, and what you clustered on
-2. **The number** — with its interval
-3. **The catch** — the confounder you could not rule out, and its direction
+3. Name a confounder, **sign its bias**, then test the prediction
+4. Report the coefficient with the cluster level and the cluster count
 :::
 
 ::: {.check}
-Full brief: [`02-practice/README.md`](02-practice/README.md)
+Brief: [`02-practice/README.md`](02-practice/README.md) · derivations:
+[`01-lecture/README.md`](01-lecture/README.md) §3.1–3.5
 :::
