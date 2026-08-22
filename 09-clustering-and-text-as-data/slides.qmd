@@ -1,10 +1,14 @@
 ---
-title: "Unsupervised II: Clustering, Embeddings, Text as Data"
+title: "Clustering, Embeddings, and Text as Data"
 subtitle: "Session 09 · Lecture, first half"
 author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,253 +25,614 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings, re
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples, adjusted_rand_score
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.datasets import make_moons
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+core = pd.read_parquet("../data/spine/core.parquet").drop(columns=["flag"])
+ener = pd.read_parquet("../data/spine/angle_a_country.parquet").drop(columns=["flag"])
+cc = core.merge(ener, on=["geo", "time"]).dropna()
+PROF = cc.groupby("geo").mean(numeric_only=True).drop(columns=["time"])
+ZP = ((PROF - PROF.mean()) / PROF.std())
+
+docs = pd.read_parquet("../data/spine/angle_e_centralbank.parquet")
+docs["year"] = pd.to_datetime(docs["date"]).dt.year
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
 ### How do you measure something that only exists as words? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **9.1** | $k$-means |
-| **9.2** | Hierarchical clustering |
-| **9.3** | Choosing $k$ |
-| **9.4** | Representing text |
-| **9.5** | Validity — the part that is actually hard |
+| **1** | The warning that comes first |
+| **2** | k-means: the objective and the algorithm |
+| **3** | What the algorithm assumes |
+| **4** | Hierarchical clustering |
+| **5** | Choosing $k$ |
+| **6** | Representing text |
+| **7** | Validity — the part that is actually hard |
 
-::: {.muted}
-Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
+## Learning objectives
+
+::: {.tight}
+- State the k-means objective and prove that Lloyd's algorithm **converges** — and to what
+- Draw the Voronoi tessellation and say which cluster shapes it **cannot** find
+- Compute a silhouette by hand and read its sign
+- Build a TF-IDF matrix and say what word order costs you
+- Apply four validity criteria to a text-derived index, and **actually read the documents**
 :::
 
-# 9.1 $k$-means {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · Start with the warning {background-color="#16181A" style="color:#F7F6F3"}
+
+## Four clusters. What do they mean?
+
+```{python}
+rng = np.random.default_rng(9)
+noise = rng.uniform(0, 1, size=(220, 2))
+km4 = KMeans(n_clusters=4, n_init=20, random_state=0).fit(noise)
+
+fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.0))
+axes[0].scatter(noise[:, 0], noise[:, 1], s=15, color=CL.muted, alpha=.75, edgecolor="none")
+axes[0].set_title("220 points, drawn uniformly at random", fontsize=9.5)
+for k in range(4):
+    m = km4.labels_ == k
+    axes[1].scatter(noise[m, 0], noise[m, 1], s=15, color=CL.ramp[k], alpha=.85, edgecolor="none")
+    axes[1].scatter(*km4.cluster_centers_[k], s=110, marker="X", color=CL.ink, zorder=5)
+axes[1].set_title("the same points, k-means with k = 4", fontsize=9.5)
+for ax in axes:
+    ax.set_xticks([]); ax.set_yticks([]); ax.grid(visible=False)
+plt.show()
+```
+
+::: {.warn}
+There is **no structure in that data**. There cannot be — it is uniform noise. Every clustering
+algorithm returns clusters, including on noise.
+:::
+
+## So the burden of proof is yours
+
+::: {.step}
+A supervised model can be wrong in a way the test set exposes. An unsupervised model **cannot**.
+There is no held-out label to contradict you.
+:::
+
+::: {.tight}
+- The algorithm will always return an answer
+- The answer will always look convincing when plotted
+- Nothing in the output tells you whether the structure exists
+:::
+
+::: {.check}
+Everything in this session is therefore about **evidence**, not about algorithms. The algorithms are
+twenty lines each.
+:::
+
+# 2 · k-means {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The objective
 
-Partition observations into $k$ clusters minimising within-cluster sum of squares:
+$$\min_{C_1,\dots,C_k}\;\sum_{j=1}^{k}\sum_{i \in C_j}\|x_i - \mu_j\|^2,
+\qquad \mu_j = \frac{1}{|C_j|}\sum_{i \in C_j} x_i$$
 
-$$\min_{C_1,\dots,C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \|x_i - \mu_j\|^2, \qquad
-\mu_j = \frac{1}{|C_j|}\sum_{i\in C_j} x_i$$
-
-::: {.muted}
-The problem is **NP-hard**.
+::: {.warn}
+This problem is **NP-hard**. You are not going to solve it. You are going to find a local minimum
+and be honest about that.
 :::
 
 ## Lloyd's algorithm
 
-Two steps, each weakly decreasing the objective:
-
-::: {.tight}
-1. **Assign:** $c_i \leftarrow \arg\min_j \|x_i - \mu_j\|^2$
-2. **Update:** $\mu_j \leftarrow$ mean of points assigned to $j$
+::: {.step}
+**1 · Assign.** $c_i \leftarrow \arg\min_j \|x_i - \mu_j\|^2$ — each point to its nearest centroid.
 :::
 
-Step 2 is optimal given assignments (differentiate in $\mu_j$, set to zero); step 1 is optimal given
-centroids.
-
-## Why it terminates — and where
-
-The objective decreases monotonically and there are finitely many partitions, so the algorithm
-terminates — **at a local minimum**.
-
-::: {.warn}
-Run it many times from different starts (`n_init`), or use **k-means++**, which seeds centroids with
-probability proportional to squared distance from the nearest existing centroid and gives an
-$O(\log k)$-competitive guarantee in expectation.
+::: {.step}
+**2 · Update.** $\mu_j \leftarrow$ the mean of the points now assigned to $j$.
 :::
-
-## What the Euclidean objective assumes
-
-Because clusters are defined by nearest-centroid, the decision boundaries are the perpendicular
-bisectors between centroids — a **Voronoi tessellation**.
 
 ::: {.check}
-This *forces* convex, roughly spherical, similarly-sized clusters. Elongated or nested structures
-will be cut incorrectly **no matter how well you optimise.**
+Step 2 is **optimal given the assignments** (differentiate the objective in $\mu_j$, set to zero —
+the answer is the mean). Step 1 is **optimal given the centroids**. So the objective decreases
+monotonically, and there are finitely many partitions. Hence it terminates.
 :::
+
+## Watch it converge
+
+```{python}
+rng = np.random.default_rng(21)
+cent_true = np.array([[0, 0], [3.2, .4], [1.4, 3.0]])
+pts = np.vstack([c + rng.normal(0, .78, (70, 2)) for c in cent_true])
+
+mu = np.array([[-1.4, 2.6], [-1.0, -1.4], [-.6, .4]])   # a deliberately bad start
+snaps, obj = [], []
+for it in range(7):
+    dist = ((pts[:, None, :] - mu[None]) ** 2).sum(-1)
+    lab = dist.argmin(1)
+    obj.append(dist.min(1).sum())
+    snaps.append((mu.copy(), lab.copy()))
+    mu = np.array([pts[lab == j].mean(0) if (lab == j).any() else mu[j] for j in range(3)])
+
+fig, axes = plt.subplots(1, 4, figsize=(8.0, 2.35))
+for ax, it in zip(axes[:3], [0, 1, 6]):
+    m_, l_ = snaps[it]
+    for j in range(3):
+        ax.scatter(pts[l_ == j, 0], pts[l_ == j, 1], s=8, color=CL.ramp[j], alpha=.75,
+                   edgecolor="none")
+        ax.scatter(*m_[j], s=80, marker="X", color=CL.ink, zorder=5)
+    ax.set_title(f"iteration {it}", fontsize=9)
+    ax.set_xticks([]); ax.set_yticks([]); ax.grid(visible=False)
+axes[3].plot(range(len(obj)), obj, "o-", color=CL.accent, lw=2.2, ms=4)
+axes[3].set_title("objective", fontsize=9)
+axes[3].set_xlabel("iteration", fontsize=8)
+axes[3].tick_params(labelsize=7)
+plt.show()
+```
 
 ::: {.muted}
-If that assumption is wrong: a Gaussian mixture (covariance structure, soft assignments via EM), or
-DBSCAN / spectral clustering for non-convex shapes.
+Monotone decrease, then a flat line. The flat line is convergence; it is not optimality.
 :::
 
-# 9.2 Hierarchical clustering {background-color="#16181A" style="color:#F7F6F3"}
+## Local minima are the normal case
 
-## Linkage defines "closest"
+::: {.warn}
+Different starts give different answers. Not slightly different — **structurally** different, with
+different cluster counts in each group.
+:::
 
-Build a dendrogram bottom-up, merging the two closest clusters at each step.
+::: {.tight}
+- Run it many times from different starts: `n_init=20`, not the default
+- Or use **k-means++**, which seeds centroids with probability proportional to squared distance from
+  the nearest existing centroid
+- k-means++ is $O(\log k)$-competitive **in expectation** — a guarantee about the average, not about
+  your run
+:::
+
+::: {.check}
+Report the number of restarts. A clustering from one restart is not a result.
+:::
+
+# 3 · What the algorithm assumes {background-color="#16181A" style="color:#F7F6F3"}
+
+## Nearest-centroid means straight boundaries
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.0))
+
+ax = axes[0]
+kmv = KMeans(n_clusters=3, n_init=20, random_state=0).fit(pts)
+gx, gy = np.meshgrid(np.linspace(-2.6, 5.6, 320), np.linspace(-2.6, 5.4, 320))
+lab = kmv.predict(np.c_[gx.ravel(), gy.ravel()]).reshape(gx.shape)
+ax.contourf(gx, gy, lab, levels=[-.5, .5, 1.5, 2.5],
+            colors=[CL.ramp[0], CL.ramp[1], CL.ramp[2]], alpha=.16)
+ax.contour(gx, gy, lab, levels=[.5, 1.5], colors=CL.ink, linewidths=1.3)
+ax.scatter(pts[:, 0], pts[:, 1], s=8, color=CL.muted, alpha=.75, edgecolor="none")
+ax.scatter(kmv.cluster_centers_[:, 0], kmv.cluster_centers_[:, 1], s=90, marker="X",
+           color=CL.ink, zorder=5)
+ax.set_title("Voronoi: boundaries are perpendicular bisectors", fontsize=9)
+
+ax = axes[1]
+mo, _ = make_moons(n_samples=340, noise=.06, random_state=3)
+lm = KMeans(n_clusters=2, n_init=20, random_state=0).fit_predict(mo)
+for j in range(2):
+    ax.scatter(mo[lm == j, 0], mo[lm == j, 1], s=9, color=CL.ramp[j], alpha=.85,
+               edgecolor="none")
+ax.set_title("two obvious groups, cut the wrong way", fontsize=9)
+
+for ax in axes:
+    ax.set_xticks([]); ax.set_yticks([]); ax.grid(visible=False)
+plt.show()
+```
+
+::: {.warn}
+The right-hand panel is not a tuning failure. **No** value of `n_init` fixes it. The objective
+itself forbids the correct answer.
+:::
+
+## Say precisely what is assumed
+
+::: {.step}
+Because clusters are defined by nearest centroid, the boundaries are perpendicular bisectors — a
+**Voronoi tessellation**. That *forces* clusters that are convex, roughly spherical, and of similar
+size.
+:::
+
+::: {.tight}
+- Elongated or nested structures will be cut incorrectly no matter how well you optimise
+- **Gaussian mixture** (EM): allows covariance structure, gives *soft* assignments
+- **DBSCAN / spectral clustering**: for non-convex shapes
+:::
+
+::: {.check}
+Those shapes are **forced by the algorithm, not discovered in the data**. Say which you are doing.
+:::
+
+# 4 · Hierarchical clustering {background-color="#16181A" style="color:#F7F6F3"}
+
+## Merge upward instead of partitioning
+
+Start with every point its own cluster; repeatedly merge the two **closest**. The linkage function
+defines "closest":
 
 | Linkage | $d(A,B)$ | Behaviour |
 |---|---|---|
-| Single | $\min_{a,b}\|a-b\|$ | Chaining; elongated shapes; unstable |
-| Complete | $\max_{a,b}\|a-b\|$ | Compact, similar-diameter clusters |
-| Average | mean pairwise distance | Compromise; not invariant to monotone transforms |
-| **Ward** | increase in within-cluster SS | Same criterion as $k$-means; the default to try |
+| Single | $\min_{a,b}\|a-b\|$ | chaining; elongated shapes; unstable |
+| Complete | $\max_{a,b}\|a-b\|$ | compact, similar-diameter clusters |
+| Average | mean pairwise distance | compromise; not transform-invariant |
+| **Ward** | increase in within-cluster SS | **minimises the k-means criterion** — try this first |
 
-## The trade
+## Linkage is not a detail
 
-::: {.tight}
-- **Advantage:** you need not fix $k$ in advance — the dendrogram shows structure at every resolution
-- **Cost:** $O(n^2)$ memory
+```{python}
+sub = ZP.copy()
+fig, axes = plt.subplots(1, 2, figsize=(7.8, 3.0))
+for ax, meth in zip(axes, ["single", "ward"]):
+    Zl = linkage(sub.to_numpy(), method=meth)
+    dendrogram(Zl, ax=ax, labels=sub.index.to_list(), leaf_font_size=6,
+               color_threshold=Zl[-3, 2], above_threshold_color=CL.muted)
+    ax.set_title(f"{meth} linkage", fontsize=9.5)
+    ax.grid(visible=False); ax.tick_params(axis="x", labelrotation=90)
+    ax.set_ylabel("merge height", fontsize=8)
+plt.show()
+```
+
+::: {.muted}
+Thirty European countries, same 13 standardised indicators. Single linkage chains them into one
+long ladder; Ward produces balanced groups.
 :::
 
-# 9.3 Choosing $k$ {background-color="#16181A" style="color:#F7F6F3"}
+## What you gain and what it costs
 
-## Elbow
-
-Plot within-cluster SS against $k$. It **always** decreases, so look for a kink.
+::: {.step}
+**Gain:** you need not fix $k$ in advance. The dendrogram shows structure at *every* resolution, and
+you cut it where the merge heights jump.
+:::
 
 ::: {.warn}
-Often no kink exists. A single elbow plot is not evidence.
+**Cost:** $O(n^2)$ memory. Thirty countries is free; three hundred thousand documents is not.
 :::
 
-## Silhouette
+::: {.check}
+Ward minimises the same within-cluster sum of squares as k-means — so a Ward dendrogram cut at $k$
+and a k-means run with $k$ usually agree. When they do not, look at your data, not your code.
+:::
 
-For observation $i$:
+# 5 · Choosing $k$ {background-color="#16181A" style="color:#F7F6F3"}
 
-$$s_i = \frac{b_i - a_i}{\max(a_i,b_i)}$$
-
-with $a_i$ the mean distance to its own cluster and $b_i$ to the nearest other cluster.
+## Three criteria
 
 ::: {.tight}
-- near **1** — well clustered
-- near **0** — on a boundary
-- **negative** — probably misassigned
+- **Elbow** — plot within-cluster SS against $k$. It *always* decreases, so you are looking for a
+  kink. Often no kink exists
+- **Silhouette** — $s_i = \dfrac{b_i - a_i}{\max(a_i, b_i)}$, with $a_i$ the mean distance to its own
+  cluster and $b_i$ to the nearest other. Average over $i$, maximise over $k$
+- **Gap statistic** — compare $\log W_k$ to its expectation under a null. It can return
+  $\mathbf{k = 1}$, i.e. *no cluster structure* — which is why it is worth the extra effort
 :::
 
-Average over $i$, maximise over $k$.
+## Silhouette, by hand
 
-## Gap statistic
-
-Compare $\log W_k$ to its expectation under a null reference distribution — uniform over the data's
-bounding box, or a PCA-aligned box. Choose the smallest $k$ where the gap exceeds the next $k$'s gap
-minus one standard error.
+| | $a_i$ | $b_i$ | $s_i$ | reading |
+|---|---|---|---|---|
+| point A | $1.2$ | $2.0$ | $(2.0-1.2)/2.0 = \mathbf{+0.40}$ | comfortably in its cluster |
+| point B | $2.0$ | $1.2$ | $(1.2-2.0)/2.0 = \mathbf{-0.40}$ | **probably misassigned** |
 
 ::: {.check}
-This one **can return $k=1$** — "no cluster structure". Which is why it is worth the extra effort:
-it is the only one of the three that can tell you to stop.
+Near $1$: well clustered. Near $0$: on a boundary. **Negative: it belongs somewhere else.** A
+clustering with many negative silhouettes is a clustering you should not report.
 :::
 
-## Report at least two
+## Both criteria, on our 30 countries
+
+```{python}
+#| echo: true
+ks = range(2, 9)
+inertia, sils = [], []
+for k in ks:
+    km = KMeans(n_clusters=k, n_init=20, random_state=0).fit(ZP)
+    inertia.append(km.inertia_)
+    sils.append(silhouette_score(ZP, km.labels_))
+
+print(f"elbow: within-cluster SS falls smoothly {inertia[0]:.0f} -> {inertia[-1]:.0f}, no kink")
+print(f"silhouette is maximised at k = {list(ks)[int(np.argmax(sils))]}"
+      f"  (score {max(sils):.3f})")
+```
+
+::: {.muted}
+`n_init=20` because a single restart is not a result. Every number here is the best of 20 runs.
+:::
+
+## And they do not agree with the truth
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+axes[0].plot(list(ks), inertia, "o-", color=CL.accent, lw=2.3, ms=4.5)
+axes[0].set_xlabel("k"); axes[0].set_ylabel("within-cluster sum of squares")
+axes[0].set_title("elbow: no kink to find", fontsize=9.5)
+
+kb = list(ks)[int(np.argmax(sils))]
+axes[1].bar(list(ks), sils, color=[CL.warn if k == kb else CL.muted for k in ks], width=.6)
+axes[1].axvline(4, color=CL.good, ls="--", lw=1.6)
+axes[1].text(4.15, max(sils) * .55, "the spine documents\nFOUR country types",
+             color=CL.good, fontsize=8, fontweight="600")
+axes[1].set_xlabel("k"); axes[1].set_ylabel("mean silhouette")
+axes[1].set_title(f"silhouette: peaks at k = {kb}", fontsize=9.5)
+plt.show()
+```
 
 ::: {.warn}
-**And report disagreement.** On the course spine — built from **four** country types — the
-silhouette score on the country profiles peaks at **six**. The diagnostic is confidently wrong, on
-data where we happen to know the answer.
+The data-generating process has **four** country types. The elbow shows nothing and the silhouette
+prefers **two**. Neither criterion is an oracle.
 :::
 
-::: {.muted}
-You will not have that luxury with real data. Which is the point of noticing it here.
+## What to do about that
+
+::: {.step}
+Report **at least two** criteria, and report the disagreement. A single elbow plot is not evidence —
+it is a plot.
 :::
 
-# 9.4 Representing text {background-color="#16181A" style="color:#F7F6F3"}
-
-## Bag of words / TF-IDF
-
-$$\mathrm{tf\text{-}idf}(t,d) = \underbrace{f_{t,d}}_{\text{term frequency}} \times
-\underbrace{\log\frac{N}{1 + n_t}}_{\text{inverse document frequency}}$$
-
-The idf factor downweights ubiquitous terms.
+::: {.tight}
+- Say how many restarts you ran
+- Say which criteria you computed, including the ones that disagreed with your choice
+- If the gap statistic returns $k=1$, **say so** and stop
+:::
 
 ::: {.check}
-The result is a very sparse, very high-dimensional matrix — exactly the $p \gg n$ setting of
-Sessions 05 and 06, so **penalised regression is the natural supervised tool on top of it.**
+"We chose $k = 4$ because it was interpretable" is an acceptable sentence, *provided you write it*.
+What is not acceptable is presenting it as what the data said.
 :::
 
-## What bag-of-words throws away
+# 6 · Representing text {background-color="#16181A" style="color:#F7F6F3"}
 
-Word order, entirely.
+## Bag of words, and TF-IDF
 
-> *"Inflation is not a concern"* and *"a concern is not inflation"* are **identical vectors**.
+$$\mathrm{tf\text{-}idf}(t,d) = \underbrace{f_{t,d}}_{\text{how often } t \text{ is in } d}
+\times \underbrace{\log\frac{N}{1 + n_t}}_{\text{how rare } t \text{ is overall}}$$
+
+::: {.step}
+The idf factor downweights ubiquitous terms. A word appearing in every document carries no
+information about which document you are looking at.
+:::
+
+::: {.warn}
+And the cost: bag-of-words discards word order **entirely**. *"Inflation is not a concern"* and
+*"a concern is not inflation"* are the **same vector**.
+:::
+
+## Build one, on 1,980 central-bank documents
+
+```{python}
+#| echo: true
+vec = TfidfVectorizer(stop_words="english", min_df=5, max_df=0.9)
+Xt = vec.fit_transform(docs["text"])
+terms = np.array(vec.get_feature_names_out())
+
+print(f"{Xt.shape[0]} documents x {Xt.shape[1]} terms")
+print(f"density: {Xt.nnz / (Xt.shape[0] * Xt.shape[1]):.1%} of cells non-zero")
+```
+
+::: {.warn}
+**Read that vocabulary size.** Forty-five terms, and most cells filled. This corpus is synthetic.
+A real central-bank corpus has 10,000+ terms and is over 99% sparse — which is the $p \gg n$
+setting of Session 05, so penalised regression is the natural supervised tool on top of it.
+:::
+
+## What the idf weights are doing
+
+```{python}
+idf = pd.Series(vec.idf_, index=terms).sort_values()
+lo, hi = idf.head(7), idf.tail(7)
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 2.85), sharex=True)
+axes[0].barh(range(len(lo)), lo.to_numpy(), color=CL.muted, height=.62)
+axes[0].set_yticks(range(len(lo))); axes[0].set_yticklabels(lo.index, fontsize=8)
+axes[0].set_title("lowest idf — everywhere, so uninformative", fontsize=9)
+axes[1].barh(range(len(hi)), hi.to_numpy(), color=CL.accent, height=.62)
+axes[1].set_yticks(range(len(hi))); axes[1].set_yticklabels(hi.index, fontsize=8)
+axes[1].set_title("highest idf — rare, so discriminating", fontsize=9)
+for ax in axes:
+    ax.set_xlabel("idf weight"); ax.grid(axis="y", visible=False)
+plt.show()
+```
 
 ::: {.muted}
-Two-word n-grams recover a little of the negation. Not all of it.
+The rare words in this corpus are the anxious ones. That is a fact about the corpus, and it is about
+to become a finding.
 :::
 
-## Dense embeddings
+## Cluster the documents and read the result
 
-A model maps each document to $v_d \in \mathbb{R}^m$ (typically $m$ = 384 to 1024), trained so that
-semantically similar texts have similar vectors. Similarity by cosine:
+```{python}
+#| echo: true
+kmt = KMeans(n_clusters=3, n_init=20, random_state=0).fit(Xt)
+for c in range(3):
+    top = terms[np.argsort(kmt.cluster_centers_[c])[::-1][:7]]
+    print(f"cluster {c}  (n={(kmt.labels_ == c).sum():4d}):  {', '.join(top)}")
 
-$$\cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\|v_b\|} \in [-1,1]$$
+print(f"\nadjusted Rand vs document type : {adjusted_rand_score(docs.doc_type, kmt.labels_):+.3f}")
+print(f"adjusted Rand vs institution   : {adjusted_rand_score(docs.institution, kmt.labels_):+.3f}")
+```
+
+::: {.warn}
+The clusters recover **tone** — calm, anxious, and an AI-themed group. They recover the metadata
+**not at all**. The algorithm answered a question you did not ask.
+:::
+
+## Dense embeddings, and cosine
+
+A model maps each document to $v_d \in \mathbb{R}^m$ ($m$ typically 384–1024), trained so that
+semantically similar texts have similar vectors:
+
+$$\cos(v_a, v_b) = \frac{v_a^\top v_b}{\|v_a\|\,\|v_b\|} \in [-1, 1]$$
+
+::: {.step}
+Cosine ignores **magnitude**, which is what you want when documents differ in length. A 300-word
+speech and a 30-word release about the same thing should be close.
+:::
 
 ::: {.check}
-Cosine ignores magnitude — which is what you want when documents differ in length.
+In the practice you generate embeddings **locally**. The corpus never leaves your machine — a
+methodological point and a governance one.
 :::
 
-## Generated locally
+## Similarity is a matrix you can look at
 
-You will generate embeddings **on your own machine** in the practice session.
+```{python}
+samp = (docs.assign(tone_grp=kmt.labels_)
+            .groupby("tone_grp", group_keys=False)
+            .head(4).reset_index(drop=True))
+S = cosine_similarity(vec.transform(samp["text"]))
+fig, ax = plt.subplots(figsize=(5.4, 3.2))
+im = ax.imshow(S, cmap="RdBu_r", vmin=0, vmax=1)
+ax.set_xticks(range(len(samp))); ax.set_yticks(range(len(samp)))
+lab = [f"grp{g}·{i%4}" for i, g in enumerate(samp["tone_grp"])]
+ax.set_xticklabels(lab, fontsize=6.5, rotation=90); ax.set_yticklabels(lab, fontsize=6.5)
+for b in (3.5, 7.5):
+    ax.axhline(b, color=CL.ink, lw=1.4); ax.axvline(b, color=CL.ink, lw=1.4)
+fig.colorbar(im, ax=ax, shrink=.8, label="cosine similarity")
+ax.grid(visible=False)
+plt.show()
+```
 
 ::: {.muted}
-The corpus never leaves it. That is both a methodological and a governance point, and it is worth
-saying out loud in a paper.
+Blocks along the diagonal are documents from the same tone group. The block structure is the
+clustering, seen from the other side.
 :::
 
-## Do not assume sophistication is progress
+## Do not assume sophistication wins
 
-**Dictionary methods** — counting terms from a pre-specified list — remain widely used in economics
+::: {.step}
+**Dictionary methods** — count terms from a pre-specified list — remain widely used in economics
 precisely because they are **transparent and auditable**.
+:::
 
 ::: {.warn}
 An embedding-based index that nobody can interrogate may be *less* useful for policy than a word
-count anyone can check.
+count anyone can check. A central banker can argue with a word list. They cannot argue with a
+1,024-dimensional vector.
 :::
 
-# 9.5 Validity {background-color="#16181A" style="color:#F7F6F3"}
+# 7 · Validity {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Four questions about any text-derived measure
 
 ::: {.tight}
 1. **Face validity** — read a random sample of high- and low-scoring documents. Do they look like
-   what you claim to measure?
-2. **Convergent validity** — does the index correlate with independent measures of the same
-   construct?
+   what you claim? *Do this. Actually read them.*
+2. **Convergent validity** — does it correlate with independent measures of the same construct?
 3. **Predictive validity** — does it forecast something it should?
-4. **Robustness** — does it survive changes in preprocessing, vocabulary and model?
-:::
-
-## On the first one
-
-::: {.check}
-**Do this. Actually read them.** It takes twenty minutes and it has killed more bad indices than any
-statistic.
-:::
-
-## On the fourth
-
-> If your finding depends on a stemming choice, **you do not have a finding.**
-
-::: {.warn}
-Also check your index against document length. An index that correlates strongly with word count is
-a length detector with extra steps — and that is one line to test.
-:::
-
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
-
-## What you do
-
-::: {.tight}
-1. Cluster your project's units; report **two** criteria for $k$ and any disagreement
-2. Test stability under resampling — do units change cluster?
-3. Build one text measure, normalised per thousand words, not raw counts
-4. Run all four validity checks, including the length correlation
+4. **Robustness** — does it survive changes in preprocessing, vocabulary, and model?
 :::
 
 ::: {.warn}
-Corpus composition drives raw counts. If more documents are published, term frequency rises with no
-change in attention. **Normalise, and say how in the caption.**
+If your finding depends on a stemming choice, you do not have a finding.
 :::
 
-## The two-minute report
+## Build a dictionary index, then test it
 
-::: {.tight}
-1. **What I did** — the representation, the normalisation, the model and version
-2. **The number** — your index, and what it correlates with
-3. **The catch** — say "our index of X", never "X"
+```{python}
+#| echo: true
+POS = {"robust", "balanced", "anchored", "confidence", "orderly",
+       "sustained", "steady", "resilient", "stable"}
+NEG = {"volatile", "unpredictable", "tension", "unclear", "fragile", "risks",
+       "risk", "uncertain", "uncertainty", "downside", "concerns", "concern"}
+
+def tone(text):
+    """Net share of tone words, in percentage points of the document."""
+    w = re.findall(r"[a-z]+", text.lower())
+    return 100 * (sum(x in POS for x in w) - sum(x in NEG for x in w)) / max(len(w), 1)
+
+docs["tone"] = docs["text"].map(tone)
+by_year = docs.groupby("year")["tone"].mean()
+print(f"most positive year: {by_year.idxmax()}  ({by_year.max():+.2f})")
+print(f"most negative year: {by_year.idxmin()}  ({by_year.min():+.2f})")
+```
+
+::: {.muted}
+Twelve lines, no model, and every step is legible to someone who has never opened a Python file.
 :::
+
+## Does it behave?
+
+```{python}
+fig, ax = plt.subplots(figsize=(6.8, 2.9))
+ax.plot(by_year.index, by_year.to_numpy(), "o-", color=CL.accent, lw=2.4, ms=4.5)
+ax.axhline(0, color=CL.line, lw=1.1)
+ax.axvspan(2021, by_year.index.max(), color=CL.warn, alpha=.10)
+ax.text(2021.15, by_year.max() * .78, "documented regime\nshift after 2021",
+        color=CL.warn, fontsize=8.5, fontweight="600")
+ax.set_xlabel("year"); ax.set_ylabel("mean tone  (net % of tone words)")
+plt.show()
+```
 
 ::: {.check}
-Full brief: [`02-practice/README.md`](02-practice/README.md)
+The index turns negative exactly where the spine documents a structural break. That is **predictive
+validity** — one of four boxes, and the only one this slide ticks.
+:::
+
+## The three boxes still open
+
+::: {.tight}
+- **Face validity**: nobody has read a single document. Do that before the next slide is written
+- **Convergent validity**: only 15 country-years merge onto the macro panel. A correlation on
+  $n = 15$ is **not** evidence, and reporting it as such is worse than reporting nothing
+- **Robustness**: swap `stable` out of the positive list and rerun. If the story moves, the story
+  was the word list
+:::
+
+::: {.warn}
+The seductive part of text-as-data is that you always get a number. The number is the easy part.
+:::
+
+# Takeaways {background-color="#16181A" style="color:#F7F6F3"}
+
+## Key takeaways
+
+::: {.tight}
+1. Every clustering algorithm returns clusters, **including on noise**
+2. Lloyd's algorithm converges — to a **local** minimum. Report your restarts
+3. k-means forces convex, similar-sized clusters. That is an assumption, not a finding
+4. Ward linkage minimises the k-means criterion, without fixing $k$ in advance
+5. Report at least two criteria for $k$, and report the disagreement
+6. TF-IDF is the $p \gg n$ setting again. Word order is gone
+7. Validity is four questions, and the first one is **read the documents**
+:::
+
+## What loses marks
+
+::: {.tight}
+- One restart, one elbow plot, one $k$
+- Naming clusters ("this is the periphery") without showing what distinguishes them
+- Reporting a clustering without saying whether the shapes were plausible
+- A text index with no face-validity check
+- A correlation on 15 observations, offered as convergent validity
+:::
+
+## Now, the practice
+
+::: {.get}
+Ninety minutes, in your groups. You will cluster a corpus, defend your $k$ against at least two
+criteria, build a text-derived index — and then spend the last half hour trying to break it.
+:::
+
+::: {.muted}
+Notes: [`01-lecture/README.md`](01-lecture/README.md) · practice brief:
+[`02-practice/README.md`](02-practice/README.md)
 :::
