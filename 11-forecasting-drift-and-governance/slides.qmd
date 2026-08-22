@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,281 +25,497 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
+from sklearn.metrics import roc_auc_score
+
+core = pd.read_parquet("../data/spine/core.parquet").drop(columns=["flag"])
+ener = pd.read_parquet("../data/spine/angle_a_country.parquet").drop(columns=["flag"])
+m = (core.merge(ener, on=["geo", "time"])
+         .dropna().sort_values(["geo", "time"]).reset_index(drop=True))
+
+TGT = "elec_price_eur_kwh"
+FEAT = [c for c in m.select_dtypes("number").columns
+        if c not in ("time", "prod_growth", "falling_behind", "falling_behind_next")]
+
+m["y_next"] = m.groupby("geo")[TGT].shift(-1)
+d = m.dropna(subset=["y_next"]).reset_index(drop=True)
+YEARS = sorted(d["time"].unique())
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
 ### What are you responsible for when someone acts on your model? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **11.1** | Backtesting time-dependent models |
-| **11.2** | Comparing forecasts honestly |
-| **11.3** | Distribution shift |
-| **11.4** | Model governance |
-| **11.5** | The arc, in one table |
-| **11.6** | Returning to *Europe 2031* |
+| **1** | Backtesting when time matters |
+| **2** | Comparing forecasts honestly |
+| **3** | Distribution shift |
+| **4** | Goodhart's law, stated precisely |
+| **5** | Model governance |
+| **6** | The arc of the course |
+| **7** | Back to *Europe 2031* |
+
+## Learning objectives
+
+::: {.tight}
+- Choose among expanding, fixed-window and **purged blocked** designs, and say why
+- Compare against a benchmark with a **Diebold–Mariano** statistic, not an eyeball
+- Detect covariate shift with a classifier — and interpret the number against a **placebo**
+- Distinguish covariate shift, label shift, concept drift and **feedback**
+- Write a governance file a competent successor could act on
+:::
+
+# 1 · Backtesting {background-color="#16181A" style="color:#F7F6F3"}
+
+## Random K-fold is invalid here, and you know why
+
+::: {.step}
+Session 04 established it: when observations are ordered in time, a random fold puts the future in
+the training set. The error you measure is not the error you will get.
+:::
+
+Three valid designs, each answering a different question:
+
+::: {.tight}
+- **Expanding window** — train on $1..t$, predict $t+h$. Uses all history; training size grows, so
+  early and late errors are not comparable
+- **Fixed window** — train on $t-w..t$. Constant size; **adapts to structural change**; discards old
+  information
+- **Blocked, with purge and embargo** — leave a gap of at least $h$ between train and test
+:::
+
+## The three designs, drawn
+
+```{python}
+fig, axes = plt.subplots(3, 1, figsize=(7.4, 3.4), sharex=True)
+T = 16
+
+for ax, kind in zip(axes, ["expanding", "fixed window (w = 6)", "blocked + purge/embargo"]):
+    for r, t in enumerate([9, 11, 13]):
+        y = 2 - r
+        if kind.startswith("expanding"):
+            ax.barh(y, t, left=0, height=.6, color=CL.accent, alpha=.8)
+        elif kind.startswith("fixed"):
+            ax.barh(y, 6, left=t - 6, height=.6, color=CL.accent, alpha=.8)
+        else:
+            ax.barh(y, t - 2, left=0, height=.6, color=CL.accent, alpha=.8)
+            ax.barh(y, 2, left=t - 2, height=.6, color=CL.line)
+        ax.barh(y, 1, left=t, height=.6, color=CL.warn)
+    ax.set_ylabel(kind, fontsize=7.5, rotation=0, ha="right", va="center")
+    ax.set_yticks([]); ax.set_ylim(-.6, 2.6)
+    ax.set_xlim(0, T); ax.grid(visible=False)
+    for s in ("left", "bottom"):
+        ax.spines[s].set_visible(False)
+axes[2].set_xlabel("time")
+axes[0].text(14.2, 2, "train", color=CL.accent, fontsize=8, fontweight="600", va="center")
+axes[2].text(14.2, 2, "grey = purge gap", color=CL.muted, fontsize=7.5, va="center")
+plt.show()
+```
 
 ::: {.muted}
-Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
+Blue: training. Red: the origin being predicted. Grey: the purge gap — essential whenever features
+are built from rolling windows, because those windows straddle the boundary.
 :::
 
-# 11.1 Backtesting {background-color="#16181A" style="color:#F7F6F3"}
+## Two rules that are violated constantly
 
-## Three valid designs
-
-Random K-fold CV is invalid whenever observations are ordered in time.
-
-::: {.tight}
-- **Rolling origin, expanding window** — train on $1..t$, predict $t+h$, increment $t$. Uses all
-  history; training size grows, so early and late errors are not comparable.
-- **Rolling origin, fixed window** — train on $t-w..t$. Constant training size; adapts to structural
-  change; discards old information.
-- **Blocked CV with a purge and an embargo** — leave a gap of at least $h$ observations between train
-  and test.
+::: {.warn}
+**1 · Point-in-time data.** Macroeconomic series are **revised**. A backtest using today's vintage
+of GDP gives your model information no forecaster had at the time.
 :::
 
-## Why the purge matters
-
-A gap prevents leakage through **overlapping horizons** or through **serially correlated features**.
-
-::: {.check}
-Essential whenever features are constructed from rolling windows — which, in macro work, is almost
-always.
-:::
-
-## Two rules violated constantly
-
-**1. Point-in-time data.** Macroeconomic series are **revised**. A backtest using today's vintage of
-GDP gives your model information no forecaster had at the time.
-
-::: {.check}
-Use real-time vintages — ALFRED, or the Philadelphia Fed's real-time dataset — or **state clearly
-that you have not**.
-:::
-
-## The second rule
-
-**2. Every preprocessing step must be inside the loop.**
-
-::: {.tight}
-- standardisation
-- **factor extraction** — Session 08
-- feature selection
-- hyperparameter choice
+::: {.step}
+Use real-time vintages — ALFRED, the Philadelphia Fed real-time dataset — or state clearly that you
+have not.
 :::
 
 ::: {.warn}
-Extracting factors from the full sample and then backtesting is look-ahead bias. It is the single
-most common flaw in student factor-model projects.
+**2 · Everything inside the loop.** Standardisation, factor extraction (**Session 08**), feature
+selection, hyperparameter choice. Every one of them. Every origin.
 :::
 
-# 11.2 Comparing honestly {background-color="#16181A" style="color:#F7F6F3"}
+## Run it, three ways
 
-## Against a benchmark that is hard to beat
+```{python}
+#| echo: true
+def backtest(window=None, first=6):
+    """One row per predicted country-year, with the model's error and the benchmark's."""
+    out = []
+    for t in YEARS[first:]:
+        tr = (d.time < t) if window is None else ((d.time < t) & (d.time >= t - window))
+        te = (d.time == t)
+        if tr.sum() < 30 or te.sum() == 0:
+            continue
+        f = (RandomForestRegressor(200, min_samples_leaf=3, random_state=0, n_jobs=-1)
+             .fit(d.loc[tr, FEAT], d.loc[tr, "y_next"]).predict(d.loc[te, FEAT]))
+        truth = d.loc[te, "y_next"].to_numpy()
+        out.append(pd.DataFrame({"time": t,
+                                 "e_model": truth - f,
+                                 "e_rw": truth - d.loc[te, TGT].to_numpy()}))  # random walk
+    return pd.concat(out, ignore_index=True)
 
-A random walk, an AR($p$), or the consensus forecast.
+rmse = lambda e: np.sqrt((e ** 2).mean())
+for name, w in [("expanding", None), ("fixed 5y", 5), ("fixed 8y", 8)]:
+    r = backtest(w)
+    print(f"{name:10s}  model RMSE {rmse(r.e_model):.4f}   random walk {rmse(r.e_rw):.4f}")
+```
 
 ::: {.warn}
-**A lower RMSE without a significance statement is an anecdote.**
+Read the second column. **The random walk wins.** Thirteen features, two hundred trees, and a rule
+that says "next year looks like this year" is better.
+:::
+
+# 2 · Comparing honestly {background-color="#16181A" style="color:#F7F6F3"}
+
+## Pick a benchmark that is hard to beat
+
+::: {.tight}
+- A **random walk** — for anything close to a unit root, this is brutal
+- An **AR($p$)** — cheap, and it uses the persistence you were going to claim credit for
+- The **consensus forecast** — if you cannot beat the professionals, say so
+:::
+
+::: {.warn}
+A lower RMSE **without a significance statement** is an anecdote. The difference between 0.0287 and
+0.0283 is not a finding until you have tested it.
 :::
 
 ## Diebold–Mariano
 
-Let $e_{1t}, e_{2t}$ be the forecast errors of two models and
-$d_t = L(e_{1t}) - L(e_{2t})$ the loss differential. Under the null of equal predictive accuracy,
-$\mathbb{E}[d_t] = 0$, and
+With $e_{1t}, e_{2t}$ the two models' errors and $d_t = L(e_{1t}) - L(e_{2t})$:
 
 $$\mathrm{DM} = \frac{\bar d}{\sqrt{\widehat{\mathrm{Var}}(\bar d)}} \;\xrightarrow{d}\; N(0,1)$$
 
-## The variance must be HAC
+::: {.step}
+The variance must use a **HAC (Newey–West)** estimator, because $d_t$ is serially correlated at
+multi-step horizons. Lag truncation of at least $h - 1$.
+:::
 
-Estimate $\widehat{\mathrm{Var}}(\bar d)$ with a **Newey–West** estimator, because $d_t$ is
-serially correlated at multi-step horizons.
+::: {.warn}
+Two cautions: not valid for **nested** models on the same sample (use Clark–West), and with small
+samples apply the **Harvey–Leybourne–Newbold** correction.
+:::
+
+## Compute it
+
+```{python}
+#| echo: true
+r = backtest(None)
+
+def dm_stat(dt, lag=1):
+    """Diebold-Mariano with a Newey-West variance."""
+    n = len(dt); dbar = dt.mean()
+    v = ((dt - dbar) ** 2).mean()
+    for l in range(1, lag + 1):
+        gl = ((dt[l:] - dbar) * (dt[:-l] - dbar)).mean()
+        v += 2 * (1 - l / (lag + 1)) * gl
+    return dbar / np.sqrt(v / n)
+
+diff = (r.e_model ** 2 - r.e_rw ** 2).to_numpy()
+print(f"mean loss differential : {diff.mean():+.6f}   (positive = model is worse)")
+print(f"DM statistic           : {dm_stat(diff):+.3f}   |DM| < 1.96, so no detectable difference")
+```
 
 ::: {.check}
-Use a lag truncation of at least $h-1$.
+The honest sentence is: *"the forest neither beats nor is beaten by a random walk on this panel."*
+That is a result. It is publishable. It is what most forecasting comparisons actually find.
 :::
 
-## Two cautions
+## Where the errors actually are
 
-::: {.tight}
-- The test is **not valid for nested models** estimated on the same sample — use **Clark–West**.
-- With small samples, the **Harvey–Leybourne–Newbold** correction is advisable.
+```{python}
+by_year = r.groupby("time").apply(
+    lambda g: pd.Series({"model": rmse(g.e_model), "rw": rmse(g.e_rw)}),
+    include_groups=False)
+
+fig, ax = plt.subplots(figsize=(6.8, 2.9))
+ax.plot(by_year.index, by_year["model"], "o-", color=CL.accent, lw=2.3, ms=4.5, label="random forest")
+ax.plot(by_year.index, by_year["rw"], "s--", color=CL.muted, lw=2.0, ms=4, label="random walk")
+ax.axvspan(2021, by_year.index.max(), color=CL.warn, alpha=.10)
+ax.text(2021.1, by_year.values.max() * .92, "documented\nregime shift", color=CL.warn,
+        fontsize=8.5, fontweight="600")
+ax.set_xlabel("forecast origin"); ax.set_ylabel("RMSE at that origin")
+ax.legend(fontsize=8)
+plt.show()
+```
+
+::: {.check}
+An average hides this. Both models get **worse** at the same moment — which is the signature of
+something changing in the world, not in the model.
 :::
 
-# 11.3 Distribution shift {background-color="#16181A" style="color:#F7F6F3"}
+# 3 · Distribution shift {background-color="#16181A" style="color:#F7F6F3"}
 
-## Four kinds
+## Four kinds, and they need different answers
 
-| Type | What changes | Fix |
-|---|---|---|
-| **Covariate shift** | $P(X)$; $P(Y\mid X)$ stable | Importance weighting, or just retrain |
-| **Label shift** | $P(Y)$; $P(X\mid Y)$ stable | Reweight, or correct the intercept (Session 06) |
-| **Concept drift** | $P(Y\mid X)$ | Retraining necessary but not sufficient — the form may be wrong |
-| **Feedback** | your model changes the world it predicts | Redesign |
+| Type | What changes | Detection | Fix |
+|---|---|---|---|
+| **Covariate shift** | $P(X)$; $P(Y\mid X)$ stable | classifier: train vs deploy | reweight, or retrain |
+| **Label shift** | $P(Y)$; $P(X\mid Y)$ stable | predicted vs observed marginal | reweight; correct the intercept (S06) |
+| **Concept drift** | $P(Y\mid X)$ | only once outcomes arrive | retrain — necessary, not sufficient |
+| **Feedback** | your model changes the world | causal reasoning, not monitoring | redesign |
 
-## How to detect them
-
-| Type | Detection |
-|---|---|
-| Covariate shift | Train a classifier to distinguish train from deploy |
-| Label shift | Compare predicted marginal to observed |
-| Concept drift | **Only** detectable once outcomes arrive |
-| Feedback | Requires causal reasoning, not monitoring |
+::: {.warn}
+Only the first is detectable **before** the damage. The last is not a monitoring problem at all.
+:::
 
 ## The classifier diagnostic
 
-Pool training and deployment features, label them by period, and try to predict the label.
-
-> **If a classifier can tell your two periods apart, so can your model's errors.**
+::: {.step}
+Pool the training and deployment features, label each row by period, and try to **predict the
+label**.
+:::
 
 ::: {.check}
-AUC near 0.5 is reassuring. Near 1.0 is an alarm.
+**If a classifier can tell your two periods apart, so can your model's errors.** AUC near 0.5 is
+reassuring. Near 1.0 is an alarm.
 :::
-
-## Goodhart's law, stated precisely
-
-> When a measure becomes a target, the relationship the model learned between measure and outcome is
-> exactly the relationship agents have an incentive to break.
 
 ::: {.muted}
-A credit-scoring feature that predicts default only until applicants learn it is used is not a
-stable feature.
+It costs four lines and it is the single highest-value monitoring check you can run.
 :::
+
+## Run it — and run a placebo
+
+```{python}
+#| echo: true
+X_lev = m[FEAT].to_numpy(float)
+chg = m.groupby("geo")[FEAT].pct_change().replace([np.inf, -np.inf], np.nan)
+ok = chg.notna().all(axis=1)
+X_chg, t_chg = chg[ok].to_numpy(float), m.loc[ok, "time"].to_numpy()
+
+def drift_auc(X, times, cut):
+    lab = (times >= cut).astype(int)
+    p = cross_val_predict(
+        RandomForestClassifier(400, min_samples_leaf=3, random_state=0, n_jobs=-1),
+        X, lab, cv=StratifiedKFold(5, shuffle=True, random_state=0),
+        method="predict_proba")[:, 1]
+    return roc_auc_score(lab, p)
+
+CUTS = [2015, 2017, 2019, 2021]
+lev = [drift_auc(X_lev, m["time"].to_numpy(), c) for c in CUTS]
+chgs = [drift_auc(X_chg, t_chg, c) for c in CUTS]
+print("cut year :", "  ".join(f"{c}" for c in CUTS))
+print("levels   :", "  ".join(f"{v:.2f}" for v in lev))
+print("changes  :", "  ".join(f"{v:.2f}" for v in chgs))
+```
+
+## Read that carefully
+
+```{python}
+fig, ax = plt.subplots(figsize=(6.6, 2.9))
+w = .36; pos = np.arange(len(CUTS))
+ax.bar(pos - w/2, lev, w, color=CL.warn, label="features in levels")
+ax.bar(pos + w/2, chgs, w, color=CL.good, label="features in year-on-year changes")
+ax.axhline(.5, color=CL.ink, ls="--", lw=1.4)
+ax.text(len(CUTS) - .55, .52, "no detectable shift", color=CL.ink, fontsize=8)
+ax.set_xticks(pos); ax.set_xticklabels([f"split at {c}" for c in CUTS], fontsize=8)
+ax.set_ylabel("classifier AUC"); ax.set_ylim(0, 1.05)
+ax.legend(fontsize=7.5, loc="lower right"); ax.grid(axis="x", visible=False)
+plt.show()
+```
 
 ::: {.warn}
-This is a **causal** problem (Session 10), not a monitoring problem. **No amount of retraining
-solves it.**
+In levels, the classifier separates **every** split at AUC 0.82–0.87 — including years with no
+documented break. It is detecting the **trend**, not the regime change.
 :::
 
-# 11.4 Model governance {background-color="#16181A" style="color:#F7F6F3"}
+## The lesson about diagnostics
 
-## Seven headings
-
-A deployable model is accompanied by a document a competent successor could act on.
+::: {.step}
+A drift AUC of 0.87 means nothing on its own. It means something compared with the AUC at a date
+where you believe nothing happened.
+:::
 
 ::: {.tight}
-1. **Intended use** — and out-of-scope uses
-2. **Data lineage** — sources, vintages, dates, licences, quality issues, checksums
-3. **Preprocessing** — every transformation, in order, with the code
-4. **Validation** — design, why the CV scheme matches deployment, metrics, benchmark, subgroups
-5. **Limitations** — where it performs worst, who is under-represented, what is load-bearing
-6. **Monitoring plan** — what is tracked, how often, what threshold triggers review
-7. **Ownership** — who is accountable, and the **retirement criterion**
+- Always run **placebo cuts**
+- Detrend or difference before asking about a regime change
+- Report the whole profile, not the one number that supported your story
 :::
-
-## Not bureaucracy
 
 ::: {.check}
-Sections **5** and **6** are where the intellectual content of the whole course finally has to be
-written down for someone else.
+This is the same discipline as Session 03's diagnostics and Session 09's second criterion for $k$.
+By now it should feel like a habit.
 :::
 
-::: {.muted}
-Template: [`02-practice/governance-file-template.md`](02-practice/governance-file-template.md)
-:::
+# 4 · Goodhart {background-color="#16181A" style="color:#F7F6F3"}
 
-## Write a specific retirement trigger
+## Stated precisely for this course
+
+> When a measure becomes a target, the relationship the model learned between measure and outcome is
+> **exactly the relationship agents have an incentive to break**.
+
+::: {.step}
+A credit-scoring feature that predicts default only until applicants learn it is used is not a
+stable feature. It was never a feature of the world; it was a feature of the world *before your
+model existed in it*.
+:::
 
 ::: {.warn}
-A model with no stated retirement condition is never retired. It is used until something goes
-visibly wrong — and by then it has been wrong for a while.
+This is a **causal** problem (Session 10), not a monitoring problem. No amount of retraining solves
+it, because every retrain teaches the agents faster.
 :::
 
-> *"Retrain when the era-classifier AUC against the training period exceeds 0.75, or when rolling
-> 2-year RMSE exceeds 1.4× the backtest median. Retire if retraining does not restore it."*
+# 5 · Governance {background-color="#16181A" style="color:#F7F6F3"}
+
+## What a deployable model comes with
+
+::: {.tight}
+1. **Intended use, and out-of-scope uses** — what decision, and what it must *not* be used for
+2. **Data lineage** — sources, vintages, collection dates, licences, quality issues, checksums
+3. **Preprocessing** — every transformation, in order, with the code
+4. **Validation** — the design, *why it matches deployment*, metrics, benchmark, subgroup performance
+5. **Limitations** — where it performs worst, who is under-represented, what is load-bearing
+6. **Monitoring plan** — which quantities, at what frequency, and what triggers review
+7. **Ownership** — who is accountable, and the retirement criterion
+:::
+
+## This is not bureaucracy
+
+::: {.step}
+Sections **5** and **6** are where the intellectual content of this entire course finally has to be
+written down for somebody else.
+:::
+
+::: {.tight}
+- Section 5 is Sessions 03, 06 and 10: what is load-bearing, and where does it fail
+- Section 6 is Sessions 04, 08 and 11: what would tell you it has stopped working
+:::
 
 ::: {.check}
-Specific enough that someone who has never met you can execute it.
+If you cannot fill in sections 5 and 6, you do not understand your own model well enough to deploy
+it. Template: `02-practice/governance-file-template.md`.
 :::
 
-# 11.5 The arc {background-color="#16181A" style="color:#F7F6F3"}
+## A monitoring plan is a threshold, not a hope
 
-## The dial, and the self-deception it prevents
-
-| Session | The dial | The self-deception |
-|---|---|---|
-| 2–3 | Which variables enter, how errors are modelled | "My standard errors are correct because the software printed them" |
-| 4 | Model complexity, via CV | "It fits the data well" |
-| 5–6 | $\lambda$ and $\alpha$ | "The model identified the true drivers" |
-| 6 | The decision threshold | "It is 97% accurate" |
-
-## Continued
-
-| Session | The dial | The self-deception |
-|---|---|---|
-| 7 | Depth, learning rate, $m$ | "The important feature is the cause" |
-| 8 | The number of factors | "I extracted factors, then backtested" |
-| 9 | $k$, and the representation of text | "The algorithm found clusters, so clusters exist" |
-| **10** | **Nothing — identification is not a dial** | "A better predictor is a better policy guide" |
-| 11 | The monitoring threshold | "It worked last year" |
-
-## The exception that defines the course
-
-> **No tuning parameter buys you identification.**
+```{python}
+fig, ax = plt.subplots(figsize=(6.8, 2.9))
+base = by_year["model"].iloc[:4].mean()
+ax.plot(by_year.index, by_year["model"], "o-", color=CL.accent, lw=2.3, ms=4.5)
+ax.axhline(base, color=CL.good, lw=1.6)
+ax.text(by_year.index[0], base * 1.03, "baseline RMSE at deployment", color=CL.good, fontsize=8)
+ax.axhline(base * 1.5, color=CL.warn, ls="--", lw=1.8)
+ax.text(by_year.index[0], base * 1.53, "review trigger: +50%", color=CL.warn, fontsize=8,
+        fontweight="600")
+over = by_year[by_year["model"] > base * 1.5]
+ax.scatter(over.index, over["model"], s=90, facecolor="none", edgecolor=CL.warn, lw=2, zorder=6)
+ax.set_xlabel("forecast origin"); ax.set_ylabel("RMSE")
+plt.show()
+```
 
 ::: {.check}
-Session 10 is the one week with nothing to tune. That is not an omission — it is the point.
+Write the threshold **before** deployment, while you still have no stake in the answer. A threshold
+chosen after the model degrades is not a threshold; it is a negotiation.
 :::
 
-# 11.6 Returning to *Europe 2031* {background-color="#16181A" style="color:#F7F6F3"}
+# 6 · The arc {background-color="#16181A" style="color:#F7F6F3"}
 
-## Sharper questions than in week one
+## Every session, one dial and one self-deception
 
-The scenario's numbers were introduced in Session 01 as **parameters of a narrative**. You can now
-interrogate them.
+| Session | The dial | The self-deception it prevents |
+|---|---|---|
+| **02–03** | which variables enter, how errors are modelled | "my standard errors are right because the software printed them" |
+| **04** | complexity, via CV | "it fits the data well" |
+| **05** | $\lambda$ and $\alpha$ | "the model identified the true drivers" |
+| **06** | the decision threshold | "it is 97% accurate" |
+| **07** | depth, learning rate, $m$ | "the important feature is the cause" |
+
+## …continued
+
+| Session | The dial | The self-deception it prevents |
+|---|---|---|
+| **08** | the number of factors | "I extracted factors, then backtested" |
+| **09** | $k$, and the text representation | "the algorithm found clusters, so clusters exist" |
+| **10** | **nothing** — identification is not a dial | "a better predictor is a better policy guide" |
+| **11** | the monitoring threshold | "it worked last year" |
+
+::: {.warn}
+Session 10 is the exception that defines the course: **no tuning parameter buys you
+identification.**
+:::
+
+# 7 · Back to *Europe 2031* {background-color="#16181A" style="color:#F7F6F3"}
+
+## The same numbers, sharper questions
+
+In Session 01 the scenario's figures — a US:EU compute ratio near 12.2 in 2031, a buildout ratio
+near 15.7 — were **parameters of a narrative**. Now ask:
 
 ::: {.tight}
 - What would a **factor model** (S08) say about how many independent dimensions "technological
-  capacity" actually has? Is compute one factor, or a proxy for several?
-- Is the labour-displacement mechanism a **prediction** or a **causal** claim (S10)? Which would you
-  need to justify the narrative's policy responses?
+  capacity" has? Is compute one factor, or a proxy for several?
+- Is the labour-displacement mechanism a **prediction** or a **causal claim** (S10)? Which one does
+  the policy menu require?
+- The policy menu implies decisions under **cost asymmetry**. What are $c_{FP}$ and $c_{FN}$, and
+  where does that put $\tau^\star$ (S06)?
 :::
 
-## And two more
-
-::: {.tight}
-- Its policy menu implies **decisions under cost asymmetry**. What are $c_{FP}$ and $c_{FN}$ for
-  acting on a false signal of European decline versus missing a true one (S06)?
-- Its indicators would be **monitored over years**. Which are vulnerable to **Goodhart**, and which
-  to **concept drift** (S11)?
+::: {.muted}
+[europe2031.ai](https://europe2031.ai)
 :::
 
-## Why a stress test
+## What has changed since Session 01
 
-> The purpose of a stress test is not to be right. It is to make you specify **what you would need
-> to know.**
-
-::: {.check}
-That is also the purpose of a model — and it is what you will be examined on next week.
-:::
-
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
-
-## What you do
-
-::: {.tight}
-1. Backtest **your project's** model with a rolling origin, at the deployment horizon
-2. Plot error by period and find the break
-3. Run the era classifier; report the AUC and read it
-4. Complete the governance file, including a **numeric** retirement trigger
-:::
-
-::: {.warn}
-Every preprocessing step inside the loop — including factor extraction.
-:::
-
-## The two-minute report
-
-::: {.tight}
-1. **What I did** — the backtest design, the window, the horizon
-2. **The number** — error against a hard benchmark, with a DM statement
-3. **The catch** — what would make you retire this model
+::: {.step}
+Nothing about the scenario. Everything about what you are able to ask of it.
 :::
 
 ::: {.check}
-Session 12 is your defence. The governance file is what you will be asked about.
+That is the deliverable of this course: not a list of methods, but the reflex of asking *what would
+have to be true* — and knowing which of Sessions 02 to 11 answers it.
+:::
+
+# Takeaways {background-color="#16181A" style="color:#F7F6F3"}
+
+## Key takeaways
+
+::: {.tight}
+1. Match the backtest design to the deployment: expanding, fixed, or blocked with a purge
+2. Everything inside the loop. Including the unsupervised steps
+3. Benchmark against something hard, and test the difference with **Diebold–Mariano**
+4. Four kinds of shift, four different responses. Only one is detectable in advance
+5. A drift diagnostic needs a **placebo** to be interpretable
+6. Goodhart is causal, not statistical. Retraining makes it worse
+7. If you cannot write the limitations and the monitoring plan, do not deploy
+:::
+
+## What loses marks
+
+::: {.tight}
+- Random K-fold on time-ordered data — after eleven weeks, there is no excuse
+- Standardising or extracting factors outside the backtest loop
+- "Our model beats the benchmark" with no DM statistic
+- A drift AUC with no placebo cut
+- A governance file whose limitations section says "none identified"
+:::
+
+## Now, the practice
+
+::: {.get}
+Ninety minutes, in your groups. You will backtest one forecast properly, test it against a hard
+benchmark, run a drift diagnostic with a placebo — and write the governance file. The governance
+file is the deliverable.
+:::
+
+::: {.muted}
+Notes: [`01-lecture/README.md`](01-lecture/README.md) · practice brief:
+[`02-practice/README.md`](02-practice/README.md)
 :::
