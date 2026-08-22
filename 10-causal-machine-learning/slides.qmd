@@ -5,6 +5,10 @@ author: "Thierry Warin"
 institute: "HEC Montréal"
 date: last-modified
 date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
 format:
   revealjs:
     theme: [default, ../slides/warin.scss]
@@ -21,53 +25,150 @@ format:
     reference-doc: ../slides/reference.pptx
 ---
 
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.model_selection import KFold, cross_val_predict
+
+core = pd.read_parquet("../data/spine/core.parquet").drop(columns=["flag"])
+c5 = pd.read_parquet("../data/spine/angle_c_country.parquet").drop(columns=["flag"])
+
+OUT, TRT = "digital_intensity", "has_ai_strategy"
+CTRL = ["gdp_pc_eur", "population", "employment_ths", "productivity_idx",
+        "gfcf_meur", "cloud_use", "ict_specialists", "time"]
+
+d = (core.merge(c5, on=["geo", "time"])
+         .dropna(subset=[OUT, TRT] + CTRL).reset_index(drop=True))
+Xr = d[CTRL].to_numpy(float)
+Dr = d[TRT].to_numpy(float)
+Yr = d[OUT].to_numpy(float)
+NAIVE = Yr[Dr == 1].mean() - Yr[Dr == 0].mean()
+```
+
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
-### You have a superb predictive model. Why can't you choose a policy with it? {style="color:#F7F6F3"}
+### You have a superb predictive model. Why can you still not use it to choose a policy? {style="color:#F7F6F3"}
 :::
 
-## These slides follow the notes
+## Outline
 
 | | |
 |---|---|
-| **10.1** | The setup |
-| **10.2** | Why the naive plug-in fails |
-| **10.3** | Fix 1 — Neyman orthogonality |
-| **10.4** | Fix 2 — cross-fitting |
-| **10.5** | Heterogeneous treatment effects |
-| **10.6** | What this does not fix |
+| **1** | Where we are, and what this adds |
+| **2** | The setup, and what identification requires |
+| **3** | Why the naive plug-in fails |
+| **4** | Fix 1 — Neyman orthogonality |
+| **5** | Fix 2 — cross-fitting |
+| **6** | Heterogeneous effects |
+| **7** | What this does *not* fix |
 
-::: {.muted}
-Same numbering as [`01-lecture/README.md`](01-lecture/README.md).
+## Learning objectives
+
+::: {.tight}
+- State the partially linear model and name the **nuisance functions**
+- Decompose the naive estimator's error into **regularisation** and **overfitting** bias
+- Explain why an orthogonal score turns two slow rates into one fast enough one
+- Implement cross-fitting, and say precisely which bias it removes
+- Report a heterogeneous effect **without** doing undisclosed multiple testing
 :::
 
-# 10.1 The setup {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+
+## Sessions 05–09 gave you prediction
+
+| Session | What you can now do |
+|---|---|
+| **05** | fit well with more predictors than rows |
+| **06–07** | classify, and fit arbitrary non-linear surfaces |
+| **08–09** | compress and cluster without an outcome at all |
+
+::: {.warn}
+And none of it answers the only question a minister ever asks: **if we do this, what happens?**
+:::
+
+## The gap, made concrete
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+lab = ["no AI strategy", "has AI strategy"]
+
+ax = axes[0]
+for k, c in [(0, CL.muted), (1, CL.accent)]:
+    ax.hist(d.loc[Dr == k, "gdp_pc_eur"] / 1000, bins=22, alpha=.68, color=c, label=lab[k])
+ax.set_xlabel("GDP per capita  (thousand €)"); ax.set_ylabel("country-years")
+ax.legend(fontsize=7.5)
+
+ax = axes[1]
+sh = d.groupby("time")[TRT].mean()
+ax.plot(sh.index, sh.to_numpy() * 100, "o-", color=CL.accent, lw=2.4, ms=4)
+ax.set_xlabel("year"); ax.set_ylabel("% of countries with a strategy")
+plt.show()
+```
+
+::: {.warn}
+Countries that adopt AI strategies are **richer**, and they adopt **later**. Treatment is not
+random, and no amount of predictive accuracy repairs that.
+:::
+
+## The number this produces
+
+```{python}
+#| echo: true
+print(f"mean digital intensity, has strategy : {Yr[Dr==1].mean():6.2f}")
+print(f"mean digital intensity, no strategy  : {Yr[Dr==0].mean():6.2f}")
+print(f"naive difference in means            : {NAIVE:+6.2f} points")
+```
+
+::: {.warn}
+Ten points. If you publish that as the effect of adopting a national AI strategy, you have published
+the difference between rich and poor countries wearing a policy label.
+:::
+
+## What today adds
+
+> A way to use the flexible learners of Sessions 05–07 for the **nuisance** parts of a causal
+> question, while keeping the **valid confidence interval** of Session 03.
+
+::: {.check}
+This is the reconciliation of the two halves of the course. Everything before Session 05 had honest
+inference and rigid functional form; everything after had flexible fit and no inference. Today they
+meet.
+:::
+
+# 2 · The setup {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The partially linear model
 
 $$Y = \theta_0 D + g_0(X) + U, \qquad \mathbb{E}[U \mid X, D] = 0$$
-
 $$D = m_0(X) + V, \qquad \mathbb{E}[V \mid X] = 0$$
 
-$\theta_0$ is the parameter of interest; $g_0$ and $m_0$ are **nuisance functions** we do not care
-about but must handle.
-
-## Why not just assume $g_0$ is linear
-
-In classical econometrics we would. The premise of DML is that we would rather estimate $g_0$ and
-$m_0$ **flexibly**, with the tools of Sessions 05–07 —
-
-::: {.check}
-because functional-form error in $g_0$ **contaminates** $\theta_0$.
+::: {.step}
+$\theta_0$ is what you want. $g_0$ and $m_0$ are **nuisance functions** — you do not care about them,
+but you cannot avoid them.
 :::
 
-## Identification requires
+::: {.check}
+Classical econometrics assumes $g_0$ is linear. DML's premise is that you would rather estimate it
+flexibly — because **functional-form error in $g_0$ contaminates $\theta_0$**.
+:::
+
+## Identification requires three things
 
 ::: {.tight}
 1. **Conditional ignorability** — $\{Y(1), Y(0)\} \perp D \mid X$
-2. **Overlap** — $0 < P(D=1\mid X) < 1$ almost surely
-3. **SUTVA**
+2. **Overlap** — $0 < P(D = 1 \mid X) < 1$ almost surely
+3. **SUTVA** — no interference between units, one version of treatment
 :::
 
 ::: {.warn}
@@ -75,197 +176,405 @@ No amount of machine learning substitutes for these. They are assumptions **abou
 defended with institutional knowledge — not with cross-validation.
 :::
 
-# 10.2 Why the naive plug-in fails {background-color="#16181A" style="color:#F7F6F3"}
+## Check overlap before anything else
 
-## The decomposition
+```{python}
+ps = cross_val_predict(
+    RandomForestClassifier(300, min_samples_leaf=5, random_state=0, n_jobs=-1),
+    Xr, Dr, cv=5, method="predict_proba")[:, 1]
+bad = ((ps < .05) | (ps > .95)).mean()
 
-Estimate $\hat g_0$ by lasso or a forest on the full sample, then regress $Y - \hat g_0(X)$ on $D$.
-Schematically:
-
-$$\sqrt n(\hat\theta - \theta_0) = \underbrace{a}_{\to N(0,\Sigma)}
-+ \underbrace{b}_{\text{regularisation bias}} + \underbrace{c}_{\text{overfitting bias}}$$
-
-## Term $b$ diverges
-
-$b$ scales like $\sqrt n \times \|\hat g_0 - g_0\|$.
-
-ML estimators converge at rates **slower** than $n^{-1/2}$ — that is the price of flexibility — so
-$b$ **diverges**.
+fig, ax = plt.subplots(figsize=(6.4, 2.9))
+bins = np.linspace(0, 1, 26)
+ax.hist(ps[Dr == 0], bins=bins, alpha=.72, color=CL.muted, label="no strategy")
+ax.hist(ps[Dr == 1], bins=bins, alpha=.72, color=CL.accent, label="has strategy")
+for b in (.05, .95):
+    ax.axvline(b, color=CL.warn, ls="--", lw=1.6)
+ax.text(.5, ax.get_ylim()[1] * .82, f"{bad:.0%} of observations lie outside [0.05, 0.95]",
+        ha="center", color=CL.warn, fontsize=9, fontweight="600")
+ax.set_xlabel(r"estimated propensity  $\hat m(X) = \hat P(D=1 \mid X)$")
+ax.set_ylabel("country-years"); ax.legend(fontsize=8, loc="upper right")
+plt.show()
+```
 
 ::: {.warn}
-The estimator is not even consistent at the parametric rate, and confidence intervals are
-meaningless.
+Two in five observations have almost no counterpart in the other arm. For those countries the data
+contain **no comparison**, and any estimate is extrapolation.
 :::
 
-## Term $c$
+# 3 · Why the naive plug-in fails {background-color="#16181A" style="color:#F7F6F3"}
 
-$\hat g_0$ was fitted using the **same observations** at which it is evaluated, inducing correlation
-between the estimated nuisance and the residual.
+## The obvious thing to do, and why it breaks
 
-::: {.check}
-Two distinct problems requiring two distinct fixes.
+Estimate $\hat g_0$ with a lasso or a forest on the full sample, then regress $Y - \hat g_0(X)$ on
+$D$. Decomposing the error:
+
+$$\sqrt n(\hat\theta - \theta_0) = \underbrace{a}_{\to\,N(0,\Sigma)}
++ \underbrace{b}_{\text{regularisation bias}} + \underbrace{c}_{\text{overfitting bias}}$$
+
+::: {.tight}
+- **$b$** scales like $\sqrt n \times \|\hat g_0 - g_0\|$. ML estimators converge **slower** than
+  $n^{-1/2}$ — that is the price of flexibility — so $b$ **diverges**
+- **$c$** arises because $\hat g_0$ was fitted on the same observations where it is evaluated
 :::
 
-# 10.3 Neyman orthogonality {background-color="#16181A" style="color:#F7F6F3"}
+::: {.warn}
+Two distinct problems. Two distinct fixes.
+:::
 
-## The partialling-out score
+## Watch it happen, with $\theta_0$ known
 
-$$\psi(W; \theta, \eta) = \big(Y - \ell_0(X) - \theta\,(D - m_0(X))\big)\big(D - m_0(X)\big)$$
+```{python}
+#| echo: true
+THETA = 0.5
 
-with $\eta = (\ell_0, m_0)$, $\ell_0(X) = \mathbb{E}[Y\mid X]$, $m_0(X)=\mathbb{E}[D\mid X]$.
+def simulate(n=300, p=20, seed=0):
+    """Partially linear model with a genuinely non-linear g0 and m0."""
+    rng = np.random.default_rng(seed)
+    X = rng.normal(size=(n, p))
+    g = np.exp(X[:, 0]) / (1 + np.exp(X[:, 0])) + 0.25 * np.cos(X[:, 1]) * X[:, 2]
+    m = 0.8 * X[:, 0] + 0.25 * np.sin(X[:, 1])
+    D = m + rng.normal(0, 1, n)
+    Y = THETA * D + g + rng.normal(0, 1, n)
+    return X, D, Y
 
-## Solving it gives FWL
+def forest():
+    return RandomForestRegressor(60, min_samples_leaf=2, random_state=0, n_jobs=-1)
+
+def estimate(X, D, Y, mode):
+    n = len(Y)
+    if mode == "naive":                       # regress Y - ghat(X) on D
+        return (D @ (Y - forest().fit(X, Y).predict(X))) / (D @ D)
+    if mode == "orthogonal":                  # residualise BOTH, same sample
+        ty = Y - forest().fit(X, Y).predict(X)
+        td = D - forest().fit(X, D).predict(X)
+    else:                                     # residualise BOTH, cross-fitted
+        ty, td = np.zeros(n), np.zeros(n)
+        for tr, te in KFold(5, shuffle=True, random_state=1).split(X):
+            ty[te] = Y[te] - forest().fit(X[tr], Y[tr]).predict(X[te])
+            td[te] = D[te] - forest().fit(X[tr], D[tr]).predict(X[te])
+    return (td @ ty) / (td @ td)
+```
+
+## Fifty replications, three estimators
+
+```{python}
+REPS = 50
+res = {m: np.array([estimate(*simulate(seed=s), m) for s in range(REPS)])
+       for m in ("naive", "orthogonal", "cross-fitted")}
+
+fig, ax = plt.subplots(figsize=(7.0, 3.0))
+for (nm, v), c in zip(res.items(), [CL.warn, CL.muted, CL.good]):
+    ax.hist(v, bins=18, alpha=.68, color=c,
+            label=f"{nm}:  bias {v.mean()-THETA:+.3f}")
+ax.axvline(THETA, color=CL.ink, lw=2.2)
+ax.text(THETA + .006, ax.get_ylim()[1] * .88, r"true $\theta_0 = 0.5$",
+        color=CL.ink, fontsize=9, fontweight="600")
+ax.set_xlabel(r"$\hat\theta$"); ax.set_ylabel("replications")
+ax.legend(fontsize=8, loc="upper left")
+plt.show()
+```
+
+::: {.warn}
+The naive estimator misses by **more than half the true effect**, and its spread is *narrow* — it is
+confidently wrong. A tight confidence interval around it would be worse than no estimate.
+:::
+
+# 4 · Fix 1 — orthogonality {background-color="#16181A" style="color:#F7F6F3"}
+
+## Use a different score
+
+$$\psi(W;\theta,\eta) = \big(Y - \ell_0(X) - \theta(D - m_0(X))\big)\big(D - m_0(X)\big)$$
+
+with $\eta = (\ell_0, m_0)$, $\ell_0(X) = \mathbb{E}[Y \mid X]$, $m_0(X) = \mathbb{E}[D \mid X]$.
+Solving $\mathbb{E}[\psi] = 0$:
 
 $$\theta_0 = \frac{\mathbb{E}\big[(Y-\ell_0(X))(D-m_0(X))\big]}{\mathbb{E}\big[(D-m_0(X))^2\big]}
 = \frac{\mathrm{Cov}(\tilde Y, \tilde D)}{\mathrm{Var}(\tilde D)}$$
 
 ::: {.check}
-Precisely Frisch–Waugh–Lovell from Session 02: **regress residualised $Y$ on residualised $D$.**
-Eight sessions later, the same theorem.
+That is **exactly Frisch–Waugh–Lovell** from Session 02: regress residualised $Y$ on residualised
+$D$. The only change is that the residualising is done by a forest instead of a projection matrix.
 :::
 
-## The orthogonality property
+## What "orthogonal" means
 
-The Gateaux derivative of $\mathbb{E}[\psi]$ with respect to $\eta$, at the truth, is zero:
+The directional derivative of $\mathbb{E}[\psi]$ with respect to the nuisance, at the truth, is
+**zero**:
 
-$$\partial_\eta \, \mathbb{E}\big[\psi(W;\theta_0,\eta_0)\big][\eta - \eta_0] = 0$$
+$$\partial_\eta\,\mathbb{E}\big[\psi(W;\theta_0,\eta_0)\big]\big[\eta - \eta_0\big] = 0$$
 
-Consequently small errors in $\hat\eta$ have only a **second-order** effect on $\hat\theta$.
-
-## Two slow rates multiply
-
-The bias term becomes of order
+::: {.step}
+So a small error in $\hat\eta$ has only a **second-order** effect on $\hat\theta$. The bias term
+becomes
 
 $$\sqrt n \times \|\hat\ell - \ell_0\| \times \|\hat m - m_0\|$$
+:::
 
-so it vanishes provided each nuisance converges faster than $n^{-1/4}$ — a rate lasso, forests and
-boosting **can** achieve under reasonable conditions.
+## Two slow rates multiply into a fast one
+
+```{python}
+n = np.logspace(2, 5, 200)
+fig, ax = plt.subplots(figsize=(6.6, 2.95))
+slow = n ** (-0.25)
+ax.loglog(n, slow, color=CL.warn, lw=2.4)
+ax.loglog(n, slow ** 2, color=CL.good, lw=2.6)
+ax.loglog(n, n ** (-0.5), color=CL.ink, ls="--", lw=1.6)
+ax.text(1.3e2, slow[10] * 1.25, r"each nuisance:  $n^{-1/4}$", color=CL.warn,
+        fontsize=9, fontweight="600")
+ax.text(1.3e2, slow[10] ** 2 * .42, r"their product:  $n^{-1/2}$", color=CL.good,
+        fontsize=9, fontweight="600")
+ax.text(2.2e4, 4e-3, r"parametric rate", color=CL.ink, fontsize=8.5)
+ax.set_xlabel("sample size  n"); ax.set_ylabel("estimation error")
+plt.show()
+```
 
 ::: {.check}
-**Note the structure: two slow rates multiply into one fast enough rate.** That is the whole trick,
-and it is why the method is called *double*.
+Neither nuisance need converge at $n^{-1/2}$. Each need only beat $n^{-1/4}$ — a rate lasso, forests
+and boosting achieve under reasonable conditions. **Two slow rates multiply into one fast enough
+rate.** That is why it is called *double*.
 :::
 
-# 10.4 Cross-fitting {background-color="#16181A" style="color:#F7F6F3"}
+# 5 · Fix 2 — cross-fitting {background-color="#16181A" style="color:#F7F6F3"}
 
-## The procedure
+## The remaining bias, and the split that removes it
 
-Split into $K$ folds. For each $k$:
-
-::: {.tight}
-1. Estimate $\hat\ell^{(-k)}$ and $\hat m^{(-k)}$ on all folds **except** $k$
-2. Form residuals **on fold $k$**:
-   $\tilde Y_i = Y_i - \hat\ell^{(-k)}(X_i)$, $\tilde D_i = D_i - \hat m^{(-k)}(X_i)$
+::: {.step}
+Term $c$ exists because $\hat\ell$ and $\hat m$ were fitted using the very observations at which
+they are then evaluated. That correlates the estimated nuisance with the residual.
 :::
 
-## Then pool
+::: {.check}
+The fix is the one you already know from Session 04: **never evaluate a fit on data it was fitted
+on**. Here it is applied to the nuisance step.
+:::
 
-$$\hat\theta = \frac{\sum_{i} \tilde Y_i \tilde D_i}{\sum_{i} \tilde D_i^2}$$
+## The procedure, drawn
 
-$$\hat\sigma^2 = \frac{\frac1n \sum_i \tilde D_i^2 (\tilde Y_i - \hat\theta \tilde D_i)^2}
+```{python}
+K = 5
+fig, ax = plt.subplots(figsize=(7.2, 2.9))
+for k in range(K):
+    for j in range(K):
+        col = CL.warn if j == k else CL.accent
+        ax.barh(K - 1 - k, 1, left=j, height=.62, color=col,
+                alpha=1.0 if j == k else .55, edgecolor=CL.bg, linewidth=2)
+    ax.text(-.25, K - 1 - k, f"round {k+1}", ha="right", va="center", fontsize=8.5)
+ax.text(K + .2, K - 1, "fit  $\\hat\\ell, \\hat m$  here", color=CL.accent,
+        fontsize=9, va="center", fontweight="600")
+ax.text(K + .2, K - 2, "form residuals here", color=CL.warn,
+        fontsize=9, va="center", fontweight="600")
+ax.set_xlim(-1.9, K + 4.6); ax.set_ylim(-.6, K - .3)
+ax.set_xticks(np.arange(K) + .5); ax.set_xticklabels([f"fold {j+1}" for j in range(K)],
+                                                     fontsize=8)
+ax.set_yticks([]); ax.grid(visible=False)
+for s in ("left", "bottom"):
+    ax.spines[s].set_visible(False)
+plt.show()
+```
+
+::: {.muted}
+Every observation gets a residual, and no observation's residual used a nuisance fitted on itself.
+:::
+
+## Then pool, and get a standard error
+
+$$\hat\theta = \frac{\sum_i \tilde Y_i \tilde D_i}{\sum_i \tilde D_i^2}, \qquad
+\hat\sigma^2 = \frac{\frac1n\sum_i \tilde D_i^2(\tilde Y_i - \hat\theta\tilde D_i)^2}
 {\big(\frac1n\sum_i \tilde D_i^2\big)^2}$$
 
 ::: {.check}
-Because the nuisance was never fitted on the observation where it is evaluated, **term $c$
-vanishes**.
+**Result:** $\sqrt n(\hat\theta - \theta_0) \to N(0,\sigma^2)$. Ordinary confidence intervals are
+valid — despite black-box learners in the nuisance step. That is the whole point of the session.
 :::
-
-## Remove split sensitivity
-
-Repeat the whole procedure over several random splits and take the **median** of $\hat\theta$.
-
-## The result
-
-$$\sqrt n(\hat\theta - \theta_0) \to N(0, \sigma^2)$$
-
-so **ordinary confidence intervals are valid** — despite having used black-box learners for the
-nuisances.
-
-::: {.check}
-This is the reconciliation of Sessions 05–07 with Session 03.
-:::
-
-# 10.5 Heterogeneous effects {background-color="#16181A" style="color:#F7F6F3"}
-
-## For whom, not on average
-
-$$\tau(x) = \mathbb{E}[Y(1)-Y(0)\mid X=x]$$
 
 ::: {.muted}
-Often the interesting question. "Does a strategy help?" is less useful than "where does it help?" —
-and only the second tells anyone what to do.
+Repeat over several random splits and take the **median** of $\hat\theta$, to remove split
+sensitivity.
 :::
 
-## Causal forests
+## Now do it on the real question
 
-Wager & Athey adapt random forests in three ways:
+```{python}
+#| echo: true
+def dml_real(seed, K=5):
+    n = len(Yr); ty, td = np.zeros(n), np.zeros(n)
+    for tr, te in KFold(K, shuffle=True, random_state=seed).split(Xr):
+        ty[te] = Yr[te] - RandomForestRegressor(300, min_samples_leaf=5, random_state=0,
+                                                n_jobs=-1).fit(Xr[tr], Yr[tr]).predict(Xr[te])
+        td[te] = Dr[te] - RandomForestClassifier(300, min_samples_leaf=5, random_state=0,
+                                                 n_jobs=-1).fit(Xr[tr], Dr[tr]).predict_proba(Xr[te])[:, 1]
+    th = (td @ ty) / (td @ td)
+    se = np.sqrt(np.mean(td**2 * (ty - th * td)**2)) / (np.mean(td**2) * np.sqrt(n))
+    return th, se, ty, td
+
+runs = [dml_real(s) for s in (1, 2, 3, 4, 5)]
+TH = float(np.median([r[0] for r in runs]))
+SE = float(np.median([r[1] for r in runs]))
+ols = sm.OLS(Yr, sm.add_constant(np.c_[Dr, Xr])).fit()
+
+print(f"naive difference in means : {NAIVE:+6.2f}")
+print(f"OLS, linear controls      : {ols.params[1]:+6.2f}  (se {ols.bse[1]:.2f})")
+print(f"DML, cross-fitted forests : {TH:+6.2f}  (se {SE:.2f})"
+      f"   95% CI [{TH-1.96*SE:+.2f}, {TH+1.96*SE:+.2f}]")
+```
+
+## The three answers, side by side
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.95))
+
+ax = axes[0]
+est = [NAIVE, ols.params[1], TH]
+errs = [0, 1.96 * ols.bse[1], 1.96 * SE]
+names = ["naive\ndifference", "OLS with\nlinear controls", "DML with\ncross-fitting"]
+cols = [CL.warn, CL.muted, CL.good]
+ax.errorbar(est, range(3), xerr=errs, fmt="o", ms=8, lw=2.2,
+            ecolor=CL.line, capsize=4, color="none",
+            markerfacecolor="none", markeredgecolor="none")
+for i, (e, er, c) in enumerate(zip(est, errs, cols)):
+    ax.errorbar(e, i, xerr=er, fmt="o", ms=8, color=c, ecolor=c, capsize=4, lw=2.0)
+ax.axvline(0, color=CL.ink, ls="--", lw=1.4)
+ax.set_yticks(range(3)); ax.set_yticklabels(names, fontsize=8)
+ax.set_xlabel("effect on digital intensity (points)")
+ax.invert_yaxis(); ax.grid(axis="y", visible=False)
+
+ax = axes[1]
+_, _, ty, td = runs[0]
+ax.scatter(td, ty, s=13, color=CL.muted, alpha=.6, edgecolor="none")
+xs = np.linspace(td.min(), td.max(), 50)
+ax.plot(xs, TH * xs, color=CL.good, lw=2.6)
+ax.axhline(0, color=CL.line, lw=1.0); ax.axvline(0, color=CL.line, lw=1.0)
+ax.set_xlabel(r"$\tilde D$ — treatment, residualised")
+ax.set_ylabel(r"$\tilde Y$ — outcome, residualised")
+ax.set_title(f"slope = {TH:+.2f}", fontsize=9.5)
+plt.show()
+```
+
+::: {.warn}
+Ten points becomes **indistinguishable from zero**. The right-hand panel is the whole estimate: one
+slope, through residualised data — Session 02's FWL picture, with forests doing the residualising.
+:::
+
+## Why the median over splits
+
+```{python}
+fig, ax = plt.subplots(figsize=(6.2, 2.5))
+vals = [r[0] for r in runs]
+ax.scatter(vals, [0] * len(vals), s=80, color=CL.accent, zorder=4)
+ax.axvline(TH, color=CL.good, lw=2.2)
+ax.text(TH, .18, f"median\n{TH:+.2f}", ha="center", color=CL.good, fontsize=9,
+        fontweight="600")
+ax.axvline(0, color=CL.ink, ls="--", lw=1.3)
+ax.set_ylim(-.35, .45); ax.set_yticks([])
+ax.set_xlabel("estimate from each of five random fold assignments")
+ax.grid(axis="y", visible=False)
+plt.show()
+```
+
+::: {.check}
+The same data, the same code, five different random fold assignments — and estimates that differ by
+more than a point. **Report the median across splits, and report the spread.**
+:::
+
+# 6 · Heterogeneous effects {background-color="#16181A" style="color:#F7F6F3"}
+
+## The question is often *for whom*
+
+$$\tau(x) = \mathbb{E}\big[Y(1) - Y(0) \mid X = x\big]$$
+
+**Causal forests** (Wager & Athey) adapt random forests in three ways:
 
 ::: {.tight}
-1. Splits are chosen to maximise **heterogeneity in the treatment effect**, not in the outcome
-2. **Honesty** — the observations used to choose splits are disjoint from those used to estimate the
+1. Splits maximise heterogeneity in the **treatment effect**, not in the outcome
+2. **Honesty** — the observations that choose the splits are disjoint from those that estimate the
    leaf effects
-3. The estimator is asymptotically normal and pointwise consistent, so **confidence intervals are
-   available**
+3. The estimator is asymptotically normal and pointwise consistent, so **confidence intervals
+   exist**
 :::
 
-## Discipline in reporting heterogeneity
+::: {.muted}
+Point 2 is Session 04's discipline again, moved inside the tree.
+:::
+
+## The discipline that must come with it
 
 ::: {.warn}
-Searching over subgroups for large effects is **multiple testing**, and it will find something.
+Searching over subgroups for large effects is **multiple testing**, and it will find something. With
+twenty subgroups and a 5% test, one significant result is the *expected* outcome under no effect at
+all.
 :::
 
 ::: {.tight}
-- **Pre-specify** subgroups where possible
-- Otherwise use the **best linear projection** of $\hat\tau(X)$ on a small set of covariates, or a
-  calibration test — the **GATES / CLAN** procedures of Chernozhukov et al.
-- Report them as **exploratory**
+- **Pre-specify** subgroups wherever possible
+- Otherwise report the **best linear projection** of $\hat\tau(X)$ on a small covariate set
+- Or use a calibration test — the GATES / CLAN procedures of Chernozhukov et al.
+- And label the whole section **exploratory**
 :::
 
-# 10.6 What this does not fix {background-color="#16181A" style="color:#F7F6F3"}
+# 7 · What this does not fix {background-color="#16181A" style="color:#F7F6F3"}
 
-## The limit of the method
-
-DML delivers valid inference **conditional on the identifying assumptions**.
+## Read this slide twice
 
 ::: {.warn}
-If treatment is confounded by something not in $X$, DML estimates a **precisely-quantified wrong
-number** — and its narrow confidence interval will make the wrong number look authoritative.
+DML delivers valid inference **conditional on the identifying assumptions**. If treatment is
+confounded by something not in $X$, DML estimates a precisely-quantified **wrong number** — and its
+narrow confidence interval will make the wrong number look authoritative.
 :::
 
-## What it does and does not remove
+::: {.step}
+Flexible nuisance estimation removes **functional-form error**. It does not remove
+**omitted-variable bias**. Session 03's OVB formula still governs everything:
+
+$$\hat\beta_{\text{short}} \to \beta_{\text{long}} + \gamma\,\delta$$
+:::
+
+## Which means the hard part is not the code
 
 ::: {.tight}
-- Flexible nuisance estimation removes **functional-form error**
-- It does **not** remove **omitted-variable bias**
+- The code is thirty lines and you have just read all of them
+- The **argument** — why $X$ contains everything that drives both $D$ and $Y$ — is the paper
+- That argument is made with institutional knowledge, not with cross-validation
 :::
 
 ::: {.check}
-Return to Session 03's OVB formula. It still governs everything.
+On our own example, 41% of observations failed the overlap check. That fact belongs in the abstract,
+not in a footnote.
 :::
 
-# The practice {background-color="#16181A" style="color:#F7F6F3"}
+# Takeaways {background-color="#16181A" style="color:#F7F6F3"}
 
-## What you do
+## Key takeaways
 
 ::: {.tight}
-1. State the estimand and the three assumptions, in writing, before estimating
-2. Check **overlap**; report any trimming
-3. Naive, then ML-with-controls, then **DML** — record all three
-4. Fit a causal forest and test whether the heterogeneity is real
+1. Prediction accuracy and causal validity are **different properties**. One does not imply the other
+2. The naive plug-in has two biases: regularisation ($b$) and overfitting ($c$)
+3. An **orthogonal score** kills $b$ — errors in the nuisance become second-order
+4. **Cross-fitting** kills $c$ — never evaluate a fit on its own training rows
+5. Two $n^{-1/4}$ rates multiply into $n^{-1/2}$. Hence *double*
+6. Heterogeneity searching is multiple testing. Pre-specify or label it exploratory
+7. None of this identifies anything. **The assumptions do that**
 :::
 
-::: {.check}
-The movement between the three estimates **is** your evidence that confounding mattered.
-:::
-
-## The two-minute report
+## What loses marks
 
 ::: {.tight}
-1. **What I did** — the estimand, and which assumption you are least sure of
-2. **The number** — $\hat\theta$ with its cross-fitted interval
-3. **The catch** — the confounder DML cannot save you from
+- Reporting a DML estimate with **no overlap diagnostic**
+- Fitting nuisances on the full sample (that is the naive plug-in, with extra steps)
+- Reporting one fold assignment instead of the median over several
+- Presenting a subgroup effect found by searching, without saying you searched
+- Any sentence of the form "the model shows that $X$ causes $Y$"
 :::
 
-::: {.check}
-Full brief: [`02-practice/README.md`](02-practice/README.md)
+## Now, the practice
+
+::: {.get}
+Ninety minutes, in your groups. You will estimate one treatment effect three ways — naive, linear
+controls, and cross-fitted DML — check overlap first, and write the paragraph defending conditional
+ignorability. That paragraph carries the marks.
+:::
+
+::: {.muted}
+Notes: [`01-lecture/README.md`](01-lecture/README.md) · practice brief:
+[`02-practice/README.md`](02-practice/README.md)
 :::
