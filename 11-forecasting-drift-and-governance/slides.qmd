@@ -235,7 +235,40 @@ print(f"DM statistic           : {dm_stat(diff):+.3f}   |DM| < 1.96, so no detec
 
 ::: {.check}
 The honest sentence is: *"the forest neither beats nor is beaten by a random walk on this panel."*
-That is a result. It is publishable. It is what most forecasting comparisons actually find.
+That is a result, and it is what most forecasting comparisons actually find.
+:::
+
+## The test, drawn
+
+```{python}
+dbar = diff.mean()
+se_d = np.std(diff, ddof=1) / np.sqrt(len(diff))
+
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+
+ax = axes[0]
+ax.scatter(np.arange(len(diff)), diff, s=9, color=CL.muted, alpha=.6, edgecolor="none")
+ax.axhline(0, color=CL.ink, lw=1.4)
+ax.axhline(dbar, color=CL.accent, lw=2.2)
+ax.set_xlabel("predicted country-year"); ax.set_ylabel(r"$d_t = e_{\mathrm{model}}^2 - e_{\mathrm{rw}}^2$")
+ax.set_title("the loss differential, observation by observation", fontsize=9)
+
+ax = axes[1]
+zs = np.linspace(-3.4, 3.4, 400)
+ax.plot(zs, np.exp(-zs**2 / 2) / np.sqrt(2 * np.pi), color=CL.ink, lw=2.0)
+ax.fill_between(zs, 0, np.exp(-zs**2 / 2) / np.sqrt(2 * np.pi),
+                where=np.abs(zs) > 1.96, color=CL.warn, alpha=.30)
+ax.axvline(dm_stat(diff), color=CL.accent, lw=2.6)
+ax.text(dm_stat(diff) + .12, .30, f"DM = {dm_stat(diff):+.2f}", color=CL.accent,
+        fontsize=9, fontweight="600")
+ax.text(2.35, .06, "reject", color=CL.warn, fontsize=8, fontweight="600")
+ax.set_xlabel("DM statistic under the null"); ax.set_yticks([])
+ax.set_title("nowhere near the rejection region", fontsize=9)
+plt.show()
+```
+
+::: {.muted}
+Left: a cloud centred on nothing. Right: where that cloud's mean lands on the null distribution.
 :::
 
 ## Where the errors actually are
@@ -274,6 +307,51 @@ something changing in the world, not in the model.
 
 ::: {.warn}
 Only the first is detectable **before** the damage. The last is not a monitoring problem at all.
+:::
+
+## What each one looks like
+
+```{python}
+rng = np.random.default_rng(7)
+fig, axes = plt.subplots(1, 4, figsize=(8.0, 2.35), sharex=True, sharey=True)
+xs = np.linspace(-3.4, 3.4, 220)
+f0 = lambda x: 0.9 * x
+
+xa = rng.normal(-1, .7, 220); xb = rng.normal(1.1, .7, 220)
+axes[0].scatter(xa, f0(xa) + rng.normal(0, .35, 220), s=5, color=CL.muted, alpha=.6)
+axes[0].scatter(xb, f0(xb) + rng.normal(0, .35, 220), s=5, color=CL.warn, alpha=.6)
+axes[0].plot(xs, f0(xs), color=CL.ink, lw=1.6)
+axes[0].set_title("covariate shift\n$P(X)$ moves", fontsize=8)
+
+x2 = rng.normal(0, 1.1, 220)
+axes[1].scatter(x2, f0(x2) + rng.normal(0, .35, 220), s=5, color=CL.muted, alpha=.6)
+axes[1].scatter(x2, f0(x2) + 1.5 + rng.normal(0, .35, 220), s=5, color=CL.warn, alpha=.6)
+axes[1].plot(xs, f0(xs), color=CL.ink, lw=1.6)
+axes[1].set_title("label shift\n$P(Y)$ moves", fontsize=8)
+
+axes[2].scatter(x2, f0(x2) + rng.normal(0, .35, 220), s=5, color=CL.muted, alpha=.6)
+axes[2].scatter(x2, -0.5 * x2 + rng.normal(0, .35, 220), s=5, color=CL.warn, alpha=.6)
+axes[2].plot(xs, f0(xs), color=CL.ink, lw=1.6)
+axes[2].plot(xs, -0.5 * xs, color=CL.warn, lw=1.6, ls="--")
+axes[2].set_title("concept drift\n$P(Y|X)$ moves", fontsize=8)
+
+axes[3].scatter(x2, f0(x2) + rng.normal(0, .35, 220), s=5, color=CL.muted, alpha=.6)
+xg = rng.normal(1.4, .5, 220)
+axes[3].scatter(xg, 0.1 * xg + rng.normal(0, .35, 220), s=5, color=CL.warn, alpha=.6)
+axes[3].plot(xs, f0(xs), color=CL.ink, lw=1.6)
+axes[3].annotate("", xy=(1.4, -1.6), xytext=(-.6, -2.6),
+                 arrowprops=dict(arrowstyle="->", color=CL.warn, lw=1.6))
+axes[3].set_title("feedback\nyou moved $P$", fontsize=8)
+
+for ax in axes:
+    ax.set_xticks([]); ax.set_yticks([]); ax.grid(visible=False)
+    ax.set_ylim(-3.4, 3.4)
+plt.show()
+```
+
+::: {.muted}
+Grey: training. Red: deployment. The black line is the model you fitted; only the third panel makes
+it wrong, and only the fourth is your fault.
 :::
 
 ## The classifier diagnostic
@@ -371,6 +449,32 @@ model existed in it*.
 ::: {.warn}
 This is a **causal** problem (Session 10), not a monitoring problem. No amount of retraining solves
 it, because every retrain teaches the agents faster.
+:::
+
+## The shape of a feature that stops working
+
+```{python}
+t = np.arange(0, 25)
+deploy = 8
+signal = np.where(t < deploy, 0.62, 0.62 * np.exp(-(t - deploy) / 6.0) + 0.02)
+
+fig, ax = plt.subplots(figsize=(6.6, 2.8))
+ax.plot(t[:deploy + 1], signal[:deploy + 1], color=CL.good, lw=2.8)
+ax.plot(t[deploy:], signal[deploy:], color=CL.warn, lw=2.8)
+ax.axvline(deploy, color=CL.ink, ls="--", lw=1.5)
+ax.text(deploy + .3, .60, "the model is deployed\nand agents learn of it",
+        color=CL.ink, fontsize=8.5)
+for x, lab, c in [(3, "backtest says\nthe feature works", CL.good),
+                  (19, "and now it does not", CL.warn)]:
+    ax.text(x, .12, lab, color=c, fontsize=8.5, fontweight="600", ha="center")
+ax.set_xlabel("quarters since deployment"); ax.set_ylabel("predictive value of the feature")
+ax.set_ylim(0, .78); ax.set_xticks([])
+plt.show()
+```
+
+::: {.check}
+Every retraining fits the decayed relationship and pushes agents to break it further. The monitoring
+plan will faithfully report the decline it cannot fix.
 :::
 
 # 5 · Governance {background-color="#16181A" style="color:#F7F6F3"}
