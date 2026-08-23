@@ -66,29 +66,29 @@ explain why no choice of estimator can reduce it.
 
 <br><br><br>
 
-**A2.** *(3)* State the assumptions under which $\mathbb{E}[\hat\beta \mid X] = \beta$ for the OLS
+**A2.** *(3)* Define the **risk** $R(g)$ of a predictor $g$. State precisely what the expectation is
+taken over, and why the average loss on your own sample is not an estimate of it.
+
+<br><br><br>
+
+**A3.** *(3)* State the assumptions under which $\mathbb{E}[\hat\beta \mid X] = \beta$ for the OLS
 estimator. Which classical assumption is **not** needed for this result?
 
 <br><br><br>
 
-**A3.** *(3)* Define the leverage $h_{ii}$ of observation $i$. State its range, and state what
+**A4.** *(3)* Define the leverage $h_{ii}$ of observation $i$. State its range, and state what
 $\sum_i h_{ii}$ equals.
 
 <br><br><br>
 
-**A4.** *(3)* Define the **optimism** of the training error. Give the expression that relates it to
+**A5.** *(3)* Define the **optimism** of the training error. Give the expression that relates it to
 the covariance between fitted values and outcomes.
 
 <br><br><br>
 
-**A5.** *(3)* Write the effective degrees of freedom of a ridge fit with penalty $\lambda$, in terms
+**A6.** *(3)* Write the effective degrees of freedom of a ridge fit with penalty $\lambda$, in terms
 of the singular values $d_j$ of the design matrix. State its limits as $\lambda \to 0$ and
 $\lambda \to \infty$.
-
-<br><br><br>
-
-**A6.** *(3)* Write the soft-thresholding operator $S_\lambda(\rho)$ and state in one sentence what
-it does to a coefficient, in words.
 
 <br><br><br>
 
@@ -110,32 +110,52 @@ Give one example of a model that has one without the other.
 
 ---
 
-## B1. Least squares and ridge *(8 points)*
+## B1. The best predictor under squared loss *(6 points)*
+
+Let $Y = f(X) + \varepsilon$ with $\mathbb{E}[\varepsilon \mid X] = 0$ and
+$\mathrm{Var}(\varepsilon) = \sigma^2$. Let $g$ be **any** predictor.
+
+**(a)** *(3)* Show that
+
+$$R(g) = \mathbb{E}\big[(Y - g(X))^2\big]
+= \sigma^2 + \mathbb{E}\Big[\big(\mathbb{E}[Y \mid X] - g(X)\big)^2\Big].$$
+
+Show the expansion, and name the property of conditional expectation that makes the cross term
+vanish.
+
+**(b)** *(1)* State the $g$ that minimises $R(g)$, and the value of the minimum.
+
+**(c)** *(2)* A colleague reports a **5-fold cross-validated** MSE of $0.04$ on a simulation in
+which $\sigma^2$ is known to equal $0.09$. State what you conclude, and name the most likely cause.
+
+<br><br><br><br>
+
+## B2. Least squares and ridge *(6 points)*
 
 For a two-regressor problem (both predictors standardised, no intercept) you are given:
 
 $$X^\top X = \begin{pmatrix} 10 & 4 \\ 4 & 8 \end{pmatrix}, \qquad
    X^\top y = \begin{pmatrix} 26 \\ 20 \end{pmatrix}$$
 
-**(a)** *(3)* Compute $\hat\beta^{\text{OLS}}$. Show the determinant and the inverse.
+**(a)** *(2)* Compute $\hat\beta^{\text{OLS}}$. Show the determinant and the inverse.
 
-**(b)** *(3)* Compute $\hat\beta^{\text{ridge}}$ with $\lambda = 2$.
+**(b)** *(2)* Compute $\hat\beta^{\text{ridge}}$ with $\lambda = 2$.
 
 **(c)** *(2)* Report the percentage shrinkage of each coefficient. In one sentence, explain why
 regularisation would still be well-defined here even if $X^\top X$ were singular.
 
 <br><br><br><br>
 
-## B2. Soft-thresholding, lasso and elastic net *(8 points)*
+## B3. Soft-thresholding, lasso and elastic net *(6 points)*
 
 With standardised columns, the partial correlations of four predictors with the current residual are
 
 $$\rho = (0.42,\; -0.18,\; 0.09,\; 0.31)$$
 
-**(a)** *(3)* Compute the lasso coordinate updates with $\lambda = 0.20$ (i.e. $\alpha = 1$).
+**(a)** *(2)* Compute the lasso coordinate updates with $\lambda = 0.20$ (i.e. $\alpha = 1$).
 Which variables are selected?
 
-**(b)** *(4)* Compute the elastic net updates with $\lambda = 0.20$ and $\alpha = 0.5$, using
+**(b)** *(3)* Compute the elastic net updates with $\lambda = 0.20$ and $\alpha = 0.5$, using
 $\hat\beta_j = S_{\lambda\alpha}(\rho_j) \,/\, \big(1 + \lambda(1-\alpha)\big)$.
 
 **(c)** *(1)* State the difference in the selected set, and name the property of the elastic net
@@ -143,7 +163,7 @@ that explains it.
 
 <br><br><br><br>
 
-## B3. Bias–variance decomposition *(6 points)*
+## B4. Bias–variance decomposition *(6 points)*
 
 A simulation with known truth and $\sigma^2 = 0.09$ gives:
 
@@ -164,7 +184,7 @@ model complexity, and which selection convention from Session 5 embodies the sam
 
 <br><br><br>
 
-## B4. Omitted variable bias *(7 points)*
+## B5. Omitted variable bias *(6 points)*
 
 The true model is
 
@@ -182,12 +202,12 @@ You estimate the **short** regression, omitting ability, and obtain $\hat\beta_1
 
 **(c)** *(1)* What is the implied value of $\beta_1$?
 
-**(d)** *(2)* You now add a noisy proxy for ability. Does the bias necessarily fall? Explain in
-one or two sentences.
+**(d)** *(1)* You now add a noisy proxy for ability. Does the bias necessarily fall? Explain in
+one sentence.
 
 <br><br><br><br>
 
-## B5. Logistic regression and the decision threshold *(7 points)*
+## B6. Logistic regression and the decision threshold *(6 points)*
 
 A credit model gives, for (intercept, income in thousands, has_collateral):
 
@@ -200,7 +220,7 @@ default.
 
 **(b)** *(1)* Report the odds ratio associated with holding collateral.
 
-**(c)** *(2)* Compute the marginal effect of one additional thousand of income at this $x$, and
+**(c)** *(1)* Compute the marginal effect of one additional thousand of income at this $x$, and
 express it in percentage points.
 
 **(d)** *(2)* A missed default costs the lender four times what a false alarm costs. Compute the

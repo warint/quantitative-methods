@@ -96,7 +96,10 @@ $\mathbb{E}[Y\mid X]$ inside the square:
 $$R(g) = \mathbb{E}\Big[\big(\underbrace{Y - \mathbb{E}[Y\mid X]}_{\text{noise}}
 + \underbrace{\mathbb{E}[Y\mid X] - g(X)}_{\text{your error}}\big)^2\Big] .$$
 
-Expanding gives three terms. The cross term vanishes, because conditioning on $X$ first,
+Expanding gives three terms. The cross term vanishes by the **tower property** of conditional
+expectation (the law of iterated expectations, $\mathbb{E}[Z] = \mathbb{E}\big[\mathbb{E}[Z\mid X]\big]$):
+condition on $X$ first, and since $\mathbb{E}[Y\mid X] - g(X)$ is a function of $X$ it passes
+outside the inner expectation, leaving
 
 $$\mathbb{E}\big[(Y - \mathbb{E}[Y\mid X])\,(\mathbb{E}[Y\mid X] - g(X))\big]
 = \mathbb{E}\Big[(\mathbb{E}[Y\mid X] - g(X))\underbrace{\mathbb{E}\big[Y - \mathbb{E}[Y\mid X]
@@ -187,8 +190,8 @@ Answer these on paper before Session 01. If you cannot, re-read the relevant sec
 whole page.
 
 1. State the difference between $f$, $\hat f$ and $\mathbb{E}[Y\mid X]$ in one sentence each.
-2. Show that the cross term in §0.3 vanishes. Which property of conditional expectation did you
-   use?
+2. Show that the cross term in §0.3 vanishes. **Name** the property of conditional expectation you
+   used, and say where in the argument you used it.
 3. A colleague reports a cross-validated $R^2$ of $0.98$ on a macro forecasting problem where every
    published model reaches $0.4$. Give two explanations, and say which you would check first.
 4. Give an example of a variable that is an excellent **predictor** of an outcome and a useless
