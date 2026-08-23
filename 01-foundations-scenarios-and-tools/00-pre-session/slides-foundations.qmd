@@ -1,0 +1,543 @@
+---
+title: "The Supervised Learning Problem"
+subtitle: "Session 01 pre-session · what Session 02 assumes you have"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+format:
+  revealjs:
+    theme: [default, ../../slides/warin.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "Quantitative Methods in International Business · Session 01 pre-session · Thierry Warin, PhD · HEC Montréal"
+  pptx:
+    slide-level: 2
+    reference-doc: ../../slides/reference.pptx
+---
+
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np
+import statsmodels.api as sm
+from sklearn.metrics import mean_squared_error
+
+SIG = 0.9
+def f_true(x):
+    return 2.0 + 1.4 * np.sin(1.1 * x) + 0.45 * x
+```
+
+# {background-color="#16181A" style="color:#F7F6F3"}
+
+::: {style="margin-top: 1.2em"}
+### When can a number about the past be used to make a claim about the future? {style="color:#F7F6F3"}
+:::
+
+## Read this before Session 02
+
+::: {.warn}
+Session 01 spends both halves on the syllabus and on *Europe 2031*. So the mathematics of the course
+starts **here**, at your desk, before the first class.
+:::
+
+::: {.tight}
+- Four ideas, forty minutes
+- Everything from Session 02 to Session 11 is built on them
+- **Part A of the midterm examines this page directly**
+:::
+
+::: {.muted}
+These slides follow the reading
+[`the-supervised-learning-problem.md`](the-supervised-learning-problem.md) section by section. Same
+numbering, same notation.
+:::
+
+## Outline
+
+| | |
+|---|---|
+| **0.1** | The problem, stated once |
+| **0.2** | Loss and risk |
+| **0.3** | The best predictor there is |
+| **0.4** | The irreducible error |
+| **0.5** | Why prediction and inference pull apart |
+
+# 0.1 · The problem {background-color="#16181A" style="color:#F7F6F3"}
+
+## Stated once
+
+You observe pairs $(x_i, y_i)$. You believe they were produced by
+
+$$Y = f(X) + \varepsilon, \qquad \mathbb{E}[\varepsilon \mid X] = 0, \qquad
+\mathrm{Var}(\varepsilon) = \sigma^2$$
+
+| | | |
+|---|---|---|
+| $f$ | the **systematic** part | fixed, unknown — the thing you want |
+| $\varepsilon$ | the **noise** | everything driving $Y$ that $X$ does not observe |
+| $\hat f$ | your **estimate** | built from data, and therefore **random** |
+
+## The distinction that trips people up
+
+::: {.check}
+$f$ is **fixed and unknown**. $\hat f$ is **known and random**.
+:::
+
+::: {.step}
+Every confidence interval in this course is a statement about the second, made in order to say
+something about the first.
+:::
+
+::: {.muted}
+If that sentence feels like a technicality now, it will not by Session 03.
+:::
+
+## Three samples, three different $\hat f$
+
+```{python}
+rng = np.random.default_rng(17)
+xs = np.linspace(0, 8, 300)
+
+fig, axes = plt.subplots(1, 3, figsize=(8.0, 2.6), sharey=True)
+for k, ax in enumerate(axes):
+    xt = rng.uniform(0, 8, 40)
+    yt = f_true(xt) + rng.normal(0, SIG, 40)
+    ax.plot(xs, f_true(xs), color=CL.ink, lw=2.0, ls="--")
+    ax.scatter(xt, yt, s=13, color=CL.muted, alpha=.7, edgecolor="none")
+    cf = np.polyfit(xt, yt, 5)
+    ax.plot(xs, np.polyval(cf, xs), color=CL.accent, lw=2.4)
+    ax.set_title(f"sample {k+1}", fontsize=9.5)
+    ax.set_xlabel("x")
+axes[0].set_ylabel("y")
+axes[0].text(.3, f_true(0) - 2.6, "dashed = $f$\nblue = $\\hat f$", fontsize=8.5, color=CL.ink)
+plt.show()
+```
+
+::: {.check}
+The dashed line is **the same in all three panels** — that is $f$. The blue line changes every time —
+that is $\hat f$. Nothing about the world changed; only the sample did.
+:::
+
+## Two reasons to want $\hat f$
+
+| | Prediction | Inference |
+|---|---|---|
+| **You want** | $\hat f(x)$ close to $y$ for new $x$ | to know *how* $Y$ depends on $X$ |
+| **A black box is** | a success, if it predicts | a failure, even if it predicts |
+
+::: {.step}
+Sessions 02–03 are **inference**. Sessions 04–09 are **prediction**. Session 10 is what happens when
+you need a third thing — **causation** — and find that neither of the first two supplies it.
+:::
+
+# 0.2 · Loss and risk {background-color="#16181A" style="color:#F7F6F3"}
+
+## First say what a mistake costs
+
+A **loss function** $L(y, \hat y)$ prices a single mistake.
+
+```{python}
+e = np.linspace(-3, 3, 400)
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.85))
+
+ax = axes[0]
+ax.plot(e, e**2, color=CL.accent, lw=2.6, label=r"squared  $(y-\hat y)^2$")
+ax.plot(e, np.abs(e), color=CL.good, lw=2.4, ls="--", label=r"absolute  $|y-\hat y|$")
+ax.set_xlabel(r"error  $y - \hat y$"); ax.set_ylabel("loss")
+ax.legend(fontsize=8); ax.set_ylim(0, 6)
+
+ax = axes[1]
+p = np.linspace(.008, .995, 400)
+ax.plot(p, -np.log(p), color=CL.accent, lw=2.6, label=r"log loss  $-\log \hat p_y$")
+ax.plot(p, (p < .5).astype(float), color=CL.warn, lw=2.4, ls="-.", label="0–1 loss")
+ax.set_xlabel(r"probability you gave the true class,  $\hat p_y$")
+ax.set_ylabel("loss"); ax.legend(fontsize=8); ax.set_ylim(0, 4)
+plt.show()
+```
+
+::: {.muted}
+Squared loss punishes one big error more than several small ones. Log loss punishes **confident and
+wrong** without limit — which is why it, not accuracy, trains a classifier.
+:::
+
+## Risk is loss over the population
+
+$$R(g) = \mathbb{E}\big[L(Y, g(X))\big]$$
+
+::: {.warn}
+Read the expectation carefully. It averages over **new** draws of $(X,Y)$ — including draws you have
+never seen and never will.
+:::
+
+::: {.check}
+That is what makes risk the quantity you **care about** and the sample average the quantity you can
+**compute**. The gap between them is the entire subject of Session 04.
+:::
+
+## Watch the gap
+
+```{python}
+rng = np.random.default_rng(4)
+big_x = rng.uniform(0, 8, 20000)
+big_y = f_true(big_x) + rng.normal(0, SIG, 20000)
+
+in_s, out_s = [], []
+for _ in range(300):
+    xt = rng.uniform(0, 8, 25)
+    yt = f_true(xt) + rng.normal(0, SIG, 25)
+    cf = np.polyfit(xt, yt, 6)
+    in_s.append(np.mean((yt - np.polyval(cf, xt)) ** 2))
+    out_s.append(np.mean((big_y - np.polyval(cf, big_x)) ** 2))
+
+fig, ax = plt.subplots(figsize=(6.6, 2.85))
+bins = np.linspace(0, 6, 46)
+ax.hist(np.clip(in_s, 0, 6), bins=bins, color=CL.good, alpha=.75,
+        label=f"sample average (what you compute) — mean {np.mean(in_s):.2f}")
+ax.hist(np.clip(out_s, 0, 6), bins=bins, color=CL.warn, alpha=.70,
+        label=f"risk (what you care about) — mean {np.mean(out_s):.2f}")
+ax.axvline(SIG**2, color=CL.ink, ls="--", lw=1.8)
+ax.text(SIG**2 + .09, ax.get_ylim()[1] * .82, r"$\sigma^2$", color=CL.ink,
+        fontsize=11, fontweight="600")
+ax.set_xlabel("mean squared error"); ax.set_ylabel("out of 300 samples")
+ax.legend(fontsize=7.5, loc="upper right")
+plt.show()
+```
+
+::: {.warn}
+The green histogram sits **below** $\sigma^2$. The red one sits far above it. They are the same
+models, scored two different ways.
+:::
+
+# 0.3 · The best predictor {background-color="#16181A" style="color:#F7F6F3"}
+
+## Suppose you knew everything
+
+Suppose you knew the entire joint distribution of $(X,Y)$ — no estimation, no sample, perfect
+knowledge. What would you predict?
+
+::: {.check}
+Under squared-error loss, the **conditional expectation**:
+
+$$f^\star(x) = \mathbb{E}[Y \mid X = x]$$
+:::
+
+::: {.muted}
+Not a convention, not a convenience. It falls out of three lines of algebra.
+:::
+
+## The derivation
+
+Take any competing predictor $g$, and add and subtract $\mathbb{E}[Y\mid X]$ inside the square:
+
+$$R(g) = \mathbb{E}\Big[\big(\underbrace{Y - \mathbb{E}[Y\mid X]}_{\text{noise}}
++ \underbrace{\mathbb{E}[Y\mid X] - g(X)}_{\text{your error}}\big)^2\Big]$$
+
+The cross term vanishes, because conditioning on $X$ first:
+
+$$\mathbb{E}\Big[(\mathbb{E}[Y\mid X] - g(X))\underbrace{\mathbb{E}\big[Y - \mathbb{E}[Y\mid X]
+\;\big|\; X\big]}_{=\,0}\Big] = 0$$
+
+## What is left
+
+$$R(g) = \sigma^2 + \mathbb{E}\big[(\mathbb{E}[Y\mid X] - g(X))^2\big]$$
+
+::: {.tight}
+- The **first** term does not depend on $g$ at all
+- The **second** is a squared quantity, so it is $\ge 0$
+- It is zero **exactly** when $g(x) = \mathbb{E}[Y\mid X = x]$
+:::
+
+::: {.warn}
+Therefore no predictor — however clever, however flexible, however much data it saw — can achieve a
+squared-error risk below $\sigma^2$. And the conditional expectation achieves it.
+:::
+
+## See it at a single $x$
+
+```{python}
+rng = np.random.default_rng(8)
+X0 = 3.2
+mu0 = f_true(X0)
+draws = mu0 + rng.normal(0, SIG, 4000)
+cands = np.linspace(mu0 - 2.4, mu0 + 2.4, 200)
+risk = [np.mean((draws - c) ** 2) for c in cands]
+
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+
+ax = axes[0]
+ax.hist(draws, bins=44, color=CL.muted, alpha=.75)
+ax.axvline(mu0, color=CL.accent, lw=2.6)
+ax.text(mu0 + .12, ax.get_ylim()[1] * .84, r"$\mathbb{E}[Y \mid X=x_0]$",
+        color=CL.accent, fontsize=9, fontweight="600")
+ax.set_xlabel(f"values of Y when x = {X0}"); ax.set_ylabel("draws")
+
+ax = axes[1]
+ax.plot(cands, risk, color=CL.ink, lw=2.6)
+ax.axhline(SIG**2, color=CL.warn, ls="--", lw=1.6)
+ax.text(cands[4], SIG**2 + .09, r"floor $=\sigma^2$", color=CL.warn, fontsize=8.5)
+ax.axvline(mu0, color=CL.accent, lw=2.2)
+ax.scatter([mu0], [min(risk)], s=70, color=CL.accent, zorder=6)
+ax.set_xlabel("constant you could predict at $x_0$")
+ax.set_ylabel("expected squared error")
+plt.show()
+```
+
+::: {.check}
+A parabola with its minimum at the conditional mean, and a floor it never touches. **That floor is
+$\sigma^2$**, and the right-hand panel is the whole of §0.3 in one picture.
+:::
+
+## For classification: the Bayes rule
+
+Under 0–1 loss the same argument gives: predict the **most probable class**.
+
+$$g^\star(x) = \arg\max_k \; P(Y = k \mid X = x), \qquad
+\text{Bayes error} = 1 - \mathbb{E}\big[\max_k P(Y = k \mid X)\big]$$
+
+```{python}
+from scipy.stats import norm
+g = np.linspace(-4, 6, 500)
+d0, d1 = norm.pdf(g, 0.4, 1.15), norm.pdf(g, 2.6, 1.15)
+b = (0.4 + 2.6) / 2
+
+fig, ax = plt.subplots(figsize=(6.4, 2.75))
+ax.plot(g, d0, color=CL.accent, lw=2.4); ax.plot(g, d1, color=CL.warn, lw=2.4)
+ax.fill_between(g, 0, np.minimum(d0, d1), color=CL.ink, alpha=.28)
+ax.axvline(b, color=CL.ink, ls="--", lw=1.8)
+ax.text(b + .1, d0.max() * .93, "Bayes boundary", color=CL.ink, fontsize=8.5, fontweight="600")
+ax.text(-2.6, d0.max() * .72, "class 0", color=CL.accent, fontsize=9, fontweight="600")
+ax.text(4.1, d0.max() * .72, "class 1", color=CL.warn, fontsize=9, fontweight="600")
+ax.text(1.5, .022, "Bayes error", color=CL.ink, fontsize=8, ha="center")
+ax.set_xlabel("x"); ax.set_ylabel("density"); ax.set_yticks([])
+plt.show()
+```
+
+::: {.muted}
+The shaded overlap is irreducible: where the two classes genuinely coincide, **no** rule separates
+them. Session 06 is about where to put that line when the two errors cost different amounts.
+:::
+
+## So what is every method in this course?
+
+| Session | How it approximates $\mathbb{E}[Y\mid X]$ |
+|---|---|
+| **02–03** | assume it is linear in $X$, estimate the coefficients |
+| **05** | assume it is linear and **sparse**, and penalise |
+| **06** | model $P(Y=1\mid X)$ through a logistic link |
+| **07** | approximate it by a **piecewise constant** function on a learned partition |
+| **08** | approximate $X$ itself first, by a few factors |
+
+::: {.check}
+Eleven weeks, one target. The methods differ only in what they are willing to assume about its
+shape.
+:::
+
+# 0.4 · The irreducible error {background-color="#16181A" style="color:#F7F6F3"}
+
+## What $\sigma^2$ is, and is not
+
+::: {.step}
+It survives the optimal predictor with perfect knowledge of the distribution. So it is **not a
+defect of your method** — it is a statement about your **variables**.
+:::
+
+::: {.tight}
+- unmeasured determinants of $Y$
+- genuine randomness
+- measurement error in $Y$
+:::
+
+::: {.warn}
+*Irreducible* means irreducible **by any method**. It does not mean irreducible by any **dataset**.
+:::
+
+## Three consequences you will use all term
+
+::: {.tight}
+1. **There is a ceiling, and you do not know where it is.** An $R^2$ of 0.30 may be excellent or
+   dreadful; nothing in the output tells you which
+2. **You lower $\sigma^2$ only by measuring more things** — better data, not better algorithms.
+   This is why Session 08's answer to "more series" is the opposite of Session 05's
+3. **A validation error below $\sigma^2$ is impossible.** If you see one you have not discovered
+   something; you have **leaked**
+:::
+
+::: {.check}
+Consequence 3 is the most useful thing on this page. It is a free correctness check you can run on
+any result, including your own.
+:::
+
+## The floor, drawn
+
+```{python}
+rng = np.random.default_rng(23)
+ns = np.array([25, 50, 100, 200, 400, 800, 1600])
+tr_c, te_c = [], []
+for n in ns:
+    a, b_ = [], []
+    for _ in range(40):
+        xt = rng.uniform(0, 8, n)
+        yt = f_true(xt) + rng.normal(0, SIG, n)
+        cf = np.polyfit(xt, yt, 6)
+        a.append(np.mean((yt - np.polyval(cf, xt)) ** 2))
+        b_.append(np.mean((big_y - np.polyval(cf, big_x)) ** 2))
+    tr_c.append(np.mean(a)); te_c.append(np.mean(b_))
+
+fig, ax = plt.subplots(figsize=(6.6, 2.85))
+ax.semilogx(ns, te_c, "s-", color=CL.warn, lw=2.4, ms=5, base=2, label="risk (new data)")
+ax.semilogx(ns, tr_c, "o-", color=CL.good, lw=2.4, ms=5, base=2, label="training error")
+ax.axhline(SIG**2, color=CL.ink, ls="--", lw=2.0)
+ax.text(ns[0] * 1.05, SIG**2 + .06, r"$\sigma^2$ — nothing gets below this", color=CL.ink,
+        fontsize=8.5, fontweight="600")
+ax.set_xlabel("sample size n"); ax.set_ylabel("mean squared error")
+ax.set_ylim(0, max(te_c) * 1.05); ax.legend(fontsize=8)
+plt.show()
+```
+
+::: {.check}
+More data closes the gap between the two curves. It does **not** move the dashed line. Only new
+*variables* do that.
+:::
+
+# 0.5 · Prediction vs inference {background-color="#16181A" style="color:#F7F6F3"}
+
+## They are served by the same $\hat f$, and they pull apart
+
+| | Prediction asks | Inference asks |
+|---|---|---|
+| **Target** | $\hat f(x)$ close to $y$ | $\hat\beta_j$ close to $\beta_j$, honestly |
+| **Judged by** | error on data never seen | coverage of the interval |
+| **Flexibility is** | a resource | a hazard |
+| **Correlated predictors** | mostly harmless | **fatal** (Session 03) |
+| **Fails when** | the future differs (S11) | misspecified, or a confounder is missing |
+
+## Prove the fourth row
+
+```{python}
+#| echo: true
+rng = np.random.default_rng(3)
+BETA, RHO = np.array([1.0, 1.0]), 0.985
+
+def experiment(correlated, reps=400, n=60):
+    """Same truth, same sample size. Only the correlation between x1 and x2 changes."""
+    coef, err = [], []
+    for _ in range(reps):
+        z = rng.normal(size=(n, 2))
+        X = np.c_[z[:, 0], RHO * z[:, 0] + np.sqrt(1 - RHO**2) * z[:, 1]] if correlated else z
+        y = X @ BETA + rng.normal(0, 1, n)
+        fit = sm.OLS(y, sm.add_constant(X)).fit()
+        coef.append(fit.params[1])
+        zt = rng.normal(size=(2000, 2))
+        Xt = np.c_[zt[:, 0], RHO * zt[:, 0] + np.sqrt(1 - RHO**2) * zt[:, 1]] if correlated else zt
+        yt = Xt @ BETA + rng.normal(0, 1, 2000)
+        err.append(np.sqrt(mean_squared_error(yt, fit.predict(sm.add_constant(Xt)))))
+    return np.array(coef), np.array(err)
+
+c_cor, e_cor = experiment(True)
+c_ind, e_ind = experiment(False)
+print(f"correlated  : beta1 sd {c_cor.std():.2f}   wrong sign in {(c_cor<0).mean():.0%}"
+      f"   test RMSE {e_cor.mean():.3f}")
+print(f"independent : beta1 sd {c_ind.std():.2f}   wrong sign in {(c_ind<0).mean():.0%}"
+      f"   test RMSE {e_ind.mean():.3f}")
+```
+
+## Look at what that means
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.9))
+
+ax = axes[0]
+bins = np.linspace(-1.6, 3.6, 46)
+ax.hist(c_ind, bins=bins, color=CL.good, alpha=.75, label=f"independent (sd {c_ind.std():.2f})")
+ax.hist(c_cor, bins=bins, color=CL.warn, alpha=.70, label=f"corr 0.985 (sd {c_cor.std():.2f})")
+ax.axvline(1.0, color=CL.ink, lw=2.2)
+ax.text(1.06, ax.get_ylim()[1] * .88, r"truth $\beta_1=1$", color=CL.ink, fontsize=8.5,
+        fontweight="600")
+ax.axvspan(-1.6, 0, color=CL.warn, alpha=.13)
+ax.text(-.8, ax.get_ylim()[1] * .45, "wrong\nsign", color=CL.warn, fontsize=8,
+        ha="center", fontweight="600")
+ax.set_xlabel(r"$\hat\beta_1$ across 400 samples"); ax.set_ylabel("samples")
+ax.legend(fontsize=7.5, loc="upper right")
+
+ax = axes[1]
+v = [e_ind.mean(), e_cor.mean()]
+b = ax.bar(["independent", "corr 0.985"], v, color=[CL.good, CL.warn], width=.5)
+for r, vv in zip(b, v):
+    ax.text(r.get_x() + r.get_width() / 2, vv + .01, f"{vv:.3f}", ha="center",
+            fontsize=10, fontweight="600")
+ax.set_ylim(0, max(v) * 1.25); ax.set_ylabel("test RMSE")
+ax.set_title("prediction does not notice", fontsize=9.5)
+ax.grid(axis="x", visible=False)
+plt.show()
+```
+
+::: {.warn}
+Same truth, same $n$. The coefficient's spread grows **almost sixfold** and it comes out with the
+**wrong sign in 11% of samples** — while the prediction error is identical to three decimals.
+:::
+
+## And a third question, which looks like the second
+
+> **Causation.** *If we changed $X$, what would happen to $Y$?*
+
+::: {.step}
+Nothing in $Y = f(X) + \varepsilon$ answers that. The model describes an association in the
+population that **generated your data**. It says nothing about a population in which somebody
+intervened.
+:::
+
+::: {.warn}
+A model can predict perfectly, carry tight standard errors, and still be a completely wrong guide to
+policy. **Session 10** is where that is confronted, and it is meant to be uncomfortable.
+:::
+
+# Before Session 01 {background-color="#16181A" style="color:#F7F6F3"}
+
+## Answer these on paper
+
+::: {.tight}
+1. State the difference between $f$, $\hat f$ and $\mathbb{E}[Y\mid X]$ in one sentence each
+2. Show that the cross term in §0.3 vanishes. **Which property of conditional expectation did you
+   use?**
+3. A colleague reports a cross-validated $R^2$ of $0.98$ where every published model reaches $0.4$.
+   Give two explanations, and say which you would check first
+4. Give a variable that is an excellent **predictor** and a useless **policy lever**. Say why they
+   can differ
+5. Under 0–1 loss, what does the Bayes error rate measure, and why can no classifier beat it?
+:::
+
+::: {.muted}
+If you cannot answer one, re-read that section — not the whole page.
+:::
+
+## What to carry into Session 02
+
+::: {.tight}
+1. $f$ is fixed and unknown; $\hat f$ is known and random
+2. Risk is over draws you have never seen; the sample average is not
+3. $\mathbb{E}[Y\mid X]$ is the best predictor under squared loss, and $R(g) = \sigma^2 + \dots$
+4. $\sigma^2$ is a fact about your **variables**, not about your method
+5. Prediction, inference and causation are **three different questions**
+:::
+
+::: {.get}
+Reading: [`the-supervised-learning-problem.md`](the-supervised-learning-problem.md) ·
+Setup: [`setup-vscodium-local-llm.md`](setup-vscodium-local-llm.md) ·
+Then: [Session 02](../../02-geometry-of-least-squares/README.md)
+:::

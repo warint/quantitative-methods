@@ -14,6 +14,11 @@ $\hat\beta$ minimises a squared error, and takes for granted that you know what 
 This page is that missing sentence. It is four ideas, it takes forty minutes, and everything from
 Session 02 to Session 11 is built on it. **It is examinable on the midterm.**
 
+> **There are slides for this.** [`slides-foundations.pptx`](slides-foundations.pptx) walks through
+> the same five sections with the figures — the risk parabola, the $\sigma^2$ floor, the Bayes
+> boundary. Work through the slides; keep this page open beside them for the derivations, which are
+> written out here in full and compressed there.
+
 ---
 
 ## 0.1 The problem, stated once
