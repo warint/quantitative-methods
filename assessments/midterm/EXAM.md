@@ -351,4 +351,7 @@ believe the assumption is not falsifiable as stated, say so and explain what wou
 
 **End of examination.**
 
-*Solutions and marking notes: [`SOLUTIONS.md`](SOLUTIONS.md)*
+*Worked solutions, with the marks shown per sub-part: [`SOLUTIONS.md`](SOLUTIONS.md)*
+
+> Sit the paper first, closed book and timed. The solutions are only worth reading against an
+> attempt you have already made.
