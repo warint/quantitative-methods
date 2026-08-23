@@ -232,8 +232,8 @@ one-command reproduction, seeds set, and the provenance file.
 
 ## 7. The implementation note
 
-**Section 7 of the paper, and 15% of the mark.** This is the section that makes the paper a
-deliverable rather than an exercise.
+**Section 7 of the paper, and 15 of the paper's 100 marks** — see the rubric in §9. This is the
+section that makes the paper a deliverable rather than an exercise.
 
 Your reader works in **R**. You worked in Python. Write the bridge.
 
@@ -253,7 +253,7 @@ It must contain:
    produce one interpretable output. It must actually run — test it.
 5. **Resource requirements.** Download size, RAM, runtime. Say it plainly.
 
-> **Why this is worth 15%.** Because a method you can only apply inside your own environment is not
+> **Why it carries 15 marks.** Because a method you can only apply inside your own environment is not
 > a method you have understood — it is a script you have. Explaining a procedure to someone using
 > different tools forces you to separate what is essential from what is incidental, and that
 > separation *is* the understanding. It is also, incidentally, the single most valuable professional

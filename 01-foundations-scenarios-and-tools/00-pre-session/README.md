@@ -1,6 +1,6 @@
 # Session 01 — Pre-session preparation
 
-> Four things, in this order. Budget **2–3 hours** in total. None of it is optional.
+> Five things, in this order. Budget **3–4 hours** in total. None of it is optional.
 
 ---
 
@@ -11,6 +11,7 @@
 | **`slides-welcome-and-setup.pptx`** | **The walkthrough.** Every install step, in order, with checks. | Work through it at your desk. **Start here.** |
 | `setup-vscodium-local-llm.md` | A one-page checklist and the troubleshooting table | When something breaks, or to confirm you missed nothing |
 | `reading-europe-2031.md` | The critical apparatus for the scenario | *After* reading the scenario itself |
+| **`the-supervised-learning-problem.md`** | **The mathematics Session 02 assumes.** Four ideas, forty minutes. **Examinable.** | Before Session 01, and again before the midterm |
 | `verify_environment.py` | The script that proves your setup works | Last — bring its output to class |
 
 > The slides and the checklist are **not two explanations of the same thing.** The slides walk you
@@ -60,7 +61,22 @@ scenario.
 
 ---
 
-## 4. Run the verification script — 5 min
+## 4. Read the supervised learning problem — 40 min
+
+[`the-supervised-learning-problem.md`](the-supervised-learning-problem.md)
+
+Session 01 spends both halves on the syllabus and on *Europe 2031*, so this is where the
+mathematics of the course actually begins. Four ideas — the model $Y = f(X) + \varepsilon$, loss
+and risk, why $\mathbb{E}[Y \mid X]$ is the best predictor there is, and what the irreducible
+error $\sigma^2$ means.
+
+**Session 02 opens assuming you have read it.** So does Part A of the midterm.
+
+End with the five self-check questions. Answer them on paper.
+
+---
+
+## 5. Run the verification script — 5 min
 
 From the course folder, with your environment activated:
 

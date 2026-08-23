@@ -2,6 +2,12 @@
 
 **Quantitative Methods in International Business · Sessions 1–6**
 
+> **What "Session 1" means here.** Session 01 has no lecture mathematics — both halves are the
+> syllabus and the *Europe 2031* conversation. Its examinable content is the pre-session reading
+> [`the-supervised-learning-problem.md`](../../01-foundations-scenarios-and-tools/00-pre-session/the-supervised-learning-problem.md):
+> the model $Y = f(X) + \varepsilon$, loss and risk, the optimality of $\mathbb{E}[Y \mid X]$,
+> and the irreducible error $\sigma^2$. Part A draws on it directly.
+
 ---
 
 |  |  |

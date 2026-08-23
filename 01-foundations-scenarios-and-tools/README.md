@@ -28,11 +28,17 @@ By the end of this session you should be able to:
 | **First half** (~90 min) | In class | The syllabus: how the course works and how you are judged | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | A conversation: *Europe 2031*, and what AI actually is | [`02-practice/`](02-practice/README.md) |
 
-**Session 01 has no practice and no deliverable.** It is the one session with no mathematics: the first
-half walks through the syllabus, the second is a discussion. The methods begin in Session 02.
+**Session 01 has no practice and no deliverable.** It is the one session with no mathematics *in
+class*: the first half walks through the syllabus, the second is a discussion. The methods begin in
+Session 02.
 
-The pre-session work is still **not optional** — arrive with a working environment and with
-*Europe 2031* read and annotated, or you cannot take part in either half.
+Because both halves are committed, the foundations that Session 02 builds on are a **pre-session
+reading**: [`the-supervised-learning-problem.md`](00-pre-session/the-supervised-learning-problem.md)
+— the model $Y = f(X) + \varepsilon$, loss and risk, why $\mathbb{E}[Y \mid X]$ is the optimal
+predictor, and what $\sigma^2$ means. It is examinable on the midterm.
+
+The pre-session work is **not optional** — arrive with a working environment, with *Europe 2031*
+read and annotated, and with that reading done, or you cannot take part in either half.
 
 ---
 
