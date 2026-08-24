@@ -24,9 +24,9 @@ Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Marko
 decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
 The tooling is modern; the standards are not new.
 
-**Research-oriented, not exercise-oriented.** Each session is built on a published paper, with the
-authors' own replication package where one exists — see [`REPLICATIONS.md`](REPLICATIONS.md), where
-every DOI has been resolved. The term ends in a research paper written for a real reader, and an
+**Research-oriented, not exercise-oriented.** Sessions 02–11 are each built on an academic article
+and its Harvard Dataverse replication package — see [`REPLICATIONS.md`](REPLICATIONS.md). The term
+ends in a research paper written for a real reader, and an
 oral defence of it. Nothing here is a toy problem with a number at the back of the book.
 
 **Open by construction.** No proprietary software, no API keys, no cloud accounts, no per-token
@@ -40,22 +40,37 @@ produce a defensible number, on real European data, and say out loud what it doe
 
 ## How every session works
 
-**Sessions 1–11** have the same three-part shape.
+**Sessions 1–11** have the same four-step rhythm, with a different first-session focus.
 
 ```
-Before class                First half (~90 min)          Second half (~90 min)
-─────────────────────────   ───────────────────────────   ────────────────────────────
-00-pre-session/             01-lecture/                   02-practice/
-  · reading                   · the mathematics             · group work in VS Codium
-  · concepts to review        · derivations                 · implement it yourself
-  · download the data         · what the method assumes     · then break it deliberately
-  · written self-check        · what it cannot do           · a written deliverable
+Before class             In class                  In class: 90 minutes       After class
+──────────────────────   ───────────────────────   ─────────────────────────  ───────────────────────
+00-pre-session/          01-lecture/               02-practice/               QMIB Lab App
+  · required article       · basic equations         · article replication      · optional knowledge check
+  · Dataverse package      · visual derivations      · compare / break / explain · app-generated report
+  · guided annotation      · graphs explained        · one-slide result         · participation credit
+  · written self-check     · assumptions and limits  · two-minute presentation  · never required next prep
 ```
 
-The lecture assumes the pre-session work is done. The practice assumes the data are already downloaded.
-Nothing in a practice session requires an internet connection.
+For Sessions 02–11, the pre-session PowerPoint is the complete preparation brief: students read and
+annotate the required academic article, download its Dataverse package, identify the target result,
+and answer the self-check before class. ISLR is optional background. The lecture assumes that work
+is done. The practice reproduces one published result in groups and ends with a
+one-slide, two-minute presentation by a randomly selected member. **Class ends with those
+presentations; no practice task carries over as required homework.**
 
-**Session 12** is different: group presentations fill both halves. No lecture, no practice.
+**Session 01** begins with workstation installation (VS Codium, Python, Ollama, Qwen 2.5 Coder, and
+Aider), introduces the syllabus and semester, and uses *Europe 2031* for a 90-minute conversation
+about evidence, scenario, prediction, and AI.
+
+Students who want to check their knowledge may complete the corresponding activity in the **QMIB
+Lab App** after class. A completed app report counts toward participation. The lab is optional and
+is never a prerequisite for the next lecture.
+
+**Session 12** is different: the pre-session prepares the final presentation and the class meeting is
+a presentation workshop and defence. There is no separate practice deck.
+
+**Complete PowerPoint and Python demo index: [`slides/COURSE-POWERPOINTS.md`](slides/COURSE-POWERPOINTS.md).**
 
 ### The second half is real research, from Africa
 
@@ -120,12 +135,32 @@ split into a compulsory Track A (German Credit) and an extension Track B (bankru
 
 ## Getting started
 
+Put the repository **directly on your Desktop** and keep the folder name
+`quantitative-methods`. All course commands and PowerPoint instructions assume that location.
+
+macOS / Linux:
+
 ```bash
-git clone https://github.com/warint/quantitative-methods.git qmib
-cd qmib
+cd ~/Desktop
+git clone https://github.com/warint/quantitative-methods.git quantitative-methods
+cd quantitative-methods
 
 python3 -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
+source .venv/bin/activate
+pip install -r requirements.txt
+
+python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
+```
+
+Windows PowerShell:
+
+```powershell
+Set-Location "$HOME\Desktop"
+git clone https://github.com/warint/quantitative-methods.git quantitative-methods
+Set-Location quantitative-methods
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
@@ -149,7 +184,8 @@ github.com/warint/quantitative-methods
 └── group-XX        ← each group commits and pushes here all term
 ```
 
-Practice deliverables go in the session folder, on the group's own branch:
+In-class practice work and the one-slide group result go in the session folder, on the group's own
+branch. They must be finished before the group presents:
 
 ```
 NN-session-name/02-practice/submissions/group-XX/
@@ -190,14 +226,14 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | **10%** | individual, continuous |
+| **Participation** | **10%** | individual, continuous; optional QMIB Lab App reports may be submitted for credit |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet — after Session 06 |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | research paper in teams of three (25) + individual oral, 15 min (15) |
 
 Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
-memo 3 · presentation and defence 3. Session practice sessions themselves are **formative** — commented on, not
-marked.
+memo 3 · presentation and defence 3. The 90-minute group practices are **formative** — commented on,
+not marked. Optional post-class lab reports contribute to participation.
 
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)
 - Final exam brief (paper + oral): [`assessments/final-paper/`](assessments/final-paper/README.md)

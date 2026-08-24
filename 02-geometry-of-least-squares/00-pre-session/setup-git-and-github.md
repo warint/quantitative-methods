@@ -113,11 +113,13 @@ This replaces the Session 01 ZIP. Delete the unzipped folder afterwards so you d
 wrong copy.
 
 ```bash
-git clone https://github.com/warint/quantitative-methods.git qmib
-cd qmib
+cd ~/Desktop                         # macOS / Linux
+git clone https://github.com/warint/quantitative-methods.git quantitative-methods
+cd quantitative-methods
 ```
 
-Then `File → Open Folder…` and choose `qmib`.
+On Windows PowerShell, use `Set-Location "$HOME\Desktop"` for the first line. Then
+`File → Open Folder…` and choose the `quantitative-methods` folder on your Desktop.
 
 Rebuild your environment inside the clone:
 

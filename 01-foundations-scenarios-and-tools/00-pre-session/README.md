@@ -26,7 +26,8 @@ Open **`slides-welcome-and-setup.pptx`** and follow it. In order:
 
 1. VS Codium
 2. Extensions
-3. **The course materials** — download the repository as a ZIP
+3. **The course materials** — download the repository as a ZIP, unzip it directly on your Desktop,
+   and keep the folder name `quantitative-methods`
 4. Python and the virtual environment
 5. Ollama and Qwen 2.5 Coder
 6. aider, the agent in your terminal

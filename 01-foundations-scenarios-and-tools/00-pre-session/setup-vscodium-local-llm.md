@@ -2,7 +2,7 @@
 
 **complete before Session 01 · budget 60–90 minutes**
 
-> **The walkthrough is the slide deck**, `slides-welcome-and-setup.pptx` in this folder. Work
+> **The walkthrough is the slide deck**, `MATH60033A-S01-Pre-Session.pptx` in this folder. Work
 > through that. This page is the checklist you scan afterwards, plus the troubleshooting table.
 > If the two ever disagree, the deck is right.
 
@@ -28,7 +28,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 
 - [ ] **VS Codium** installed from <https://vscodium.com> and it opens
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
-- [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped, and opened with `File → Open Folder…`
+- [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
 - [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked
 - [ ] `python3 --version` prints 3.11.x or 3.12.x
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
