@@ -24,28 +24,22 @@ Three principles, applied throughout.
 
 # Part A — Definitions *(24)*
 
-**A1** *(3)* — $\sigma^2 = \mathrm{Var}(\varepsilon)$, the variance of the component of $Y$
-not explained by any function of $X$. It is irreducible because the optimal predictor under squared
-loss is $\mathbb{E}[Y\mid X]$, and even that predictor leaves
-$\mathbb{E}[(Y - \mathbb{E}[Y|X])^2] = \sigma^2$. It reflects what the predictors do not observe,
-not a defect of the method.
+**A1** *(3)* — Regressing $y$ on $x_j$ **and** the other regressors $X_{-j}$ gives the same
+$\hat\beta_j$ as: residualise $x_j$ on $X_{-j}$, residualise $y$ on $X_{-j}$, then regress one
+residual on the other. So $\hat\beta_j$ measures the relationship between $y$ and the part of $x_j$
+that the other regressors **cannot explain** — a partial, not a marginal, relationship.
 
-> *2 marks for the definition, 1 for connecting it to the optimality of $\mathbb{E}[Y|X]$. A
-> answer that says only "it's the noise" earns 1.*
->
-> *Also full marks for reaching the same point through the classification analogue — the **Bayes
-> error rate**, $1 - \mathbb{E}[\max_k P(Y=k\mid X)]$, which no classifier can beat for the same
-> reason. Both are in §0.3–0.4 of the pre-session reading.*
+> *2 marks for the residual-on-residual statement, 1 for the interpretation. An answer that says
+> only "it controls for the other variables", without the partialling-out mechanism, earns 1.*
 
-**A2** *(3)* — $R(g) = \mathbb{E}\big[L(Y, g(X))\big]$, the expected loss taken over the **joint
-distribution of $(X,Y)$ in the population** — that is, over new draws the model has never seen, not
-over the rows in hand. The average loss on your own sample is not an estimate of it because the same
-observations were used to *choose* $g$; the fit has adapted to their noise, so the sample average is
-biased downward (Session 04's optimism).
+**A2** *(3)* — As $K$ rises each training set is larger, so the **bias** of the CV estimate falls:
+each fit is closer to the model you will actually deploy on all $n$ rows. The **variance** rises,
+because the $K$ training sets overlap more and the fold estimates become highly correlated — and the
+cost rises linearly in $K$. $K = 5$ or $10$ sits where the bias is already small and neither the
+variance nor the cost has yet blown up.
 
-> *1 mark for the definition, 1 for naming what the expectation ranges over, 1 for why the sample
-> average is not an unbiased estimate. "The average error on the test set" confuses risk with an
-> estimator of it — 1 mark.*
+> *1 for bias falling, 1 for variance rising, 1 for the trade-off as the reason for the convention.
+> Accept computational cost as part of the third mark.*
 
 **A3** *(3)* — Linearity in parameters, strict exogeneity $\mathbb{E}[\varepsilon\mid X]=0$, and
 full column rank of $X$. **Homoskedasticity is not needed** — it is required for efficiency
@@ -85,39 +79,27 @@ discrimination and is badly miscalibrated.
 
 ## B1 *(6)*
 
-**(a)** Write $Y - g(X) = \big(Y - \mathbb{E}[Y\mid X]\big) + \big(\mathbb{E}[Y\mid X] - g(X)\big)$
-and square:
+**(a)** $t = \dfrac{0.42}{0.10} = \mathbf{4.20}$. Interval:
+$0.42 \pm 1.96(0.10) = 0.42 \pm 0.196 = \mathbf{[0.224,\, 0.616]}$. Since $|t| > 1.96$ and the
+interval excludes zero, it **is** significant at 5%.
 
-$$R(g) = \underbrace{\mathbb{E}\big[(Y-\mathbb{E}[Y\mid X])^2\big]}_{=\;\sigma^2}
-+ \mathbb{E}\Big[\big(\mathbb{E}[Y\mid X] - g(X)\big)^2\Big]
-+ 2\,\mathbb{E}\big[(Y-\mathbb{E}[Y\mid X])(\mathbb{E}[Y\mid X]-g(X))\big]$$
+**(b)** $t = \dfrac{0.42}{0.25} = \mathbf{1.68}$. Interval:
+$0.42 \pm 1.96(0.25) = 0.42 \pm 0.49 = \mathbf{[-0.070,\, 0.910]}$. The point estimate has **not
+moved** — clustering changes the standard error, not the coefficient. But the standard error is
+$2.5\times$ larger, the interval now **contains zero**, and the result is no longer significant.
 
-The cross term vanishes by the **tower property** (law of iterated expectations): condition on $X$
-first, and since $\mathbb{E}[Y\mid X] - g(X)$ is a function of $X$ it comes outside the inner
-expectation, leaving $\mathbb{E}\big[Y - \mathbb{E}[Y\mid X] \,\big|\, X\big] = 0$.
+**(c)** "It is significant" is not a reason to prefer one standard error over another — that is
+choosing the method by the answer it gives. The **clustered** standard error is the right one here:
+30 countries observed over 12 years means the 360 rows are not independent, and errors within a
+country are almost certainly correlated across years. Classical standard errors assume independence
+and are therefore too small. The honest report is the clustered one.
 
-**(b)** $g^\star(x) = \mathbb{E}[Y\mid X = x]$, and the minimum is $R(g^\star) = \sigma^2$. The
-second term is a squared quantity, so it is $\ge 0$ and equals zero exactly at $g = \mathbb{E}[Y|X]$.
-
-**(c)** $0.04 < \sigma^2 = 0.09$, and part (b) says **no predictor can go below $\sigma^2$**. So the
-reported figure is not a performance result — it is evidence of an error. The most likely cause is
-**leakage**: some step that learned from the data (scaling, imputation, feature selection, or the
-choice of hyperparameter) was fitted on the full sample rather than inside each fold, so the
-"held-out" folds were not held out. Dependence between rows assigned to different folds is the
-second candidate.
-
-> *Marking: (a) 3 — 1 for the add-and-subtract, 1 for the three-term expansion, 1 for naming the
-> tower property. Asserting the cross term is zero without justification earns 2.
-> (b) 1 — both the minimiser and the value are needed. (c) 2 — 1 for recognising the result is
-> impossible rather than merely good, 1 for naming leakage.*
+> *Marking: (a) 2 — 1 for the $t$, 1 for the interval. (b) 2 — 1 for both recomputed values, 1 for
+> noting the coefficient is unchanged while the interval now covers zero. (c) 2 — 1 for naming the
+> circularity, 1 for clustering with the dependence argument.*
 >
-> *There is a more careful answer, and it earns full marks: a cross-validated MSE is itself a random
-> quantity with sampling variance, so a single estimate **can** fall below $\sigma^2$ by chance.
-> Saying this **and** observing that a 56% shortfall is far too large to be sampling noise is the
-> better answer, not a worse one. Stopping at "CV is random, so it's fine" earns 1.*
->
-> *This is the most diagnostic question in Part B. If you read $0.04$ as a strong result, the word
-> "irreducible" has not yet landed — whatever you wrote for A1.*
+> *Full marks in (c) also for noting that 30 clusters is on the low side, so a wild bootstrap or a
+> small-sample correction would be prudent.*
 
 ## B2 *(6)*
 
@@ -382,7 +364,7 @@ part separately and read the row that applies:
 | Weak in | What it means | What to do before Session 7 |
 |---|---|---|
 | **A** | You are working from impressions, not definitions | Re-do the pre-session self-checks in writing |
-| **A1, A2 or B1** | The foundations are missing, not the methods | Re-read [`the-supervised-learning-problem.md`](../../01-foundations-scenarios-and-tools/00-pre-session/the-supervised-learning-problem.md) and re-derive §0.3 unaided. Nothing later in the course stands without it |
+| **A1, A2 or B1** | Session 02–04 foundations: partialling out, and what cross-validation estimates | Re-derive FWL on paper, then re-run one of your own CV scripts and say what each fold is estimating |
 | **B** | You can describe methods but not derive them | Re-derive B1, B2 and B3 from scratch, without notes |
 | **C** | You accept output as given | Re-run your own Session 4 leakage practice and read the diagnostics |
 | **D** | You over-claim | Re-read your Session 1 memo. This is the row that matters most for the final paper |

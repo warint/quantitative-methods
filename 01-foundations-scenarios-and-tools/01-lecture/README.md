@@ -10,11 +10,11 @@ This session is not a lecture. There is no mathematics in it. The first half wal
 [`SYLLABUS.md`](../../SYLLABUS.md) in full, and you should arrive having read it — the ninety minutes
 are for the questions it raises, not for reading it aloud.
 
-The mathematics begins in Session 02 — but it does not begin from nothing. The concepts Session 02
-takes for granted are in the pre-session reading
-[`the-supervised-learning-problem.md`](../00-pre-session/the-supervised-learning-problem.md):
+The mathematics begins in Session 02, which introduces everything it needs. If you would like to
+arrive with the vocabulary already in hand, the optional
+[`the-supervised-learning-problem.md`](../00-pre-session/the-supervised-learning-problem.md) covers
 $Y = f(X) + \varepsilon$, loss and risk, the optimality of $\mathbb{E}[Y\mid X]$, and the
-irreducible error. **Read it before this session, not after.** Part A of the midterm examines it.
+irreducible error.
 
 ---
 

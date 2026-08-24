@@ -1,6 +1,6 @@
 # Session 01 — Pre-session preparation
 
-> Five things, in this order. Budget **3–4 hours** in total. None of it is optional.
+> Four things, in this order. Budget **2–3 hours** in total. None of it is optional.
 
 ---
 
@@ -8,12 +8,11 @@
 
 | File | What it is | When you use it |
 |---|---|---|
-| **`slides-welcome-and-setup.pptx`** | **The walkthrough.** Every install step, in order, with checks. | Work through it at your desk. **Start here.** |
+| **`MATH60033A-S01-Pre-Session.pptx`** | **The walkthrough.** Every install step, in order, with checks. | Work through it at your desk. **Start here.** |
 | `setup-vscodium-local-llm.md` | A one-page checklist and the troubleshooting table | When something breaks, or to confirm you missed nothing |
 | `reading-europe-2031.md` | The critical apparatus for the scenario | *After* reading the scenario itself |
-| **`slides-foundations.pptx`** | **The walkthrough for the mathematics**, with the figures | Work through it at your desk, after the setup |
-| **`the-supervised-learning-problem.md`** | The same four ideas in prose, with the derivations written out. **Examinable.** | Alongside the slides, and again before the midterm |
 | `verify_environment.py` | The script that proves your setup works | Last — bring its output to class |
+| `the-supervised-learning-problem.md` | *Optional.* The vocabulary Session 02 uses, with the derivations written out | If you want a head start on the mathematics |
 
 > The slides and the checklist are **not two explanations of the same thing.** The slides walk you
 > through it; the checklist is what you scan afterwards. If they ever disagree, the slides are right.
@@ -22,7 +21,7 @@
 
 ## 1. Build your workstation — 60–90 min
 
-Open **`slides-welcome-and-setup.pptx`** and follow it. In order:
+Open **`MATH60033A-S01-Pre-Session.pptx`** and follow it. In order:
 
 1. VS Codium
 2. Extensions
@@ -63,24 +62,7 @@ scenario.
 
 ---
 
-## 4. Read the supervised learning problem — 40 min
-
-Open **`slides-foundations.pptx`** and work through it, with
-[`the-supervised-learning-problem.md`](the-supervised-learning-problem.md) open beside it. The
-slides carry the pictures; the reading carries the derivations written out in full.
-
-Session 01 spends both halves on the syllabus and on *Europe 2031*, so this is where the
-mathematics of the course actually begins. Four ideas — the model $Y = f(X) + \varepsilon$, loss
-and risk, why $\mathbb{E}[Y \mid X]$ is the best predictor there is, and what the irreducible
-error $\sigma^2$ means.
-
-**Session 02 opens assuming you have read it.** So does Part A of the midterm.
-
-End with the five self-check questions. Answer them on paper.
-
----
-
-## 5. Run the verification script — 5 min
+## 4. Run the verification script — 5 min
 
 From the course folder, with your environment activated:
 
@@ -98,8 +80,15 @@ itself a test of whether it works.
 ## Optional, and worth it
 
 **ISLR ch. 2**, free at <https://www.statlearning.com/>. Sections 2.1–2.2 give the vocabulary — $f$,
-$\varepsilon$, reducible and irreducible error — used from Session 02 onward. Not needed for
-Session 01, which has no mathematics in it.
+$\varepsilon$, reducible and irreducible error — used from Session 02 onward.
+
+**[`the-supervised-learning-problem.md`](the-supervised-learning-problem.md)** covers the same
+ground in forty minutes, with the derivations written out and five self-check questions: the model
+$Y = f(X) + \varepsilon$, loss and risk, why $\mathbb{E}[Y \mid X]$ is the best predictor there is,
+and what the irreducible error $\sigma^2$ means.
+
+Neither is needed for Session 01, which has no mathematics in it, and neither is examinable.
+Session 02 introduces everything it needs.
 
 ---
 

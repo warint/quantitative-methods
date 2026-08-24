@@ -2,12 +2,6 @@
 
 **Quantitative Methods in International Business · Sessions 1–6**
 
-> **What "Session 1" means here.** Session 01 has no lecture mathematics — both halves are the
-> syllabus and the *Europe 2031* conversation. Its examinable content is the pre-session reading
-> [`the-supervised-learning-problem.md`](../../01-foundations-scenarios-and-tools/00-pre-session/the-supervised-learning-problem.md):
-> the model $Y = f(X) + \varepsilon$, loss and risk, the optimality of $\mathbb{E}[Y \mid X]$,
-> and the irreducible error $\sigma^2$. Part A draws on it directly.
-
 ---
 
 |  |  |
@@ -61,13 +55,13 @@
 
 ---
 
-**A1.** *(3)* Define the irreducible error $\sigma^2$ in the model $Y = f(X) + \varepsilon$, and
-explain why no choice of estimator can reduce it.
+**A1.** *(3)* State the **Frisch–Waugh–Lovell** result, and say what it tells you a multiple-regression
+coefficient $\hat\beta_j$ actually measures.
 
 <br><br><br>
 
-**A2.** *(3)* Define the **risk** $R(g)$ of a predictor $g$. State precisely what the expectation is
-taken over, and why the average loss on your own sample is not an estimate of it.
+**A2.** *(3)* In $K$-fold cross-validation, state what rises and what falls as $K$ increases, and
+say why $K = 5$ or $10$ became the convention.
 
 <br><br><br>
 
@@ -110,23 +104,21 @@ Give one example of a model that has one without the other.
 
 ---
 
-## B1. The best predictor under squared loss *(6 points)*
+## B1. Standard errors and what they license *(6 points)*
 
-Let $Y = f(X) + \varepsilon$ with $\mathbb{E}[\varepsilon \mid X] = 0$ and
-$\mathrm{Var}(\varepsilon) = \sigma^2$. Let $g$ be **any** predictor.
+On a panel of 30 countries observed over 12 years, a regression of productivity growth on ICT
+investment gives $\hat\beta_1 = 0.42$ with a **classical** standard error of $0.10$.
 
-**(a)** *(3)* Show that
+> Use $1.96$ for the 95% critical value throughout.
 
-$$R(g) = \mathbb{E}\big[(Y - g(X))^2\big]
-= \sigma^2 + \mathbb{E}\Big[\big(\mathbb{E}[Y \mid X] - g(X)\big)^2\Big].$$
+**(a)** *(2)* Compute the $t$-statistic and the 95% confidence interval. Is the coefficient
+significant at 5%?
 
-Show the expansion, and name the property of conditional expectation that makes the cross term
-vanish.
+**(b)** *(2)* Re-estimated with standard errors **clustered by country**, the standard error becomes
+$0.25$. Recompute the $t$-statistic and the interval, and state what changed.
 
-**(b)** *(1)* State the $g$ that minimises $R(g)$, and the value of the minimum.
-
-**(c)** *(2)* A colleague reports a **5-fold cross-validated** MSE of $0.04$ on a simulation in
-which $\sigma^2$ is known to equal $0.09$. State what you conclude, and name the most likely cause.
+**(c)** *(2)* The analyst reports the classical result, "because it is significant". State what is
+wrong with that, and say which standard error is the right one here and why.
 
 <br><br><br><br>
 

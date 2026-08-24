@@ -11,13 +11,11 @@ starts in Session 02 — and it starts *mid-sentence*, because Session 02 opens 
 $\hat\beta$ minimises a squared error, and takes for granted that you know what a squared error is
 *for*.
 
-This page is that missing sentence. It is four ideas, it takes forty minutes, and everything from
-Session 02 to Session 11 is built on it. **It is examinable on the midterm.**
+This page is that missing sentence. It is four ideas and it takes forty minutes.
 
-> **There are slides for this.** [`slides-foundations.pptx`](slides-foundations.pptx) walks through
-> the same five sections with the figures — the risk parabola, the $\sigma^2$ floor, the Bayes
-> boundary. Work through the slides; keep this page open beside them for the derivations, which are
-> written out here in full and compressed there.
+> **This page is optional and is not examinable.** Session 02 introduces everything it needs from
+> first principles. Read this if you would rather arrive with the vocabulary already in hand — many
+> students find the rest of the course easier for it.
 
 ---
 

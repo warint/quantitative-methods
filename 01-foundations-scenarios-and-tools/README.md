@@ -32,13 +32,12 @@ By the end of this session you should be able to:
 class*: the first half walks through the syllabus, the second is a discussion. The methods begin in
 Session 02.
 
-Because both halves are committed, the foundations that Session 02 builds on are a **pre-session
-reading**: [`the-supervised-learning-problem.md`](00-pre-session/the-supervised-learning-problem.md)
-— the model $Y = f(X) + \varepsilon$, loss and risk, why $\mathbb{E}[Y \mid X]$ is the optimal
-predictor, and what $\sigma^2$ means. It is examinable on the midterm.
+The pre-session work is **not optional** — arrive with a working environment and with *Europe 2031*
+read and annotated, or you cannot take part in either half.
 
-The pre-session work is **not optional** — arrive with a working environment, with *Europe 2031*
-read and annotated, and with that reading done, or you cannot take part in either half.
+If you want a head start on the mathematics, the optional
+[`the-supervised-learning-problem.md`](00-pre-session/the-supervised-learning-problem.md) covers the
+vocabulary Session 02 uses. It is not required and not examinable.
 
 ---
 
