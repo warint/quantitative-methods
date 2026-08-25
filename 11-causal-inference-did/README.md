@@ -2,6 +2,9 @@
 
 > **What are you responsible for when someone acts on your model?**
 
+> **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-11-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S11-Lecture.qmd`](01-lecture/MATH60033A-S11-Lecture.qmd).
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

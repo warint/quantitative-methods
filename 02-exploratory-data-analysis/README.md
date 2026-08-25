@@ -2,6 +2,9 @@
 
 > **Before you model anything, what does the data actually look like?**
 
+> **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-02-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S02-Lecture.qmd`](01-lecture/MATH60033A-S02-Lecture.qmd).
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

@@ -2,6 +2,9 @@
 
 > **If we abandon linearity, what do we lose - and is interpretability recoverable?**
 
+> **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-07-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S07-Lecture.qmd`](01-lecture/MATH60033A-S07-Lecture.qmd).
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

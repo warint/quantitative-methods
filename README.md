@@ -38,6 +38,18 @@ produce a defensible number, on real European data, and say out loud what it doe
 
 ---
 
+## Lecture slides, in your browser
+
+**[https://warint.github.io/quantitative-methods/](https://warint.github.io/quantitative-methods/)**
+
+Every lecture deck renders as a slideshow you can open directly — no download, no PowerPoint.
+Press **F** for full screen, **S** for speaker notes, **Esc** for the slide overview.
+
+The sources are the `MATH60033A-S*-Lecture.qmd` files in each session's `01-lecture/` folder;
+rebuild the site with `scripts/render_session_lectures.sh` and `scripts/build_docs.py`.
+
+---
+
 ## How every session works
 
 **Sessions 1–11** have the same four-step rhythm, with a different first-session focus.

@@ -2,6 +2,9 @@
 
 > **How do you measure something that only exists as words?**
 
+> **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-09-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S09-Lecture.qmd`](01-lecture/MATH60033A-S09-Lecture.qmd).
+
 Quantitative Methods in International Business · duration 3h00
 
 ---
