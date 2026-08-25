@@ -72,4 +72,4 @@ prematurely.
 
 ---
 
-[<- Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md) | [Session 07: Trees, Forests, and Gradient Boosting ->](../07-trees-forests-boosting/README.md)
+[<- Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md) | [Session 07: Trees, Forests, and Gradient Boosting ->](../07-pca-and-factor-analysis/README.md)

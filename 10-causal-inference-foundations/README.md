@@ -68,4 +68,4 @@ identification argument and whose last sentence states what would change your co
 
 ---
 
-[<- Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data](../09-clustering-and-text-as-data/README.md) | [Session 11: Forecasting, Distribution Shift, and Model Governance ->](../11-forecasting-drift-and-governance/README.md)
+[<- Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data](../09-structural-equation-modelling/README.md) | [Session 11: Forecasting, Distribution Shift, and Model Governance ->](../11-causal-inference-did/README.md)

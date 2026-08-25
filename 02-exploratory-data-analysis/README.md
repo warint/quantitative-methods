@@ -73,4 +73,4 @@ in a paper, and what does its shape tell you about the methods available to you 
 
 ---
 
-[<- Session 01: Foundations, Scenarios, and Tools](../01-foundations-scenarios-and-tools/README.md) | [Session 03: From Data to Models ->](../03-inference-diagnostics-interpretation/README.md)
+[<- Session 01: Foundations, Scenarios, and Tools](../01-foundations-scenarios-and-tools/README.md) | [Session 03: From Data to Models ->](../03-regression-adequacy-and-validity/README.md)

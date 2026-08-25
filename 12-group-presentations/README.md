@@ -68,7 +68,7 @@ Submit everything to `submissions/group-XX/`. Preparation checklist:
 [`00-pre-session/README.md`](00-pre-session/README.md).
 
 The governance file, backtest and shift diagnostic were drafted in the
-[Session 11 practice](../11-forecasting-drift-and-governance/02-practice/README.md) — this session assesses
+[Session 11 practice](../11-causal-inference-did/02-practice/README.md) — this session assesses
 the finished versions.
 
 ---
@@ -121,4 +121,4 @@ Go and be careful with other people's decisions.
 
 ---
 
-[<- Session 11: Forecasting, Distribution Shift, and Model Governance](../11-forecasting-drift-and-governance/README.md)
+[<- Session 11: Forecasting, Distribution Shift, and Model Governance](../11-causal-inference-did/README.md)

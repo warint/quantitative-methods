@@ -66,4 +66,4 @@ These carry forward directly into the Session 12 submission — nothing here is 
 
 ---
 
-[<- Session 10: Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects](../10-causal-machine-learning/README.md) | [Session 12: Final Group Presentations ->](../12-group-presentations/README.md)
+[<- Session 10: Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects](../10-causal-inference-foundations/README.md) | [Session 12: Final Group Presentations ->](../12-group-presentations/README.md)

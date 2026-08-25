@@ -67,4 +67,4 @@ RMSE?*
 
 ---
 
-[<- Session 06: Classification: Logistic Regression, Regularisation, and Decision Thresholds](../06-classification-logistic-and-penalised/README.md) | [Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics ->](../08-pca-and-factor-models/README.md)
+[<- Session 06: Classification: Logistic Regression, Regularisation, and Decision Thresholds](../06-advanced-regression/README.md) | [Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics ->](../08-knn-and-bias-variance/README.md)

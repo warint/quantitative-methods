@@ -68,4 +68,4 @@ demonstrated, receives full marks.**
 
 ---
 
-[<- Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics](../08-pca-and-factor-models/README.md) | [Session 10: Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects ->](../10-causal-machine-learning/README.md)
+[<- Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics](../08-knn-and-bias-variance/README.md) | [Session 10: Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects ->](../10-causal-inference-foundations/README.md)

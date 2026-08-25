@@ -67,4 +67,4 @@ than optimism.
 
 ---
 
-[<- Session 07: Trees, Forests, and Gradient Boosting](../07-trees-forests-boosting/README.md) | [Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data ->](../09-clustering-and-text-as-data/README.md)
+[<- Session 07: Trees, Forests, and Gradient Boosting](../07-pca-and-factor-analysis/README.md) | [Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data ->](../09-structural-equation-modelling/README.md)

@@ -67,4 +67,4 @@ referee report?*
 
 ---
 
-[<- Session 03: Linear Regression: Inference, Diagnostics, and Interpretation](../03-inference-diagnostics-interpretation/README.md) | [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net ->](../05-ridge-lasso-elastic-net/README.md)
+[<- Session 03: Linear Regression: Inference, Diagnostics, and Interpretation](../03-regression-adequacy-and-validity/README.md) | [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net ->](../05-ridge-lasso-elastic-net/README.md)

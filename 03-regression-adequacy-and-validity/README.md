@@ -66,4 +66,4 @@ The paragraph is worth as much as the code.
 
 ---
 
-[<- Session 02: Exploratory Data Analysis: Centre, Spread, and Shape](../02-exploratory-data-analysis/README.md) | [Session 04: The Bias-Variance Tradeoff, Overfitting, and Cross-Validation ->](../04-bias-variance-and-cross-validation/README.md)
+[<- Session 02: Exploratory Data Analysis: Centre, Spread, and Shape](../02-exploratory-data-analysis/README.md) | [Session 04: The Bias-Variance Tradeoff, Overfitting, and Cross-Validation ->](../04-logistic-ordinal-multinomial/README.md)

@@ -67,4 +67,4 @@ them, and what must you refuse to claim?*
 
 ---
 
-[<- Session 04: The Bias-Variance Tradeoff, Overfitting, and Cross-Validation](../04-bias-variance-and-cross-validation/README.md) | [Session 06: Classification: Logistic Regression, Regularisation, and Decision Thresholds ->](../06-classification-logistic-and-penalised/README.md)
+[<- Session 04: The Bias-Variance Tradeoff, Overfitting, and Cross-Validation](../04-logistic-ordinal-multinomial/README.md) | [Session 06: Classification: Logistic Regression, Regularisation, and Decision Thresholds ->](../06-advanced-regression/README.md)
