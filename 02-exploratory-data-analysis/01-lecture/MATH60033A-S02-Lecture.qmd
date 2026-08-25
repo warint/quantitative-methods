@@ -261,11 +261,14 @@ Sample mean
 ::::: {.column style="width:50%;"}
 :::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# built-in data and making a dataframe out of a vector
-mydata <- data.frame(stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import statsmodels.api as sm
 
-#View(mydata)
+# 21 observations from an ammonia-oxidation plant — ships with statsmodels,
+# so there is nothing to download.
+mydata = sm.datasets.stackloss.load_pandas().data
+stack_loss = mydata["STACKLOSS"]
 ```
 :::
 ::::
@@ -286,13 +289,13 @@ mydata <- data.frame(stack.loss)
 :::::: {.column style="width:50%;"}
 ::::: cell
 ::: {#cb2 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-mean(mydata$stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.mean()
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 17.52381
+    np.float64(17.523809523809526)
 :::
 :::::
 ::::::
@@ -312,13 +315,13 @@ How to find it
 
 ::::: cell
 ::: {#cb4 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-median(mydata$stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.median()
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 15
+    np.float64(15.0)
 :::
 :::::
 
@@ -339,15 +342,15 @@ How to find it
 
 ::::: cell
 ::: {#cb6 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Let's simplify the writing
-attach(mydata)
-mean(stack.loss, trim = 0.05)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from scipy import stats
+
+stats.trim_mean(stack_loss, 0.05)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 16.78947
+    np.float64(16.789473684210527)
 :::
 :::::
 
@@ -357,14 +360,13 @@ mean(stack.loss, trim = 0.05)
 
 ::::: cell
 ::: {#cb8 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-quantile(stack.loss, probs = 0.75)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.quantile(0.75)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    75% 
-     19 
+    np.float64(19.0)
 :::
 :::::
 
@@ -372,14 +374,16 @@ So, [\\(75%\\)]{.math .inline} of the data (.75\*21=16) fall below the value [\\
 
 ::::: cell
 ::: {#cb10 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-quantile(stack.loss, probs = c(0, 0.25, 0.80))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.quantile([0, 0.25, 0.80])
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-     0% 25% 80% 
-      7  11  20 
+    0.00     7.0
+    0.25    11.0
+    0.80    20.0
+    Name: STACKLOSS, dtype: float64
 :::
 :::::
 
@@ -395,13 +399,13 @@ quantile(stack.loss, probs = c(0, 0.25, 0.80))
 
 ::::: cell
 ::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-pnorm(1800, mean = 1500, sd = 300)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stats.norm.cdf(1800, loc=1500, scale=300)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 0.8413447
+    np.float64(0.8413447460685429)
 :::
 :::::
 ::::::::::::::::
@@ -435,13 +439,15 @@ The **sample standard deviation** is [\\((s = \\sqrt{s\^{2}})\\)]{.math .inline}
 
 :::::: cell
 ::: {#cb14 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-var(stack.loss); sd(stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(stack_loss.var(ddof=1))
+print(stack_loss.std(ddof=1))
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 103.4619
+    103.46190476190478
+    10.171622523565489
 :::
 
 ::: {.cell-output .cell-output-stdout}
@@ -515,13 +521,13 @@ Following the 68-95-99.7 Rule:
 
 ::::: cell
 ::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-IQR(stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.quantile(0.75) - stack_loss.quantile(0.25)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 8
+    np.float64(8.0)
 :::
 :::::
 
@@ -531,14 +537,15 @@ IQR(stack.loss)
 
 ::::: cell
 ::: {#cb19 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-quantile(stack.loss, probs = c(0.25, 0.75))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stack_loss.quantile([0.25, 0.75])
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    25% 75% 
-     11  19 
+    0.25    11.0
+    0.75    19.0
+    Name: STACKLOSS, dtype: float64
 :::
 :::::
 :::::::::::::::::::::::
@@ -606,14 +613,21 @@ Things to notice:
 
 ::::: cell
 ::: {#cb21 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(e1071) # install.packages("e1071")
-skewness(stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import numpy as np
+
+def skewness(x):
+    """g1, exactly as defined on the previous slide."""
+    x = np.asarray(x, float)
+    xbar, s = x.mean(), x.std(ddof=1)
+    return ((x - xbar) ** 3).mean() / s ** 3
+
+skewness(stack_loss)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 1.156401
+    np.float64(1.1564007167787318)
 :::
 :::::
 
@@ -621,23 +635,28 @@ If [\\(\\vert g\_{1} \\vert \> 2\\sqrt{6/n}\\)]{.math .inline}, then the data di
 
 ::::::: cell
 ::: {#cb23 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-skewness(discoveries)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The same test on course data: GDP per capita across 30 European countries
+import pandas as pd
+core = pd.read_parquet("data/spine/core.parquet")
+gdp = core["gdp_pc_eur"].dropna()
+
+skewness(gdp)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 1.2076
+    np.float64(0.8805789352785794)
 :::
 
 ::: {#cb25 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-2*sqrt(6/length(discoveries))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+2 * np.sqrt(6 / len(gdp))
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 0.4898979
+    np.float64(0.2343499700593521)
 :::
 :::::::
 
@@ -659,14 +678,19 @@ Things to note:
 
 ::::: cell
 ::: {#cb27 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(e1071)
-kurtosis(stack.loss)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+def excess_kurtosis(x):
+    """g2, with the -3 that puts the normal distribution at zero."""
+    x = np.asarray(x, float)
+    xbar, s = x.mean(), x.std(ddof=1)
+    return ((x - xbar) ** 4).mean() / s ** 4 - 3
+
+excess_kurtosis(stack_loss)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 0.1343524
+    np.float64(0.13435238060300536)
 :::
 :::::
 
@@ -674,23 +698,27 @@ If [\\(\\vert g\_{2} \\vert \> 4\\sqrt{6/n}\\)]{.math .inline}, then the data di
 
 ::::::: cell
 ::: {#cb29 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-kurtosis(UKDriverDeaths)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Renewable share: symmetric, but far from normal in the tails
+ener = pd.read_parquet("data/spine/angle_a_country.parquet")
+renew = ener["share_renew"].dropna()
+
+excess_kurtosis(renew)
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 0.07133848
+    np.float64(-0.6560298273186116)
 :::
 
 ::: {#cb31 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-4*sqrt(6/length(UKDriverDeaths))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+4 * np.sqrt(6 / len(renew))
 ```
 :::
 
 ::: {.cell-output .cell-output-stdout}
-    [1] 0.7071068
+    np.float64(0.47866161858603057)
 :::
 :::::::
 :::::::::::::::::::

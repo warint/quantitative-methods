@@ -83,6 +83,16 @@ def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / ".nojekyll").touch()   # skip Jekyll: nothing here needs processing
 
+    # Publish the data spine alongside the slides, so qmib.REMOTE works from a
+    # notebook that has no clone of the repository (Colab, a student's laptop).
+    data_out = DOCS / "data"
+    data_out.mkdir(exist_ok=True)
+    n_data = 0
+    for f in sorted((ROOT / "data" / "spine").glob("*.parquet")):
+        shutil.copy2(f, data_out / f.name)
+        n_data += 1
+    print(f"published {n_data} spine files to docs/data/")
+
     pattern = str(ROOT / "[0-9][0-9]-*/01-lecture/MATH60033A-S*-Lecture.html")
     decks = sorted(glob.glob(pattern))
     if not decks:
