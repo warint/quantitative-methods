@@ -29,6 +29,10 @@ By the end of this session you should be able to:
   threshold $2\sqrt{6/n}$ and $4\sqrt{6/n}$.
 - Show that skewness and kurtosis are **independent** — and that symmetry is not normality.
 - Read a mean–median gap as evidence about shape rather than as a rounding artefact.
+- Fit a **simple regression** by least squares in Python, and state the slope **in units**.
+- Compute a **fitted value** and a **residual** by hand, and say what each one is.
+- Explain what adding a second predictor does to a slope — what *controlling for* means.
+- Say why a slope is an **association**, and what it would take to call it a cause.
 
 ---
 
@@ -71,7 +75,8 @@ in a paper, and what does its shape tell you about the methods available to you 
 
 ## Before the next session
 
-- Bring the profile of your variables. Session 03 fits a mean function to one of them.
+- Bring the profile of your variables. Session 03 asks whether the regression you fitted
+  today can be trusted — its residuals, its influential points, its assumptions.
 - Optional: ISLR ch. 2 for the vocabulary Session 03 uses.
 
 ---
