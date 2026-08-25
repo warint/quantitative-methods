@@ -6,7 +6,7 @@ institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session2_cours/"
 format:
   revealjs:
-    theme: [default, ../../slides/warin.scss]
+    theme: [default, ../../slides/economist.scss]
     embed-resources: true
     slide-number: c/t
     slide-level: 2
@@ -695,10 +695,168 @@ kurtosis(UKDriverDeaths)
 :::::::
 :::::::::::::::::::
 
+# From data to models {background-color="#E3120B" style="color:#F7F4ED"}
+
+## The question
+
+> **Do more productive European countries have higher income per head?**
+
+Thirty countries, fifteen years, both numbers already in the repository.
+
+::: {.muted}
+No download, no API key: `data/spine/core.parquet`.
+:::
+
+## Always look first
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+core = pd.read_parquet("data/spine/core.parquet")
+d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
+
+plt.scatter(d["productivity_idx"], d["gdp_pc_eur"], s=12, alpha=0.6)
+plt.xlabel("Labour productivity index (EU average = 100)")
+plt.ylabel("GDP per capita (EUR)")
+plt.show()
+```
+
+::: {.warn}
+Draw the picture before you fit anything. A straight line through a curved cloud is still a
+straight line, and the software will not warn you.
+:::
+
+## The model, and what each piece is
+
+$$y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$$
+
+| Symbol | Name | Here |
+|---|---|---|
+| $y_i$ | outcome | GDP per capita |
+| $x_i$ | predictor | productivity index |
+| $\beta_0$ | intercept | predicted $y$ when $x = 0$ |
+| $\beta_1$ | slope | change in $y$ per unit of $x$ |
+| $\varepsilon_i$ | error | what $x_i$ does not explain |
+
+## Choosing the line
+
+$$\min_{\beta_0,\,\beta_1} \sum_{i=1}^{n}\big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
+
+::: {.step}
+Squaring makes every miss positive, so misses above and below cannot cancel — and it punishes one
+large miss more than several small ones.
+:::
+
+::: {.check}
+This is the mean, done conditionally. The mean minimises $\sum(x_i - c)^2$; the regression line
+minimises the same quantity over *lines*.
+:::
+
+## Three lines of Python
+
+```python
+import statsmodels.formula.api as smf
+
+model = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+print(model.params)
+```
+
+```
+Intercept          -86118.1
+productivity_idx     1111.3
+```
+
+::: {.muted}
+Read the `~` as "explained by". `.fit()` does the arithmetic; `model.params` holds the estimates.
+:::
+
+## The slope is the sentence you will write
+
+::: {.check}
+Comparing two country-years that differ by **one point** of productivity, the more productive one
+has on average **€1,111 more** GDP per capita.
+:::
+
+Always say the units aloud — euros per index point. **A slope without units is not a finding.**
+
+::: {.warn}
+The intercept says a country at productivity 0 would have **−€86,118**. The index runs from 72 to
+129 in our data. Do not interpret an intercept you have no data near.
+:::
+
+## Fitted values and residuals
+
+Germany, 2022 — productivity 121.2, actual GDP per capita €54,239:
+
+$$\hat y = -86{,}118 + 1{,}111.3 \times 121.2 = 48{,}606$$
+
+$$e = 54{,}239 - 48{,}606 = \mathbf{+5{,}633}$$
+
+::: {.check}
+Germany sits **€5,633 above** the line. That residual is everything about German income that
+productivity alone does not account for — and reading residuals is most of Session 03.
+:::
+
+## How much did the line explain?
+
+```python
+print(f"R-squared = {model.rsquared:.3f}")
+```
+
+```
+R-squared = 0.627
+```
+
+::: {.step}
+$R^2$ is the share of the variation in $y$ the model accounts for: **62.7%**, on a scale from 0 to 1.
+:::
+
+::: {.warn}
+It does **not** say the model is correct, that the relationship is causal, or that the line will
+predict a new country well.
+:::
+
+## Two predictors: what "controlling for" means
+
+```python
+model2 = smf.ols("gdp_pc_eur ~ productivity_idx + gfcf_meur", data=d2).fit()
+```
+
+```
+Intercept          -71211.8
+productivity_idx      928.3
+gfcf_meur              68.7
+R-squared = 0.692
+```
+
+::: {.check}
+The productivity slope falls **1,111 → 928**, about 16%. It now answers a different question:
+comparing country-years **with the same investment**, one point more productivity goes with €928
+more income.
+:::
+
+## Correlation is not causation
+
+The slope says the two **move together**. It does not say raising productivity by a point *would*
+raise income by €928.
+
+::: {.tight}
+1. Productivity raises income
+2. Higher income buys the capital and training that raise productivity — the arrow points the other way
+3. Something else — institutions, education, market size — drives both
+:::
+
+::: {.warn}
+Nothing in the output distinguishes these. Until Sessions 10–11, write **"is associated with"** —
+and mean it.
+:::
+
 ## Conclusion {#imported-s02-029 .center .scrollable}
 
 ## Conclusion {#imported-s02-030 .scrollable}
 
 -   We have seen the basic concepts of exploratory data analysis
 -   We have seen the basic concepts of measuring the center, spread and shape of a distribution
--   Now, why do we care about the distribution of the data?
+-   We have fitted the smallest possible model, and read its slope in units
+-   Session 03 asks the next question: **can this regression be trusted?**
