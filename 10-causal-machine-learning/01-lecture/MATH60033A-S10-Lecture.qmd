@@ -1,0 +1,675 @@
+---
+title: "Session 10: Causal Inference: Establishing Cause and Effect in Data"
+subtitle: "Published course presentation · repository edition"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+source-url: "https://warin.ca/quant/en/session10_cours/"
+format:
+  revealjs:
+    theme: [default, ../../slides/warin.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    footer: "MATH60033A · Session 10 · Thierry Warin, PhD · HEC Montréal"
+---
+
+<!-- Imported from https://warin.ca/quant/en/session10_cours/. Content is static so the deck renders without R or Python. -->
+## Causal Inference: Logic and Tools {#imported-s10-001 .center .scrollable}
+
+## Session Overview {#imported-s10-002 .scrollable}
+
+-   Motivation: Why regression isn't enough
+-   Key Concepts: Counterfactuals, potential outcomes, Rubin Causal Model
+-   Core Methods: RCTs, Matching, IV, DiD
+-   Assumptions & Validity: Parallel trends, exclusion restriction, internal vs. external validity
+-   Applications in Policy and Management
+
+## Objectives {#imported-s10-003 .scrollable}
+
+-   Distinguish correlation from causation
+-   Explain potential outcomes and counterfactuals
+-   Apply causal inference techniques in R
+-   Evaluate assumptions and threats to identification
+-   Interpret empirical strategies in applied research
+
+## {#imported-s10-004 .scrollable}
+
+![](economist-assets/potential-outcomes.png){.r-stretch}
+
+## Counterfactual Framework {#imported-s10-005 .center .scrollable}
+
+## The Rubin Causal Model {#imported-s10-006 .scrollable}
+
+Causal inference is fundamentally about comparison---understanding what would have happened to the same unit had it experienced a different condition.
+
+In the potential outcomes framework, each unit [\\(i\\)]{.math .inline} has two potential outcomes:
+
+-   [\\(Y_i(1)\\)]{.math .inline}: the outcome if treated
+-   [\\(Y_i(0)\\)]{.math .inline}: the outcome if untreated
+
+The causal effect for unit [\\(i\\)]{.math .inline} is defined as [\\(Y_i(1) - Y_i(0)\\)]{.math .inline}.
+
+> However, only one of these outcomes is ever observed; the other remains a counterfactual. This is the core problem that causal inference aims to address.
+
+## Why It Matters {#imported-s10-007 .scrollable}
+
+Without this framework, we cannot articulate what it means for a treatment to have an effect. Understanding causal effects requires us to think explicitly about what did *not* happen.
+
+## {#imported-s10-008 .scrollable}
+
+## Real Example of Observed and Counterfactual Outcomes {#imported-s10-009 .scrollable}
+
+Consider a public policy intervention such as a **subsidy for electric-vehicle (EV) purchases**. Suppose the government introduces a financial incentive intended to increase EV adoption among households. For each household (i), we can define two potential outcomes:
+
+[\\\[ Y_i(1) = \\text{EV adoption if the household receives the subsidy}, \\\]]{.math .display}
+
+[\\\[ Y_i(0) = \\text{EV adoption if the household does not receive the subsidy}. \\\]]{.math .display}
+
+## Observed vs. Counterfactual {#imported-s10-010 .scrollable}
+
+Imagine a specific household, say **Household 27**. After the policy is implemented, Household 27 *does* receive the subsidy and purchases an electric vehicle. Therefore, we observe:
+
+[\\\[ Y\_{27}(1) = 1. \\\]]{.math .display}
+
+But we never observe the counterfactual outcome:
+
+[\\\[ Y\_{27}(0) = ? \\\]]{.math .display}
+
+## The Missing Counterfactual {#imported-s10-011 .scrollable}
+
+This non-observed outcome represents what would have happened *to the same household* had it **not** received the subsidy. It is fundamentally unobservable, because the household cannot simultaneously be treated and untreated. Yet this is precisely the comparison needed to identify the causal effect for that household:
+
+[\\\[ \\text{Causal Effect}\*{27} = Y\*{27}(1) - Y\_{27}(0). \\\]]{.math .display}
+
+Since [\\(Y\_{27}(0)\\)]{.math .inline} is missing by design---not due to lack of data but because of the logic of causality---researchers must rely on techniques such as randomized controlled trials, matching, instrumental variables, or difference-in-differences to recover credible approximations of this unobserved counterfactual.
+
+This tension between **observed reality** and **missing counterfactuals** encapsulates the fundamental problem of causal inference articulated by Rubin (1974) and formalized in the potential-outcomes framework.
+
+## How to Proceed {#imported-s10-012 .scrollable}
+
+> We aim to estimate the average causal effect (ATE) by constructing designs or assumptions that allow us to approximate the missing counterfactuals.
+
+How? By creating comparable groups through randomization, matching, or leveraging natural experiments.
+
+## Randomized Controlled Trials (RCTs) {#imported-s10-013 .center .scrollable}
+
+## Why Randomize? {#imported-s10-014 .scrollable}
+
+Randomization is the most reliable method for ensuring that treated and control groups are comparable.
+
+> It removes systematic differences between groups, which means that any observed difference in outcomes can be attributed to the treatment.
+
+## What For? {#imported-s10-015 .scrollable}
+
+RCTs allow us to isolate the effect of a single intervention, making them the gold standard for internal validity.
+
+They are widely used in medicine, economics, and the social sciences.
+
+## How It Works {#imported-s10-016 .scrollable}
+
+Units are assigned to treatment or control groups purely by chance.
+
+> This ensures balance on both observed and unobserved confounders.
+
+## Example in R {#imported-s10-017 .scrollable}
+
+Suppose an employer offers an intensive data-analytics training course aimed at improving employees' performance in tasks that rely on quantitative analysis and digital tools. The variable `treat` indicates whether an employee participated in the training (1) or not (0). The variables `age`, `education`, and `experience` describe each employee's profile: `age` in years, `education` as years of schooling, and `experience` as years of labour-market experience, approximately measured as age minus 18 with some noise, which is standard in labour economics.
+
+## Data Generation Process {#imported-s10-018 .scrollable}
+
+In this organization, employees who are slightly older and more educated are more likely to be selected or to self-select into the training programme. This is reflected in the way `treat` is generated: the probability of being treated increases with age and education through the propensity score `ps`. This captures realistic selection mechanisms, such as managers prioritizing "high-potential" workers or those already in more skilled positions.
+
+The outcome variable, `outcome`, can be interpreted as an index of job performance or productivity, for example a standardized annual performance score used in internal evaluations, or an objective productivity measure (such as the number of correctly processed files, resolved cases, or successfully completed projects). The data-generating process assumes that performance increases with age, education, and experience, which is consistent with human capital theory. On top of these effects, the training programme has a true causal effect of +3 units on the performance index for those who participate. This models the idea that, after controlling for their characteristics, employees who receive the training perform systematically better than similar employees who do not.
+
+## Data Simulation {#imported-s10-019 .scrollable}
+
+::::: cell
+::: {#cb1 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+set.seed(123)
+# Sample size
+n <- 800
+
+# Covariates
+age        <- round(rnorm(n, mean = 40, sd = 10))
+education  <- round(rnorm(n, mean = 14, sd = 2))
+experience <- pmax(0, age - 18 + rnorm(n, 0, 3))
+
+# Treatment assignment with confounding
+
+# Older and more educated individuals have a slightly higher probability of treatment.
+ps <- plogis(-5 + 0.05*age + 0.15*education)
+treat <- rbinom(n, 1, ps)
+
+# Outcome model with a true treatment effect of +3
+outcome <- 20 +
+0.3*age +
+0.8*education +
+0.5*experience +
+3*treat +
+rnorm(n, 0, 5)
+
+# Assemble the dataset
+df <- data.frame(
+treat      = treat,
+age        = age,
+education  = education,
+experience = experience,
+outcome    = outcome
+)
+
+head(df)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+      treat age education experience  outcome
+    1     0  34        15   15.13293 51.35139
+    2     0  38        13   21.96954 47.27609
+    3     1  56        16   36.63801 63.76421
+    4     0  41        16   21.21841 65.16926
+    5     0  41        15   17.86886 55.22382
+    6     0  57        14   38.37165 65.50069
+:::
+:::::
+
+## Estimating the Treatment Effect {#imported-s10-020 .scrollable}
+
+::::: cell
+::: {#cb3 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+set.seed(42)
+n <- 100
+treatment <- rbinom(n, 1, 0.5)
+y <- 50 + 5 * treatment + rnorm(n, 0, 10)
+mean(y[treatment == 1]) - mean(y[treatment == 0])
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 6.975967
+:::
+:::::
+
+## Interpretation {#imported-s10-021 .scrollable}
+
+Here, the difference in means provides an unbiased estimate of the Average Treatment Effect (ATE).
+
+## Observational Data: Challenges {#imported-s10-022 .center .scrollable}
+
+## Why Not Always Use RCTs? {#imported-s10-023 .scrollable}
+
+RCTs are not always feasible due to ethical, financial, or logistical constraints. In many real-world settings, we rely on observational data.
+
+## What's the Risk? {#imported-s10-024 .scrollable}
+
+In observational studies, treatment assignment is not random. This introduces selection bias: treated and control units may differ systematically in ways that affect the outcome.
+
+## What We Need {#imported-s10-025 .scrollable}
+
+To estimate causal effects from observational data, we need methods that adjust for these differences or mimic randomization.
+
+## Matching Methods {#imported-s10-026 .center .scrollable}
+
+## Why Use Matching? {#imported-s10-027 .scrollable}
+
+Matching is a technique designed to reduce selection bias in observational studies by creating a control group that is comparable to the treated group on observed characteristics.
+
+## What For? {#imported-s10-028 .scrollable}
+
+It aims to emulate the balance achieved in RCTs, making the treatment and control groups as similar as possible in terms of observable covariates.
+
+## How It Works {#imported-s10-029 .scrollable}
+
+We calculate a propensity score---the probability of receiving treatment given observed covariates---and match each treated unit to one or more control units with a similar score.
+
+## R Example {#imported-s10-030 .scrollable}
+
+Imagine that a large public-sector organization has implemented an advanced **data-analytics training programme** for its employees. Participation is voluntary but encouraged for individuals working in analytically demanding units. As a result, the employees who choose to enrol tend to be somewhat older, more educated, and more experienced---characteristics that are also associated with better job performance. This creates a **confounding problem**: treated and untreated employees differ in systematic ways that also predict outcomes.
+
+## Objective {#imported-s10-031 .scrollable}
+
+The HR analytics team wants to estimate whether the training actually **improves job performance**, measured by a standardized annual performance index. They cannot rely on simple mean comparisons, because employees who enrolled in the training differ on observable dimensions that are associated with performance. To obtain a more credible estimate of the causal effect, they apply **nearest-neighbour propensity score matching**.
+
+## The model {#imported-s10-032 .scrollable}
+
+::::: cell
+::: {#cb5 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+library(MatchIt)
+m.out <- matchit(treat ~ age + education + experience, 
+                 data = df, 
+                 method = "nearest")
+matched <- match.data(m.out)
+t.test(outcome ~ treat, data = matched)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+        Welch Two Sample t-test
+
+    data:  outcome by treat
+    t = -3.0569, df = 463.82, p-value = 0.002366
+    alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+    95 percent confidence interval:
+     -4.4337743 -0.9638923
+    sample estimates:
+    mean in group 0 mean in group 1 
+           57.18446        59.88329 
+:::
+:::::
+
+implements the following reasoning. The `matchit()` function constructs a matched sample in which treated and untreated employees are paired with others who have similar values of age, education, and experience. This aims to approximate the conditions of a randomized experiment by balancing key covariates. After matching, the organization compares the performance outcomes between the two groups using a t-test. The goal is to estimate how much of the performance difference can plausibly be attributed to the training rather than to pre-existing differences in employee characteristics.
+
+## Interpretation {#imported-s10-033 .scrollable}
+
+In this scenario, the matching procedure is understood as a method for approximating the unobserved counterfactual---what treated employees' performance would have been had they not participated.
+
+> The resulting matched estimate provides a substantively meaningful measure of the programme's effectiveness under the assumption of conditional independence.
+
+## Limitations {#imported-s10-034 .scrollable}
+
+> Matching only accounts for observed variables. Any unmeasured confounder can still bias the results.
+
+## Exercise: Propensity Score Matching and Post-Matching Estimation {#imported-s10-035 .center .scrollable}
+
+## Problem Statement {#imported-s10-036 .scrollable}
+
+You are given a dataframe named `df` with the following variables:
+
+-   `treat`: a binary treatment indicator equal to 1 for treated units and 0 for control units.
+-   `outcome`: a continuous outcome.
+-   `age`, `education`, `experience`: pre-treatment covariates that may jointly influence both treatment assignment and the outcome.
+
+Your task is to estimate the causal effect of the treatment on the outcome using propensity score matching. Use the **MatchIt** package to implement nearest-neighbor matching without replacement, and evaluate the quality of the matching using **PSAgraphics**. Then, run a linear regression of the outcome on the treatment in the matched sample.
+
+## Steps to Follow {#imported-s10-037 .scrollable}
+
+Perform the following steps:
+
+1.  Estimate a propensity score using a logit model with covariates `x1`, `x2`, and `x3`.
+2.  Perform nearest-neighbor matching (one-to-one) using the estimated propensity score.
+3.  Assess covariate balance before and after matching using graphical diagnostics.
+4.  Extract the matched dataset and estimate the average treatment effect on the treated (ATT) using a linear regression of `y` on `treat`.
+5.  Interpret the results substantively.
+
+## **Solution** {#imported-s10-038 .center .scrollable}
+
+## **Step 1. Estimating the propensity score** {#imported-s10-039 .scrollable}
+
+Propensity scores summarize the probability of receiving treatment conditional on observable covariates. Here, the probability is modeled via a logistic regression. This corresponds to the classical Rosenbaum and Rubin (1983) framework in which identification requires unconfoundedness and overlap.
+
+::::: cell
+::: {#cb7 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+library(MatchIt)
+library(PSAgraphics)
+
+# Logistic regression to estimate the propensity score
+ps_model <- glm(treat ~ age + education + experience, 
+                data = df, 
+                family = binomial())
+
+summary(ps_model)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    Call:
+    glm(formula = treat ~ age + education + experience, family = binomial(), 
+        data = df)
+
+    Coefficients:
+                Estimate Std. Error z value Pr(>|z|)    
+    (Intercept) -4.47646    0.85261  -5.250 1.52e-07 ***
+    age          0.02815    0.02818   0.999 0.317732    
+    education    0.13609    0.04076   3.339 0.000841 ***
+    experience   0.02170    0.02669   0.813 0.416268    
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    (Dispersion parameter for binomial family taken to be 1)
+
+        Null deviance: 965.23  on 799  degrees of freedom
+    Residual deviance: 918.46  on 796  degrees of freedom
+    AIC: 926.46
+
+    Number of Fisher Scoring iterations: 4
+:::
+:::::
+
+This output provides the estimated influence of each covariate on the likelihood of receiving the treatment. Covariates should be selected based on theoretical arguments regarding confounding, rather than any predictive purpose.
+
+## **Step 2. Performing nearest-neighbor matching** {#imported-s10-040 .scrollable}
+
+Using the estimated scores, nearest-neighbor matching without replacement is implemented. This aligns each treated unit with a similar untreated unit based on the estimated propensity score.
+
+::::: cell
+::: {#cb9 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+m.out <- matchit(treat ~ age + education + experience,
+                 data = df,
+                 method = "nearest",
+                 distance = "logit",
+                 replace = FALSE)
+
+summary(m.out)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    Call:
+    matchit(formula = treat ~ age + education + experience, data = df, 
+        method = "nearest", distance = "logit", replace = FALSE)
+
+    Summary of Balance for All Data:
+               Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+    distance          0.3319        0.2745          0.5083     1.1864    0.1450
+    age              43.2661       38.8025          0.4570     1.0457    0.0792
+    education        14.4206       13.9436          0.2416     0.9749    0.0370
+    experience       25.4287       20.7730          0.4478     1.0897    0.1282
+               eCDF Max
+    distance     0.2264
+    age          0.1986
+    education    0.1070
+    experience   0.2060
+
+    Summary of Balance for Matched Data:
+               Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+    distance          0.3319        0.3288          0.0277     1.0908    0.0035
+    age              43.2661       43.2661          0.0000     1.1483    0.0136
+    education        14.4206       14.3648          0.0283     1.0448    0.0109
+    experience       25.4287       25.1901          0.0230     1.1726    0.0188
+               eCDF Max Std. Pair Dist.
+    distance     0.0429          0.0295
+    age          0.0472          5.6738
+    education    0.0258          0.9932
+    experience   0.0515          0.5554
+
+    Sample Sizes:
+              Control Treated
+    All           567     233
+    Matched       233     233
+    Unmatched     334       0
+    Discarded       0       0
+:::
+:::::
+
+## **Interpreting the Balance Table Before Matching** {#imported-s10-041 .scrollable}
+
+You have the following results:
+
+  ------------------------------------------------------------------------------------------------
+  Variable     Treated Mean   Control Mean   Std. Mean Diff.   Var. Ratio   eCDF Mean   eCDF Max
+  ------------ -------------- -------------- ----------------- ------------ ----------- ----------
+  distance     0.3319         0.2745         0.5083            1.1864       0.1450      0.2264
+
+  age          43.2661        38.8025        0.4570            1.0457       0.0792      0.1986
+
+  education    14.4206        13.9436        0.2416            0.9749       0.0370      0.1070
+
+  experience   25.4287        20.7730        0.4478            1.0897       0.1282      0.2060
+  ------------------------------------------------------------------------------------------------
+
+These numbers reflect the **balance before matching**, meaning how different the treated and control groups are in the raw data.
+
+## **Means (Treated vs. Control)** {#imported-s10-042 .scrollable}
+
+These columns simply report the average value of each variable in the treated and control groups.
+
+For example:
+
+-   **Age**: Treated = 43.27, Control = 38.80 On average, treated individuals are **older**.
+
+-   **Experience**: Treated = 25.43, Control = 20.77 Treated individuals have **more prior experience**.
+
+These raw differences suggest **selection into treatment**: people with higher age and experience are more likely to be treated.
+
+## **Standardized Mean Difference (SMD)** {#imported-s10-043 .scrollable}
+
+This is the most important measure. It shows the difference in means in units of standard deviations. The rule of thumb:
+
+-   \|SMD\| \< **0.10** → excellent balance
+-   \|SMD\| \< **0.20** → acceptable
+-   \|SMD\| \> **0.25** → problematic imbalance
+-   \|SMD\| \> **0.40** → severe imbalance
+
+our values:
+
+-   **distance**: 0.5083 → severe imbalance
+-   **age**: 0.4570 → severe imbalance
+-   **experience**: 0.4478 → severe imbalance
+-   **education**: 0.2416 → moderate imbalance
+
+## **Interpretation** {#imported-s10-044 .scrollable}
+
+Before matching, the treated and control groups differ substantially on the covariates and on the propensity score. The matching procedure has a lot of work to do.
+
+## **Variance Ratio** {#imported-s10-045 .scrollable}
+
+Variance ratio = Var(treated) / Var(control)
+
+Guidelines:
+
+-   Between **0.80 and 1.25** → good
+-   Below 0.60 or above 1.40 → problematic
+
+our values:
+
+-   **age**: 1.0457 → good
+-   **education**: 0.9749 → excellent
+-   **experience**: 1.0897 → acceptable
+-   **distance**: 1.1864 → acceptable
+
+## **Interpretation** {#imported-s10-046 .scrollable}
+
+Variances are fairly similar across groups. The main problem is **mean differences**, not dispersion.
+
+## **eCDF Mean and eCDF Max** {#imported-s10-047 .scrollable}
+
+These measure differences between the treated and control **entire distributions**:
+
+-   **eCDF Mean**: average difference in cumulative distribution functions
+-   **eCDF Max**: maximum difference between distributions (Kolmogorov--Smirnov distance)
+
+Interpretation thresholds are less formal, but:
+
+-   Values \< **0.10** → good
+-   Values between **0.10 and 0.20** → moderate imbalance
+-   Values \> **0.20** → problematic imbalance
+
+our values:
+
+-   **distance eCDF Max = 0.2264** → problematic
+-   **experience eCDF Max = 0.2060** → problematic
+-   **age eCDF Max = 0.1986** → moderate-to-high
+-   **education eCDF Max = 0.1070** → acceptable
+
+## **Interpretation** {#imported-s10-048 .scrollable}
+
+Age, experience, and the propensity score distributions differ notably between groups.
+
+## **Overall Interpretation** {#imported-s10-049 .scrollable}
+
+our pre-matching table shows **substantial imbalance** between treated and control units:
+
+1.  **Age** and **experience** show large standardized mean differences (\> 0.45).
+2.  The **propensity score (distance)** also shows a very large SMD (\> 0.50).
+3.  Distributional metrics (eCDF Max) confirm these differences.
+4.  Variance ratios are acceptable, so the issue is not variance but **mean shifts**.
+
+## {#imported-s10-050 .scrollable}
+
+Before matching, treated and untreated groups are **not comparable**.
+
+Matching is therefore **necessary** to construct a credible counterfactual.
+
+This table is exactly what we expect in observational data: the treatment is not randomized, so individuals self-select into treatment based on characteristics like age and experience.
+
+## **Step 3. Covariate balance assessment** {#imported-s10-051 .scrollable}
+
+Diagnosing the quality of matching is essential. Graphical tools from **PSAgraphics** are particularly useful for evaluating whether the pre-treatment covariates are better aligned post-matching.
+
+:::: cell
+::: {#cb11 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# Propensity score distributions: before matching
+plot(density(fitted(ps_model)[df$treat == 1]),
+     main = "Propensity Score Distributions (Before Matching)",
+     xlab = "Propensity Score")
+lines(density(fitted(ps_model)[df$treat == 0]), col = 2)
+legend("topright", legend = c("Treated", "Control"),
+       col = c(1, 2), lty = 1)
+```
+:::
+::::
+
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-6-1.png){.r-stretch width="960"}
+
+## **Step 4. Covariate balance assessment (continued)** {#imported-s10-052 .scrollable}
+
+:::: cell
+::: {#cb12 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# Extract matched data
+matched_df <- match.data(m.out)
+
+# Propensity score distributions: after matching
+plot(density(matched_df$distance[matched_df$treat == 1]),
+     main = "Propensity Score Distributions (After Matching)",
+     xlab = "Propensity Score")
+lines(density(matched_df$distance[matched_df$treat == 0]), col = 2)
+legend("topright", legend = c("Treated", "Control"),
+       col = c(1, 2), lty = 1)
+```
+:::
+::::
+
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-7-1.png){.r-stretch width="960"}
+
+## **Step 5. Covariate balance assessment (continued)** {#imported-s10-053 .scrollable}
+
+:::: cell
+::: {#cb13 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# Boxplots of age before and after matching
+boxplot(df$age ~ df$treat,
+        main = "Before Matching: Age",
+        xlab = "Treatment status", ylab = "Age")
+```
+:::
+::::
+
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-8-1.png){.r-stretch width="960"}
+
+## **Step 6. Covariate balance assessment (continued)** {#imported-s10-054 .scrollable}
+
+:::: cell
+::: {#cb14 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+boxplot(matched_df$age ~ matched_df$treat,
+        main = "After Matching: Age",
+        xlab = "Treatment status", ylab = "Age")
+```
+:::
+::::
+
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-9-1.png){.r-stretch width="960"}
+
+Other diagnostic visuals include mirrored histograms or the "love plot" from the cobalt package, though the exercise here focuses on PSAgraphics.
+
+## **Step 4. Estimating the treatment effect on the matched sample** {#imported-s10-055 .scrollable}
+
+After matching, the dataset contains reweighted or selected observations reflecting similarity in covariate distributions. The linear model now approximates the average treatment effect on the treated (ATT). The regression does not have a causal interpretation unless matching succeeded in balancing confounders.
+
+::::: cell
+::: {#cb15 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# 1. Get the matched data
+matched_df <- match.data(m.out)
+
+# matched_df already contains all original columns from df
+# including 'outcome', plus 'treat', 'distance', and 'weights'.
+
+# 2. Estimate ATT on the matched sample
+att_model <- lm(outcome ~ treat,
+                data   = matched_df,
+                weights = weights)
+
+summary(att_model)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    Call:
+    lm(formula = outcome ~ treat, data = matched_df, weights = weights)
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -24.486  -6.996   0.210   6.624  33.139 
+
+    Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+    (Intercept)  57.1845     0.6243  91.599  < 2e-16 ***
+    treat         2.6988     0.8829   3.057  0.00237 ** 
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Residual standard error: 9.529 on 464 degrees of freedom
+    Multiple R-squared:  0.01974,   Adjusted R-squared:  0.01763 
+    F-statistic: 9.344 on 1 and 464 DF,  p-value: 0.002366
+:::
+:::::
+
+The coefficient on `treat` corresponds to the estimated ATT. Weighting is recommended because MatchIt may assign non-unit weights even under nearest-neighbor algorithms.
+
+High R² is not the goal in causal inference; unbiased estimation of the treatment effect is.
+
+## **Step 5. Interpretation** {#imported-s10-056 .scrollable}
+
+If the coefficient on `treat` is positive and statistically significant, this indicates that, conditional on observable characteristics and after matching treated individuals with comparable untreated individuals, the treatment led to an increase in the outcome `y` for the treated group. The magnitude represents the estimated average causal effect among those who actually received the treatment.
+
+Interpretation must emphasize the assumptions underlying matching: unconfoundedness cannot be tested statistically, and overlap must be verified graphically. When these assumptions are plausible, propensity score matching constitutes an effective strategy for reducing selection bias in observational studies.
+
+## **Additional Note on Naive Difference-in-Means** {#imported-s10-057 .scrollable}
+
+::::: cell
+::: {#cb17 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+mean(df$outcome[df$treat == 1]) - mean(df$outcome[df$treat == 0])
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 6.471933
+:::
+:::::
+
+This does not invalidate matching.
+
+It demonstrates that:
+
+-   although the two groups were imbalanced on age, education, and experience, these variables happened not to create a major numerical bias in the naive difference-in-means but matching greatly improves internal validity and design transparency
+
+> Matching primarily improves credibility, not necessarily magnitude.
+
+## Your turn {#imported-s10-058 .center .scrollable}
+
+## Team Work {#imported-s10-059 .scrollable}
+
+Team 1: <https://cran.r-project.org/web/packages/MatchIt/vignettes/MatchIt.html>
+
+Team 2: <https://dlab.berkeley.edu/news/introduction-propensity-score-matching-matchit>
+
+Team 3: <https://simonejdemyr.com/r-tutorials/statistics/tutorial8.html> [data here](imported-assets/mydata.RData)
+
+Team 4: <https://psa.bryer.org/effects-of-tutoring-on-course-grades.html>

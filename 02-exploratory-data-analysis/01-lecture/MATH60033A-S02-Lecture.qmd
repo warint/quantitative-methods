@@ -1,0 +1,704 @@
+---
+title: "Session 2: Exploratory Data Analysis - Fundamentals"
+subtitle: "Published course presentation · repository edition"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+source-url: "https://warin.ca/quant/en/session2_cours/"
+format:
+  revealjs:
+    theme: [default, ../../slides/warin.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    footer: "MATH60033A · Session 02 · Thierry Warin, PhD · HEC Montréal"
+---
+
+<!-- Imported from https://warin.ca/quant/en/session2_cours/. Content is static so the deck renders without R or Python. -->
+## Class Organization {#imported-s02-001 .center .scrollable}
+
+## {#imported-s02-002 .scrollable}
+
+::: panel-tabset
+### Class rules
+
+-   **Respect**: Respect other participants and speakers.
+
+-   **Participation**: Participate actively in discussions and activities.
+
+-   **Commitment**: Be committed and involved in the learning process.
+
+-   **Collaboration**: Collaborate with your peers and share your knowledge.
+
+-   **Confidentiality**: Respect the confidentiality of shared information.
+
+### and therefore
+
+-   Cell phones are in backpacks, not on the table.
+
+-   Computers are used for taking notes and following the course, not for personal messages or other activities.
+
+### Schedule
+
+  ----------------------------------------------------------------------------------------------------------
+  Session      Day and Time          Building, Room                     Instructor      Session Dates
+  ------------ --------------------- ---------------------------------- --------------- --------------------
+  Session 1    Wed 3:30PM - 6:30PM   C-Ste-Cath, Serge-Saucier          Thierry Warin   August 27, 2025
+
+  Session 2    Wed 3:30PM - 6:30PM   C-Ste-Cath, Student Associations                   September 3, 2025
+
+  Session 3    Wed 3:30PM - 6:30PM   C-Ste-Cath, Serge-Saucier                          September 10, 2025
+
+  Session 4    Wed 3:30PM - 6:30PM   C-Ste-Cath, Serge-Saucier                          September 17, 2025
+
+  Session 5    Wed 3:30PM - 6:30PM   C-Ste-Cath, Serge-Saucier                          September 24, 2025
+
+  Session 6    Wed 3:30PM - 6:30PM   Synchronous with Africa                            October 1, 2025
+
+  Session 7    Wed 3:30PM - 6:30PM   Synchronous with Africa                            October 8, 2025
+
+  Session 8    Wed 3:30PM - 6:30PM   C-Ste-Cath, Rona                                   November 5, 2025
+
+  Session 9    Wed 3:30PM - 6:30PM   C-Ste-Cath, Rona                                   November 12, 2025
+
+  Session 10   Wed 3:30PM - 6:30PM   C-Ste-Cath, Rona                                   November 19, 2025
+
+  Session 11   Wed 3:30PM - 6:30PM   C-Ste-Cath, Rona                                   November 26, 2025
+
+  Session 12   Wed 3:30PM - 6:30PM   C-Ste-Cath, Rona                                   December 3, 2025
+  ----------------------------------------------------------------------------------------------------------
+:::
+
+## Quote of the day {#imported-s02-003 .center .scrollable}
+
+> It's tough to make predictions, especially about the future
+
+> [Yogi Berra](https://www.goodreads.com/author/quotes/79014.Yogi_Berra)
+
+## Introduction {#imported-s02-004 .center .scrollable background-color="#f0f0f0"}
+
+## {#imported-s02-005 .scrollable}
+
+-   Statistics is a language, constructed by mathematicians.
+
+-   The tools (formulas and processes) are constructs. They do not represent the truth, just the tools to get closer to the truth. They are the **foundations** that we use in our **applications** as a data analyst.
+
+> So, let us spend some time on the foundations first.
+
+## {#imported-s02-006 .scrollable}
+
+> The magic in the data
+
+[Web app](http://shiny.calpoly.sh/Longest_Run/)
+
+## Introduction - Differences between statistics and statistical learning? {#imported-s02-007 .scrollable}
+
+::::: columns
+::: {.column style="width:50%;"}
+Statistics: decision making under uncertainty.
+
+*Statistics* is that branch of knowledge which deals with the multiplicity of data, its
+
+-   collection,
+
+-   analysis, and
+
+-   interpretation
+:::
+
+::: {.column style="width:50%;"}
+Statistical learning is a vast set of tools for *understanding data*
+
+-   classified as *supervised learning*: building a statistical model for predicting, or estimating, and output based on one (single) or more (multiple) inputs.
+
+-   classified as *unsupervised learning*: there are inputs, but no supervising output
+:::
+:::::
+
+> The goal is to understand the models, intuitions, and strengths and weaknesses of the various approaches
+
+## {#imported-s02-008 .scrollable}
+
+:::::: columns
+::: {.column style="width:50%;"}
+-   scalar, random variable, vector, matrix
+
+-   quantitative values versus qualitative values
+
+    -   quantitative: numerical (continuous or discrete)
+
+    -   qualitative: categorical (nominal or ordinal)
+:::
+
+:::: {.column style="width:50%;"}
+::: cell
+```{mermaid}
+graph TB
+A[Types of data] --> B[Quantitative]; B --> D{Numerical}
+A --> C[Qualitative]; C --> E{Categorical}
+
+D --> F(Continuous)
+D --> G(Discrete)
+
+E --> H(Ordinal)
+E --> I(Nominal)
+```
+:::
+::::
+::::::
+
+## {#imported-s02-009 .scrollable}
+
+---------------------------------------------------------------------------------------------------------
+  Numerical                                            Examples                   Visualizations
+  ---------------------------------------------------- -------------------------- -------------------------
+  Discrete: data have a finite number of values        Number of balls in a jar   Bar charts, line graphs
+
+  Continuous: data have an infinite number of values   Distance, time             Histograms, line graphs
+  ---------------------------------------------------------------------------------------------------------
+
+  -----------------------------------------------------------------------------------------------------------------------------------------
+  Categorical                                                                                  Examples                    Visualizations
+  -------------------------------------------------------------------------------------------- --------------------------- ----------------
+  Nominal: identified by particular names or categories and cannot be organized in any order   Gender, colors, locations   Bar charts
+
+  Ordinal: identified by particular names or categories and can be ordered                     Rankings                    Bar charts
+  -----------------------------------------------------------------------------------------------------------------------------------------
+
+## {#imported-s02-010 .scrollable}
+
+-   Outcomes associated with random experiments (probabilistic) called *random variables*:
+
+[\\\[ X, Y, Z \\\]]{.math .display}
+
+-   Observed values:
+
+[\\\[ x, y, z \\\]]{.math .display}
+
+Let [\\(X\\)]{.math .inline} be a r.v. taking values in the sample space [\\(S=\\left\\{x\_{1},\\, x\_{2},\\,\\ldots,x\_{k}\\right\\}\\)]{.math .inline}
+
+[\\\[ p(x\_{i})=\\Pr(X=x\_{i}), \\quad i=1,2,\\ldots,k \\\]]{.math .display}
+
+[\\\[ \\sum\_{i=1}\^{k}p(x\_{i}) = p(x\_{1})+p(x\_{2})+\\cdots+p(x\_{k}), = 1 \\\]]{.math .display}
+
+## {#imported-s02-011 .scrollable}
+
+::::: columns
+::: {.column style="width:50%;"}
+Three Basic Features
+
+-   Center: middle or general tendency
+
+-   Spread: small means tightly clustered, large means highly variable
+
+-   Shape: symmetry versus skewness, kurtosis
+:::
+
+::: {.column style="width:50%;"}
+Make the difference between a **sample** and a **population**!
+:::
+:::::
+
+## Measuring the center {#imported-s02-012 .center .scrollable background-color="#f0f0f0"}
+
+## Measuring the center {#imported-s02-013 .scrollable}
+
+In what follows, we will look into the following concepts:
+
+Basics:
+
+-   The sample mean
+-   The sample median
+
+Extensions:
+
+-   The trimmed mean
+-   The sample quantile
+-   The sample percentile
+
+## The basics: the sample mean {#imported-s02-014 .scrollable}
+
+::::: columns
+::: {.column style="width:50%;"}
+R.V.'s mean
+
+[\\\[ \\mu = \\sum\_{i=1}\^{k} x\_{i} p(x\_{i}) \\\\\\\\ = x\_{1} \\times p(x\_{1}) + \\cdots + x\_{k} \\times p(x\_{k}) \\\]]{.math .display}
+
+-   the mean is a center or average value of [\\((X)\\)]{.math .inline}
+
+-   [\\((\\mu)\\)]{.math .inline} can be any number or decimal
+
+-   [\\((\\mu)\\)]{.math .inline} is the "first moment about the origin"
+:::
+
+::: {.column style="width:50%;"}
+Sample mean
+
+[\\\[ \\overline{x} = \\frac{x\_{1} + x\_{2} + \\cdots+x\_{n}}{n} \\\\\\\\ = \\frac{1}{n}\\sum\_{i = 1}\^{n} x\_{i} \\\]]{.math .display}
+
+-   Good: natural, easy to compute, nice properties
+-   Bad: sensitive to extreme values
+:::
+:::::
+
+## {#imported-s02-015 .scrollable}
+
+> Wait!
+
+> Greek letters are for the RV and latin letters are for the sample?
+
+## The basics: the sample mean {#imported-s02-016 .scrollable}
+
+:::::::::: columns
+::::: {.column style="width:50%;"}
+:::: cell
+::: {#cb1 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# built-in data and making a dataframe out of a vector
+mydata <- data.frame(stack.loss)
+
+#View(mydata)
+```
+:::
+::::
+
+   stack.loss
+  ------------
+       42
+       37
+       37
+       28
+       18
+       18
+       19
+       20
+      etc.
+:::::
+
+:::::: {.column style="width:50%;"}
+::::: cell
+::: {#cb2 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+mean(mydata$stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 17.52381
+:::
+:::::
+::::::
+::::::::::
+
+## The basics: the sample median {#imported-s02-017 .scrollable}
+
+How to find it
+
+-   sort the data into an increasing sequence of [\\(n\\)]{.math .inline} numbers
+
+-   [\\(\\tilde{x}\\)]{.math .inline} lies in position [\\((n + 1)/2\\)]{.math .inline}
+
+-   Good: resistant to extreme values, easy to describe
+
+-   Bad: not as mathematically tractable, need to sort the data to calculate
+
+::::: cell
+::: {#cb4 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+median(mydata$stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 15
+:::
+:::::
+
+## Extensions {#imported-s02-018 .scrollable}
+
+:::::::::::::::: panel-tabset
+### The trimmed mean
+
+How to find it
+
+-   "trim" a proportion of data from both ends of the ordered list
+
+-   find the sample mean of what's left
+
+-   Good: also resistant to extreme values, has good properties, too
+
+-   Bad: still need to sort data to get rid of outliers
+
+::::: cell
+::: {#cb6 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+# Let's simplify the writing
+attach(mydata)
+mean(stack.loss, trim = 0.05)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 16.78947
+:::
+:::::
+
+### The sample quantile
+
+-   Quantile: approximately [\\(100 \\times p\\%\\)]{.math .inline} of the data fall below the value [\\(\\tilde{q}\_{p}\\)]{.math .inline}
+
+::::: cell
+::: {#cb8 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+quantile(stack.loss, probs = 0.75)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    75% 
+     19 
+:::
+:::::
+
+So, [\\(75%\\)]{.math .inline} of the data (.75\*21=16) fall below the value [\\(19\\)]{.math .inline}.
+
+::::: cell
+::: {#cb10 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+quantile(stack.loss, probs = c(0, 0.25, 0.80))
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+     0% 25% 80% 
+      7  11  20 
+:::
+:::::
+
+### The sample percentile
+
+-   Percentile: the percentage of observations that fall below a given data point
+
+::: {.cell layout-align="center"}
+<figure>
+<p><img src="economist-assets/percentile.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
+</figure>
+:::
+
+::::: cell
+::: {#cb12 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+pnorm(1800, mean = 1500, sd = 300)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 0.8413447
+:::
+:::::
+::::::::::::::::
+
+## Measuring the spread {#imported-s02-019 .center .scrollable}
+
+## Measures of spread {#imported-s02-020 .scrollable}
+
+In what follows, we will look into the following concepts:
+
+-   The sample variance
+
+-   The sample standard deviation
+
+-   The sample interquartile range (IQR)
+
+## Measures of spread {#imported-s02-021 .scrollable}
+
+::::::::::::::::::::::: panel-tabset
+### Variance and STD
+
+The **sample variance** [\\(s\^{2}\\)]{.math .inline}:
+
+[\\\[ s\^{2} = \\frac{1}{n - 1}\\sum\_{i = 1}\^{n}(x\_{i} - \\overline{x})\^{2} \\\]]{.math .display}
+
+The **sample standard deviation** is [\\((s = \\sqrt{s\^{2}})\\)]{.math .inline}
+
+-   Good: tractable, nice mathematical/statistical properties
+
+-   Bad: sensitive to extreme values
+
+:::::: cell
+::: {#cb14 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+var(stack.loss); sd(stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 103.4619
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 10.17162
+:::
+::::::
+
+### Interpretation
+
+::::::: columns
+::: {.column style="width:50%;"}
+Interpretation of [\\(s\\)]{.math .inline}
+
+The empirical rule:
+
+-   For nearly normally distributed data,
+
+-   about [\\(68\\%\\)]{.math .inline} falls within 1 SD of the mean,
+
+-   about [\\(95\\%\\)]{.math .inline} falls within 2 SD of the mean,
+
+-   about [\\(99.7\\%\\)]{.math .inline} falls within 3 SD of the mean.
+
+-   It is possible for observations to fall 4, 5, or more standard deviations away from the mean, but these occurrences are very rare if the data are nearly normal.
+:::
+
+::::: {.column style="width:50%;"}
+:::: cell
+<div>
+
+<figure>
+<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" /></p>
+</figure>
+
+</div>
+::::
+:::::
+:::::::
+
+### Interpretation
+
+::::::: columns
+::: {.column style="width:50%;"}
+SAT scores are distributed nearly normally with mean 1500 and standard deviation 300.
+
+Following the 68-95-99.7 Rule:
+
+-   [\\(\\sim 68\\%\\)]{.math .inline} of students score between 1200 and 1800 on the SAT.
+
+-   [\\(\\sim 95\\%\\)]{.math .inline} of students score between 900 and 2100 on the SAT.
+
+-   [\\(\\sim 99.7\\%\\)]{.math .inline} of students score between 600 and 2400 on the SAT.
+:::
+
+::::: {.column style="width:50%;"}
+:::: cell
+<div>
+
+<figure>
+<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" /></p>
+</figure>
+
+</div>
+::::
+:::::
+:::::::
+
+### IQR
+
+[\\\[ IQR = \\tilde{q}\_{0.75} - \\tilde{q}\_{0.25} \\\]]{.math .display}
+
+::::: cell
+::: {#cb17 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+IQR(stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 8
+:::
+:::::
+
+-   Good: resistant to outliers (see session 3)
+
+-   Bad: only considers middle [\\(50\\%\\)]{.math .inline} of the data, equivalent to:
+
+::::: cell
+::: {#cb19 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+quantile(stack.loss, probs = c(0.25, 0.75))
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    25% 75% 
+     11  19 
+:::
+:::::
+:::::::::::::::::::::::
+
+## Measuring the shape {#imported-s02-022 .center .scrollable background-color="blue!10"}
+
+## Measuring the shape {#imported-s02-023 .scrollable}
+
+In what follows, we will look into the following concepts:
+
+-   Skewness: degree of "symmetry"
+
+-   Kurtosis: degree of "thickness"
+
+## Measuring the shape {#imported-s02-024 .center .scrollable}
+
+![](economist-assets/mean-median.png){.r-stretch}
+
+## Measuring the shape {#imported-s02-025 .scrollable}
+
+::: panel-tabset
+### Skewness/Kurtosis 1
+
+-   Symmetric or skewed
+
+    -   right (positive) and left (negative) skewness
+
+-   Kurtosis
+
+    -   leptokurtic - steep peak, heavy tails
+
+    -   platykurtic - flatter, thin tails
+
+    -   mesokurtic - right in the middle
+
+### Skewness/Kurtosis 2
+
+![](economist-assets/shape.png){.r-stretch}
+:::
+
+## {#imported-s02-026 .center .scrollable}
+
+> Wait!
+
+> Why are we looking at the distribution of the sample?
+
+> Is the study of the sample shape/distribution relevant because otherwise the tools designed by the statisticians would not work?
+
+## Measures of shape: sample skewness {#imported-s02-027 .scrollable}
+
+The sample skewness [\\(g\_{1}\\)]{.math .inline}:
+
+[\\\[ g\_{1} = \\frac{1}{n}\\frac{\\sum\_{i = 1}\^{n}(x\_{i} - \\overline{x})\^{3}}{s\^{3}} \\\]]{.math .display}
+
+Things to notice:
+
+-   [\\(-\\infty \< g\_{1} \< \\infty\\)]{.math .inline}
+
+-   sign of [\\(g\_{1}\\)]{.math .inline} indicates direction of skewness [\\(\\pm)\\)]{.math .inline}
+
+## Measures of shape {#imported-s02-028 .scrollable}
+
+::::::::::::::::::: panel-tabset
+### Sample skewness
+
+::::: cell
+::: {#cb21 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+library(e1071) # install.packages("e1071")
+skewness(stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 1.156401
+:::
+:::::
+
+If [\\(\\vert g\_{1} \\vert \> 2\\sqrt{6/n}\\)]{.math .inline}, then the data distribution is **substantially skewed** in the direction of the sign of [\\(g\_{1}\\)]{.math .inline}
+
+::::::: cell
+::: {#cb23 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+skewness(discoveries)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 1.2076
+:::
+
+::: {#cb25 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+2*sqrt(6/length(discoveries))
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 0.4898979
+:::
+:::::::
+
+### Sample excess kurtosis 1
+
+The sample excess kurtosis [\\(g\_{2}\\)]{.math .inline}:
+
+[\\\[ g\_{2} = \\frac{1}{n}\\frac{\\sum\_{i = 1}\^{n}(x\_{i} - \\overline{x})\^{4}}{s\^{4}} - 3 \\\]]{.math .display}
+
+Things to note:
+
+-   [\\(-2 \\leq g\_{2} \< \\infty\\)]{.math .inline}
+
+-   [\\(g\_{2} \> 0\\)]{.math .inline} indicates leptokurtosis
+
+-   [\\(g\_{2} \< 0\\)]{.math .inline} indicates platykurtosis
+
+### Sample excess kurtosis 2
+
+::::: cell
+::: {#cb27 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+library(e1071)
+kurtosis(stack.loss)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 0.1343524
+:::
+:::::
+
+If [\\(\\vert g\_{2} \\vert \> 4\\sqrt{6/n}\\)]{.math .inline}, then the data distribution is **substantially kurtic**.
+
+::::::: cell
+::: {#cb29 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+kurtosis(UKDriverDeaths)
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 0.07133848
+:::
+
+::: {#cb31 .sourceCode .cell-code}
+``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+4*sqrt(6/length(UKDriverDeaths))
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+    [1] 0.7071068
+:::
+:::::::
+:::::::::::::::::::
+
+## Conclusion {#imported-s02-029 .center .scrollable}
+
+## Conclusion {#imported-s02-030 .scrollable}
+
+-   We have seen the basic concepts of exploratory data analysis
+-   We have seen the basic concepts of measuring the center, spread and shape of a distribution
+-   Now, why do we care about the distribution of the data?
