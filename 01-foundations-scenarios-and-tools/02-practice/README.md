@@ -91,7 +91,7 @@ Session 02 begins the mathematics â€” least squares, as a right-angle triangle â
 with your project and your group.
 
 Before then, complete the
-**[Session 02 setup guide](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**:
+**[Session 02 setup guide](../../02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md)**:
 git, a GitHub account, and your group's private repository. Budget 45 minutes.
 
 ---

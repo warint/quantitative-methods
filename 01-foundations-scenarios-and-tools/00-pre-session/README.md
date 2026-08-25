@@ -100,7 +100,7 @@ Session 02 introduces everything it needs.
 | **Second** (~90 min) | [A conversation](../02-practice/README.md) — *Europe 2031*, and what AI actually is |
 
 No practice session, no code, no deliverable. The methods begin in Session 02 — for which you need
-[git and a GitHub account](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
+[git and a GitHub account](../../02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md).
 
 ---
 

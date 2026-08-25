@@ -175,10 +175,10 @@ git checkout group-07
 
 ```bash
 # group 7 shown throughout — substitute your own number everywhere
-mkdir -p 02-geometry-of-least-squares/02-practice/submissions/group-07
-echo "# Group 07 — session 02" > 02-geometry-of-least-squares/02-practice/submissions/group-07/NOTES.md
+mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-07
+echo "# Group 07 — session 02" > 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
 
-git add 02-geometry-of-least-squares/02-practice/submissions/group-07/
+git add 02-exploratory-data-analysis/02-practice/submissions/group-07/
 git commit -m "Add group 07 notes for session 02"
 git push
 ```

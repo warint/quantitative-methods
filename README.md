@@ -109,7 +109,7 @@ answerable question, where to find data, and what each session asks of you.
 | # | Session | The method | The question it answers |
 |---|---|---|---|
 | [01](01-foundations-scenarios-and-tools/README.md) | Foundations: Scenarios, Tools, and the Supervised Learning Problem | Loss, risk, $\mathbb{E}[Y\mid X]$ | Before we model the future, what are we claiming to know? |
-| [02](02-geometry-of-least-squares/README.md) | Data, Vectors, and the Geometry of Least Squares | OLS, projection, FWL, QR | Why is the most-used estimator in economics a right-angle triangle? |
+| [02](02-exploratory-data-analysis/README.md) | Exploratory Data Analysis: Centre, Spread, and Shape | mean/median/trimmed, variance, IQR, skewness, kurtosis | Before you model anything, what does the data actually look like? |
 | [03](03-inference-diagnostics-interpretation/README.md) | Linear Regression: Inference, Diagnostics, Interpretation | Gauss–Markov, robust SEs, OVB | Your coefficient has a standard error. When does it mean anything? |
 | [04](04-bias-variance-and-cross-validation/README.md) | Bias–Variance, Overfitting, Cross-Validation | CV, optimism, effective df | Your model fits the past perfectly. Why is that bad news? |
 | [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, Elastic Net | Soft-thresholding, coordinate descent | When is a deliberately biased estimator the better one? |
@@ -201,10 +201,10 @@ it, and invisible work cannot be credited.
 | **Instructor** | Add every student as a collaborator with **Write**; protect `main` so only they can push to it |
 
 Students never need to create, own or configure a repository. Full walkthrough, including the
-instructor's steps: **[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**
+instructor's steps: **[Session 02 setup guide](02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md)**
 
 Git, GitHub and group working, needed from Session 02:
-**[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md)**
+**[Session 02 setup guide](02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md)**
 
 ---
 

@@ -42,7 +42,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
-[`setup-git-and-github.md`](../../02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
+[`setup-git-and-github.md`](../../02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md).
 
 ---
 

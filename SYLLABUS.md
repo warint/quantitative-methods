@@ -128,7 +128,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | # | Session | Method | Theme of the second half |
 |---|---|---|---|
 | 01 | Syllabus, and a conversation: *Europe 2031* and what AI is | — | *(no practice; discussion)* |
-| 02 | Data, vectors, and the geometry of least squares | OLS, projection, FWL, QR | How much of the gap is composition? |
+| 02 | Exploratory data analysis: centre, spread and shape | mean/median/trimmed, variance, IQR, skewness, kurtosis | Which summary would you defend in print? |
 | 03 | Linear regression: inference, diagnostics, interpretation | Gauss–Markov, robust SEs, OVB | Which differences survive a referee? |
 | 04 | Bias–variance, overfitting, cross-validation | CV, optimism, effective df | Predicting, or describing the past? |
 | 05 | Regularisation: ridge, lasso, elastic net | soft-thresholding, coordinate descent | Which few indicators carry the signal? |
@@ -307,7 +307,7 @@ Setup, with troubleshooting:
 Budget 60–90 minutes **before** Session 1; installation time is not part of class.
 
 Git, GitHub and the group repository are set up separately, before Session 2:
-[Session 02 setup guide](02-geometry-of-least-squares/00-pre-session/setup-git-and-github.md).
+[Session 02 setup guide](02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md).
 Budget 45 minutes.
 
 > **Why local rather than hosted.** Partly governance — data sovereignty is a real constraint in

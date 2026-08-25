@@ -68,4 +68,4 @@ Attach your indicator plot. **Five minutes of oral presentation** in the last 20
 
 ---
 
-[Session 02: Data, Vectors, and the Geometry of Least Squares ->](../02-geometry-of-least-squares/README.md)
+[Session 02: Exploratory Data Analysis: Centre, Spread, and Shape ->](../02-exploratory-data-analysis/README.md)

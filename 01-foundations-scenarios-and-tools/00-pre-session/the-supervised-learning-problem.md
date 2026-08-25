@@ -219,4 +219,4 @@ whole page.
 
 ---
 
-[Back to the pre-session](README.md) · [On to Session 02 ->](../../02-geometry-of-least-squares/README.md)
+[Back to the pre-session](README.md) · [On to Session 02 ->](../../02-exploratory-data-analysis/README.md)
