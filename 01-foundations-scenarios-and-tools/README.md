@@ -2,6 +2,9 @@
 
 > **Before we can model the future, what exactly are we claiming to know about it?**
 
+> **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-01-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S01-Lecture.qmd`](01-lecture/MATH60033A-S01-Lecture.qmd).
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

@@ -6,6 +6,7 @@ left unchanged.
 
 | Course session | Source | Lecture topic | Runnable QMD |
 |---|---|---|---|
+| S01 | Repository-native | The syllabus, evaluations, and the rules on using a language model | `01-foundations-scenarios-and-tools/01-lecture/MATH60033A-S01-Lecture.qmd` |
 | S02 | Original S02 | Exploratory data analysis | `02-exploratory-data-analysis/01-lecture/MATH60033A-S02-Lecture.qmd` |
 | S03 | Original S04 | Adequacy, validity, and robustness of regression models | `03-regression-adequacy-and-validity/01-lecture/MATH60033A-S03-Lecture.qmd` |
 | S04 | Original S05 | Logistic, ordinal, and multinomial regression | `04-logistic-ordinal-multinomial/01-lecture/MATH60033A-S04-Lecture.qmd` |

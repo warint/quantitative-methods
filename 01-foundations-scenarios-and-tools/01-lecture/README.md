@@ -10,6 +10,9 @@ This session is not a lecture. There is no mathematics in it. The first half wal
 [`SYLLABUS.md`](../../SYLLABUS.md) in full, and you should arrive having read it — the ninety minutes
 are for the questions it raises, not for reading it aloud.
 
+> **[Open the deck](https://warint.github.io/quantitative-methods/session-01-lecture.html)** ·
+> source: [`MATH60033A-S01-Lecture.qmd`](MATH60033A-S01-Lecture.qmd)
+
 The mathematics begins in Session 02, which introduces everything it needs. If you would like to
 arrive with the vocabulary already in hand, the optional
 [`the-supervised-learning-problem.md`](../00-pre-session/the-supervised-learning-problem.md) covers

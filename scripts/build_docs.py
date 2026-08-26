@@ -28,6 +28,9 @@ REPO_URL = "https://github.com/warint/quantitative-methods"
 
 # Session number -> (title, one-line description) for the landing page.
 SESSIONS = {
+    "01": ("The Syllabus",
+           "What the course asks of you, how you are judged, and the rules on using a "
+           "language model"),
     "02": ("Exploratory Data Analysis",
            "Centre, spread and shape — mean, median, trimmed mean, variance, IQR, "
            "skewness, kurtosis"),
