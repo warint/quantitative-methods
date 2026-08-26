@@ -189,10 +189,9 @@ governance file, the analysis, the revised memo and the defence.**
 It does **not** touch:
 
 - the **midterm exam (30%)**, which is written alone under exam conditions;
-- the **final exam (40%)**, whose oral component examines each student individually and whose paper carries its own
-  signed [CRediT authorship statement](assessments/final-paper/README.md#8-authorship-and-llm-statements)
-  — a more honest instrument, because the attribution is published in the paper rather than
-  collected in confidence afterwards;
+- the **final exam (40%)**, which is individual in both components — the
+  [paper is written alone](assessments/final-paper/README.md) and the oral examines each student
+  directly, so there is no shared work to attribute;
 - **participation**, which is already individual.
 
 Nobody loses more than 30% of the group component. The 1.05 exists so that carrying a group is
