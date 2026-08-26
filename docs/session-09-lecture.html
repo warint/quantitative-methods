@@ -1248,11 +1248,11 @@ Thierry Warin, PhD
 <p>The confirmatory factor analysis model for these nine observed variables is typically written as:</p>
 <div class="cell">
 <div id="cb1" class="sourceCode cell-code">
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a>HS.model <span class="ot">&lt;-</span> <span class="st">&#39;</span></span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>HS_model <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
 <span id="cb1-2"><a href></a><span class="st">  visual  =~ x1 + x2 + x3</span></span>
 <span id="cb1-3"><a href></a><span class="st">  textual =~ x4 + x5 + x6</span></span>
 <span id="cb1-4"><a href></a><span class="st">  speed   =~ x7 + x8 + x9</span></span>
-<span id="cb1-5"><a href></a><span class="st">&#39;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href></a><span class="st">&quot;&quot;&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>This model proposes that:</p>
@@ -1286,8 +1286,13 @@ Thierry Warin, PhD
 <h2></h2>
 <div class="cell">
 <div id="cb2" class="sourceCode cell-code">
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb2-2"><a href></a><span class="fu">head</span>(HolzingerSwineford1939)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb2-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb2-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
+<span id="cb2-4"><a href></a></span>
+<span id="cb2-5"><a href></a><span class="co"># 301 children, nine ability tests — ships with semopy, nothing to download</span></span>
+<span id="cb2-6"><a href></a>data <span class="op">=</span> holzinger39.get_data()</span>
+<span id="cb2-7"><a href></a>data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  id sex ageyr agemo  school grade       x1   x2    x3       x4   x5        x6
@@ -1312,7 +1317,10 @@ Thierry Warin, PhD
 <p>Each line in your syntax, such as</p>
 <div class="cell">
 <div id="cb4" class="sourceCode cell-code">
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href></a>visual <span class="ot">=</span><span class="er">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># &quot;visual is measured by x1, x2 and x3&quot;</span></span>
+<span id="cb4-2"><a href></a><span class="co"># =~ reads as &quot;is measured by&quot;: the latent variable on the left,</span></span>
+<span id="cb4-3"><a href></a><span class="co"># its observed indicators on the right.</span></span>
+<span id="cb4-4"><a href></a>visual <span class="op">=~</span> x1 <span class="op">+</span> x2 <span class="op">+</span> x3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>tells R that:</p>
@@ -1341,20 +1349,11 @@ Thierry Warin, PhD
 <h2><strong>3. Writing the model</strong></h2>
 <div class="cell">
 <div id="cb5" class="sourceCode cell-code">
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="do">## Load Libraries</span></span>
-<span id="cb5-2"><a href></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb5-3"><a href></a><span class="fu">library</span>(lavaanPlot)</span>
-<span id="cb5-4"><a href></a><span class="fu">library</span>(dplyr) </span>
-<span id="cb5-5"><a href></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb5-6"><a href></a><span class="fu">library</span>(knitr)</span>
-<span id="cb5-7"><a href></a><span class="fu">library</span>(mvnormalTest)</span>
-<span id="cb5-8"><a href></a></span>
-<span id="cb5-9"><a href></a></span>
-<span id="cb5-10"><a href></a>HS.model <span class="ot">&lt;-</span> <span class="st">&#39;</span></span>
-<span id="cb5-11"><a href></a><span class="st">  visual  =~ x1 + x2 + x3</span></span>
-<span id="cb5-12"><a href></a><span class="st">  textual =~ x4 + x5 + x6</span></span>
-<span id="cb5-13"><a href></a><span class="st">  speed   =~ x7 + x8 + x9</span></span>
-<span id="cb5-14"><a href></a><span class="st">&#39;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="co"># In the VS Codium terminal, with .venv active:</span></span>
+<span id="cb5-2"><a href></a><span class="co">#   pip install semopy</span></span>
+<span id="cb5-3"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb5-4"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-5"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>This model defines three latent factors:</p>
@@ -1370,7 +1369,8 @@ Thierry Warin, PhD
 <p>You fit the model using the <strong>cfa()</strong> function:</p>
 <div class="cell">
 <div id="cb6" class="sourceCode cell-code">
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a>fit <span class="ot">&lt;-</span> <span class="fu">cfa</span>(HS.model, <span class="at">data =</span> HolzingerSwineford1939)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a>fit <span class="op">=</span> semopy.Model(HS_model)</span>
+<span id="cb6-2"><a href></a>fit.fit(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <ul>
@@ -1393,7 +1393,11 @@ Thierry Warin, PhD
 <h2></h2>
 <div class="cell">
 <div id="cb7" class="sourceCode cell-code">
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href></a><span class="fu">summary</span>(fit, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href></a><span class="co"># Parameter estimates, standardised alongside the raw ones</span></span>
+<span id="cb7-2"><a href></a><span class="bu">print</span>(fit.inspect(std_est<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb7-3"><a href></a></span>
+<span id="cb7-4"><a href></a><span class="co"># Fit indices</span></span>
+<span id="cb7-5"><a href></a><span class="bu">print</span>(semopy.calc_stats(fit).T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-20 ended normally after 35 iterations
@@ -1703,23 +1707,15 @@ Variances:
 <h2>Example lavaan specification:</h2>
 <div class="cell">
 <div id="cb9" class="sourceCode cell-code">
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href></a>model <span class="ot">&lt;-</span> <span class="st">&#39;</span></span>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a>model <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
 <span id="cb9-2"><a href></a><span class="st">  # Measurement model</span></span>
 <span id="cb9-3"><a href></a><span class="st">  ind60 =~ x1 + x2 + x3</span></span>
 <span id="cb9-4"><a href></a><span class="st">  dem60 =~ y1 + y2 + y3 + y4</span></span>
 <span id="cb9-5"><a href></a><span class="st">  dem65 =~ y5 + y6 + y7 + y8</span></span>
-<span id="cb9-6"><a href></a></span>
-<span id="cb9-7"><a href></a><span class="st">  # Structural model</span></span>
-<span id="cb9-8"><a href></a><span class="st">  dem60 ~ ind60</span></span>
-<span id="cb9-9"><a href></a><span class="st">  dem65 ~ ind60 + dem60</span></span>
-<span id="cb9-10"><a href></a></span>
-<span id="cb9-11"><a href></a><span class="st">  # Correlated residuals (same democracy indicators over time)</span></span>
-<span id="cb9-12"><a href></a><span class="st">  y1 ~~ y5</span></span>
-<span id="cb9-13"><a href></a><span class="st">  y2 ~~ y4 + y6</span></span>
-<span id="cb9-14"><a href></a><span class="st">  y3 ~~ y7</span></span>
-<span id="cb9-15"><a href></a><span class="st">  y4 ~~ y8</span></span>
-<span id="cb9-16"><a href></a><span class="st">  y6 ~~ y8</span></span>
-<span id="cb9-17"><a href></a><span class="st">&#39;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-6"><a href></a><span class="st">  # Regressions — the structural part</span></span>
+<span id="cb9-7"><a href></a><span class="st">  dem60 ~ ind60</span></span>
+<span id="cb9-8"><a href></a><span class="st">  dem65 ~ ind60 + dem60</span></span>
+<span id="cb9-9"><a href></a><span class="st">&quot;&quot;&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>This model is the canonical <strong>PoliticalDemocracy SEM</strong> — it shows how <strong>industrialization in 1960</strong> affects <strong>democracy in 1960</strong> and <strong>1965</strong>, while also accounting for stability and measurement consistency over time.</p>
@@ -1753,10 +1749,11 @@ Variances:
 <p>You can load and view it directly in R:</p>
 <div class="cell">
 <div id="cb10" class="sourceCode cell-code">
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb10-2"><a href></a><span class="fu">data</span>(PoliticalDemocracy)</span>
-<span id="cb10-3"><a href></a>?PoliticalDemocracy  <span class="co"># View the help page</span></span>
-<span id="cb10-4"><a href></a><span class="fu">head</span>(PoliticalDemocracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
+<span id="cb10-2"><a href></a></span>
+<span id="cb10-3"><a href></a><span class="co"># 75 countries: industrialisation and democratic institutions</span></span>
+<span id="cb10-4"><a href></a>PoliticalDemocracy <span class="op">=</span> political_democracy.get_data()</span>
+<span id="cb10-5"><a href></a>PoliticalDemocracy.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     y1       y2       y3       y4       y5       y6       y7       y8       x1
@@ -1827,29 +1824,22 @@ Variances:
 <p>Here’s the model Bollen used, implemented in <strong>lavaan</strong>:</p>
 <div class="cell">
 <div id="cb12" class="sourceCode cell-code">
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href></a>model <span class="ot">&lt;-</span> <span class="st">&#39;</span></span>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>model <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
 <span id="cb12-2"><a href></a><span class="st">  # measurement model</span></span>
 <span id="cb12-3"><a href></a><span class="st">  ind60 =~ x1 + x2 + x3</span></span>
 <span id="cb12-4"><a href></a><span class="st">  dem60 =~ y1 + y2 + y3 + y4</span></span>
 <span id="cb12-5"><a href></a><span class="st">  dem65 =~ y5 + y6 + y7 + y8</span></span>
-<span id="cb12-6"><a href></a></span>
-<span id="cb12-7"><a href></a><span class="st">  # structural model</span></span>
-<span id="cb12-8"><a href></a><span class="st">  dem60 ~ ind60</span></span>
-<span id="cb12-9"><a href></a><span class="st">  dem65 ~ ind60 + dem60</span></span>
-<span id="cb12-10"><a href></a></span>
-<span id="cb12-11"><a href></a><span class="st">  # correlated residuals (same indicators over time)</span></span>
-<span id="cb12-12"><a href></a><span class="st">  y1 ~~ y5</span></span>
-<span id="cb12-13"><a href></a><span class="st">  y2 ~~ y4 + y6</span></span>
-<span id="cb12-14"><a href></a><span class="st">  y3 ~~ y7</span></span>
-<span id="cb12-15"><a href></a><span class="st">  y4 ~~ y8</span></span>
-<span id="cb12-16"><a href></a><span class="st">  y6 ~~ y8</span></span>
-<span id="cb12-17"><a href></a><span class="st">&#39;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-6"><a href></a><span class="st">  # regressions</span></span>
+<span id="cb12-7"><a href></a><span class="st">  dem60 ~ ind60</span></span>
+<span id="cb12-8"><a href></a><span class="st">  dem65 ~ ind60 + dem60</span></span>
+<span id="cb12-9"><a href></a><span class="st">&quot;&quot;&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>Then fit it:</p>
 <div class="cell">
 <div id="cb13" class="sourceCode cell-code">
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href></a>fit <span class="ot">&lt;-</span> <span class="fu">sem</span>(model, <span class="at">data =</span> PoliticalDemocracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a>fit <span class="op">=</span> semopy.Model(model)</span>
+<span id="cb13-2"><a href></a>fit.fit(PoliticalDemocracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -1857,7 +1847,8 @@ Variances:
 <h2>🔹 <strong>Viewing the results</strong></h2>
 <div class="cell">
 <div id="cb14" class="sourceCode cell-code">
-<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href></a><span class="fu">summary</span>(fit, <span class="at">standardized =</span> <span class="cn">TRUE</span>, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="bu">print</span>(fit.inspect(std_est<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb14-2"><a href></a><span class="bu">print</span>(semopy.calc_stats(fit).T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-20 ended normally after 68 iterations
@@ -2252,32 +2243,14 @@ Variances:
 <h2>SEM Dataset Simulation</h2>
 <div class="cell">
 <div id="cb16" class="sourceCode cell-code">
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb16-2"><a href></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
+<span id="cb16-2"><a href></a>n <span class="op">=</span> <span class="dv">400</span></span>
 <span id="cb16-3"><a href></a></span>
 <span id="cb16-4"><a href></a><span class="co"># Latent variables</span></span>
-<span id="cb16-5"><a href></a>Attitude <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb16-6"><a href></a>Norms <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb16-7"><a href></a>Control <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb16-8"><a href></a>Intention <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>Attitude <span class="sc">+</span> <span class="fl">0.6</span><span class="sc">*</span>Norms <span class="sc">+</span> <span class="fl">0.3</span><span class="sc">*</span>Control <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-9"><a href></a></span>
-<span id="cb16-10"><a href></a><span class="co"># Indicators (two per latent)</span></span>
-<span id="cb16-11"><a href></a>sex.fool <span class="ot">&lt;-</span> <span class="fl">0.8</span><span class="sc">*</span>Attitude <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-12"><a href></a>sex.harm <span class="ot">&lt;-</span> <span class="fl">0.7</span><span class="sc">*</span>Attitude <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-13"><a href></a></span>
-<span id="cb16-14"><a href></a>love.sex <span class="ot">&lt;-</span> <span class="fl">0.9</span><span class="sc">*</span>Norms <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-15"><a href></a>frnd.sex <span class="ot">&lt;-</span> <span class="fl">0.8</span><span class="sc">*</span>Norms <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-16"><a href></a></span>
-<span id="cb16-17"><a href></a>self.cntl <span class="ot">&lt;-</span> <span class="fl">0.85</span><span class="sc">*</span>Control <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-18"><a href></a>how.ref <span class="ot">&lt;-</span> <span class="fl">0.8</span><span class="sc">*</span>Control <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-19"><a href></a></span>
-<span id="cb16-20"><a href></a>int.abs <span class="ot">&lt;-</span> <span class="fl">0.9</span><span class="sc">*</span>Intention <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-21"><a href></a>int.avoid <span class="ot">&lt;-</span> <span class="fl">0.85</span><span class="sc">*</span>Intention <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-22"><a href></a></span>
-<span id="cb16-23"><a href></a>tpb <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(int.abs, int.avoid, sex.fool, sex.harm,</span>
-<span id="cb16-24"><a href></a>                  love.sex, frnd.sex, self.cntl, how.ref)</span>
-<span id="cb16-25"><a href></a></span>
-<span id="cb16-26"><a href></a><span class="fu">write.csv</span>(tpb, <span class="st">&quot;tpb.csv&quot;</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-5"><a href></a>Attitude <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb16-6"><a href></a>Norms    <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb16-7"><a href></a>Control  <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb16-8"><a href></a>Intention <span class="op">=</span> <span class="fl">0.4</span> <span class="op">*</span> Attitude <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> Norms <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> Control <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.5</span>, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -2285,13 +2258,10 @@ Variances:
 <h2></h2>
 <div class="cell">
 <div id="cb17" class="sourceCode cell-code">
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href></a><span class="do">## Load Libraries</span></span>
-<span id="cb17-2"><a href></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb17-3"><a href></a><span class="fu">library</span>(lavaanPlot)</span>
-<span id="cb17-4"><a href></a><span class="fu">library</span>(dplyr) </span>
-<span id="cb17-5"><a href></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb17-6"><a href></a><span class="fu">library</span>(knitr)</span>
-<span id="cb17-7"><a href></a><span class="fu">library</span>(mvnormalTest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb17-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb17-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-4"><a href></a><span class="im">from</span> scipy <span class="im">import</span> stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -2299,9 +2269,19 @@ Variances:
 <h2></h2>
 <div class="cell">
 <div id="cb18" class="sourceCode cell-code">
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href></a><span class="do">## Load data</span></span>
-<span id="cb18-2"><a href></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;tpb.csv&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>)     <span class="do">## load csv file</span></span>
-<span id="cb18-3"><a href></a><span class="fu">head</span>(data)                                   <span class="do">## list a first few records to check your data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="co"># The R deck reads a local tpb.csv. We simulate the same structure so the</span></span>
+<span id="cb18-2"><a href></a><span class="co"># slide runs anywhere, with no file to find.</span></span>
+<span id="cb18-3"><a href></a>tpb <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb18-4"><a href></a>    <span class="st">&quot;sex_fool&quot;</span>: Attitude <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-5"><a href></a>    <span class="st">&quot;sex_harm&quot;</span>: Attitude <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-6"><a href></a>    <span class="st">&quot;frnd_sex&quot;</span>: Norms    <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-7"><a href></a>    <span class="st">&quot;love_sex&quot;</span>: Norms    <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-8"><a href></a>    <span class="st">&quot;sex_ctrl&quot;</span>: Control  <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-9"><a href></a>    <span class="st">&quot;sex_plan&quot;</span>: Control  <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-10"><a href></a>    <span class="st">&quot;intend_a&quot;</span>: Intention <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-11"><a href></a>    <span class="st">&quot;intend_b&quot;</span>: Intention <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">.5</span>, n),</span>
+<span id="cb18-12"><a href></a>})</span>
+<span id="cb18-13"><a href></a>tpb.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     int.abs    int.avoid   sex.fool   sex.harm   love.sex    frnd.sex
@@ -2325,9 +2305,10 @@ Variances:
 <h2>Assessing assumptions</h2>
 <div class="cell">
 <div id="cb20" class="sourceCode cell-code">
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href></a>mvnout <span class="ot">&lt;-</span> <span class="fu">mardia</span>(data)</span>
-<span id="cb20-2"><a href></a><span class="do">## Shapiro-Wilk Univariate normality test</span></span>
-<span id="cb20-3"><a href></a>mvnout<span class="sc">$</span>uv.shapiro</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a><span class="co"># Univariate normality, one test per indicator</span></span>
+<span id="cb20-2"><a href></a><span class="cf">for</span> col <span class="kw">in</span> tpb.columns:</span>
+<span id="cb20-3"><a href></a>    W, p <span class="op">=</span> stats.shapiro(tpb[col])</span>
+<span id="cb20-4"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>col<span class="sc">:10s}</span><span class="ss"> W = </span><span class="sc">{</span>W<span class="sc">:.4f}</span><span class="ss">   p = </span><span class="sc">{</span>p<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          W      p-value UV.Normality
@@ -2346,8 +2327,15 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <h2>Assessing assumptions</h2>
 <div class="cell">
 <div id="cb22" class="sourceCode cell-code">
-<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href></a><span class="do">## Mardia Multivariate normaility test</span></span>
-<span id="cb22-2"><a href></a>mvnout<span class="sc">$</span>mv.test</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href></a><span class="co"># Multivariate normality: Mardia&#39;s skewness and kurtosis</span></span>
+<span id="cb22-2"><a href></a>X <span class="op">=</span> tpb.to_numpy()</span>
+<span id="cb22-3"><a href></a>Xc <span class="op">=</span> X <span class="op">-</span> X.mean(<span class="dv">0</span>)</span>
+<span id="cb22-4"><a href></a>S_inv <span class="op">=</span> np.linalg.inv(np.cov(X, rowvar<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb22-5"><a href></a>D <span class="op">=</span> Xc <span class="op">@</span> S_inv <span class="op">@</span> Xc.T</span>
+<span id="cb22-6"><a href></a>n_, k <span class="op">=</span> X.shape</span>
+<span id="cb22-7"><a href></a>b1 <span class="op">=</span> (D <span class="op">**</span> <span class="dv">3</span>).<span class="bu">sum</span>() <span class="op">/</span> n_ <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb22-8"><a href></a>b2 <span class="op">=</span> np.trace(D <span class="op">@</span> D) <span class="op">/</span> n_        <span class="co"># summary statistics; see the notes</span></span>
+<span id="cb22-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;Mardia skewness </span><span class="sc">{</span>b1<span class="sc">:.3f}</span><span class="ss">   kurtosis </span><span class="sc">{</span>b2<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          Test Statistic p-value Result
@@ -2361,15 +2349,17 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <h2>Model speicification</h2>
 <div class="cell">
 <div id="cb24" class="sourceCode cell-code">
-<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href></a><span class="do">## Model specification</span></span>
-<span id="cb24-2"><a href></a>model <span class="ot">&lt;-</span> <span class="st">&#39;</span></span>
-<span id="cb24-3"><a href></a><span class="st">  attitudes =~ sex.fool + sex.harm</span></span>
-<span id="cb24-4"><a href></a><span class="st">  norms =~ frnd.sex + love.sex</span></span>
-<span id="cb24-5"><a href></a><span class="st">  control =~ self.cntl + how.ref</span></span>
-<span id="cb24-6"><a href></a><span class="st">  intention =~ int.abs + int.avoid</span></span>
-<span id="cb24-7"><a href></a><span class="st">  intention ~ attitudes + norms + control&#39;</span></span>
-<span id="cb24-8"><a href></a><span class="do">## sem function syntax</span></span>
-<span id="cb24-9"><a href></a>fit.mod <span class="ot">&lt;-</span> <span class="fu">sem</span>(model, <span class="at">data=</span>data, <span class="at">std.lv =</span> <span class="cn">TRUE</span>, <span class="at">estimator =</span> <span class="st">&quot;MLM&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href></a><span class="co"># Measurement model + structural model, in one description</span></span>
+<span id="cb24-2"><a href></a>model <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb24-3"><a href></a><span class="st">  attitudes =~ sex_fool + sex_harm</span></span>
+<span id="cb24-4"><a href></a><span class="st">  norms     =~ frnd_sex + love_sex</span></span>
+<span id="cb24-5"><a href></a><span class="st">  control   =~ sex_ctrl + sex_plan</span></span>
+<span id="cb24-6"><a href></a><span class="st">  intention =~ intend_a + intend_b</span></span>
+<span id="cb24-7"><a href></a><span class="st">  intention ~ attitudes + norms + control</span></span>
+<span id="cb24-8"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb24-9"><a href></a></span>
+<span id="cb24-10"><a href></a>fit_mod <span class="op">=</span> semopy.Model(model)</span>
+<span id="cb24-11"><a href></a>fit_mod.fit(tpb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -2377,7 +2367,8 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <h2>Model fit</h2>
 <div class="cell">
 <div id="cb25" class="sourceCode cell-code">
-<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href></a><span class="fu">fitMeasures</span>(fit.mod, <span class="fu">c</span>(<span class="st">&quot;chisq.scaled&quot;</span>, <span class="st">&quot;df.scaled&quot;</span>, <span class="st">&quot;pvalue.scaled&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href></a>stats_tbl <span class="op">=</span> semopy.calc_stats(fit_mod)</span>
+<span id="cb25-2"><a href></a><span class="bu">print</span>(stats_tbl[[<span class="st">&quot;chi2&quot;</span>, <span class="st">&quot;DoF&quot;</span>, <span class="st">&quot;chi2 p-value&quot;</span>]].T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code> chisq.scaled     df.scaled pvalue.scaled 
@@ -2386,7 +2377,7 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 </div>
 <div class="cell">
 <div id="cb27" class="sourceCode cell-code">
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href></a><span class="fu">fitMeasures</span>(fit.mod, <span class="fu">c</span>(<span class="st">&quot;rmsea.scaled&quot;</span>, <span class="st">&quot;rmsea.ci.lower.scaled&quot;</span>, <span class="st">&quot;rmsea.ci.upper.scaled&quot;</span>, <span class="st">&quot;rmsea.pvalue.scaled&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href></a><span class="bu">print</span>(stats_tbl[[<span class="st">&quot;RMSEA&quot;</span>]].T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         rmsea.scaled rmsea.ci.lower.scaled rmsea.ci.upper.scaled 
@@ -2397,7 +2388,7 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 </div>
 <div class="cell">
 <div id="cb29" class="sourceCode cell-code">
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href></a><span class="fu">fitMeasures</span>(fit.mod, <span class="fu">c</span>(<span class="st">&quot;cfi.scaled&quot;</span>, <span class="st">&quot;srmr&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href></a><span class="bu">print</span>(stats_tbl[[<span class="st">&quot;CFI&quot;</span>, <span class="st">&quot;TLI&quot;</span>, <span class="st">&quot;GFI&quot;</span>]].T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>cfi.scaled       srmr 
@@ -2409,9 +2400,9 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <h2>Measurement Model Results</h2>
 <div class="cell">
 <div id="cb31" class="sourceCode cell-code">
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href></a><span class="fu">standardizedsolution</span>(fit.mod, <span class="at">type =</span> <span class="st">&quot;std.all&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">zstat =</span> <span class="cn">TRUE</span>, <span class="at">pvalue =</span> <span class="cn">TRUE</span>, <span class="at">ci =</span> <span class="cn">TRUE</span>)<span class="sc">%&gt;%</span> </span>
-<span id="cb31-2"><a href></a>  <span class="fu">filter</span>(op <span class="sc">==</span> <span class="st">&quot;=~&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb31-3"><a href></a>  <span class="fu">select</span>(<span class="at">LV=</span>lhs, <span class="at">Item=</span>rhs, <span class="at">Coefficient=</span>est.std, ci.lower, ci.upper, <span class="at">SE=</span>se, <span class="at">Z=</span>z, <span class="st">&#39;p-value&#39;</span><span class="ot">=</span>pvalue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href></a><span class="co"># Standardised loadings — the measurement part</span></span>
+<span id="cb31-2"><a href></a>ins <span class="op">=</span> fit_mod.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-3"><a href></a><span class="bu">print</span>(ins[ins[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>][[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>, <span class="st">&quot;p-value&quot;</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value
@@ -2427,9 +2418,8 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 </div>
 <div class="cell">
 <div id="cb33" class="sourceCode cell-code">
-<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href></a><span class="fu">parameterEstimates</span>(fit.mod, <span class="at">standardized=</span><span class="cn">TRUE</span>, <span class="at">rsquare =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb33-2"><a href></a>  <span class="fu">filter</span>(op <span class="sc">==</span> <span class="st">&quot;r2&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb33-3"><a href></a>  <span class="fu">select</span>(<span class="at">Item=</span>rhs, <span class="at">R2 =</span> est) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href></a><span class="co"># R-squared for each indicator</span></span>
+<span id="cb33-2"><a href></a><span class="bu">print</span>(fit_mod.inspect(std_est<span class="op">=</span><span class="va">True</span>).query(<span class="st">&quot;op == &#39;~~&#39; and lval == rval&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Item    R2
@@ -2449,9 +2439,8 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <h2>Structural Model Results</h2>
 <div class="cell">
 <div id="cb35" class="sourceCode cell-code">
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href></a><span class="fu">standardizedsolution</span>(fit.mod, <span class="at">type =</span> <span class="st">&quot;std.all&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">zstat =</span> <span class="cn">TRUE</span>, <span class="at">pvalue =</span> <span class="cn">TRUE</span>, <span class="at">ci =</span> <span class="cn">TRUE</span>)<span class="sc">%&gt;%</span> </span>
-<span id="cb35-2"><a href></a>  <span class="fu">filter</span>(op <span class="sc">==</span> <span class="st">&quot;~&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb35-3"><a href></a>  <span class="fu">select</span>(<span class="at">LV=</span>lhs, <span class="at">Item=</span>rhs, <span class="at">Coefficient=</span>est.std, ci.lower, ci.upper, <span class="at">SE=</span>se, <span class="at">Z=</span>z, <span class="st">&#39;p-value&#39;</span><span class="ot">=</span>pvalue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href></a><span class="co"># The structural paths: what predicts intention</span></span>
+<span id="cb35-2"><a href></a><span class="bu">print</span>(ins[(ins[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>) <span class="op">&amp;</span> (ins[<span class="st">&quot;rval&quot;</span>].isin([<span class="st">&quot;attitudes&quot;</span>, <span class="st">&quot;norms&quot;</span>, <span class="st">&quot;control&quot;</span>]))])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value

@@ -1206,7 +1206,7 @@ Thierry Warin
 </section>
 <section id="what-complete-case-analysis-leaves-you" class="slide level2">
 <h2>What complete-case analysis leaves you</h2>
-<div id="48ea709a" class="cell" data-execution_count="2">
+<div id="4c4c5852" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>raw <span class="op">=</span> pd.read_parquet(<span class="st">&quot;../../data/spine/angle_c_country.parquet&quot;</span>)</span>
 <span id="cb1-2"><a href></a>YCOL  <span class="op">=</span> <span class="st">&quot;rd_pct_gdp&quot;</span></span>
 <span id="cb1-3"><a href></a>XCOLS <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> raw.columns <span class="cf">if</span> c <span class="kw">not</span> <span class="kw">in</span> (<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;flag&quot;</span>, YCOL)]</span>
@@ -1223,7 +1223,7 @@ Thierry Warin
 </section>
 <section id="why-ols-cannot-cope-here" class="slide level2">
 <h2>Why OLS cannot cope here</h2>
-<div id="f3b9629c" class="cell" data-execution_count="3">
+<div id="b2d52bcc" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;condition number of the standardised design: </span><span class="sc">{</span>np<span class="sc">.</span>linalg<span class="sc">.</span>cond(Ztr)<span class="sc">:.1e}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>condition number of the standardised design: 5.0e+15</code></pre>
@@ -1242,7 +1242,7 @@ Thierry Warin
 </section>
 <section id="four-estimators-one-held-out-test-set" class="slide level2">
 <h2>Four estimators, one held-out test set</h2>
-<div id="d6f12903" class="cell" data-execution_count="4">
+<div id="f3327b11" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
 <span id="cb5-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
 <span id="cb5-3"><a href></a>    model.fit(Xtr, ytr)</span>
@@ -1328,7 +1328,7 @@ Thierry Warin
 </section>
 <section id="ridge-in-three-lines-explained" class="slide level2">
 <h2>Ridge in three lines, explained</h2>
-<div id="c2c0e191" class="cell" data-execution_count="7">
+<div id="47914d1b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a>mod <span class="op">=</span> make_pipeline(</span>
 <span id="cb6-2"><a href></a>    StandardScaler(),                       <span class="co"># 1. penalty is scale-dependent: standardise first</span></span>
 <span id="cb6-3"><a href></a>    RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))  <span class="co"># 2. pick lambda by leave-one-out CV over a log grid</span></span>
@@ -1470,7 +1470,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </section>
 <section id="what-survived-on-our-data" class="slide level2">
 <h2>What survived, on our data</h2>
-<div id="73cefa04" class="cell" data-execution_count="11">
+<div id="f5d417e0" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a>lcv <span class="op">=</span> LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>).fit(Ztr, ytr)</span>
 <span id="cb8-2"><a href></a>kept <span class="op">=</span> [(c, b) <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, lcv.coef_) <span class="cf">if</span> <span class="bu">abs</span>(b) <span class="op">&gt;</span> <span class="fl">1e-8</span>]</span>
 <span id="cb8-3"><a href></a></span>
@@ -1514,7 +1514,7 @@ auxiliary series kept: 0 of 15</code></pre>
 <section id="limitation-2-is-not-academic" class="slide level2">
 <h2>Limitation 2 is not academic</h2>
 <p>Our five AI-adoption columns are all measuring roughly the same thing:</p>
-<div id="6104ce4b" class="cell" data-execution_count="12">
+<div id="706b084f" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
 <span id="cb10-2"><a href></a>C <span class="op">=</span> d[GRP].corr().to_numpy()</span>
 <span id="cb10-3"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pairwise correlations within the group: </span><span class="sc">{</span>C[np.triu_indices(<span class="dv">5</span>, <span class="dv">1</span>)]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.2f}</span><span class="ss">&quot;</span></span>

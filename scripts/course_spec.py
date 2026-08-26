@@ -28,7 +28,24 @@ SESSIONS = {
         question="Before you model anything, what does the data actually look like?",
         methods="mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression",
         theme="Which summary of your key variable would you defend in print?",
-        generated=False,          # written by hand earlier; already current
+        generated=False,          # pages written by hand; decks still generated
+        objectives=[
+            "Compute the **mean, median and trimmed mean**, and say which question each answers",
+            "Explain why the sample variance divides by $n-1$",
+            "Apply the **empirical rule**, and state the precondition that makes it valid",
+            "Compute **skewness** and **excess kurtosis**, and test each against its threshold",
+            "Fit a simple regression and state the slope **in units**",
+        ],
+        dataset="core",
+        dataset_note="the course spine — thirty European countries, 2010–2024",
+        deliverable=("a profile of your project's three key variables — centre, spread and shape, "
+                     "thresholds tested — and the summary you would defend in print"),
+        loses_marks=[
+            "`df.describe()` pasted with no interpretation",
+            "A skewness reported without its threshold",
+            "Calling a variable normal because it is symmetric",
+            "Applying the empirical rule to a variable you have shown to be skewed",
+        ],
     ),
     "03": dict(
         dir="03-regression-adequacy-and-validity",
@@ -89,7 +106,24 @@ SESSIONS = {
         question="When is a deliberately biased estimator the better one?",
         methods="soft-thresholding, coordinate descent, the grouping effect",
         theme="Of many indicators, which few actually carry the signal?",
-        generated=False,          # repository-native and already current
+        generated=False,          # repository-native pages; decks still generated
+        objectives=[
+            "State the ridge and lasso objectives and say **what each penalty buys**",
+            "Explain why ridge shrinkage is **targeted** rather than blunt",
+            "Derive **soft-thresholding** and use it to explain the lasso's exact zeros",
+            "Choose between lasso and elastic net from the **correlation structure**",
+            "Report $\\lambda$ by cross-validation, and know why post-selection inference is invalid",
+        ],
+        dataset="core",
+        dataset_note="a wide slice of the spine — more candidate indicators than usable rows",
+        deliverable=("a penalised fit on your own angle: the path, the chosen $\\lambda$, what "
+                     "survived, and what that does not license you to claim"),
+        loses_marks=[
+            "Penalising unstandardised predictors",
+            "Standardising before the cross-validation split",
+            "Reporting the selected set as \"the variables that matter\"",
+            "Reporting post-selection p-values with no caveat",
+        ],
     ),
     "06": dict(
         dir="06-advanced-regression",

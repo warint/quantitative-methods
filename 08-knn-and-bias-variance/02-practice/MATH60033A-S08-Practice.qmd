@@ -1,0 +1,153 @@
+---
+title: "Session 8: Practice"
+subtitle: "Does flexibility buy you anything on your own data?"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+course-session: "08"
+format:
+  revealjs:
+    theme: [default, ../../slides/economist.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    footer: "MATH60033A · Session 08 practice · Thierry Warin, PhD · HEC Montréal"
+---
+
+# Practice {background-color="#E3120B" style="color:#F7F4ED"}
+
+::: {style="margin-top: 1.0em; color:#F7F4ED"}
+### Does flexibility buy you anything on your own data?
+:::
+
+## Ninety minutes
+
+| | | |
+|---|---|---|
+| **00–20** | Reproduce | one result from the paper you read |
+| **20–55** | Apply | the method, to **your own angle** |
+| **55–70** | Break | one assumption, deliberately |
+| **70–90** | Write, and report | 250 words, then two minutes to the room |
+
+::: {.warn}
+The presenter is drawn **at random** when your group is called. All three of you prepare.
+:::
+
+## Before you start
+
+Everyone pushes at least once. Replace `XX` with your group number — group 07 uses `group-07`.
+
+```bash
+git checkout -b group-XX
+mkdir -p 08-knn-and-bias-variance/02-practice/submissions/group-XX
+```
+
+::: {.muted}
+The git log is the participation record. It is not a formality.
+:::
+
+## 1 · Reproduce — 20 min
+
+Take the result the paper rests on, and reproduce it.
+
+```python
+import qmib
+
+data = qmib.load("core")
+```
+
+::: {.check}
+A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.
+:::
+
+::: {.muted}
+"It did not work" is not a diagnosis. Where did it stop, and what did you check?
+:::
+
+## 2 · Apply to your own angle — 35 min
+
+```python
+core = qmib.load("core")
+mine = qmib.load("angle_c_country")     # your angle — see your dictionary
+df   = core.merge(mine, on=["geo", "time"], how="inner")
+```
+
+Fit the session's method on **your** data, and report what the lecture said to report — in the
+units of your own variables.
+
+::: {.warn}
+A coefficient without units is not a finding.
+:::
+
+## 3 · Break one assumption — 15 min
+
+Every method in this course rests on something.
+
+::: {.step}
+Find the assumption this one leans on hardest. Break it **deliberately**. Record what happened to
+your answer.
+:::
+
+::: {.check}
+This is the part that carries the marks. A group that shows how its result falls apart understands
+it; a group that only shows it holding does not yet know.
+:::
+
+## 4 · Write it down — 20 min
+
+250 words in your submissions folder:
+
+::: {.tight}
+- What you found, **in units**
+- Which assumption you broke, and what it did
+- What this result does **not** license you to claim
+:::
+
+::: {.muted}
+And the standing rule: one LLM output you identified as wrong, and how you established that.
+:::
+
+## Submitting
+
+```bash
+git add 08-knn-and-bias-variance/02-practice/submissions/group-XX
+git commit -m "Session 08 practice — group XX"
+git push -u origin group-XX
+```
+
+::: {.get}
+**Deliverable.** A knn classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
+:::
+
+## What loses marks
+
+::: {.tight}
+- Running KNN on unstandardised predictors
+- Choosing $k$ on the test set
+- Reporting accuracy with no benchmark
+- Treating a low training error as evidence of anything
+:::
+
+::: {.warn}
+And everywhere in this course: an association described in causal language.
+:::
+
+## Two-minute report
+
+| | |
+|---|---|
+| **One number** | with its units and its uncertainty |
+| **One assumption** | the one you broke, and what happened |
+| **One limit** | what you cannot claim from this |
+
+::: {.muted}
+Listen for traceable evidence, not confidence of delivery.
+:::
