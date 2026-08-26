@@ -60,7 +60,7 @@ will derive, implement, break, and defend eleven methods.
 By the end of the course you will be able to:
 
 1. **Derive** the estimators of linear regression, penalised regression, logistic regression,
-   tree ensembles, principal components, and double machine learning — from first principles, on
+   panel models, principal components, and causal inference — from first principles, on
    paper.
 2. **State the assumptions** each method requires, identify when they fail, and quantify the
    consequence.
@@ -127,25 +127,27 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
 | # | Session | Method | Theme of the second half |
 |---|---|---|---|
-| 01 | Syllabus, and a conversation: *Europe 2031* and what AI is | — | *(no practice; discussion)* |
-| 02 | Exploratory data analysis: centre, spread and shape | mean/median/trimmed, variance, IQR, skewness, kurtosis | Which summary would you defend in print? |
-| 03 | Linear regression: inference, diagnostics, interpretation | Gauss–Markov, robust SEs, OVB | Which differences survive a referee? |
-| 04 | Bias–variance, overfitting, cross-validation | CV, optimism, effective df | Predicting, or describing the past? |
-| 05 | Regularisation: ridge, lasso, elastic net | soft-thresholding, coordinate descent | Which few indicators carry the signal? |
-| 06 | Classification: logistic, regularisation, thresholds | MLE, IRLS, ROC, cost thresholds | Can we flag a decline a year ahead? |
+| 01 | Foundations: Scenarios, Tools, and the Syllabus | the syllabus, the toolchain, and a conversation | *(no practice; discussion)* |
+| 02 | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression | Which summary of your key variable would you defend in print? |
+| 03 | Regression: Adequacy, Validity, and Robustness | residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
+| 04 | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
+| 05 | Regularisation: Ridge, Lasso, and the Elastic Net | soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
+| 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
 | — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |
-| 07 | Trees, forests, gradient boosting | CART, bagging, functional gradient descent | Non-linear, and still explainable? |
-| 08 | Unsupervised I: PCA, SVD, factor models | Eckart–Young, Bai–Ng | How many independent things are happening? |
-| 09 | Unsupervised II: clustering, embeddings, text | Lloyd, TF–IDF, validity | Do countries fall into types? |
-| 10 | Causal machine learning: double/debiased ML | Neyman orthogonality, cross-fitting | Did the policy do anything? |
-| 11 | Forecasting, distribution shift, model governance | rolling origin, Diebold–Mariano | Would you sign this dashboard? |
-| 12 | **Final group presentations** | — | — |
+| 07 | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
+| 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
+| 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
+| 10 | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
+| 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
+| 12 | Final Group Presentations | — | — |
 
-**The arc.** Sessions 2–3 build the classical estimator and its inference. Session 4 is the hinge:
-in-sample fit stops counting as evidence. Sessions 5–7 buy flexibility and pay for it in
-interpretability. Sessions 8–9 turn to structure nobody labelled. Session 10 shows why none of the
-previous nine sessions licenses a policy claim. Session 11 asks what you owe the person who acts on
-your work. Session 12 is where you defend it.
+**The arc.** Session 2 describes one variable, then relates two — the smallest possible model.
+Session 3 asks whether that model can be trusted, which is where diagnostics live. Session 4 carries
+regression to discrete outcomes, and Session 5 to problems with more predictors than you can
+estimate. Session 6 takes the panel structure of international data seriously. Sessions 7 to 9 turn
+to structure nobody labelled: dimensions, neighbours, and quantities you cannot observe directly.
+Sessions 10 and 11 confront the question the first nine sessions cannot answer — whether anything
+*caused* anything — and Session 12 is where you defend your own attempt.
 
 ---
 
@@ -240,11 +242,12 @@ be claimed).
 
 Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/).
 
-### Group project — 30%, Session 12
+### Team work — 20%, Session 12
 
-Eleven weeks of work on your project, presented and defended. Three parts: a **model governance file**
-that a competent stranger could act on, a **reproducible analysis** that runs from a clean clone,
-and a **presentation** to a decision-maker who will not read your code.
+Eleven weeks of work on your project, presented and defended. Three parts: a **model governance
+file** that a competent stranger could act on — what the model is for, what it must not be used
+for, how it was validated, and where it is weakest — a **reproducible analysis** that runs from a
+clean clone, and a **presentation** to a decision-maker who will not read your code.
 
 > **Why the governance file carries the most weight.** Because it is where every other skill in the
 > course has to be written down for someone else. Its Limitations section is the hardest paragraph

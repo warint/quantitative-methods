@@ -237,15 +237,16 @@ Prices are observed before and after the construction of the subsidized housing 
 
 ::::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-data <- data.frame(
-  House_Price = c(
-    213679.8, 229355.4, 190580.1, 188669.0, 253573.7,
-    320094.0, 188525.7, 282998.4, 184424.0, 290409.4
-  ),
-  Group = c(0, 0, 1, 1, 0, 0, 1, 1, 0, 0),
-  Post_Treatment = c(0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
-)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import pandas as pd
+
+data = pd.DataFrame({
+    "House_Price": [213679.8, 229355.4, 190580.1, 188669.0, 253573.7,
+                    320094.0, 188525.7, 282998.4, 184424.0, 290409.4],
+    "Group":          [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],   # 1 = treated area
+    "Post_Treatment": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],   # 1 = after the policy
+})
 
 data
 ```
@@ -280,28 +281,14 @@ The DiD regression is:
 
 :::: cell
 ::: {#cb3 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Example structure (assuming `data` already exists)
-reg_housing <- lm(
-  House_Price ~ Group * Post_Treatment,
-  data = data
-)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import statsmodels.formula.api as smf
 
-stargazer(
-  reg_housing,
-  type            = "text",
-  dep.var.labels  = "Housing prices",
-  column.labels   = c(""),
-  covariate.labels = c(
-    "Intercept (B0)",
-    "Treatment group (B1)",
-    "Post-treatment (B2)",
-    "Diff in Diff (B3)"
-  ),
-  omit.stat       = "all",
-  digits          = 2,
-  intercept.bottom = FALSE
-)
+# The interaction IS the difference-in-differences estimate
+reg_housing = smf.ols("House_Price ~ Group * Post_Treatment", data=data).fit()
+
+print(reg_housing.summary())
+print(f"\nDiD estimate = {reg_housing.params['Group:Post_Treatment']:+,.0f}")
 ```
 :::
 ::::
@@ -385,21 +372,19 @@ Results from the working example
 
 ::::: cell
 ::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-data <- data.frame(
-  Treatment = c(1, 0, 1, 1, 1, 0, 0, 1, 0, 1),
-  age        = c(75, 62, 60, 60, 57, 55, 50, 48, 60, 51),
-  sex        = c(1, 2, 1, 2, 2, 2, 2, 2, 1, 2),
-  education  = c(3, 2, 1, 2, 1, 1, 1, 2, 2, 2),
-  marital    = c(4, 4, 4, 4, 4, 4, 4, 4, 3, 3),
-  information= c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-  income     = c(3000, 3000, 11000, 1000, 1000, 4000, 3000, 2000, 2000, 3000),
-  newvar     = c(1.45, 1.00, 1.45, 1.45, 1.45, 1.00, 1.00, 1.45, 1.00, 1.45),
-  info_index = c(
-    2.2967648, -0.6487551, 1.5254940, 1.5254940, 1.3712398,
-    -0.7515912, -0.8250455, 0.9084774, -0.6781368, 1.0627315
-  )
-)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+data = pd.DataFrame({
+    "Treatment":  [1, 0, 1, 1, 1, 0, 0, 1, 0, 1],
+    "age":        [75, 62, 60, 60, 57, 55, 50, 48, 60, 51],
+    "sex":        [1, 2, 1, 2, 2, 2, 2, 2, 1, 2],
+    "education":  [3, 2, 1, 2, 1, 1, 1, 2, 2, 2],
+    "marital":    [4, 4, 4, 4, 4, 4, 4, 4, 3, 3],
+    "information":[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "income":     [3000, 3000, 11000, 1000, 1000, 4000, 3000, 2000, 2000, 3000],
+    "newvar":     [1.45, 1.00, 1.45, 1.45, 1.45, 1.00, 1.00, 1.45, 1.00, 1.45],
+    "info_index": [2.2967648, -0.6487551, 1.5254940, 1.5254940, 1.3712398,
+                   -0.7515912, -0.8250455, 0.9084774, -0.6781368, 1.0627315],
+})
 
 data
 ```

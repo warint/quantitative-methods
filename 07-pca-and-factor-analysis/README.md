@@ -1,6 +1,6 @@
-# Session 07 — Trees, Forests, and Gradient Boosting
+# Session 07 — Principal Component and Factor Analyses
 
-> **If we abandon linearity, what do we lose - and is interpretability recoverable?**
+> **How many independent things are actually being measured?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-07-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S07-Lecture.qmd`](01-lecture/MATH60033A-S07-Lecture.qmd).
@@ -11,23 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### Is the relationship non-linear — and can you still explain it to a minister?
+> ### How many distinct dimensions does your angle really have?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- Derive recursive binary splitting and the impurity criteria (Gini, entropy, variance reduction).
-- Explain cost-complexity pruning and the weakest-link algorithm.
-- Show why bagging reduces variance, and quantify the limit imposed by inter-tree correlation.
-- Derive gradient boosting as functional gradient descent in the space of predictors.
-- Interpret a black-box model with permutation importance, partial dependence, and Shapley values - and state each method's assumptions.
+- Explain why PCA requires **standardised** inputs, and what happens if you forget
+- Read a **scree plot** and defend the number of components you retained
+- Distinguish a **loading** from a **score**, and say what each is for
+- State the difference between **PCA** and **factor analysis**, and when each applies
+- Say why a factor is identified only **up to rotation**
 
 ---
 
@@ -35,39 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: eigenvalues, loadings, scree plots, rotation, FAMD | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**Ames Housing (regression) + Bank Marketing (classification)**
+**45,000 films — budget, popularity, revenue, runtime and votes** — one line to load it:
 
-Source: OpenML / UCI
-URL: https://archive.ics.uci.edu/dataset/222/bank+marketing
+```python
+import qmib
+data = qmib.load("movies")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` with the five-model comparison table, the OOB-vs-$m$
-curve, PDP/ICE and SHAP figures, and a 400-word note: *you must present one model to a municipal
-housing authority. Which do you choose, and how do you defend the choice on grounds other than
-RMSE?*
+In `02-practice/submissions/group-XX/`: a dimension-reduction of your project's indicators: the scree plot, the number retained with its justification, the loadings interpreted, and a note on what you are *not* entitled to call the components.
 
 ---
 
-## Before the next session
-
-- ISLR ch. 12.1-12.2 (PCA) before Session 8.
-
----
-
-[<- Session 06: Classification: Logistic Regression, Regularisation, and Decision Thresholds](../06-advanced-regression/README.md) | [Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics ->](../08-knn-and-bias-variance/README.md)
+[<- [Session 06: Regression: Advanced Considerations](../06-advanced-regression/README.md)](../06-advanced-regression/README.md) | [[Session 08: K-Nearest Neighbours and the Bias–Variance Trade-off](../08-knn-and-bias-variance/README.md) ->](../08-knn-and-bias-variance/README.md)

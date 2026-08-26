@@ -192,12 +192,13 @@ As we saw in the two previous modules, linear regression allows us to model the 
 
 :::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 ::::
@@ -223,14 +224,13 @@ When working with a binary dependent variable, a scatter plot is often not that 
 
 :::: cell
 ::: {#cb2 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
-
-summary(loans)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 ::::
@@ -274,14 +274,13 @@ summary(loans)
 
 ::::: cell
 ::: {#cb4 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid
-
-plot(loans$fico, loans$default)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 
@@ -302,9 +301,12 @@ plot(loans$fico, loans$default)
 
 :::: cell
 ::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-m1 <- lm(default ~ fico, data = loans)
-summary(m1)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import statsmodels.formula.api as smf
+
+# The linear probability model: a straight line through 0/1 outcomes
+m1 = smf.ols("default ~ fico", data=loans).fit()
+print(m1.summary())
 ```
 :::
 ::::
@@ -479,14 +481,13 @@ For our loan default data, the R output from estimating a logistic regression is
 
 :::: cell
 ::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
-m2 <- glm(default ~ fico, data = loans, family = "binomial")
-summary(m2)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 ::::
@@ -555,14 +556,13 @@ With this equation we can predict probability of loan default for any FICO score
 
 ::::: cell
 ::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
-m2 <- glm(default ~ fico, data = loans, family = "binomial")
-summary(m2)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 
@@ -671,12 +671,11 @@ The formula for SE(p) is complex, so we let R do the work:
 
 ::::: cell
 ::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-p = predict(m2, newdata=data.frame(fico=700), type="response", se.fit=T)
-# fit, lower, upper for 95% CI
-out = c(p$fit, p$fit - 1.96*p$se.fit, p$fit + 1.96*p$se.fit)
-names(out) = c("Fit","Lower","Upper")
-round(out, 3)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import pandas as pd
+
+pred = m2.get_prediction(pd.DataFrame({"fico": [700]})).summary_frame()
+print(pred[["predicted", "ci_lower", "ci_upper"]].round(4))
 ```
 :::
 
@@ -762,11 +761,13 @@ This calculation looks similar to that of [\\(R\^2\\)]{.math .inline} for linear
 
 ::::: cell
 ::: {#cb15 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-m2 <- glm(default ~ fico, data = loans, family = "binomial")
-nullm2 <- glm( default ~ 1, data = loans, family="binomial")
-pseudoR2 <- 1 - logLik(m2) / logLik(nullm2)
-round(pseudoR2, 4)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+m2 = smf.logit("default ~ fico", data=loans).fit()
+null = smf.logit("default ~ 1", data=loans).fit()
+
+# McFadden's pseudo R-squared
+pseudo_r2 = 1 - m2.llf / null.llf
+print(f"pseudo R2 = {pseudo_r2:.4f}")
 ```
 :::
 
@@ -815,11 +816,11 @@ Can we use analytics to predict quality from physio-chemical content of red wine
 
 :::: cell
 ::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-redwines <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session8/redwines.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import qmib
 
-summary(redwines)
+redwines = qmib.load("redwines")
+redwines.describe()
 ```
 :::
 ::::
@@ -856,9 +857,11 @@ summary(redwines)
 
 ::::: cell
 ::: {#cb19 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-redwines <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session8/redwines.csv")
-head(redwines$good, 20)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import qmib
+
+redwines = qmib.load("redwines")
+redwines.describe()
 ```
 :::
 
@@ -874,11 +877,9 @@ head(redwines$good, 20)
 
 :::: cell
 ::: {#cb21 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(tidyverse)
-redwines <- redwines %>% mutate(good = case_when(good == "Yes" ~ 1
-                                                  , TRUE ~ 0))
-redwines$good <- as.factor(redwines$good)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# qmib.load() already returns good as 0/1, so no recoding is needed.
+redwines["good"].value_counts()
 ```
 :::
 ::::
@@ -889,19 +890,14 @@ redwines$good <- as.factor(redwines$good)
 ::::: {.column style="width:50%;"}
 :::: cell
 ::: {#cb22 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(cowplot)
-library(gridExtra)
-p1 <- ggplot(redwines, aes(x = good, y = fixed.acidity)) +   geom_boxplot()
-p2 <- ggplot(redwines, aes(x = good, y = volatile.acidity)) +   geom_boxplot()
-p3 <- ggplot(redwines, aes(x = good, y = residual.sugar)) +   geom_boxplot()
-p4 <- ggplot(redwines, aes(x = good, y = chlorides)) +   geom_boxplot()
-p5 <- ggplot(redwines, aes(x = good, y = total.sulfur.dioxide)) +   geom_boxplot()
-p6 <- ggplot(redwines, aes(x = good, y = density)) +   geom_boxplot()
-p7 <- ggplot(redwines, aes(x = good, y = sulphates)) +   geom_boxplot()
-p8 <- ggplot(redwines, aes(x = good, y = alcohol)) +   geom_boxplot()
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import matplotlib.pyplot as plt
 
-grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8, nrow = 2)
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.4))
+for ax, col in zip(axes, ["fixed_acidity", "volatile_acidity", "alcohol"]):
+    redwines.boxplot(column=col, by="good", ax=ax)
+    ax.set_title(col); ax.set_xlabel("good")
+plt.suptitle(""); plt.tight_layout(); plt.show()
 ```
 :::
 ::::
@@ -942,9 +938,12 @@ Similar goals:
 
 :::: cell
 ::: {#cb23 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-m1 <- glm(good ~ fixed.acidity + volatile.acidity + residual.sugar + chlorides + total.sulfur.dioxide + density + sulphates + alcohol, data = redwines, family = "binomial")
-summary(m1)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
+              "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
+
+w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit()
+print(w1.summary())
 ```
 :::
 ::::
@@ -1049,9 +1048,9 @@ The coefficients are called the log-odds
 
 ::::: cell
 ::: {#cb26 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Log-odds ratios only
-coef(m1)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Log-odds: the coefficients as fitted
+w1.params
 ```
 :::
 
@@ -1071,9 +1070,11 @@ To get the "odds", we just to take the exponential value of the coefficients:
 
 ::::: cell
 ::: {#cb28 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Odds ratios only
-exp(coef(m1))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import numpy as np
+
+# Odds ratios: exponentiate. Above 1 raises the odds, below 1 lowers them.
+np.exp(w1.params)
 ```
 :::
 
@@ -1095,14 +1096,13 @@ To get the predicted probabilities:
 
 ::::: cell
 ::: {#cb30 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Let us keep everything constant but our predictor
-newm1 <- with(redwines, data.frame(alcohol = 8:15, fixed.acidity  = mean(fixed.acidity, na.rm = TRUE), volatile.acidity = mean(volatile.acidity, na.rm=TRUE), residual.sugar = mean(residual.sugar, na.rm = TRUE), chlorides = mean(chlorides, na.rm = TRUE), total.sulfur.dioxide = mean(total.sulfur.dioxide, na.rm = TRUE), density = mean(density, na.rm = TRUE), sulphates = mean(sulphates, na.rm = TRUE)))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Hold every other predictor at its mean and vary alcohol alone
+grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
+grid["alcohol"] = range(8, 16)
 
-# let us create the predicted probabilities
-preds <- predict(m1, newm1, type = "response", se.fit=TRUE)
-
-preds$fit
+grid["p_good"] = w1.predict(grid)
+print(grid[["alcohol", "p_good"]].round(3))
 ```
 :::
 
@@ -1120,22 +1120,13 @@ To get the predicted probabilities:
 
 :::: cell
 ::: {#cb32 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Let us keep everything constant but our predictor
-newm1 <- with(redwines, data.frame(alcohol = 8:15, fixed.acidity  = mean(fixed.acidity, na.rm = TRUE), volatile.acidity = mean(volatile.acidity, na.rm=TRUE), residual.sugar = mean(residual.sugar, na.rm = TRUE), chlorides = mean(chlorides, na.rm = TRUE), total.sulfur.dioxide = mean(total.sulfur.dioxide, na.rm = TRUE), density = mean(density, na.rm = TRUE), sulphates = mean(sulphates, na.rm = TRUE)))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Hold every other predictor at its mean and vary alcohol alone
+grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
+grid["alcohol"] = range(8, 16)
 
-# let us create the predicted probabilities
-preds <- predict(m1, newm1, type = "response", se.fit=TRUE)
-
-# Let us use the SE for a beautiful graph
-predf <- preds$fit # predicted
-lower <- preds$fit - (1.96*preds$se.fit) # lower bounds
-upper <- preds$fit + (1.96*preds$se.fit) # upper bounds
-
-# Let's plot now
-plot(8:15, predf, type="l", ylab="Predicted Probability to be Good", xlab="Alcohol", bty="n")
-lines(8:15, lower, lty=2)
-lines(8:15, upper, lty=2)
+grid["p_good"] = w1.predict(grid)
+print(grid[["alcohol", "p_good"]].round(3))
 ```
 :::
 ::::
@@ -1238,16 +1229,13 @@ Let us use our *loans* dataset.
 
 :::: cell
 ::: {#cb33 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
-
-m2 <- glm(default ~ fico, data = loans, family = "binomial")
-
-plot(m2$fitted.values, m2$residuals)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 ::::
@@ -1280,10 +1268,12 @@ Using logistic regression as a predictive model is still valid.
 
 :::: cell
 ::: {#cb34 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-plot(loans$fico, loans$default)
-p = predict(m2, newdata = data.frame(fico=550:900), type = "response")
-lines(550:900, p, col = "blue", lwd = 3 )
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+grid = pd.DataFrame({"fico": range(550, 901)})
+plt.scatter(loans["fico"], loans["default"], s=4, alpha=0.2)
+plt.plot(grid["fico"], m2.predict(grid), color="blue", lw=3)
+plt.xlabel("FICO"); plt.ylabel("P(default)")
+plt.show()
 ```
 :::
 ::::
@@ -1346,17 +1336,22 @@ Comparing two models to predict defaulted loans in R:
 
 :::: cell
 ::: {#cb35 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-m2 <- glm(default ~ fico, data = loans, family = "binomial")
-m3 <- glm(default ~ fico + purpose, data = loans, family = "binomial")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+m2 = smf.logit("default ~ fico", data=loans).fit()
+m3 = smf.logit("default ~ fico + C(purpose)", data=loans).fit()
 ```
 :::
 ::::
 
 :::: cell
 ::: {#cb36 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-anova(m2, m3, test="Chisq")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from scipy import stats
+
+# Likelihood-ratio test: does purpose earn its extra parameters?
+lr = 2 * (m3.llf - m2.llf)
+df = int(m3.df_model - m2.df_model)
+print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
 ```
 :::
 ::::
@@ -1365,8 +1360,13 @@ anova(m2, m3, test="Chisq")
 
 ::::: cell
 ::: {#cb37 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-anova(m2, m3, test="Chisq")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from scipy import stats
+
+# Likelihood-ratio test: does purpose earn its extra parameters?
+lr = 2 * (m3.llf - m2.llf)
+df = int(m3.df_model - m2.df_model)
+print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
 ```
 :::
 
@@ -1423,10 +1423,17 @@ To predict whether a borrower defaults on a loan, let's start with a 'full model
 
 :::: cell
 ::: {#cb39 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# perform a backward stepwise model selection to build a best predictive model
-loans.glmfull = glm(default ~ fico + dti + log.annual.inc + int.rate + purpose, family = "binomial", data = loans)
-summary(loans.glmfull)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Compare candidate models on AIC rather than running an automatic search:
+# it is clearer what you chose, and why.
+candidates = [
+    "default ~ fico",
+    "default ~ fico + int_rate",
+    "default ~ fico + int_rate + log_annual_inc + dti",
+]
+for formula in candidates:
+    m = smf.logit(formula, data=loans).fit(disp=0)
+    print(f"AIC {m.aic:9.1f}   {formula}")
 ```
 :::
 ::::
@@ -1475,19 +1482,13 @@ Looks like 'dti' is unimportant. Let's see what gets removed after performing a 
 
 :::: cell
 ::: {#cb41 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-loans = readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session7/loans.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
 
-# rename the dependent variable for ease of use
-loans$default = loans$not.fully.paid 
-
-# perform a backward stepwise model selection to build a best predictive model
-loans.glmfull = glm(default ~ fico + dti + log.annual.inc + int.rate + purpose, family = "binomial", data = loans)
-summary(loans.glmfull)
-loans.glm.step <- step(loans.glmfull)
-
-summary(loans.glm.step)
+# One call. Downloaded once, then read from the local cache.
+loans = qmib.load("loans")
+loans.describe()
 ```
 :::
 ::::
@@ -1602,9 +1603,11 @@ A study looks at factors that influence the decision of whether to apply to grad
 
 :::: cell
 ::: {#cb45 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# load the data set and summarize the included variables
-dat <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session8/ologit.csv")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import qmib
+
+dat = qmib.load("ologit")
+dat.head()
 ```
 :::
 ::::
@@ -1615,8 +1618,8 @@ dat <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session
 :::::: {.column style="width:50%;"}
 ::::: cell
 ::: {#cb46 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-head(dat)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+dat.head()
 ```
 :::
 
@@ -1637,8 +1640,8 @@ head(dat)
 :::::: {.column style="width:50%;"}
 ::::: cell
 ::: {#cb48 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-ftable(xtabs(~ public + apply + pared, data = dat))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+pd.crosstab([dat["public"], dat["pared"]], dat["apply"])
 ```
 :::
 
@@ -1660,9 +1663,11 @@ ftable(xtabs(~ public + apply + pared, data = dat))
 
 :::: cell
 ::: {#cb50 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-dat <- dat %>% mutate(apply = case_when(apply == "very likely" ~ 2, apply == "somewhat likely" ~ 1
-                                        , TRUE ~ 0))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Keep the order — "unlikely" < "somewhat likely" < "very likely".
+# An ordinal model needs the ordering, not just the labels.
+order = ["unlikely", "somewhat likely", "very likely"]
+dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
 ```
 :::
 ::::
@@ -1683,13 +1688,12 @@ dat <- dat %>% mutate(apply = case_when(apply == "very likely" ~ 2, apply == "so
 
 :::: cell
 ::: {#cb51 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(MASS)
-# fit ordered logit model and store results 'm'
-m <- polr(as.factor(apply) ~ pared + public + gpa, data = dat, Hess=TRUE)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from statsmodels.miscmodels.ordinal_model import OrderedModel
 
-# view a summary of the model
-summary(m)
+om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
+                  distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
 ```
 :::
 ::::
@@ -1722,8 +1726,9 @@ summary(m)
 
 ::::: cell
 ::: {#cb53 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-exp(coef(m))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Proportional-odds ratios
+np.exp(om.params[["pared", "public", "gpa"]])
 ```
 :::
 
@@ -1743,8 +1748,9 @@ Parental Education
 
 ::::: cell
 ::: {#cb55 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-exp(coef(m))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Proportional-odds ratios
+np.exp(om.params[["pared", "public", "gpa"]])
 ```
 :::
 
@@ -1768,8 +1774,9 @@ School Type
 
 ::::: cell
 ::: {#cb57 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-exp(coef(m))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Proportional-odds ratios
+np.exp(om.params[["pared", "public", "gpa"]])
 ```
 :::
 
@@ -1799,11 +1806,11 @@ We can study the relationship of one's occupation choice with education level an
 
 :::: cell
 ::: {#cb59 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(nnet)
-library(reshape2)
-ml <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session8/hsbdemo.csv")
-summary(ml)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import qmib
+
+ml = qmib.load("hsbdemo")
+ml.describe()
 ```
 :::
 ::::
@@ -1851,8 +1858,8 @@ summary(ml)
 
 ::::: cell
 ::: {#cb61 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-with(ml, table(ses, prog))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+pd.crosstab(ml["ses"], ml["prog"])
 ```
 :::
 
@@ -1880,14 +1887,14 @@ First, we need to choose the level of our outcome that we wish to use as our bas
 
 :::: cell
 ::: {#cb64 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(nnet)
-require(reshape2)
-ml$prog <- as.factor(ml$prog)
-ml$prog2 <- relevel(ml$prog, ref = "academic")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# academic is the reference outcome; middle is the reference ses
+levels = ["academic", "general", "vocation"]
+ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
 
-ml$ses <- as.factor(ml$ses)
-ml$ses2 <- relevel(ml$ses, ref = "low")
+X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_low", "ses_high"]].astype(float)
+X["write"] = ml["write"].astype(float)
+X = sm.add_constant(X)
 ```
 :::
 ::::
@@ -1896,9 +1903,11 @@ Then, we run our model using multinom. The multinom package does not include p-v
 
 :::: cell
 ::: {#cb65 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-test <- multinom(prog2 ~ ses2 + write, data = ml)
-summary(test)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import statsmodels.api as sm
+
+mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
+print(mn.summary())
 ```
 :::
 ::::
@@ -1937,9 +1946,9 @@ summary(test)
 
 ::::: cell
 ::: {#cb68 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(AER)
-coeftest(test)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# z-tests come with the summary in statsmodels
+mn.summary()
 ```
 :::
 
@@ -1986,8 +1995,9 @@ The model summary output has a block of coefficients and a block of standard err
 
 ::::: cell
 ::: {#cb70 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-exp(coef(test))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Column 0 is general vs academic; column 1 is vocation vs academic
+np.exp(mn.params)
 ```
 :::
 

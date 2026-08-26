@@ -134,40 +134,28 @@ The outcome variable, `outcome`, can be interpreted as an index of job performan
 
 ::::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-set.seed(123)
-# Sample size
-n <- 800
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import numpy as np, pandas as pd
+from scipy.special import expit
+
+rng = np.random.default_rng(123)
+n = 800
 
 # Covariates
-age        <- round(rnorm(n, mean = 40, sd = 10))
-education  <- round(rnorm(n, mean = 14, sd = 2))
-experience <- pmax(0, age - 18 + rnorm(n, 0, 3))
+age        = np.round(rng.normal(40, 10, n))
+education  = np.round(rng.normal(14, 2, n))
+experience = np.maximum(0, age - 18 + rng.normal(0, 3, n))
 
-# Treatment assignment with confounding
+# Treatment is NOT random: older, more educated people take it up more often.
+ps_true = expit(-5 + 0.05 * age + 0.15 * education)
+treat   = rng.binomial(1, ps_true)
 
-# Older and more educated individuals have a slightly higher probability of treatment.
-ps <- plogis(-5 + 0.05*age + 0.15*education)
-treat <- rbinom(n, 1, ps)
+# The true effect we are trying to recover is +2.5
+outcome = 20 + 2.5 * treat + 0.3 * age + 0.8 * education + rng.normal(0, 5, n)
 
-# Outcome model with a true treatment effect of +3
-outcome <- 20 +
-0.3*age +
-0.8*education +
-0.5*experience +
-3*treat +
-rnorm(n, 0, 5)
-
-# Assemble the dataset
-df <- data.frame(
-treat      = treat,
-age        = age,
-education  = education,
-experience = experience,
-outcome    = outcome
-)
-
-head(df)
+df = pd.DataFrame(dict(age=age, education=education, experience=experience,
+                       treat=treat, outcome=outcome))
 ```
 :::
 
@@ -186,12 +174,13 @@ head(df)
 
 ::::: cell
 ::: {#cb3 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-set.seed(42)
-n <- 100
-treatment <- rbinom(n, 1, 0.5)
-y <- 50 + 5 * treatment + rnorm(n, 0, 10)
-mean(y[treatment == 1]) - mean(y[treatment == 0])
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+rng = np.random.default_rng(42)
+n = 100
+treatment = rng.binomial(1, 0.5, n)          # randomised: no confounding
+y = 50 + 5 * treatment + rng.normal(0, 10, n)
+
+y[treatment == 1].mean() - y[treatment == 0].mean()
 ```
 :::
 
@@ -244,13 +233,17 @@ The HR analytics team wants to estimate whether the training actually **improves
 
 ::::: cell
 ::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(MatchIt)
-m.out <- matchit(treat ~ age + education + experience, 
-                 data = df, 
-                 method = "nearest")
-matched <- match.data(m.out)
-t.test(outcome ~ treat, data = matched)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from sklearn.neighbors import NearestNeighbors
+import statsmodels.formula.api as smf
+
+# 1:1 nearest-neighbour matching on the propensity score
+treated, control = df[df.treat == 1], df[df.treat == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+_, idx = nn.kneighbors(treated[["pscore"]])
+matched = pd.concat([treated, control.iloc[idx.ravel()]])
+
+smf.ols("outcome ~ treat", data=matched).fit().summary()
 ```
 :::
 
@@ -310,16 +303,14 @@ Propensity scores summarize the probability of receiving treatment conditional o
 
 ::::: cell
 ::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(MatchIt)
-library(PSAgraphics)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import statsmodels.formula.api as smf
 
-# Logistic regression to estimate the propensity score
-ps_model <- glm(treat ~ age + education + experience, 
-                data = df, 
-                family = binomial())
+# Estimate the propensity score: the probability of treatment given covariates
+ps_model = smf.logit("treat ~ age + education + experience", data=df).fit()
+df["pscore"] = ps_model.predict(df)
 
-summary(ps_model)
+print(ps_model.summary())
 ```
 :::
 
@@ -355,14 +346,15 @@ Using the estimated scores, nearest-neighbor matching without replacement is imp
 
 ::::: cell
 ::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-m.out <- matchit(treat ~ age + education + experience,
-                 data = df,
-                 method = "nearest",
-                 distance = "logit",
-                 replace = FALSE)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from sklearn.neighbors import NearestNeighbors
 
-summary(m.out)
+treated, control = df[df.treat == 1], df[df.treat == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+_, idx = nn.kneighbors(treated[["pscore"]])
+matched = pd.concat([treated, control.iloc[idx.ravel()]])
+
+print(f"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct controls")
 ```
 :::
 
@@ -521,14 +513,14 @@ Diagnosing the quality of matching is essential. Graphical tools from **PSAgraph
 
 :::: cell
 ::: {#cb11 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Propensity score distributions: before matching
-plot(density(fitted(ps_model)[df$treat == 1]),
-     main = "Propensity Score Distributions (Before Matching)",
-     xlab = "Propensity Score")
-lines(density(fitted(ps_model)[df$treat == 0]), col = 2)
-legend("topright", legend = c("Treated", "Control"),
-       col = c(1, 2), lty = 1)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import matplotlib.pyplot as plt
+
+# Before matching: do the two groups even overlap?
+df[df.treat == 1]["pscore"].plot.density(label="Treated")
+df[df.treat == 0]["pscore"].plot.density(label="Control")
+plt.xlabel("Propensity score"); plt.title("Before matching"); plt.legend()
+plt.show()
 ```
 :::
 ::::
@@ -539,17 +531,12 @@ legend("topright", legend = c("Treated", "Control"),
 
 :::: cell
 ::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Extract matched data
-matched_df <- match.data(m.out)
-
-# Propensity score distributions: after matching
-plot(density(matched_df$distance[matched_df$treat == 1]),
-     main = "Propensity Score Distributions (After Matching)",
-     xlab = "Propensity Score")
-lines(density(matched_df$distance[matched_df$treat == 0]), col = 2)
-legend("topright", legend = c("Treated", "Control"),
-       col = c(1, 2), lty = 1)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# After matching: the two distributions should sit on top of each other
+matched[matched.treat == 1]["pscore"].plot.density(label="Treated")
+matched[matched.treat == 0]["pscore"].plot.density(label="Control")
+plt.xlabel("Propensity score"); plt.title("After matching"); plt.legend()
+plt.show()
 ```
 :::
 ::::
@@ -560,11 +547,9 @@ legend("topright", legend = c("Treated", "Control"),
 
 :::: cell
 ::: {#cb13 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# Boxplots of age before and after matching
-boxplot(df$age ~ df$treat,
-        main = "Before Matching: Age",
-        xlab = "Treatment status", ylab = "Age")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+df.boxplot(column="age", by="treat")
+plt.suptitle(""); plt.title("Before matching: age"); plt.show()
 ```
 :::
 ::::
@@ -575,10 +560,9 @@ boxplot(df$age ~ df$treat,
 
 :::: cell
 ::: {#cb14 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-boxplot(matched_df$age ~ matched_df$treat,
-        main = "After Matching: Age",
-        xlab = "Treatment status", ylab = "Age")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+matched.boxplot(column="age", by="treat")
+plt.suptitle(""); plt.title("After matching: age"); plt.show()
 ```
 :::
 ::::
@@ -593,19 +577,12 @@ After matching, the dataset contains reweighted or selected observations reflect
 
 ::::: cell
 ::: {#cb15 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-# 1. Get the matched data
-matched_df <- match.data(m.out)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The ATT: the treatment effect on the matched sample
+att = smf.ols("outcome ~ treat", data=matched).fit()
+print(att.summary())
 
-# matched_df already contains all original columns from df
-# including 'outcome', plus 'treat', 'distance', and 'weights'.
-
-# 2. Estimate ATT on the matched sample
-att_model <- lm(outcome ~ treat,
-                data   = matched_df,
-                weights = weights)
-
-summary(att_model)
+print(f"\nATT = {att.params['treat']:+.3f}   (the truth we simulated is +2.5)")
 ```
 :::
 
@@ -644,8 +621,9 @@ Interpretation must emphasize the assumptions underlying matching: unconfoundedn
 
 ::::: cell
 ::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-mean(df$outcome[df$treat == 1]) - mean(df$outcome[df$treat == 0])
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The naive comparison, for contrast
+df.loc[df.treat == 1, "outcome"].mean() - df.loc[df.treat == 0, "outcome"].mean()
 ```
 :::
 

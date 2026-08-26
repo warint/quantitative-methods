@@ -252,9 +252,17 @@ Visual: bar chart comparing variance explained ([\\(R\^2\\)]{.math .inline}) acr
 
 ::::::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fit <- lm(Poverty ~ Graduates, data = poverty)
-summary(fit)$adj.r.squared
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import qmib
+import statsmodels.formula.api as smf
+
+core = qmib.load("core")
+d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
+
+# the model Session 02 fitted — now we ask whether it can be trusted
+fit = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+fit.rsquared_adj
 ```
 :::
 
@@ -263,8 +271,10 @@ summary(fit)$adj.r.squared
 :::
 
 ::: {#cb3 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-summary(fit)$sigma
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import numpy as np
+
+np.sqrt(fit.mse_resid)      # residual standard error
 ```
 :::
 
@@ -454,8 +464,14 @@ Visual: Q-Q plot --- left = good (points on line), right = heavy tails.
 
 ::::: cell
 ::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-plot(fit, which = 3)  # Scale-Location
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import matplotlib.pyplot as plt
+
+# Scale-Location: is the spread of the residuals constant?
+plt.scatter(fit.fittedvalues, np.sqrt(np.abs(fit.get_influence().resid_studentized_internal)),
+            s=12, alpha=0.6)
+plt.xlabel("Fitted values"); plt.ylabel("sqrt(|standardised residual|)")
+plt.show()
 ```
 :::
 
@@ -506,9 +522,12 @@ Residual = observed [\\(y_i\\)]{.math .inline} -- predicted [\\(\\hat{y}\_i\\)]{
 
 :::: cell
 ::: {#cb6 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fit <- lm(Poverty ~ Graduates, data = poverty)
-plot(fit, which = 1)  # Residuals vs Fitted
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Residuals vs Fitted: is there structure the straight line missed?
+plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
+plt.axhline(0, color="black", lw=1)
+plt.xlabel("Fitted values"); plt.ylabel("Residuals")
+plt.show()
 ```
 :::
 ::::
@@ -636,8 +655,12 @@ Visual schematic: regression line with one leverage point pulling the slope.
 
 :::::: cell
 ::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-hatvalues(fit)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+influence = fit.get_influence()
+leverage = influence.hat_matrix_diag
+
+print(f"mean leverage {leverage.mean():.4f}, max {leverage.max():.4f}")
+print(f"rule of thumb 2p/n = {2 * 2 / len(d):.4f}")
 ```
 :::
 
@@ -661,8 +684,12 @@ hatvalues(fit)
 :::
 
 ::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-plot(fit, which = 5)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Residuals vs Leverage — the points with the power to move the line
+plt.scatter(leverage, influence.resid_studentized_internal, s=12, alpha=0.6)
+plt.axvline(2 * 2 / len(d), color="red", ls="--")
+plt.xlabel("Leverage"); plt.ylabel("Standardised residual")
+plt.show()
 ```
 :::
 ::::::
@@ -678,8 +705,11 @@ plot(fit, which = 5)
 
 :::::: cell
 ::: {#cb10 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-cooks.distance(fit)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+cooks_d = influence.cooks_distance[0]
+
+print(f"largest Cook's D {cooks_d.max():.4f}")
+print(f"above 4/n ({4/len(d):.4f}): {(cooks_d > 4/len(d)).sum()} observations")
 ```
 :::
 
@@ -705,8 +735,11 @@ cooks.distance(fit)
 :::
 
 ::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-plot(fit, which = 4)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+plt.stem(cooks_d)
+plt.axhline(4 / len(d), color="red", ls="--")
+plt.xlabel("Observation"); plt.ylabel("Cook's distance")
+plt.show()
 ```
 :::
 ::::::
@@ -726,8 +759,8 @@ Cook's distance plot with threshold marked.
 
 ::::: cell
 ::: {#cb13 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-AIC(fit)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+fit.aic
 ```
 :::
 
@@ -754,9 +787,20 @@ AIC(fit)
 
 :::::: cell
 ::: {#cb15 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(MASS)
-step(fit, direction="both")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Python has no step(); compare candidate models directly, which is
+# clearer about what you are doing and why.
+candidates = [
+    "gdp_pc_eur ~ productivity_idx",
+    "gdp_pc_eur ~ productivity_idx + gfcf_meur",
+    "gdp_pc_eur ~ productivity_idx + gfcf_meur + employment_ths",
+]
+cols = ["gdp_pc_eur", "productivity_idx", "gfcf_meur", "employment_ths"]
+dd = core.dropna(subset=cols)
+
+for formula in candidates:
+    m = smf.ols(formula, data=dd).fit()
+    print(f"AIC {m.aic:9.1f}   adj R2 {m.rsquared_adj:.3f}   {formula}")
 ```
 :::
 

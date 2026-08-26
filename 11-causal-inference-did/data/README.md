@@ -1,29 +1,24 @@
 # Session 11 — Data
 
-**Your group's own final-project data**
+**The spine's post-2021 structural break, treated as a policy change**
 
-- **Source:** Chosen by Session 10 and approved by the instructor
+```python
+import qmib
+data = qmib.load("core")
+```
 
+One call. It resolves a local cache first, then the committed spine, then the published URL —
+downloading once and caching as parquet. After the first run the practice works offline.
 
----
-
-Final projects use a dataset of the group's choosing, subject to two constraints: it
-must be publicly reproducible, and it must be relevant to a question posed or implied by
-*Europe 2031*.
-
-If your project is time-dependent, you will also want a **real-time vintage** source
-(ALFRED, or the Philadelphia Fed's real-time dataset) — see section 11.1 on why.
+- Everything available: `qmib.catalog()`
+- Your group's columns, units and traps: [data dictionaries](../../data/spine/dictionaries/)
+- Provenance and flags: [`data/spine/PROVENANCE.md`](../../data/spine/PROVENANCE.md)
 
 ---
 
 ## Rules for this folder
 
-- Data files are **git-ignored**. Never commit raw data.
-- Download **once**, cache as parquet, and read from the cache. The practice must run offline.
-- Record your download date and, where available, a checksum in `PROVENANCE.md`.
-- If you extend the dataset yourself, document the source and respect its licence.
-
-```bash
-# record provenance after downloading
-echo "$(date -Iseconds)  $(shasum -a 256 <file>)" >> PROVENANCE.md
-```
+- Raw data files are **git-ignored**. Never commit them; `qmib` fetches and caches instead.
+- The synthetic spine is the exception: small, licence-free, committed deliberately so the
+  practice runs with no network.
+- If you bring in a dataset of your own, record its source, date and licence in `PROVENANCE.md`.

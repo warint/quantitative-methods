@@ -120,18 +120,18 @@ answerable question, where to find data, and what each session asks of you.
 
 | # | Session | The method | The question it answers |
 |---|---|---|---|
-| [01](01-foundations-scenarios-and-tools/README.md) | Foundations: Scenarios, Tools, and the Supervised Learning Problem | Loss, risk, $\mathbb{E}[Y\mid X]$ | Before we model the future, what are we claiming to know? |
-| [02](02-exploratory-data-analysis/README.md) | Exploratory Data Analysis: Centre, Spread, and Shape | mean/median/trimmed, variance, IQR, skewness, kurtosis | Before you model anything, what does the data actually look like? |
-| [03](03-regression-adequacy-and-validity/README.md) | Linear Regression: Inference, Diagnostics, Interpretation | Gauss–Markov, robust SEs, OVB | Your coefficient has a standard error. When does it mean anything? |
-| [04](04-logistic-ordinal-multinomial/README.md) | Bias–Variance, Overfitting, Cross-Validation | CV, optimism, effective df | Your model fits the past perfectly. Why is that bad news? |
-| [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, Elastic Net | Soft-thresholding, coordinate descent | When is a deliberately biased estimator the better one? |
-| [06](06-advanced-regression/README.md) | Classification: Logistic Regression, Regularisation, Thresholds | MLE, IRLS, elastic-net GLM, ROC, cost thresholds | Your classifier is 97% accurate. Should anyone be impressed? |
-| [07](07-pca-and-factor-analysis/README.md) | Trees, Forests, and Gradient Boosting | CART, bagging, functional gradient descent | If we abandon linearity, is interpretability recoverable? |
-| [08](08-knn-and-bias-variance/README.md) | Unsupervised I: PCA, SVD, and Factor Models | Eckart–Young, Bai–Ng, diffusion indexes | Two hundred macro series move together. How many things are happening? |
-| [09](09-structural-equation-modelling/README.md) | Unsupervised II: Clustering, Embeddings, Text as Data | Lloyd's algorithm, TF–IDF, validity | How do you measure something that only exists as words? |
-| [10](10-causal-inference-foundations/README.md) | Causal Machine Learning: Double/Debiased ML | Neyman orthogonality, cross-fitting | You have a superb predictive model. Why can't you choose a policy with it? |
-| [11](11-causal-inference-did/README.md) | Forecasting, Distribution Shift, and Model Governance | Rolling-origin backtests, Diebold–Mariano, model cards | What are you responsible for when someone acts on your model? |
-| [12](12-group-presentations/README.md) | **Final Group Presentations** | — | Can you make a decision-maker act on this — and say what would change your mind? |
+| [01](01-foundations-scenarios-and-tools/README.md) | Foundations: Scenarios, Tools, and the Syllabus | the syllabus, the toolchain, and a conversation | Before we model the future, what are we claiming to know? |
+| [02](02-exploratory-data-analysis/README.md) | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression | Which summary of your key variable would you defend in print? |
+| [03](03-regression-adequacy-and-validity/README.md) | Regression: Adequacy, Validity, and Robustness | residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
+| [04](04-logistic-ordinal-multinomial/README.md) | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
+| [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, and the Elastic Net | soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
+| [06](06-advanced-regression/README.md) | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
+| [07](07-pca-and-factor-analysis/README.md) | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
+| [08](08-knn-and-bias-variance/README.md) | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
+| [09](09-structural-equation-modelling/README.md) | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
+| [10](10-causal-inference-foundations/README.md) | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
+| [11](11-causal-inference-did/README.md) | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
+| [12](12-group-presentations/README.md) | Final Group Presentations | — | Can you make a decision-maker act on this — and say what would change your mind? |
 
 **The arc.** Sessions 2–3 build the classical estimator and its inference. Session 4 is the hinge:
 in-sample fit stops being evidence. Sessions 5–7 buy flexibility and pay for it in interpretability.

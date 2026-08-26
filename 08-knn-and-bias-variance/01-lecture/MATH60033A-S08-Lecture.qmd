@@ -284,20 +284,25 @@ Suppose we wish to use this data set to make a prediction for [Y]{.MathJax_Previ
 ::: pull-left
 [d(a,b) = d(b,a) = \\sqrt{\\sum\_{i=1}\^{p}(a_i - b_i)\^2}]{.MathJax_Preview}
 
-``` r
-obs1 <- c(0, 3, 0)
-obs2 <- c(2, 0, 0)
-obs3 <- c(0, 1, 3)
-obs4 <- c(0, 1, 2)
-obs5 <- c(-1, 0, 1)
-obs6 <- c(1, 1, 1)
-obs0 <- c(0, 0, 0)
-dist1 <- sqrt(sum((obs1-obs0)^2))
-dist2 <- sqrt(sum((obs2-obs0)^2))
-dist3 <- sqrt(sum((obs3-obs0)^2))
-dist4 <- sqrt(sum((obs4-obs0)^2))
-dist5 <- sqrt(sum((obs5-obs0)^2))
-dist6 <- sqrt(sum((obs6-obs0)^2))
+``` python
+# In the VS Codium terminal, with .venv active:  python
+import numpy as np
+
+# Six observations in three dimensions — we will find the nearest neighbours by hand
+obs = np.array([
+    [0,  3, 0],
+    [2,  0, 0],
+    [0,  1, 3],
+    [0,  1, 2],
+    [-1, 0, 1],
+    [1,  1, 1],
+])
+test = np.array([0, 0, 0])
+
+# Euclidean distance from the test point to each observation
+dist = np.sqrt(((obs - test) ** 2).sum(axis=1))
+for i, d in enumerate(dist, 1):
+    print(f"obs{i}: {d:.3f}")
 ```
 :::
 
@@ -376,9 +381,13 @@ We would expect a small K to perform better for a nonlinear decision boundary. A
 ::: panel-tabset
 ### Data collection
 
-``` r
-library(ISLR)
-head(Smarket)
+``` python
+import pandas as pd
+
+# Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV.
+Smarket = pd.read_csv(
+    "https://www.statlearning.com/s/Smarket.csv")
+Smarket.head()
 ```
 
     ##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
@@ -465,14 +474,15 @@ Centering/standardization:
 
 ### Step 1: Data collection
 
-``` remark-code-has-line-highlighted
-library(tidyverse)
-library(ISLR)
-library(caret)
-# Creating a train and a test dataset
-train <- Smarket %>% filter(Year < 2005)
-test <- Smarket %>% filter(Year == 2005)
-head(train)
+``` python
+import pandas as pd
+
+Smarket = pd.read_csv("https://www.statlearning.com/s/Smarket.csv")
+
+# Train on everything before 2005, test on 2005 — a time split, not a random one
+train = Smarket[Smarket["Year"] < 2005]
+test  = Smarket[Smarket["Year"] == 2005]
+train.head()
 ```
 
     ##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
@@ -489,23 +499,39 @@ head(train)
 ::: panel-tabset
 ### Step 2: Code
 
-``` r
-modelknn <- train(form = Direction ~ Lag1 + Lag2, data = train,
-                method = "knn",
-                tuneGrid = expand.grid(k = seq(1, 101, by = 2)),
-                preProcess = c("center", "scale"))
-modelknn
+``` python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+train = Smarket[Smarket["Year"] < 2005]
+test_set = Smarket[Smarket["Year"] == 2005]
+X_tr, y_tr = train[["Lag1", "Lag2"]], train["Direction"]
+
+# KNN needs standardised inputs: distance is meaningless in mixed units.
+pipe = make_pipeline(StandardScaler(), KNeighborsClassifier())
+grid = GridSearchCV(pipe, {"kneighborsclassifier__n_neighbors": range(1, 26)}, cv=5)
+modelknn = grid.fit(X_tr, y_tr)
 ```
 
 or with k-fold cross-validation:
 
-``` remark-code-has-line-highlighted
-modelknn <- train(form = Direction ~ Lag1 + Lag2, data = train,
-                method = "knn",
-                tuneGrid = expand.grid(k = seq(1, 101, by = 2)),
-                preProcess = c("center", "scale") #,
-                trControl = trainControl(method = "cv", number = 3))
-modelknn
+``` python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+X_tr, y_tr = train[["Lag1", "Lag2"]], train["Direction"]
+
+# StandardScaler inside the pipeline, so it is refitted in every CV fold
+modelknn = GridSearchCV(
+    make_pipeline(StandardScaler(), KNeighborsClassifier()),
+    {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
+    cv=3).fit(X_tr, y_tr)
+
+print(modelknn.best_params_, round(modelknn.best_score_, 4))
 ```
 
 ### Step 2: Output
@@ -579,8 +605,14 @@ modelknn
 
 ### Step 2: Plot
 
-``` r
-plot(modelknn)
+``` python
+import matplotlib.pyplot as plt
+
+k_values = range(1, 26)
+scores = modelknn.cv_results_["mean_test_score"]
+plt.plot(k_values, scores, "o-")
+plt.xlabel("k (number of neighbours)"); plt.ylabel("CV accuracy")
+plt.show()
 ```
 
 ![](imported-assets/index_files/figure-html/unnamed-chunk-26-1.png)
@@ -589,8 +621,8 @@ plot(modelknn)
 
 Best tuning:
 
-``` r
-modelknn$bestTune
+``` python
+modelknn.best_params_
 ```
 
     ##   k
@@ -598,8 +630,13 @@ modelknn$bestTune
 
 Variable importance?
 
-``` r
-varImp(modelknn)
+``` python
+from sklearn.inspection import permutation_importance
+
+# KNN has no coefficients — importance is measured by scrambling a column
+imp = permutation_importance(modelknn, X_tr, y_tr, n_repeats=10, random_state=0)
+for name, m in zip(X_tr.columns, imp.importances_mean):
+    print(f"{name}: {m:.4f}")
 ```
 
     ## ROC curve variable importance
@@ -616,24 +653,20 @@ varImp(modelknn)
 
 Let us predict the Direction, and see what it does predict indeed.
 
-``` remark-code-has-line-highlighted
-modelknn <- train(form = Direction ~ Lag1 + Lag2, data = train,
-                method = "knn",
-                tuneGrid = expand.grid(k = seq(1, 101, by = 2)),
-                preProcess = c("center", "scale"))
+``` python
+X_te, y_te = test[["Lag1", "Lag2"]], test["Direction"]
+knn_predict = modelknn.predict(X_te)
 
-knnPredict <- predict(modelknn, newdata = test)
-
-df_knnPredict <- data.frame(knnPredict)
-df_knnPredict <- bind_cols(test, df_knnPredict)
-head(df_knnPredict$Direction)
+df_knn_predict = test.assign(knnPredict=knn_predict)
+df_knn_predict["Direction"].head()
 ```
 
     ## [1] Down Down Down Up   Down Up  
     ## Levels: Down Up
 
-``` r
-head(df_knnPredict$knnPredict)
+``` python
+knn_predict = modelknn.predict(test_set[["Lag1", "Lag2"]])
+knn_predict[:6]
 ```
 
     ## [1] Down Down Up   Up   Down Up  
@@ -643,16 +676,12 @@ head(df_knnPredict$knnPredict)
 
 Since we have the actual labels with in the test\$Direction variable for the test dataset, we will be able to check the performance of the prediction on the test dataset. Let\'s produce the confusion matrix based on the optimal parameters from the knnfit with the new dataset called test_final:
 
-``` remark-code-has-line-highlighted
-modelknn <- train(form = Direction ~ Lag1 + Lag2, data = train,
-                method = "knn",
-                tuneGrid = expand.grid(k = seq(1, 101, by = 2)),
-                preProcess = c("center", "scale"))
+``` python
+from sklearn.metrics import confusion_matrix, classification_report
 
-knnPredict <- predict(modelknn, newdata = test)
-
-#Get the confusion matrix to see accuracy value and other parameter values
-confusionMatrix(knnPredict, test$Direction)
+# The confusion matrix, and the accuracy that goes with it
+print(confusion_matrix(y_te, knn_predict))
+print(classification_report(y_te, knn_predict))
 ```
 
 ### Step 3: Output - Test
@@ -693,27 +722,21 @@ confusionMatrix(knnPredict, test$Direction)
 
 Here we will perform a **point estimate** prediction. You can use your own features to see what the model will predict\...
 
-``` remark-code-has-line-highlighted
-library(tidyverse)
-library(ISLR)
-library(caret)
-# Creating a train and a test dataset
-train <- Smarket %>% filter(Year < 2005)
-test <- Smarket %>% filter(Year == 2005)
+``` python
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
-modelknn <- train(form = Direction ~ Lag1 + Lag2, data = train,
-                method = "knn",
-                tuneGrid = expand.grid(k = seq(1, 101, by = 2)),
-                preProcess = c("center", "scale"))
+Smarket = pd.read_csv("https://www.statlearning.com/s/Smarket.csv")
+train = Smarket[Smarket["Year"] < 2005]
+test  = Smarket[Smarket["Year"] == 2005]
 
-my_own_data <- test %>% slice(1)
-
-knnPredict2 <- predict(modelknn, newdata = my_own_data)
-
-df_knnPredict2 <- data.frame(knnPredict2)
-
-head(my_own_data)
-head(df_knnPredict2)
+modelknn = GridSearchCV(
+    make_pipeline(StandardScaler(), KNeighborsClassifier()),
+    {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
+    cv=3).fit(train[["Lag1", "Lag2"]], train["Direction"])
 ```
 
 ### Step 4: Output
@@ -778,83 +801,57 @@ OK, let\'s step back first\...
 ::: panel-tabset
 ### Neural Network - Not exam material
 
-``` r
-## Classification Example
+``` python
+# Classification example: the iris data, which ships with scikit-learn
+from sklearn.datasets import load_iris
 
-data(iris)
-TrainData <- iris[,1:4]
-TrainClasses <- iris[,5]
+iris = load_iris(as_frame=True)
+TrainData, TrainClasses = iris.data, iris.target
 
-library(MASS)
-nnetFit <- train(TrainData, TrainClasses,
-                 "nnet", 
-                 tuneLength = 2,
-                 trace = FALSE,
-                 maxit = 100)
+knn_iris = GridSearchCV(
+    make_pipeline(StandardScaler(), KNeighborsClassifier()),
+    {"kneighborsclassifier__n_neighbors": range(1, 16)}, cv=10).fit(TrainData, TrainClasses)
+
+print(f"best k = {knn_iris.best_params_}, accuracy = {knn_iris.best_score_:.3f}")
 ```
 
 ### ML Regression
 
-``` r
-#######################################
-## Regression Example
+``` python
+# Regression example: California housing replaces the retired Boston data,
+# which was withdrawn over an ethically problematic variable.
+from sklearn.datasets import fetch_california_housing
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import cross_val_score
 
-library(mlbench)
-data(BostonHousing)
+housing = fetch_california_housing(as_frame=True)
+X, y = housing.data, housing.target
 
-lmFit <- train(medv ~ . + rm:lstat,
-               data = BostonHousing, 
-               "lm")
-
-library(rpart)
-rpartFit <- train(medv ~ .,
-                  data = BostonHousing,
-                  "rpart",
-                  tuneLength = 9)
+knn_reg = make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=5))
+rmse = -cross_val_score(knn_reg, X[:2000], y[:2000], cv=5,
+                        scoring="neg_root_mean_squared_error").mean()
+print(f"KNN regression RMSE = {rmse:.3f}")
 ```
 
 ### glmboost
 
-``` r
-#######################################
-## Parallel Processing Example via MPI
+``` python
+# scikit-learn parallelises with n_jobs — no cluster setup required.
+knn_par = GridSearchCV(
+    make_pipeline(StandardScaler(), KNeighborsClassifier()),
+    {"kneighborsclassifier__n_neighbors": range(1, 26)},
+    cv=5, n_jobs=-1).fit(X_tr, y_tr)
 
-## A function to emulate lapply in parallel
-mpiCalcs <- function(X, FUN, ...)
-  {
-    theDots <- list(...)
-    parLapply(theDots$cl, X, FUN)
-  }
-
-library(snow)
-cl <- makeCluster(5, "MPI")
-
-## 50 bootstrap models distributed across 5 workers
-mpiControl <- trainControl(workers = 5,
-                           number = 50,
-                           computeFunction = mpiCalcs,
-                           computeArgs = list(cl = cl))
-set.seed(1)
-usingMPI <-  train(medv ~ .,
-                   data = BostonHousing, 
-                   "glmboost",
-                   trControl = mpiControl)
+print(f"best k = {knn_par.best_params_}")
 ```
 
 ### RF
 
-``` r
-################################################
-## Parallel Random Forest using foreach and doMPI
+``` python
+# A random forest, also parallelised, for comparison with KNN
+from sklearn.ensemble import RandomForestClassifier
 
-library(doMPI)
-cl <- startMPIcluster(count = 5, verbose = TRUE)
-registerDoMPI(cl)
-
-rfMPI <- train(medv ~ .,
-               data = BostonHousing, 
-               "parRF")
-
-closeCluster(cl)
+rf = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0)
+print(f"forest CV accuracy = {cross_val_score(rf, X_tr, y_tr, cv=5).mean():.3f}")
 ```
 :::

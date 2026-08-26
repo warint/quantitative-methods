@@ -63,6 +63,11 @@ PUBLISHED = {
                  "wine-quality/winequality-red.csv"),
     "hsbdemo":  (f"{_BASE}/session8/hsbdemo.csv", None),
     "ologit":   (f"{_BASE}/session8/ologit.csv", None),
+    "panel":      (f"{_BASE}/session5/panel_data_1.csv", None),
+    "realestate": (f"{_BASE}/session5/Real_Estate_Sample.csv", None),
+    "glassdoor":  (f"{_BASE}/session5/glassdoordata.csv", None),
+    "movies":     (f"{_BASE}/session9/movies_metadata.csv", None),
+    "efa":        (f"{_BASE}/session9/EFA.csv", None),
 }
 
 # The spine: committed, synthetic, safe to ship. `core` is shared by every
@@ -87,6 +92,11 @@ DESCRIPTIONS = {
     "redwines": "Portuguese red wines — 1,599 bottles, physico-chemical measures",
     "hsbdemo": "High school programme choice — 200 students (multinomial)",
     "ologit": "Graduate school application — 400 juniors (ordinal)",
+    "panel": "Country panel: government debt and economic-freedom indices",
+    "realestate": "Residential sales — price, living area, bedrooms, bathrooms",
+    "glassdoor": "Glassdoor pay data — salary, bonus, gender, education, age",
+    "movies": "Movie metadata — budget, popularity, revenue, runtime, votes",
+    "efa": "Questionnaire on car purchase decisions — 14 items (factor analysis)",
 }
 
 
@@ -170,6 +180,16 @@ def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
         df = df.rename(columns={"quality": "good"})
         if df["good"].dtype == object:
             df["good"] = (df["good"].astype(str).str.strip().str.lower() == "yes").astype(int)
+    if name == "movies":
+        # The raw file mixes numbers and strings in several columns, which
+        # parquet will not store. Coerce the numeric ones and drop the rest.
+        numeric = ["budget", "popularity", "revenue", "runtime",
+                   "vote_average", "vote_count"]
+        keep = [c for c in numeric if c in df.columns]
+        for c in keep:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+        title = [c for c in ("title", "original_title") if c in df.columns][:1]
+        df = df[title + keep].dropna(subset=keep, how="all")
     return df
 
 

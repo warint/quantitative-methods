@@ -277,11 +277,12 @@ These files contain metadata for all 45,000 movies listed in the Full MovieLens 
 
 Data points include cast, crew, plot keywords, budget, revenue, posters, release dates, languages, production companies, countries, TMDB vote counts and vote averages.
 
-``` r
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github("kassambara/factoextra")
-
-if(!require(FactoMineR)) install.packages("FactoMineR")
+``` python
+# In the VS Codium terminal, with .venv active:
+#   pip install scikit-learn prince
+import qmib
+import numpy as np
+import pandas as pd
 ```
 
 ## {#imported-s07-022 .scrollable}
@@ -291,14 +292,13 @@ if(!require(FactoMineR)) install.packages("FactoMineR")
 ::: panel-tabset
 ### Code
 
-``` r
-library(tidyverse)
-movies <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session9/movies_metadata.csv")
-df <- movies %>%
+``` python
+movies = qmib.load("movies")
 
-  # select features
-  select(budget, popularity, revenue, runtime, vote_average, vote_count)
-head(df)
+# Keep the numeric columns and drop rows with holes
+df = movies[["budget", "popularity", "revenue", "runtime",
+             "vote_average", "vote_count"]].dropna()
+df.head()
 ```
 
 ### Output
@@ -318,17 +318,25 @@ head(df)
 
 **Step 2: Computing the principal components**
 
-``` r
-library("FactoMineR")
-res.pca <- PCA(df,  graph = FALSE)
+``` python
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# PCA is scale-dependent: standardise first, always.
+Z = StandardScaler().fit_transform(df)
+res_pca = PCA().fit(Z)
 ```
 
 Extract eigenvalues/variances:
 
-``` r
-library(factoextra)
-# Extract eigenvalues/variances
-get_eig(res.pca)
+``` python
+# Eigenvalues and the variance each component explains
+eig = pd.DataFrame({
+    "eigenvalue": res_pca.explained_variance_,
+    "pct_variance": res_pca.explained_variance_ratio_ * 100,
+    "cumulative_pct": np.cumsum(res_pca.explained_variance_ratio_) * 100,
+}, index=[f"PC{i+1}" for i in range(len(res_pca.explained_variance_))])
+print(eig.round(2))
 ```
 
     ##       eigenvalue variance.percent cumulative.variance.percent
@@ -344,9 +352,14 @@ get_eig(res.pca)
 ::: panel-tabset
 ### Code
 
-``` r
-# Visualize eigenvalues/variances
-fviz_screeplot(res.pca, addlabels = TRUE, ylim = c(0, 50))
+``` python
+import matplotlib.pyplot as plt
+
+# Scree plot: where does the curve flatten?
+plt.bar(range(1, len(res_pca.explained_variance_ratio_) + 1),
+        res_pca.explained_variance_ratio_ * 100)
+plt.xlabel("Component"); plt.ylabel("% of variance")
+plt.show()
 ```
 
 ### Output
@@ -360,10 +373,12 @@ fviz_screeplot(res.pca, addlabels = TRUE, ylim = c(0, 50))
 
 Extract the results for variables
 
-``` r
-# Extract the results for variables
-var <- get_pca_var(res.pca)
-var
+``` python
+# The loadings: how each variable relates to each component
+loadings = pd.DataFrame(
+    res_pca.components_.T * np.sqrt(res_pca.explained_variance_),
+    index=df.columns, columns=[f"PC{i+1}" for i in range(res_pca.n_components_)])
+print(loadings.round(3))
 ```
 
     ## Principal Component Analysis Results for variables
@@ -379,9 +394,9 @@ var
 ::: panel-tabset
 ### Coordinates
 
-``` r
-# Coordinates of variables
-head(var$coord)
+``` python
+# Coordinates of the variables on the first two components
+print(loadings[["PC1", "PC2"]].round(3))
 ```
 
     ##                  Dim.1       Dim.2       Dim.3        Dim.4       Dim.5
@@ -394,9 +409,11 @@ head(var$coord)
 
 ### Contributions
 
-``` r
-# Contribution of variables
-head(var$contrib)
+``` python
+# Contribution of each variable to each component, in percent
+contrib = (loadings ** 2)
+contrib = contrib / contrib.sum() * 100
+print(contrib.round(2))
 ```
 
     ##                  Dim.1      Dim.2       Dim.3        Dim.4      Dim.5
@@ -413,13 +430,16 @@ head(var$contrib)
 ::: panel-tabset
 ### Code
 
-``` r
-# Control variable colors using their contributions
-## look at axes = c(1, 2), you can look at other dimensions as well c(3, 4), etc.
-fviz_pca_var(res.pca, axes = c(1, 2), col.var="contrib",
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE # Avoid text overlapping
-             )
+``` python
+# Variable plot: arrows on the unit circle, coloured by contribution
+fig, ax = plt.subplots(figsize=(5.5, 5.5))
+for name, (x, y) in loadings[["PC1", "PC2"]].iterrows():
+    ax.arrow(0, 0, x, y, head_width=.02, color="#356B8C")
+    ax.text(x * 1.08, y * 1.08, name, fontsize=9)
+ax.add_patch(plt.Circle((0, 0), 1, fill=False, color="#B8C0CA"))
+ax.set_xlim(-1.1, 1.1); ax.set_ylim(-1.1, 1.1)
+ax.set_xlabel("PC1"); ax.set_ylabel("PC2")
+plt.show()
 ```
 
 ### Output
@@ -432,9 +452,9 @@ fviz_pca_var(res.pca, axes = c(1, 2), col.var="contrib",
 ::: panel-tabset
 ### Code
 
-``` r
-# Contributions of variables to PC1
-fviz_contrib(res.pca, choice = "var", axes = 1, top = 10)
+``` python
+contrib["PC1"].sort_values(ascending=False).head(10).plot.bar()
+plt.ylabel("% contribution to PC1"); plt.show()
 ```
 
 ### Output
@@ -447,9 +467,9 @@ fviz_contrib(res.pca, choice = "var", axes = 1, top = 10)
 ::: panel-tabset
 ### Code
 
-``` r
-# Contributions of variables to PC2
-fviz_contrib(res.pca, choice = "var", axes = 2, top = 10)
+``` python
+contrib["PC2"].sort_values(ascending=False).head(10).plot.bar()
+plt.ylabel("% contribution to PC2"); plt.show()
 ```
 
 ### Output
@@ -464,10 +484,11 @@ fviz_contrib(res.pca, choice = "var", axes = 2, top = 10)
 ::: panel-tabset
 ### Results for individuals
 
-``` r
-# Extract the results for individuals
-ind <- get_pca_ind(res.pca)
-ind
+``` python
+# The scores: where each film sits in the new coordinate system
+scores = pd.DataFrame(res_pca.transform(Z)[:, :5],
+                      columns=[f"PC{i+1}" for i in range(5)])
+scores.describe().round(3)
 ```
 
     ## Principal Component Analysis Results for individuals
@@ -479,9 +500,8 @@ ind
 
 ### Coordinates for individuals
 
-``` r
-# Coordinates of individuals
-head(ind$coord)
+``` python
+scores.head().round(3)
 ```
 
     ##        Dim.1      Dim.2       Dim.3      Dim.4      Dim.5
@@ -498,13 +518,11 @@ head(ind$coord)
 ::: panel
 [Code]{.panel-name}
 
-``` r
-# Graph of individuals
-# 1. Use repel = TRUE to avoid overplotting
-fviz_pca_ind(res.pca, axes = c(1, 2), col.ind = "cos2",
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE # Avoid text overlapping (slow if many points)
-             )
+``` python
+# Individuals plotted on the first two components
+plt.scatter(scores["PC1"], scores["PC2"], s=4, alpha=.3)
+plt.xlabel("PC1"); plt.ylabel("PC2")
+plt.show()
 ```
 :::
 
@@ -519,9 +537,16 @@ fviz_pca_ind(res.pca, axes = c(1, 2), col.ind = "cos2",
 ::: panel
 [Code]{.panel-name}
 
-``` r
-# Biplot of individuals and variables
-fviz_pca_biplot(res.pca, axes = c(1, 2), repel = TRUE)
+``` python
+# Biplot: individuals as points, variables as arrows
+fig, ax = plt.subplots(figsize=(6.5, 5.5))
+ax.scatter(scores["PC1"], scores["PC2"], s=4, alpha=.2)
+scale = 4
+for name, (x, y) in loadings[["PC1", "PC2"]].iterrows():
+    ax.arrow(0, 0, x * scale, y * scale, head_width=.08, color="#E3120B")
+    ax.text(x * scale * 1.1, y * scale * 1.1, name, fontsize=9, color="#E3120B")
+ax.set_xlabel("PC1"); ax.set_ylabel("PC2")
+plt.show()
 ```
 :::
 
@@ -592,15 +617,15 @@ In a case with 4 original variables, the Factor Analysis model would be as follo
 ::: panel-tabset
 ### Code
 
-``` r
-library("FactoMineR")
-library(factoextra)
-# Compute FAMD
- data(wine)
- head(wine)
+``` python
+# FAMD — factor analysis of mixed (numeric and categorical) data.
+#   pip install prince
+import prince
 
- # Compute Multiple Factor Analysis
- res.famd <- FAMD(wine[, c(1, 2, 16, 22, 29, 28, 30, 31)], graph = FALSE)
+wine = qmib.load("redwines")
+wine["quality_label"] = np.where(wine["good"] == 1, "good", "ordinary")
+
+famd = prince.FAMD(n_components=5, random_state=0).fit(wine)
 ```
 
 ### Output
@@ -661,9 +686,9 @@ library(factoextra)
 ::: panel-tabset
 ### Code
 
-``` r
-# Eigenvalues/variances of dimensions
-fviz_screeplot(res.famd)# Graph of variables
+``` python
+# Eigenvalues of the FAMD dimensions
+print(famd.eigenvalues_summary)
 ```
 
 ### Output
@@ -676,8 +701,9 @@ fviz_screeplot(res.famd)# Graph of variables
 ::: panel-tabset
 ### Code
 
-``` r
-fviz_famd_var(res.famd)
+``` python
+# Variable coordinates
+print(famd.column_coordinates_(wine).round(3).head(12))
 ```
 
 ### Output
@@ -690,8 +716,10 @@ fviz_famd_var(res.famd)
 ::: panel-tabset
 ### Code
 
-``` r
-fviz_famd_var(res.famd, "quanti.var", repel = TRUE, col.var = "black") # Just the quantitative data
+``` python
+# Just the quantitative variables
+num_cols = [c for c in wine.columns if c not in ("quality_label",)]
+print(famd.column_coordinates_(wine).loc[num_cols].round(3))
 ```
 
 ### Output
@@ -704,8 +732,9 @@ fviz_famd_var(res.famd, "quanti.var", repel = TRUE, col.var = "black") # Just th
 ::: panel-tabset
 ### Code
 
-``` r
-fviz_famd_var(res.famd, "quali.var", col.var = "black") # Just the qualitative data
+``` python
+# Just the qualitative variable
+print(famd.column_coordinates_(wine).drop(index=num_cols).round(3))
 ```
 
 ### Output
@@ -718,10 +747,13 @@ fviz_famd_var(res.famd, "quali.var", col.var = "black") # Just the qualitative d
 ::: panel-tabset
 ### Code
 
-``` r
-fviz_famd_ind(res.famd, col.ind = "cos2",
-  gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-  repel = TRUE)
+``` python
+# Individuals, coloured by how well they are represented
+coords = famd.row_coordinates(wine)
+plt.scatter(coords[0], coords[1], s=6, alpha=.35,
+            c=wine["good"], cmap="RdYlBu_r")
+plt.xlabel("Dim 1"); plt.ylabel("Dim 2")
+plt.show()
 ```
 
 ### Output
@@ -733,11 +765,13 @@ fviz_famd_ind(res.famd, col.ind = "cos2",
 
 ## Factor Analysis for Questionnaires {#imported-s07-045 .scrollable}
 
-``` r
-if(!require(GPArotation)) install.packages("GPArotation")
-if(!require(psych)) install.packages("psych")
-data <- readr::read_csv("https://www.warin.ca/datalake/courses_data/qmibr/session9/EFA.csv")
-head(data)
+``` python
+# Exploratory factor analysis
+#   pip install factor_analyzer
+from factor_analyzer import FactorAnalyzer
+
+data = qmib.load("efa")
+data.head()
 ```
 
     ## # A tibble: 6 × 14
@@ -758,8 +792,14 @@ head(data)
 ::: panel-tabset
 ### Code
 
-``` r
-parallel <- fa.parallel(data, fm = 'minres', fa = 'fa')
+``` python
+# How many factors? A scree plot of the eigenvalues.
+fa = FactorAnalyzer(rotation=None).fit(data)
+ev, _ = fa.get_eigenvalues()
+plt.plot(range(1, len(ev) + 1), ev, "o-")
+plt.axhline(1, color="red", ls="--")   # Kaiser criterion
+plt.xlabel("Factor"); plt.ylabel("Eigenvalue")
+plt.show()
 ```
 
 ### Output
@@ -774,9 +814,11 @@ parallel <- fa.parallel(data, fm = 'minres', fa = 'fa')
 ::: panel-tabset
 ### Code
 
-``` r
-threefactor <- fa(data, nfactors = 3, rotate = "oblimin", fm = "minres")
-print(threefactor$loadings, cutoff = 0.3)
+``` python
+threefactor = FactorAnalyzer(n_factors=3, rotation="oblimin", method="minres").fit(data)
+loadings3 = pd.DataFrame(threefactor.loadings_, index=data.columns,
+                         columns=["MR1", "MR2", "MR3"])
+print(loadings3.round(3))
 ```
 
 ### Output
@@ -810,9 +852,13 @@ print(threefactor$loadings, cutoff = 0.3)
 ::: panel-tabset
 ### Code
 
-``` r
-fourfactor <- fa(data, nfactors = 4, rotate = "oblimin", fm = "minres")
-print(fourfactor, cutoff = 0.3)
+``` python
+fourfactor = FactorAnalyzer(n_factors=4, rotation="oblimin", method="minres").fit(data)
+loadings4 = pd.DataFrame(fourfactor.loadings_, index=data.columns,
+                         columns=["MR1", "MR2", "MR3", "MR4"])
+
+# Hide the small loadings so the structure is readable
+print(loadings4.round(3).where(loadings4.abs() > 0.3, ""))
 ```
 
 ### Output
@@ -878,8 +924,11 @@ print(fourfactor, cutoff = 0.3)
 ::: panel-tabset
 ### Code
 
-``` r
-fa.diagram(fourfactor)
+``` python
+# The same loadings, read as a diagram: each item under the factor it loads on
+for j, col in enumerate(loadings4.columns):
+    items = loadings4.index[loadings4[col].abs() > 0.3].tolist()
+    print(f"{col}: " + ", ".join(items))
 ```
 
 ### Output

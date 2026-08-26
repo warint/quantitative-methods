@@ -1,6 +1,6 @@
-# Session 08 — Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics
+# Session 08 — K-Nearest Neighbours and the Bias–Variance Trade-off
 
-> **Two hundred macro series move together. How many things are actually happening?**
+> **Flexible, or just unstable?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-08-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S08-Lecture.qmd`](01-lecture/MATH60033A-S08-Lecture.qmd).
@@ -11,23 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### How many independent things are we actually measuring?
+> ### Does flexibility buy you anything on your own data?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- Derive principal components as the successive maximisers of projected variance, and via the SVD.
-- Prove the Eckart-Young theorem's consequence: PCA gives the best low-rank approximation.
-- Connect PCA to the approximate factor model of Stock & Watson and to diffusion-index forecasting.
-- Select the number of factors using scree plots, cumulative variance, and the Bai-Ng information criteria.
-- Build a nowcasting model from extracted factors and evaluate it out-of-sample.
+- State the **Bayes classifier** and say why no rule can beat it
+- Compute a Euclidean distance and find nearest neighbours **by hand**
+- Explain why KNN requires **standardised** predictors
+- Choose $k$ by cross-validation, and read the trade-off the curve shows
+- Say what happens to KNN as the number of predictors grows
 
 ---
 
@@ -35,39 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: the Bayes classifier, distance, choosing $k$ by cross-validation | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**FRED-MD (revisited, from Session 5) + a target series for nowcasting**
+**The course spine, plus the smarket returns used in the lecture** — one line to load it:
 
-Source: Federal Reserve Bank of St. Louis
-URL: https://www.stlouisfed.org/research/economists/mccracken/fred-databases
+```python
+import qmib
+data = qmib.load("core")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` with the factor-selection comparison table, the
-loadings interpretation with its self-critique, the three-way forecast comparison, and a 300-word
-note quantifying the look-ahead bias and explaining to a non-technical reader why it is fraud rather
-than optimism.
+In `02-practice/submissions/group-XX/`: a KNN classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
 
 ---
 
-## Before the next session
-
-- ISLR ch. 12.4 (clustering) before Session 9.
-
----
-
-[<- Session 07: Trees, Forests, and Gradient Boosting](../07-pca-and-factor-analysis/README.md) | [Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data ->](../09-structural-equation-modelling/README.md)
+[<- [Session 07: Principal Component and Factor Analyses](../07-pca-and-factor-analysis/README.md)](../07-pca-and-factor-analysis/README.md) | [[Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md) ->](../09-structural-equation-modelling/README.md)

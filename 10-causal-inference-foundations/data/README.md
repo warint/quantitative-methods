@@ -1,33 +1,24 @@
 # Session 10 — Data
 
-**401(k) eligibility and financial wealth (the DML canonical example), or the NSW/LaLonde job-training data**
-
-- **Source:** Available via the `doubleml` Python package; LaLonde via `causaldata`
-- **URL:** <https://docs.doubleml.org/stable/examples/py_double_ml_pension.html>
-
----
+**The spine's documented treatment, with a known effect to recover**
 
 ```python
-from doubleml.datasets import fetch_401K
-df = fetch_401K(return_type="DataFrame")
-df.to_parquet("data/pension401k.parquet")
+import qmib
+data = qmib.load("core")
 ```
 
-The 401(k) example is ideal: eligibility is plausibly exogenous conditional on income and
-demographics, the sample is large, and the literature gives a benchmark estimate to compare against.
-The LaLonde data is the harder, more humbling case - the experimental benchmark is known, and most
-observational methods miss it.
+One call. It resolves a local cache first, then the committed spine, then the published URL —
+downloading once and caching as parquet. After the first run the practice works offline.
+
+- Everything available: `qmib.catalog()`
+- Your group's columns, units and traps: [data dictionaries](../../data/spine/dictionaries/)
+- Provenance and flags: [`data/spine/PROVENANCE.md`](../../data/spine/PROVENANCE.md)
 
 ---
 
 ## Rules for this folder
 
-- Data files are **git-ignored**. Never commit raw data.
-- Download **once**, cache as parquet, and read from the cache. The practice must run offline.
-- Record your download date and, where available, a checksum in `PROVENANCE.md`.
-- If you extend the dataset yourself, document the source and respect its licence.
-
-```bash
-# record provenance after downloading
-echo "$(date -Iseconds)  $(shasum -a 256 <file>)" >> PROVENANCE.md
-```
+- Raw data files are **git-ignored**. Never commit them; `qmib` fetches and caches instead.
+- The synthetic spine is the exception: small, licence-free, committed deliberately so the
+  practice runs with no network.
+- If you bring in a dataset of your own, record its source, date and licence in `PROVENANCE.md`.

@@ -1,6 +1,6 @@
-# Session 09 — Unsupervised Learning II: Clustering, Embeddings, and Text as Data
+# Session 09 — Structural Equation Modelling
 
-> **How do you measure something that only exists as words?**
+> **Can you measure something you cannot observe?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-09-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S09-Lecture.qmd`](01-lecture/MATH60033A-S09-Lecture.qmd).
@@ -11,23 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### Do European countries fall into types — and does the language of policy track them?
+> ### What is the construct behind your indicators?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- State the k-means objective, derive Lloyd's algorithm, and explain why it converges but not to a global optimum.
-- Compare k-means, hierarchical clustering, and Gaussian mixtures in terms of the assumptions each imposes.
-- Choose $k$ using silhouette, gap statistic, and the elbow - and explain why none is definitive.
-- Construct document representations: TF-IDF, and dense embeddings from a local model.
-- Build a quantitative index from an unstructured corpus and defend its validity.
+- Distinguish the **measurement** model from the **structural** model
+- Write a model description and read `=~` as "is measured by"
+- Interpret a **standardised loading**, and say when an indicator is weak
+- Report **CFI, TLI and RMSEA**, and say what each would have to be
+- State why good fit is not evidence that the model is correct
 
 ---
 
@@ -35,40 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: measurement and structural models, latent variables, fit indices | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**A corpus of central bank communications (ECB / Bank of Canada / Fed statements) + a regional economic panel**
+**A 14-item questionnaire on purchase decisions, plus semopy's bundled examples** — one line to load it:
 
-Source: ECB press releases; Eurostat regional accounts
-URL: https://www.ecb.europa.eu/press/pr/date/html/index.en.html
+```python
+import qmib
+data = qmib.load("efa")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` with the cluster map, the three-criterion $k$
-selection, the null-data comparison, both uncertainty indices plotted together, and a 500-word
-validity report structured under the four headings in section 9.5. **A negative finding, clearly
-demonstrated, receives full marks.**
+In `02-practice/submissions/group-XX/`: a measurement model for one construct in your project, with the loadings reported, the fit indices stated, and a note on the indicators you would drop and why.
 
 ---
 
-## Before the next session
-
-- Chernozhukov et al. (2018) on double/debiased ML - the introduction and section 1 - before Session 10.
-- Groups must confirm their final-project dataset with the instructor before Session 10.
-
----
-
-[<- Session 08: Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics](../08-knn-and-bias-variance/README.md) | [Session 10: Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects ->](../10-causal-inference-foundations/README.md)
+[<- [Session 08: K-Nearest Neighbours and the Bias–Variance Trade-off](../08-knn-and-bias-variance/README.md)](../08-knn-and-bias-variance/README.md) | [[Session 10: Causal Inference I: Counterfactuals, Randomisation, Matching](../10-causal-inference-foundations/README.md) ->](../10-causal-inference-foundations/README.md)

@@ -1,32 +1,24 @@
 # Session 03 — Data
 
-**CPS / IPUMS-style wage microdata (use the Wooldridge `wage2` or CPS 1985 extract)**
-
-- **Source:** `statsmodels` datasets, or the Wooldridge R package data mirrored as CSV
-- **URL:** <https://cran.r-project.org/package=wooldridge>
-
----
-
-A clean, dependency-free option:
+**The same regression session 02 fitted — gdp per capita on productivity**
 
 ```python
-import pandas as pd
-url = "https://raw.githubusercontent.com/JeffSackmann/.../cps85.csv"  # replace with your mirror
+import qmib
+data = qmib.load("core")
 ```
 
-**Recommended:** the instructor will place `data/wages.csv` in the shared repo before class so the
-practice has no network dependency. Verify with `md5sum` against the value in `data/CHECKSUMS.txt`.
+One call. It resolves a local cache first, then the committed spine, then the published URL —
+downloading once and caching as parquet. After the first run the practice works offline.
+
+- Everything available: `qmib.catalog()`
+- Your group's columns, units and traps: [data dictionaries](../../data/spine/dictionaries/)
+- Provenance and flags: [`data/spine/PROVENANCE.md`](../../data/spine/PROVENANCE.md)
 
 ---
 
 ## Rules for this folder
 
-- Data files are **git-ignored**. Never commit raw data.
-- Download **once**, cache as parquet, and read from the cache. The practice must run offline.
-- Record your download date and, where available, a checksum in `PROVENANCE.md`.
-- If you extend the dataset yourself, document the source and respect its licence.
-
-```bash
-# record provenance after downloading
-echo "$(date -Iseconds)  $(shasum -a 256 <file>)" >> PROVENANCE.md
-```
+- Raw data files are **git-ignored**. Never commit them; `qmib` fetches and caches instead.
+- The synthetic spine is the exception: small, licence-free, committed deliberately so the
+  practice runs with no network.
+- If you bring in a dataset of your own, record its source, date and licence in `PROVENANCE.md`.

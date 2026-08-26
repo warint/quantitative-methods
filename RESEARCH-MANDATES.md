@@ -211,16 +211,16 @@ The theme is the same for everyone; the execution is yours, on your project.
 
 | # | Method taught | **Theme of the session** |
 |---|---|---|
-| 02 | OLS geometry, FWL | **How much of the measured gap is real, and how much is composition?** |
-| 03 | Inference, robust SEs, OVB | **Which of these differences would survive a referee?** |
-| 04 | Bias–variance, cross-validation | **Are we predicting, or only describing the past?** |
-| 05 | Ridge, lasso, elastic net | **Of many candidate indicators, which few actually carry the signal?** |
-| 06 | Logistic and penalised logistic | **Can we flag the outcome ahead of time — and what does a false alarm cost?** |
-| 07 | Trees, forests, boosting | **Is the relationship non-linear — and can you still explain it to a minister?** |
-| 08 | PCA and factor models | **How many independent things are we actually measuring?** |
-| 09 | Clustering and text as data | **Do the units fall into types — and does the available text track them?** |
-| 10 | Double machine learning | **Did the intervention do anything, or did we measure who was already ahead?** |
-| 11 | Forecasting, drift, governance | **If this became a monitoring tool for your SDAfrique team, would you sign it?** |
+| 02 | Exploratory data analysis | **Which summary of your key variable would you defend in print?** |
+| 03 | Regression diagnostics | **Which model would survive a referee?** |
+| 04 | Logistic regression | **Can we predict a discrete outcome honestly?** |
+| 05 | Regularisation | **Of many indicators, which few actually carry the signal?** |
+| 06 | Panel data and interactions | **Does your finding survive the structure of your data?** |
+| 07 | PCA and factor analysis | **How many distinct dimensions does your angle really have?** |
+| 08 | KNN and bias–variance | **Does flexibility buy you anything on your own data?** |
+| 09 | Structural equation modelling | **What is the construct behind your indicators?** |
+| 10 | Causal inference (1/2) | **Can your project support a causal claim at all?** |
+| 11 | Causal inference (2/2) | **What is your counterfactual, and would anyone believe it?** |
 
 Session 01 has no project work — it is the syllabus and the *Europe 2031* conversation. Sessions 02
 and 03 run on the practice data, because projects arrive in Session 04. Session 12 is the

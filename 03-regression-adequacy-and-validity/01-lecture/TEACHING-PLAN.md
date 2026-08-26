@@ -1,18 +1,23 @@
 # Session 03 — teaching plan (first half, 90 min)
 
-# Linear Regression: Inference, Diagnostics, and Interpretation
+# Regression: Adequacy, Validity, and Robustness
 
-> **Instructor page.** The student-facing derivations are in
-> [`README.md`](README.md); this is how to deliver them.
+> **Instructor page.** The student-facing companion is [`README.md`](README.md); the deck is
+> [`MATH60033A-S03-Lecture.qmd`](MATH60033A-S03-Lecture.qmd).
 
 lecture 90 min · practice follows on
-*Which of these differences would survive a referee?*
+*You have fitted a regression. Can it be trusted?*
 
 ---
 
 ## Opening
 
-Project a regression table with three stars on a coefficient. Ask: *"under what conditions does that number mean anything?"* Then reveal that the data are 27 countries over 14 years with classical standard errors. Let someone object.
+Put the session question on the board and let them attempt an answer before any method appears:
+
+> **You have fitted a regression. Can it be trusted?**
+
+Then the pre-session paper: ask what they underlined, and why. Two minutes, three students. It
+establishes that the reading is load-bearing rather than decorative.
 
 ---
 
@@ -20,59 +25,42 @@ Project a regression table with three stars on a coefficient. Ask: *"under what 
 
 | Minutes | |
 |---|---|
-| **0–05** | The hook. |
-| **05–20** | $\hat\beta = \beta + (X^\top X)^{-1}X^\top\varepsilon$. Write it large. Say: *everything in regression inference follows from what you assume about $\varepsilon$.* Unbiasedness needs only exogeneity. |
-| **20–42** | Variance. Derive $\sigma^2(X^\top X)^{-1}$, then expand to $\sigma^2 / (n \mathrm{Var}(x_j)(1 - R_j^2))$ and **read off the four levers** — noise, sample size, variation, redundancy. This single expression explains collinearity, and it motivates Session 05. |
-| **42–56** | Gauss–Markov. Sketch the proof. Then the caveat that matters: BLUE is a guarantee *within unbiased estimators*, and Session 05 will deliberately leave that class. |
-| **56–75** | The sandwich. Robust (HC1), cluster-robust, and the rule: cluster at the level at which treatment is assigned. Warn about few clusters. |
-| **75–90** | Omitted variable bias. Derive $\mathbb{E}[\hat\beta_1] = \beta_1 + \delta\beta_2$ and give the two-question recipe for signing it. |
+| **0–10** | The question, and the paper they read. Establish what is at stake. |
+| **10–35** | Why Evaluate Models? — build it from intuition before notation. |
+| **35–60** | Introduction: Key Aspects of Model Evaluation — derive it, then run it in Python on the session dataset. |
+| **60–80** | Key Aspects of Model Evaluation — read the output in units, out loud. |
+| **80–90** | What the method does **not** license. Hand off to the practice. |
 
 ---
 
-## Worked example — do this live
+## Run the code live
 
-OVB with numbers. True $\beta_2 = 0.08$, auxiliary $\delta_1 = 0.6$, so the bias is $+0.048$. If the short regression reports 0.112, the implied $\beta_1$ is 0.064. Have the room sign it before you compute it.
-
-> Working an example on the board is not a break from the derivation; it is what converts the
-> derivation into something students can use under pressure. Do it slowly enough that they copy it.
+Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
+the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
+error appear and be read is worth more than a slide saying errors happen.
 
 ---
 
 ## Put this to the room
 
-*"Your robust standard errors come out SMALLER than the classical ones. Is that possible?"* Yes — robust SEs are not uniformly larger. Students who think otherwise are pattern-matching rather than understanding the sandwich.
+*"What would have to be true of your own data for this method to apply — and is it?"*
+
+Do not accept "it probably is". Push until someone names the specific column and the specific
+assumption.
 
 ---
 
 ## Misconception to pre-empt
 
-> That clustering always inflates standard errors, and that a large standard error is evidence of a small coefficient. Failure to reject is not acceptance. Say it twice; it is the most common error in their write-ups.
-
-Say it explicitly, early, and once more at the end. Misconceptions that go unnamed in the lecture
-reappear in the deliverable.
+Reporting $R^2$ without a single diagnostic plot. Say it explicitly, early, and once more at the end. Misconceptions that go
+unnamed in the lecture reappear in the deliverable.
 
 ---
 
 ## Leave on the board for the practice
 
-$\mathrm{Var}(\hat\beta_j) = \sigma^2 / (n\mathrm{Var}(x_j)(1-R_j^2))$ and the OVB formula.
+The method's core expression, and the one diagnostic that tells you it has failed.
 
 ---
 
-## If you are running short
-
-Compress Gauss–Markov to the statement plus the caveat. The variance decomposition and OVB are both load-bearing later.
-
----
-
-## Then hand over
-
-The second half is the groups' own. Remind them:
-
-- the presenter is **drawn at random** when their group is called — `python scripts/assess.py draw --session 3`
-- the report is **one slide, three sentences**, and sentence three is the one that earns the slot
-- **every member has pushed** before they leave the room
-
----
-
-[Student notes](README.md) · [Session 03](../README.md) · [Practice](../02-practice/README.md)
+[Student companion](README.md) · [Practice brief](../02-practice/README.md)

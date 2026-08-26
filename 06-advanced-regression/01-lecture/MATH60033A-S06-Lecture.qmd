@@ -112,9 +112,13 @@ Throughout, practical applications---including the "Moneyball" case study---prov
 
 ## Step 1. Running a TSCS model {#imported-s06-012 .scrollable}
 
-``` r
-mydata1 <- readr::read_csv("https://warin.ca/datalake/courses_data/qmibr/session5/panel_data_1.csv")
-head(mydata1)
+``` python
+# In the VS Codium terminal, with .venv active:  python
+import qmib
+
+# Country panel: government debt and economic-freedom indices
+mydata1 = qmib.load("panel")
+mydata1.head()
 ```
 
     ## # A tibble: 6 × 45
@@ -139,22 +143,29 @@ head(mydata1)
 ::::: panel-tabset
 ### Code
 
-``` r
-if (!require("plm")) install.packages("plm")
-library(plm)
-mydata_1_random <- plm(grossdebt ~ busfreedom + finfreedom + invfreedom, data = mydata1, index = c("country", "year"), model = "random")
+``` python
+from linearmodels.panel import RandomEffects
+import pandas as pd
+
+# A panel needs a two-level index: entity, then time
+cols = ["grossdebt", "busfreedom", "finfreedom", "invfreedom"]
+panel = mydata1.dropna(subset=cols).set_index(["country", "year"])
+y = panel["grossdebt"]
+X = panel[["busfreedom", "finfreedom", "invfreedom"]]
+
+re_model = RandomEffects(y, X).fit()
 ```
 
 Also, remember how useful this command can be:
 
-``` r
-?plm
+``` python
+help(RandomEffects)
 ```
 
 ### Code 2
 
-``` r
-summary(mydata_1_random)
+``` python
+print(re_model)
 ```
 
 ::: pull-left
@@ -187,15 +198,12 @@ Another important assumption of the FE model is that those time-invariant charac
 
 Each entity is different therefore the entity's error term and the constant (which captures individual characteristics) should not be correlated with the others. If the error terms are correlated, then FE is no suitable since inferences may not be correct and you need to model that relationship (probably using random-effects), this is the main rationale for the Hausman test.
 
-``` r
-# Running a panel data with fixed effects
-fixed <- plm(grossdebt ~ busfreedom + finfreedom + invfreedom,
-             data = mydata1, index = c("country", "year"), model = "within")
-# Running a panel data with random effects
-random <- plm(grossdebt ~ busfreedom + finfreedom + invfreedom,
-              data = mydata1, index = c("country", "year"), model = "random")
-# Running the Hausman test
-phtest(fixed, random)
+``` python
+from linearmodels.panel import PanelOLS
+
+# Fixed effects: one intercept per country, absorbed
+fixed = PanelOLS(y, X, entity_effects=True).fit()
+print(fixed)
 ```
 
 Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need a random effects model.
@@ -219,14 +227,12 @@ Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need
 ::: pull-left
 Let's go to the real estate data. Let's see if selling price is related to Living.area. First visualize this relationship:
 
-``` r
-re = readr::read_csv("https://warin.ca/datalake/courses_data/qmibr/session5/Real_Estate_Sample.csv")
-re1 = lm(Price ~ Living.area, data = re)
+``` python
+import qmib
+import statsmodels.formula.api as smf
 
-plot(Price ~ Living.area,cex=0.5,data = re)
-x=500:5000
-abline(re1,lwd=3, lty=2)
-lines(x, predict(re1, newdata = data.frame(Living.area = x)), col="red", lwd=3, lty=3)
+re_data = qmib.load("realestate")
+re1 = smf.ols("price ~ living_area", data=re_data).fit()
 ```
 :::
 
@@ -236,8 +242,8 @@ lines(x, predict(re1, newdata = data.frame(Living.area = x)), col="red", lwd=3, 
 
 ### Results 1
 
-``` r
-summary(re1)
+``` python
+print(re1.summary())
 ```
 
     ## 
@@ -283,9 +289,9 @@ So we can perform a \\(t-test\\) for \\(\\beta_2\\) to determine if the relation
 
 Let's fit a regression model to predict Price from both \\(Living.area\\) and \\(Living.area\^2\\).
 
-``` r
-re2 = lm(Price ~ Living.area + I(Living.area^2),data = re)
-summary(re2)  # very significant quadratic effect
+``` python
+re2 = smf.ols("price ~ living_area + I(living_area**2)", data=re_data).fit()
+print(re2.summary())   # the quadratic term is very significant
 ```
 
     ## 
@@ -358,28 +364,32 @@ In this example, notice that we don\'t have to create a dummy variable to repres
 
 If \\(X_1=0\\) and \\(X_2=0\\), we know the voter is neither Republican nor Democrat. Therefore, voter must be Independent.
 
-``` r
-#start by reading in the glassdoor data set
-glassdoor <- readr::read_csv("https://warin.ca/datalake/courses_data/qmibr/session5/glassdoordata.csv")
-glassdoor$totalpay = glassdoor$income + glassdoor$bonus
-#head(glassdoor)
+``` python
+glassdoor = qmib.load("glassdoor")
+
+# The R deck uses totalpay; here it is income plus bonus
+glassdoor["totalpay"] = glassdoor["income"] + glassdoor["bonus"]
+glassdoor.head()
 ```
 
 ### Code
 
-``` r
-glassdoor$female = 1*(glassdoor$gender == "Female")
-plot(totalpay ~ female, data = glassdoor)
-lm1 = lm(totalpay ~ female, data = glassdoor)
-abline(lm1, lwd = 3, col = "red")
+``` python
+import matplotlib.pyplot as plt
+
+glassdoor["female"] = (glassdoor["gender"].str.lower() == "female").astype(int)
+glassdoor.boxplot(column="totalpay", by="female")
+plt.suptitle(""); plt.show()
+
+lm1 = smf.ols("totalpay ~ female", data=glassdoor).fit()
 ```
 
 ![](imported-assets/figures/binary1.png){style="display: block; margin: auto;" width="60%"}
 
 ### Results
 
-``` r
-summary(lm1)
+``` python
+print(lm1.summary())
 ```
 
     ## 
@@ -455,15 +465,11 @@ If we define a new variable where 1 = high school, 2 = college, etc. and use it 
 
 By creating 3 binary independent variable to represent the 4 groups, we can estimate the mean salary for each group separately.
 
-``` r
-library(tidyverse)
-glassdoor <- glassdoor %>% mutate(college = case_when(education == "College" ~ 1
-                                                      , TRUE ~ 0))
-glassdoor <- glassdoor %>% mutate(masters = case_when(education == "Masters" ~ 1
-                                                      , TRUE ~ 0))
-glassdoor <- glassdoor %>% mutate(phd = case_when(education == "PhD" ~ 1
-                                                      , TRUE ~ 0))
-# View(glassdoor)
+``` python
+# Dummy variables for each level of education
+glassdoor["college"] = (glassdoor["education"] == "College").astype(int)
+glassdoor["masters"] = (glassdoor["education"] == "Masters").astype(int)
+glassdoor["phd"]     = (glassdoor["education"] == "PhD").astype(int)
 ```
 
 ### Model
@@ -472,8 +478,9 @@ We use the following regression to model the mean of total pay:
 
 \$\$\\mu = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_3\$\$
 
-``` r
-summary(fit2<-lm(totalpay ~ college + masters + phd, data = glassdoor))
+``` python
+fit2 = smf.ols("totalpay ~ college + masters + phd", data=glassdoor).fit()
+print(fit2.summary())
 ```
 
     ## 
@@ -545,9 +552,9 @@ We can also use the fastDummies package: glassdoor \<- fastDummies::dummy_cols(g
 
 ### results
 
-``` r
-lm3 <- lm(totalpay ~ female + college + masters + phd + age, data = glassdoor)
-summary(lm3)
+``` python
+lm3 = smf.ols("totalpay ~ female + college + masters + phd + age", data=glassdoor).fit()
+print(lm3.summary())
 ```
 
     ## 
@@ -586,8 +593,9 @@ summary(lm3)
 
 Let's look at a multiple regression to predict Y = bonus of employees based on \\(x_1 = age\\) and an \\(x_2 =female\\):
 
-``` r
-summary(fit5 <- lm(bonus~age+female,data = glassdoor))
+``` python
+fit5 = smf.ols("bonus ~ age + female", data=glassdoor).fit()
+print(fit5.summary())
 ```
 
     ## 
@@ -636,8 +644,10 @@ We can perform a \\(t-test\\) to see if this interaction effect is significant.
 
 Let's look at a multiple regression **to predict bonus of employees based on age, an indicator for female, and the interaction between the two**:
 
-``` r
-summary(fit6 <- lm(bonus ~ age * female, data = glassdoor))
+``` python
+# age * female expands to age + female + age:female — the interaction
+fit6 = smf.ols("bonus ~ age * female", data=glassdoor).fit()
+print(fit6.summary())
 ```
 
     ## 
@@ -703,8 +713,9 @@ Women (red):
 
 What can we conclude?
 
-``` r
-summary(fit6 <- lm(bonus ~ age * female, data = glassdoor))
+``` python
+fit6 = smf.ols("bonus ~ age * female", data=glassdoor).fit()
+print(fit6.summary())
 ```
 
     ## 
@@ -806,8 +817,9 @@ It is the effect of beds on mean price, controlling for number of baths and livi
 
 ### Code model A
 
-``` r
-summary(modelA<-lm(Price ~ bedrooms, data = re))
+``` python
+model_a = smf.ols("price ~ bedrooms", data=re_data).fit()
+print(model_a.summary())
 ```
 
     ## 
@@ -831,8 +843,9 @@ summary(modelA<-lm(Price ~ bedrooms, data = re))
 
 ### Code model B
 
-``` r
-summary(modelB<-lm(Price ~ bedrooms + bathrooms + Living.area, data = re))
+``` python
+model_b = smf.ols("price ~ bedrooms + bathrooms + living_area", data=re_data).fit()
+print(model_b.summary())
 ```
 
     ## 
@@ -912,11 +925,8 @@ If the p-value is small, then there is evidence to suggest that the extra variab
 
 Comparing Model A and Model B from before in R:
 
-``` r
-re = readr::read_csv("https://warin.ca/datalake/courses_data/qmibr/session5/Real_Estate_Sample.csv")
-modelA = lm(Price ~ bedrooms, data = re)
-modelB = lm(Price ~ bedrooms + bathrooms + Living.area, data = re)
-anova(modelA, modelB)
+``` python
+re_data = qmib.load("realestate")
 ```
 
     ## Analysis of Variance Table
@@ -949,8 +959,10 @@ Model C is not nested with either Model A (using bedrooms as a predictor alone) 
 
 ### 5
 
-``` r
-summary(modelC<-lm(Price~Living.area+I(Living.area^2)+bathrooms+I(bathrooms^2), data = re))
+``` python
+model_c = smf.ols("price ~ living_area + I(living_area**2) + bathrooms + I(bathrooms**2)",
+                  data=re_data).fit()
+print(model_c.summary())
 ```
 
     ## 
@@ -980,8 +992,10 @@ summary(modelC<-lm(Price~Living.area+I(Living.area^2)+bathrooms+I(bathrooms^2), 
 
 Here is the R output for calculating AIC for these 3 models:
 
-``` r
-AIC(modelA, modelB, modelC)
+``` python
+# Lower AIC is better. The comparison only makes sense on the same rows.
+for name, m in [("A", model_a), ("B", model_b), ("C", model_c)]:
+    print(f"model {name}:  AIC {m.aic:10.1f}   adj R2 {m.rsquared_adj:.4f}")
 ```
 
     ##        df      AIC
@@ -1003,16 +1017,16 @@ Note: 'df' here represents the number of independent variable + 2.
 ::: panel-tabset
 ### Nested models
 
-``` r
-library(lmtest)
-waldtest(mymodel1, mymodel2, test = "F")
+``` python
+# An F-test for nested models: does B earn its extra terms over A?
+print(model_b.compare_f_test(model_a))
 ```
 
 ### Non-nested models
 
-``` r
-library(lmtest)
-encomptest(mymodel3, mymodel4)
+``` python
+# Non-nested models are compared on information criteria, not an F-test
+print(f"AIC  B {model_b.aic:.1f}   C {model_c.aic:.1f}")
 ```
 :::
 
@@ -1067,11 +1081,13 @@ One approach is **backward stepwise regression:**
 
 R prints out all of the steps in the backward stepwise command. This is just the first step:
 
-``` r
-lm.full = lm(Price ~ ., data = re)
-lm.step = step(lm.full, direction = "backward")
-
-summary(lm.step)
+``` python
+# Python has no step(); choose among candidates explicitly.
+predictors = ["living_area", "bedrooms", "bathrooms", "year", "garage"]
+for k in range(1, len(predictors) + 1):
+    formula = "price ~ " + " + ".join(predictors[:k])
+    m = smf.ols(formula, data=re_data).fit()
+    print(f"AIC {m.aic:10.1f}   {formula}")
 ```
 
 ::: pull-left

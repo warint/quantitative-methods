@@ -1,25 +1,24 @@
 # Session 08 — Data
 
-**FRED-MD (revisited, from Session 5) + a target series for nowcasting**
+**The course spine, plus the smarket returns used in the lecture**
 
-- **Source:** Federal Reserve Bank of St. Louis
-- **URL:** <https://www.stlouisfed.org/research/economists/mccracken/fred-databases>
+```python
+import qmib
+data = qmib.load("core")
+```
 
----
+One call. It resolves a local cache first, then the committed spine, then the published URL —
+downloading once and caching as parquet. After the first run the practice works offline.
 
-You already have the transformed panel from Session 5. Reuse it - and this time, exploit
-its correlation structure instead of penalising it.
+- Everything available: `qmib.catalog()`
+- Your group's columns, units and traps: [data dictionaries](../../data/spine/dictionaries/)
+- Provenance and flags: [`data/spine/PROVENANCE.md`](../../data/spine/PROVENANCE.md)
 
 ---
 
 ## Rules for this folder
 
-- Data files are **git-ignored**. Never commit raw data.
-- Download **once**, cache as parquet, and read from the cache. The practice must run offline.
-- Record your download date and, where available, a checksum in `PROVENANCE.md`.
-- If you extend the dataset yourself, document the source and respect its licence.
-
-```bash
-# record provenance after downloading
-echo "$(date -Iseconds)  $(shasum -a 256 <file>)" >> PROVENANCE.md
-```
+- Raw data files are **git-ignored**. Never commit them; `qmib` fetches and caches instead.
+- The synthetic spine is the exception: small, licence-free, committed deliberately so the
+  practice runs with no network.
+- If you bring in a dataset of your own, record its source, date and licence in `PROVENANCE.md`.

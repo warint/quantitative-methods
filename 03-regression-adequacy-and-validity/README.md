@@ -1,6 +1,6 @@
-# Session 03 — Linear Regression: Inference, Diagnostics, and Interpretation
+# Session 03 — Regression: Adequacy, Validity, and Robustness
 
-> **Your coefficient has a standard error. Under what conditions does that number mean anything?**
+> **You have fitted a regression. Can it be trusted?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-03-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S03-Lecture.qmd`](01-lecture/MATH60033A-S03-Lecture.qmd).
@@ -11,23 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### Which of these differences would survive a referee?
+> ### Which model would survive a referee?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- State the Gauss-Markov assumptions and prove that OLS is BLUE under them.
-- Derive $\mathrm{Var}(\hat\beta)$ and explain each term's economic content.
-- Explain heteroskedasticity- and cluster-robust standard errors, and know when each is required.
-- Quantify omitted variable bias and sign it in a real application.
-- Estimate and interpret a Mincer earnings equation, distinguishing what the coefficients do and do not identify.
+- Read a **residuals-versus-fitted** plot and say what structure it reveals
+- Diagnose non-constant variance from a **scale–location** plot
+- Compute **leverage** and say which observations have the power to move the line
+- Use **Cook's distance** to separate an outlier from an influential point
+- Compare candidate models on **AIC**, and say why that is not model selection
 
 ---
 
@@ -35,38 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: residual diagnostics, leverage, Cook's distance, information criteria | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**CPS / IPUMS-style wage microdata (use the Wooldridge `wage2` or CPS 1985 extract)**
+**The same regression session 02 fitted — gdp per capita on productivity** — one line to load it:
 
-Source: `statsmodels` datasets, or the Wooldridge R package data mirrored as CSV
-URL: https://cran.r-project.org/package=wooldridge
+```python
+import qmib
+data = qmib.load("core")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/mincer.md` with the three-column results table,
-two diagnostic plots, your predicted-vs-actual OVB calculation, and the interpretation paragraph.
-The paragraph is worth as much as the code.
+In `02-practice/submissions/group-XX/`: a diagnostic report on your group's own regression: four plots, the observations you investigated, and a 250-word note on which conclusions survived the diagnostics and which did not.
 
 ---
 
-## Before the next session
-
-- ISLR ch. 5 (resampling methods) before Session 4. This is the pivot of the course.
-
----
-
-[<- Session 02: Exploratory Data Analysis: Centre, Spread, and Shape](../02-exploratory-data-analysis/README.md) | [Session 04: The Bias-Variance Tradeoff, Overfitting, and Cross-Validation ->](../04-logistic-ordinal-multinomial/README.md)
+[<- [Session 02: Exploratory Data Analysis, and the First Model](../02-exploratory-data-analysis/README.md)](../02-exploratory-data-analysis/README.md) | [[Session 04: Logistic Regression: Binary, Ordinal, and Multinomial](../04-logistic-ordinal-multinomial/README.md) ->](../04-logistic-ordinal-multinomial/README.md)

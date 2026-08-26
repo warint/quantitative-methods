@@ -1,6 +1,6 @@
-# Session 06 — Classification: Logistic Regression, Regularisation, and Decision Thresholds
+# Session 06 — Regression: Advanced Considerations
 
-> **Your classifier is 97% accurate. Should anyone be impressed?**
+> **Does the relationship hold across countries, and across years?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-06-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S06-Lecture.qmd`](01-lecture/MATH60033A-S06-Lecture.qmd).
@@ -11,24 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### Can we flag a country or sector falling behind one year ahead — and what does a false alarm cost?
+> ### Does your finding survive the structure of your data?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- Derive the logistic model from the log-odds link and from a latent-variable formulation.
-- Write the log-likelihood, derive the score and Hessian, prove concavity, and explain IRLS.
-- Explain what perfect separation does to the MLE and why a penalty cures it.
-- Compose the Session 5 elastic-net penalty with the logistic likelihood, and state the resulting coordinate update.
-- Interpret coefficients as log-odds, odds ratios, and average marginal effects.
-- Choose a decision threshold from an explicit cost ratio, and assess calibration and selection stability.
+- State what a **panel** is, and why pooling it with OLS understates uncertainty
+- Distinguish **fixed** from **random** effects, and say what each assumes
+- Fit a quadratic term and interpret a **non-linear** relationship in units
+- Read an **interaction** as a slope that differs between groups
+- Compare non-nested models on information criteria rather than an F-test
 
 ---
 
@@ -36,43 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: panel data, fixed and random effects, non-linearity, interactions | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**Statlog German Credit (1,000 applicants, 20 features) + Polish/Taiwanese company bankruptcy (wide and severely imbalanced)**
+**A country panel of government debt and economic-freedom indices** — one line to load it:
 
-Source: UCI Machine Learning Repository
-URL: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+```python
+import qmib
+data = qmib.load("panel")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` containing: the IRLS implementation, the
-three-metric coefficient table, the cost curve with the optimal threshold marked, the reliability
-diagram, and (Track B) the calibration comparison and stability plot.
-
-Plus a **400-word memo to a credit committee** that (a) states the recommended threshold and its
-cost justification, (b) names which features are *robustly* selected and explicitly refuses to
-over-claim about the others, and (c) raises the group-disparity finding without resolving it
-prematurely.
+In `02-practice/submissions/group-XX/`: a panel specification of your project's core relationship, fitted with both fixed and random effects, plus a 250-word note on which you would report and why.
 
 ---
 
-## Before the next session
-
-- ISLR ch. 8 (tree-based methods) before Session 7.
-
----
-
-[<- Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md) | [Session 07: Trees, Forests, and Gradient Boosting ->](../07-pca-and-factor-analysis/README.md)
+[<- [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md)](../05-ridge-lasso-elastic-net/README.md) | [[Session 07: Principal Component and Factor Analyses](../07-pca-and-factor-analysis/README.md) ->](../07-pca-and-factor-analysis/README.md)

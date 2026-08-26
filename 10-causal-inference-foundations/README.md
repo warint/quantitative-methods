@@ -1,6 +1,6 @@
-# Session 10 — Causal Machine Learning: Double/Debiased ML and Heterogeneous Effects
+# Session 10 — Causal Inference I: Counterfactuals, Randomisation, Matching
 
-> **You have a superb predictive model. Why can you still not use it to choose a policy?**
+> **Did the policy do anything, or were the groups different to begin with?**
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-10-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S10-Lecture.qmd`](01-lecture/MATH60033A-S10-Lecture.qmd).
@@ -11,23 +11,22 @@ Quantitative Methods in International Business · duration 3h00
 
 ## Theme of the second half
 
-> ### Did the policy do anything, or did we just measure the countries that were already ahead?
+> ### Can your project support a causal claim at all?
 
 All ten groups attack this question from their own angle, then report in two minutes each.
 See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of analysis and data.
 
 ---
 
-
 ## Learning objectives
 
 By the end of this session you should be able to:
 
-- State the potential-outcomes framework and the identifying assumptions for conditional ignorability.
-- Explain why naively plugging an ML estimate of the nuisance function into a treatment-effect regression fails.
-- Derive the Neyman-orthogonal score for the partially linear model and show why it is insensitive to first-stage error.
-- Explain cross-fitting and why it removes the overfitting bias term.
-- Estimate an average treatment effect with DML and explore heterogeneity with a causal forest.
+- State the **fundamental problem of causal inference**
+- Explain why **randomisation** solves it, and what it costs
+- Estimate a **propensity score** and use it to match treated to control units
+- Check **overlap** and **balance**, and say what to do when they fail
+- Report an **ATT**, and state the assumption it rests on
 
 ---
 
@@ -35,40 +34,33 @@ By the end of this session you should be able to:
 
 | Phase | When | What | Where |
 |---|---|---|---|
-| **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
+| **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
+| **First half** (~90 min) | In class | Lecture: potential outcomes, randomisation, propensity scores, matching | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
-The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
-a working environment; the practice session assumes you arrive with the data already downloaded.
+The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
+practice assumes you arrive with the data loaded.
 
 ---
 
 ## Data for this session
 
-**401(k) eligibility and financial wealth (the DML canonical example), or the NSW/LaLonde job-training data**
+**The spine's documented treatment, with a known effect to recover** — one line to load it:
 
-Source: Available via the `doubleml` Python package; LaLonde via `causaldata`
-URL: https://docs.doubleml.org/stable/examples/py_double_ml_pension.html
+```python
+import qmib
+data = qmib.load("core")
+```
 
-Download instructions: [`data/README.md`](data/README.md)
+See [`data/README.md`](data/README.md) and your group's
+[data dictionary](../data/spine/dictionaries/).
 
 ---
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` with your from-scratch DML implementation, the
-estimator comparison table (naive / OLS / DML with three learners / package), the split-sensitivity
-plot, the heterogeneity projection, and a 500-word memo whose *first* paragraph is the
-identification argument and whose last sentence states what would change your conclusion.
+In `02-practice/submissions/group-XX/`: a matched comparison on your own data: the naive difference, the overlap check, the balance table, the matched estimate, and the paragraph defending conditional ignorability — that paragraph carries the marks.
 
 ---
 
-## Before the next session
-
-- Mitchell et al. (2019), 'Model Cards for Model Reporting', before Session 11.
-- Bring a draft of your final-project analysis to Session 11 - the practice is a workshop on it.
-
----
-
-[<- Session 09: Unsupervised Learning II: Clustering, Embeddings, and Text as Data](../09-structural-equation-modelling/README.md) | [Session 11: Forecasting, Distribution Shift, and Model Governance ->](../11-causal-inference-did/README.md)
+[<- [Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md)](../09-structural-equation-modelling/README.md) | [[Session 11: Causal Inference II: Difference-in-Differences](../11-causal-inference-did/README.md) ->](../11-causal-inference-did/README.md)

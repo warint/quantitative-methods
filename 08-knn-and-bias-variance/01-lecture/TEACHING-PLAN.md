@@ -1,18 +1,23 @@
 # Session 08 — teaching plan (first half, 90 min)
 
-# Unsupervised Learning I: PCA, the SVD, and Factor Models in Macroeconomics
+# K-Nearest Neighbours and the Bias–Variance Trade-off
 
-> **Instructor page.** The student-facing derivations are in
-> [`README.md`](README.md); this is how to deliver them.
+> **Instructor page.** The student-facing companion is [`README.md`](README.md); the deck is
+> [`MATH60033A-S08-Lecture.qmd`](MATH60033A-S08-Lecture.qmd).
 
 lecture 90 min · practice follows on
-*How many independent things are we actually measuring?*
+*Flexible, or just unstable?*
 
 ---
 
 ## Opening
 
-List a dozen macro series on the board — industrial production, new orders, capacity utilisation, employment, hours, shipments. Ask: *"how many distinct things are being measured here?"* Nobody says twelve.
+Put the session question on the board and let them attempt an answer before any method appears:
+
+> **Flexible, or just unstable?**
+
+Then the pre-session paper: ask what they underlined, and why. Two minutes, three students. It
+establishes that the reading is load-bearing rather than decorative.
 
 ---
 
@@ -20,59 +25,42 @@ List a dozen macro series on the board — industrial production, new orders, ca
 
 | Minutes | |
 |---|---|
-| **0–06** | The hook. Note that standardisation is not optional and PCA is a rotation, not a selection. |
-| **06–26** | PCA as variance maximisation. Lagrangian, first-order condition, $\hat\Sigma v = \phi v$ — so the answer must be an eigenvector. |
-| **26–44** | Via the SVD. Loadings $V$, scores $UD$, variance ratios. **Then the callback worth the whole session:** ridge shrank along this same basis; PCA truncates exactly the directions ridge damps. Eckart–Young. |
-| **44–68** | The approximate factor model. $X_{it} = \lambda_i^\top F_t + e_{it}$, consistency as **both** $N, T \to \infty$, and the condition $\sqrt T / N \to 0$ under which estimated factors can be treated as known. **Make the contrast explicit:** in Session 05 more predictors added variance; here more measurements of one latent object average noise away. |
-| **68–80** | How many factors: scree, cumulative variance, Bai–Ng $IC_{p1..3}$, Ahn–Horenstein. Report all and say when they disagree. |
-| **80–90** | Diffusion-index forecasting, and the rule they will break: factors must be re-estimated at each forecast origin. |
+| **0–10** | The question, and the paper they read. Establish what is at stake. |
+| **10–35** | Bias--Variance Trade-off — build it from intuition before notation. |
+| **35–60** | Classification — derive it, then run it in Python on the session dataset. |
+| **60–80** | The Bayes Classifier — read the output in units, out loud. |
+| **80–90** | What the method does **not** license. Hand off to the practice. |
 
 ---
 
-## Worked example — do this live
+## Run the code live
 
-Eigendecompose $\begin{pmatrix}2&1\\1&2\end{pmatrix}$ by hand: eigenvalues 3 and 1, eigenvectors $(1,1)/\sqrt2$ and $(1,-1)/\sqrt2$. 75% of variance on the first component. Thirty seconds, and PCA stops being magic.
-
-> Working an example on the board is not a break from the derivation; it is what converts the
-> derivation into something students can use under pressure. Do it slowly enough that they copy it.
+Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
+the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
+error appear and be read is worth more than a slide saying errors happen.
 
 ---
 
 ## Put this to the room
 
-*"Why does adding more noisy series HELP factor estimation, when in Session 05 it hurt the regression?"* This is the best question of the semester. Make them work for it.
+*"What would have to be true of your own data for this method to apply — and is it?"*
+
+Do not accept "it probably is". Push until someone names the specific column and the specific
+assumption.
 
 ---
 
 ## Misconception to pre-empt
 
-> That factors are identified. They are identified only up to rotation, so 'Factor 1 is the business cycle' is an interpretation, never an estimate. Require the self-critique in the practice session.
-
-Say it explicitly, early, and once more at the end. Misconceptions that go unnamed in the lecture
-reappear in the deliverable.
+Running KNN on unstandardised predictors. Say it explicitly, early, and once more at the end. Misconceptions that go
+unnamed in the lecture reappear in the deliverable.
 
 ---
 
 ## Leave on the board for the practice
 
-The rotation-indeterminacy statement and the Bai–Ng criterion.
+The method's core expression, and the one diagnostic that tells you it has failed.
 
 ---
 
-## If you are running short
-
-Compress Eckart–Young to the statement. The $N, T$ asymptotics contrast with Session 05 is the intellectual core.
-
----
-
-## Then hand over
-
-The second half is the groups' own. Remind them:
-
-- the presenter is **drawn at random** when their group is called — `python scripts/assess.py draw --session 8`
-- the report is **one slide, three sentences**, and sentence three is the one that earns the slot
-- **every member has pushed** before they leave the room
-
----
-
-[Student notes](README.md) · [Session 08](../README.md) · [Practice](../02-practice/README.md)
+[Student companion](README.md) · [Practice brief](../02-practice/README.md)

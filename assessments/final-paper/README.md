@@ -156,7 +156,7 @@ a proposed alternative is welcome and often better.
 | **B** Work & skills | task-based exposure; classification | Labour, education, gender gaps | Which occupational or educational transitions predict women's labour force participation? |
 | **C** AI adoption | penalised regression; stability selection | Mobile money, internet and firm digitalisation | Of the many candidate correlates of mobile money adoption, which few are robustly selected? |
 | **D** Trade & dependence | concentration measures; clustering | Intra-African trade and import dependence | How concentrated is dependence on non-African suppliers in essential goods, and is it falling? |
-| **E** Policy language | text as data; validity | African policy, media or open-ended survey text | Can an attention index built from national policy text be validated against outcomes? |
+| **E** Policy language | measurement and validity | African policy, media or open-ended survey text | Can an attention index built from national policy text be validated against outcomes? |
 
 **Whatever you choose, the question must satisfy four tests.**
 

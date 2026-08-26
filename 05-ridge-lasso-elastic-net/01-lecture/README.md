@@ -97,7 +97,7 @@ Two conventions:
 
 **Inference warning.** Standard errors reported after lasso selection are not valid, because
 selection used the same data. Naive post-selection $p$-values are badly anti-conservative. This
-motivates the debiased methods of Session 10.
+motivates the design-based methods of Sessions 10 and 11.
 
 ---
 

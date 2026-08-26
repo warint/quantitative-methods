@@ -1,18 +1,23 @@
 # Session 09 — teaching plan (first half, 90 min)
 
-# Unsupervised Learning II: Clustering, Embeddings, and Text as Data
+# Structural Equation Modelling
 
-> **Instructor page.** The student-facing derivations are in
-> [`README.md`](README.md); this is how to deliver them.
+> **Instructor page.** The student-facing companion is [`README.md`](README.md); the deck is
+> [`MATH60033A-S09-Lecture.qmd`](MATH60033A-S09-Lecture.qmd).
 
 lecture 90 min · practice follows on
-*Do European countries fall into types — and does the language of policy track them?*
+*Can you measure something you cannot observe?*
 
 ---
 
 ## Opening
 
-Run k-means with $k=4$ on 200 draws from a uniform square, projected live. Four tight, convincing clusters. Ask what they mean. **Nothing.** Every clustering algorithm returns clusters, including on noise.
+Put the session question on the board and let them attempt an answer before any method appears:
+
+> **Can you measure something you cannot observe?**
+
+Then the pre-session paper: ask what they underlined, and why. Two minutes, three students. It
+establishes that the reading is load-bearing rather than decorative.
 
 ---
 
@@ -20,60 +25,42 @@ Run k-means with $k=4$ on 200 draws from a uniform square, projected live. Four 
 
 | Minutes | |
 |---|---|
-| **0–07** | The hook. Establish that the burden of proof is entirely on the analyst. |
-| **07–27** | k-means objective and Lloyd's algorithm. Show each step is optimal given the other, hence monotone decrease, hence convergence — to a **local** minimum. k-means++. |
-| **27–40** | What the Euclidean objective assumes. Draw the Voronoi tessellation and note that convex, spherical, similarly-sized clusters are *forced* by the algorithm, not discovered. Alternatives when that is wrong. |
-| **40–50** | Hierarchical clustering and the linkage table. Ward as the k-means criterion in agglomerative form. |
-| **50–65** | Choosing $k$: elbow, silhouette, gap statistic. Stress that the gap statistic can return $k=1$, which is why it is worth the extra effort. |
-| **65–82** | Text. TF-IDF and the fact that it is the $p \gg n$ setting of Session 05, so penalised regression is the natural supervised tool on top. Embeddings and cosine similarity. Dictionary methods and why transparency often wins. |
-| **82–90** | **Validity.** The four criteria. This is what the practice is graded on. |
+| **0–10** | The question, and the paper they read. Establish what is at stake. |
+| **10–35** | Part I: SEM Basics — build it from intuition before notation. |
+| **35–60** | What is SEM? — derive it, then run it in Python on the session dataset. |
+| **60–80** | Why use SEM? — read the output in units, out loud. |
+| **80–90** | What the method does **not** license. Hand off to the practice. |
 
 ---
 
-## Worked example — do this live
+## Run the code live
 
-Compute one silhouette by hand: a point with $a_i = 1.2$ to its own cluster and $b_i = 2.0$ to the nearest other gives $s_i = 0.4$. Then show a point with $a_i = 2.0$, $b_i = 1.2$ giving $-0.4$ — probably misassigned.
-
-> Working an example on the board is not a break from the derivation; it is what converts the
-> derivation into something students can use under pressure. Do it slowly enough that they copy it.
+Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
+the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
+error appear and be read is worth more than a slide saying errors happen.
 
 ---
 
 ## Put this to the room
 
-*"What would count as evidence that a text-derived index measures what it claims?"* Do not accept 'it correlates with something'. Push to face validity — actually reading the documents.
+*"What would have to be true of your own data for this method to apply — and is it?"*
+
+Do not accept "it probably is". Push until someone names the specific column and the specific
+assumption.
 
 ---
 
 ## Misconception to pre-empt
 
-> That clustering discovers structure. It imposes a structure and reports how well the data tolerate it. The permuted-data comparison in the practice session exists to make this visceral.
-
-Say it explicitly, early, and once more at the end. Misconceptions that go unnamed in the lecture
-reappear in the deliverable.
+Reporting fit indices without saying which threshold you applied. Say it explicitly, early, and once more at the end. Misconceptions that go
+unnamed in the lecture reappear in the deliverable.
 
 ---
 
 ## Leave on the board for the practice
 
-The four validity criteria and the Voronoi picture.
+The method's core expression, and the one diagnostic that tells you it has failed.
 
 ---
 
-## If you are running short
-
-Compress hierarchical linkage to the table. Never cut the validity section — it is the graded part.
-
----
-
-## Then hand over
-
-The second half is the groups' own. Remind them:
-
-- the presenter is **drawn at random** when their group is called — `python scripts/assess.py draw --session 9`
-- the report is **one slide, three sentences**, and sentence three is the one that earns the slot
-- **every member has pushed** before they leave the room
-
----
-
-[Student notes](README.md) · [Session 09](../README.md) · [Practice](../02-practice/README.md)
+[Student companion](README.md) · [Practice brief](../02-practice/README.md)

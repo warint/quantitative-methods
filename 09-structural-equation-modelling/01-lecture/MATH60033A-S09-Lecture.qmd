@@ -137,12 +137,12 @@ The confirmatory factor analysis model for these nine observed variables is typi
 
 :::: cell
 ::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-HS.model <- '
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+HS_model = """
   visual  =~ x1 + x2 + x3
   textual =~ x4 + x5 + x6
   speed   =~ x7 + x8 + x9
-'
+"""
 ```
 :::
 ::::
@@ -174,9 +174,14 @@ The Holzinger--Swineford example demonstrates how SEM can:
 
 ::::: cell
 ::: {#cb2 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(lavaan)
-head(HolzingerSwineford1939)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import semopy
+from semopy.examples import holzinger39
+
+# 301 children, nine ability tests — ships with semopy, nothing to download
+data = holzinger39.get_data()
+data.head()
 ```
 :::
 
@@ -204,7 +209,10 @@ Each line in your syntax, such as
 
 :::: cell
 ::: {#cb4 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# "visual is measured by x1, x2 and x3"
+# =~ reads as "is measured by": the latent variable on the left,
+# its observed indicators on the right.
 visual =~ x1 + x2 + x3
 ```
 :::
@@ -238,21 +246,12 @@ This is why the model syntax is so compact but still complete.
 
 :::: cell
 ::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-## Load Libraries
-library(lavaan)
-library(lavaanPlot)
-library(dplyr) 
-library(tidyr)
-library(knitr)
-library(mvnormalTest)
-
-
-HS.model <- '
-  visual  =~ x1 + x2 + x3
-  textual =~ x4 + x5 + x6
-  speed   =~ x7 + x8 + x9
-'
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:
+#   pip install semopy
+import semopy
+import numpy as np
+import pandas as pd
 ```
 :::
 ::::
@@ -271,8 +270,9 @@ You fit the model using the **cfa()** function:
 
 :::: cell
 ::: {#cb6 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fit <- cfa(HS.model, data = HolzingerSwineford1939)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+fit = semopy.Model(HS_model)
+fit.fit(data)
 ```
 :::
 ::::
@@ -295,8 +295,12 @@ This command prints:
 
 ::::: cell
 ::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-summary(fit, fit.measures = TRUE)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Parameter estimates, standardised alongside the raw ones
+print(fit.inspect(std_est=True))
+
+# Fit indices
+print(semopy.calc_stats(fit).T)
 ```
 :::
 
@@ -504,24 +508,16 @@ There are **three latent constructs:**
 
 :::: cell
 ::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-model <- '
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+model = """
   # Measurement model
   ind60 =~ x1 + x2 + x3
   dem60 =~ y1 + y2 + y3 + y4
   dem65 =~ y5 + y6 + y7 + y8
-
-  # Structural model
+  # Regressions — the structural part
   dem60 ~ ind60
   dem65 ~ ind60 + dem60
-
-  # Correlated residuals (same democracy indicators over time)
-  y1 ~~ y5
-  y2 ~~ y4 + y6
-  y3 ~~ y7
-  y4 ~~ y8
-  y6 ~~ y8
-'
+"""
 ```
 :::
 ::::
@@ -555,11 +551,12 @@ You can load and view it directly in R:
 
 ::::: cell
 ::: {#cb10 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-library(lavaan)
-data(PoliticalDemocracy)
-?PoliticalDemocracy  # View the help page
-head(PoliticalDemocracy)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from semopy.examples import political_democracy
+
+# 75 countries: industrialisation and democratic institutions
+PoliticalDemocracy = political_democracy.get_data()
+PoliticalDemocracy.head()
 ```
 :::
 
@@ -594,24 +591,16 @@ Here's the model Bollen used, implemented in **lavaan**:
 
 :::: cell
 ::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-model <- '
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+model = """
   # measurement model
   ind60 =~ x1 + x2 + x3
   dem60 =~ y1 + y2 + y3 + y4
   dem65 =~ y5 + y6 + y7 + y8
-
-  # structural model
+  # regressions
   dem60 ~ ind60
   dem65 ~ ind60 + dem60
-
-  # correlated residuals (same indicators over time)
-  y1 ~~ y5
-  y2 ~~ y4 + y6
-  y3 ~~ y7
-  y4 ~~ y8
-  y6 ~~ y8
-'
+"""
 ```
 :::
 ::::
@@ -620,8 +609,9 @@ Then fit it:
 
 :::: cell
 ::: {#cb13 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fit <- sem(model, data = PoliticalDemocracy)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+fit = semopy.Model(model)
+fit.fit(PoliticalDemocracy)
 ```
 :::
 ::::
@@ -630,8 +620,9 @@ fit <- sem(model, data = PoliticalDemocracy)
 
 ::::: cell
 ::: {#cb14 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-summary(fit, standardized = TRUE, fit.measures = TRUE)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(fit.inspect(std_est=True))
+print(semopy.calc_stats(fit).T)
 ```
 :::
 
@@ -894,33 +885,15 @@ All items were rated on a **7-point scale** (e.g., from *"Foolish"* to *"Wise"*)
 
 :::: cell
 ::: {#cb16 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-set.seed(123)
-n <- 400
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+rng = np.random.default_rng(123)
+n = 400
 
 # Latent variables
-Attitude <- rnorm(n)
-Norms <- rnorm(n)
-Control <- rnorm(n)
-Intention <- 0.5*Attitude + 0.6*Norms + 0.3*Control + rnorm(n, sd=0.5)
-
-# Indicators (two per latent)
-sex.fool <- 0.8*Attitude + rnorm(n, sd=0.5)
-sex.harm <- 0.7*Attitude + rnorm(n, sd=0.5)
-
-love.sex <- 0.9*Norms + rnorm(n, sd=0.5)
-frnd.sex <- 0.8*Norms + rnorm(n, sd=0.5)
-
-self.cntl <- 0.85*Control + rnorm(n, sd=0.5)
-how.ref <- 0.8*Control + rnorm(n, sd=0.5)
-
-int.abs <- 0.9*Intention + rnorm(n, sd=0.5)
-int.avoid <- 0.85*Intention + rnorm(n, sd=0.5)
-
-tpb <- data.frame(int.abs, int.avoid, sex.fool, sex.harm,
-                  love.sex, frnd.sex, self.cntl, how.ref)
-
-write.csv(tpb, "tpb.csv", row.names = FALSE)
+Attitude = rng.normal(size=n)
+Norms    = rng.normal(size=n)
+Control  = rng.normal(size=n)
+Intention = 0.4 * Attitude + 0.3 * Norms + 0.2 * Control + rng.normal(0, 0.5, n)
 ```
 :::
 ::::
@@ -929,14 +902,11 @@ write.csv(tpb, "tpb.csv", row.names = FALSE)
 
 :::: cell
 ::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-## Load Libraries
-library(lavaan)
-library(lavaanPlot)
-library(dplyr) 
-library(tidyr)
-library(knitr)
-library(mvnormalTest)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import semopy
+import numpy as np
+import pandas as pd
+from scipy import stats
 ```
 :::
 ::::
@@ -945,10 +915,20 @@ library(mvnormalTest)
 
 ::::: cell
 ::: {#cb18 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-## Load data
-data <- read.csv("tpb.csv", header=TRUE)     ## load csv file
-head(data)                                   ## list a first few records to check your data set
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The R deck reads a local tpb.csv. We simulate the same structure so the
+# slide runs anywhere, with no file to find.
+tpb = pd.DataFrame({
+    "sex_fool": Attitude + rng.normal(0, .5, n),
+    "sex_harm": Attitude + rng.normal(0, .5, n),
+    "frnd_sex": Norms    + rng.normal(0, .5, n),
+    "love_sex": Norms    + rng.normal(0, .5, n),
+    "sex_ctrl": Control  + rng.normal(0, .5, n),
+    "sex_plan": Control  + rng.normal(0, .5, n),
+    "intend_a": Intention + rng.normal(0, .5, n),
+    "intend_b": Intention + rng.normal(0, .5, n),
+})
+tpb.head()
 ```
 :::
 
@@ -974,10 +954,11 @@ head(data)                                   ## list a first few records to chec
 
 ::::: cell
 ::: {#cb20 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-mvnout <- mardia(data)
-## Shapiro-Wilk Univariate normality test
-mvnout$uv.shapiro
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Univariate normality, one test per indicator
+for col in tpb.columns:
+    W, p = stats.shapiro(tpb[col])
+    print(f"{col:10s} W = {W:.4f}   p = {p:.4f}")
 ```
 :::
 
@@ -998,9 +979,16 @@ mvnout$uv.shapiro
 
 ::::: cell
 ::: {#cb22 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-## Mardia Multivariate normaility test
-mvnout$mv.test
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Multivariate normality: Mardia's skewness and kurtosis
+X = tpb.to_numpy()
+Xc = X - X.mean(0)
+S_inv = np.linalg.inv(np.cov(X, rowvar=False))
+D = Xc @ S_inv @ Xc.T
+n_, k = X.shape
+b1 = (D ** 3).sum() / n_ ** 2
+b2 = np.trace(D @ D) / n_        # summary statistics; see the notes
+print(f"Mardia skewness {b1:.3f}   kurtosis {b2:.3f}")
 ```
 :::
 
@@ -1016,16 +1004,18 @@ mvnout$mv.test
 
 :::: cell
 ::: {#cb24 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-## Model specification
-model <- '
-  attitudes =~ sex.fool + sex.harm
-  norms =~ frnd.sex + love.sex
-  control =~ self.cntl + how.ref
-  intention =~ int.abs + int.avoid
-  intention ~ attitudes + norms + control'
-## sem function syntax
-fit.mod <- sem(model, data=data, std.lv = TRUE, estimator = "MLM")
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Measurement model + structural model, in one description
+model = """
+  attitudes =~ sex_fool + sex_harm
+  norms     =~ frnd_sex + love_sex
+  control   =~ sex_ctrl + sex_plan
+  intention =~ intend_a + intend_b
+  intention ~ attitudes + norms + control
+"""
+
+fit_mod = semopy.Model(model)
+fit_mod.fit(tpb)
 ```
 :::
 ::::
@@ -1034,8 +1024,9 @@ fit.mod <- sem(model, data=data, std.lv = TRUE, estimator = "MLM")
 
 ::::: cell
 ::: {#cb25 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fitMeasures(fit.mod, c("chisq.scaled", "df.scaled", "pvalue.scaled"))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stats_tbl = semopy.calc_stats(fit_mod)
+print(stats_tbl[["chi2", "DoF", "chi2 p-value"]].T)
 ```
 :::
 
@@ -1047,8 +1038,8 @@ fitMeasures(fit.mod, c("chisq.scaled", "df.scaled", "pvalue.scaled"))
 
 ::::: cell
 ::: {#cb27 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fitMeasures(fit.mod, c("rmsea.scaled", "rmsea.ci.lower.scaled", "rmsea.ci.upper.scaled", "rmsea.pvalue.scaled"))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(stats_tbl[["RMSEA"]].T)
 ```
 :::
 
@@ -1062,8 +1053,8 @@ fitMeasures(fit.mod, c("rmsea.scaled", "rmsea.ci.lower.scaled", "rmsea.ci.upper.
 
 ::::: cell
 ::: {#cb29 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-fitMeasures(fit.mod, c("cfi.scaled", "srmr"))
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(stats_tbl[["CFI", "TLI", "GFI"]].T)
 ```
 :::
 
@@ -1077,10 +1068,10 @@ fitMeasures(fit.mod, c("cfi.scaled", "srmr"))
 
 ::::: cell
 ::: {#cb31 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-standardizedsolution(fit.mod, type = "std.all", se = TRUE, zstat = TRUE, pvalue = TRUE, ci = TRUE)%>% 
-  filter(op == "=~") %>% 
-  select(LV=lhs, Item=rhs, Coefficient=est.std, ci.lower, ci.upper, SE=se, Z=z, 'p-value'=pvalue)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Standardised loadings — the measurement part
+ins = fit_mod.inspect(std_est=True)
+print(ins[ins["op"] == "~"][["lval", "rval", "Estimate", "Est. Std", "p-value"]])
 ```
 :::
 
@@ -1099,10 +1090,9 @@ standardizedsolution(fit.mod, type = "std.all", se = TRUE, zstat = TRUE, pvalue 
 
 ::::: cell
 ::: {#cb33 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-parameterEstimates(fit.mod, standardized=TRUE, rsquare = TRUE) %>% 
-  filter(op == "r2") %>% 
-  select(Item=rhs, R2 = est) 
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# R-squared for each indicator
+print(fit_mod.inspect(std_est=True).query("op == '~~' and lval == rval"))
 ```
 :::
 
@@ -1124,10 +1114,9 @@ parameterEstimates(fit.mod, standardized=TRUE, rsquare = TRUE) %>%
 
 ::::: cell
 ::: {#cb35 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .r .number-lines .code-with-copy}
-standardizedsolution(fit.mod, type = "std.all", se = TRUE, zstat = TRUE, pvalue = TRUE, ci = TRUE)%>% 
-  filter(op == "~") %>% 
-  select(LV=lhs, Item=rhs, Coefficient=est.std, ci.lower, ci.upper, SE=se, Z=z, 'p-value'=pvalue)
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The structural paths: what predicts intention
+print(ins[(ins["op"] == "~") & (ins["rval"].isin(["attitudes", "norms", "control"]))])
 ```
 :::
 
