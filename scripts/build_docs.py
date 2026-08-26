@@ -79,6 +79,12 @@ STYLE = """
   footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line);
     color:var(--muted); font-size:.88rem; }
   a.plain { color:var(--accent); }
+  .row { margin-bottom:.6rem; }
+  .row .card { margin-bottom:.25rem; }
+  .also { display:block; font-size:.82rem; color:var(--muted);
+    padding-left:3.2rem; }
+  .also a { color:var(--muted); text-decoration:underline; }
+  .also a:hover { color:var(--accent); }
 """
 
 
@@ -96,29 +102,48 @@ def main():
         n_data += 1
     print(f"published {n_data} spine files to docs/data/")
 
-    pattern = str(ROOT / "[0-9][0-9]-*/01-lecture/MATH60033A-S*-Lecture.html")
-    decks = sorted(glob.glob(pattern))
+    decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:
         raise SystemExit("No rendered decks found — run scripts/render_session_lectures.sh first.")
 
+    KINDS = {"Pre-Session": "pre-session", "Lecture": "lecture", "Practice": "practice"}
+    extra = {}          # session -> {kind: filename}
     rows = []
     for src in decks:
-        num = re.search(r"-S(\d\d)-", os.path.basename(src)).group(1)
+        base = os.path.basename(src)
+        num = re.search(r"-S(\d\d)", base).group(1)
         if num not in SESSIONS:
             print(f"  skipping unknown session {num}")
             continue
-        dest = DOCS / f"session-{num}-lecture.html"
+        kind = next((v for k, v in KINDS.items() if k in base), None)
+        if kind is None:
+            continue
+        dest = DOCS / f"session-{num}-{kind}.html"
         shutil.copy2(src, dest)
-        title, blurb = SESSIONS[num]
-        rows.append((num, title, blurb, dest.name, dest.stat().st_size))
+        if kind == "lecture":
+            title, blurb = SESSIONS[num]
+            rows.append((num, title, blurb, dest.name, dest.stat().st_size))
+        else:
+            extra.setdefault(num, {})[kind] = dest.name
+
+    def companions(num):
+        got = extra.get(num, {})
+        if not got:
+            return ""
+        bits = " · ".join(f'<a href="{v}">{k.replace("-", " ")}</a>'
+                          for k, v in sorted(got.items()))
+        return f'<span class="also">also: {bits}</span>'
 
     cards = "\n".join(
-        f'''    <a class="card" href="{fn}">
-      <span class="num">{num}</span>
-      <span class="body"><strong>{html.escape(title)}</strong>'''
+        f'''    <div class="row">
+      <a class="card" href="{fn}">
+        <span class="num">{num}</span>
+        <span class="body"><strong>{html.escape(title)}</strong>'''
         f'''<span class="blurb">{html.escape(blurb)}</span></span>
-      <span class="go">Open →</span>
-    </a>'''
+        <span class="go">Open →</span>
+      </a>
+      {companions(num)}
+    </div>'''
         for num, title, blurb, fn, _ in rows)
 
     page = f"""<!doctype html>

@@ -8,7 +8,7 @@
 
 | File | What it is | When you use it |
 |---|---|---|
-| **`MATH60033A-S01-Pre-Session.pptx`** | **The walkthrough.** Every install step, in order, with checks. | Work through it at your desk. **Start here.** |
+| **`MATH60033A-S01-Pre-Session.qmd`** | **The walkthrough.** Every install step, in order, with checks. | Work through it at your desk. **Start here.** |
 | `setup-vscodium-local-llm.md` | A one-page checklist and the troubleshooting table | When something breaks, or to confirm you missed nothing |
 | `reading-europe-2031.md` | The critical apparatus for the scenario | *After* reading the scenario itself |
 | `verify_environment.py` | The script that proves your setup works | Last — bring its output to class |
@@ -21,7 +21,10 @@
 
 ## 1. Build your workstation — 60–90 min
 
-Open **`MATH60033A-S01-Pre-Session.pptx`** and follow it. In order:
+> **[Open the setup slides](https://warint.github.io/quantitative-methods/session-01-pre-session.html)** ·
+> source: [`MATH60033A-S01-Pre-Session.qmd`](MATH60033A-S01-Pre-Session.qmd)
+
+Work through the deck. In order:
 
 1. VS Codium
 2. Extensions

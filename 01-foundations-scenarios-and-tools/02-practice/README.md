@@ -5,6 +5,9 @@
 > **This is not a practice.** There is no code, no deliverable and no submission folder. It is a
 > discussion, and the only preparation is having read the scenario.
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-01-practice.html)** ·
+> source: [`MATH60033A-S01-Practice.qmd`](MATH60033A-S01-Practice.qmd)
+
 ---
 
 ## What you should have read

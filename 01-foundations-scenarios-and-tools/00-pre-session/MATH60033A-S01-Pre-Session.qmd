@@ -1,0 +1,245 @@
+---
+title: "Session 1: Building your workstation"
+subtitle: "VS Codium, Python, Ollama, Qwen, and an agent in your terminal"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+course-session: "01"
+format:
+  revealjs:
+    theme: [default, ../../slides/economist.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    footer: "MATH60033A · Session 01 pre-session · Thierry Warin, PhD · HEC Montréal"
+---
+
+# Before the first class {background-color="#E3120B" style="color:#F7F4ED"}
+
+::: {style="margin-top: 1.0em; color:#F7F4ED"}
+### Work through this at your desk. Budget 60–90 minutes.
+:::
+
+## What you are building
+
+Six pieces, in this order. Each one checks before you move on.
+
+| | | |
+|---|---|---|
+| **1** | VS Codium | the editor — Visual Studio Code without the telemetry |
+| **2** | Extensions | Python support, from the Open VSX registry |
+| **3** | The course materials | this repository, on your Desktop |
+| **4** | Python | and a project environment, `.venv` |
+| **5** | Ollama + Qwen 2.5 Coder | a language model that runs **on your machine** |
+| **6** | aider | the agent you talk to in the terminal |
+
+::: {.warn}
+**Session 1 does not include installation time.** Arriving without a working environment means you
+cannot take part in either half.
+:::
+
+## Where do I type this?
+
+::: {.check}
+**Always the VS Codium terminal.** Not the macOS Terminal, not PowerShell.
+:::
+
+Open it with **Terminal → New Terminal**, or ``Ctrl + ` ``.
+
+::: {.step}
+Why it matters: the VS Codium terminal starts inside your project folder and sees your `.venv`. The
+system terminal does neither, which is the single most common reason a command that "should work"
+does not.
+:::
+
+## Why local, and why these tools
+
+::: {.tight}
+- **VS Codium** — the same editor as VS Code, without telemetry, from a registry you can inspect
+- **Ollama + Qwen** — the model runs on your laptop. No API key, no subscription, no data leaving
+  the machine
+- **aider** — an agent in the terminal, so you can see every command it proposes before it runs
+:::
+
+::: {.check}
+Data sovereignty is a real constraint in the work you will do. A workflow that only functions when
+you can send the data to somebody else's server is not a workflow you can take to a client.
+:::
+
+## Step 1 — VS Codium
+
+Download from **[vscodium.com](https://vscodium.com)** and install it as you would any application.
+
+::: {.step}
+You will live in two panels: the **editor** on the right, and the **terminal** below it. Everything
+in this course happens in one or the other.
+:::
+
+## Step 2 — Extensions
+
+VS Codium uses the **Open VSX** registry, not Microsoft's Marketplace.
+
+::: {.tight}
+- **Python** (ms-python) — syntax, linting, the interpreter picker
+- **Jupyter** — for running cells inside a file
+- **Quarto** — to preview the lecture decks
+:::
+
+::: {.muted}
+Extensions view: **View → Extensions**, or `Cmd/Ctrl + Shift + X`.
+:::
+
+## Step 3 — The course materials
+
+Download the repository as a ZIP, unzip it **directly on your Desktop**, and keep the folder name:
+
+```text
+Desktop/quantitative-methods
+```
+
+Then **File → Open Folder** and choose it.
+
+::: {.warn}
+Every command in this course assumes you are in that folder. If your paths differ, nothing else on
+these slides will work.
+:::
+
+::: {.muted}
+In Session 02 you will do this properly, with git and your own group branch.
+:::
+
+## Step 4 — Python and the environment
+
+```bash
+python3 --version          # 3.11 or newer
+python3 -m venv .venv
+```
+
+Activate it — macOS and Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+Then install everything the course needs:
+
+```bash
+pip install -r requirements.txt
+```
+
+::: {.check}
+Your prompt should now begin with `(.venv)`. If it does not, the activation did not take.
+:::
+
+## Step 5 — Ollama and Qwen
+
+Install **[ollama.com](https://ollama.com)**, then in the VS Codium terminal:
+
+```bash
+ollama --version
+ollama pull qwen2.5-coder
+ollama pull nomic-embed-text
+```
+
+::: {.muted}
+The second model is used in Session 09 for text embeddings. Pull it now while you have bandwidth.
+:::
+
+Check it answers:
+
+```bash
+ollama run qwen2.5-coder "In one sentence, what is a residual?"
+```
+
+::: {.check}
+**Turn your wifi off and run that again.** It should still answer. That is the point of running it
+locally.
+:::
+
+## Step 6 — The agent in your terminal
+
+```bash
+pip install aider-chat
+```
+
+Point it at Ollama, and give the model a real context window:
+
+```bash
+export OLLAMA_API_BASE=http://127.0.0.1:11434
+export OLLAMA_CONTEXT_LENGTH=8192
+
+aider --model ollama/qwen2.5-coder
+```
+
+::: {.step}
+Ask it for something real — *"open `qmib.py` and explain what `load` does when the file is already
+cached"* — and read what it proposes **before** you accept it.
+:::
+
+## Two terminals is the working pattern
+
+::: {.tight}
+- **One** running `aider`, where you talk to the model
+- **One** running `python`, where you check what it told you
+:::
+
+::: {.warn}
+That second terminal is not optional. The rule for every deliverable in this course is that you
+document one thing the model got wrong — and you cannot do that without checking.
+:::
+
+## The last check
+
+```bash
+python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
+```
+
+::: {.check}
+Five checks should pass. **Bring the output to class.**
+:::
+
+If one fails, the script prints what to do. If you are still stuck, ask Qwen — which is itself a
+test of whether your setup works.
+
+## Also before class
+
+::: {.tight}
+1. **Read *Europe 2031*** — [europe2031.ai](https://europe2031.ai) — and annotate as you go
+2. **Read the critical brief** — [`reading-europe-2031.md`](reading-europe-2031.md)
+3. **Bring** one annotated page, one unresolved question, and your self-check answers
+:::
+
+::: {.get}
+Optional, and worth it: [`the-supervised-learning-problem.md`](the-supervised-learning-problem.md)
+gives you the vocabulary Session 02 uses. Not required, not examinable.
+:::
+
+## Ready?
+
+| | |
+|---|---|
+| Repository on the Desktop | ☐ |
+| `.venv` created and selected | ☐ |
+| `requirements.txt` installed | ☐ |
+| Qwen answers with the wifi off | ☐ |
+| `verify_environment.py` passes | ☐ |
+| *Europe 2031* read and annotated | ☐ |
+| One question ready | ☐ |
+
+::: {.muted}
+Full checklist and troubleshooting: [`setup-vscodium-local-llm.md`](setup-vscodium-local-llm.md)
+:::

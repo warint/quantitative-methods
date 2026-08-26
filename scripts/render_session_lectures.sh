@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Render the transferred MATH60033A lecture decks to self-contained RevealJS.
+# Render every MATH60033A deck — pre-session, lecture and practice — to
+# self-contained RevealJS.
 # Usage: scripts/render_session_lectures.sh [two-digit session filter]
 
 set -euo pipefail
@@ -31,11 +32,11 @@ while IFS= read -r deck; do
         failed=$((failed + 1))
         echo "  FAILED: $deck" >&2
     fi
-done < <(find . -path './[0-9][0-9]-*/01-lecture/MATH60033A-S*-Lecture.qmd' -print | sort)
+done < <(find . -path './[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.qmd' -print | sort)
 
-printf '\n%d lecture deck(s) rendered, %d failed.\n' "$found" "$failed"
+printf '\n%d deck(s) rendered, %d failed.\n' "$found" "$failed"
 if [ "$found" -eq 0 ]; then
-    echo "No matching lecture decks found." >&2
+    echo "No matching decks found." >&2
     exit 1
 fi
 
