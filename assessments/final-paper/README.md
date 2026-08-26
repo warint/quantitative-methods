@@ -1,6 +1,6 @@
 # Final exam — research paper and oral
 
-**40% of the final grade** · paper in teams of three, English, academic format · **oral examined
+**40% of the final grade** · **written alone**, English, academic format · **oral examined
 individually, 15 minutes per student**
 
 > You will write for a reader who exists, who is not your professor, and who will use what you
@@ -8,7 +8,7 @@ individually, 15 minutes per student**
 
 | Component | Weight | Form |
 |---|---|---|
-| **Research paper** | 25 | Teams of three |
+| **Research paper** | 25 | Individual |
 | **Oral examination** | 15 | Individual, 15 minutes |
 
 ---
@@ -44,7 +44,7 @@ health service delivery. They work in R and Markdown, and present their findings
 **Your commission is to write a methods paper that an SDAfrique student in her second or third year
 could pick up and use.**
 
-Concretely: take the method your group spent eleven weeks mastering on European data, carry it to a
+Concretely: take the method your group spent eleven weeks mastering on European data, carry it — **on your own** — to a
 problem in Africa, and write the paper that makes the method usable by someone who works in R, on a
 modest machine, with limited bandwidth, on a problem she chose herself.
 
@@ -263,23 +263,26 @@ It must contain:
 
 ## 8. Authorship and LLM statements
 
-### CRediT authorship statement
+### Authorship and acknowledgements
 
-Required, exactly as a journal would require it. Use the
-[CRediT taxonomy](https://credit.niso.org/) and name each author against each role they held:
+The paper is **single-authored**. You are responsible for every sentence in it.
 
-> **Author contributions.** *Conceptualization:* A.B., C.D. — *Data curation:* C.D. —
-> *Formal analysis:* A.B., E.F. — *Methodology:* A.B. — *Software:* E.F., C.D. —
-> *Validation:* E.F. — *Visualization:* C.D. — *Writing – original draft:* A.B., C.D. —
-> *Writing – review & editing:* all authors.
+That does not mean you worked in a vacuum, and the paper should say so. Use the
+[CRediT taxonomy](https://credit.niso.org/) to record what you did, and an acknowledgement to
+record what others contributed without meeting the bar for authorship:
 
-All three authors must be named in at least three roles, and all three must appear under
-*Writing – review & editing*. The statement is signed by all authors and is binding: if questioned,
-each author must be able to speak to the roles listed against their name.
+> **Author contributions.** *Conceptualization, Methodology, Formal analysis, Software,
+> Visualization, Writing – original draft, Writing – review & editing:* A.B.
+>
+> **Acknowledgements.** The author thanks [SDAfrique student] for framing the problem and for
+> feedback on an earlier draft, and [group members] for discussion of the method during the
+> practice sessions. Responsibility for the content is the author's alone.
 
-> **Why.** Because this is how authorship actually works in academic publishing, and because a
-> statement each of you has signed is a more honest instrument than a peer rating collected in
-> confidence afterwards. It puts the attribution in the paper, where it belongs.
+> **Why acknowledge rather than co-author.** Authorship implies responsibility for the whole. Your
+> SDAfrique contact set the problem and will use the result, but did not write the paper and cannot
+> answer for its statistics — that is what an acknowledgement is for. Getting this distinction right
+> is itself part of the training: misplaced authorship is one of the most common integrity failures
+> in academic publishing.
 
 ### LLM use statement
 
@@ -312,7 +315,7 @@ Out of 100, for the 25 points the paper carries.
 | **Method** | 20 | Derived, not cited. Assumptions stated. Choice of method defended against the obvious alternative |
 | **Results and honest evaluation** | 20 | Uncertainty reported; named benchmark; evaluation design matching the data's dependence structure; no leakage |
 | **Implementation note** | 15 | An SDAfrique student could follow it in R without contacting you. The MRE runs |
-| **Writing, references, statements** | 10 | Clear prose; consistent references; CRediT and LLM statements complete and specific |
+| **Writing, references, statements** | 10 | Clear prose; consistent references; authorship, acknowledgements and LLM statements complete and specific |
 
 ### What earns credit that students do not expect
 

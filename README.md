@@ -241,7 +241,7 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 | **Participation** | **10%** | individual, continuous; optional QMIB Lab App reports may be submitted for credit |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet — after Session 06 |
 | **Team work** | **20%** | groups of three, presented Session 12 |
-| **Final exam** | **40%** | research paper in teams of three (25) + individual oral, 15 min (15) |
+| **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
 
 Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
 memo 3 · presentation and defence 3. The 90-minute group practices are **formative** — commented on,

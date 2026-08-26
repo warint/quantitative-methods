@@ -60,7 +60,7 @@ Team work is **20% of the course grade**. Within it:
 
 The [individual multiplier](../GROUP-ASSESSMENT.md) applies to these 20 points only — never to the
 midterm or the final exam, which are assessed separately. The **final exam (40%)** — a research
-paper in teams of three plus a 15-minute individual oral — is a distinct deliverable with its own
+an individual paper plus a 15-minute individual oral — is a distinct deliverable with its own
 brief:
 [`assessments/final-paper/`](../assessments/final-paper/README.md).
 

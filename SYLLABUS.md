@@ -158,7 +158,7 @@ Sessions 10 and 11 confront the question the first nine sessions cannot answer �
 | **Participation** | **10%** | individual, continuous | every session |
 | **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | after Session 06 |
 | **Team work** | **20%** | groups of three (practice groups) | Session 12 |
-| **Final exam** | **40%** | paper in teams of three (25) + individual oral, 15 min (15) | end of term |
+| **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | end of term |
 
 **Team work, 20%**, broken down:
 
@@ -244,15 +244,28 @@ Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/
 
 ### Team work — 20%, Session 12
 
-Eleven weeks of work on your project, presented and defended. Three parts: a **model governance
-file** that a competent stranger could act on — what the model is for, what it must not be used
-for, how it was validated, and where it is weakest — a **reproducible analysis** that runs from a
-clean clone, and a **presentation** to a decision-maker who will not read your code.
+Eleven weeks of work with a **real client**: a student in the
+[Science des Données au Féminin en Afrique](https://sdafrique.org) programme who has identified a
+problem in her own community and will use what you produce.
+
+**The work is the relationship as much as the analysis.** You are in contact with her from Session
+04 onward: you agree what the question is, you send a draft rather than only a final version, and
+you hand back something she can act on without you in the room.
+
+Three parts: a **model governance file** that she could act on — what the model is for, what it
+must not be used for, how it was validated, and where it is weakest — a **reproducible analysis**
+that runs from a clean clone on modest hardware, and a **presentation** to a decision-maker who
+will not read your code.
 
 > **Why the governance file carries the most weight.** Because it is where every other skill in the
-> course has to be written down for someone else. Its Limitations section is the hardest paragraph
-> you will write this semester — it requires you to know precisely where your own work is weak, and
-> to say so in a document that will outlive the conversation.
+> course has to be written down for someone else — someone in another country, working in another
+> language, on another machine. Its Limitations section is the hardest paragraph you will write this
+> semester.
+>
+> **Why a real client rather than a simulated one.** Because a client who will actually use the
+> result asks different questions from a marker, and cannot be satisfied with a number that is
+> technically correct and practically useless. She is your client, **not your co-author** — see
+> [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md).
 >
 > **Why reproducibility is graded, not assumed.** A result that does not reproduce from a clean
 > clone is not a result. This is not pedantry: it is the difference between a finding and an
@@ -265,9 +278,14 @@ Details and rubric: [Session 12](12-group-presentations/README.md).
 
 ### Final exam — 40%: research paper (25) + individual oral (15)
 
-An academic paper that takes the method your group mastered on European data and **transfers it to a
-problem in francophone Africa**, written for a specific reader: a student in the
-[Science des Données au Féminin en Afrique](https://sdafrique.org) programme who works in R.
+An academic paper, **written alone**, that takes the method your group mastered on European data
+and **transfers it to a problem in francophone Africa**, written for a specific reader: a student
+in the [Science des Données au Féminin en Afrique](https://sdafrique.org) programme who works in R.
+
+> **Why this one is individual.** Everything else in the second half of the course is collective:
+> the practice sessions, the project, the presentation. This is the piece where you answer for your
+> own judgement, with nobody to divide the work with. It is the closest thing in the course to what
+> you will be asked to do in a job.
 
 > **Why transfer rather than extension.** Re-running your method on more of the same data proves
 > you can run code. Carrying it to a new context — new data, new constraints, new reader — is the
@@ -289,9 +307,13 @@ problem in francophone Africa**, written for a specific reader: a student in the
 on the methods used in your own paper — derive the estimator, state the assumptions, say what would
 break the result — and half on the course, Sessions 02 to 11.
 
-> **Why an oral on top of a paper.** A paper written by three people cannot tell me which of the
-> three understood it. Fifteen minutes can. This is also why the individual multiplier does not
-> apply to the final: the oral measures the individual directly, so there is nothing to correct.
+> **Why an oral on top of a paper.** A paper can be written slowly, with help, over weeks. Fifteen
+> minutes without documents establishes what you can reconstruct and defend in real time — which is
+> a different thing, and the thing an employer or a referee will actually test. The two together
+> measure preparation and command; either alone measures half of it.
+>
+> This is also why the individual multiplier does not apply to the final: both components already
+> measure you individually, so there is nothing to correct.
 
 Full brief: [`assessments/final-paper/`](assessments/final-paper/README.md).
 
