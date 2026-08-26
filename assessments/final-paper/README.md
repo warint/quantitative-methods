@@ -209,11 +209,11 @@ All open, all reachable from most of Africa.
 
 ## 6. Structure of the paper
 
-**6,000 words ± 1,000**, excluding references, tables and appendices. Standard academic format.
+**8,000 words**, excluding references, tables and appendices. Standard academic format, single-authored.
 
 | § | Section | Guidance |
 |---|---|---|
-| — | **Title, authors, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
+| — | **Title, author, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
 | 1 | **Introduction** | The question, why it matters, what you contribute, and — in the last paragraph — what you found. Do not withhold the finding for suspense; this is not a novel. |
 | 2 | **Literature** | Fifteen+ sources. Organised by argument, not by author. It must end with the gap your paper addresses. |
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations. Include the descriptive table a referee will ask for. |
@@ -223,7 +223,7 @@ All open, all reachable from most of Africa.
 | 7 | **Implementation note for R users** | See §7. This is graded separately and heavily. |
 | 8 | **Conclusion** | What an SDAfrique team should take from this, and what they should not. |
 | — | **References** | Consistent style. APA or Chicago; choose one. |
-| — | **Statements** | CRediT authorship and LLM use. See §8. |
+| — | **Statements** | Authorship, acknowledgements and LLM use. See §8. |
 
 **Accompanying repository**, submitted with the paper: code, cached data, `README.md` with a
 one-command reproduction, seeds set, and the provenance file.

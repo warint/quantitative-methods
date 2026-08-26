@@ -315,7 +315,9 @@ break the result — and half on the course, Sessions 02 to 11.
 > This is also why the individual multiplier does not apply to the final: both components already
 > measure you individually, so there is nothing to correct.
 
-Full brief: [`assessments/final-paper/`](assessments/final-paper/README.md).
+**The shape of the paper.** **8,000 words**, excluding references and tables: a research
+question, a literature review, the data, the model, the results, and references. Full brief:
+[`assessments/final-paper/`](assessments/final-paper/README.md).
 
 ---
 
