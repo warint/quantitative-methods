@@ -79,6 +79,10 @@ STYLE = """
   footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line);
     color:var(--muted); font-size:.88rem; }
   a.plain { color:var(--accent); }
+  .card.book { border-color:var(--accent); background:rgba(28,115,197,.045);
+               margin-bottom:2.2rem; }
+  .card.book .num { font-size:1.15rem; }
+  .card.book strong { font-size:1.02rem; }
   .row { margin-bottom:.6rem; }
   .row .card { margin-bottom:.25rem; }
   .also { display:block; font-size:.82rem; color:var(--muted);
@@ -159,10 +163,22 @@ def main():
     <h1>Quantitative Methods in International Business</h1>
     <p class="sub">Lecture slides — MATH60033A</p>
     <p class="by">Thierry Warin, PhD · HEC Montréal</p>
+
+    <a class="card book" href="book/">
+      <span class="num">&#9776;</span>
+      <span class="body">
+        <strong>The course book</strong>
+        <span class="blurb">Twelve chapters as continuous prose — every method derived, then
+        run in Python on real data. Searchable across the whole course.</span>
+      </span>
+      <span class="go">Read &rarr;</span>
+    </a>
+
 {cards}
     <footer>
       Slides open in the browser; press <strong>F</strong> for full screen, <strong>S</strong> for
       speaker notes, <strong>Esc</strong> for the overview.<br>
+      The same material as a book: <a class="plain" href="book/">the course book</a>.<br>
       Course materials, notes and practice briefs:
       <a class="plain" href="{REPO_URL}">github.com/warint/quantitative-methods</a>
     </footer>
