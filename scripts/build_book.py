@@ -222,7 +222,7 @@ CHAPTER_LINKS = {
 def rewrite_links(text, num=None):
     def repl(m):
         label, target = m.group(1), m.group(2).strip()
-        if target.startswith(("http://", "https://", "#", "mailto:")):
+        if target.startswith(("http://", "https://", "#", "mailto:", "images/")):
             return m.group(0)
 
         base, _, frag = target.partition("#")
@@ -263,6 +263,67 @@ def fix_relative_paths(text):
     `book/` those resolve above the repository root.
     """
     return text.replace('"../../', '"../').replace("'../../", "'../")
+
+
+IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")
+
+
+def localise_assets(text, num, source_dir):
+    """Copy the figures a deck references into the book, and point at them.
+
+    The decks keep their figures beside themselves, in 01-lecture/economist-assets/
+    and 01-lecture/imported-assets/. Flattened into book/, those relative paths
+    resolve to nothing, and the link rewriter's fallback sent them to GitHub —
+    stripping the session directory on the way, and to /blob/ rather than /raw/,
+    which serves an HTML page rather than an image. Eighty-seven references
+    across seven chapters pointed at 404s.
+
+    A book should not be fetching its own illustrations over the network in any
+    case, so they are copied in. The destination name flattens the path
+    (`imported-assets/index_files/figure-revealjs/x.png` becomes one filename)
+    which also keeps the result clear of the `*_files/` ignore rule that would
+    otherwise stop the copies from ever being committed.
+    """
+    dest = BOOK / "images" / "decks"
+
+    def repl(m):
+        label, target = m.group(1), m.group(2).strip()
+        if target.startswith(("http://", "https://", "#", "data:")):
+            return m.group(0)
+        base = target.partition("#")[0]
+        if not base.lower().endswith(IMAGE_SUFFIXES):
+            return m.group(0)
+
+        src = (source_dir / base).resolve()
+        if not src.exists():
+            return m.group(0)
+
+        flat = f"session-{num}-" + re.sub(r"[^A-Za-z0-9._-]", "-", base.strip("./"))
+        dest.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest / flat)
+        return f"![{label}](images/decks/{flat})"
+
+    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", repl, text)
+
+    # The imported decks also carry raw <img src="..."> inside HTML blocks —
+    # pandoc left them there — and those need the same treatment.
+    def repl_tag(m):
+        rewritten = repl(_FakeMatch(m.group(0), "", m.group(1)))
+        if rewritten.startswith("!["):
+            return m.group(0).replace(m.group(1), rewritten.split("(", 1)[1].rstrip(")"))
+        return m.group(0)
+
+    return re.sub(r'<img[^>]*\ssrc="([^"]+)"', repl_tag, text)
+
+
+class _FakeMatch:
+    """Lets the markdown replacer above be reused for an <img> tag."""
+
+    def __init__(self, whole, label, target):
+        self._g = (whole, label, target)
+
+    def group(self, i):
+        return self._g[i]
 
 
 def normalise_deck(path):
@@ -410,7 +471,8 @@ Session 1 to here is examinable.
     # A chapter that has been written keeps the space for explanation instead.
     pre = d / "00-pre-session/README.md"
     if pre.exists() and not prose:
-        parts.append("## Before the session\n\n" + normalise_brief(pre, num, 2))
+        parts.append("## Before the session\n\n"
+                     + localise_assets(normalise_brief(pre, num, 2), num, pre.parent))
 
     if prose:
         parts.append(prose)
@@ -420,7 +482,7 @@ Session 1 to here is examinable.
         parts.append("## The lecture\n\n::: {.muted}\nDelivered from "
                      f"[the slides]({PAGES}session-{num}-lecture.html). "
                      "What follows is the same material as prose.\n:::\n\n"
-                     + rewrite_links(normalise_deck(deck), num))
+                     + rewrite_links(localise_assets(normalise_deck(deck), num, deck.parent), num))
     else:
         lec = d / "01-lecture/README.md"
         if lec.exists():
@@ -428,7 +490,8 @@ Session 1 to here is examinable.
 
     prac = d / "02-practice/README.md"
     if prac.exists():
-        parts.append("## In the practice\n\n" + normalise_brief(prac, num, 2))
+        parts.append("## In the practice\n\n"
+                     + localise_assets(normalise_brief(prac, num, 2), num, prac.parent))
 
     return "\n\n".join(parts) + "\n"
 

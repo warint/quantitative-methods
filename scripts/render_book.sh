@@ -53,6 +53,9 @@ fi
 echo "=== rendering to docs/book/"
 (cd book && quarto render)
 
+echo "=== checking every referenced asset exists"
+"$python_bin" scripts/check_book_assets.py
+
 cat <<'DONE'
 
 Book written to docs/book/.
