@@ -254,23 +254,20 @@ report counts because attempting it is the engagement being measured. It exists 
 gives you a private way to find out whether you actually followed the session, and it gives a route
 to full participation marks that does not depend on speaking in a room of thirty.
 
-**How the 10% is earned.** Against an **absolute, published bar** — never against each other:
+**How the 10% is earned.** By **sustained engagement across the term**, through any mix of the
+three routes above. There is no attendance count and no quota of interventions to hit: a student who
+speaks rarely but works the practice every week and submits lab reports has engaged, and is marked
+as having engaged.
 
-| | |
-|---|---|
-| Bar met | **10 / 10** |
-| Within one contribution of the bar | 7 / 10 |
-| Roughly half the bar | 5 / 10 |
-| Little or no recorded engagement | 0–3 / 10 |
+The one thing that is recorded against you is **failing to deliver the two-minute report when your
+group is drawn** — that is the clearest participation failure there is, because three other people
+prepared on the assumption you would.
 
-The bar is **a recorded contribution in at least six of the ten practice sessions** — from any of
-the three routes above — and no more than one failure to deliver the two-minute report when drawn.
-
-> **Why an absolute bar rather than a ranking.** Because a participation score that ranks students
+> **Why it is not a ranking.** Because a participation score that ranks students
 > against one another measures confidence and extraversion as much as engagement, and it makes
 > helping another group personally costly — the exact opposite of what the course design requires.
-> Everyone who clears the bar gets the full 10 for this component. (The curve described
-> above applies only to the final letter conversion, never to this score.)
+> Engagement is judged on its own terms, not against how much anyone else spoke. (The curve
+> described above applies only to the final letter conversion, never to this score.)
 
 If you contribute mainly in writing, within your group, or through the labs, say so — being quiet is
 not being absent, and the record should reflect what you actually did. A student who delivered every

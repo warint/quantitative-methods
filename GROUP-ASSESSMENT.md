@@ -302,10 +302,12 @@ Same tick count. Completely different students. The verdict column knows the dif
 
 ### What students are told
 
-> Participation is worth 10%, earned against an absolute published bar. It is not attendance. After each practice session, the instructor records the
-> students who contributed something that helped the room — a question that changed how another
-> group saw their result, a connection between angles, a challenge that landed. To pass you need a
-> recorded contribution in at least **N** of the ten practice sessions.
+> Participation is worth 10% and it is not attendance. It is **active engagement**, and three
+> routes count: contributing in the room — a question that changed how another group saw their
+> result, a connection between angles, a challenge that landed — working the ninety minutes of the
+> practice with your group, and completing an optional QMIB Lab App knowledge check at home.
+> What is marked is sustained engagement across the term, judged on its own terms and never as a
+> ranking against each other.
 >
 > If you are drawn to present, deliver. Failing to deliver when drawn is the clearest participation
 > failure there is.

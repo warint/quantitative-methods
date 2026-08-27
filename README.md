@@ -281,10 +281,9 @@ memo 3 · presentation and defence 3.
 
 **Participation (10) is active engagement, earned by any of three routes:** contributing in the
 room, engaging in the 90-minute practice, or submitting an optional QMIB Lab App report after a
-session. The bar is a recorded contribution in **six of the ten practices**, and clearing it earns
-the full 10 — it is scored against that published bar, never against other students. Note that the
-practices themselves are **formative**: the analysis is commented on, not marked. What is recorded
-is that you engaged with it.
+session. What is marked is **sustained engagement across the term**, not a count of interventions,
+and never a ranking against other students. Note that the practices themselves are **formative**:
+the analysis is commented on, not marked. What is recorded is that you engaged with it.
 
 **Letter grades are curved**, with the class **median at B+**. The curve applies once, at the
 conversion from the mark out of 100 to a letter — never inside a single component.
