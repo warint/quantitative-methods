@@ -332,23 +332,50 @@ def plate(num):
 
 
 def chapter_prose(d, num):
-    """The authored chapter, if one has been written for this session.
+    """The authored chapter for this session, and what it declares about itself.
 
     book/ is generated, so nothing written into book/session-NN.qmd survives a
     rebuild. Long-form prose therefore lives beside the deck and the brief, in
     the session's own directory, and is assembled in like everything else.
+
+    An optional front matter block lets the prose override what surrounds it:
+
+        title:       replaces the session title for this chapter
+        standalone:  true — the chapter is the prose and nothing else, with no
+                     deck transcript, practice brief or session facts appended
+
+    Returns (declared, text); (dict(), None) when no chapter has been written.
     """
     path = d / "chapter.md"
     if not path.exists():
-        return None
-    text = strip_frontmatter(path.read_text(encoding="utf-8"))
-    return text.replace("{{portrait}}", plate(num)).strip()
+        return {}, None
+
+    raw = path.read_text(encoding="utf-8")
+    declared = {}
+    m = re.match(r"^---\n(.*?)\n---\n", raw, re.S)
+    if m:
+        for line in m.group(1).splitlines():
+            key, sep, value = line.partition(":")
+            if sep:
+                declared[key.strip()] = value.strip().strip("\"'")
+
+    text = strip_frontmatter(raw)
+    return declared, text.replace("{{portrait}}", plate(num)).strip()
 
 
 def chapter(num, s):
     d = ROOT / s["dir"]
+    declared, prose = chapter_prose(d, num)
+    title = declared.get("title") or s["title"]
+
+    # A standalone chapter is prose and nothing else: no deck transcript, no
+    # practice brief, no session facts. Chapter 1 is written this way — it is
+    # an introduction to the book, not a record of the first class.
+    if declared.get("standalone") == "true":
+        return f'---\ntitle: "{title}"\n---\n\n{prose}\n'
+
     parts = [f"""---
-title: "{s['title']}"
+title: "{title}"
 ---
 
 ::: {{.chapter-meta}}
@@ -381,8 +408,6 @@ Session 1 to here is examinable.
     # these four things — is instruction for the week, not part of a chapter.
     # It stays in the deck and the session README, where a student looks for it.
     # A chapter that has been written keeps the space for explanation instead.
-    prose = chapter_prose(d, num)
-
     pre = d / "00-pre-session/README.md"
     if pre.exists() and not prose:
         parts.append("## Before the session\n\n" + normalise_brief(pre, num, 2))
@@ -428,7 +453,6 @@ def preface():
                         f"**Chapters 1–{int(MIDTERM_AFTER)}** |")
     table = "\n".join(rows)
     return f"""---
-title: "Foreword"
 number-sections: false
 ---
 
@@ -607,13 +631,11 @@ book:
     right: "Built from the course repository"
   chapters:
     - index.qmd
-    - part: "Getting started"
-      chapters:
-        - setup.qmd
     - part: "The twelve chapters"
       chapters:
 {chapters}
   appendices:
+    - setup.qmd
     - data-api.qmd
     - replications.qmd
 

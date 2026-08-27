@@ -1,5 +1,6 @@
 ---
 title: "Introduction"
+standalone: true
 ---
 
 ## The question underneath every method
