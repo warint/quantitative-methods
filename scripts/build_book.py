@@ -464,6 +464,14 @@ title: "{title}"
     parts.append("| | |\n|---|---|\n" +
                  "\n".join(f"| **{k}** | {v} |" for k, v in facts) + "\n")
 
+    # A written chapter places its own portrait with {{portrait}}. One assembled
+    # from the deck has nowhere to say so, so the plate goes here — after the
+    # session facts, before the material starts.
+    if not (prose and "{{portrait}}" in prose):
+        mounted = plate(num)
+        if mounted:
+            parts.append(mounted)
+
     if num == MIDTERM_AFTER:
         md = datetime.date.fromisoformat(MIDTERM_DATE)
         parts.append(f"""::: {{.warn}}

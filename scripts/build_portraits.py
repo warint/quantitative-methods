@@ -23,6 +23,7 @@ Attribution for every plate is written to assets/portraits/credits.json and
 rendered into the caption by scripts/build_book.py.
 """
 
+import html as htmllib
 import io
 import json
 import re
@@ -48,6 +49,12 @@ FREE = ("public domain", "pd", "cc0")
 # for sheets that hold more than one sitter. Boilly drew Legendre and Fourier on
 # one leaf, so Legendre is the left half of it.
 ROSTER = {
+    "02": [
+        ("nightingale", "Florence Nightingale", "1820–1910",
+         "File:Florence Nightingale by Henry Hering, 1858.jpg",
+         "Made the case with a chart rather than a table, and changed policy with it.",
+         None),
+    ],
     "03": [
         ("gauss", "Carl Friedrich Gauss", "1777–1855",
          "File:Carl Friedrich Gauss 1840 by Jensen.jpg",
@@ -59,7 +66,46 @@ ROSTER = {
          "likeness of him known to exist.",
          (0.02, 0.02, 0.50, 0.98)),
     ],
+    "04": [
+        ("verhulst", "Pierre François Verhulst", "1804–1849",
+         "File:P.F. Verhulst, PA02415.jpg",
+         "Named the logistic curve in 1845, modelling how populations stop growing.",
+         None),
+    ],
+    "07": [
+        ("pearson", "Karl Pearson", "1857–1936",
+         "File:Portrait of Karl Pearson.jpg",
+         "Principal components, 1901 — lines and planes of closest fit.",
+         None),
+    ],
+    "10": [
+        ("hume", "David Hume", "1711–1776",
+         "File:David Hume Ramsay.jpg",
+         "Asked what entitles us to say one thing causes another, and did not "
+         "find a satisfying answer. Neither has anyone since.",
+         None),
+    ],
+    "11": [
+        ("snow", "John Snow", "1813–1858",
+         "File:John Snow.jpg",
+         "Mapped cholera deaths in 1854 and read a natural experiment off the "
+         "water supply — before the statistics existed to justify it.",
+         None),
+    ],
 }
+
+# Chapters with no plate, and why. Every one of these was looked for:
+#   01  an introduction, not a method — nobody in particular to show
+#   05  ridge and lasso are 1970 and 1996; Tikhonov, Hoerl, Kennard and
+#       Tibshirani are all still in copyright
+#   06  Udny Yule is the right figure for spurious regression across groups;
+#       Commons has no portrait of him
+#   08  k-nearest neighbours is Fix and Hodges, 1951 — no free likeness
+#   09  Spearman is the right figure and his photograph is CC BY-SA 4.0, not
+#       public domain, so fetch() refuses it
+#   12  a presentation chapter; no historical claim to attach a face to
+#
+# The rule is not negotiable: a real portrait, freely licensed, or none.
 
 # The plate. 4:5 at 900px wide, then framed.
 W, H = 900, 1125
@@ -85,7 +131,10 @@ def fetch(title):
     meta = info["extmetadata"]
 
     def field(key):
-        return re.sub(r"<[^>]+>", "", str(meta.get(key, {}).get("value", ""))).strip()
+        # Commons stores these as HTML; entities survive tag-stripping and
+        # would print as "Elliott &amp; Fry" in a caption.
+        raw = re.sub(r"<[^>]+>", "", str(meta.get(key, {}).get("value", "")))
+        return htmllib.unescape(raw).strip()
 
     licence = field("LicenseShortName")
     if not any(f in licence.lower() for f in FREE):
@@ -97,11 +146,22 @@ def fetch(title):
 
     img = requests.get(info["url"], headers={"User-Agent": UA}, timeout=120)
     img.raise_for_status()
+
+    # Catalogue annotations belong in a catalogue, not in a caption:
+    # "Flameng, Léopold (French painter and engraver, 1831-1911) (artist)".
+    artist = re.sub(r"\s*\([^)]*\)", "", field("Artist")).strip(" ,;") or "unknown"
+
+    # Some records carry the file's upload timestamp in the date field. A
+    # portrait was not painted at 14:33:54.
+    date = re.sub(r"date QS:.*", "", field("DateTimeOriginal")).strip()
+    if re.match(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}", date):
+        date = ""
+
     return {
         "commons": page["title"],
         "licence": licence,
-        "artist": field("Artist") or "unknown",
-        "date": re.sub(r"date QS:.*", "", field("DateTimeOriginal")).strip() or "undated",
+        "artist": artist,
+        "date": date or "undated",
         "descriptionurl": info.get("descriptionurl", ""),
     }, img.content
 
