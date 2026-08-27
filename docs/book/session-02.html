@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Session 2 — Exploratory Data Analysis, and the First Model – Quantitative Methods in International Business</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./session-03.html" rel="next">
+<link href="./session-01.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-87cceeb0dc72897ec58809a022325911.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-35a1a3f4182a89951995139d29d3b534.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-02.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Quantitative Methods in International Business</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/warint/quantitative-methods" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">The course</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Setting up your tools</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">The twelve sessions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Session 1 — Foundations: Scenarios, Tools, and the Syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-02.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Session 3 — Regression: Adequacy, Validity, and Robustness</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Session 5 — Regularisation: Ridge, Lasso, and the Elastic Net</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Session 6 — Regression: Advanced Considerations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Session 7 — Principal Component and Factor Analyses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Session 9 — Structural Equation Modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Session 10 — Causal Inference I: Counterfactuals, Randomisation, Matching</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Session 11 — Causal Inference II: Difference-in-Differences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Session 12 — Final Group Presentations</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">The data API</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./replications.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Replication packages</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mandates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">The ten research mandates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./group-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">How group work is assessed</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#before-the-session" id="toc-before-the-session" class="nav-link active" data-scroll-target="#before-the-session"><span class="header-section-number">5.1</span> Before the session</a>
+  <ul class="collapse">
+  <li><a href="#session-2-only-set-up-git-and-your-group-repository" id="toc-session-2-only-set-up-git-and-your-group-repository" class="nav-link" data-scroll-target="#session-2-only-set-up-git-and-your-group-repository"><span class="header-section-number">5.1.1</span> ⚠️ Session 2 only — set up git and your group repository</a></li>
+  <li><a href="#step-1-reading" id="toc-step-1-reading" class="nav-link" data-scroll-target="#step-1-reading"><span class="header-section-number">5.1.2</span> Step 1 — Reading</a></li>
+  <li><a href="#step-2-concepts-to-review" id="toc-step-2-concepts-to-review" class="nav-link" data-scroll-target="#step-2-concepts-to-review"><span class="header-section-number">5.1.3</span> Step 2 — Concepts to review</a></li>
+  <li><a href="#step-3-get-both-datasets" id="toc-step-3-get-both-datasets" class="nav-link" data-scroll-target="#step-3-get-both-datasets"><span class="header-section-number">5.1.4</span> Step 3 — Get both datasets</a></li>
+  <li><a href="#step-4-self-check" id="toc-step-4-self-check" class="nav-link" data-scroll-target="#step-4-self-check"><span class="header-section-number">5.1.5</span> Step 4 — Self-check</a></li>
+  <li><a href="#using-your-local-llm-on-the-preparation" id="toc-using-your-local-llm-on-the-preparation" class="nav-link" data-scroll-target="#using-your-local-llm-on-the-preparation"><span class="header-section-number">5.1.6</span> Using your local LLM on the preparation</a></li>
+  </ul></li>
+  <li><a href="#the-lecture" id="toc-the-lecture" class="nav-link" data-scroll-target="#the-lecture"><span class="header-section-number">5.2</span> The lecture</a>
+  <ul class="collapse">
+  <li><a href="#class-organization" id="toc-class-organization" class="nav-link" data-scroll-target="#class-organization"><span class="header-section-number">5.2.1</span> Class Organization</a></li>
+  <li><a href="#quote-of-the-day" id="toc-quote-of-the-day" class="nav-link" data-scroll-target="#quote-of-the-day"><span class="header-section-number">5.2.2</span> Quote of the day</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">5.2.3</span> Introduction</a></li>
+  <li><a href="#introduction---differences-between-statistics-and-statistical-learning" id="toc-introduction---differences-between-statistics-and-statistical-learning" class="nav-link" data-scroll-target="#introduction---differences-between-statistics-and-statistical-learning"><span class="header-section-number">5.2.4</span> Introduction - Differences between statistics and statistical learning?</a></li>
+  <li><a href="#measuring-the-center" id="toc-measuring-the-center" class="nav-link" data-scroll-target="#measuring-the-center"><span class="header-section-number">5.2.5</span> Measuring the center</a></li>
+  <li><a href="#measuring-the-center-1" id="toc-measuring-the-center-1" class="nav-link" data-scroll-target="#measuring-the-center-1"><span class="header-section-number">5.2.6</span> Measuring the center</a></li>
+  <li><a href="#the-basics-the-sample-mean" id="toc-the-basics-the-sample-mean" class="nav-link" data-scroll-target="#the-basics-the-sample-mean"><span class="header-section-number">5.2.7</span> The basics: the sample mean</a></li>
+  <li><a href="#the-basics-the-sample-mean-1" id="toc-the-basics-the-sample-mean-1" class="nav-link" data-scroll-target="#the-basics-the-sample-mean-1"><span class="header-section-number">5.2.8</span> The basics: the sample mean</a></li>
+  <li><a href="#the-basics-the-sample-median" id="toc-the-basics-the-sample-median" class="nav-link" data-scroll-target="#the-basics-the-sample-median"><span class="header-section-number">5.2.9</span> The basics: the sample median</a></li>
+  <li><a href="#extensions" id="toc-extensions" class="nav-link" data-scroll-target="#extensions"><span class="header-section-number">5.2.10</span> Extensions</a></li>
+  <li><a href="#measuring-the-spread" id="toc-measuring-the-spread" class="nav-link" data-scroll-target="#measuring-the-spread"><span class="header-section-number">5.2.11</span> Measuring the spread</a></li>
+  <li><a href="#measures-of-spread" id="toc-measures-of-spread" class="nav-link" data-scroll-target="#measures-of-spread"><span class="header-section-number">5.2.12</span> Measures of spread</a></li>
+  <li><a href="#measures-of-spread-1" id="toc-measures-of-spread-1" class="nav-link" data-scroll-target="#measures-of-spread-1"><span class="header-section-number">5.2.13</span> Measures of spread</a></li>
+  <li><a href="#measuring-the-shape" id="toc-measuring-the-shape" class="nav-link" data-scroll-target="#measuring-the-shape"><span class="header-section-number">5.2.14</span> Measuring the shape</a></li>
+  <li><a href="#measuring-the-shape-1" id="toc-measuring-the-shape-1" class="nav-link" data-scroll-target="#measuring-the-shape-1"><span class="header-section-number">5.2.15</span> Measuring the shape</a></li>
+  <li><a href="#measuring-the-shape-2" id="toc-measuring-the-shape-2" class="nav-link" data-scroll-target="#measuring-the-shape-2"><span class="header-section-number">5.2.16</span> Measuring the shape</a></li>
+  <li><a href="#measuring-the-shape-3" id="toc-measuring-the-shape-3" class="nav-link" data-scroll-target="#measuring-the-shape-3"><span class="header-section-number">5.2.17</span> Measuring the shape</a></li>
+  <li><a href="#measures-of-shape-sample-skewness" id="toc-measures-of-shape-sample-skewness" class="nav-link" data-scroll-target="#measures-of-shape-sample-skewness"><span class="header-section-number">5.2.18</span> Measures of shape: sample skewness</a></li>
+  <li><a href="#measures-of-shape" id="toc-measures-of-shape" class="nav-link" data-scroll-target="#measures-of-shape"><span class="header-section-number">5.2.19</span> Measures of shape</a></li>
+  </ul></li>
+  <li><a href="#from-data-to-models" id="toc-from-data-to-models" class="nav-link" data-scroll-target="#from-data-to-models"><span class="header-section-number">5.3</span> From data to models</a>
+  <ul class="collapse">
+  <li><a href="#the-question" id="toc-the-question" class="nav-link" data-scroll-target="#the-question"><span class="header-section-number">5.3.1</span> The question</a></li>
+  <li><a href="#always-look-first" id="toc-always-look-first" class="nav-link" data-scroll-target="#always-look-first"><span class="header-section-number">5.3.2</span> Always look first</a></li>
+  <li><a href="#the-model-and-what-each-piece-is" id="toc-the-model-and-what-each-piece-is" class="nav-link" data-scroll-target="#the-model-and-what-each-piece-is"><span class="header-section-number">5.3.3</span> The model, and what each piece is</a></li>
+  <li><a href="#choosing-the-line" id="toc-choosing-the-line" class="nav-link" data-scroll-target="#choosing-the-line"><span class="header-section-number">5.3.4</span> Choosing the line</a></li>
+  <li><a href="#three-lines-of-python" id="toc-three-lines-of-python" class="nav-link" data-scroll-target="#three-lines-of-python"><span class="header-section-number">5.3.5</span> Three lines of Python</a></li>
+  <li><a href="#the-slope-is-the-sentence-you-will-write" id="toc-the-slope-is-the-sentence-you-will-write" class="nav-link" data-scroll-target="#the-slope-is-the-sentence-you-will-write"><span class="header-section-number">5.3.6</span> The slope is the sentence you will write</a></li>
+  <li><a href="#fitted-values-and-residuals" id="toc-fitted-values-and-residuals" class="nav-link" data-scroll-target="#fitted-values-and-residuals"><span class="header-section-number">5.3.7</span> Fitted values and residuals</a></li>
+  <li><a href="#how-much-did-the-line-explain" id="toc-how-much-did-the-line-explain" class="nav-link" data-scroll-target="#how-much-did-the-line-explain"><span class="header-section-number">5.3.8</span> How much did the line explain?</a></li>
+  <li><a href="#two-predictors-what-controlling-for-means" id="toc-two-predictors-what-controlling-for-means" class="nav-link" data-scroll-target="#two-predictors-what-controlling-for-means"><span class="header-section-number">5.3.9</span> Two predictors: what “controlling for” means</a></li>
+  <li><a href="#correlation-is-not-causation" id="toc-correlation-is-not-causation" class="nav-link" data-scroll-target="#correlation-is-not-causation"><span class="header-section-number">5.3.10</span> Correlation is not causation</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5.3.11</span> Conclusion</a></li>
+  <li><a href="#conclusion-1" id="toc-conclusion-1" class="nav-link" data-scroll-target="#conclusion-1"><span class="header-section-number">5.3.12</span> Conclusion</a></li>
+  </ul></li>
+  <li><a href="#in-the-practice" id="toc-in-the-practice" class="nav-link" data-scroll-target="#in-the-practice"><span class="header-section-number">5.4</span> In the practice</a>
+  <ul class="collapse">
+  <li><a href="#profiling-a-variable-you-will-have-to-defend" id="toc-profiling-a-variable-you-will-have-to-defend" class="nav-link" data-scroll-target="#profiling-a-variable-you-will-have-to-defend"><span class="header-section-number">5.4.1</span> Profiling a variable you will have to defend</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-02.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-02.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="chapter-meta">
+<p>Wednesday 2 September 2026 · 15:30–18:30 · Décelles — Victoriaville</p>
+<p><a href="https://warint.github.io/quantitative-methods/session-02-lecture.html">Lecture slides</a> · <a href="https://warint.github.io/quantitative-methods/session-02-pre-session.html">Pre-session slides</a> · <a href="https://warint.github.io/quantitative-methods/session-02-practice.html">Practice slides</a></p>
+</div>
+<blockquote class="blockquote">
+<p><strong>Before you model anything, what does the data actually look like?</strong></p>
+</blockquote>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Theme of the practice</strong></td>
+<td>Which summary of your key variable would you defend in print?</td>
+</tr>
+<tr class="even">
+<td><strong>Reading</strong></td>
+<td>Fraiberger et al.&nbsp;(2021), <em>Media sentiment and international asset prices</em> · <a href="https://doi.org/10.1016/j.jinteco.2021.103526">article</a></td>
+</tr>
+<tr class="odd">
+<td><strong>Replication package</strong></td>
+<td><a href="https://doi.org/10.7910/DVN/QNKFJF">10.7910/DVN/QNKFJF</a></td>
+</tr>
+<tr class="even">
+<td><strong>Data</strong></td>
+<td><code>qmib.load("core")</code> — the course spine — thirty European countries, 2010–2024</td>
+</tr>
+</tbody>
+</table>
+<section id="before-the-session" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="before-the-session"><span class="header-section-number">5.1</span> Before the session</h2>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-02-pre-session.html">Open the pre-session slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S02-Pre-Session.qmd"><code>MATH60033A-S02-Pre-Session.qmd</code></a></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Complete <strong>all four steps</strong> before class. Expect 90–120 minutes, plus 45 for the git setup below.</p>
+</blockquote>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Before class</th>
+<th>Used in the practice for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>Read the paper</td>
+<td>reproducing one of its results</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>Get <strong>both</strong> datasets</td>
+<td>that, and profiling your own angle</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>Set up git and your group repository</td>
+<td>pushing your work, this session and every session after</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="session-2-only-set-up-git-and-your-group-repository" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="session-2-only-set-up-git-and-your-group-repository"><span class="header-section-number">5.1.1</span> ⚠️ Session 2 only — set up git and your group repository</h3>
+<p>Before the four steps, work through <strong><a href="./setup.html#git-and-github"><code>setup-git-and-github.md</code></a></strong>. Budget 45 minutes.</p>
+<p>From this session onward you are assessed as a group, and your commit history is one of the four records used to check that all three members did the work. That record only exists if git knows who you are.</p>
+<p>You must arrive with a private group repository that your teammates <strong>and the instructor</strong> can see, and with at least one commit pushed from your own machine.</p>
+<p>Slides: <a href="https://github.com/warint/quantitative-methods/blob/main/slides-github-and-teamwork.qmd"><code>slides-github-and-teamwork.qmd</code></a></p>
+<hr>
+</section>
+<section id="step-1-reading" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="step-1-reading"><span class="header-section-number">5.1.2</span> Step 1 — Reading</h3>
+<p><strong>Fraiberger et al.&nbsp;(2021), <em>Media sentiment and international asset prices</em></strong> <a href="https://doi.org/10.1016/j.jinteco.2021.103526">Read the article</a></p>
+<p>You reproduce one of its results in the first twenty minutes of the practice, so read it with that in mind.</p>
+<p>Read for the <strong>argument</strong>, not for coverage. Annotate four things:</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>The research question, in one sentence</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>How they build the sentiment measure</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>The strongest single piece of evidence</td>
+</tr>
+<tr class="even">
+<td><strong>4</strong></td>
+<td>One limitation you would raise as a referee</td>
+</tr>
+</tbody>
+</table>
+<p><em>Optional background:</em> <strong>ISLR ch.&nbsp;2</strong> — <a href="https://www.statlearning.com/" class="uri">https://www.statlearning.com/</a> — for the vocabulary Session 02 uses.</p>
+<hr>
+</section>
+<section id="step-2-concepts-to-review" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="step-2-concepts-to-review"><span class="header-section-number">5.1.3</span> Step 2 — Concepts to review</h3>
+<p>Refresh these before class; we will use them without re-deriving them.</p>
+<ul>
+<li><strong>Mean and median.</strong> The mean is the balance point; the median is the middle of the ordering.</li>
+<li><strong>Variance and standard deviation.</strong> <span class="math inline">\(s^2 = \frac{1}{n-1}\sum_i (x_i - \bar x)^2\)</span> — note the <span class="math inline">\(n-1\)</span>.</li>
+<li><strong>Quantiles.</strong> <span class="math inline">\(\tilde q_p\)</span> is the value below which about <span class="math inline">\(100p\%\)</span> of the data falls.</li>
+<li><strong>A straight line.</strong> <span class="math inline">\(y = \beta_0 + \beta_1 x\)</span>: what the intercept and the slope each mean.</li>
+</ul>
+<p>If any of these is unfamiliar, work through it with your local LLM <em>before</em> class, and bring your worked notes.</p>
+<hr>
+</section>
+<section id="step-3-get-both-datasets" class="level3" data-number="5.1.4">
+<h3 data-number="5.1.4" class="anchored" data-anchor-id="step-3-get-both-datasets"><span class="header-section-number">5.1.4</span> Step 3 — Get both datasets</h3>
+<p>The practice uses <strong>two</strong>, and both should be on your machine before you arrive.</p>
+<section id="a-the-papers-replication-package" class="level4" data-number="5.1.4.1">
+<h4 data-number="5.1.4.1" class="anchored" data-anchor-id="a-the-papers-replication-package"><span class="header-section-number">5.1.4.1</span> a) The paper’s replication package</h4>
+<p>This is what you reproduce in the first twenty minutes.</p>
+<p><strong>Harvard Dataverse: <a href="https://doi.org/10.7910/DVN/QNKFJF">10.7910/DVN/QNKFJF</a></strong></p>
+<p>Download once and unzip into <code>02-exploratory-data-analysis/data/replication/</code>. That folder is git-ignored, so nothing large is committed. Keep the authors’ own structure and README.</p>
+</section>
+<section id="b-the-course-data-for-your-own-angle" class="level4" data-number="5.1.4.2">
+<h4 data-number="5.1.4.2" class="anchored" data-anchor-id="b-the-course-data-for-your-own-angle"><span class="header-section-number">5.1.4.2</span> b) The course data, for your own angle</h4>
+<p>This is what you apply the method to in the second half. It is <strong>already cleaned and cached</strong> — one line, nothing to download.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Group</th>
+<th>Angle</th>
+<th>Your file</th>
+<th>Unit</th>
+<th>Columns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>G01</strong></td>
+<td>A</td>
+<td><code>angle_a_country.parquet</code></td>
+<td>country × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G01.md">dictionary</a></td>
+</tr>
+<tr class="even">
+<td><strong>G02</strong></td>
+<td>A</td>
+<td><code>angle_a_sector.parquet</code></td>
+<td>country × sector × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G02.md">dictionary</a></td>
+</tr>
+<tr class="odd">
+<td><strong>G03</strong></td>
+<td>B</td>
+<td><code>angle_b_occupation.parquet</code></td>
+<td>occupation × country × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G03.md">dictionary</a></td>
+</tr>
+<tr class="even">
+<td><strong>G04</strong></td>
+<td>B</td>
+<td><code>angle_b_sector.parquet</code></td>
+<td>sector × country × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G04.md">dictionary</a></td>
+</tr>
+<tr class="odd">
+<td><strong>G05</strong></td>
+<td>C</td>
+<td><code>angle_c_country.parquet</code></td>
+<td>country × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G05.md">dictionary</a></td>
+</tr>
+<tr class="even">
+<td><strong>G06</strong></td>
+<td>C</td>
+<td><code>angle_c_sector_size.parquet</code></td>
+<td>country × sector × size × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G06.md">dictionary</a></td>
+</tr>
+<tr class="odd">
+<td><strong>G07</strong></td>
+<td>D</td>
+<td><code>angle_d_partner.parquet</code></td>
+<td>reporter × partner × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G07.md">dictionary</a></td>
+</tr>
+<tr class="even">
+<td><strong>G08</strong></td>
+<td>D</td>
+<td><code>angle_d_product.parquet</code></td>
+<td>reporter × product × time</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G08.md">dictionary</a></td>
+</tr>
+<tr class="odd">
+<td><strong>G09</strong></td>
+<td>E</td>
+<td><code>angle_e_centralbank.parquet</code></td>
+<td>document</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G09.md">dictionary</a></td>
+</tr>
+<tr class="even">
+<td><strong>G10</strong></td>
+<td>E</td>
+<td><code>angle_e_national.parquet</code></td>
+<td>document</td>
+<td><a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/G10.md">dictionary</a></td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)                 <span class="co"># shared by every group</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)      <span class="co"># YOUR file — see the table above</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">"geo"</span>, <span class="st">"time"</span>], how<span class="op">=</span><span class="st">"inner"</span>)   <span class="co"># not for angle E</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(core.shape, mine.shape, df.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p><code>qmib.load()</code> resolves the local cache first, so after the first run the practice works with the wifi off. <code>qmib.catalog()</code> lists everything available.</p>
+</blockquote>
+<p><strong>Before class:</strong> load your file, join it to <code>core</code>, and pick the <strong>three variables</strong> your research question depends on most — the outcome, and the two you most expect to explain it. Write down one sentence on why you chose each. That is what you profile in the practice.</p>
+<blockquote class="blockquote">
+<p>Read your <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/">data dictionary</a> first. Its <strong>Traps</strong> section lists the things that have cost somebody a week, and its <strong>First look</strong> items take ten minutes. Knowing that a series is survey-based, breaks in 2021, or is structurally absent before a given year is part of your answer — not a footnote.</p>
+<p>⚠️ The spine currently holds <strong>teaching fixtures</strong>: real schema, real coverage, real flags and real pathologies, generated from a known structure. Every method behaves as it would on the genuine sources, but no number in them is a fact about Europe. See <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/PROVENANCE.md"><code>PROVENANCE.md</code></a>.</p>
+</blockquote>
+<details>
+<summary>
+Teaching dataset for the method exercise (optional)
+</summary>
+<p><strong>Ames Housing (2,930 residential sales, 79 features)</strong></p>
+<p>Source: OpenML / scikit-learn <code>fetch_openml</code> URL: <a href="https://www.openml.org/d/42165" class="uri">https://www.openml.org/d/42165</a></p>
+<p>Download once and cache locally:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_openml</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ames <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">"house_prices"</span>, as_frame<span class="op">=</span><span class="va">True</span>, parser<span class="op">=</span><span class="st">"auto"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ames.frame.to_parquet(<span class="st">"data/ames.parquet"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Everything after the first run reads the local parquet file. <strong>No network access is needed during the practice.</strong></p>
+<p>Use this if you want to see the method work on known ground before turning it on your own angle. The result you report must come from <strong>your project</strong>.</p>
+</details>
+<hr>
+</section>
+</section>
+<section id="step-4-self-check" class="level3" data-number="5.1.5">
+<h3 data-number="5.1.5" class="anchored" data-anchor-id="step-4-self-check"><span class="header-section-number">5.1.5</span> Step 4 — Self-check</h3>
+<p>Answer these <strong>in writing</strong> before class. You will not hand them in, but the lecture assumes you have attempted them. If you cannot answer one, bring the question.</p>
+<ol type="1">
+<li>Show that if <span class="math inline">\(P = X(X^\top X)^{-1}X^\top\)</span> then <span class="math inline">\(P^2 = P\)</span> and <span class="math inline">\(P^\top = P\)</span>.</li>
+<li>What is the trace of the hat matrix, and why does that number have a name you already know?</li>
+<li>If two columns of <span class="math inline">\(X\)</span> are perfectly collinear, what fails - and does the <em>fitted value</em> <span class="math inline">\(\hat y\)</span> still exist?</li>
+<li>Why does adding a variable never decrease <span class="math inline">\(R^2\)</span>? Answer geometrically, not algebraically.</li>
+</ol>
+<hr>
+</section>
+<section id="using-your-local-llm-on-the-preparation" class="level3" data-number="5.1.6">
+<h3 data-number="5.1.6" class="anchored" data-anchor-id="using-your-local-llm-on-the-preparation"><span class="header-section-number">5.1.6</span> Using your local LLM on the preparation</h3>
+<p>Your local model is a study partner, not an answer key. Ask it to <em>explain</em>, to <em>quiz you</em>, and to <em>argue against you</em>. Verify everything it says against the reading.</p>
+<p>Prompts that work well for this session:</p>
+<ul>
+<li>“I get a LinAlgError: Singular matrix. Explain what this means about the geometry of my design matrix, without giving me code.”</li>
+<li>“Walk me through the Frisch-Waugh-Lovell theorem using a two-regressor example with numbers.”</li>
+<li>“Explain the difference between numpy.linalg.inv, numpy.linalg.solve and numpy.linalg.lstsq in terms of numerical stability.”</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Standing rule for this course.</strong> Whenever you use the LLM in a deliverable, you must be able to say what you checked and how. An unverified claim from a language model has the same evidential status as an unverified claim from a stranger.</p>
+</blockquote>
+<hr>
+<p><a href="./session-02.html">Back to session 02</a></p>
+</section>
+</section>
+<section id="the-lecture" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-lecture"><span class="header-section-number">5.2</span> The lecture</h2>
+<div class="muted">
+<p>Delivered from <a href="https://warint.github.io/quantitative-methods/session-02-lecture.html">the slides</a>. What follows is the same material as prose.</p>
+</div>
+<!-- Imported from https://warin.ca/quant/en/session2_cours/. Content is static so the deck renders without R or Python. -->
+<section id="class-organization" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="class-organization"><span class="header-section-number">5.2.1</span> Class Organization</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">Class rules</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">and therefore</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Schedule</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<ul>
+<li><p><strong>Respect</strong>: Respect other participants and speakers.</p></li>
+<li><p><strong>Participation</strong>: Participate actively in discussions and activities.</p></li>
+<li><p><strong>Commitment</strong>: Be committed and involved in the learning process.</p></li>
+<li><p><strong>Collaboration</strong>: Collaborate with your peers and share your knowledge.</p></li>
+<li><p><strong>Confidentiality</strong>: Respect the confidentiality of shared information.</p></li>
+</ul>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<ul>
+<li><p>Cell phones are in backpacks, not on the table.</p></li>
+<li><p>Computers are used for taking notes and following the course, not for personal messages or other activities.</p></li>
+</ul>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 20%">
+<col style="width: 32%">
+<col style="width: 14%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Session</th>
+<th style="text-align: left;">Day and Time</th>
+<th style="text-align: left;">Building, Room</th>
+<th style="text-align: left;">Instructor</th>
+<th style="text-align: left;">Session Dates</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Session 1</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Serge-Saucier</td>
+<td style="text-align: left;">Thierry Warin</td>
+<td style="text-align: left;">August 27, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 2</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Student Associations</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">September 3, 2025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Session 3</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Serge-Saucier</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">September 10, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 4</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Serge-Saucier</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">September 17, 2025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Session 5</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Serge-Saucier</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">September 24, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 6</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">Synchronous with Africa</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">October 1, 2025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Session 7</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">Synchronous with Africa</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">October 8, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 8</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Rona</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">November 5, 2025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Session 9</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Rona</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">November 12, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 10</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Rona</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">November 19, 2025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Session 11</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Rona</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">November 26, 2025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Session 12</td>
+<td style="text-align: left;">Wed 3:30PM - 6:30PM</td>
+<td style="text-align: left;">C-Ste-Cath, Rona</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">December 3, 2025</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="quote-of-the-day" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="quote-of-the-day"><span class="header-section-number">5.2.2</span> Quote of the day</h3>
+<blockquote class="blockquote">
+<p>It’s tough to make predictions, especially about the future</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><a href="https://www.goodreads.com/author/quotes/79014.Yogi_Berra">Yogi Berra</a></p>
+</blockquote>
+</section>
+<section id="introduction" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="introduction"><span class="header-section-number">5.2.3</span> Introduction</h3>
+<ul>
+<li><p>Statistics is a language, constructed by mathematicians.</p></li>
+<li><p>The tools (formulas and processes) are constructs. They do not represent the truth, just the tools to get closer to the truth. They are the <strong>foundations</strong> that we use in our <strong>applications</strong> as a data analyst.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>So, let us spend some time on the foundations first.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>The magic in the data</p>
+</blockquote>
+<p><a href="http://shiny.calpoly.sh/Longest_Run/">Web app</a></p>
+</section>
+<section id="introduction---differences-between-statistics-and-statistical-learning" class="level3" data-number="5.2.4">
+<h3 data-number="5.2.4" class="anchored" data-anchor-id="introduction---differences-between-statistics-and-statistical-learning"><span class="header-section-number">5.2.4</span> Introduction - Differences between statistics and statistical learning?</h3>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Statistics: decision making under uncertainty.</p>
+<p><em>Statistics</em> is that branch of knowledge which deals with the multiplicity of data, its</p>
+<ul>
+<li><p>collection,</p></li>
+<li><p>analysis, and</p></li>
+<li><p>interpretation</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p>Statistical learning is a vast set of tools for <em>understanding data</em></p>
+<ul>
+<li><p>classified as <em>supervised learning</em>: building a statistical model for predicting, or estimating, and output based on one (single) or more (multiple) inputs.</p></li>
+<li><p>classified as <em>unsupervised learning</em>: there are inputs, but no supervising output</p></li>
+</ul>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The goal is to understand the models, intuitions, and strengths and weaknesses of the various approaches</p>
+</blockquote>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p>scalar, random variable, vector, matrix</p></li>
+<li><p>quantitative values versus qualitative values</p>
+<ul>
+<li><p>quantitative: numerical (continuous or discrete)</p></li>
+<li><p>qualitative: categorical (nominal or ordinal)</p></li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TB
+A[Types of data] --&gt; B[Quantitative]; B --&gt; D{Numerical}
+A --&gt; C[Qualitative]; C --&gt; E{Categorical}
+
+D --&gt; F(Continuous)
+D --&gt; G(Discrete)
+
+E --&gt; H(Ordinal)
+E --&gt; I(Nominal)
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 48%">
+<col style="width: 24%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Numerical</th>
+<th style="text-align: left;">Examples</th>
+<th style="text-align: left;">Visualizations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Discrete: data have a finite number of values</td>
+<td style="text-align: left;">Number of balls in a jar</td>
+<td style="text-align: left;">Bar charts, line graphs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Continuous: data have an infinite number of values</td>
+<td style="text-align: left;">Distance, time</td>
+<td style="text-align: left;">Histograms, line graphs</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 66%">
+<col style="width: 20%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Categorical</th>
+<th style="text-align: left;">Examples</th>
+<th style="text-align: left;">Visualizations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Nominal: identified by particular names or categories and cannot be organized in any order</td>
+<td style="text-align: left;">Gender, colors, locations</td>
+<td style="text-align: left;">Bar charts</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ordinal: identified by particular names or categories and can be ordered</td>
+<td style="text-align: left;">Rankings</td>
+<td style="text-align: left;">Bar charts</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Outcomes associated with random experiments (probabilistic) called <em>random variables</em>:</li>
+</ul>
+<p><span class="math display">\[ X, Y, Z \]</span></p>
+<ul>
+<li>Observed values:</li>
+</ul>
+<p><span class="math display">\[ x, y, z \]</span></p>
+<p>Let <span class="math inline">\(X\)</span> be a r.v. taking values in the sample space <span class="math inline">\(S=\left\{x\_{1},\, x\_{2},\,\ldots,x\_{k}\right\}\)</span></p>
+<p><span class="math display">\[ p(x\_{i})=\Pr(X=x\_{i}), \quad i=1,2,\ldots,k \]</span></p>
+<p><span class="math display">\[ \sum\_{i=1}^{k}p(x\_{i}) = p(x\_{1})+p(x\_{2})+\cdots+p(x\_{k}), = 1 \]</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Three Basic Features</p>
+<ul>
+<li><p>Center: middle or general tendency</p></li>
+<li><p>Spread: small means tightly clustered, large means highly variable</p></li>
+<li><p>Shape: symmetry versus skewness, kurtosis</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p>Make the difference between a <strong>sample</strong> and a <strong>population</strong>!</p>
+</div>
+</div>
+</section>
+<section id="measuring-the-center" class="level3" data-number="5.2.5">
+<h3 data-number="5.2.5" class="anchored" data-anchor-id="measuring-the-center"><span class="header-section-number">5.2.5</span> Measuring the center</h3>
+</section>
+<section id="measuring-the-center-1" class="level3" data-number="5.2.6">
+<h3 data-number="5.2.6" class="anchored" data-anchor-id="measuring-the-center-1"><span class="header-section-number">5.2.6</span> Measuring the center</h3>
+<p>In what follows, we will look into the following concepts:</p>
+<p>Basics:</p>
+<ul>
+<li>The sample mean</li>
+<li>The sample median</li>
+</ul>
+<p>Extensions:</p>
+<ul>
+<li>The trimmed mean</li>
+<li>The sample quantile</li>
+<li>The sample percentile</li>
+</ul>
+</section>
+<section id="the-basics-the-sample-mean" class="level3" data-number="5.2.7">
+<h3 data-number="5.2.7" class="anchored" data-anchor-id="the-basics-the-sample-mean"><span class="header-section-number">5.2.7</span> The basics: the sample mean</h3>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>R.V.’s mean</p>
+<p><span class="math display">\[ \mu = \sum\_{i=1}^{k} x\_{i} p(x\_{i}) \\\\ = x\_{1} \times p(x\_{1}) + \cdots + x\_{k} \times p(x\_{k}) \]</span></p>
+<ul>
+<li><p>the mean is a center or average value of <span class="math inline">\((X)\)</span></p></li>
+<li><p><span class="math inline">\((\mu)\)</span> can be any number or decimal</p></li>
+<li><p><span class="math inline">\((\mu)\)</span> is the “first moment about the origin”</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p>Sample mean</p>
+<p><span class="math display">\[ \overline{x} = \frac{x\_{1} + x\_{2} + \cdots+x\_{n}}{n} \\\\ = \frac{1}{n}\sum\_{i = 1}^{n} x\_{i} \]</span></p>
+<ul>
+<li>Good: natural, easy to compute, nice properties</li>
+<li>Bad: sensitive to extreme values</li>
+</ul>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Wait!</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Greek letters are for the RV and latin letters are for the sample?</p>
+</blockquote>
+</section>
+<section id="the-basics-the-sample-mean-1" class="level3" data-number="5.2.8">
+<h3 data-number="5.2.8" class="anchored" data-anchor-id="the-basics-the-sample-mean-1"><span class="header-section-number">5.2.8</span> The basics: the sample mean</h3>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># 21 observations from an ammonia-oxidation plant — ships with statsmodels,</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># so there is nothing to download.</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>mydata <span class="op">=</span> sm.datasets.stackloss.load_pandas().data</span>
+<span id="cb3-7"><a href="#cb3-7"></a>stack_loss <span class="op">=</span> mydata[<span class="st">"STACKLOSS"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">stack.loss</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">42</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">37</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">37</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">28</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">20</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">etc.</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a>stack_loss.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(17.523809523809526)</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="the-basics-the-sample-median" class="level3" data-number="5.2.9">
+<h3 data-number="5.2.9" class="anchored" data-anchor-id="the-basics-the-sample-median"><span class="header-section-number">5.2.9</span> The basics: the sample median</h3>
+<p>How to find it</p>
+<ul>
+<li><p>sort the data into an increasing sequence of <span class="math inline">\(n\)</span> numbers</p></li>
+<li><p><span class="math inline">\(\tilde{x}\)</span> lies in position <span class="math inline">\((n + 1)/2\)</span></p></li>
+<li><p>Good: resistant to extreme values, easy to describe</p></li>
+<li><p>Bad: not as mathematically tractable, need to sort the data to calculate</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a>stack_loss.median()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(15.0)</code></pre>
+</div>
+</section>
+<section id="extensions" class="level3" data-number="5.2.10">
+<h3 data-number="5.2.10" class="anchored" data-anchor-id="extensions"><span class="header-section-number">5.2.10</span> Extensions</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">The trimmed mean</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">The sample quantile</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">The sample percentile</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p>How to find it</p>
+<ul>
+<li><p>“trim” a proportion of data from both ends of the ordered list</p></li>
+<li><p>find the sample mean of what’s left</p></li>
+<li><p>Good: also resistant to extreme values, has good properties, too</p></li>
+<li><p>Bad: still need to sort data to get rid of outliers</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a>stats.trim_mean(stack_loss, <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(16.789473684210527)</code></pre>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<ul>
+<li>Quantile: approximately <span class="math inline">\(100 \times p\%\)</span> of the data fall below the value <span class="math inline">\(\tilde{q}\_{p}\)</span></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a>stack_loss.quantile(<span class="fl">0.75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(19.0)</code></pre>
+</div>
+<p>So, <span class="math inline">\(75%\)</span> of the data (.75*21=16) fall below the value <span class="math inline">\(19\)</span>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a>stack_loss.quantile([<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.80</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>0.00     7.0
+0.25    11.0
+0.80    20.0
+Name: STACKLOSS, dtype: float64</code></pre>
+</div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<ul>
+<li>Percentile: the percentage of observations that fall below a given data point</li>
+</ul>
+<figure class="figure">
+<p>
+<img src="economist-assets/percentile.png" class="quarto-figure quarto-figure-center figure-img" style="width:82.0%">
+</p>
+</figure>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a>stats.norm.cdf(<span class="dv">1800</span>, loc<span class="op">=</span><span class="dv">1500</span>, scale<span class="op">=</span><span class="dv">300</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(0.8413447460685429)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="measuring-the-spread" class="level3" data-number="5.2.11">
+<h3 data-number="5.2.11" class="anchored" data-anchor-id="measuring-the-spread"><span class="header-section-number">5.2.11</span> Measuring the spread</h3>
+</section>
+<section id="measures-of-spread" class="level3" data-number="5.2.12">
+<h3 data-number="5.2.12" class="anchored" data-anchor-id="measures-of-spread"><span class="header-section-number">5.2.12</span> Measures of spread</h3>
+<p>In what follows, we will look into the following concepts:</p>
+<ul>
+<li><p>The sample variance</p></li>
+<li><p>The sample standard deviation</p></li>
+<li><p>The sample interquartile range (IQR)</p></li>
+</ul>
+</section>
+<section id="measures-of-spread-1" class="level3" data-number="5.2.13">
+<h3 data-number="5.2.13" class="anchored" data-anchor-id="measures-of-spread-1"><span class="header-section-number">5.2.13</span> Measures of spread</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Variance and STD</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Interpretation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false">Interpretation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-4" role="tab" aria-controls="tabset-3-4" aria-selected="false">IQR</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<p>The <strong>sample variance</strong> <span class="math inline">\(s^{2}\)</span>:</p>
+<p><span class="math display">\[ s^{2} = \frac{1}{n - 1}\sum\_{i = 1}^{n}(x\_{i} - \overline{x})^{2} \]</span></p>
+<p>The <strong>sample standard deviation</strong> is <span class="math inline">\((s = \sqrt{s^{2}})\)</span></p>
+<ul>
+<li><p>Good: tractable, nice mathematical/statistical properties</p></li>
+<li><p>Bad: sensitive to extreme values</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a><span class="bu">print</span>(stack_loss.var(ddof<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="bu">print</span>(stack_loss.std(ddof<span class="op">=</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>103.46190476190478
+10.171622523565489</code></pre>
+<pre class="text"><code>[1] 10.17162</code></pre>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Interpretation of <span class="math inline">\(s\)</span></p>
+<p>The empirical rule:</p>
+<ul>
+<li><p>For nearly normally distributed data,</p></li>
+<li><p>about <span class="math inline">\(68\%\)</span> falls within 1 SD of the mean,</p></li>
+<li><p>about <span class="math inline">\(95\%\)</span> falls within 2 SD of the mean,</p></li>
+<li><p>about <span class="math inline">\(99.7\%\)</span> falls within 3 SD of the mean.</p></li>
+<li><p>It is possible for observations to fall 4, 5, or more standard deviations away from the mean, but these occurrences are very rare if the data are nearly normal.</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>SAT scores are distributed nearly normally with mean 1500 and standard deviation 300.</p>
+<p>Following the 68-95-99.7 Rule:</p>
+<ul>
+<li><p><span class="math inline">\(\sim 68\%\)</span> of students score between 1200 and 1800 on the SAT.</p></li>
+<li><p><span class="math inline">\(\sim 95\%\)</span> of students score between 900 and 2100 on the SAT.</p></li>
+<li><p><span class="math inline">\(\sim 99.7\%\)</span> of students score between 600 and 2400 on the SAT.</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
+<p><span class="math display">\[ IQR = \tilde{q}\_{0.75} - \tilde{q}\_{0.25} \]</span></p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>stack_loss.quantile(<span class="fl">0.75</span>) <span class="op">-</span> stack_loss.quantile(<span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(8.0)</code></pre>
+</div>
+<ul>
+<li><p>Good: resistant to outliers (see session 3)</p></li>
+<li><p>Bad: only considers middle <span class="math inline">\(50\%\)</span> of the data, equivalent to:</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a>stack_loss.quantile([<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>0.25    11.0
+0.75    19.0
+Name: STACKLOSS, dtype: float64</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="measuring-the-shape" class="level3" data-number="5.2.14">
+<h3 data-number="5.2.14" class="anchored" data-anchor-id="measuring-the-shape"><span class="header-section-number">5.2.14</span> Measuring the shape</h3>
+</section>
+<section id="measuring-the-shape-1" class="level3" data-number="5.2.15">
+<h3 data-number="5.2.15" class="anchored" data-anchor-id="measuring-the-shape-1"><span class="header-section-number">5.2.15</span> Measuring the shape</h3>
+<p>In what follows, we will look into the following concepts:</p>
+<ul>
+<li><p>Skewness: degree of “symmetry”</p></li>
+<li><p>Kurtosis: degree of “thickness”</p></li>
+</ul>
+</section>
+<section id="measuring-the-shape-2" class="level3" data-number="5.2.16">
+<h3 data-number="5.2.16" class="anchored" data-anchor-id="measuring-the-shape-2"><span class="header-section-number">5.2.16</span> Measuring the shape</h3>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/mean-median.png" class="r-stretch img-fluid"></p>
+</section>
+<section id="measuring-the-shape-3" class="level3" data-number="5.2.17">
+<h3 data-number="5.2.17" class="anchored" data-anchor-id="measuring-the-shape-3"><span class="header-section-number">5.2.17</span> Measuring the shape</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Skewness/Kurtosis 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Skewness/Kurtosis 2</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<ul>
+<li><p>Symmetric or skewed</p>
+<ul>
+<li>right (positive) and left (negative) skewness</li>
+</ul></li>
+<li><p>Kurtosis</p>
+<ul>
+<li><p>leptokurtic - steep peak, heavy tails</p></li>
+<li><p>platykurtic - flatter, thin tails</p></li>
+<li><p>mesokurtic - right in the middle</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/shape.png" class="r-stretch img-fluid"></p>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Wait!</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Why are we looking at the distribution of the sample?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Is the study of the sample shape/distribution relevant because otherwise the tools designed by the statisticians would not work?</p>
+</blockquote>
+</section>
+<section id="measures-of-shape-sample-skewness" class="level3" data-number="5.2.18">
+<h3 data-number="5.2.18" class="anchored" data-anchor-id="measures-of-shape-sample-skewness"><span class="header-section-number">5.2.18</span> Measures of shape: sample skewness</h3>
+<p>The sample skewness <span class="math inline">\(g\_{1}\)</span>:</p>
+<p><span class="math display">\[ g\_{1} = \frac{1}{n}\frac{\sum\_{i = 1}^{n}(x\_{i} - \overline{x})^{3}}{s^{3}} \]</span></p>
+<p>Things to notice:</p>
+<ul>
+<li><p><span class="math inline">\(-\infty &lt; g\_{1} &lt; \infty\)</span></p></li>
+<li><p>sign of <span class="math inline">\(g\_{1}\)</span> indicates direction of skewness <span class="math inline">\(\pm)\)</span></p></li>
+</ul>
+</section>
+<section id="measures-of-shape" class="level3" data-number="5.2.19">
+<h3 data-number="5.2.19" class="anchored" data-anchor-id="measures-of-shape"><span class="header-section-number">5.2.19</span> Measures of shape</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Sample skewness</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Sample excess kurtosis 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false">Sample excess kurtosis 2</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb23-2"><a href="#cb23-2"></a></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="kw">def</span> skewness(x):</span>
+<span id="cb23-4"><a href="#cb23-4"></a>    <span class="co">"""g1, exactly as defined on the previous slide."""</span></span>
+<span id="cb23-5"><a href="#cb23-5"></a>    x <span class="op">=</span> np.asarray(x, <span class="bu">float</span>)</span>
+<span id="cb23-6"><a href="#cb23-6"></a>    xbar, s <span class="op">=</span> x.mean(), x.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb23-7"><a href="#cb23-7"></a>    <span class="cf">return</span> ((x <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">3</span>).mean() <span class="op">/</span> s <span class="op">**</span> <span class="dv">3</span></span>
+<span id="cb23-8"><a href="#cb23-8"></a></span>
+<span id="cb23-9"><a href="#cb23-9"></a>skewness(stack_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(1.1564007167787318)</code></pre>
+</div>
+<p>If <span class="math inline">\(\vert g\_{1} \vert &gt; 2\sqrt{6/n}\)</span>, then the data distribution is <strong>substantially skewed</strong> in the direction of the sign of <span class="math inline">\(g\_{1}\)</span></p>
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># The same test on course data: GDP per capita across 30 European countries</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb25-3"><a href="#cb25-3"></a>core <span class="op">=</span> pd.read_parquet(<span class="st">"data/spine/core.parquet"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4"></a>gdp <span class="op">=</span> core[<span class="st">"gdp_pc_eur"</span>].dropna()</span>
+<span id="cb25-5"><a href="#cb25-5"></a></span>
+<span id="cb25-6"><a href="#cb25-6"></a>skewness(gdp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(0.8805789352785794)</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a><span class="dv">2</span> <span class="op">*</span> np.sqrt(<span class="dv">6</span> <span class="op">/</span> <span class="bu">len</span>(gdp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(0.2343499700593521)</code></pre>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<p>The sample excess kurtosis <span class="math inline">\(g\_{2}\)</span>:</p>
+<p><span class="math display">\[ g\_{2} = \frac{1}{n}\frac{\sum\_{i = 1}^{n}(x\_{i} - \overline{x})^{4}}{s^{4}} - 3 \]</span></p>
+<p>Things to note:</p>
+<ul>
+<li><p><span class="math inline">\(-2 \leq g\_{2} &lt; \infty\)</span></p></li>
+<li><p><span class="math inline">\(g\_{2} &gt; 0\)</span> indicates leptokurtosis</p></li>
+<li><p><span class="math inline">\(g\_{2} &lt; 0\)</span> indicates platykurtosis</p></li>
+</ul>
+</div>
+<div id="tabset-5-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-3-tab">
+<div class="cell">
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw">def</span> excess_kurtosis(x):</span>
+<span id="cb29-2"><a href="#cb29-2"></a>    <span class="co">"""g2, with the -3 that puts the normal distribution at zero."""</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a>    x <span class="op">=</span> np.asarray(x, <span class="bu">float</span>)</span>
+<span id="cb29-4"><a href="#cb29-4"></a>    xbar, s <span class="op">=</span> x.mean(), x.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb29-5"><a href="#cb29-5"></a>    <span class="cf">return</span> ((x <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">4</span>).mean() <span class="op">/</span> s <span class="op">**</span> <span class="dv">4</span> <span class="op">-</span> <span class="dv">3</span></span>
+<span id="cb29-6"><a href="#cb29-6"></a></span>
+<span id="cb29-7"><a href="#cb29-7"></a>excess_kurtosis(stack_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(0.13435238060300536)</code></pre>
+</div>
+<p>If <span class="math inline">\(\vert g\_{2} \vert &gt; 4\sqrt{6/n}\)</span>, then the data distribution is <strong>substantially kurtic</strong>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># Renewable share: symmetric, but far from normal in the tails</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a>ener <span class="op">=</span> pd.read_parquet(<span class="st">"data/spine/angle_a_country.parquet"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3"></a>renew <span class="op">=</span> ener[<span class="st">"share_renew"</span>].dropna()</span>
+<span id="cb31-4"><a href="#cb31-4"></a></span>
+<span id="cb31-5"><a href="#cb31-5"></a>excess_kurtosis(renew)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(-0.6560298273186116)</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1"></a><span class="dv">4</span> <span class="op">*</span> np.sqrt(<span class="dv">6</span> <span class="op">/</span> <span class="bu">len</span>(renew))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>np.float64(0.47866161858603057)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="from-data-to-models" class="level2" data-background-color="#E3120B" style="color:#F7F4ED" data-number="5.3">
+<h2 data-background-color="#E3120B" style="color:#F7F4ED" data-number="5.3" class="anchored" data-anchor-id="from-data-to-models"><span class="header-section-number">5.3</span> From data to models</h2>
+<section id="the-question" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="the-question"><span class="header-section-number">5.3.1</span> The question</h3>
+<blockquote class="blockquote">
+<p><strong>Do more productive European countries have higher income per head?</strong></p>
+</blockquote>
+<p>Thirty countries, fifteen years, both numbers already in the repository.</p>
+<div class="muted">
+<p>No download, no API key: <code>data/spine/core.parquet</code>.</p>
+</div>
+</section>
+<section id="always-look-first" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="always-look-first"><span class="header-section-number">5.3.2</span> Always look first</h3>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> pd.read_parquet(<span class="st">"data/spine/core.parquet"</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">"gdp_pc_eur"</span>, <span class="st">"productivity_idx"</span>])</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>plt.scatter(d[<span class="st">"productivity_idx"</span>], d[<span class="st">"gdp_pc_eur"</span>], s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Labour productivity index (EU average = 100)"</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"GDP per capita (EUR)"</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p>Draw the picture before you fit anything. A straight line through a curved cloud is still a straight line, and the software will not warn you.</p>
+</div>
+</section>
+<section id="the-model-and-what-each-piece-is" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="the-model-and-what-each-piece-is"><span class="header-section-number">5.3.3</span> The model, and what each piece is</h3>
+<p><span class="math display">\[y_i = \beta_0 + \beta_1 x_i + \varepsilon_i\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Name</th>
+<th>Here</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(y_i\)</span></td>
+<td>outcome</td>
+<td>GDP per capita</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x_i\)</span></td>
+<td>predictor</td>
+<td>productivity index</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>intercept</td>
+<td>predicted <span class="math inline">\(y\)</span> when <span class="math inline">\(x = 0\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>slope</td>
+<td>change in <span class="math inline">\(y\)</span> per unit of <span class="math inline">\(x\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\varepsilon_i\)</span></td>
+<td>error</td>
+<td>what <span class="math inline">\(x_i\)</span> does not explain</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="choosing-the-line" class="level3" data-number="5.3.4">
+<h3 data-number="5.3.4" class="anchored" data-anchor-id="choosing-the-line"><span class="header-section-number">5.3.4</span> Choosing the line</h3>
+<p><span class="math display">\[\min_{\beta_0,\,\beta_1} \sum_{i=1}^{n}\big(y_i - \beta_0 - \beta_1 x_i\big)^2\]</span></p>
+<div class="step">
+<p>Squaring makes every miss positive, so misses above and below cannot cancel — and it punishes one large miss more than several small ones.</p>
+</div>
+<div class="check">
+<p>This is the mean, done conditionally. The mean minimises <span class="math inline">\(\sum(x_i - c)^2\)</span>; the regression line minimises the same quantity over <em>lines</em>.</p>
+</div>
+</section>
+<section id="three-lines-of-python" class="level3" data-number="5.3.5">
+<h3 data-number="5.3.5" class="anchored" data-anchor-id="three-lines-of-python"><span class="header-section-number">5.3.5</span> Three lines of Python</h3>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> smf.ols(<span class="st">"gdp_pc_eur ~ productivity_idx"</span>, data<span class="op">=</span>d).fit()</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>Intercept          -86118.1
+productivity_idx     1111.3</code></pre>
+<div class="muted">
+<p>Read the <code>~</code> as “explained by”. <code>.fit()</code> does the arithmetic; <code>model.params</code> holds the estimates.</p>
+</div>
+</section>
+<section id="the-slope-is-the-sentence-you-will-write" class="level3" data-number="5.3.6">
+<h3 data-number="5.3.6" class="anchored" data-anchor-id="the-slope-is-the-sentence-you-will-write"><span class="header-section-number">5.3.6</span> The slope is the sentence you will write</h3>
+<div class="check">
+<p>Comparing two country-years that differ by <strong>one point</strong> of productivity, the more productive one has on average <strong>€1,111 more</strong> GDP per capita.</p>
+</div>
+<p>Always say the units aloud — euros per index point. <strong>A slope without units is not a finding.</strong></p>
+<div class="warn">
+<p>The intercept says a country at productivity 0 would have <strong>−€86,118</strong>. The index runs from 72 to 129 in our data. Do not interpret an intercept you have no data near.</p>
+</div>
+</section>
+<section id="fitted-values-and-residuals" class="level3" data-number="5.3.7">
+<h3 data-number="5.3.7" class="anchored" data-anchor-id="fitted-values-and-residuals"><span class="header-section-number">5.3.7</span> Fitted values and residuals</h3>
+<p>Germany, 2022 — productivity 121.2, actual GDP per capita €54,239:</p>
+<p><span class="math display">\[\hat y = -86{,}118 + 1{,}111.3 \times 121.2 = 48{,}606\]</span></p>
+<p><span class="math display">\[e = 54{,}239 - 48{,}606 = \mathbf{+5{,}633}\]</span></p>
+<div class="check">
+<p>Germany sits <strong>€5,633 above</strong> the line. That residual is everything about German income that productivity alone does not account for — and reading residuals is most of Session 03.</p>
+</div>
+</section>
+<section id="how-much-did-the-line-explain" class="level3" data-number="5.3.8">
+<h3 data-number="5.3.8" class="anchored" data-anchor-id="how-much-did-the-line-explain"><span class="header-section-number">5.3.8</span> How much did the line explain?</h3>
+<div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"R-squared = </span><span class="sc">{</span>model<span class="sc">.</span>rsquared<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>R-squared = 0.627</code></pre>
+<div class="step">
+<p><span class="math inline">\(R^2\)</span> is the share of the variation in <span class="math inline">\(y\)</span> the model accounts for: <strong>62.7%</strong>, on a scale from 0 to 1.</p>
+</div>
+<div class="warn">
+<p>It does <strong>not</strong> say the model is correct, that the relationship is causal, or that the line will predict a new country well.</p>
+</div>
+</section>
+<section id="two-predictors-what-controlling-for-means" class="level3" data-number="5.3.9">
+<h3 data-number="5.3.9" class="anchored" data-anchor-id="two-predictors-what-controlling-for-means"><span class="header-section-number">5.3.9</span> Two predictors: what “controlling for” means</h3>
+<div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="op">=</span> smf.ols(<span class="st">"gdp_pc_eur ~ productivity_idx + gfcf_meur"</span>, data<span class="op">=</span>d2).fit()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>Intercept          -71211.8
+productivity_idx      928.3
+gfcf_meur              68.7
+R-squared = 0.692</code></pre>
+<div class="check">
+<p>The productivity slope falls <strong>1,111 → 928</strong>, about 16%. It now answers a different question: comparing country-years <strong>with the same investment</strong>, one point more productivity goes with €928 more income.</p>
+</div>
+</section>
+<section id="correlation-is-not-causation" class="level3" data-number="5.3.10">
+<h3 data-number="5.3.10" class="anchored" data-anchor-id="correlation-is-not-causation"><span class="header-section-number">5.3.10</span> Correlation is not causation</h3>
+<p>The slope says the two <strong>move together</strong>. It does not say raising productivity by a point <em>would</em> raise income by €928.</p>
+<div class="tight">
+<ol type="1">
+<li>Productivity raises income</li>
+<li>Higher income buys the capital and training that raise productivity — the arrow points the other way</li>
+<li>Something else — institutions, education, market size — drives both</li>
+</ol>
+</div>
+<div class="warn">
+<p>Nothing in the output distinguishes these. Until Sessions 10–11, write <strong>“is associated with”</strong> — and mean it.</p>
+</div>
+</section>
+<section id="conclusion" class="level3" data-number="5.3.11">
+<h3 data-number="5.3.11" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5.3.11</span> Conclusion</h3>
+</section>
+<section id="conclusion-1" class="level3" data-number="5.3.12">
+<h3 data-number="5.3.12" class="anchored" data-anchor-id="conclusion-1"><span class="header-section-number">5.3.12</span> Conclusion</h3>
+<ul>
+<li>We have seen the basic concepts of exploratory data analysis</li>
+<li>We have seen the basic concepts of measuring the center, spread and shape of a distribution</li>
+<li>We have fitted the smallest possible model, and read its slope in units</li>
+<li>Session 03 asks the next question: <strong>can this regression be trusted?</strong></li>
+</ul>
+</section>
+</section>
+<section id="in-the-practice" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="in-the-practice"><span class="header-section-number">5.4</span> In the practice</h2>
+<section id="profiling-a-variable-you-will-have-to-defend" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="profiling-a-variable-you-will-have-to-defend"><span class="header-section-number">5.4.1</span> Profiling a variable you will have to defend</h3>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-02-practice.html">Open the practice slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S02-Practice.qmd"><code>MATH60033A-S02-Practice.qmd</code></a></p>
+</blockquote>
+<hr>
+<section id="the-theme-of-this-session" class="level4" data-number="5.4.1.1">
+<h4 data-number="5.4.1.1" class="anchored" data-anchor-id="the-theme-of-this-session"><span class="header-section-number">5.4.1.1</span> The theme of this session</h4>
+<blockquote class="blockquote">
+<h1 id="which-summary-of-your-projects-key-variable-would-you-defend-in-print" data-number="6"><span class="header-section-number">6</span> Which summary of your project’s key variable would you defend in print?</h1>
+</blockquote>
+<p>All ten groups attack this question, each on <strong>its own project</strong>, and the last twenty minutes assemble the answers.</p>
+<hr>
+</section>
+<section id="what-you-are-doing-in-one-paragraph" class="level4" data-number="6.0.0.1">
+<h4 data-number="6.0.0.1" class="anchored" data-anchor-id="what-you-are-doing-in-one-paragraph"><span class="header-section-number">6.0.0.1</span> What you are doing, in one paragraph</h4>
+<p>Every group has a research question and a data angle (<a href="./mandates.html"><code>RESEARCH-MANDATES.md</code></a>). Today you profile the three variables that question depends on most — centre, spread and shape — and decide which summary you would put in a paper. The deliverable is not a table of numbers. It is a defensible <strong>choice</strong>, with the reason written down.</p>
+<hr>
+</section>
+<section id="before-you-start" class="level4" data-number="6.0.0.2">
+<h4 data-number="6.0.0.2" class="anchored" data-anchor-id="before-you-start"><span class="header-section-number">6.0.0.2</span> Before you start</h4>
+<p>Everyone in the group pushes at least once this session. Replace <code>XX</code> with your group number everywhere below — group 07 uses <code>group-07</code>.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> group-XX</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> 02-exploratory-data-analysis/02-practice/submissions/group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="reproduce-one-result-from-the-paper-20-min" class="level4" data-number="6.0.0.3">
+<h4 data-number="6.0.0.3" class="anchored" data-anchor-id="reproduce-one-result-from-the-paper-20-min"><span class="header-section-number">6.0.0.3</span> 0 · Reproduce one result from the paper — 20 min</h4>
+<p>Fraiberger et al.&nbsp;build a sentiment index and relate it to returns. Take the descriptive result the paper opens with — the distribution of the sentiment measure — and reproduce it from the replication package you downloaded:</p>
+<pre class="text"><code>02-exploratory-data-analysis/data/replication/</code></pre>
+<p>A failed reproduction that you <strong>diagnose</strong> earns full marks; one you do not attempt earns none. “It did not work” is not a diagnosis — where did it stop, and what did you check?</p>
+<hr>
+</section>
+<section id="load-your-angle-and-pick-three-variables-15-min" class="level4" data-number="6.0.0.4">
+<h4 data-number="6.0.0.4" class="anchored" data-anchor-id="load-your-angle-and-pick-three-variables-15-min"><span class="header-section-number">6.0.0.4</span> 1 · Load your angle and pick three variables — 15 min</h4>
+<div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)                  <span class="co"># shared by every group</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)       <span class="co"># your angle — see your dictionary</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">"geo"</span>, <span class="st">"time"</span>], how<span class="op">=</span><span class="st">"inner"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Choose <strong>three</strong> numeric variables: the outcome your research question is about, and the two you most expect to explain it. Write one sentence each on why you chose it, before you compute anything.</p>
+<blockquote class="blockquote">
+<p>Read your <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/">data dictionary</a> first. Some columns carry flags, breaks in series, or structural missingness. A variable that is only observed from 2021 will produce a perfectly clean profile of a period that is not the one you meant to describe.</p>
+</blockquote>
+<hr>
+</section>
+<section id="centre-15-min" class="level4" data-number="6.0.0.5">
+<h4 data-number="6.0.0.5" class="anchored" data-anchor-id="centre-15-min"><span class="header-section-number">6.0.0.5</span> 2 · Centre — 15 min</h4>
+<p>For each variable, report the mean, the 5% trimmed mean and the median.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> centre(x):</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> pd.Series(x).dropna()</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.Series({</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n"</span>:       <span class="bu">len</span>(x),</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean"</span>:    x.mean(),</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"trim_5%"</span>: stats.trim_mean(x, <span class="fl">0.05</span>),</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"median"</span>:  x.median(),</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    })</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>The question to answer:</strong> do the three agree? If they do not, in which direction, and by how much relative to the spread? A gap between mean and median that is a tenth of a standard deviation is a curiosity; one that is a third of a standard deviation is a finding.</p>
+<hr>
+</section>
+<section id="spread-15-min" class="level4" data-number="6.0.0.6">
+<h4 data-number="6.0.0.6" class="anchored" data-anchor-id="spread-15-min"><span class="header-section-number">6.0.0.6</span> 3 · Spread — 15 min</h4>
+<p>Report the standard deviation and the IQR for each variable, and test the empirical rule directly:</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empirical_rule(x):</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""What fraction actually falls within 1, 2 and 3 standard deviations?"""</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> pd.Series(x).dropna()</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    m, s <span class="op">=</span> x.mean(), x.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="ss">f"±</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">s"</span>: <span class="bu">float</span>(((x <span class="op">-</span> m).<span class="bu">abs</span>() <span class="op">&lt;=</span> k <span class="op">*</span> s).mean()) <span class="cf">for</span> k <span class="kw">in</span> (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Compare what you get against 68% / 95% / 99.7%. <strong>Where it fails, say by how much and in which tail.</strong> That failure is the bridge to the next section.</p>
+<hr>
+</section>
+<section id="shape-20-min" class="level4" data-number="6.0.0.7">
+<h4 data-number="6.0.0.7" class="anchored" data-anchor-id="shape-20-min"><span class="header-section-number">6.0.0.7</span> 4 · Shape — 20 min</h4>
+<p>Compute skewness and excess kurtosis from the definitions in <a href="#the-lecture">the notes</a>, and test each against its threshold.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> shape(x):</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> pd.Series(x).dropna().to_numpy(<span class="bu">float</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(x)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    xbar, s <span class="op">=</span> x.mean(), x.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    g1 <span class="op">=</span> ((x <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">3</span>).mean() <span class="op">/</span> s <span class="op">**</span> <span class="dv">3</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    g2 <span class="op">=</span> ((x <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">4</span>).mean() <span class="op">/</span> s <span class="op">**</span> <span class="dv">4</span> <span class="op">-</span> <span class="dv">3</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"n"</span>: n, <span class="st">"g1"</span>: g1, <span class="st">"g2"</span>: g2,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"skewed"</span>: <span class="bu">abs</span>(g1) <span class="op">&gt;</span> <span class="dv">2</span> <span class="op">*</span> np.sqrt(<span class="dv">6</span> <span class="op">/</span> n),</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"kurtic"</span>: <span class="bu">abs</span>(g2) <span class="op">&gt;</span> <span class="dv">4</span> <span class="op">*</span> np.sqrt(<span class="dv">6</span> <span class="op">/</span> n)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then plot each variable — a histogram and a boxplot side by side — and check that the picture agrees with the two numbers. <strong>If they disagree, trust the picture and work out why.</strong> Usually it is a second mode, which neither <span class="math inline">\(g_1\)</span> nor <span class="math inline">\(g_2\)</span> can see.</p>
+<hr>
+</section>
+<section id="decide-and-write-it-down-20-min" class="level4" data-number="6.0.0.8">
+<h4 data-number="6.0.0.8" class="anchored" data-anchor-id="decide-and-write-it-down-20-min"><span class="header-section-number">6.0.0.8</span> 5 · Decide, and write it down — 20 min</h4>
+<p>For the variable at the centre of your research question, write the 250-word note:</p>
+<ul>
+<li>Which summary would you put in a paper, and why that one</li>
+<li>What the shape implies for the methods available to you later — a badly skewed outcome constrains what Session 03 can do with it</li>
+<li>One thing you would need to check before trusting the profile</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>What earns marks.</strong> A group that reports a variable is skewed, says which direction, tests it against the threshold, and then says what that costs them later has done the work. A group that prints <code>df.describe()</code> and moves on has not.</p>
+</blockquote>
+<hr>
+</section>
+<section id="two-minute-report-20-min" class="level4" data-number="6.0.0.9">
+<h4 data-number="6.0.0.9" class="anchored" data-anchor-id="two-minute-report-20-min"><span class="header-section-number">6.0.0.9</span> 6 · Two-minute report — 20 min</h4>
+<p>One slide, one variable, three numbers and one sentence of judgement. The presenter is chosen at random when you start, so everyone prepares.</p>
+<hr>
+</section>
+<section id="submitting" class="level4" data-number="6.0.0.10">
+<h4 data-number="6.0.0.10" class="anchored" data-anchor-id="submitting"><span class="header-section-number">6.0.0.10</span> Submitting</h4>
+<div class="sourceCode" id="cb48"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add 02-exploratory-data-analysis/02-practice/submissions/group-XX</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Session 02 practice — group XX"</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Everyone pushes at least once. The log is the record of participation.</p>
+<hr>
+</section>
+<section id="what-loses-marks" class="level4" data-number="6.0.0.11">
+<h4 data-number="6.0.0.11" class="anchored" data-anchor-id="what-loses-marks"><span class="header-section-number">6.0.0.11</span> What loses marks</h4>
+<ul>
+<li><code>df.describe()</code> pasted with no interpretation</li>
+<li>Reporting a skewness without its threshold — <span class="math inline">\(0.4\)</span> is substantial at <span class="math inline">\(n=437\)</span> and negligible at <span class="math inline">\(n=40\)</span></li>
+<li>Calling a variable “normal” because it is symmetric</li>
+<li>Applying the empirical rule to a variable you have just shown to be skewed</li>
+<li>Dropping outliers before you have said what they are</li>
+</ul>
+<hr>
+<p><a href="#the-lecture">&lt;- The lecture</a> · <a href="./session-02.html">Session 02 overview</a></p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./session-01.html" class="pagination-link" aria-label="Session 1 — Foundations: Scenarios, Tools, and the Syllabus">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Session 1 — Foundations: Scenarios, Tools, and the Syllabus</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./session-03.html" class="pagination-link" aria-label="Session 3 — Regression: Adequacy, Validity, and Robustness">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Session 3 — Regression: Adequacy, Validity, and Robustness</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MATH60033A · HEC Montréal</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-02.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Built from the course repository</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

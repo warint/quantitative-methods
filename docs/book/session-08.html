@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off – Quantitative Methods in International Business</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./session-09.html" rel="next">
+<link href="./session-07.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-87cceeb0dc72897ec58809a022325911.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-35a1a3f4182a89951995139d29d3b534.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-08.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Quantitative Methods in International Business</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/warint/quantitative-methods" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">The course</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Setting up your tools</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">The twelve sessions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Session 1 — Foundations: Scenarios, Tools, and the Syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Session 3 — Regression: Adequacy, Validity, and Robustness</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Session 5 — Regularisation: Ridge, Lasso, and the Elastic Net</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Session 6 — Regression: Advanced Considerations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Session 7 — Principal Component and Factor Analyses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-08.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Session 9 — Structural Equation Modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Session 10 — Causal Inference I: Counterfactuals, Randomisation, Matching</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Session 11 — Causal Inference II: Difference-in-Differences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Session 12 — Final Group Presentations</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">The data API</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./replications.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Replication packages</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mandates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">The ten research mandates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./group-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">How group work is assessed</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#before-the-session" id="toc-before-the-session" class="nav-link active" data-scroll-target="#before-the-session"><span class="header-section-number">11.1</span> Before the session</a>
+  <ul class="collapse">
+  <li><a href="#the-reading-4560-min" id="toc-the-reading-4560-min" class="nav-link" data-scroll-target="#the-reading-4560-min"><span class="header-section-number">11.1.1</span> 1. The reading — 45–60 min</a></li>
+  <li><a href="#the-data-10-min" id="toc-the-data-10-min" class="nav-link" data-scroll-target="#the-data-10-min"><span class="header-section-number">11.1.2</span> 2. The data — 10 min</a></li>
+  <li><a href="#self-check-15-min" id="toc-self-check-15-min" class="nav-link" data-scroll-target="#self-check-15-min"><span class="header-section-number">11.1.3</span> 3. Self-check — 15 min</a></li>
+  <li><a href="#arrive-with" id="toc-arrive-with" class="nav-link" data-scroll-target="#arrive-with"><span class="header-section-number">11.1.4</span> Arrive with</a></li>
+  </ul></li>
+  <li><a href="#the-lecture" id="toc-the-lecture" class="nav-link" data-scroll-target="#the-lecture"><span class="header-section-number">11.2</span> The lecture</a></li>
+  <li><a href="#biasvariance-trade-off" id="toc-biasvariance-trade-off" class="nav-link" data-scroll-target="#biasvariance-trade-off"><span class="header-section-number">11.3</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#biasvariance-trade-off-1" id="toc-biasvariance-trade-off-1" class="nav-link" data-scroll-target="#biasvariance-trade-off-1"><span class="header-section-number">11.4</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#biasvariance-trade-off-2" id="toc-biasvariance-trade-off-2" class="nav-link" data-scroll-target="#biasvariance-trade-off-2"><span class="header-section-number">11.5</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#biasvariance-trade-off-3" id="toc-biasvariance-trade-off-3" class="nav-link" data-scroll-target="#biasvariance-trade-off-3"><span class="header-section-number">11.6</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#biasvariance-trade-off-4" id="toc-biasvariance-trade-off-4" class="nav-link" data-scroll-target="#biasvariance-trade-off-4"><span class="header-section-number">11.7</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#biasvariance-trade-off-5" id="toc-biasvariance-trade-off-5" class="nav-link" data-scroll-target="#biasvariance-trade-off-5"><span class="header-section-number">11.8</span> Bias–Variance Trade-off</a></li>
+  <li><a href="#classification" id="toc-classification" class="nav-link" data-scroll-target="#classification"><span class="header-section-number">11.9</span> Classification</a></li>
+  <li><a href="#the-bayes-classifier" id="toc-the-bayes-classifier" class="nav-link" data-scroll-target="#the-bayes-classifier"><span class="header-section-number">11.10</span> The Bayes Classifier</a></li>
+  <li><a href="#k-nearest-neighbors" id="toc-k-nearest-neighbors" class="nav-link" data-scroll-target="#k-nearest-neighbors"><span class="header-section-number">11.11</span> K-Nearest Neighbors</a></li>
+  <li><a href="#knn-by-hand-you-are-the-algorithm" id="toc-knn-by-hand-you-are-the-algorithm" class="nav-link" data-scroll-target="#knn-by-hand-you-are-the-algorithm"><span class="header-section-number">11.12</span> KNN by hand (you are the algorithm)</a></li>
+  <li><a href="#knn-by-hand" id="toc-knn-by-hand" class="nav-link" data-scroll-target="#knn-by-hand"><span class="header-section-number">11.13</span> KNN by hand</a></li>
+  <li><a href="#knn-by-hand-1" id="toc-knn-by-hand-1" class="nav-link" data-scroll-target="#knn-by-hand-1"><span class="header-section-number">11.14</span> KNN by hand</a></li>
+  <li><a href="#knn-by-hand-2" id="toc-knn-by-hand-2" class="nav-link" data-scroll-target="#knn-by-hand-2"><span class="header-section-number">11.15</span> KNN by hand</a></li>
+  <li><a href="#knn-in-r-code-you-are-not-longer-the-algorithm" id="toc-knn-in-r-code-you-are-not-longer-the-algorithm" class="nav-link" data-scroll-target="#knn-in-r-code-you-are-not-longer-the-algorithm"><span class="header-section-number">11.16</span> KNN in R code (you are not longer the algorithm)</a></li>
+  <li><a href="#machine-learning-using-knn-as-an-example" id="toc-machine-learning-using-knn-as-an-example" class="nav-link" data-scroll-target="#machine-learning-using-knn-as-an-example"><span class="header-section-number">11.17</span> Machine Learning: using KNN as an example</a></li>
+  <li><a href="#machine-learning-using-knn-as-an-example-1" id="toc-machine-learning-using-knn-as-an-example-1" class="nav-link" data-scroll-target="#machine-learning-using-knn-as-an-example-1"><span class="header-section-number">11.18</span> Machine Learning: using KNN as an example</a></li>
+  <li><a href="#big-lessons-from-ml" id="toc-big-lessons-from-ml" class="nav-link" data-scroll-target="#big-lessons-from-ml"><span class="header-section-number">11.19</span> Big lessons from ML</a></li>
+  <li><a href="#big-lessons" id="toc-big-lessons" class="nav-link" data-scroll-target="#big-lessons"><span class="header-section-number">11.20</span> Big lessons</a></li>
+  <li><a href="#in-the-practice" id="toc-in-the-practice" class="nav-link" data-scroll-target="#in-the-practice"><span class="header-section-number">11.21</span> In the practice</a>
+  <ul class="collapse">
+  <li><a href="#k-nearest-neighbours-and-the-biasvariance-trade-off" id="toc-k-nearest-neighbours-and-the-biasvariance-trade-off" class="nav-link" data-scroll-target="#k-nearest-neighbours-and-the-biasvariance-trade-off"><span class="header-section-number">11.21.1</span> K-Nearest Neighbours and the Bias–Variance Trade-off</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-08.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-08.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="chapter-meta">
+<p>Wednesday 4 November 2026 · 15:30–18:30 · Décelles — Victoriaville</p>
+<p><a href="https://warint.github.io/quantitative-methods/session-08-lecture.html">Lecture slides</a> · <a href="https://warint.github.io/quantitative-methods/session-08-pre-session.html">Pre-session slides</a> · <a href="https://warint.github.io/quantitative-methods/session-08-practice.html">Practice slides</a></p>
+</div>
+<blockquote class="blockquote">
+<p><strong>Flexible, or just unstable?</strong></p>
+</blockquote>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Theme of the practice</strong></td>
+<td>Does flexibility buy you anything on your own data?</td>
+</tr>
+<tr class="even">
+<td><strong>Reading</strong></td>
+<td>Amsili, van Es &amp; Schindelbeck (2025), <em>Pedotransfer Functions for Soil Protein Based on Random Forest Modeling</em> · <a href="https://doi.org/10.1080/00103624.2025.2454015">article</a></td>
+</tr>
+<tr class="odd">
+<td><strong>Replication package</strong></td>
+<td><a href="https://doi.org/10.7910/DVN/HGBPCW">10.7910/DVN/HGBPCW</a></td>
+</tr>
+<tr class="even">
+<td><strong>Data</strong></td>
+<td><code>qmib.load("core")</code> — the course spine, plus the Smarket returns used in the lecture</td>
+</tr>
+</tbody>
+</table>
+<section id="before-the-session" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="before-the-session"><span class="header-section-number">11.1</span> Before the session</h2>
+<blockquote class="blockquote">
+<p><strong>Flexible, or just unstable?</strong></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-08-pre-session.html">Open the pre-session slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S08-Pre-Session.qmd"><code>MATH60033A-S08-Pre-Session.qmd</code></a></p>
+</blockquote>
+<p>Two things to do before class, and they are the two halves of the practice. Budget <strong>60–90 minutes</strong>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Before class</th>
+<th>Used in the practice for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>Read the paper</td>
+<td>reproducing one of its results</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>Get both datasets</td>
+<td>that, and applying the method to your own angle</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="the-reading-4560-min" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="the-reading-4560-min"><span class="header-section-number">11.1.1</span> 1. The reading — 45–60 min</h3>
+<p><strong>Amsili, van Es &amp; Schindelbeck (2025), <em>Pedotransfer Functions for Soil Protein Based on Random Forest Modeling</em></strong> <a href="https://doi.org/10.1080/00103624.2025.2454015">Read the article</a></p>
+<p>Read for the <strong>argument</strong>, not for coverage:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>What to look for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>The research question, in one sentence</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>The method or design, and why they chose it</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>The strongest single piece of evidence</td>
+</tr>
+<tr class="even">
+<td><strong>4</strong></td>
+<td>One limitation you would raise as a referee</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Annotate as you go.</strong> You will be asked what you underlined and why.</p>
+<hr>
+</section>
+<section id="the-data-10-min" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="the-data-10-min"><span class="header-section-number">11.1.2</span> 2. The data — 10 min</h3>
+<p>You need <strong>two</strong> datasets in the practice, and both should be on your machine before you arrive.</p>
+<section id="a-the-papers-replication-package" class="level4" data-number="11.1.2.1">
+<h4 data-number="11.1.2.1" class="anchored" data-anchor-id="a-the-papers-replication-package"><span class="header-section-number">11.1.2.1</span> a) The paper’s replication package</h4>
+<p>This is what you reproduce in the first twenty minutes of the practice.</p>
+<p><strong>Harvard Dataverse: <a href="https://doi.org/10.7910/DVN/HGBPCW">10.7910/DVN/HGBPCW</a></strong></p>
+<p>Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:</p>
+<pre class="text"><code>08-knn-and-bias-variance/data/replication/</code></pre>
+<p>Keep the authors’ own folder structure and README.</p>
+</section>
+<section id="b-the-course-data-for-your-own-angle" class="level4" data-number="11.1.2.2">
+<h4 data-number="11.1.2.2" class="anchored" data-anchor-id="b-the-course-data-for-your-own-angle"><span class="header-section-number">11.1.2.2</span> b) The course data, for your own angle</h4>
+<p>This is what you apply the method to in the second half.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> qmib.load(<span class="st">"core"</span>)      <span class="co"># what the lecture uses</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)                 <span class="co"># shared by every group</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)      <span class="co"># YOUR angle — see your dictionary</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data.shape, core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The course spine, plus the smarket returns used in the lecture.</p>
+<blockquote class="blockquote">
+<p>Run this <strong>before</strong> class. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing. <code>qmib.catalog()</code> lists everything available.</p>
+</blockquote>
+<p>Your group’s file, columns, units and traps are in your <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/">data dictionary</a>.</p>
+<hr>
+</section>
+</section>
+<section id="self-check-15-min" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="self-check-15-min"><span class="header-section-number">11.1.3</span> 3. Self-check — 15 min</h3>
+<p>Answer on paper. If you cannot, that is what the lecture is for.</p>
+<ol type="1">
+<li>In one sentence: what does this session’s method let you claim that the previous one did not?</li>
+<li>What must be true of your data for it to apply?</li>
+<li>Which claim in the paper rests on this method — and how hard does it lean on it?</li>
+</ol>
+<hr>
+</section>
+<section id="arrive-with" class="level3" data-number="11.1.4">
+<h3 data-number="11.1.4" class="anchored" data-anchor-id="arrive-with"><span class="header-section-number">11.1.4</span> Arrive with</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">The paper read and annotated</label></li>
+<li><label><input type="checkbox">The replication package downloaded and unzipped</label></li>
+<li><label><input type="checkbox"><code>qmib.load()</code> run at least once, so the cache exists</label></li>
+<li><label><input type="checkbox">Your self-check answers, on paper</label></li>
+</ul>
+<hr>
+<p><a href="./session-08.html">Session 08 overview</a> · <a href="#the-lecture">The lecture</a> · <a href="#in-the-practice">The practice</a></p>
+</section>
+</section>
+<section id="the-lecture" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="the-lecture"><span class="header-section-number">11.2</span> The lecture</h2>
+<div class="muted">
+<p>Delivered from <a href="https://warint.github.io/quantitative-methods/session-08-lecture.html">the slides</a>. What follows is the same material as prose.</p>
+</div>
+<!-- Imported from https://warin.ca/quant/en/session8_cours/. Content is static so the deck renders without R or Python. -->
+<blockquote class="blockquote">
+<p>"If you live 5 minutes away from Bill Gates, I bet you are rich."</p>
+</blockquote>
+</section>
+<section id="biasvariance-trade-off" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="biasvariance-trade-off"><span class="header-section-number">11.3</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/knn-boundary.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="biasvariance-trade-off-1" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="biasvariance-trade-off-1"><span class="header-section-number">11.4</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/nearest-neighbours.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="biasvariance-trade-off-2" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="biasvariance-trade-off-2"><span class="header-section-number">11.5</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/bias-variance.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="biasvariance-trade-off-3" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="biasvariance-trade-off-3"><span class="header-section-number">11.6</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/underfit.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="biasvariance-trade-off-4" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="biasvariance-trade-off-4"><span class="header-section-number">11.7</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/overfit.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="biasvariance-trade-off-5" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="biasvariance-trade-off-5"><span class="header-section-number">11.8</span> Bias–Variance Trade-off</h2>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/error-complexity.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</section>
+<section id="classification" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="classification"><span class="header-section-number">11.9</span> Classification</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">Principle</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">The test error</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<p>Thus far, our discussion of model accuracy has been focused on the <strong>regression setting</strong>.</p>
+<p>But many of the concepts that we have encountered, such as the bias-variance trade-off, transfer over to the classification setting with only some modifications due to the fact that <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-1" class="MJXp-math"><span id="MJXp-Span-2" class="MJXp-msubsup"><span id="MJXp-Span-3" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-4" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span></span></span> is no longer numerical.</p>
+<blockquote class="blockquote">
+<p>Suppose that we seek to estimate <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-5" class="MJXp-math"><span id="MJXp-Span-6" class="MJXp-mi MJXp-italic">f</span></span></span> on the basis of training observations <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-7" class="MJXp-math"><span id="MJXp-Span-8" class="MJXp-mrow"><span id="MJXp-Span-9" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-10" class="MJXp-msubsup"><span id="MJXp-Span-11" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">x</span><span id="MJXp-Span-12" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">1</span></span><span id="MJXp-Span-13" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-14" class="MJXp-msubsup"><span id="MJXp-Span-15" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-16" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">1</span></span><span id="MJXp-Span-17" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span><span id="MJXp-Span-18" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-19" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-20" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-21" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-22" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-23" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-24" class="MJXp-msubsup"><span id="MJXp-Span-25" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">x</span><span id="MJXp-Span-26" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">n</span></span><span id="MJXp-Span-27" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-28" class="MJXp-msubsup"><span id="MJXp-Span-29" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-30" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">n</span></span><span id="MJXp-Span-31" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span></span>, where now <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-32" class="MJXp-math"><span id="MJXp-Span-33" class="MJXp-msubsup"><span id="MJXp-Span-34" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-35" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">1</span></span><span id="MJXp-Span-36" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-37" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-38" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-39" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">.</span><span id="MJXp-Span-40" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-41" class="MJXp-msubsup"><span id="MJXp-Span-42" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-43" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">n</span></span></span></span> are qualitative.</p>
+</blockquote>
+<ul>
+<li>The most common approach for quantifying the accuracy of our estimate <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-44" class="MJXp-math"><span id="MJXp-Span-45" class="MJXp-mrow"><span id="MJXp-Span-46" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -0.92em;"><span id="MJXp-Span-48" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-47" class="MJXp-mi MJXp-italic">f</span></span></span></span></span></span> is the training <em>error rate</em>, the proportion of mistakes that are made if we apply error rate our estimate <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-49" class="MJXp-math"><span id="MJXp-Span-50" class="MJXp-mrow"><span id="MJXp-Span-51" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -0.92em;"><span id="MJXp-Span-53" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-52" class="MJXp-mi MJXp-italic">f</span></span></span></span></span></span> to the training observations <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-54" class="MJXp-math"><span id="MJXp-Span-55" class="MJXp-mrow"><span id="MJXp-Span-56" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -0.92em;"><span id="MJXp-Span-58" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-57" class="MJXp-mi MJXp-italic">f</span></span></span></span></span></span>:</li>
+</ul>
+<p><span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-59" class="MJXp-math MJXp-display"><span id="MJXp-Span-60" class="MJXp-mfrac" style="vertical-align: 0.25em;"><span class="MJXp-box"><span id="MJXp-Span-61" class="MJXp-mn">1</span></span><span class="MJXp-box" style="margin-top: -0.9em;"><span class="MJXp-denom"><span class="MJXp-rule" style="height: 1em; border-top-width: medium; border-top-style: none; border-top-color: currentcolor; border-bottom: 1px solid; margin: 0.1em 0px;"></span><span class="MJXp-box"><span id="MJXp-Span-62" class="MJXp-mi MJXp-italic">n</span></span></span></span></span><span id="MJXp-Span-63" class="MJXp-munderover"><span class="MJXp-over"><span class="MJXp-script"><span id="MJXp-Span-69" class="MJXp-mi MJXp-italic" style="margin-right: 0px; margin-left: 0px;">n</span></span><span id="MJXp-Span-64" class="MJXp-mo" style="margin-left: 0.111em; margin-right: 0.167em;"><span class="MJXp-largeop">∑</span></span></span><span class="MJXp-script"><span id="MJXp-Span-65" class="MJXp-mrow" style="margin-left: 0px;"><span id="MJXp-Span-66" class="MJXp-mi MJXp-italic">i</span><span id="MJXp-Span-67" class="MJXp-mo">=</span><span id="MJXp-Span-68" class="MJXp-mn">1</span></span></span></span><span id="MJXp-Span-70" class="MJXp-mi MJXp-italic">I</span><span id="MJXp-Span-71" class="MJXp-mrow"><span id="MJXp-Span-72" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"><span class="MJXp-right MJXp-scale7" style="font-size: 1.978em; margin-left: -0.05em;">(</span></span><span id="MJXp-Span-73" class="MJXp-msubsup"><span id="MJXp-Span-74" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-75" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-76" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-77" class="MJXp-msubsup"><span id="MJXp-Span-78" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-79" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-81" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-80" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-82" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-83" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"><span class="MJXp-right MJXp-scale7" style="font-size: 1.978em; margin-left: -0.05em;">)</span></span></span></span></span></p>
+<p>Here <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-84" class="MJXp-math"><span id="MJXp-Span-85" class="MJXp-msubsup"><span id="MJXp-Span-86" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-87" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-89" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-88" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-90" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span></span></span> is the predicted class label for the <em>i</em>th observation using <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-91" class="MJXp-math"><span id="MJXp-Span-92" class="MJXp-mrow"><span id="MJXp-Span-93" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -0.92em;"><span id="MJXp-Span-95" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-94" class="MJXp-mi MJXp-italic">f</span></span></span></span></span></span>. And <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-96" class="MJXp-math"><span id="MJXp-Span-97" class="MJXp-mi MJXp-italic">I</span><span id="MJXp-Span-98" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-99" class="MJXp-msubsup"><span id="MJXp-Span-100" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-101" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-102" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-103" class="MJXp-msubsup"><span id="MJXp-Span-104" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-105" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-107" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-106" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-108" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-109" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span> is an <em>indicator variable</em> that equals 1 if <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-110" class="MJXp-math"><span id="MJXp-Span-111" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-112" class="MJXp-msubsup"><span id="MJXp-Span-113" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-114" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-115" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-116" class="MJXp-msubsup"><span id="MJXp-Span-117" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-118" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-120" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-119" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-121" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-122" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span> and 0 if <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-123" class="MJXp-math"><span id="MJXp-Span-124" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-125" class="MJXp-msubsup"><span id="MJXp-Span-126" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-127" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-128" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">=</span><span id="MJXp-Span-129" class="MJXp-msubsup"><span id="MJXp-Span-130" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-131" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-133" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-132" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-134" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-135" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span>.</p>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p><span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-136" class="MJXp-math MJXp-display"><span id="MJXp-Span-137" class="MJXp-mfrac" style="vertical-align: 0.25em;"><span class="MJXp-box"><span id="MJXp-Span-138" class="MJXp-mn">1</span></span><span class="MJXp-box" style="margin-top: -0.9em;"><span class="MJXp-denom"><span class="MJXp-rule" style="height: 1em; border-top-width: medium; border-top-style: none; border-top-color: currentcolor; border-bottom: 1px solid; margin: 0.1em 0px;"></span><span class="MJXp-box"><span id="MJXp-Span-139" class="MJXp-mi MJXp-italic">n</span></span></span></span></span><span id="MJXp-Span-140" class="MJXp-munderover"><span class="MJXp-over"><span class="MJXp-script"><span id="MJXp-Span-146" class="MJXp-mi MJXp-italic" style="margin-right: 0px; margin-left: 0px;">n</span></span><span id="MJXp-Span-141" class="MJXp-mo" style="margin-left: 0.111em; margin-right: 0.167em;"><span class="MJXp-largeop">∑</span></span></span><span class="MJXp-script"><span id="MJXp-Span-142" class="MJXp-mrow" style="margin-left: 0px;"><span id="MJXp-Span-143" class="MJXp-mi MJXp-italic">i</span><span id="MJXp-Span-144" class="MJXp-mo">=</span><span id="MJXp-Span-145" class="MJXp-mn">1</span></span></span></span><span id="MJXp-Span-147" class="MJXp-mi MJXp-italic">I</span><span id="MJXp-Span-148" class="MJXp-mrow"><span id="MJXp-Span-149" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"><span class="MJXp-right MJXp-scale7" style="font-size: 1.978em; margin-left: -0.05em;">(</span></span><span id="MJXp-Span-150" class="MJXp-msubsup"><span id="MJXp-Span-151" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-152" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-153" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-154" class="MJXp-msubsup"><span id="MJXp-Span-155" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-156" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-158" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-157" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-159" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-160" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"><span class="MJXp-right MJXp-scale7" style="font-size: 1.978em; margin-left: -0.05em;">)</span></span></span></span></span></p>
+<p>If <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-161" class="MJXp-math"><span id="MJXp-Span-162" class="MJXp-mi MJXp-italic">I</span><span id="MJXp-Span-163" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-164" class="MJXp-msubsup"><span id="MJXp-Span-165" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-166" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-167" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-168" class="MJXp-msubsup"><span id="MJXp-Span-169" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-170" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-172" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-171" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-173" class="MJXp-mi MJXp-italic MJXp-script" style="vertical-align: -0.4em;">i</span></span><span id="MJXp-Span-174" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span> = 0 then the <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-175" class="MJXp-math"><span id="MJXp-Span-176" class="MJXp-msubsup"><span id="MJXp-Span-177" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">i</span><span id="MJXp-Span-178" class="MJXp-mrow MJXp-script" style="vertical-align: 0.5em;"><span id="MJXp-Span-179" class="MJXp-mi MJXp-italic">t</span><span id="MJXp-Span-180" class="MJXp-mi MJXp-italic">h</span></span></span></span></span> observation was classified correctly by our variable classification method; otherwise it was misclassified.</p>
+<p>Hence this equation computes the fraction of incorrect classifications.</p>
+<p>The equation is referred to as the <em>training error</em> rate because it is computed based on the data that was used to train our classifier.</p>
+<blockquote class="blockquote">
+<p>As in the error regression setting, we are most interested in the error rates that result from applying our classifier to test observations that were not used in training.</p>
+</blockquote>
+<p>The <em>test error</em> rate associated with a set of test observations of the form <em>test error</em> <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-181" class="MJXp-math"><span id="MJXp-Span-182" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-183" class="MJXp-msubsup"><span id="MJXp-Span-184" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">x</span><span id="MJXp-Span-185" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span><span id="MJXp-Span-186" class="MJXp-mo" style="margin-left: 0em; margin-right: 0.222em;">,</span><span id="MJXp-Span-187" class="MJXp-msubsup"><span id="MJXp-Span-188" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-189" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span><span id="MJXp-Span-190" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span> is given by:</p>
+<p><span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-191" class="MJXp-math MJXp-display"><span id="MJXp-Span-192" class="MJXp-mi MJXp-italic">A</span><span id="MJXp-Span-193" class="MJXp-mi MJXp-italic">v</span><span id="MJXp-Span-194" class="MJXp-mi MJXp-italic">e</span><span id="MJXp-Span-195" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-196" class="MJXp-mi MJXp-italic">I</span><span id="MJXp-Span-197" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">(</span><span id="MJXp-Span-198" class="MJXp-msubsup"><span id="MJXp-Span-199" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">y</span><span id="MJXp-Span-200" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span><span id="MJXp-Span-201" class="MJXp-mo" style="margin-left: 0.333em; margin-right: 0.333em;">≠</span><span id="MJXp-Span-202" class="MJXp-msubsup"><span id="MJXp-Span-203" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-204" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-206" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-205" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-207" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span><span id="MJXp-Span-208" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span><span id="MJXp-Span-209" class="MJXp-mo" style="margin-left: 0em; margin-right: 0em;">)</span></span></span></p>
+<p>where <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-210" class="MJXp-math"><span id="MJXp-Span-211" class="MJXp-msubsup"><span id="MJXp-Span-212" class="MJXp-mrow" style="margin-right: 0.05em;"><span id="MJXp-Span-213" class="MJXp-munderover"><span class="MJXp-over"><span style="margin-bottom: -1.17em;"><span id="MJXp-Span-215" class="MJXp-mo" style="margin-left: 0px; margin-right: 0px;">ˆ</span></span><span id="MJXp-Span-214" class="MJXp-mi MJXp-italic">y</span></span></span></span><span id="MJXp-Span-216" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span></span></span> is the predicted class label that results from applying the classifier to the test observation with predictor <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-217" class="MJXp-math"><span id="MJXp-Span-218" class="MJXp-msubsup"><span id="MJXp-Span-219" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">x</span><span id="MJXp-Span-220" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span></span></span>. A good classifier is one for which the test error is smallest.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="the-bayes-classifier" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="the-bayes-classifier"><span class="header-section-number">11.10</span> The Bayes Classifier</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">The Bayes classifier</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Example</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p>It is possible to show that the test error rate given in is minimized, on average, by a very simple classifier that <em>assigns each observation to the most likely class, given its predictor values</em>.</p>
+<p>In other words, we should simply assign a test observation with predictor vector <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-221" class="MJXp-math"><span id="MJXp-Span-222" class="MJXp-msubsup"><span id="MJXp-Span-223" class="MJXp-mi MJXp-italic" style="margin-right: 0.05em;">x</span><span id="MJXp-Span-224" class="MJXp-mn MJXp-script" style="vertical-align: -0.4em;">0</span></span></span></span> to the class <span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-225" class="MJXp-math"><span id="MJXp-Span-226" class="MJXp-mi MJXp-italic">j</span></span></span> for which:</p>
+<p><span class="MathJax_Preview" style="color: inherit;"><span id="MJXp-Span-227" class="MJXp-math"><span id="MJXp-Span-228" class="MJXp-mo">Pr</span></span></span></p>
+<p>is largest.</p>
+<blockquote class="blockquote">
+<p>Note that this equation is a <em>conditional probability</em>: it is the probability conditional that <span class="MathJax_Preview">Y = j</span>, given the observed predictor vector <span class="MathJax_Preview">x_0</span>.</p>
+</blockquote>
+<p>This very simple classifier is called the <strong>Bayes classifier</strong>.</p>
+<p>In a two-class problem where there are only two possible response values, say <em>class 1</em> or <em>class 2</em>, the Bayes classifier corresponds to predicting class one if <span class="MathJax_Preview">\Pr\left(Y=j\ |\ X\ =x_0\right) &gt; 0.5</span>, and class two otherwise.</p>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="pull-left">
+<p>A simulated data set consisting of 100 observations in each of two groups, indicated in blue and in orange.</p>
+<p>The purple dashed line represents the Bayes decision boundary.</p>
+<p>The orange background grid indicates the region in which a test observation will be assigned to the orange class, and the blue background grid indicates the region in which a test observation will be assigned to the blue class.</p>
+<p>This figure provides an example using a simulated data set in a two-dimensional space consisting of predictors <span class="MathJax_Preview">X_1</span> and <span class="MathJax_Preview">X_2</span>.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/knn-boundary.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>"If you live 5 minutes away from Bill Gates, I bet you are rich."</p>
+</blockquote>
+</section>
+<section id="k-nearest-neighbors" class="level2" data-number="11.11">
+<h2 data-number="11.11" class="anchored" data-anchor-id="k-nearest-neighbors"><span class="header-section-number">11.11</span> K-Nearest Neighbors</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">K-Nearest Neightbors</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Mathematics</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<p>In theory we would always like to predict qualitative responses using the Bayes classifier.</p>
+<p>But for real data, we do not know the conditional distribution of <span class="MathJax_Preview">Y</span> given <span class="MathJax_Preview">X</span>, and so computing the Bayes classifier is impossible.</p>
+<p>Therefore, the Bayes classifier serves as an unattainable gold standard against which to compare other methods.</p>
+<p>Many approaches attempt to estimate the conditional distribution of <span class="MathJax_Preview">Y</span> given <span class="MathJax_Preview">X</span>, and then classify a given observation to the class with highest estimated probability.</p>
+<blockquote class="blockquote">
+<p>One such method is the K-nearest neighbors (KNN) classifier.</p>
+</blockquote>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<p>Given a positive integer <span class="MathJax_Preview">K</span> and a test observation <span class="MathJax_Preview">x_0</span>, the KNN classifier first identifies the neighbors <span class="MathJax_Preview">K</span> points in the training data that are closest to <span class="MathJax_Preview">x_0</span>, represented by <span class="MathJax_Preview">N_0</span>.</p>
+<p>It then estimates the conditional probability for class <span class="MathJax_Preview">j</span> as the fraction of points in <span class="MathJax_Preview">N_0</span> whose response values equal <span class="MathJax_Preview">j</span>:</p>
+<p><span class="MathJax_Preview">Pr\left(Y=j\ |\ X\ =x_0\right) = \frac{1}{K}\sum_{i∈N_0}I\left(y_i =j\right)</span></p>
+<p>Finally, KNN applies Bayes rule and classifies the test observation <span class="MathJax_Preview">x_0</span> to the class with the largest probability.</p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Goal</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Example</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="pull-left">
+<p>Our goal is to make a prediction for the point labeled by the black cross. Suppose that we choose <span class="MathJax_Preview">K = 3</span>.</p>
+<p>Then KNN will first identify the three observations that are closest to the cross. This neighborhood is shown as a circle.</p>
+<p>It consists of two blue points and one orange point, resulting in estimated probabilities of <span class="MathJax_Preview">2/3</span> for the blue class and <span class="MathJax_Preview">1/3</span> for the orange class.</p>
+<p>Hence KNN will predict that the black cross belongs to the blue class.</p>
+<p>Right-hand panel of the figure: we have applied the KNN approach with <span class="MathJax_Preview">K = 3</span> at all of the possible values for <span class="MathJax_Preview">X_1</span> and <span class="MathJax_Preview">X_2</span>, and have drawn in the corresponding KNN decision boundary.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/nearest-neighbours.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/nearest-neighbours.png" class="img-fluid" style="display: block; margin: auto;;width:78.0%"></p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Efficiency</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Choice of K</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="pull-left">
+<p>Despite the fact that it is a very simple approach, KNN can often produce classifiers that are surprisingly close to the optimal Bayes classifier.</p>
+<p>This figure displays the KNN decision boundary, using <span class="MathJax_Preview">K = 10</span>, when applied to the larger simulated data set from the first figure.</p>
+<p>The Bayes decision boundary is shown as a purple dashed line. The KNN and Bayes decision boundaries are very similar.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/knn-boundary.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="pull-left">
+<p>The choice of <span class="MathJax_Preview">K</span> has a drastic effect on the KNN classifier obtained.</p>
+<p>This figure displays two KNN fits to the simulated data , using <span class="MathJax_Preview">K = 1</span> and <span class="MathJax_Preview">K = 100</span>. When <span class="MathJax_Preview">K = 1</span>, the decision boundary is overly flexible and finds patterns in the data that don’t correspond to the Bayes decision boundary.</p>
+<p>This corresponds to a classifier that has low bias but very high variance.</p>
+<p>As <span class="MathJax_Preview">K</span> grows, the method becomes less flexible and produces a decision boundary that is close to linear.</p>
+<p>This corresponds to a low-variance but high-bias classifier.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/complexity-compare.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Goal</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Errors</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<div class="pull-left">
+<p>Just as in the regression setting, there is not a strong relationship between the training error rate and the test error rate. With <span class="MathJax_Preview">K = 1</span>, the KNN training error rate is 0, but the test error rate may be quite high.</p>
+<p>In general, as we use more flexible classification methods, the training error rate will decline but the test error rate may not.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/error-complexity.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="pull-left">
+<p>The KNN training error rate (blue, 200 observations) and test error rate (orange, 5,000 observations) on the data from the first figure, as the level of flexibility (assessed using <span class="MathJax_Preview">1/K</span>) increases.</p>
+<p>The black dashed line indicates the Bayes error rate.</p>
+<p>The jumpiness of the curves is due to the small size of the training data set.</p>
+<p>Choosing the correct level of flexibility is critical to the success of any statistical learning method.</p>
+<p>The bias-variance tradeoff, and the resulting U-shape in the test error, can make this a difficult task.</p>
+</div>
+<div class="pull-right">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/error-complexity.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="knn-by-hand-you-are-the-algorithm" class="level2" data-number="11.12">
+<h2 data-number="11.12" class="anchored" data-anchor-id="knn-by-hand-you-are-the-algorithm"><span class="header-section-number">11.12</span> KNN by hand (you are the algorithm)</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Example</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">Euclidean distance</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<p>The table provides a training data set containing six observations, three predictors, and one qualitative response variable.</p>
+<div class="pull-left">
+<p>Suppose we wish to use this data set to make a prediction for <span class="MathJax_Preview">Y</span> when <span class="MathJax_Preview">X_1 = X_2 = X_3 = 0</span> using <span class="MathJax_Preview">K</span>-nearest neighbors.</p>
+<ul>
+<li>Compute the Euclidean distance between each observation and the test point, <span class="MathJax_Preview">X_1 = X_2 = X_3 = 0</span>.</li>
+</ul>
+<p><span class="MathJax_Preview">d(a,b) = d(b,a) = \sqrt{\sum_{i=1}^{p}(a_i - b_i)^2}</span></p>
+</div>
+<div class="pull-right">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{1}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{2}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{3}</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">Y</span>`</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">Red</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">Green</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Green</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Red</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<div class="pull-left">
+<p><span class="MathJax_Preview">d(a,b) = d(b,a) = \sqrt{\sum_{i=1}^{p}(a_i - b_i)^2}</span></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Six observations in three dimensions — we will find the nearest neighbours by hand</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>obs <span class="op">=</span> np.array([</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,  <span class="dv">3</span>, <span class="dv">0</span>],</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">2</span>,  <span class="dv">0</span>, <span class="dv">0</span>],</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,  <span class="dv">1</span>, <span class="dv">3</span>],</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,  <span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    [<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>,  <span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> np.array([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Euclidean distance from the test point to each observation</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>dist <span class="op">=</span> np.sqrt(((obs <span class="op">-</span> test) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, d <span class="kw">in</span> <span class="bu">enumerate</span>(dist, <span class="dv">1</span>):</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"obs</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>d<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="pull-right">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{1}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{2}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{3}</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">Y</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">d(X, Z)</span>`</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">3.0000</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">2.0000</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">3.1623</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">2.2361</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1.4142</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">1.7321</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="knn-by-hand" class="level2" data-number="11.13">
+<h2 data-number="11.13" class="anchored" data-anchor-id="knn-by-hand"><span class="header-section-number">11.13</span> KNN by hand</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true">Question</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<ul>
+<li>What is our prediction with <span class="MathJax_Preview">K = 1</span>? Why?</li>
+</ul>
+<blockquote class="blockquote">
+<p>Green, since the single nearest neighbor to <span class="MathJax_Preview">Z</span> is observation 5.</p>
+</blockquote>
+</div>
+<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{1}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{2}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{3}</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">Y</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">d(X, Z)</span>`</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">3</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">3.1623</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">2.2361</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">[Green]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+<td style="text-align: left;">[1.4142]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">1.7321</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="knn-by-hand-1" class="level2" data-number="11.14">
+<h2 data-number="11.14" class="anchored" data-anchor-id="knn-by-hand-1"><span class="header-section-number">11.14</span> KNN by hand</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true">Question</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
+<ul>
+<li>What is our prediction with <span class="MathJax_Preview">K = 3</span>? Why?</li>
+</ul>
+<blockquote class="blockquote">
+<p>Red, since the three nearest neighbors to <span class="MathJax_Preview">Z</span> are observations 5, 6 and 2; two are “Red”.</p>
+</blockquote>
+</div>
+<div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{1}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{2}</span>`</th>
+<th style="text-align: right;">`<span class="MathJax_Preview">X_{3}</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">Y</span>`</th>
+<th style="text-align: left;">`<span class="MathJax_Preview">d(X, Z)</span>`</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">3</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">[Red]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+<td style="text-align: left;">[2]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">3.1623</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">2.2361</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">[Green]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+<td style="text-align: left;">[1.4142]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">[Red]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+<td style="text-align: left;">[1.7321]{style=” font-weight: bold; border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;“}</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="knn-by-hand-2" class="level2" data-number="11.15">
+<h2 data-number="11.15" class="anchored" data-anchor-id="knn-by-hand-2"><span class="header-section-number">11.15</span> KNN by hand</h2>
+<ul>
+<li>If the Bayes decision boundary in this problem is highly nonlinear, then would we expect the best value for <span class="MathJax_Preview">K</span> to be large or small? Why?</li>
+</ul>
+<p>Solution</p>
+<p>We would expect a small K to perform better for a nonlinear decision boundary. A small `<span class="MathJax_Preview">K</span>` would be more ‘flexible’ and the KNN boundary would be pulled in different directions easier, whereas a large K would have a ‘smoothing’ effect and produce a more linear boundary (hence, a worse classifier), because it takes more points into account.</p>
+</section>
+<section id="knn-in-r-code-you-are-not-longer-the-algorithm" class="level2" data-number="11.16">
+<h2 data-number="11.16" class="anchored" data-anchor-id="knn-in-r-code-you-are-not-longer-the-algorithm"><span class="header-section-number">11.16</span> KNN in R code (you are not longer the algorithm)</h2>
+</section>
+<section id="machine-learning-using-knn-as-an-example" class="level2" data-number="11.17">
+<h2 data-number="11.17" class="anchored" data-anchor-id="machine-learning-using-knn-as-an-example"><span class="header-section-number">11.17</span> Machine Learning: using KNN as an example</h2>
+<ul>
+<li>How does an AI work?</li>
+</ul>
+<blockquote class="blockquote">
+<p>The KNN mathematics, now integrated in an algorithm, what does it change?</p>
+</blockquote>
+</section>
+<section id="machine-learning-using-knn-as-an-example-1" class="level2" data-number="11.18">
+<h2 data-number="11.18" class="anchored" data-anchor-id="machine-learning-using-knn-as-an-example-1"><span class="header-section-number">11.18</span> Machine Learning: using KNN as an example</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true">Data collection</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false">Data description</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Smarket: 1,250 daily S&amp;P 500 returns. ISLR ships it as a CSV.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Smarket <span class="op">=</span> pd.read_csv(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://www.statlearning.com/s/Smarket.csv"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>Smarket.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
+## 1 2001  0.381 -0.192 -2.624 -1.055  5.010 1.1913  0.959        Up
+## 2 2001  0.959  0.381 -0.192 -2.624 -1.055 1.2965  1.032        Up
+## 3 2001  1.032  0.959  0.381 -0.192 -2.624 1.4112 -0.623      Down
+## 4 2001 -0.623  1.032  0.959  0.381 -0.192 1.2760  0.614        Up
+## 5 2001  0.614 -0.623  1.032  0.959  0.381 1.2057  0.213        Up
+## 6 2001  0.213  0.614 -0.623  1.032  0.959 1.3491  1.392        Up</code></pre>
+</div>
+<div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
+<p>We have a labeled dataset here about the stock market. A data frame with 1250 observations on the following 9 variables.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="MathJax_Preview">Year</span></td>
+<td style="text-align: left;">The year that the observation was recorded</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="MathJax_Preview">Lag_1</span></td>
+<td style="text-align: left;">Percentage return for previous day</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="MathJax_Preview">Lag_2</span></td>
+<td style="text-align: left;">Percentage return for 2 days previous</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="MathJax_Preview">Lag_n</span></td>
+<td style="text-align: left;">Percentage return for <span class="MathJax_Preview">n</span> days previous</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="MathJax_Preview">Direction</span></td>
+<td style="text-align: left;">A factor with levels Down and Up indicating whether the market had a positive or negative return on a given day</td>
+</tr>
+</tbody>
+</table>
+<p>Pre-processing means that we will create the train and the test datasets (they will be called train and test). We also need to consider a variable with the labeled value, here "Direction" (it is a factor with the "up" and "down" values).</p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-11-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-1" role="tab" aria-controls="tabset-11-1" aria-selected="true">Steps</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-2" role="tab" aria-controls="tabset-11-2" aria-selected="false">Confusion Matrix</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-3" role="tab" aria-controls="tabset-11-3" aria-selected="false">Interpretation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-4" role="tab" aria-controls="tabset-11-4" aria-selected="false">Pre-processing</a></li></ul>
+<div class="tab-content">
+<div id="tabset-11-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-11-1-tab">
+<p>We will now perform KNN.</p>
+<ol type="1">
+<li><p>A matrix containing the predictors associated with the training data, labeled <code class="remark-inline-code">train</code> below.</p></li>
+<li><p>A matrix containing the predictors associated with the data for which we wish to make predictions, labeled <code class="remark-inline-code">test</code> below.</p></li>
+<li><p>A vector containing the class labels for the training observations, labeled <code class="remark-inline-code">Direction</code> below.</p></li>
+<li><p>A value for <span class="MathJax_Preview">K</span>, the number of nearest neighbors to be used by the classifier (will be determined automatically).</p></li>
+</ol>
+</div>
+<div id="tabset-11-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-2-tab">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/confusion-matrix.png" class="img-fluid" style="display: block; margin: auto;;width:72.0%"></p>
+</div>
+<div id="tabset-11-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-3-tab">
+<p>Based on the above confusion matrix, we can calculate the following values and prepare for plotting the ROC curve.</p>
+<p><span class="MathJax_Preview">Accuracy = \frac{TP+TN}{TP+FP+TN+FN}</span></p>
+<p><span class="MathJax_Preview">TPR / Recall / Sensitivity = \frac{TP}{TP+FN}</span></p>
+<p><span class="MathJax_Preview">Precision = \frac{TP}{TP+FP}</span></p>
+<p><span class="MathJax_Preview">Specificity = \frac{TN}{TN+FP}</span></p>
+<p><span class="MathJax_Preview">False~Postitive~Rate = 1 — Specificity = \frac{FP}{TN+FP}</span></p>
+<p><span class="MathJax_Preview">F1~Score =\frac{2*TP}{2*TP+FP+FN}= (Precision * Recall) / (Precision + Recall)</span></p>
+</div>
+<div id="tabset-11-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-4-tab">
+<p>Scaling/normalization:</p>
+<p><span class="MathJax_Preview">x_{normalized} = \frac{x - x_{min}}{x_{max} - x_{min}}</span></p>
+<p>Centering/standardization:</p>
+<p><span class="MathJax_Preview">x_{standardized} = \frac{x - \mu}{\sigma}</span></p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-12-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-1" role="tab" aria-controls="tabset-12-1" aria-selected="true">Steps</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-12-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-2" role="tab" aria-controls="tabset-12-2" aria-selected="false">Step 1: Data collection</a></li></ul>
+<div class="tab-content">
+<div id="tabset-12-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-12-1-tab">
+<ol type="1">
+<li><p>Data collection</p></li>
+<li><p>Model training with or without cross-validation and pre-processing of data</p></li>
+<li><p>Model testing</p></li>
+<li><p>Prediction on user's data</p></li>
+</ol>
+</div>
+<div id="tabset-12-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-12-2-tab">
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Smarket <span class="op">=</span> pd.read_csv(<span class="st">"https://www.statlearning.com/s/Smarket.csv"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Train on everything before 2005, test on 2005 — a time split, not a random one</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">&lt;</span> <span class="dv">2005</span>]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>test  <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">==</span> <span class="dv">2005</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
+## 1 2001  0.381 -0.192 -2.624 -1.055  5.010 1.1913  0.959        Up
+## 2 2001  0.959  0.381 -0.192 -2.624 -1.055 1.2965  1.032        Up
+## 3 2001  1.032  0.959  0.381 -0.192 -2.624 1.4112 -0.623      Down
+## 4 2001 -0.623  1.032  0.959  0.381 -0.192 1.2760  0.614        Up
+## 5 2001  0.614 -0.623  1.032  0.959  0.381 1.2057  0.213        Up
+## 6 2001  0.213  0.614 -0.623  1.032  0.959 1.3491  1.392        Up</code></pre>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-13-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-1" role="tab" aria-controls="tabset-13-1" aria-selected="true">Step 2: Code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-13-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-2" role="tab" aria-controls="tabset-13-2" aria-selected="false">Step 2: Output</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-13-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-3" role="tab" aria-controls="tabset-13-3" aria-selected="false">Step 2: Plot</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-13-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-4" role="tab" aria-controls="tabset-13-4" aria-selected="false">Step 2: TL;DR</a></li></ul>
+<div class="tab-content">
+<div id="tabset-13-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-13-1-tab">
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">&lt;</span> <span class="dv">2005</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>test_set <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">==</span> <span class="dv">2005</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>X_tr, y_tr <span class="op">=</span> train[[<span class="st">"Lag1"</span>, <span class="st">"Lag2"</span>]], train[<span class="st">"Direction"</span>]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN needs standardised inputs: distance is meaningless in mixed units.</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>pipe <span class="op">=</span> make_pipeline(StandardScaler(), KNeighborsClassifier())</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> GridSearchCV(pipe, {<span class="st">"kneighborsclassifier__n_neighbors"</span>: <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">26</span>)}, cv<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>modelknn <span class="op">=</span> grid.fit(X_tr, y_tr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>or with k-fold cross-validation:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>X_tr, y_tr <span class="op">=</span> train[[<span class="st">"Lag1"</span>, <span class="st">"Lag2"</span>]], train[<span class="st">"Direction"</span>]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># StandardScaler inside the pipeline, so it is refitted in every CV fold</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>modelknn <span class="op">=</span> GridSearchCV(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    make_pipeline(StandardScaler(), KNeighborsClassifier()),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"kneighborsclassifier__n_neighbors"</span>: <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">102</span>, <span class="dv">2</span>)},</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">3</span>).fit(X_tr, y_tr)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(modelknn.best_params_, <span class="bu">round</span>(modelknn.best_score_, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-13-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-2-tab">
+<pre><code>## k-Nearest Neighbors 
+## 
+## 998 samples
+##   2 predictor
+##   2 classes: 'Down', 'Up' 
+## 
+## Pre-processing: centered (2), scaled (2) 
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 998, 998, 998, 998, 998, 998, ... 
+## Resampling results across tuning parameters:
+## 
+##   k    Accuracy   Kappa        
+##     1  0.5077431   1.599383e-02
+##     3  0.4919940  -1.512538e-02
+##     5  0.4917264  -1.577724e-02
+##     7  0.4784333  -4.190927e-02
+##     9  0.4809359  -3.675615e-02
+##    11  0.4814100  -3.579917e-02
+##    13  0.4830695  -3.260827e-02
+##    15  0.4861415  -2.581052e-02
+##    17  0.4901345  -1.755719e-02
+##    19  0.4933934  -1.116671e-02
+##    21  0.4990181   2.010178e-05
+##    23  0.4969327  -4.049311e-03
+##    25  0.5002967   2.613570e-03
+##    27  0.5029592   7.997583e-03
+##    29  0.4982065  -1.298930e-03
+##    31  0.5045753   1.167676e-02
+##    33  0.5025924   7.565307e-03
+##    35  0.5011583   4.917095e-03
+##    37  0.5033302   9.090351e-03
+##    39  0.4990326   7.128709e-04
+##    41  0.5027772   7.862683e-03
+##    43  0.5020358   6.557758e-03
+##    45  0.4990432   5.371903e-04
+##    47  0.4992148   8.371058e-04
+##    49  0.4947610  -7.758225e-03
+##    51  0.4918414  -1.356142e-02
+##    53  0.4962420  -4.504979e-03
+##    55  0.4962089  -4.540006e-03
+##    57  0.4938731  -9.126126e-03
+##    59  0.4930313  -1.098474e-02
+##    61  0.4924355  -1.204873e-02
+##    63  0.4882357  -2.030122e-02
+##    65  0.4916030  -1.348158e-02
+##    67  0.4909612  -1.493990e-02
+##    69  0.4887982  -1.894524e-02
+##    71  0.4937787  -9.054955e-03
+##    73  0.4946094  -7.184378e-03
+##    75  0.4935163  -9.257376e-03
+##    77  0.4933196  -9.723898e-03
+##    79  0.4934470  -9.291803e-03
+##    81  0.4937045  -9.057264e-03
+##    83  0.4946732  -7.218470e-03
+##    85  0.4965836  -3.461526e-03
+##    87  0.4964156  -3.797219e-03
+##    89  0.4938407  -8.835032e-03
+##    91  0.4997053   2.765046e-03
+##    93  0.4997206   2.993713e-03
+##    95  0.5013862   6.431938e-03
+##    97  0.4949097  -6.424768e-03
+##    99  0.4936504  -9.192792e-03
+##   101  0.4948240  -6.543159e-03
+## 
+## Accuracy was used to select the optimal model using the largest value.
+## The final value used for the model was k = 1.</code></pre>
+</div>
+<div id="tabset-13-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-3-tab">
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">26</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> modelknn.cv_results_[<span class="st">"mean_test_score"</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, scores, <span class="st">"o-"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"k (number of neighbours)"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"CV accuracy"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/imported-assets/index_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid"></p>
+</div>
+<div id="tabset-13-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-4-tab">
+<p>Best tuning:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>modelknn.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>##   k
+## 1 1</code></pre>
+<p>Variable importance?</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.inspection <span class="im">import</span> permutation_importance</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN has no coefficients — importance is measured by scrambling a column</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>imp <span class="op">=</span> permutation_importance(modelknn, X_tr, y_tr, n_repeats<span class="op">=</span><span class="dv">10</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, m <span class="kw">in</span> <span class="bu">zip</span>(X_tr.columns, imp.importances_mean):</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>m<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>## ROC curve variable importance
+## 
+##      Importance
+## Lag1        100
+## Lag2          0</code></pre>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-14-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-14-1" role="tab" aria-controls="tabset-14-1" aria-selected="true">Step 3: Test</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-14-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-14-2" role="tab" aria-controls="tabset-14-2" aria-selected="false">Step 3: Code - Test</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-14-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-14-3" role="tab" aria-controls="tabset-14-3" aria-selected="false">Step 3: Output - Test</a></li></ul>
+<div class="tab-content">
+<div id="tabset-14-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-14-1-tab">
+<p>Let us predict the Direction, and see what it does predict indeed.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>X_te, y_te <span class="op">=</span> test[[<span class="st">"Lag1"</span>, <span class="st">"Lag2"</span>]], test[<span class="st">"Direction"</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>knn_predict <span class="op">=</span> modelknn.predict(X_te)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>df_knn_predict <span class="op">=</span> test.assign(knnPredict<span class="op">=</span>knn_predict)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>df_knn_predict[<span class="st">"Direction"</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>## [1] Down Down Down Up   Down Up  
+## Levels: Down Up</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>knn_predict <span class="op">=</span> modelknn.predict(test_set[[<span class="st">"Lag1"</span>, <span class="st">"Lag2"</span>]])</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>knn_predict[:<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>## [1] Down Down Up   Up   Down Up  
+## Levels: Down Up</code></pre>
+</div>
+<div id="tabset-14-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-14-2-tab">
+<p>Since we have the actual labels with in the test$Direction variable for the test dataset, we will be able to check the performance of the prediction on the test dataset. Let's produce the confusion matrix based on the optimal parameters from the knnfit with the new dataset called test_final:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix, classification_report</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The confusion matrix, and the accuracy that goes with it</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(confusion_matrix(y_te, knn_predict))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_te, knn_predict))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-14-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-14-3-tab">
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction Down Up
+##       Down   43 60
+##       Up     68 81
+##                                           
+##                Accuracy : 0.4921          
+##                  95% CI : (0.4288, 0.5555)
+##     No Information Rate : 0.5595          
+##     P-Value [Acc &gt; NIR] : 0.9866          
+##                                           
+##                   Kappa : -0.0384         
+##                                           
+##  Mcnemar's Test P-Value : 0.5361          
+##                                           
+##             Sensitivity : 0.3874          
+##             Specificity : 0.5745          
+##          Pos Pred Value : 0.4175          
+##          Neg Pred Value : 0.5436          
+##              Prevalence : 0.4405          
+##          Detection Rate : 0.1706          
+##    Detection Prevalence : 0.4087          
+##       Balanced Accuracy : 0.4809          
+##                                           
+##        'Positive' Class : Down            
+##</code></pre>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-15-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-1" role="tab" aria-controls="tabset-15-1" aria-selected="true">Step 4: Prediction - Code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-15-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-2" role="tab" aria-controls="tabset-15-2" aria-selected="false">Step 4: Output</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-15-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-3" role="tab" aria-controls="tabset-15-3" aria-selected="false">Step 4: Visual</a></li></ul>
+<div class="tab-content">
+<div id="tabset-15-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-15-1-tab">
+<p>Here we will perform a <strong>point estimate</strong> prediction. You can use your own features to see what the model will predict...</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>Smarket <span class="op">=</span> pd.read_csv(<span class="st">"https://www.statlearning.com/s/Smarket.csv"</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">&lt;</span> <span class="dv">2005</span>]</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>test  <span class="op">=</span> Smarket[Smarket[<span class="st">"Year"</span>] <span class="op">==</span> <span class="dv">2005</span>]</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>modelknn <span class="op">=</span> GridSearchCV(</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    make_pipeline(StandardScaler(), KNeighborsClassifier()),</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"kneighborsclassifier__n_neighbors"</span>: <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">102</span>, <span class="dv">2</span>)},</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">3</span>).fit(train[[<span class="st">"Lag1"</span>, <span class="st">"Lag2"</span>]], train[<span class="st">"Direction"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-15-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-15-2-tab">
+<pre><code>##     Lag1  Lag2
+## 1 -0.134 0.008
+
+##   knnPredict2
+## 1        Down</code></pre>
+</div>
+<div id="tabset-15-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-15-3-tab">
+<p><img src="https://github.com/warint/quantitative-methods/blob/main/economist-assets/nearest-neighbours.png" class="img-fluid" style="display: block; margin: auto;;width:100.0%"></p>
+</div>
+</div>
+</div>
+<p>You survived your second session on Machine Learning! Congrats!</p>
+<p>You survived your second session on Machine Learning! Congrats!</p>
+<blockquote class="blockquote">
+<p>Wait! I am not an expert! I will never be!!!</p>
+<p>I only know the K-Nearest-Neighbor classification technique!!!</p>
+</blockquote>
+<p>You survived your second session on Machine Learning! Congrats!</p>
+<blockquote class="blockquote">
+<p>Wait! I am not an expert! I will never be!!!</p>
+<p>I only know the K-Nearest-Neighbor classification technique!!!</p>
+</blockquote>
+<p>OK, let's step back first...</p>
+</section>
+<section id="big-lessons-from-ml" class="level2" data-number="11.19">
+<h2 data-number="11.19" class="anchored" data-anchor-id="big-lessons-from-ml"><span class="header-section-number">11.19</span> Big lessons from ML</h2>
+</section>
+<section id="big-lessons" class="level2" data-number="11.20">
+<h2 data-number="11.20" class="anchored" data-anchor-id="big-lessons"><span class="header-section-number">11.20</span> Big lessons</h2>
+<ul>
+<li><p>Machine Learning is about:</p>
+<ul>
+<li><p>regressions</p></li>
+<li><p>classifications</p></li>
+</ul></li>
+<li><p>Machine Learning is about:</p>
+<ul>
+<li>a process: the 7 principles of ML (see the previous session)</li>
+</ul></li>
+<li><p>You can run the lm(), glm(), plm() in the context of ML: k-fold cross validation, training/testing, predictions</p></li>
+<li><p>ML aims at:</p>
+<ul>
+<li><p>reducing the model and data biases in <strong>sampling with regards to the populations</strong></p></li>
+<li><p>as such, it is a <strong>GIGANTIC improvement</strong> of current quantitative studies</p></li>
+</ul></li>
+</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-16-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-16-1" role="tab" aria-controls="tabset-16-1" aria-selected="true">Neural Network - Not exam material</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-16-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-16-2" role="tab" aria-controls="tabset-16-2" aria-selected="false">ML Regression</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-16-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-16-3" role="tab" aria-controls="tabset-16-3" aria-selected="false">glmboost</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-16-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-16-4" role="tab" aria-controls="tabset-16-4" aria-selected="false">RF</a></li></ul>
+<div class="tab-content">
+<div id="tabset-16-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-16-1-tab">
+<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Classification example: the iris data, which ships with scikit-learn</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_iris</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> load_iris(as_frame<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>TrainData, TrainClasses <span class="op">=</span> iris.data, iris.target</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>knn_iris <span class="op">=</span> GridSearchCV(</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    make_pipeline(StandardScaler(), KNeighborsClassifier()),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"kneighborsclassifier__n_neighbors"</span>: <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">16</span>)}, cv<span class="op">=</span><span class="dv">10</span>).fit(TrainData, TrainClasses)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"best k = </span><span class="sc">{</span>knn_iris<span class="sc">.</span>best_params_<span class="sc">}</span><span class="ss">, accuracy = </span><span class="sc">{</span>knn_iris<span class="sc">.</span>best_score_<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-16-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-16-2-tab">
+<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression example: California housing replaces the retired Boston data,</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># which was withdrawn over an ethically problematic variable.</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_california_housing</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsRegressor</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>housing <span class="op">=</span> fetch_california_housing(as_frame<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> housing.data, housing.target</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>knn_reg <span class="op">=</span> make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors<span class="op">=</span><span class="dv">5</span>))</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> <span class="op">-</span>cross_val_score(knn_reg, X[:<span class="dv">2000</span>], y[:<span class="dv">2000</span>], cv<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>                        scoring<span class="op">=</span><span class="st">"neg_root_mean_squared_error"</span>).mean()</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"KNN regression RMSE = </span><span class="sc">{</span>rmse<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-16-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-16-3-tab">
+<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scikit-learn parallelises with n_jobs — no cluster setup required.</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>knn_par <span class="op">=</span> GridSearchCV(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    make_pipeline(StandardScaler(), KNeighborsClassifier()),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"kneighborsclassifier__n_neighbors"</span>: <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">26</span>)},</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>).fit(X_tr, y_tr)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"best k = </span><span class="sc">{</span>knn_par<span class="sc">.</span>best_params_<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-16-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-16-4-tab">
+<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A random forest, also parallelised, for comparison with KNN</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>rf <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span><span class="dv">500</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"forest CV accuracy = </span><span class="sc">{</span>cross_val_score(rf, X_tr, y_tr, cv<span class="op">=</span><span class="dv">5</span>)<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="in-the-practice" class="level2" data-number="11.21">
+<h2 data-number="11.21" class="anchored" data-anchor-id="in-the-practice"><span class="header-section-number">11.21</span> In the practice</h2>
+<section id="k-nearest-neighbours-and-the-biasvariance-trade-off" class="level3" data-number="11.21.1">
+<h3 data-number="11.21.1" class="anchored" data-anchor-id="k-nearest-neighbours-and-the-biasvariance-trade-off"><span class="header-section-number">11.21.1</span> K-Nearest Neighbours and the Bias–Variance Trade-off</h3>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-08-practice.html">Open the practice slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S08-Practice.qmd"><code>MATH60033A-S08-Practice.qmd</code></a></p>
+</blockquote>
+<hr>
+<section id="the-theme-of-this-session" class="level4" data-number="11.21.1.1">
+<h4 data-number="11.21.1.1" class="anchored" data-anchor-id="the-theme-of-this-session"><span class="header-section-number">11.21.1.1</span> The theme of this session</h4>
+<blockquote class="blockquote">
+<h1 id="does-flexibility-buy-you-anything-on-your-own-data" data-number="12"><span class="header-section-number">12</span> Does flexibility buy you anything on your own data?</h1>
+</blockquote>
+<p>All ten groups attack this question, each on <strong>its own project</strong>, and the last twenty minutes assemble the answers.</p>
+<hr>
+</section>
+<section id="what-you-are-doing" class="level4" data-number="12.0.0.1">
+<h4 data-number="12.0.0.1" class="anchored" data-anchor-id="what-you-are-doing"><span class="header-section-number">12.0.0.1</span> What you are doing</h4>
+<p>The lecture showed the method on the session’s dataset. You now apply it to <strong>your own angle</strong>, and to the question your group is actually trying to answer (<a href="./mandates.html"><code>RESEARCH-MANDATES.md</code></a>).</p>
+<p>The deliverable is not a printout. It is a <strong>decision</strong>, with the reason written down.</p>
+<hr>
+</section>
+<section id="before-you-start" class="level4" data-number="12.0.0.2">
+<h4 data-number="12.0.0.2" class="anchored" data-anchor-id="before-you-start"><span class="header-section-number">12.0.0.2</span> Before you start</h4>
+<p>Everyone in the group pushes at least once this session. Replace <code>XX</code> with your group number — group 07 uses <code>group-07</code>.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> group-XX</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> 08-knn-and-bias-variance/02-practice/submissions/group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="reproduce-one-result-from-the-paper-20-min" class="level4" data-number="12.0.0.3">
+<h4 data-number="12.0.0.3" class="anchored" data-anchor-id="reproduce-one-result-from-the-paper-20-min"><span class="header-section-number">12.0.0.3</span> 1 · Reproduce one result from the paper — 20 min</h4>
+<p>Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot, and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one that is not attempted earns none.</p>
+<p>The paper is <strong>Amsili, van Es &amp; Schindelbeck (2025), <em>Pedotransfer Functions for Soil Protein Based on Random Forest Modeling</em></strong>, and its replication package (<a href="https://doi.org/10.7910/DVN/HGBPCW">10.7910/DVN/HGBPCW</a>) should already be unzipped at:</p>
+<pre class="text"><code>08-knn-and-bias-variance/data/replication/</code></pre>
+<p>The session’s own dataset, for comparison:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> qmib.load(<span class="st">"core"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="apply-the-method-to-your-own-angle-35-min" class="level4" data-number="12.0.0.4">
+<h4 data-number="12.0.0.4" class="anchored" data-anchor-id="apply-the-method-to-your-own-angle-35-min"><span class="header-section-number">12.0.0.4</span> 2 · Apply the method to your own angle — 35 min</h4>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)     <span class="co"># your angle — see your dictionary</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">"geo"</span>, <span class="st">"time"</span>], how<span class="op">=</span><span class="st">"inner"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Fit the session’s method on your own data. Report what the lecture said to report, in the units of your own variables.</p>
+<hr>
+</section>
+<section id="break-one-assumption-15-min" class="level4" data-number="12.0.0.5">
+<h4 data-number="12.0.0.5" class="anchored" data-anchor-id="break-one-assumption-15-min"><span class="header-section-number">12.0.0.5</span> 3 · Break one assumption — 15 min</h4>
+<p>Every method in this course rests on something. Find the assumption this one rests on hardest, break it deliberately, and record what happened to your answer. <strong>This is the part that carries the marks.</strong></p>
+<hr>
+</section>
+<section id="write-it-down-20-min" class="level4" data-number="12.0.0.6">
+<h4 data-number="12.0.0.6" class="anchored" data-anchor-id="write-it-down-20-min"><span class="header-section-number">12.0.0.6</span> 4 · Write it down — 20 min</h4>
+<p>A 250-word note in your submissions folder:</p>
+<ul>
+<li>What you found, in units</li>
+<li>Which assumption you broke, and what it did</li>
+<li>What this result does <strong>not</strong> license you to claim</li>
+</ul>
+<hr>
+</section>
+<section id="submitting" class="level4" data-number="12.0.0.7">
+<h4 data-number="12.0.0.7" class="anchored" data-anchor-id="submitting"><span class="header-section-number">12.0.0.7</span> Submitting</h4>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add 08-knn-and-bias-variance/02-practice/submissions/group-XX</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Session 08 practice — group XX"</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Everyone pushes at least once. The log is the record of participation.</p>
+<hr>
+</section>
+<section id="what-loses-marks" class="level4" data-number="12.0.0.8">
+<h4 data-number="12.0.0.8" class="anchored" data-anchor-id="what-loses-marks"><span class="header-section-number">12.0.0.8</span> What loses marks</h4>
+<ul>
+<li>Running KNN on unstandardised predictors</li>
+<li>Choosing <span class="math inline">\(k\)</span> on the test set</li>
+<li>Reporting accuracy with no benchmark</li>
+<li>Treating a low training error as evidence of anything</li>
+</ul>
+<hr>
+<p><a href="#the-lecture">&lt;- The lecture</a> · <a href="./session-08.html">Session 08 overview</a></p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./session-07.html" class="pagination-link" aria-label="Session 7 — Principal Component and Factor Analyses">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Session 7 — Principal Component and Factor Analyses</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./session-09.html" class="pagination-link" aria-label="Session 9 — Structural Equation Modelling">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Session 9 — Structural Equation Modelling</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MATH60033A · HEC Montréal</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-08.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Built from the course repository</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

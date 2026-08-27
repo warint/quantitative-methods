@@ -1,0 +1,2883 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial – Quantitative Methods in International Business</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./session-05.html" rel="next">
+<link href="./session-03.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-87cceeb0dc72897ec58809a022325911.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-35a1a3f4182a89951995139d29d3b534.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-04.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Quantitative Methods in International Business</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/warint/quantitative-methods" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">The course</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Setting up your tools</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">The twelve sessions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Session 1 — Foundations: Scenarios, Tools, and the Syllabus</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Session 2 — Exploratory Data Analysis, and the First Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Session 3 — Regression: Adequacy, Validity, and Robustness</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-04.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Session 5 — Regularisation: Ridge, Lasso, and the Elastic Net</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Session 6 — Regression: Advanced Considerations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Session 7 — Principal Component and Factor Analyses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Session 8 — K-Nearest Neighbours and the Bias–Variance Trade-off</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Session 9 — Structural Equation Modelling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Session 10 — Causal Inference I: Counterfactuals, Randomisation, Matching</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Session 11 — Causal Inference II: Difference-in-Differences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./session-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Session 12 — Final Group Presentations</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">The data API</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./replications.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Replication packages</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mandates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">The ten research mandates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./group-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">How group work is assessed</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#before-the-session" id="toc-before-the-session" class="nav-link active" data-scroll-target="#before-the-session"><span class="header-section-number">7.1</span> Before the session</a>
+  <ul class="collapse">
+  <li><a href="#the-reading-4560-min" id="toc-the-reading-4560-min" class="nav-link" data-scroll-target="#the-reading-4560-min"><span class="header-section-number">7.1.1</span> 1. The reading — 45–60 min</a></li>
+  <li><a href="#the-data-10-min" id="toc-the-data-10-min" class="nav-link" data-scroll-target="#the-data-10-min"><span class="header-section-number">7.1.2</span> 2. The data — 10 min</a></li>
+  <li><a href="#self-check-15-min" id="toc-self-check-15-min" class="nav-link" data-scroll-target="#self-check-15-min"><span class="header-section-number">7.1.3</span> 3. Self-check — 15 min</a></li>
+  <li><a href="#arrive-with" id="toc-arrive-with" class="nav-link" data-scroll-target="#arrive-with"><span class="header-section-number">7.1.4</span> Arrive with</a></li>
+  </ul></li>
+  <li><a href="#the-lecture" id="toc-the-lecture" class="nav-link" data-scroll-target="#the-lecture"><span class="header-section-number">7.2</span> The lecture</a></li>
+  <li><a href="#outline" id="toc-outline" class="nav-link" data-scroll-target="#outline"><span class="header-section-number">7.3</span> Outline</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">7.4</span> Learning objectives</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">7.5</span> Introduction</a></li>
+  <li><a href="#introduction-1" id="toc-introduction-1" class="nav-link" data-scroll-target="#introduction-1"><span class="header-section-number">7.6</span> Introduction</a></li>
+  <li><a href="#introduction-2" id="toc-introduction-2" class="nav-link" data-scroll-target="#introduction-2"><span class="header-section-number">7.7</span> Introduction</a></li>
+  <li><a href="#introduction-3" id="toc-introduction-3" class="nav-link" data-scroll-target="#introduction-3"><span class="header-section-number">7.8</span> Introduction</a></li>
+  <li><a href="#introduction-4" id="toc-introduction-4" class="nav-link" data-scroll-target="#introduction-4"><span class="header-section-number">7.9</span> Introduction</a></li>
+  <li><a href="#lets-start-with-an-example" id="toc-lets-start-with-an-example" class="nav-link" data-scroll-target="#lets-start-with-an-example"><span class="header-section-number">7.10</span> Let’s start with an example</a></li>
+  <li><a href="#lending-club" id="toc-lending-club" class="nav-link" data-scroll-target="#lending-club"><span class="header-section-number">7.11</span> Lending Club</a></li>
+  <li><a href="#the-basics-of-logistic-regression" id="toc-the-basics-of-logistic-regression" class="nav-link" data-scroll-target="#the-basics-of-logistic-regression"><span class="header-section-number">7.12</span> The basics of logistic regression</a></li>
+  <li><a href="#lets-use-another-example" id="toc-lets-use-another-example" class="nav-link" data-scroll-target="#lets-use-another-example"><span class="header-section-number">7.13</span> Let’s use another example</a></li>
+  <li><a href="#fico-score" id="toc-fico-score" class="nav-link" data-scroll-target="#fico-score"><span class="header-section-number">7.14</span> FICO Score</a></li>
+  <li><a href="#inference-and-goodness-of-fit" id="toc-inference-and-goodness-of-fit" class="nav-link" data-scroll-target="#inference-and-goodness-of-fit"><span class="header-section-number">7.15</span> Inference and goodness of fit</a></li>
+  <li><a href="#lets-see-another-example" id="toc-lets-see-another-example" class="nav-link" data-scroll-target="#lets-see-another-example"><span class="header-section-number">7.16</span> Let’s see another example</a></li>
+  <li><a href="#portugals-red-wines" id="toc-portugals-red-wines" class="nav-link" data-scroll-target="#portugals-red-wines"><span class="header-section-number">7.17</span> Portugal’s Red Wines</a></li>
+  <li><a href="#comparing-logistic-models" id="toc-comparing-logistic-models" class="nav-link" data-scroll-target="#comparing-logistic-models"><span class="header-section-number">7.18</span> Comparing logistic models</a></li>
+  <li><a href="#comparing-logistic-models-1" id="toc-comparing-logistic-models-1" class="nav-link" data-scroll-target="#comparing-logistic-models-1"><span class="header-section-number">7.19</span> Comparing logistic models</a></li>
+  <li><a href="#model-selection" id="toc-model-selection" class="nav-link" data-scroll-target="#model-selection"><span class="header-section-number">7.20</span> Model selection</a></li>
+  <li><a href="#ordinal-logistic-regression" id="toc-ordinal-logistic-regression" class="nav-link" data-scroll-target="#ordinal-logistic-regression"><span class="header-section-number">7.21</span> Ordinal logistic regression</a></li>
+  <li><a href="#ordinal-logistic-regression-1" id="toc-ordinal-logistic-regression-1" class="nav-link" data-scroll-target="#ordinal-logistic-regression-1"><span class="header-section-number">7.22</span> Ordinal logistic regression</a></li>
+  <li><a href="#multinomial-logistic-regression" id="toc-multinomial-logistic-regression" class="nav-link" data-scroll-target="#multinomial-logistic-regression"><span class="header-section-number">7.23</span> Multinomial logistic regression</a></li>
+  <li><a href="#multinomial-logistic-regression-1" id="toc-multinomial-logistic-regression-1" class="nav-link" data-scroll-target="#multinomial-logistic-regression-1"><span class="header-section-number">7.24</span> Multinomial logistic regression</a></li>
+  <li><a href="#conclusion-2" id="toc-conclusion-2" class="nav-link" data-scroll-target="#conclusion-2"><span class="header-section-number">7.25</span> Conclusion</a></li>
+  <li><a href="#conclusion-3" id="toc-conclusion-3" class="nav-link" data-scroll-target="#conclusion-3"><span class="header-section-number">7.26</span> Conclusion</a></li>
+  <li><a href="#conclusion---key-takeaways" id="toc-conclusion---key-takeaways" class="nav-link" data-scroll-target="#conclusion---key-takeaways"><span class="header-section-number">7.27</span> Conclusion - Key Takeaways</a></li>
+  <li><a href="#in-the-practice" id="toc-in-the-practice" class="nav-link" data-scroll-target="#in-the-practice"><span class="header-section-number">7.28</span> In the practice</a>
+  <ul class="collapse">
+  <li><a href="#logistic-regression-binary-ordinal-and-multinomial" id="toc-logistic-regression-binary-ordinal-and-multinomial" class="nav-link" data-scroll-target="#logistic-regression-binary-ordinal-and-multinomial"><span class="header-section-number">7.28.1</span> Logistic Regression: Binary, Ordinal, and Multinomial</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-04.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./session-01.html">The twelve sessions</a></li><li class="breadcrumb-item"><a href="./session-04.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Session 4 — Logistic Regression: Binary, Ordinal, and Multinomial</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="chapter-meta">
+<p>Wednesday 16 September 2026 · 15:30–18:30 · Décelles — Victoriaville</p>
+<p><a href="https://warint.github.io/quantitative-methods/session-04-lecture.html">Lecture slides</a> · <a href="https://warint.github.io/quantitative-methods/session-04-pre-session.html">Pre-session slides</a> · <a href="https://warint.github.io/quantitative-methods/session-04-practice.html">Practice slides</a></p>
+</div>
+<blockquote class="blockquote">
+<p><strong>The outcome is a category, not a number. Now what?</strong></p>
+</blockquote>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Theme of the practice</strong></td>
+<td>Can we predict a discrete outcome honestly?</td>
+</tr>
+<tr class="even">
+<td><strong>Reading</strong></td>
+<td>Saganowski et al.&nbsp;(2019), <em>Analysis of group evolution prediction in complex networks</em> · <a href="https://doi.org/10.1371/journal.pone.0224194">article</a></td>
+</tr>
+<tr class="odd">
+<td><strong>Replication package</strong></td>
+<td><a href="https://doi.org/10.7910/DVN/ONOFS7">10.7910/DVN/ONOFS7</a></td>
+</tr>
+<tr class="even">
+<td><strong>Data</strong></td>
+<td><code>qmib.load("loans")</code> — Lending Club — 9,578 three-year loans, FICO scores and default</td>
+</tr>
+</tbody>
+</table>
+<section id="before-the-session" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="before-the-session"><span class="header-section-number">7.1</span> Before the session</h2>
+<blockquote class="blockquote">
+<p><strong>The outcome is a category, not a number. Now what?</strong></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-04-pre-session.html">Open the pre-session slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S04-Pre-Session.qmd"><code>MATH60033A-S04-Pre-Session.qmd</code></a></p>
+</blockquote>
+<p>Two things to do before class, and they are the two halves of the practice. Budget <strong>60–90 minutes</strong>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Before class</th>
+<th>Used in the practice for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>Read the paper</td>
+<td>reproducing one of its results</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>Get both datasets</td>
+<td>that, and applying the method to your own angle</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="the-reading-4560-min" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="the-reading-4560-min"><span class="header-section-number">7.1.1</span> 1. The reading — 45–60 min</h3>
+<p><strong>Saganowski et al.&nbsp;(2019), <em>Analysis of group evolution prediction in complex networks</em></strong> <a href="https://doi.org/10.1371/journal.pone.0224194">Read the article</a></p>
+<p>Read for the <strong>argument</strong>, not for coverage:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>What to look for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>The research question, in one sentence</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>The method or design, and why they chose it</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>The strongest single piece of evidence</td>
+</tr>
+<tr class="even">
+<td><strong>4</strong></td>
+<td>One limitation you would raise as a referee</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Annotate as you go.</strong> You will be asked what you underlined and why.</p>
+<hr>
+</section>
+<section id="the-data-10-min" class="level3" data-number="7.1.2">
+<h3 data-number="7.1.2" class="anchored" data-anchor-id="the-data-10-min"><span class="header-section-number">7.1.2</span> 2. The data — 10 min</h3>
+<p>You need <strong>two</strong> datasets in the practice, and both should be on your machine before you arrive.</p>
+<section id="a-the-papers-replication-package" class="level4" data-number="7.1.2.1">
+<h4 data-number="7.1.2.1" class="anchored" data-anchor-id="a-the-papers-replication-package"><span class="header-section-number">7.1.2.1</span> a) The paper’s replication package</h4>
+<p>This is what you reproduce in the first twenty minutes of the practice.</p>
+<p><strong>Harvard Dataverse: <a href="https://doi.org/10.7910/DVN/ONOFS7">10.7910/DVN/ONOFS7</a></strong></p>
+<p>Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:</p>
+<pre class="text"><code>04-logistic-ordinal-multinomial/data/replication/</code></pre>
+<p>Keep the authors’ own folder structure and README.</p>
+</section>
+<section id="b-the-course-data-for-your-own-angle" class="level4" data-number="7.1.2.2">
+<h4 data-number="7.1.2.2" class="anchored" data-anchor-id="b-the-course-data-for-your-own-angle"><span class="header-section-number">7.1.2.2</span> b) The course data, for your own angle</h4>
+<p>This is what you apply the method to in the second half.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)      <span class="co"># what the lecture uses</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)                 <span class="co"># shared by every group</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)      <span class="co"># YOUR angle — see your dictionary</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(data.shape, core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Lending club — 9,578 three-year loans, fico scores and default.</p>
+<blockquote class="blockquote">
+<p>Run this <strong>before</strong> class. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing. <code>qmib.catalog()</code> lists everything available.</p>
+</blockquote>
+<p>Your group’s file, columns, units and traps are in your <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/">data dictionary</a>.</p>
+<hr>
+</section>
+</section>
+<section id="self-check-15-min" class="level3" data-number="7.1.3">
+<h3 data-number="7.1.3" class="anchored" data-anchor-id="self-check-15-min"><span class="header-section-number">7.1.3</span> 3. Self-check — 15 min</h3>
+<p>Answer on paper. If you cannot, that is what the lecture is for.</p>
+<ol type="1">
+<li>In one sentence: what does this session’s method let you claim that the previous one did not?</li>
+<li>What must be true of your data for it to apply?</li>
+<li>Which claim in the paper rests on this method — and how hard does it lean on it?</li>
+</ol>
+<hr>
+</section>
+<section id="arrive-with" class="level3" data-number="7.1.4">
+<h3 data-number="7.1.4" class="anchored" data-anchor-id="arrive-with"><span class="header-section-number">7.1.4</span> Arrive with</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">The paper read and annotated</label></li>
+<li><label><input type="checkbox">The replication package downloaded and unzipped</label></li>
+<li><label><input type="checkbox"><code>qmib.load()</code> run at least once, so the cache exists</label></li>
+<li><label><input type="checkbox">Your self-check answers, on paper</label></li>
+</ul>
+<hr>
+<p><a href="./session-04.html">Session 04 overview</a> · <a href="#the-lecture">The lecture</a> · <a href="#in-the-practice">The practice</a></p>
+</section>
+</section>
+<section id="the-lecture" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="the-lecture"><span class="header-section-number">7.2</span> The lecture</h2>
+<div class="muted">
+<p>Delivered from <a href="https://warint.github.io/quantitative-methods/session-04-lecture.html">the slides</a>. What follows is the same material as prose.</p>
+</div>
+<!-- Source session 5 is taught as course session 4. Content is static so the deck renders without R or Python. -->
+<blockquote class="blockquote">
+<p>The greatest adventure is what lies ahead. Today and tomorrow are yet to be said. The chances, the changes are all yours to make. The mold of your life is in your hands to break.</p>
+</blockquote>
+<p><a href="https://en.wikipedia.org/wiki/J._R._R._Tolkien">J. R. R. Tolkien</a></p>
+</section>
+<section id="outline" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="outline"><span class="header-section-number">7.3</span> Outline</h2>
+<ul>
+<li>Introduction</li>
+<li>Business example (loan defaults)</li>
+<li>Basics of logistic regression</li>
+<li>Inference and goodness of fit</li>
+<li>Comparing logistic models (χ² tests, AIC, stepwise)</li>
+<li>Ordinal logistic regression</li>
+<li>Multinomial logistic regression</li>
+</ul>
+</section>
+<section id="learning-objectives" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">7.4</span> Learning objectives</h2>
+<p>By the end of this session:</p>
+<ul>
+<li><p>students should be able to articulate the conceptual differences between linear and logistic regression for binary outcomes;</p></li>
+<li><p>derive and interpret the logistic link, odds, log-odds, and odds ratios;</p></li>
+<li><p>estimate simple and multiple logistic regression models in R and report coefficient estimates, standard errors, and confidence intervals;</p></li>
+<li><p>compute and interpret predicted probabilities with associated uncertainty for specified covariate profiles; assess model fit using likelihood-based diagnostics, including McFadden’s pseudo-R², and conduct inference using Wald tests and likelihood ratio (χ²) tests;</p></li>
+<li><p>compare nested and non-nested specifications via likelihood ratio tests and AIC, including stepwise selection when appropriate;</p></li>
+<li><p>generalize the binary logit to ordinal and multinomial settings and interpret coefficients within these frameworks;</p></li>
+<li><p>and critically evaluate model assumptions, data limitations, and construct validity in applied international business research contexts.</p></li>
+</ul>
+</section>
+<section id="introduction" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="introduction"><span class="header-section-number">7.5</span> Introduction</h2>
+</section>
+<section id="introduction-1" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="introduction-1"><span class="header-section-number">7.6</span> Introduction</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">Reading</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Contrib</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Hyp</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Models</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false">Accuracy</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-6" role="tab" aria-controls="tabset-1-6" aria-selected="false">Validity</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-7" role="tab" aria-controls="tabset-1-7" aria-selected="false">Conclusion</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<ul>
+<li>Musteen, Martina “<a href="https://www.sciencedirect.com/science/article/pii/S1090951609001138?via%3Dihub">The influence of international networks on internationalization speed and performance: A study of Czech SMEs</a>”, Journal of World Business, vol.&nbsp;45 , no. 3</li>
+</ul>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p><em>The influence of international networks on internationalization speed and performance: A study of Czech SMEs</em></p>
+<ul>
+<li><strong>Speed of entry</strong>: Firms with CEOs sharing a common language with international contacts internationalize faster.</li>
+<li><strong>Performance</strong>: Broader geographic diversity in networks improves outcomes; over-reliance on personal ties can hinder performance.</li>
+<li><strong>Contribution</strong>: Not all network ties are equally valuable — structure, diversity, and quality of ties shape how SMEs succeed abroad.</li>
+</ul>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<ul>
+<li>CEOs’ <strong>international networks</strong> influence both the <strong>speed</strong> of SME internationalization and the <strong>performance</strong> of the first foreign venture.</li>
+<li><strong>Language commonality</strong> between CEOs and their network partners accelerates international entry.</li>
+<li><strong>Geographic diversity</strong> of networks improves performance.</li>
+<li><strong>Reliance on personal ties</strong> may hinder performance by limiting access to diverse, novel resources.</li>
+</ul>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<ul>
+<li><p>Dependent variables:</p>
+<ul>
+<li><strong>Internationalization speed</strong> (time until first foreign market entry).</li>
+<li><strong>Internationalization performance</strong> (success of first international venture).</li>
+</ul></li>
+<li><p>Independent variables:</p>
+<ul>
+<li>Network characteristics (language commonality, geographic diversity, reliance on personal ties, size of network).</li>
+</ul></li>
+<li><p>Analytical framework: <strong>social capital theory</strong>; estimated with regression models on survey data from 155 Czech SMEs.</p></li>
+</ul>
+</div>
+<div id="tabset-1-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-5-tab">
+<ul>
+<li>Measures of accuracy focus on <strong>statistical significance</strong> of predictors and <strong>model fit</strong> in explaining variance in speed and performance.</li>
+<li>Results show robust effects for language and diversity, but mixed/negative for personal ties.</li>
+</ul>
+</div>
+<div id="tabset-1-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-6-tab">
+<ul>
+<li><strong>Internal validity</strong>: Reasonable given the focus on first internationalization and careful measurement of CEO networks.</li>
+<li><strong>External validity</strong>: Limited by context (Czech manufacturing SMEs in the late transition economy period).</li>
+<li><strong>Construct validity</strong>: Network measures are self-reported and retrospective, raising risks of recall bias.</li>
+<li><strong>Conclusion validity</strong>: Results support differentiated roles of network dimensions, but caution is needed in generalizing beyond early-stage internationalization.</li>
+</ul>
+</div>
+<div id="tabset-1-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-7-tab">
+<div class="cell">
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 516.73 152.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 148)">
+<title>international_networks</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-148 512.73,-148 512.73,4 -4,4"></polygon>
+<!-- language -->
+<g id="node1" class="node">
+<title>language</title>
+<polygon fill="lightgrey" stroke="black" points="171.58,-36 7.84,-36 7.84,0 171.58,0 171.58,-36"></polygon>
+<text text-anchor="middle" x="89.71" y="-13.8" font-family="Helvetica,sans-Serif" font-size="14.00">Language Commonality</text>
+</g>
+<!-- speed -->
+<g id="node4" class="node">
+<title>speed</title>
+<polygon fill="lightgrey" stroke="black" points="507.82,-36 313.9,-36 313.9,0 507.82,0 507.82,-36"></polygon>
+<text text-anchor="middle" x="410.86" y="-13.8" font-family="Helvetica,sans-Serif" font-size="14.00">Speed of Internationalization</text>
+</g>
+<!-- language&#45;&gt;speed -->
+<g id="edge1" class="edge">
+<title>language-&gt;speed</title>
+<path fill="none" stroke="green" d="M171.66,-18C211.75,-18 260.67,-18 303.72,-18"></path>
+<polygon fill="green" stroke="green" points="303.95,-21.5 313.95,-18 303.95,-14.5 303.95,-21.5"></polygon>
+<text text-anchor="middle" x="246.2" y="-22.2" font-family="Times,serif" font-size="14.00" fill="green">faster entry</text>
+</g>
+<!-- diversity -->
+<g id="node2" class="node">
+<title>diversity</title>
+<polygon fill="lightgrey" stroke="black" points="162.65,-144 16.77,-144 16.77,-108 162.65,-108 162.65,-144"></polygon>
+<text text-anchor="middle" x="89.71" y="-121.8" font-family="Helvetica,sans-Serif" font-size="14.00">Geographic Diversity</text>
+</g>
+<!-- performance -->
+<g id="node5" class="node">
+<title>performance</title>
+<polygon fill="lightgrey" stroke="black" points="508.6,-117 313.12,-117 313.12,-81 508.6,-81 508.6,-117"></polygon>
+<text text-anchor="middle" x="410.86" y="-94.8" font-family="Helvetica,sans-Serif" font-size="14.00">Performance of First Venture</text>
+</g>
+<!-- diversity&#45;&gt;performance -->
+<g id="edge2" class="edge">
+<title>diversity-&gt;performance</title>
+<path fill="none" stroke="green" d="M162.73,-119.91C204.09,-116.41 256.83,-111.95 302.95,-108.04"></path>
+<polygon fill="green" stroke="green" points="303.32,-111.53 312.99,-107.2 302.73,-104.55 303.32,-111.53"></polygon>
+<text text-anchor="middle" x="246.2" y="-120.2" font-family="Times,serif" font-size="14.00" fill="green">better outcomes</text>
+</g>
+<!-- personal -->
+<g id="node3" class="node">
+<title>personal</title>
+<polygon fill="lightgrey" stroke="black" points="179.63,-90 -0.21,-90 -0.21,-54 179.63,-54 179.63,-90"></polygon>
+<text text-anchor="middle" x="89.71" y="-67.8" font-family="Helvetica,sans-Serif" font-size="14.00">Reliance on Personal Ties</text>
+</g>
+<!-- personal&#45;&gt;performance -->
+<g id="edge3" class="edge">
+<title>personal-&gt;performance</title>
+<path fill="none" stroke="red" d="M179.47,-78.76C215.35,-81.56 257.15,-84.92 294.99,-88.2 297.56,-88.42 300.17,-88.65 302.8,-88.88"></path>
+<polygon fill="red" stroke="red" points="302.77,-92.39 313.04,-89.8 303.39,-85.42 302.77,-92.39"></polygon>
+<text text-anchor="middle" x="246.2" y="-92.2" font-family="Times,serif" font-size="14.00" fill="red">weaker outcomes</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="introduction-2" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="introduction-2"><span class="header-section-number">7.7</span> Introduction</h2>
+<p><a href="https://bookdown.org/roback/bookdown-BeyondMLR/">Link to book</a></p>
+</section>
+<section id="introduction-3" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="introduction-3"><span class="header-section-number">7.8</span> Introduction</h2>
+<div class="cell">
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 513.70 404.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 400)">
+<title>a_nice_graph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-400 509.7,-400 509.7,4 -4,4"></polygon>
+<!-- a -->
+<g id="node1" class="node">
+<title>a</title>
+<polygon fill="none" stroke="black" points="305.48,-396 205.94,-396 205.94,-360 305.48,-360 305.48,-396"></polygon>
+<text text-anchor="middle" x="255.71" y="-373.8" font-family="Helvetica,sans-Serif" font-size="14.00">Data Science</text>
+</g>
+<!-- b -->
+<g id="node2" class="node">
+<title>b</title>
+<polygon fill="none" stroke="black" points="319.51,-324 191.91,-324 191.91,-288 319.51,-288 319.51,-324"></polygon>
+<text text-anchor="middle" x="255.71" y="-301.8" font-family="Helvetica,sans-Serif" font-size="14.00">Machine Learning</text>
+</g>
+<!-- a&#45;&gt;b -->
+<g id="edge1" class="edge">
+<title>a-&gt;b</title>
+<path fill="none" stroke="black" d="M255.71,-359.7C255.71,-351.98 255.71,-342.71 255.71,-334.11"></path>
+<polygon fill="black" stroke="black" points="259.21,-334.1 255.71,-324.1 252.21,-334.1 259.21,-334.1"></polygon>
+</g>
+<!-- c -->
+<g id="node3" class="node">
+<title>c</title>
+<polygon fill="none" stroke="black" points="165.63,-252 -0.21,-252 -0.21,-216 165.63,-216 165.63,-252"></polygon>
+<text text-anchor="middle" x="82.71" y="-229.8" font-family="Helvetica,sans-Serif" font-size="14.00">Reinforcement Learning</text>
+</g>
+<!-- b&#45;&gt;c -->
+<g id="edge2" class="edge">
+<title>b-&gt;c</title>
+<path fill="none" stroke="black" d="M213.39,-287.88C189.53,-278.22 159.54,-266.09 134.31,-255.88"></path>
+<polygon fill="black" stroke="black" points="135.48,-252.57 124.89,-252.07 132.85,-259.06 135.48,-252.57"></polygon>
+</g>
+<!-- d -->
+<g id="node4" class="node">
+<title>d</title>
+<polygon fill="none" stroke="black" points="328.13,-252 183.29,-252 183.29,-216 328.13,-216 328.13,-252"></polygon>
+<text text-anchor="middle" x="255.71" y="-229.8" font-family="Helvetica,sans-Serif" font-size="14.00">Supervised Learning</text>
+</g>
+<!-- b&#45;&gt;d -->
+<g id="edge3" class="edge">
+<title>b-&gt;d</title>
+<path fill="none" stroke="black" d="M255.71,-287.7C255.71,-279.98 255.71,-270.71 255.71,-262.11"></path>
+<polygon fill="black" stroke="black" points="259.21,-262.1 255.71,-252.1 252.21,-262.1 259.21,-262.1"></polygon>
+</g>
+<!-- e -->
+<g id="node5" class="node">
+<title>e</title>
+<polygon fill="none" stroke="black" points="505.69,-252 345.73,-252 345.73,-216 505.69,-216 505.69,-252"></polygon>
+<text text-anchor="middle" x="425.71" y="-229.8" font-family="Helvetica,sans-Serif" font-size="14.00">Unsupervised Learning</text>
+</g>
+<!-- b&#45;&gt;e -->
+<g id="edge4" class="edge">
+<title>b-&gt;e</title>
+<path fill="none" stroke="black" d="M297.3,-287.88C320.74,-278.22 350.21,-266.09 375.01,-255.88"></path>
+<polygon fill="black" stroke="black" points="376.34,-259.11 384.26,-252.07 373.68,-252.64 376.34,-259.11"></polygon>
+</g>
+<!-- f -->
+<g id="node6" class="node">
+<title>f</title>
+<polygon fill="none" stroke="black" points="249.19,-180 150.23,-180 150.23,-144 249.19,-144 249.19,-180"></polygon>
+<text text-anchor="middle" x="199.71" y="-157.8" font-family="Helvetica,sans-Serif" font-size="14.00">Classification</text>
+</g>
+<!-- d&#45;&gt;f -->
+<g id="edge5" class="edge">
+<title>d-&gt;f</title>
+<path fill="none" stroke="black" d="M241.87,-215.7C235.22,-207.39 227.13,-197.28 219.82,-188.14"></path>
+<polygon fill="black" stroke="black" points="222.37,-185.73 213.39,-180.1 216.91,-190.1 222.37,-185.73"></polygon>
+</g>
+<!-- g -->
+<g id="node7" class="node">
+<title>g</title>
+<polygon fill="none" stroke="black" points="354.02,-180 267.4,-180 267.4,-144 354.02,-144 354.02,-180"></polygon>
+<text text-anchor="middle" x="310.71" y="-157.8" font-family="Helvetica,sans-Serif" font-size="14.00">Regression</text>
+</g>
+<!-- d&#45;&gt;g -->
+<g id="edge6" class="edge">
+<title>d-&gt;g</title>
+<path fill="none" stroke="black" d="M269.31,-215.7C275.83,-207.39 283.78,-197.28 290.96,-188.14"></path>
+<polygon fill="black" stroke="black" points="293.84,-190.13 297.27,-180.1 288.34,-185.81 293.84,-190.13"></polygon>
+</g>
+<!-- h -->
+<g id="node8" class="node">
+<title>h</title>
+<polygon fill="none" stroke="black" points="186.21,-108 53.21,-108 53.21,-72 186.21,-72 186.21,-108"></polygon>
+<text text-anchor="middle" x="119.71" y="-85.8" font-family="Helvetica,sans-Serif" font-size="14.00">Generative Models</text>
+</g>
+<!-- f&#45;&gt;h -->
+<g id="edge7" class="edge">
+<title>f-&gt;h</title>
+<path fill="none" stroke="black" d="M179.93,-143.7C169.96,-134.97 157.7,-124.24 146.85,-114.75"></path>
+<polygon fill="black" stroke="black" points="149.09,-112.06 139.26,-108.1 144.48,-117.32 149.09,-112.06"></polygon>
+</g>
+<!-- i -->
+<g id="node9" class="node">
+<title>i</title>
+<polygon fill="none" stroke="black" points="356.85,-108 204.57,-108 204.57,-72 356.85,-72 356.85,-108"></polygon>
+<text text-anchor="middle" x="280.71" y="-85.8" font-family="Helvetica,sans-Serif" font-size="14.00">Discriminative Models</text>
+</g>
+<!-- f&#45;&gt;i -->
+<g id="edge8" class="edge">
+<title>f-&gt;i</title>
+<path fill="none" stroke="black" d="M219.73,-143.7C229.84,-134.97 242.25,-124.24 253.23,-114.75"></path>
+<polygon fill="black" stroke="black" points="255.64,-117.29 260.92,-108.1 251.06,-111.99 255.64,-117.29"></polygon>
+</g>
+<!-- j -->
+<g id="node10" class="node">
+<title>j</title>
+<polygon fill="none" stroke="black" points="349.88,-36 211.54,-36 211.54,0 349.88,0 349.88,-36"></polygon>
+<text text-anchor="middle" x="280.71" y="-13.8" font-family="Helvetica,sans-Serif" font-size="14.00">Logistic Regression</text>
+</g>
+<!-- i&#45;&gt;j -->
+<g id="edge9" class="edge">
+<title>i-&gt;j</title>
+<path fill="none" stroke="black" d="M280.71,-71.7C280.71,-63.98 280.71,-54.71 280.71,-46.11"></path>
+<polygon fill="black" stroke="black" points="284.21,-46.1 280.71,-36.1 277.21,-46.1 284.21,-46.1"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="introduction-4" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="introduction-4"><span class="header-section-number">7.9</span> Introduction</h2>
+<p>As we saw in the two previous modules, linear regression allows us to model the relationship between a quantitative dependent variable Y and a set of independent variables.</p>
+<blockquote class="blockquote">
+<p>In this module we extend our modeling capabilities and learn how to model the relationship between a <strong>binary dependent variable Y</strong> (then ordinal, then multinomial) and a set of independent variables.</p>
+</blockquote>
+</section>
+<section id="lets-start-with-an-example" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="lets-start-with-an-example"><span class="header-section-number">7.10</span> Let’s start with an example</h2>
+</section>
+<section id="lending-club" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="lending-club"><span class="header-section-number">7.11</span> Lending Club</h2>
+<p><a href="https://www.lendingclub.com/" class="uri">https://www.lendingclub.com/</a></p>
+<ul>
+<li>Peer-to-peer network</li>
+</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-4" role="tab" aria-controls="tabset-2-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-5" role="tab" aria-controls="tabset-2-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-6" role="tab" aria-controls="tabset-2-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-7" role="tab" aria-controls="tabset-2-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-8" role="tab" aria-controls="tabset-2-8" aria-selected="false">8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-9" role="tab" aria-controls="tabset-2-9" aria-selected="false">9</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-10-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-10" role="tab" aria-controls="tabset-2-10" aria-selected="false">10</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-11-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-11" role="tab" aria-controls="tabset-2-11" aria-selected="false">11</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-12-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-12" role="tab" aria-controls="tabset-2-12" aria-selected="false">12</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-13-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-13" role="tab" aria-controls="tabset-2-13" aria-selected="false">Conclusion</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<blockquote class="blockquote">
+<p>Which loans are successfull and which one are not successful?</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="im">import</span> qmib</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<ul>
+<li><p>We have data on 9,578 3-year loans that were funded through LendingClub.com between May 2007 and February 2010.</p></li>
+<li><p>We have a variable called “default” that indicates that the loan was not paid back in full (the borrower either defaulted or the loan was “charged off,” meaning the borrower was deemed unlikely to ever pay it back).</p></li>
+<li><p>We also have the borrower’s FICO (credit) score when they applied for the loan.</p></li>
+<li><p>The dependent variable, <span class="math inline">\(Y\)</span>, we want to model is “default” which measures whether or not the loan defaulted.</p></li>
+</ul>
+<p>It is called a binary variable since it only takes on the values 0 or 1:</p>
+<ul>
+<li><span class="math inline">\(default = 0\)</span> indicates loan was paid back.</li>
+<li><span class="math inline">\(default = 1\)</span> indicates loan was not paid back.</li>
+</ul>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<p>When working with a binary dependent variable, a scatter plot is often not that useful.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="im">import</span> qmib</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-4-tab">
+<div class="cell">
+<pre class="text"><code> credit.policy     purpose             int.rate       installment    
+ Min.   :0.000   Length:9578        Min.   :0.0600   Min.   : 15.67  
+ 1st Qu.:1.000   Class :character   1st Qu.:0.1039   1st Qu.:163.77  
+ Median :1.000   Mode  :character   Median :0.1221   Median :268.95  
+ Mean   :0.805                      Mean   :0.1226   Mean   :319.09  
+ 3rd Qu.:1.000                      3rd Qu.:0.1407   3rd Qu.:432.76  
+ Max.   :1.000                      Max.   :0.2164   Max.   :940.14  
+ log.annual.inc        dti              fico       days.with.cr.line
+ Min.   : 7.548   Min.   : 0.000   Min.   :612.0   Min.   :  179    
+ 1st Qu.:10.558   1st Qu.: 7.213   1st Qu.:682.0   1st Qu.: 2820    
+ Median :10.929   Median :12.665   Median :707.0   Median : 4140    
+ Mean   :10.932   Mean   :12.607   Mean   :710.8   Mean   : 4561    
+ 3rd Qu.:11.291   3rd Qu.:17.950   3rd Qu.:737.0   3rd Qu.: 5730    
+ Max.   :14.528   Max.   :29.960   Max.   :827.0   Max.   :17640    
+   revol.bal         revol.util    inq.last.6mths    delinq.2yrs     
+ Min.   :      0   Min.   :  0.0   Min.   : 0.000   Min.   : 0.0000  
+ 1st Qu.:   3187   1st Qu.: 22.6   1st Qu.: 0.000   1st Qu.: 0.0000  
+ Median :   8596   Median : 46.3   Median : 1.000   Median : 0.0000  
+ Mean   :  16914   Mean   : 46.8   Mean   : 1.577   Mean   : 0.1637  
+ 3rd Qu.:  18250   3rd Qu.: 70.9   3rd Qu.: 2.000   3rd Qu.: 0.0000  
+ Max.   :1207359   Max.   :119.0   Max.   :33.000   Max.   :13.0000  
+    pub.rec        not.fully.paid      default      
+ Min.   :0.00000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.00000   Median :0.0000   Median :0.0000  
+ Mean   :0.06212   Mean   :0.1601   Mean   :0.1601  
+ 3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+ Max.   :5.00000   Max.   :1.0000   Max.   :1.0000  </code></pre>
+</div>
+</div>
+<div id="tabset-2-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-5-tab">
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="im">import</span> qmib</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+<div id="tabset-2-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-6-tab">
+<blockquote class="blockquote">
+<p>If the only tool we have is a hammer, we are tempted to use it for every problem.</p>
+</blockquote>
+<ul>
+<li>Let’s see how linear regression would address this problem.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co"># The linear probability model: a straight line through 0/1 outcomes</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>m1 <span class="op">=</span> smf.ols(<span class="st">"default ~ fico"</span>, data<span class="op">=</span>loans).fit()</span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="bu">print</span>(m1.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-7-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+lm(formula = default ~ fico, data = loans)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.3029 -0.1945 -0.1512 -0.0789  1.0006 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  1.187e+00  6.946e-02   17.10   &lt;2e-16 ***
+fico        -1.445e-03  9.757e-05  -14.81   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3626 on 9576 degrees of freedom
+Multiple R-squared:  0.0224,    Adjusted R-squared:  0.0223 
+F-statistic: 219.4 on 1 and 9576 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div id="tabset-2-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-8-tab">
+<p>Some observations:</p>
+<ul>
+<li><p>Because the <span class="math inline">\(p-value &lt; 0.05\)</span>, FICO score is a significant predictor.</p></li>
+<li><p>As FICO increases by 1 point, the average of the dependent variable decreases by <span class="math inline">\(0.001445\)</span>.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>How do we interpret this in the case that Y only takes on 0 or 1 values?</p>
+</blockquote>
+</div>
+<div id="tabset-2-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-9-tab">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+<div id="tabset-2-10" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-10-tab">
+<blockquote class="blockquote">
+<p>We ran a linear regression, but what exactly are we modeling?</p>
+</blockquote>
+<p>Recall that in the linear regression model we have:</p>
+<p><span class="math display">\[ Y \approx N(\mu,~\sigma^2) \]</span></p>
+<p>where</p>
+<p><span class="math display">\[ \mu = \beta_0 + \beta_1 x \]</span></p>
+<p>That is, the average of Y is modeled as a line.</p>
+</div>
+<div id="tabset-2-11" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-11-tab">
+<p>The average of Y:</p>
+<ul>
+<li>When Y only takes on <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span> values, the linear regression model has an interesting interpretation.</li>
+</ul>
+<p>In this case the linear regression model is equivalent to assuming:</p>
+<p><span class="math display">\[ \pi = P(Y=1)=\beta_0+\beta_1x \]</span></p>
+</div>
+<div id="tabset-2-12" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-12-tab">
+<p>Let’s examine some predicted values from our regression model.</p>
+<ul>
+<li>FICO score = 650, default probability = 0.25</li>
+</ul>
+<p><span class="math display">\[\hat{y} = 1.187 - 0.001445(650) = 0.25\]</span></p>
+<ul>
+<li>FICO score = 825, default probability = -0.005</li>
+</ul>
+<p><span class="math display">\[\hat{y} = 1.187 - 0.001445(825) = -0.005\]</span></p>
+<p>although a FICO score of 825 represents a great credit score, the probability can’t be negative.</p>
+</div>
+<div id="tabset-2-13" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-13-tab">
+<ul>
+<li><p>If we model a binary dependent variable using linear regression, we are modeling probability as a linear relationship with a predictor.</p></li>
+<li><p>Probabilities have to always be between 0 and 1, but the <strong>linear regression model doesn’t make this assumption</strong>. So there is no guarantee predictions will make sense.</p></li>
+<li><p>Probabilities computed by linear regressions can be negative or beyond 1.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>Fortunately there is another type of regression model better suited to model probabilities that we discuss now.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</section>
+<section id="the-basics-of-logistic-regression" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="the-basics-of-logistic-regression"><span class="header-section-number">7.12</span> The basics of logistic regression</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">LR 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">LR 2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false">LR 3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-4" role="tab" aria-controls="tabset-3-4" aria-selected="false">LR 4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-5" role="tab" aria-controls="tabset-3-5" aria-selected="false">LR 5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-6" role="tab" aria-controls="tabset-3-6" aria-selected="false">LR 6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-7" role="tab" aria-controls="tabset-3-7" aria-selected="false">LR 7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-8" role="tab" aria-controls="tabset-3-8" aria-selected="false">LR 8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-9" role="tab" aria-controls="tabset-3-9" aria-selected="false">LR 9</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-10-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-10" role="tab" aria-controls="tabset-3-10" aria-selected="false">LR 10</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<p>Recall that a binary dependent variable can take on only one of two values; e.g.&nbsp;<span class="math inline">\(Y = 0\)</span> or <span class="math inline">\(Y = 1\)</span>.</p>
+<p>Conventionally <span class="math inline">\(1\)</span> represents a success and <span class="math inline">\(0\)</span> a failure, regardless of the outcome.</p>
+<p>Examples of this type of variable in practice are:</p>
+<ul>
+<li><p><span class="math inline">\(Y = 1\)</span> if defaulted on loan, 0 otherwise.</p></li>
+<li><p><span class="math inline">\(Y = 1\)</span> if made online purchase, 0 otherwise.</p></li>
+<li><p><span class="math inline">\(Y = 1\)</span> if renewed car lease, 0 otherwise.</p></li>
+<li><p><span class="math inline">\(Y = 1\)</span> if employee promoted, 0 otherwise.</p></li>
+</ul>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<p>We showed in the previous segment that when a binary dependent variable is modeled using linear regression, the underlying model being estimated is</p>
+<p><span class="math display">\[\pi = P(Y=1) = \beta_0 + \beta_1 x\]</span></p>
+<p>As we saw, issues can arise when making predictions since this model does not prevent probabilities from being larger than 0 or less than 1.</p>
+</div>
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
+<p>Logistic regression is a way to model a binary dependent variable.</p>
+<ul>
+<li>The logistic regression model states that:</li>
+</ul>
+<p><span class="math display">\[ \pi = P(Y=1) = \frac{e^{(\beta_0+\beta_1x)}}{1+e^{(\beta_0+\beta_1x)}} \]</span></p>
+<p><span class="math display">\[ \pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1x)}} \]</span></p>
+</div>
+<div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>The weird looking function is called the logistic function, and its purpose is to ensure that predictions will always be between 0 to 1.</p>
+<p>It is called the S-shape function.</p>
+</div><div class="column" style="width:50%;">
+<figure class="figure">
+<p>
+<img src="economist-assets/logistic-curves.png" class="quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</p>
+</figure>
+</div>
+</div>
+</div>
+<div id="tabset-3-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-5-tab">
+<p>The logistic regression model can be estimated by the method of <strong>maximum likelihood estimation</strong>, a common approach for estimating parameters in statistical models.</p>
+<ul>
+<li>The estimated probability that <span class="math inline">\(Y = 1\)</span> given <span class="math inline">\(x\)</span> is:</li>
+</ul>
+<p><span class="math display">\[p = \frac{1}{1 + e^{-(b_0 + b_1 x)}}\]</span></p>
+<ul>
+<li><p><span class="math inline">\(b_0\)</span> is the estimate of <span class="math inline">\(\beta_0\)</span>.</p></li>
+<li><p><span class="math inline">\(b_1\)</span> is the estimate of <span class="math inline">\(\beta_1\)</span>.</p></li>
+</ul>
+</div>
+<div id="tabset-3-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-6-tab">
+<p>For our loan default data, the R output from estimating a logistic regression is as follows:</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="im">import</span> qmib</span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-7-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = default ~ fico, family = "binomial", data = loans)
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  6.7188776  0.5768348   11.65   &lt;2e-16 ***
+fico        -0.0118775  0.0008231  -14.43   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424.0  on 9577  degrees of freedom
+Residual deviance: 8196.1  on 9576  degrees of freedom
+AIC: 8200.1
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<div id="tabset-3-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-8-tab">
+<p>Using the R output, the estimated equation for the probability of a loan default is:</p>
+<p><span class="math display">\[ p = \frac{1}{1 + e^{-(6.72 - 0.012 x)}} \]</span></p>
+<p>With this equation we can predict probability of loan default for any FICO score <span class="math inline">\(x\)</span>.</p>
+</div>
+<div id="tabset-3-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-9-tab">
+<ul>
+<li>Using the estimated equation, if someone’s FICO score is 600 the probability of default is:</li>
+</ul>
+<p><span class="math display">\[ p = \frac{1}{1 + e^{-(6.72 - 0.012 \times 600)}} = 0.38 \]</span></p>
+<ul>
+<li>If someone’s FICO score is 850 the probability of default is:</li>
+</ul>
+<p><span class="math display">\[ p = \frac{1}{1 + e^{-(6.72 - 0.012 \times 850)}} = 0.03 \]</span></p>
+</div>
+<div id="tabset-3-10" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-10-tab">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-14-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="lets-use-another-example" class="level2" data-number="7.13">
+<h2 data-number="7.13" class="anchored" data-anchor-id="lets-use-another-example"><span class="header-section-number">7.13</span> Let’s use another example</h2>
+</section>
+<section id="fico-score" class="level2" data-number="7.14">
+<h2 data-number="7.14" class="anchored" data-anchor-id="fico-score"><span class="header-section-number">7.14</span> FICO Score</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-4" role="tab" aria-controls="tabset-4-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-5" role="tab" aria-controls="tabset-4-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-6" role="tab" aria-controls="tabset-4-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-7" role="tab" aria-controls="tabset-4-7" aria-selected="false">7</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="im">import</span> qmib</span>
+<span id="cb11-3"><a href="#cb11-3"></a></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>Call:
+glm(formula = default ~ fico, family = "binomial", data = loans)
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  6.7188776  0.5768348   11.65   &lt;2e-16 ***
+fico        -0.0118775  0.0008231  -14.43   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424.0  on 9577  degrees of freedom
+Residual deviance: 8196.1  on 9576  degrees of freedom
+AIC: 8200.1
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<p>The estimate <span class="math inline">\(b_1 = - 0.0119\)</span> is difficult to interpret exactly.</p>
+<p>But an important question is whether the data provide evidence that <span class="math inline">\(\beta_1 \neq 0\)</span>, which would imply that FICO scores are related to the probability of a loan default.</p>
+<p>We could construct a confidence interval for <span class="math inline">\(\beta_1\)</span> using the same approach as we did with linear regression.</p>
+<p><span class="math display">\[ b_1 \pm 1.96 \times SE(b_1) \]</span></p>
+<ul>
+<li><p>Usually difficult to make sense out of the exact set of values.</p></li>
+<li><p>However, we can assess whether <span class="math inline">\(\beta_1\)</span> is positive or negative through a confidence interval.</p></li>
+</ul>
+</div>
+<div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = default ~ fico, family = "binomial", data = loans)
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  6.7188776  0.5768348   11.65   &lt;2e-16 ***
+fico        -0.0118775  0.0008231  -14.43   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424.0  on 9577  degrees of freedom
+Residual deviance: 8196.1  on 9576  degrees of freedom
+AIC: 8200.1
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>95% confidence interval for <span class="math inline">\(\beta_1\)</span>:</li>
+</ul>
+<p><span class="math display">\[ -.0119 \pm 1.96 \times (0.000823) \]</span></p>
+<p><span class="math display">\[ = (-0.0119 - 0.001646, - 0.0119 + 0.001646) \]</span></p>
+<p><span class="math display">\[ = (-0.0135, -0.0103) \]</span></p>
+</div>
+</div>
+</div>
+<div id="tabset-4-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-4-tab">
+<p>we are usually interested in the following test:</p>
+<p><span class="math display">\[H_0: \beta_1 = 0\]</span></p>
+<p><span class="math display">\[H_1: \beta_1 \neq 0\]</span></p>
+<ul>
+<li>If we assume a significance level of <span class="math inline">\(\alpha = 0.05\)</span>, then because the <span class="math inline">\(p-value &lt; 0.05\)</span> we can reject the null hypothesis of <span class="math inline">\(\beta_1 = 0\)</span>.</li>
+</ul>
+<p>Therefore FICO score is a statistically significant predictor of the probability of a loan default.</p>
+</div>
+<div id="tabset-4-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-5-tab">
+<p>Estimating <span class="math inline">\(\pi\)</span></p>
+<blockquote class="blockquote">
+<p>A natural type of question to ask is: What is the probability of a loan default for a FICO score of (say) 700?</p>
+</blockquote>
+<ul>
+<li>As we have seen in the last segment, we can answer this from the formula of the <strong>point estimate</strong>, where <span class="math inline">\(b_0\)</span> and <span class="math inline">\(b_1\)</span> are the estimates of <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, and <span class="math inline">\(x = 700\)</span>:</li>
+</ul>
+<p><span class="math display">\[\pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1x)}}\]</span></p>
+</div>
+<div id="tabset-4-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-6-tab">
+<p>Instead of a point estimate of <span class="math inline">\(\pi\)</span>, <span class="math inline">\(p\)</span>, we can also compute a 95% confidence interval:</p>
+<p><span class="math display">\[p \pm 1.96 \times SE(b_1)\]</span></p>
+<p>The formula for SE(p) is complex, so we let R do the work:</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a>pred <span class="op">=</span> m2.get_prediction(pd.DataFrame({<span class="st">"fico"</span>: [<span class="dv">700</span>]})).summary_frame()</span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="bu">print</span>(pred[[<span class="st">"predicted"</span>, <span class="st">"ci_lower"</span>, <span class="st">"ci_upper"</span>]].<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>  Fit Lower Upper 
+0.169 0.161 0.176 </code></pre>
+</div>
+<p>The 95% confidence interval for <span class="math inline">\(\pi\)</span> is (0.161, 0.177).</p>
+<blockquote class="blockquote">
+<p>We are 95% confident that the probability that a borrower with a FICO score of 700 would default is between 0.161 and 0.177.</p>
+</blockquote>
+<div class="cell">
+<pre class="text"><code>                  2.5 %      97.5 %
+(Intercept)  5.59461730  7.85621388
+fico        -0.01350184 -0.01027486</code></pre>
+</div>
+</div>
+<div id="tabset-4-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-7-tab">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-19-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="inference-and-goodness-of-fit" class="level2" data-number="7.15">
+<h2 data-number="7.15" class="anchored" data-anchor-id="inference-and-goodness-of-fit"><span class="header-section-number">7.15</span> Inference and goodness of fit</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">IGF 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">IGF 2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false">IGF 3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-4" role="tab" aria-controls="tabset-5-4" aria-selected="false">IGF 4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-5" role="tab" aria-controls="tabset-5-5" aria-selected="false">IGF 5</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<p>In the last segment, we learned how to estimate the coefficients of a simple logistic regression and obtain predictions.</p>
+<p>We now focus on:</p>
+<ul>
+<li><p><strong>Hypothesis testing</strong> for the coefficient of a predictor in logistic regression.</p></li>
+<li><p><strong>Confidence intervals</strong> for probabilities.</p></li>
+<li><p>An <strong>analogous measure</strong> to <span class="math inline">\(R^2\)</span> in linear regression.</p></li>
+</ul>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<p>Again, the simple logistic regression model is given by:</p>
+<p><span class="math display">\[ \pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1x)}} \]</span></p>
+<ul>
+<li><p>We usually consider both confidence intervals and hypothesis tests for <span class="math inline">\(\beta_1\)</span> (btw, not <span class="math inline">\(b_1\)</span>).</p></li>
+<li><p>Because the value of <span class="math inline">\(\beta_1\)</span> is difficult to interpret, we will focus mainly on hypothesis testing for <span class="math inline">\(\beta_1 = 0\)</span>.</p></li>
+</ul>
+</div>
+<div id="tabset-5-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-3-tab">
+<ul>
+<li><p>No agreed-upon method for summarizing goodness-of-fit for logistic regression.</p></li>
+<li><p>The difficulty is that the notion of “percent variation explained” by the predictor is not as obvious as with linear regression.</p></li>
+</ul>
+</div>
+<div id="tabset-5-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-4-tab">
+<p>Various suggestions have been proposed – we will use the pseudo-R2 measure (due to McFadden).</p>
+<ul>
+<li>Logistic regression models are fitted using the method of maximum likelihood - i.e.&nbsp;the parameter estimates are those values which maximize the likelihood of the data which have been observed. McFadden’s R squared measure is defined as:</li>
+</ul>
+<p><span class="math display">\[ R^{2}\_{\text{McFadden}} = 1- \frac{log(L_c)}{log(L\_{\text{null}})} \]</span></p>
+<ul>
+<li>where <span class="math inline">\(L_c\)</span> denotes the (maximized) likelihood value from the current fitted model, and <span class="math inline">\(L\_{\text{null}}\)</span> denotes the corresponding value but for the null model - the model with only an intercept and no covariates.</li>
+</ul>
+</div>
+<div id="tabset-5-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-5-tab">
+<p>This calculation looks similar to that of <span class="math inline">\(R^2\)</span> for linear regression.</p>
+<ul>
+<li>Analysis of goodness-of-fit for loan default logistic regression:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1"></a>m2 <span class="op">=</span> smf.logit(<span class="st">"default ~ fico"</span>, data<span class="op">=</span>loans).fit()</span>
+<span id="cb17-2"><a href="#cb17-2"></a>null <span class="op">=</span> smf.logit(<span class="st">"default ~ 1"</span>, data<span class="op">=</span>loans).fit()</span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co"># McFadden's pseudo R-squared</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a>pseudo_r2 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> m2.llf <span class="op">/</span> null.llf</span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="bu">print</span>(<span class="ss">f"pseudo R2 = </span><span class="sc">{</span>pseudo_r2<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>'log Lik.' 0.0271 (df=2)</code></pre>
+</div>
+<p>Value is computed to be 0.0271</p>
+<ul>
+<li><p>Very low pseudo-R2 – roughly 2.7% of the “variation” explained by the FICO score.</p></li>
+<li><p>Generally do not expect high <span class="math inline">\(pseudo-R^2\)</span> values.</p></li>
+<li><p>Values as high as 0.4 or 0.5 indicate a very good fit for logistic regression.</p></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="lets-see-another-example" class="level2" data-number="7.16">
+<h2 data-number="7.16" class="anchored" data-anchor-id="lets-see-another-example"><span class="header-section-number">7.16</span> Let’s see another example</h2>
+</section>
+<section id="portugals-red-wines" class="level2" data-number="7.17">
+<h2 data-number="7.17" class="anchored" data-anchor-id="portugals-red-wines"><span class="header-section-number">7.17</span> Portugal’s Red Wines</h2>
+<ul>
+<li><p>Analogous to linear regression, logistic regression benefits from using multiple predictors simultaneously.</p></li>
+<li><p>Pros and cons of multiple predictors:</p>
+<ul>
+<li><p>Greater accuracy in predictions</p></li>
+<li><p>Better use of data</p></li>
+<li><p>Much more difficult to visualize</p></li>
+<li><p>With large data, computing-intensive to fit</p></li>
+</ul></li>
+</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Wine 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-3" role="tab" aria-controls="tabset-6-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-4" role="tab" aria-controls="tabset-6-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-5" role="tab" aria-controls="tabset-6-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-6" role="tab" aria-controls="tabset-6-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-7" role="tab" aria-controls="tabset-6-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-8" role="tab" aria-controls="tabset-6-8" aria-selected="false">8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-9" role="tab" aria-controls="tabset-6-9" aria-selected="false">9</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-10-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-10" role="tab" aria-controls="tabset-6-10" aria-selected="false">10</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-11-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-11" role="tab" aria-controls="tabset-6-11" aria-selected="false">11</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-12-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-12" role="tab" aria-controls="tabset-6-12" aria-selected="false">12</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-13-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-13" role="tab" aria-controls="tabset-6-13" aria-selected="false">13</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-14-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-14" role="tab" aria-controls="tabset-6-14" aria-selected="false">14</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-15-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-15" role="tab" aria-controls="tabset-6-15" aria-selected="false">15</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-16-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-16" role="tab" aria-controls="tabset-6-16" aria-selected="false">16</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-17-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-17" role="tab" aria-controls="tabset-6-17" aria-selected="false">17</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-18-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-18" role="tab" aria-controls="tabset-6-18" aria-selected="false">18</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-19-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-19" role="tab" aria-controls="tabset-6-19" aria-selected="false">19</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-20-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-20" role="tab" aria-controls="tabset-6-20" aria-selected="false">20</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-21-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-21" role="tab" aria-controls="tabset-6-21" aria-selected="false">21</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<p>Can we use analytics to predict quality from physio-chemical content of red wine?</p>
+<ul>
+<li><p>Data were collected on 1599 bottles of Portuguese red wines.</p></li>
+<li><p>Each wine was evaluated by experts; wines were dichotomized into “bad” vs “good” based on quality.</p></li>
+</ul>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a><span class="im">import</span> qmib</span>
+<span id="cb19-2"><a href="#cb19-2"></a></span>
+<span id="cb19-3"><a href="#cb19-3"></a>redwines <span class="op">=</span> qmib.load(<span class="st">"redwines"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4"></a>redwines.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-6-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-3-tab">
+<div class="cell">
+<pre class="text"><code> fixed.acidity   volatile.acidity residual.sugar     chlorides      
+ Min.   : 4.60   Min.   :0.1200   Min.   : 0.900   Min.   :0.01200  
+ 1st Qu.: 7.10   1st Qu.:0.3900   1st Qu.: 1.900   1st Qu.:0.07000  
+ Median : 7.90   Median :0.5200   Median : 2.200   Median :0.07900  
+ Mean   : 8.32   Mean   :0.5278   Mean   : 2.539   Mean   :0.08747  
+ 3rd Qu.: 9.20   3rd Qu.:0.6400   3rd Qu.: 2.600   3rd Qu.:0.09000  
+ Max.   :15.90   Max.   :1.5800   Max.   :15.500   Max.   :0.61100  
+ total.sulfur.dioxide    density         sulphates         alcohol     
+ Min.   :  6.00       Min.   :0.9901   Min.   :0.3300   Min.   : 8.40  
+ 1st Qu.: 22.00       1st Qu.:0.9956   1st Qu.:0.5500   1st Qu.: 9.50  
+ Median : 38.00       Median :0.9968   Median :0.6200   Median :10.20  
+ Mean   : 46.47       Mean   :0.9967   Mean   :0.6581   Mean   :10.42  
+ 3rd Qu.: 62.00       3rd Qu.:0.9978   3rd Qu.:0.7300   3rd Qu.:11.10  
+ Max.   :289.00       Max.   :1.0037   Max.   :2.0000   Max.   :14.90  
+     good          
+ Length:1599       
+ Class :character  
+ Mode  :character  
+                   
+                   
+                   </code></pre>
+</div>
+</div>
+<div id="tabset-6-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-4-tab">
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a><span class="im">import</span> qmib</span>
+<span id="cb21-2"><a href="#cb21-2"></a></span>
+<span id="cb21-3"><a href="#cb21-3"></a>redwines <span class="op">=</span> qmib.load(<span class="st">"redwines"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4"></a>redwines.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code> [1] "No"  "No"  "No"  "No"  "No"  "No"  "No"  "Yes" "Yes" "No"  "No"  "No" 
+[13] "No"  "No"  "No"  "No"  "Yes" "No"  "No"  "No" </code></pre>
+</div>
+</div>
+<div id="tabset-6-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-5-tab">
+<ul>
+<li>We will consider eight predictors listed above of good wine quality (No/Yes) for this example. We will let Y = 1 to represent “Yes” and Y = 0 to represent “No.”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># qmib.load() already returns good as 0/1, so no recoding is needed.</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a>redwines[<span class="st">"good"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-6-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-6-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb24-2"><a href="#cb24-2"></a></span>
+<span id="cb24-3"><a href="#cb24-3"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">3.4</span>))</span>
+<span id="cb24-4"><a href="#cb24-4"></a><span class="cf">for</span> ax, col <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">"fixed_acidity"</span>, <span class="st">"volatile_acidity"</span>, <span class="st">"alcohol"</span>]):</span>
+<span id="cb24-5"><a href="#cb24-5"></a>    redwines.boxplot(column<span class="op">=</span>col, by<span class="op">=</span><span class="st">"good"</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb24-6"><a href="#cb24-6"></a>    ax.set_title(col)<span class="op">;</span> ax.set_xlabel(<span class="st">"good"</span>)</span>
+<span id="cb24-7"><a href="#cb24-7"></a>plt.suptitle(<span class="st">""</span>)<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-26-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-6-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-7-tab">
+<p>We have predictors <span class="math inline">\(x_1, x_2, x_3, ..., x_p\)</span></p>
+<p>Our model for the binary response is:</p>
+<p><span class="math display">\[ \pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1 x_1 + \beta_2 x_2 + ... + \beta_p x_p)}} \]</span></p>
+<p>Same method to estimate the coefficients (i.e., the <span class="math inline">\(\beta\)</span>s) by maximum likelihood estimation.</p>
+<p>Similar goals:</p>
+<ul>
+<li><p>Perform statistical inference for the <span class="math inline">\(beta\)</span>s</p></li>
+<li><p>Make probability predictions of the response based on predictor variable values</p></li>
+<li><p>Slight difference comes in the interpretation of coefficients</p></li>
+</ul>
+</div>
+<div id="tabset-6-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-8-tab">
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a>predictors <span class="op">=</span> [<span class="st">"fixed_acidity"</span>, <span class="st">"volatile_acidity"</span>, <span class="st">"residual_sugar"</span>, <span class="st">"chlorides"</span>,</span>
+<span id="cb25-2"><a href="#cb25-2"></a>              <span class="st">"total_sulfur_dioxide"</span>, <span class="st">"density"</span>, <span class="st">"sulphates"</span>, <span class="st">"alcohol"</span>]</span>
+<span id="cb25-3"><a href="#cb25-3"></a></span>
+<span id="cb25-4"><a href="#cb25-4"></a>w1 <span class="op">=</span> smf.logit(<span class="st">"good ~ "</span> <span class="op">+</span> <span class="st">" + "</span>.join(predictors), data<span class="op">=</span>redwines).fit()</span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="bu">print</span>(w1.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-6-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-9-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = good ~ fixed.acidity + volatile.acidity + residual.sugar + 
+    chlorides + total.sulfur.dioxide + density + sulphates + 
+    alcohol, family = "binomial", data = redwines)
+
+Coefficients:
+                       Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)           2.268e+02  9.163e+01   2.475 0.013336 *  
+fixed.acidity         2.812e-01  8.029e-02   3.502 0.000462 ***
+volatile.acidity     -2.913e+00  6.467e-01  -4.504 6.66e-06 ***
+residual.sugar        2.328e-01  7.009e-02   3.322 0.000893 ***
+chlorides            -8.441e+00  3.259e+00  -2.590 0.009593 ** 
+total.sulfur.dioxide -1.360e-02  3.447e-03  -3.946 7.95e-05 ***
+density              -2.409e+02  9.202e+01  -2.618 0.008835 ** 
+sulphates             3.699e+00  5.287e-01   6.997 2.62e-12 ***
+alcohol               7.823e-01  1.120e-01   6.983 2.88e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1269.92  on 1598  degrees of freedom
+Residual deviance:  872.08  on 1590  degrees of freedom
+AIC: 890.08
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+<div id="tabset-6-10" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-10-tab">
+<p>The estimated multiple logistic regression is therefore:</p>
+<p><span class="math display">\[\pi = P(Y=1) = \frac{1}{1+e^{-(227 + 0.281 x_1 -0.291 x_2 + ... + 0.782 x_p)}}\]</span></p>
+<p>A positive value of a coefficient means:</p>
+<ul>
+<li>A one-unit increase in the predictor, holding the other predictors fixed, corresponds to an increase in the probability of “success.”</li>
+</ul>
+<p>A negative value of a coefficient means:</p>
+<ul>
+<li>A one-unit increase in the predictor, holding the other predictors fixed, corresponds to an decrease in the probability of “success.”</li>
+</ul>
+</div>
+<div id="tabset-6-11" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-11-tab">
+<p>An increase in fixed acidity, residual sugar, sulphates, and alcohol content correspond to higher wine quality, holding all other variables fixed.</p>
+<p>An increase in volatile acidity, chlorides, total sulfur dioxide and density correspond to lower wine quality, holding all other variables fixed.</p>
+</div>
+<div id="tabset-6-12" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-12-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = good ~ fixed.acidity + volatile.acidity + residual.sugar + 
+    chlorides + total.sulfur.dioxide + density + sulphates + 
+    alcohol, family = "binomial", data = redwines)
+
+Coefficients:
+                       Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)           2.268e+02  9.163e+01   2.475 0.013336 *  
+fixed.acidity         2.812e-01  8.029e-02   3.502 0.000462 ***
+volatile.acidity     -2.913e+00  6.467e-01  -4.504 6.66e-06 ***
+residual.sugar        2.328e-01  7.009e-02   3.322 0.000893 ***
+chlorides            -8.441e+00  3.259e+00  -2.590 0.009593 ** 
+total.sulfur.dioxide -1.360e-02  3.447e-03  -3.946 7.95e-05 ***
+density              -2.409e+02  9.202e+01  -2.618 0.008835 ** 
+sulphates             3.699e+00  5.287e-01   6.997 2.62e-12 ***
+alcohol               7.823e-01  1.120e-01   6.983 2.88e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1269.92  on 1598  degrees of freedom
+Residual deviance:  872.08  on 1590  degrees of freedom
+AIC: 890.08
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+<div id="tabset-6-13" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-13-tab">
+<p>Interpreting the magnitude of the coefficients:</p>
+<ul>
+<li>As with simple logistic regression, the actual values of the estimated coefficients do have an interpretation, but they are not straightforward.</li>
+</ul>
+<blockquote class="blockquote">
+<p>It is more crucial to interpret when a coefficient is positive or negative.</p>
+</blockquote>
+</div>
+<div id="tabset-6-14" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-14-tab">
+<p>The coefficients are called the log-odds</p>
+<div class="cell">
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1"></a><span class="co"># Log-odds: the coefficients as fitted</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a>w1.params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>         (Intercept)        fixed.acidity     volatile.acidity 
+        226.75035047           0.28116907          -2.91283364 
+      residual.sugar            chlorides total.sulfur.dioxide 
+          0.23284320          -8.44080365          -0.01359982 
+             density            sulphates              alcohol 
+       -240.94649105           3.69873557           0.78225259 </code></pre>
+</div>
+</div>
+<div id="tabset-6-15" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-15-tab">
+<p>To get the “odds”, we just to take the exponential value of the coefficients:</p>
+<div class="cell">
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb30-2"><a href="#cb30-2"></a></span>
+<span id="cb30-3"><a href="#cb30-3"></a><span class="co"># Odds ratios: exponentiate. Above 1 raises the odds, below 1 lowers them.</span></span>
+<span id="cb30-4"><a href="#cb30-4"></a>np.exp(w1.params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>         (Intercept)        fixed.acidity     volatile.acidity 
+        2.995201e+98         1.324678e+00         5.432158e-02 
+      residual.sugar            chlorides total.sulfur.dioxide 
+        1.262184e+00         2.158766e-04         9.864922e-01 
+             density            sulphates              alcohol 
+       2.281752e-105         4.039619e+01         2.186392e+00 </code></pre>
+</div>
+<blockquote class="blockquote">
+<p>For one unit increase in alcohol, the odds of the wine being qualified as good increase by a factor of 2.18.</p>
+</blockquote>
+</div>
+<div id="tabset-6-16" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-16-tab">
+<p>To get the predicted probabilities:</p>
+<div class="cell">
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a><span class="co"># Hold every other predictor at its mean and vary alcohol alone</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>grid <span class="op">=</span> pd.DataFrame({c: [redwines[c].mean()] <span class="op">*</span> <span class="dv">8</span> <span class="cf">for</span> c <span class="kw">in</span> predictors})</span>
+<span id="cb32-3"><a href="#cb32-3"></a>grid[<span class="st">"alcohol"</span>] <span class="op">=</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">16</span>)</span>
+<span id="cb32-4"><a href="#cb32-4"></a></span>
+<span id="cb32-5"><a href="#cb32-5"></a>grid[<span class="st">"p_good"</span>] <span class="op">=</span> w1.predict(grid)</span>
+<span id="cb32-6"><a href="#cb32-6"></a><span class="bu">print</span>(grid[[<span class="st">"alcohol"</span>, <span class="st">"p_good"</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>          1           2           3           4           5           6 
+0.009037878 0.019550710 0.041776513 0.087026502 0.172467214 0.313030560 
+          7           8 
+0.499065901 0.685360230 </code></pre>
+</div>
+</div>
+<div id="tabset-6-17" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-17-tab">
+<p>To get the predicted probabilities:</p>
+<div class="cell">
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># Hold every other predictor at its mean and vary alcohol alone</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a>grid <span class="op">=</span> pd.DataFrame({c: [redwines[c].mean()] <span class="op">*</span> <span class="dv">8</span> <span class="cf">for</span> c <span class="kw">in</span> predictors})</span>
+<span id="cb34-3"><a href="#cb34-3"></a>grid[<span class="st">"alcohol"</span>] <span class="op">=</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">16</span>)</span>
+<span id="cb34-4"><a href="#cb34-4"></a></span>
+<span id="cb34-5"><a href="#cb34-5"></a>grid[<span class="st">"p_good"</span>] <span class="op">=</span> w1.predict(grid)</span>
+<span id="cb34-6"><a href="#cb34-6"></a><span class="bu">print</span>(grid[[<span class="st">"alcohol"</span>, <span class="st">"p_good"</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-6-18" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-18-tab">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-34-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+<div id="tabset-6-19" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-19-tab">
+<p>Also we might want to know whether a coefficient is <span class="math inline">\(0\)</span> (i.e., whether the predictor is important).</p>
+<p>Can formally address this question using hypothesis tests:</p>
+<ul>
+<li>Interpretation: Each predictor individually is significant (at the α = 0.05 level) of wine quality relative to a model with all other predictors included.</li>
+</ul>
+<p>There are no simple formulas for confidence intervals for the true probability, π, for a specific set of predictor values. But they are easily computable in R.</p>
+</div>
+<div id="tabset-6-20" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-20-tab">
+<p>Consider a bottle of wine with the characteristics:</p>
+<div class="line-block">fixed.acidity | volatile.acidity | residual.sugar | chlorides</div>
+<p>|||-|| | 6.2 | 0.36 | 2.2 | 0.095</p>
+<div class="line-block">total.sulfur.dioxide | density | sulphates | alcohol</div>
+<p>|-||–|-| | 42 | 0.9946 | 0.57 | 11.7 |</p>
+<p>We can determine that the estimated probability that this wine is of good quality is 0.141.</p>
+<p>By the way, this particular wine was rated as “not good” in the actual data set.</p>
+</div>
+<div id="tabset-6-21" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-21-tab">
+<p>For wines with the following characteristics:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">fixed.acidity</th>
+<th style="text-align: left;">volatile.acidity</th>
+<th style="text-align: left;">residual.sugar</th>
+<th style="text-align: left;">chlorides</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">6.2</td>
+<td style="text-align: left;">0.36</td>
+<td style="text-align: left;">2.2</td>
+<td style="text-align: left;">0.095</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">total.sulfur.dioxide</th>
+<th style="text-align: left;">density</th>
+<th style="text-align: left;">sulphates</th>
+<th style="text-align: left;">alcohol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">42</td>
+<td style="text-align: left;">0.9946</td>
+<td style="text-align: left;">0.57</td>
+<td style="text-align: left;">11.7</td>
+</tr>
+</tbody>
+</table>
+<p>A 95% confidence interval for <span class="math inline">\(\pi\)</span>, the probability wine with these features would be rated good, is:</p>
+<p>(0.089, 0.195)</p>
+<blockquote class="blockquote">
+<p>For wines with the listed physio-chemical composition, we are 95% confident that the probability of a “good” evaluation is between 0.089 and 0.195.</p>
+</blockquote>
+<p>The pseudo-R2 can be computed for multiple logistic regression in the same way as in simple logistic regression.</p>
+<blockquote class="blockquote">
+<p>For the wine quality logistic regression, the pseudo-R2 is computed to be 0.313.</p>
+</blockquote>
+<p>This suggests that a moderate amount of variability in the binary response can be explained by the physio-chemical predictors.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="comparing-logistic-models" class="level2" data-number="7.18">
+<h2 data-number="7.18" class="anchored" data-anchor-id="comparing-logistic-models"><span class="header-section-number">7.18</span> Comparing logistic models</h2>
+</section>
+<section id="comparing-logistic-models-1" class="level2" data-number="7.19">
+<h2 data-number="7.19" class="anchored" data-anchor-id="comparing-logistic-models-1"><span class="header-section-number">7.19</span> Comparing logistic models</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Comparison 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-4" role="tab" aria-controls="tabset-7-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-5" role="tab" aria-controls="tabset-7-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-6" role="tab" aria-controls="tabset-7-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-7" role="tab" aria-controls="tabset-7-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-8" role="tab" aria-controls="tabset-7-8" aria-selected="false">8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-9" role="tab" aria-controls="tabset-7-9" aria-selected="false">9</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<p>Recall that the simple logistic regression model used to model Y, a Bernoulli variable with probability of success <span class="math inline">\(\pi\)</span> is given by:</p>
+<p><span class="math display">\[ \pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1 x_1 + \beta_2 x_2 + ... + \beta_p x_p)}} \]</span></p>
+<p>The estimates for the model then become:</p>
+<p><span class="math display">\[ p = P(Y=1) = \frac{1}{1+e^{-(b_0+ b_1 x_1 + b_2 x_2 + ... + b_p x_p)}} \]</span></p>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<p>Residuals in logistic regression:</p>
+<ul>
+<li>Residuals in logistic regression can then be calculated just like in linear regression:</li>
+</ul>
+<p><span class="math display">\[e = y - p\]</span></p>
+<p>Here, <span class="math inline">\(p\)</span> is the estimated probability of the response taking on the value 1, and <span class="math inline">\(Y\)</span> is either 0 or 1.</p>
+<p>This results in the estimated residuals, <span class="math inline">\(e\)</span>, only being able to take on two values for any predicted value.</p>
+</div>
+<div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Let us use our <em>loans</em> dataset.</p>
+<div class="cell">
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="im">import</span> qmib</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb35-5"><a href="#cb35-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb35-6"><a href="#cb35-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div><div class="column" style="width:50%;">
+<p>Below is the residual scatter plot for the logistic model predicting loan default from FICO score:</p>
+<p>The pattern emerges because of the discreteness in the binary response.</p>
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-36-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-4-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Because of this pattern (based on the response being binary), performing model diagnostics in logistic regression is not easy.</p>
+<p>Using logistic regression as a predictive model is still valid.</p>
+<div class="cell">
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1"></a>grid <span class="op">=</span> pd.DataFrame({<span class="st">"fico"</span>: <span class="bu">range</span>(<span class="dv">550</span>, <span class="dv">901</span>)})</span>
+<span id="cb36-2"><a href="#cb36-2"></a>plt.scatter(loans[<span class="st">"fico"</span>], loans[<span class="st">"default"</span>], s<span class="op">=</span><span class="dv">4</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb36-3"><a href="#cb36-3"></a>plt.plot(grid[<span class="st">"fico"</span>], m2.predict(grid), color<span class="op">=</span><span class="st">"blue"</span>, lw<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb36-4"><a href="#cb36-4"></a>plt.xlabel(<span class="st">"FICO"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"P(default)"</span>)</span>
+<span id="cb36-5"><a href="#cb36-5"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-38-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-5-tab">
+<p>Comparing logistic models is similar to the approach we took with linear regression.</p>
+<ul>
+<li><p>If two models are nested, a formal significance test, the chi-squared test <span class="math inline">\(\chi^2\)</span>, can be performed.</p></li>
+<li><p>If two models are not nested, then Akaike Information Criterion (AIC) can be compared.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>Backward stepwise regression (using AIC) can be used to select a best predictive model.</p>
+</blockquote>
+</div>
+<div id="tabset-7-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-6-tab">
+<p>We’ve seen that FICO score is predictive of whether a borrower defaults on a loan.</p>
+<blockquote class="blockquote">
+<p>Can we improve our model by using the purpose of the loan as an additional predictor?</p>
+</blockquote>
+<p>The variable ‘purpose’ has 7 categories, so R will create 6 binary predictors to define it in a logistic regression model.</p>
+<ul>
+<li>To determine if it is important, a single test for one coefficient is not possible since there are six of them, so we need a different approach.</li>
+</ul>
+</div>
+<div id="tabset-7-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-7-tab">
+<section id="chi-squared-test" class="level4" data-number="7.19.0.1">
+<h4 data-number="7.19.0.1" class="anchored" data-anchor-id="chi-squared-test"><span class="header-section-number">7.19.0.1</span> Chi-squared test</h4>
+<p>Formally the hypotheses being tested in a chi-squared test in logistic regression are:</p>
+<ul>
+<li><p><span class="math inline">\(H_0\)</span>: the <span class="math inline">\(\beta\)</span>s associated with the extra variables are all zero</p></li>
+<li><p><span class="math inline">\(H_1\)</span>: at least one of the extra <span class="math inline">\(\beta\)</span>s is not zero.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>A large chi-squared statistic is in favor of the alternative hypothesis.</p>
+</blockquote>
+<ul>
+<li><p>If the <span class="math inline">\(p-value\)</span> is small, then there is evidence to suggest that the extra variables are important.</p></li>
+<li><p>The chi-squared test in logistic regression is the analog to the F-test in linear regression.</p></li>
+</ul>
+</section>
+</div>
+<div id="tabset-7-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-8-tab">
+<section id="chi-squared-test-1" class="level4" data-number="7.19.0.2">
+<h4 data-number="7.19.0.2" class="anchored" data-anchor-id="chi-squared-test-1"><span class="header-section-number">7.19.0.2</span> Chi-squared test</h4>
+<p>Comparing two models to predict defaulted loans in R:</p>
+<div class="cell">
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1"></a>m2 <span class="op">=</span> smf.logit(<span class="st">"default ~ fico"</span>, data<span class="op">=</span>loans).fit()</span>
+<span id="cb37-2"><a href="#cb37-2"></a>m3 <span class="op">=</span> smf.logit(<span class="st">"default ~ fico + C(purpose)"</span>, data<span class="op">=</span>loans).fit()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb38-2"><a href="#cb38-2"></a></span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="co"># Likelihood-ratio test: does purpose earn its extra parameters?</span></span>
+<span id="cb38-4"><a href="#cb38-4"></a>lr <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (m3.llf <span class="op">-</span> m2.llf)</span>
+<span id="cb38-5"><a href="#cb38-5"></a>df <span class="op">=</span> <span class="bu">int</span>(m3.df_model <span class="op">-</span> m2.df_model)</span>
+<span id="cb38-6"><a href="#cb38-6"></a><span class="bu">print</span>(<span class="ss">f"chi2 = </span><span class="sc">{</span>lr<span class="sc">:.2f}</span><span class="ss">, df = </span><span class="sc">{</span>df<span class="sc">}</span><span class="ss">, p = </span><span class="sc">{</span>stats<span class="sc">.</span>chi2<span class="sc">.</span>sf(lr, df)<span class="sc">:.6f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</div>
+<div id="tabset-7-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-9-tab">
+<div class="cell">
+<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb39-2"><a href="#cb39-2"></a></span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="co"># Likelihood-ratio test: does purpose earn its extra parameters?</span></span>
+<span id="cb39-4"><a href="#cb39-4"></a>lr <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (m3.llf <span class="op">-</span> m2.llf)</span>
+<span id="cb39-5"><a href="#cb39-5"></a>df <span class="op">=</span> <span class="bu">int</span>(m3.df_model <span class="op">-</span> m2.df_model)</span>
+<span id="cb39-6"><a href="#cb39-6"></a><span class="bu">print</span>(<span class="ss">f"chi2 = </span><span class="sc">{</span>lr<span class="sc">:.2f}</span><span class="ss">, df = </span><span class="sc">{</span>df<span class="sc">}</span><span class="ss">, p = </span><span class="sc">{</span>stats<span class="sc">.</span>chi2<span class="sc">.</span>sf(lr, df)<span class="sc">:.6f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>Analysis of Deviance Table
+
+Model 1: default ~ fico
+Model 2: default ~ fico + purpose
+  Resid. Df Resid. Dev Df Deviance  Pr(&gt;Chi)    
+1      9576     8196.1                          
+2      9570     8077.9  6   118.16 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<p>The chi-squared test has a very small p-value (certainly less than 0.0001).</p>
+<blockquote class="blockquote">
+<p>We can conclude that the purpose for their loan is an important predictor (beyond just FICO score).</p>
+</blockquote>
+</div>
+</div>
+</div>
+</section>
+<section id="model-selection" class="level2" data-number="7.20">
+<h2 data-number="7.20" class="anchored" data-anchor-id="model-selection"><span class="header-section-number">7.20</span> Model selection</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true">Stepwise 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-3" role="tab" aria-controls="tabset-8-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-4" role="tab" aria-controls="tabset-8-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-5" role="tab" aria-controls="tabset-8-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-6" role="tab" aria-controls="tabset-8-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-7" role="tab" aria-controls="tabset-8-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-8" role="tab" aria-controls="tabset-8-8" aria-selected="false">8</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<p>Stepwise model selection can be used in logistic regression (just like in linear regression) using AIC as the criterion to choose the best predictive model.</p>
+<p>The algorithm is the same. For backwards selection:</p>
+<ul>
+<li><p>Start with the ‘full’ model</p></li>
+<li><p>Remove the variable that would result in an model that improves AIC the most</p></li>
+<li><p>Continue removing variables, one at a time, until AIC cannot be improved (smallest AIC).</p></li>
+</ul>
+</div>
+<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
+<p>To predict whether a borrower defaults on a loan, let’s start with a ‘full model’ that uses the following predictors:</p>
+<ul>
+<li><p>FICO score</p></li>
+<li><p>Debt to income ratio (dti)</p></li>
+<li><p>Annual income (on the log scale)</p></li>
+<li><p>Interest rate</p></li>
+<li><p>Purpose (7 categories: credit card, educational, etc.)</p></li>
+</ul>
+</div>
+<div id="tabset-8-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-3-tab">
+<div class="cell">
+<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1"></a><span class="co"># Compare candidate models on AIC rather than running an automatic search:</span></span>
+<span id="cb41-2"><a href="#cb41-2"></a><span class="co"># it is clearer what you chose, and why.</span></span>
+<span id="cb41-3"><a href="#cb41-3"></a>candidates <span class="op">=</span> [</span>
+<span id="cb41-4"><a href="#cb41-4"></a>    <span class="st">"default ~ fico"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5"></a>    <span class="st">"default ~ fico + int_rate"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6"></a>    <span class="st">"default ~ fico + int_rate + log_annual_inc + dti"</span>,</span>
+<span id="cb41-7"><a href="#cb41-7"></a>]</span>
+<span id="cb41-8"><a href="#cb41-8"></a><span class="cf">for</span> formula <span class="kw">in</span> candidates:</span>
+<span id="cb41-9"><a href="#cb41-9"></a>    m <span class="op">=</span> smf.logit(formula, data<span class="op">=</span>loans).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb41-10"><a href="#cb41-10"></a>    <span class="bu">print</span>(<span class="ss">f"AIC </span><span class="sc">{</span>m<span class="sc">.</span>aic<span class="sc">:9.1f}</span><span class="ss">   </span><span class="sc">{</span>formula<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-8-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-4-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = default ~ fico + dti + log.annual.inc + int.rate + 
+    purpose, family = "binomial", data = loans)
+
+Coefficients:
+                           Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                4.697208   1.014115   4.632 3.62e-06 ***
+fico                      -0.008248   0.001180  -6.990 2.74e-12 ***
+dti                        0.005858   0.004299   1.363 0.172981    
+log.annual.inc            -0.137702   0.048142  -2.860 0.004232 ** 
+int.rate                   7.911574   1.567205   5.048 4.46e-07 ***
+purposecredit_card        -0.470383   0.106820  -4.404 1.07e-05 ***
+purposedebt_consolidation -0.261531   0.073679  -3.550 0.000386 ***
+purposeeducational         0.125278   0.149362   0.839 0.401608    
+purposehome_improvement    0.148847   0.123822   1.202 0.229321    
+purposemajor_purchase     -0.388134   0.163949  -2.367 0.017913 *  
+purposesmall_business      0.610618   0.114703   5.323 1.02e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424.0  on 9577  degrees of freedom
+Residual deviance: 8045.1  on 9567  degrees of freedom
+AIC: 8067.1
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<div id="tabset-8-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-5-tab">
+<p>AIC was calculated to be 8067.1.</p>
+<p>Looks like ‘dti’ is unimportant. Let’s see what gets removed after performing a backward stepwise approach</p>
+</div>
+<div id="tabset-8-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-6-tab">
+<div class="cell">
+<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1"></a><span class="co"># In the VS Codium terminal, with .venv active:  python</span></span>
+<span id="cb43-2"><a href="#cb43-2"></a><span class="im">import</span> qmib</span>
+<span id="cb43-3"><a href="#cb43-3"></a></span>
+<span id="cb43-4"><a href="#cb43-4"></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
+<span id="cb43-5"><a href="#cb43-5"></a>loans <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span>
+<span id="cb43-6"><a href="#cb43-6"></a>loans.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-8-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-7-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+glm(formula = default ~ fico + dti + log.annual.inc + int.rate + 
+    purpose, family = "binomial", data = loans)
+
+Coefficients:
+                           Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                4.697208   1.014115   4.632 3.62e-06 ***
+fico                      -0.008248   0.001180  -6.990 2.74e-12 ***
+dti                        0.005858   0.004299   1.363 0.172981    
+log.annual.inc            -0.137702   0.048142  -2.860 0.004232 ** 
+int.rate                   7.911574   1.567205   5.048 4.46e-07 ***
+purposecredit_card        -0.470383   0.106820  -4.404 1.07e-05 ***
+purposedebt_consolidation -0.261531   0.073679  -3.550 0.000386 ***
+purposeeducational         0.125278   0.149362   0.839 0.401608    
+purposehome_improvement    0.148847   0.123822   1.202 0.229321    
+purposemajor_purchase     -0.388134   0.163949  -2.367 0.017913 *  
+purposesmall_business      0.610618   0.114703   5.323 1.02e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424.0  on 9577  degrees of freedom
+Residual deviance: 8045.1  on 9567  degrees of freedom
+AIC: 8067.1
+
+Number of Fisher Scoring iterations: 5</code></pre>
+<pre class="text"><code>Start:  AIC=8067.13
+default ~ fico + dti + log.annual.inc + int.rate + purpose
+
+                 Df Deviance    AIC
+- dti             1   8047.0 8067.0
+&lt;none&gt;                8045.1 8067.1
+- log.annual.inc  1   8053.3 8073.3
+- int.rate        1   8070.4 8090.4
+- fico            1   8095.5 8115.5
+- purpose         6   8136.1 8146.1
+
+Step:  AIC=8066.99
+default ~ fico + log.annual.inc + int.rate + purpose
+
+                 Df Deviance    AIC
+&lt;none&gt;                8047.0 8067.0
+- log.annual.inc  1   8055.4 8073.4
+- int.rate        1   8073.9 8091.9
+- fico            1   8098.9 8116.9
+- purpose         6   8136.2 8144.2</code></pre>
+<pre class="text"><code>Call:
+glm(formula = default ~ fico + log.annual.inc + int.rate + purpose, 
+    family = "binomial", data = loans)
+
+Coefficients:
+                           Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                4.808434   1.007669   4.772 1.83e-06 ***
+fico                      -0.008328   0.001175  -7.088 1.36e-12 ***
+log.annual.inc            -0.138768   0.048014  -2.890 0.003850 ** 
+int.rate                   8.114300   1.557021   5.211 1.87e-07 ***
+purposecredit_card        -0.454342   0.106169  -4.279 1.87e-05 ***
+purposedebt_consolidation -0.247504   0.072951  -3.393 0.000692 ***
+purposeeducational         0.123510   0.149385   0.827 0.408357    
+purposehome_improvement    0.145575   0.123755   1.176 0.239471    
+purposemajor_purchase     -0.394170   0.163895  -2.405 0.016171 *  
+purposesmall_business      0.604124   0.114593   5.272 1.35e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 8424  on 9577  degrees of freedom
+Residual deviance: 8047  on 9568  degrees of freedom
+AIC: 8067
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<div id="tabset-8-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-8-tab">
+<p>Removing ‘dti’ improved the AIC slightly (8067.1 to 8066.99).</p>
+<p>We stop after dropping ‘dti’ because all other models with one fewer predictor have higher AIC.</p>
+<p>Notice: ‘purpose’, with its six binary variables, is either entirely included or not included at all.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="ordinal-logistic-regression" class="level2" data-number="7.21">
+<h2 data-number="7.21" class="anchored" data-anchor-id="ordinal-logistic-regression"><span class="header-section-number">7.21</span> Ordinal logistic regression</h2>
+</section>
+<section id="ordinal-logistic-regression-1" class="level2" data-number="7.22">
+<h2 data-number="7.22" class="anchored" data-anchor-id="ordinal-logistic-regression-1"><span class="header-section-number">7.22</span> Ordinal logistic regression</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true">OLR 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-3" role="tab" aria-controls="tabset-9-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-4" role="tab" aria-controls="tabset-9-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-5" role="tab" aria-controls="tabset-9-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-6" role="tab" aria-controls="tabset-9-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-7" role="tab" aria-controls="tabset-9-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-8" role="tab" aria-controls="tabset-9-8" aria-selected="false">8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-9" role="tab" aria-controls="tabset-9-9" aria-selected="false">9</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
+<p>A study looks at factors that influence the decision of whether to apply to graduate school. College juniors are asked if they are unlikely, somewhat likely, or very likely to apply to graduate school. Hence, our outcome variable has three categories.</p>
+<ul>
+<li><p>Data on parental educational status, whether the undergraduate institution is public or private, and current GPA is also collected. The researchers have reason to believe that the “distances” between these three points are not equal.</p></li>
+<li><p>For example, the “distance” between “unlikely” and “somewhat likely” may be shorter than the distance between “somewhat likely” and “very likely”.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb47"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1"></a><span class="im">import</span> qmib</span>
+<span id="cb47-2"><a href="#cb47-2"></a></span>
+<span id="cb47-3"><a href="#cb47-3"></a>dat <span class="op">=</span> qmib.load(<span class="st">"ologit"</span>)</span>
+<span id="cb47-4"><a href="#cb47-4"></a>dat.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode" id="cb48"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1"></a>dat.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code># A tibble: 6 × 4
+  apply           pared public   gpa
+  &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1 very likely         0      0  3.26
+2 somewhat likely     1      0  3.21
+3 unlikely            1      1  3.94
+4 somewhat likely     0      0  2.81
+5 somewhat likely     0      0  2.53
+6 unlikely            0      1  2.59</code></pre>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode" id="cb50"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1"></a>pd.crosstab([dat[<span class="st">"public"</span>], dat[<span class="st">"pared"</span>]], dat[<span class="st">"apply"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>                       pared   0   1
+public apply                        
+0      somewhat likely        98  26
+       unlikely              175  14
+       very likely            20  10
+1      somewhat likely        12   4
+       unlikely               25   6
+       very likely             7   3</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-9-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-3-tab">
+<div class="cell">
+<div class="sourceCode" id="cb52"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1"></a><span class="co"># Keep the order — "unlikely" &lt; "somewhat likely" &lt; "very likely".</span></span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="co"># An ordinal model needs the ordering, not just the labels.</span></span>
+<span id="cb52-3"><a href="#cb52-3"></a>order <span class="op">=</span> [<span class="st">"unlikely"</span>, <span class="st">"somewhat likely"</span>, <span class="st">"very likely"</span>]</span>
+<span id="cb52-4"><a href="#cb52-4"></a>dat[<span class="st">"apply_c"</span>] <span class="op">=</span> pd.Categorical(dat[<span class="st">"apply"</span>], categories<span class="op">=</span>order, ordered<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-9-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-4-tab">
+<div class="cell">
+<div>
+<figure class="figure">
+<p>
+<img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-50-1.png" width="960" class="figure-img">
+</p>
+</figure>
+</div>
+</div>
+</div>
+<div id="tabset-9-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-5-tab">
+<div class="cell">
+<div class="sourceCode" id="cb53"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1"></a><span class="im">from</span> statsmodels.miscmodels.ordinal_model <span class="im">import</span> OrderedModel</span>
+<span id="cb53-2"><a href="#cb53-2"></a></span>
+<span id="cb53-3"><a href="#cb53-3"></a>om <span class="op">=</span> OrderedModel(dat[<span class="st">"apply_c"</span>], dat[[<span class="st">"pared"</span>, <span class="st">"public"</span>, <span class="st">"gpa"</span>]],</span>
+<span id="cb53-4"><a href="#cb53-4"></a>                  distr<span class="op">=</span><span class="st">"logit"</span>).fit(method<span class="op">=</span><span class="st">"bfgs"</span>, disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb53-5"><a href="#cb53-5"></a><span class="bu">print</span>(om.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-9-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-6-tab">
+<div class="cell">
+<pre class="text"><code>Call:
+polr(formula = as.factor(apply) ~ pared + public + gpa, data = dat, 
+    Hess = TRUE)
+
+Coefficients:
+          Value Std. Error t value
+pared   1.04769     0.2658  3.9418
+public -0.05879     0.2979 -0.1974
+gpa     0.61594     0.2606  2.3632
+
+Intercepts:
+    Value   Std. Error t value
+0|1  2.2039  0.7795     2.8272
+1|2  4.2994  0.8043     5.3453
+
+Residual Deviance: 717.0249 
+AIC: 727.0249 </code></pre>
+</div>
+</div>
+<div id="tabset-9-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-7-tab">
+<div class="cell">
+<div class="sourceCode" id="cb55"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1"></a><span class="co"># Proportional-odds ratios</span></span>
+<span id="cb55-2"><a href="#cb55-2"></a>np.exp(om.params[[<span class="st">"pared"</span>, <span class="st">"public"</span>, <span class="st">"gpa"</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>    pared    public       gpa 
+2.8510579 0.9429088 1.8513972 </code></pre>
+</div>
+<p>Parental Education</p>
+<ul>
+<li><p>For students whose parents did attend college, the <strong>odds</strong> of being <strong>more likely</strong> (i.e., <strong>very or somewhat likely versus unlikely</strong>) to apply is 2.85 times (i.e., increases 185%) that of students whose parents did not go to college, holding constant all other variables.</p></li>
+<li><p>For students whose parents did not attend college, the <strong>odds</strong> of being <strong>less likely</strong> to apply (i.e., <strong>unlikely versus somewhat or very likely</strong>) is 2.85 times that of students whose parents did go to college, holding constant all other variables.</p></li>
+</ul>
+</div>
+<div id="tabset-9-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-8-tab">
+<div class="cell">
+<div class="sourceCode" id="cb57"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1"></a><span class="co"># Proportional-odds ratios</span></span>
+<span id="cb57-2"><a href="#cb57-2"></a>np.exp(om.params[[<span class="st">"pared"</span>, <span class="st">"public"</span>, <span class="st">"gpa"</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>    pared    public       gpa 
+2.8510579 0.9429088 1.8513972 </code></pre>
+</div>
+<p>School Type</p>
+<ul>
+<li><p>For students in public school, the <strong>odds</strong> of being <strong>more likely</strong> (i.e., very or somewhat likely versus unlikely) to apply is 5.71% lower [i.e., (1 -0.943) x 100%] than private school students, holding constant all other variables.</p></li>
+<li><p>For students in private school, the <strong>odds</strong> of being <strong>more likely</strong> to apply is 1.06 times [i.e., 1/0.943] that of public school students, holding constant all other variables (positive odds ratio).</p></li>
+<li><p>For students in private school, the <strong>odds</strong> of being <strong>less likely</strong> to apply (i.e., unlikely versus somewhat or very likely) is 5.71% lower than public school students, holding constant all other variables.</p></li>
+<li><p>For students in public school, the <strong>odds</strong> of being <strong>less likely</strong> to apply is 1.06 times that of private school students, holding constant all other variables (positive odds ratio).</p></li>
+</ul>
+</div>
+<div id="tabset-9-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-9-tab">
+<div class="cell">
+<div class="sourceCode" id="cb59"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1"></a><span class="co"># Proportional-odds ratios</span></span>
+<span id="cb59-2"><a href="#cb59-2"></a>np.exp(om.params[[<span class="st">"pared"</span>, <span class="st">"public"</span>, <span class="st">"gpa"</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>    pared    public       gpa 
+2.8510579 0.9429088 1.8513972 </code></pre>
+</div>
+<p>GPA</p>
+<ul>
+<li><p>For every one unit increase in student’s GPA the <strong>odds</strong> of being <strong>more likely</strong> to apply (very or somewhat likely versus unlikely) is multiplied 1.85 times (i.e., increases 85%), holding constant all other variables.</p></li>
+<li><p>For every one unit decrease in student’s GPA the <strong>odds</strong> of being <strong>less likely</strong> to apply (unlikely versus somewhat or very likely) is multiplied 1.85 times, holding constant all other variables.</p></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="multinomial-logistic-regression" class="level2" data-number="7.23">
+<h2 data-number="7.23" class="anchored" data-anchor-id="multinomial-logistic-regression"><span class="header-section-number">7.23</span> Multinomial logistic regression</h2>
+</section>
+<section id="multinomial-logistic-regression-1" class="level2" data-number="7.24">
+<h2 data-number="7.24" class="anchored" data-anchor-id="multinomial-logistic-regression-1"><span class="header-section-number">7.24</span> Multinomial logistic regression</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true">MLR 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-3" role="tab" aria-controls="tabset-10-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-4" role="tab" aria-controls="tabset-10-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-5" role="tab" aria-controls="tabset-10-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-6" role="tab" aria-controls="tabset-10-6" aria-selected="false">6</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-7" role="tab" aria-controls="tabset-10-7" aria-selected="false">7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-8" role="tab" aria-controls="tabset-10-8" aria-selected="false">8</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-9" role="tab" aria-controls="tabset-10-9" aria-selected="false">9</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
+<p>People’s occupational choices might be influenced by their parents’ occupations and their own education level.</p>
+<p>We can study the relationship of one’s occupation choice with education level and father’s occupation. The occupational choices will be the outcome variable which consists of categories of occupations.</p>
+<div class="cell">
+<div class="sourceCode" id="cb61"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1"></a><span class="im">import</span> qmib</span>
+<span id="cb61-2"><a href="#cb61-2"></a></span>
+<span id="cb61-3"><a href="#cb61-3"></a>ml <span class="op">=</span> qmib.load(<span class="st">"hsbdemo"</span>)</span>
+<span id="cb61-4"><a href="#cb61-4"></a>ml.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
+<div class="cell">
+<pre class="text"><code>       id            female              ses               schtyp         
+ Min.   :  1.00   Length:200         Length:200         Length:200        
+ 1st Qu.: 50.75   Class :character   Class :character   Class :character  
+ Median :100.50   Mode  :character   Mode  :character   Mode  :character  
+ Mean   :100.50                                                           
+ 3rd Qu.:150.25                                                           
+ Max.   :200.00                                                           
+     prog                read           write            math      
+ Length:200         Min.   :28.00   Min.   :31.00   Min.   :33.00  
+ Class :character   1st Qu.:44.00   1st Qu.:45.75   1st Qu.:45.00  
+ Mode  :character   Median :50.00   Median :54.00   Median :52.00  
+                    Mean   :52.23   Mean   :52.77   Mean   :52.65  
+                    3rd Qu.:60.00   3rd Qu.:60.00   3rd Qu.:59.00  
+                    Max.   :76.00   Max.   :67.00   Max.   :75.00  
+    science          socst          honors              awards    
+ Min.   :26.00   Min.   :26.00   Length:200         Min.   :0.00  
+ 1st Qu.:44.00   1st Qu.:46.00   Class :character   1st Qu.:0.00  
+ Median :53.00   Median :52.00   Mode  :character   Median :1.00  
+ Mean   :51.85   Mean   :52.41                      Mean   :1.67  
+ 3rd Qu.:58.00   3rd Qu.:61.00                      3rd Qu.:2.00  
+ Max.   :74.00   Max.   :71.00                      Max.   :7.00  
+      cid       
+ Min.   : 1.00  
+ 1st Qu.: 5.00  
+ Median :10.50  
+ Mean   :10.43  
+ 3rd Qu.:15.00  
+ Max.   :20.00  </code></pre>
+</div>
+</div>
+<div id="tabset-10-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-3-tab">
+<ul>
+<li><p>The data set contains variables on 200 students.</p></li>
+<li><p>The outcome variable is <span class="math inline">\(prog\)</span>, program type. The predictor variables are social economic status, <span class="math inline">\(ses\)</span>, a three-level categorical variable and writing score, <span class="math inline">\(write\)</span>, a continuous variable.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb63"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1"></a>pd.crosstab(ml[<span class="st">"ses"</span>], ml[<span class="st">"prog"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>        prog
+ses      academic general vocation
+  high         42       9        7
+  low          19      16       12
+  middle       44      20       31</code></pre>
+</div>
+<div class="cell">
+<pre class="text"><code>             Mean       SD
+academic 56.25714 7.943343
+general  51.33333 9.397775
+vocation 46.76000 9.318754</code></pre>
+</div>
+</div>
+<div id="tabset-10-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-4-tab">
+<p>First, we need to choose the level of our outcome that we wish to use as our baseline and specify this in the relevel function.</p>
+<div class="cell">
+<div class="sourceCode" id="cb66"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1"></a><span class="co"># academic is the reference outcome; middle is the reference ses</span></span>
+<span id="cb66-2"><a href="#cb66-2"></a>levels <span class="op">=</span> [<span class="st">"academic"</span>, <span class="st">"general"</span>, <span class="st">"vocation"</span>]</span>
+<span id="cb66-3"><a href="#cb66-3"></a>ml[<span class="st">"prog_c"</span>] <span class="op">=</span> pd.Categorical(ml[<span class="st">"prog"</span>], categories<span class="op">=</span>levels).codes</span>
+<span id="cb66-4"><a href="#cb66-4"></a></span>
+<span id="cb66-5"><a href="#cb66-5"></a>X <span class="op">=</span> pd.get_dummies(ml[[<span class="st">"ses"</span>]].astype(<span class="bu">str</span>))[[<span class="st">"ses_low"</span>, <span class="st">"ses_high"</span>]].astype(<span class="bu">float</span>)</span>
+<span id="cb66-6"><a href="#cb66-6"></a>X[<span class="st">"write"</span>] <span class="op">=</span> ml[<span class="st">"write"</span>].astype(<span class="bu">float</span>)</span>
+<span id="cb66-7"><a href="#cb66-7"></a>X <span class="op">=</span> sm.add_constant(X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then, we run our model using multinom. The multinom package does not include p-value calculation for the regression coefficients, so we calculate p-values using Wald tests (here z-tests).</p>
+<div class="cell">
+<div class="sourceCode" id="cb67"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb67-2"><a href="#cb67-2"></a></span>
+<span id="cb67-3"><a href="#cb67-3"></a>mn <span class="op">=</span> sm.MNLogit(ml[<span class="st">"prog_c"</span>], X).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb67-4"><a href="#cb67-4"></a><span class="bu">print</span>(mn.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-10-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-5-tab">
+<div class="cell">
+<pre class="text"><code># weights:  15 (8 variable)
+initial  value 219.722458 
+iter  10 value 179.982880
+final  value 179.981726 
+converged</code></pre>
+<pre class="text"><code>Call:
+multinom(formula = prog2 ~ ses2 + write, data = ml)
+
+Coefficients:
+         (Intercept)   ses2high ses2middle      write
+general     2.852198 -1.1628226 -0.5332810 -0.0579287
+vocation    5.218260 -0.9826649  0.2913859 -0.1136037
+
+Std. Errors:
+         (Intercept)  ses2high ses2middle      write
+general     1.166441 0.5142196  0.4437323 0.02141097
+vocation    1.163552 0.5955665  0.4763739 0.02221996
+
+Residual Deviance: 359.9635 
+AIC: 375.9635 </code></pre>
+</div>
+</div>
+<div id="tabset-10-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-6-tab">
+<div class="cell">
+<div class="sourceCode" id="cb70"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1"></a><span class="co"># z-tests come with the summary in statsmodels</span></span>
+<span id="cb70-2"><a href="#cb70-2"></a>mn.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>z test of coefficients:
+
+                      Estimate Std. Error z value  Pr(&gt;|z|)    
+general:(Intercept)   2.852198   1.166441  2.4452  0.014477 *  
+general:ses2high     -1.162823   0.514220 -2.2613  0.023739 *  
+general:ses2middle   -0.533281   0.443732 -1.2018  0.229438    
+general:write        -0.057929   0.021411 -2.7056  0.006819 ** 
+vocation:(Intercept)  5.218260   1.163552  4.4848 7.299e-06 ***
+vocation:ses2high    -0.982665   0.595567 -1.6500  0.098950 .  
+vocation:ses2middle   0.291386   0.476374  0.6117  0.540753    
+vocation:write       -0.113604   0.022220 -5.1127 3.176e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<div id="tabset-10-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-7-tab">
+<p>The model summary output has a block of coefficients and a block of standard errors. Each of these blocks has one row of values corresponding to a model equation. Focusing on the block of coefficients, we can look at the first row comparing prog = “general” to our baseline prog = “academic” and the second row comparing prog = “vocation” to our baseline prog = “academic”. If we consider our coefficients from the first row to be and our coefficients from the second row to be , we can write our model equations:</p>
+<p><span class="math display">\[ ln\left(\frac{P(prog=general)}{P(prog=academic)}\right) = b\_{10} + b\_{11}(ses=2) + b\_{12}(ses=3) + b\_{13}write \]</span></p>
+<p><span class="math display">\[ ln\left(\frac{P(prog=vocation)}{P(prog=academic)}\right) = b\_{20} + b\_{21}(ses=2) + b\_{22}(ses=3) + b\_{23}write \]</span></p>
+</div>
+<div id="tabset-10-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-8-tab">
+<p><span class="math inline">\(b\_{13}\)</span>: A one-unit increase in the variable write is associated with the decrease in the log odds of being in general program vs.&nbsp;academic program in the amount of .058</p>
+<p><span class="math inline">\(b\_{23}\)</span>: A one-unit increase in the variable write is associated with the decrease in the log odds of being in vocation program vs.&nbsp;academic program. in the amount of .1136</p>
+<p><span class="math inline">\(b\_{12}\)</span>: The log odds of being in general program vs.&nbsp;in academic program will decrease by 1.163 if moving from ses=“low” to ses=“high”</p>
+<p><span class="math inline">\(b\_{11}\)</span>: The log odds of being in general program vs.&nbsp;in academic program will decrease by 0.533 if moving from ses=“low”to ses=“middle”, although this coefficient is not significant.</p>
+<p><span class="math inline">\(b\_{22}\)</span>: The log odds of being in vocation program vs.&nbsp;in academic program will decrease by 0.983 if moving from ses=“low” to ses=“high”</p>
+<p><span class="math inline">\(b\_{21}\)</span>: The log odds of being in vocation program vs.&nbsp;in academic program will increase by 0.291 if moving from ses=“low” to ses=“middle”, although this coefficient is not significant.</p>
+</div>
+<div id="tabset-10-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-9-tab">
+<div class="cell">
+<div class="sourceCode" id="cb72"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1"></a><span class="co"># Column 0 is general vs academic; column 1 is vocation vs academic</span></span>
+<span id="cb72-2"><a href="#cb72-2"></a>np.exp(mn.params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="text"><code>         (Intercept)  ses2high ses2middle     write
+general     17.32582 0.3126026  0.5866769 0.9437172
+vocation   184.61262 0.3743123  1.3382809 0.8926116</code></pre>
+</div>
+<ul>
+<li><p>The odds (also called the relative risk ratio) for a one-unit increase in the variable <span class="math inline">\(write\)</span> is <span class="math inline">\(.9437\)</span> for being in general program vs.&nbsp;academic program.</p></li>
+<li><p>The odds (relative risk ratio) switching from <span class="math inline">\(ses = 1\)</span> to <span class="math inline">\(3\)</span> is <span class="math inline">\(.3126\)</span> for being in general program vs.&nbsp;academic program.</p></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion-2" class="level2" data-number="7.25">
+<h2 data-number="7.25" class="anchored" data-anchor-id="conclusion-2"><span class="header-section-number">7.25</span> Conclusion</h2>
+</section>
+<section id="conclusion-3" class="level2" data-number="7.26">
+<h2 data-number="7.26" class="anchored" data-anchor-id="conclusion-3"><span class="header-section-number">7.26</span> Conclusion</h2>
+<ul>
+<li><p>Logistic regression extends linear regression to binary, ordinal, and multinomial outcomes.</p></li>
+<li><p>The logistic function constrains predicted probabilities between 0 and 1.</p></li>
+<li><p>Coefficients are interpreted through odds and odds ratios, rather than direct changes in means.</p></li>
+<li><p>Inference relies on likelihood-based methods (Wald tests, likelihood ratio tests) instead of variance decomposition.</p></li>
+<li><p>Model fit can be evaluated using measures such as McFadden’s pseudo-R².</p></li>
+<li><p>Competing models can be compared via χ² tests for nested models and AIC for non-nested models, with stepwise procedures as an option.</p></li>
+<li><p>Applications to credit risk and wine quality illustrated the interpretive and practical uses of logistic regression.</p></li>
+<li><p>Ordinal and multinomial extensions allow richer modeling of categorical outcomes in business research.</p></li>
+<li><p>Successful application requires attention to assumptions, data quality, and validity of interpretations.</p></li>
+</ul>
+</section>
+<section id="conclusion---key-takeaways" class="level2" data-number="7.27">
+<h2 data-number="7.27" class="anchored" data-anchor-id="conclusion---key-takeaways"><span class="header-section-number">7.27</span> Conclusion - Key Takeaways</h2>
+<ol type="1">
+<li><p>Logistic regression provides a robust framework for modeling binary and categorical outcomes, ensuring probabilities are always between 0 and 1.</p></li>
+<li><p>Inference and model fit rely on likelihood-based methods (Wald tests, χ² tests, AIC, pseudo-R²), rather than variance decomposition.</p></li>
+<li><p>Extensions to ordinal and multinomial logit models allow richer analysis of categorical responses in applied business research.</p></li>
+</ol>
+</section>
+<section id="in-the-practice" class="level2" data-number="7.28">
+<h2 data-number="7.28" class="anchored" data-anchor-id="in-the-practice"><span class="header-section-number">7.28</span> In the practice</h2>
+<section id="logistic-regression-binary-ordinal-and-multinomial" class="level3" data-number="7.28.1">
+<h3 data-number="7.28.1" class="anchored" data-anchor-id="logistic-regression-binary-ordinal-and-multinomial"><span class="header-section-number">7.28.1</span> Logistic Regression: Binary, Ordinal, and Multinomial</h3>
+<blockquote class="blockquote">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-04-practice.html">Open the practice slides</a></strong> · source: <a href="https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S04-Practice.qmd"><code>MATH60033A-S04-Practice.qmd</code></a></p>
+</blockquote>
+<hr>
+<section id="the-theme-of-this-session" class="level4" data-number="7.28.1.1">
+<h4 data-number="7.28.1.1" class="anchored" data-anchor-id="the-theme-of-this-session"><span class="header-section-number">7.28.1.1</span> The theme of this session</h4>
+<blockquote class="blockquote">
+<h1 id="can-we-predict-a-discrete-outcome-honestly" data-number="8"><span class="header-section-number">8</span> Can we predict a discrete outcome honestly?</h1>
+</blockquote>
+<p>All ten groups attack this question, each on <strong>its own project</strong>, and the last twenty minutes assemble the answers.</p>
+<hr>
+</section>
+<section id="what-you-are-doing" class="level4" data-number="8.0.0.1">
+<h4 data-number="8.0.0.1" class="anchored" data-anchor-id="what-you-are-doing"><span class="header-section-number">8.0.0.1</span> What you are doing</h4>
+<p>The lecture showed the method on the session’s dataset. You now apply it to <strong>your own angle</strong>, and to the question your group is actually trying to answer (<a href="./mandates.html"><code>RESEARCH-MANDATES.md</code></a>).</p>
+<p>The deliverable is not a printout. It is a <strong>decision</strong>, with the reason written down.</p>
+<hr>
+</section>
+<section id="before-you-start" class="level4" data-number="8.0.0.2">
+<h4 data-number="8.0.0.2" class="anchored" data-anchor-id="before-you-start"><span class="header-section-number">8.0.0.2</span> Before you start</h4>
+<p>Everyone in the group pushes at least once this session. Replace <code>XX</code> with your group number — group 07 uses <code>group-07</code>.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> group-XX</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> 04-logistic-ordinal-multinomial/02-practice/submissions/group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="reproduce-one-result-from-the-paper-20-min" class="level4" data-number="8.0.0.3">
+<h4 data-number="8.0.0.3" class="anchored" data-anchor-id="reproduce-one-result-from-the-paper-20-min"><span class="header-section-number">8.0.0.3</span> 1 · Reproduce one result from the paper — 20 min</h4>
+<p>Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot, and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one that is not attempted earns none.</p>
+<p>The paper is <strong>Saganowski et al.&nbsp;(2019), <em>Analysis of group evolution prediction in complex networks</em></strong>, and its replication package (<a href="https://doi.org/10.7910/DVN/ONOFS7">10.7910/DVN/ONOFS7</a>) should already be unzipped at:</p>
+<pre class="text"><code>04-logistic-ordinal-multinomial/data/replication/</code></pre>
+<p>The session’s own dataset, for comparison:</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> qmib</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> qmib.load(<span class="st">"loans"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="apply-the-method-to-your-own-angle-35-min" class="level4" data-number="8.0.0.4">
+<h4 data-number="8.0.0.4" class="anchored" data-anchor-id="apply-the-method-to-your-own-angle-35-min"><span class="header-section-number">8.0.0.4</span> 2 · Apply the method to your own angle — 35 min</h4>
+<div class="sourceCode" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> qmib.load(<span class="st">"core"</span>)</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>mine <span class="op">=</span> qmib.load(<span class="st">"angle_c_country"</span>)     <span class="co"># your angle — see your dictionary</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">"geo"</span>, <span class="st">"time"</span>], how<span class="op">=</span><span class="st">"inner"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Fit the session’s method on your own data. Report what the lecture said to report, in the units of your own variables.</p>
+<hr>
+</section>
+<section id="break-one-assumption-15-min" class="level4" data-number="8.0.0.5">
+<h4 data-number="8.0.0.5" class="anchored" data-anchor-id="break-one-assumption-15-min"><span class="header-section-number">8.0.0.5</span> 3 · Break one assumption — 15 min</h4>
+<p>Every method in this course rests on something. Find the assumption this one rests on hardest, break it deliberately, and record what happened to your answer. <strong>This is the part that carries the marks.</strong></p>
+<hr>
+</section>
+<section id="write-it-down-20-min" class="level4" data-number="8.0.0.6">
+<h4 data-number="8.0.0.6" class="anchored" data-anchor-id="write-it-down-20-min"><span class="header-section-number">8.0.0.6</span> 4 · Write it down — 20 min</h4>
+<p>A 250-word note in your submissions folder:</p>
+<ul>
+<li>What you found, in units</li>
+<li>Which assumption you broke, and what it did</li>
+<li>What this result does <strong>not</strong> license you to claim</li>
+</ul>
+<hr>
+</section>
+<section id="submitting" class="level4" data-number="8.0.0.7">
+<h4 data-number="8.0.0.7" class="anchored" data-anchor-id="submitting"><span class="header-section-number">8.0.0.7</span> Submitting</h4>
+<div class="sourceCode" id="cb78"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add 04-logistic-ordinal-multinomial/02-practice/submissions/group-XX</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Session 04 practice — group XX"</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Everyone pushes at least once. The log is the record of participation.</p>
+<hr>
+</section>
+<section id="what-loses-marks" class="level4" data-number="8.0.0.8">
+<h4 data-number="8.0.0.8" class="anchored" data-anchor-id="what-loses-marks"><span class="header-section-number">8.0.0.8</span> What loses marks</h4>
+<ul>
+<li>Reporting log-odds as though they were probabilities</li>
+<li>Interpreting an odds ratio as a relative risk</li>
+<li>Comparing non-nested models with a likelihood-ratio test</li>
+<li>Reporting accuracy on an imbalanced outcome with no base rate</li>
+</ul>
+<hr>
+<p><a href="#the-lecture">&lt;- The lecture</a> · <a href="./session-04.html">Session 04 overview</a></p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./session-03.html" class="pagination-link" aria-label="Session 3 — Regression: Adequacy, Validity, and Robustness">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Session 3 — Regression: Adequacy, Validity, and Robustness</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./session-05.html" class="pagination-link" aria-label="Session 5 — Regularisation: Ridge, Lasso, and the Elastic Net">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Session 5 — Regularisation: Ridge, Lasso, and the Elastic Net</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MATH60033A · HEC Montréal</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-04.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Built from the course repository</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
