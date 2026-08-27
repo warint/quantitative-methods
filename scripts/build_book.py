@@ -365,31 +365,38 @@ def _decks(num):
 
 
 def plate(num):
-    """The chapter's portrait, with its attribution taken from credits.json.
+    """The chapter's portraits, with attribution taken from credits.json.
 
-    The credit is not decoration. These are real paintings and photographs by
-    named artists, and the licence that lets the book use them is conditional
-    on saying so.
+    A chapter may carry more than one sitter — chapter 3 opens on the priority
+    dispute between Legendre and Gauss, and shows both. The credit is not
+    decoration: these are real paintings and drawings by named artists, and the
+    licence that lets the book use them is conditional on saying so.
     """
     creds = PORTRAITS / "credits.json"
     if not creds.exists():
         return ""
-    entry = json.loads(creds.read_text(encoding="utf-8")).get(f"session-{num}")
-    if not entry:
+    entries = json.loads(creds.read_text(encoding="utf-8")).get(f"session-{num}")
+    if not entries:
         return ""
+    if isinstance(entries, dict):          # single-sitter chapters
+        entries = [entries]
 
-    src = Path(entry["file"]).name
-    artist = entry["artist"]
-    when = entry["date"]
-    return (
-        '::: {.plate}\n'
-        f'![](images/{src}){{fig-alt="Portrait of {entry["name"]}, {entry["dates"]}."}}\n\n'
-        f'**{entry["name"]}** · {entry["dates"]}\n\n'
-        f'{entry["why"]}\n\n'
-        f'[{artist}, {when}. {entry["licence"]}, via Wikimedia Commons.]'
-        '{.plate-credit}\n'
-        ':::\n'
-    )
+    plates = []
+    for e in entries:
+        src = Path(e["file"]).name
+        plates.append(
+            '::: {.plate}\n'
+            f'![](images/{src}){{fig-alt="Portrait of {e["name"]}, {e["dates"]}."}}\n\n'
+            f'**{e["name"]}** · {e["dates"]}\n\n'
+            f'{e["why"]}\n\n'
+            f'[{e["artist"]}, {e["date"] or "undated"}. {e["licence"]}, '
+            'via Wikimedia Commons.]{.plate-credit}\n'
+            ':::\n'
+        )
+
+    if len(plates) == 1:
+        return plates[0]
+    return ':::: {.plates}\n' + "\n".join(plates) + '::::\n'
 
 
 def chapter_prose(d, num):
@@ -937,6 +944,21 @@ details.code-fold {
     cursor: pointer;
 
     &:hover { color: $econ-teal; }
+  }
+}
+
+/* Two sitters side by side — the priority dispute, shown rather than told. */
+.plates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  justify-content: center;
+  margin: 2.4rem 0;
+
+  .plate {
+    flex: 1 1 15rem;
+    max-width: 19rem;
+    margin: 0;
   }
 }
 """

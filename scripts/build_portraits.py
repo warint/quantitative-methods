@@ -23,6 +23,7 @@ Attribution for every plate is written to assets/portraits/credits.json and
 rendered into the caption by scripts/build_book.py.
 """
 
+import io
 import json
 import re
 import sys
@@ -30,7 +31,7 @@ from pathlib import Path
 
 import numpy as np
 import requests
-from PIL import Image, ImageDraw, ImageEnhance, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "portraits"
@@ -41,20 +42,31 @@ UA = "MATH60033A-course-repo/1.0 (https://github.com/warint/quantitative-methods
 # Licence strings Commons uses for material that is free of copyright.
 FREE = ("public domain", "pd", "cc0")
 
-# session -> (slug, display name, dates, Commons file, why this person)
+# session -> (slug, name, dates, Commons file, why this person, crop)
+#
+# crop is an optional (left, top, right, bottom) box in fractions of the source,
+# for sheets that hold more than one sitter. Boilly drew Legendre and Fourier on
+# one leaf, so Legendre is the left half of it.
 ROSTER = {
-    "03": ("gauss", "Carl Friedrich Gauss", "1777–1855",
-           "File:Carl Friedrich Gauss 1840 by Jensen.jpg",
-           "Least squares, and the theorem that says when it is the best you can do."),
+    "03": [
+        ("gauss", "Carl Friedrich Gauss", "1777–1855",
+         "File:Carl Friedrich Gauss 1840 by Jensen.jpg",
+         "Least squares, and the theorem that says when it is the best you can do.",
+         None),
+        ("legendre", "Adrien-Marie Legendre", "1752–1833",
+         "File:Legendre and Fourier (1820).jpg",
+         "Published least squares first, in 1805. This caricature is the only "
+         "likeness of him known to exist.",
+         (0.02, 0.02, 0.50, 0.98)),
+    ],
 }
 
 # The plate. 4:5 at 900px wide, then framed.
 W, H = 900, 1125
-SHADOW = (58, 42, 24)        # warm bistre, the darkest ink in the plate
-HIGHLIGHT = (243, 234, 216)  # the book's paper, one shade warmer
-FRAME_GOLD = (176, 138, 58)
-FRAME_DARK = (74, 58, 30)
-MAT = (238, 231, 216)
+SHADOW = (62, 47, 32)        # warm bistre — the darkest ink on the leaf
+HIGHLIGHT = (247, 241, 228)  # the book's paper, one shade warmer
+PAPER = (242, 236, 222)      # the album leaf the plate is mounted on
+RULE = (196, 182, 158)       # the pencil rule around it
 
 
 def fetch(title):
@@ -94,60 +106,75 @@ def fetch(title):
     }, img.content
 
 
-def duotone(grey):
-    """Map a greyscale plate onto the book's warm two-tone range."""
-    ramp = []
-    for i in range(256):
-        t = i / 255
-        ramp += [round(SHADOW[c] + (HIGHLIGHT[c] - SHADOW[c]) * t) for c in range(3)]
-    # Image.point wants one flat channel list per band, so split and remap.
-    r = grey.point([ramp[i * 3] for i in range(256)])
-    g = grey.point([ramp[i * 3 + 1] for i in range(256)])
-    b = grey.point([ramp[i * 3 + 2] for i in range(256)])
-    return Image.merge("RGB", (r, g, b))
+def wash(img, keep=0.55):
+    """Ink-and-wash: colour held back, blacks lifted to a warm brown.
 
-
-def vignette(img, strength=0.34):
-    """Darken the corners, the way an old varnish does.
-
-    A radial falloff computed per pixel, not a drawn ellipse: an ellipse leaves
-    a visible rim where its edge lands, which on a plate this size reads as a
-    printing fault rather than as age.
+    Boilly's caricatures are watercolour on cream; the Jensen portrait of Gauss
+    is a dark oil. Pushed all the way to one duotone they lose what makes the
+    caricature worth looking at. Held part-way — desaturated, shadows warmed,
+    highlights taken to paper — a 1820 watercolour and an 1840 oil sit on the
+    same page as leaves from one album.
     """
-    w, h = img.size
-    yy, xx = np.mgrid[0:h, 0:w]
-    r = np.sqrt(((xx - w / 2) / (w * 0.70)) ** 2 + ((yy - h / 2) / (h * 0.70)) ** 2)
-    # Flat across the middle, then easing away — nothing happens before r=0.55.
-    fall = np.clip((r - 0.55) / 0.85, 0, 1) ** 1.6
-    mask = np.clip(1.0 - strength * fall, 0, 1)
+    arr = np.asarray(img).astype(np.float32) / 255.0
+    grey = arr @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+    arr = arr * keep + grey[..., None] * (1 - keep)
 
-    arr = np.asarray(img).astype(np.float32)
-    dark = np.array(SHADOW, dtype=np.float32)
-    out = arr * mask[..., None] + dark * (1 - mask[..., None])
-    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
+    shadow = np.array(SHADOW, dtype=np.float32) / 255.0
+    paper = np.array(HIGHLIGHT, dtype=np.float32) / 255.0
+    arr = shadow + (paper - shadow) * arr            # compress onto the ink range
+    return Image.fromarray(np.clip(arr * 255, 0, 255).astype(np.uint8), "RGB")
 
 
-def frame(plate):
-    """Mat and gilt border, identical on every plate in the book."""
-    mat_w, gilt_w = 26, 14
-    pad = mat_w + gilt_w
+def deckle(size, rng):
+    """A soft, slightly irregular edge — a leaf lifted from an album."""
+    w, h = size
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rectangle([0, 0, w - 1, h - 1], fill=255)
+    m = np.asarray(mask).astype(np.float32)
+
+    # Perturb the border inward by a few pixels of low-frequency noise.
+    edge = 9
+    for axis, length in ((0, w), (1, h)):
+        noise = rng.random(length) * edge
+        noise = np.convolve(noise, np.ones(31) / 31, mode="same")
+        for i in range(length):
+            d = int(noise[i])
+            if axis == 0:
+                m[:d, i] = 0
+                m[h - d:, i] = 0
+            else:
+                m[i, :d] = 0
+                m[i, w - d:] = 0
+    return Image.fromarray(m.astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(1.6))
+
+
+def album_leaf(plate, rng):
+    """Set the plate on cream laid paper, with grain and a drawn rule."""
+    pad = 34
     w, h = plate.size
-    canvas = Image.new("RGB", (w + pad * 2, h + pad * 2), FRAME_GOLD)
-    d = ImageDraw.Draw(canvas)
+    W, H = w + pad * 2, h + pad * 2
 
-    # Gilt is flat colour plus two rules, which reads as moulding at book size.
-    d.rectangle([2, 2, canvas.width - 3, canvas.height - 3], outline=FRAME_DARK, width=2)
-    d.rectangle([gilt_w - 3, gilt_w - 3, canvas.width - gilt_w + 2, canvas.height - gilt_w + 2],
-                fill=MAT)
-    d.rectangle([pad - 2, pad - 2, canvas.width - pad + 1, canvas.height - pad + 1],
-                outline=FRAME_DARK, width=2)
-    canvas.paste(plate, (pad, pad))
+    grain = rng.normal(0, 3.1, (H, W, 1)).astype(np.float32)
+    paper = np.clip(np.array(PAPER, dtype=np.float32) + grain, 0, 255)
+    canvas = Image.fromarray(paper.astype(np.uint8), "RGB")
+
+    canvas.paste(plate, (pad, pad), deckle(plate.size, rng))
+
+    # A pencil rule just outside the image, the way an album leaf is ruled.
+    d = ImageDraw.Draw(canvas)
+    d.rectangle([pad - 7, pad - 7, W - pad + 6, H - pad + 6],
+                outline=RULE, width=1)
     return canvas
 
 
-def treat(raw_bytes):
-    img = Image.open(raw_bytes if hasattr(raw_bytes, "read") else __import__("io").BytesIO(raw_bytes))
+def treat(raw_bytes, crop=None, seed=0):
+    img = Image.open(io.BytesIO(raw_bytes))
     img = ImageOps.exif_transpose(img).convert("RGB")
+
+    if crop:
+        w, h = img.size
+        l, tp, r, b = crop
+        img = img.crop((int(w * l), int(h * tp), int(w * r), int(h * b)))
 
     # Crop to 4:5 about the upper middle — where a portrait keeps its face.
     w, h = img.size
@@ -161,10 +188,9 @@ def treat(raw_bytes):
         img = img.crop((0, top, w, top + new_h))
 
     img = img.resize((W, H), Image.LANCZOS)
-    grey = ImageOps.autocontrast(ImageOps.grayscale(img), cutoff=1)
-    plate = duotone(grey)
-    plate = ImageEnhance.Contrast(plate).enhance(1.06)
-    return frame(vignette(plate))
+    img = ImageEnhance.Contrast(img).enhance(1.04)
+    rng = np.random.default_rng(seed)
+    return album_leaf(wash(img), rng)
 
 
 def main():
@@ -174,19 +200,22 @@ def main():
     credits_path = OUT / "credits.json"
     credits = json.loads(credits_path.read_text()) if credits_path.exists() else {}
 
-    for num, (slug, name, dates, title, why) in sorted(ROSTER.items()):
+    for num, sitters in sorted(ROSTER.items()):
         if only and num != only:
             continue
-        print(f"session {num}: {name}")
-        meta, blob = fetch(title)
-        out = OUT / f"session-{num}-{slug}.jpg"
-        treat(blob).save(out, "JPEG", quality=88, optimize=True)
-        credits[f"session-{num}"] = {
-            "slug": slug, "name": name, "dates": dates, "why": why,
-            "file": out.relative_to(ROOT).as_posix(), **meta,
-        }
-        print(f"  {meta['artist']}, {meta['date']} — {meta['licence']}")
-        print(f"  wrote {out.relative_to(ROOT)}")
+        entries = []
+        for seed, (slug, name, dates, title, why, crop) in enumerate(sitters):
+            print(f"session {num}: {name}")
+            meta, blob = fetch(title)
+            out = OUT / f"session-{num}-{slug}.jpg"
+            treat(blob, crop, seed).save(out, "JPEG", quality=90, optimize=True)
+            entries.append({
+                "slug": slug, "name": name, "dates": dates, "why": why,
+                "file": out.relative_to(ROOT).as_posix(), **meta,
+            })
+            print(f"  {meta['artist']}, {meta['date']} — {meta['licence']}")
+            print(f"  wrote {out.relative_to(ROOT)}")
+        credits[f"session-{num}"] = entries
 
     credits_path.write_text(json.dumps(credits, indent=2, ensure_ascii=False) + "\n")
     print(f"\ncredits written to {credits_path.relative_to(ROOT)}")
