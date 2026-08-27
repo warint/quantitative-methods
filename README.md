@@ -1,4 +1,4 @@
-# Quantitative Methods in International Business
+# Quantitative Methods in International Business with Python
 
 ### Econometrics and machine learning, taught the way the work is now done — in an IDE, with an LLM beside you, on your own machine.
 

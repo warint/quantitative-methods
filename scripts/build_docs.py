@@ -155,12 +155,12 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quantitative Methods in International Business — Lecture slides</title>
+<title>Quantitative Methods in International Business with Python — Lecture slides</title>
 <style>{STYLE}</style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Quantitative Methods in International Business</h1>
+    <h1>Quantitative Methods in International Business with Python</h1>
     <p class="sub">Lecture slides — MATH60033A</p>
     <p class="by">Thierry Warin, PhD · HEC Montréal</p>
 
