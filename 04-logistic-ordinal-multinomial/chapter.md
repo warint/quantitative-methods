@@ -1,5 +1,6 @@
 ---
 title: "Logistic Regression: Binary, Ordinal, and Multinomial"
+standalone: true
 ---
 
 ## When the outcome is a category
@@ -70,16 +71,7 @@ one. The line has no way to express that.
 
 ## The logistic function, and where it came from
 
-::: {.plate}
-![](images/session-04-verhulst.jpg){fig-alt="Portrait of Pierre François Verhulst, 1804–1849."}
-
-**Pierre François Verhulst** · 1804–1849
-
-Named the logistic curve in 1845, modelling how populations stop growing.
-
-[Flameng, Léopold, 1850. Public domain, via Wikimedia Commons.]{.plate-credit}
-:::
-
+{{portrait}}
 
 ::: {.archive}
 [From the archive · Verhulst, 1845]{.archive-label}
