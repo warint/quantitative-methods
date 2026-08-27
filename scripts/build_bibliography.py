@@ -22,6 +22,7 @@ build, so the failure happens to the author rather than to the student.
 Add a reference by adding its DOI. Cite it as @family-year in a chapter.
 """
 
+import html
 import re
 import sys
 from pathlib import Path
@@ -67,7 +68,10 @@ def citekey(msg, taken, explicit=None):
 
 def escape(text):
     """BibTeX-safe, and brace-protect capitals so styles cannot lowercase them."""
-    text = re.sub(r"\s+", " ", str(text)).strip()
+    # Crossref stores some titles with HTML entities already in them — "Data
+    # &amp; Policy" — which BibTeX-escaping would turn into a literal "&Amp;".
+    text = html.unescape(str(text))
+    text = re.sub(r"\s+", " ", text).strip()
     text = text.replace("&", r"\&").replace("%", r"\%").replace("_", r"\_")
     # Protect any word carrying an interior capital or a lone initial: AIC, R^2,
     # Gauss, Monte Carlo. Lowercasing those is the classic bibliography failure.
@@ -82,7 +86,13 @@ def entry(doi, msg, key):
     authors = []
     for a in msg.get("author", []):
         if a.get("family"):
-            authors.append(f"{a['family']}, {a.get('given', '')}".strip().rstrip(","))
+            family = a["family"]
+            # Some publishers register the family name shouted ("SHAPIRO").
+            # Only touch it when the whole thing is upper case, so McDonald,
+            # MacKinnon and van Es survive untouched.
+            if family.isupper() and len(family) > 1:
+                family = family.title()
+            authors.append(f"{family}, {a.get('given', '')}".strip().rstrip(","))
         elif a.get("name"):
             authors.append(a["name"])
     if authors:
