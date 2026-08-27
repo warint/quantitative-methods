@@ -1,5 +1,6 @@
 ---
 title: "Regularisation: Ridge, Lasso, and the Elastic Net"
+standalone: true
 ---
 
 ## The mechanical first attempt
