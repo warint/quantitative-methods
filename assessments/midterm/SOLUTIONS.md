@@ -57,8 +57,17 @@ same $x_i$ and the training error:
 $\mathbb{E}[\mathrm{Err}_{\text{in}}] - \mathbb{E}[\mathrm{err}] = \frac{2}{n}\sum_i \mathrm{Cov}(\hat y_i, y_i)$.
 It is the degree to which the model chases its own training labels.
 
-**A6** *(3)* — $\mathrm{df}(\lambda) = \sum_{j=1}^p \dfrac{d_j^2}{d_j^2 + \lambda}$. As
-$\lambda \to 0$ it tends to $p$; as $\lambda \to \infty$ it tends to 0.
+**A6** *(3)* — The first principal component is the unit-length direction $v_1$ maximising the
+**variance of the projection** $Xv$ — equivalently, the eigenvector of $\hat\Sigma$ with the
+largest eigenvalue. Inputs must be **standardised** because the objective is variance, so without
+it whichever variable is measured in the largest units becomes the first component. A **loading**
+is a weight on a *variable* (a column of $V$: how the variable contributes to a component); a
+**score** is the value of a component for an *observation* ($XV$: where that row sits in the new
+coordinates).
+
+> *1 mark for variance maximisation, 1 for the standardisation reason — the reason, not just
+> "because you should" — and 1 for the loading/score distinction. A student who says PCA "reduces
+> dimensions" without naming what is maximised earns 0 for the first part.*
 
 **A7** *(3)* — $\sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big)$. Score:
 $\nabla\ell(\beta) = X^\top(y - p)$ — the residual is orthogonal to every regressor at the optimum,

@@ -88,8 +88,8 @@ European one.
 
 ## 3. Why a literature review
 
-You are asked for a literature review of **10 to 15** academic articles. Here is the argument for
-it, because "because papers have them" is not an argument.
+You are asked for a literature review of **10 academic articles**. Here is the argument for it,
+because "because papers have them" is not an argument.
 
 ### The old reason, which no longer holds
 
@@ -139,11 +139,11 @@ what puts you in the first category.
 You will also, in the course of it, discover that your assistant invents citations. Finding one is
 a required element of your LLM statement (§8).
 
-**Range: 10 to 15 academic articles**, of which at least eight peer-reviewed and at least four
-concerning the African context specifically. A source you cite is a source you have read.
+**10 academic articles**, of which at least eight peer-reviewed and at least four concerning the
+African context specifically. A source you cite is a source you have read.
 
-> The range is a range, not a target to max out. Fifteen articles you have read and organised by
-> argument beats twenty-five you have skimmed and listed alphabetically.
+> Ten is the number, not a floor to exceed. Ten articles you have read and organised by argument
+> beats twenty-five you have skimmed and listed alphabetically.
 
 ---
 
@@ -222,7 +222,7 @@ All open, all reachable from most of Africa.
 |---|---|---|
 | — | **Title, author, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
 | 1 | **Introduction** | The question, why it matters, what you contribute, and — in the last paragraph — what you found. Do not withhold the finding for suspense; this is not a novel. |
-| 2 | **Literature** | 10–15 academic articles. Organised by argument, not by author. It must end with the gap your paper addresses. |
+| 2 | **Literature** | 10 academic articles. Organised by argument, not by author. It must end with the gap your paper addresses. |
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations. Include the descriptive table a referee will ask for. |
 | 4 | **Method** | **Derive it.** Not "we use elastic net (Zou and Hastie 2005)" but the objective function, what the penalty does, why the tuning parameter is chosen as it is. Assume a reader who knows regression but not your method. |
 | 5 | **Results** | Main result with uncertainty and against a named benchmark. Figures with captions that say what they *show*. |
@@ -317,7 +317,7 @@ Out of 100, for the 25 points the paper carries.
 | Component | Weight | What earns full marks |
 |---|---|---|
 | **Question and contribution** | 10 | A specific, answerable question that matters locally, with the contribution stated plainly in the introduction |
-| **Literature review** | 15 | 10–15 read articles organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
+| **Literature review** | 15 | 10 read articles organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
 | **Data and provenance** | 10 | Full provenance; missingness confronted rather than concealed; survey design respected |
 | **Method** | 20 | Derived, not cited. Assumptions stated. Choice of method defended against the obvious alternative |
 | **Results and honest evaluation** | 20 | Uncertainty reported; named benchmark; evaluation design matching the data's dependence structure; no leakage |

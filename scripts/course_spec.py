@@ -355,7 +355,7 @@ MIDTERM_ROOM = "room to be announced"
 
 ORAL_EXAM = "Monday 14 December 2026 (to be confirmed)"
 
-MIDTERM_AFTER = "06"
+MIDTERM_AFTER = "07"   # written 28 Oct; examines everything taught before it
 
 
 def ordered():

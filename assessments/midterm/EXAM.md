@@ -1,6 +1,6 @@
 # Midterm examination
 
-**Quantitative Methods in International Business · Sessions 1–6**
+**Quantitative Methods in International Business · Sessions 1–7**
 
 ---
 
@@ -80,9 +80,8 @@ the covariance between fitted values and outcomes.
 
 <br><br><br>
 
-**A6.** *(3)* Write the effective degrees of freedom of a ridge fit with penalty $\lambda$, in terms
-of the singular values $d_j$ of the design matrix. State its limits as $\lambda \to 0$ and
-$\lambda \to \infty$.
+**A6.** *(3)* State what the first principal component **maximises**, why the inputs must be
+**standardised** first, and the difference between a **loading** and a **score**.
 
 <br><br><br>
 
@@ -330,7 +329,7 @@ The *Europe 2031* scenario assigns the United States roughly 12 times Europe's A
 **(a)** *(3)* State the assumption in a form that could be tested. Name one observable indicator,
 its publishing institution, and a trigger point with a horizon.
 
-**(b)** *(3)* Which method from Sessions 1–6 would you use, and why that one rather than the
+**(b)** *(3)* Which method from Sessions 1–7 would you use, and why that one rather than the
 obvious alternative?
 
 **(c)** *(2)* State one observation that would count as evidence **against** the assumption. If you

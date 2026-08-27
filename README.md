@@ -129,7 +129,7 @@ answerable question, where to find data, and what each session asks of you.
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
 | **07** | Wed 14 Oct | PCA and factor analysis |
-| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–7 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
@@ -144,8 +144,8 @@ answerable question, where to find data, and what each session asks of you.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> The **midterm is written on 28 October**, after Session 07. It examines **Sessions 1–6 only**:
-> Session 07 is taught before the paper but is not on it.
+> The **midterm is written on 28 October** and covers **everything taught before it** —
+> Sessions 1 to 7, up to and including principal component and factor analysis.
 
 ---
 

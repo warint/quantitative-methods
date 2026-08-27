@@ -136,7 +136,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
 | **07** | Wed 14 Oct | PCA and factor analysis |
-| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–7 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
@@ -151,8 +151,8 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> The **midterm is written on 28 October**, after Session 07. It examines **Sessions 1–6 only**:
-> Session 07 is taught before the paper but is not on it.
+> The **midterm is written on 28 October** and covers **everything taught before it** —
+> Sessions 1 to 7, up to and including principal component and factor analysis.
 
 ---
 
@@ -166,7 +166,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 04 | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
 | 05 | Regularisation: Ridge, Lasso, and the Elastic Net | soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
-| — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |
+| — | **MIDTERM** *(in class, covering Sessions 1–7)* | | |
 | 07 | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
 | 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
@@ -250,9 +250,10 @@ is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
-Covers Sessions 1–6: the supervised learning problem, least squares and its geometry, inference and
-diagnostics, bias–variance and cross-validation, ridge/lasso/elastic net, logistic regression and
-decision thresholds.
+Written **Wednesday 28 October**. Covers **Sessions 1–7** — everything taught before the paper:
+exploratory data analysis and the first regression, regression diagnostics and validity, logistic
+regression, regularisation, panel data and interactions, and principal component and factor
+analysis.
 
 Four parts: **definitions** (state it precisely), **calculations** (derive and compute),
 **diagnostics** (read an output and find the fault), **interpretation** (say what may and may not
@@ -349,7 +350,7 @@ break the result — and half on the course, Sessions 02 to 11.
 > measure you individually, so there is nothing to correct.
 
 **The shape of the paper.** **6,000–8,000 words, including references and appendices**: a research
-question on an **international** topic, a literature review of **10 to 15 academic articles**, the
+question on an **international** topic, a literature review of **10 academic articles**, the
 data, the model, the results, and references. Full brief:
 [`assessments/final-paper/`](assessments/final-paper/README.md).
 
