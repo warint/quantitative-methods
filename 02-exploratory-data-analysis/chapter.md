@@ -1,5 +1,6 @@
 ---
 title: "Exploratory Data Analysis, and the First Model"
+standalone: true
 ---
 
 ## Looking, before deciding what to look for
@@ -19,16 +20,7 @@ no formula. Confirmatory statistics can only test a hypothesis you already
 have. Where the hypothesis comes from is exploratory work, and pretending
 otherwise is how a dataset ends up answering a question nobody asked.
 
-::: {.plate}
-![](images/session-02-nightingale.jpg){fig-alt="Portrait of Florence Nightingale, 1820–1910."}
-
-**Florence Nightingale** · 1820–1910
-
-Made the case with a chart rather than a table, and changed policy with it.
-
-[Hering, circa 1857-1858. Public domain, via Wikimedia Commons.]{.plate-credit}
-:::
-
+{{portrait}}
 
 ::: {.archive}
 [From the archive · Nightingale, 1858]{.archive-label}
