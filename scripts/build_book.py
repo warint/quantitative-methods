@@ -781,10 +781,34 @@ pre code { font-size: 0.86em; }
 """
 
 
+# What a build owns, and may therefore delete. Everything else in book/ —
+# _freeze/ and .quarto/ — belongs to Quarto and must survive.
+GENERATED = ("*.qmd", "*.scss", "_quarto.yml", "references.bib")
+
+
+def clean():
+    """Remove what this script generated, and nothing else.
+
+    This used to be rmtree(BOOK) followed by mkdir, which had two faults. It
+    deleted book/_freeze/, the execution cache that `freeze: auto` exists to
+    maintain, so every render re-executed every chapter from scratch. And on a
+    synced folder — this repository lives on an iCloud Desktop — removing and
+    immediately recreating a directory races the sync daemon, which restores
+    files it had cached into the directory being rebuilt. macOS renames the
+    collisions, and "index 2.qmd" and ".quarto 3/" appear out of nowhere. Once,
+    65 of them reached a commit.
+    """
+    BOOK.mkdir(exist_ok=True)
+    for pattern in GENERATED:
+        for stale in BOOK.glob(pattern):
+            stale.unlink()
+    images = BOOK / "images"
+    if images.exists():
+        shutil.rmtree(images)
+
+
 def main():
-    if BOOK.exists():
-        shutil.rmtree(BOOK)
-    BOOK.mkdir()
+    clean()
 
     (BOOK / "index.qmd").write_text(preface(), encoding="utf-8")
     (BOOK / "syllabus.qmd").write_text(
