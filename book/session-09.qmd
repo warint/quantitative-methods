@@ -1,0 +1,1397 @@
+---
+title: "Session 9 — Structural Equation Modelling"
+---
+
+::: {.chapter-meta}
+Wednesday 11 November 2026 · 15:30–18:30 · Décelles — Victoriaville
+
+[Lecture slides](https://warint.github.io/quantitative-methods/session-09-lecture.html) · [Pre-session slides](https://warint.github.io/quantitative-methods/session-09-pre-session.html) · [Practice slides](https://warint.github.io/quantitative-methods/session-09-practice.html)
+:::
+
+> **Can you measure something you cannot observe?**
+
+
+| | |
+|---|---|
+| **Theme of the practice** | What is the construct behind your indicators? |
+| **Reading** | Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings* · [article](https://doi.org/10.1016/j.jimonfin.2024.103161) |
+| **Replication package** | [10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38) |
+| **Data** | `qmib.load("efa")` — a 14-item questionnaire on purchase decisions, plus semopy's bundled examples |
+
+
+## Before the session
+
+> **Can you measure something you cannot observe?**
+
+> **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-09-pre-session.html)** ·
+> source: [`MATH60033A-S09-Pre-Session.qmd`](https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S09-Pre-Session.qmd)
+
+Two things to do before class, and they are the two halves of the practice.
+Budget **60–90 minutes**.
+
+| | Before class | Used in the practice for |
+|---|---|---|
+| **1** | Read the paper | reproducing one of its results |
+| **2** | Get both datasets | that, and applying the method to your own angle |
+
+---
+
+### 1. The reading — 45–60 min
+
+**Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***
+[Read the article](https://doi.org/10.1016/j.jimonfin.2024.103161)
+
+Read for the **argument**, not for coverage:
+
+| | What to look for |
+|---|---|
+| **1** | The research question, in one sentence |
+| **2** | The method or design, and why they chose it |
+| **3** | The strongest single piece of evidence |
+| **4** | One limitation you would raise as a referee |
+
+**Annotate as you go.** You will be asked what you underlined and why.
+
+---
+
+### 2. The data — 10 min
+
+You need **two** datasets in the practice, and both should be on your machine before you arrive.
+
+#### a) The paper's replication package
+
+This is what you reproduce in the first twenty minutes of the practice.
+
+**Harvard Dataverse: [10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)**
+
+Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
+
+```text
+09-structural-equation-modelling/data/replication/
+```
+
+Keep the authors' own folder structure and README.
+
+#### b) The course data, for your own angle
+
+This is what you apply the method to in the second half.
+
+```python
+import qmib
+
+data = qmib.load("efa")      # what the lecture uses
+core = qmib.load("core")                 # shared by every group
+mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
+
+print(data.shape, core.shape, mine.shape)
+```
+
+A 14-item questionnaire on purchase decisions, plus semopy's bundled examples.
+
+> Run this **before** class. It downloads once and caches as parquet, so the practice works
+> whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
+
+Your group's file, columns, units and traps are in your
+[data dictionary](https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/).
+
+---
+
+### 3. Self-check — 15 min
+
+Answer on paper. If you cannot, that is what the lecture is for.
+
+1. In one sentence: what does this session's method let you claim that the previous one did not?
+2. What must be true of your data for it to apply?
+3. Which claim in the paper rests on this method — and how hard does it lean on it?
+
+---
+
+### Arrive with
+
+- [ ] The paper read and annotated
+- [ ] The replication package downloaded and unzipped
+- [ ] `qmib.load()` run at least once, so the cache exists
+- [ ] Your self-check answers, on paper
+
+---
+
+[Session 09 overview](session-09.qmd) · [The lecture](#the-lecture) ·
+[The practice](#in-the-practice)
+
+## The lecture
+
+::: {.muted}
+Delivered from [the slides](https://warint.github.io/quantitative-methods/session-09-lecture.html). What follows is the same material as prose.
+:::
+
+<!-- Imported from https://warin.ca/quant/en/session9_cours/. Content is static so the deck renders without R or Python. -->
+## Learning Objectives
+
+-   Understand the fundamental concepts and terminology of Structural Equation Modeling (SEM)
+-   Distinguish between the measurement model and the structural model components of SEM
+-   Learn about key SEM considerations: identification, estimation methods, and model fit indices
+-   See how to specify and estimate an SEM in R using the lavaan package (with well-commented code)
+-   Explore advanced topics: mediation analysis and applications of SEM in international business research
+
+## Outline
+
+-   SEM Basics: What is SEM, why use it, key terms, and components
+-   SEM Analysis Process: Steps in conducting SEM -- from model specification to fit evaluation
+-   SEM Example in R: A hands-on example using lavaan (with path diagrams and interpretation)
+-   Mediation & Advanced Topics: Mediation analysis and other advanced extensions of SEM
+
+## Part I: SEM Basics
+
+## What is SEM?
+
+-   **Structural Equation Modeling (SEM)** is a comprehensive statistical framework used to test and estimate **causal relationships** based on both statistical data and theoretically grounded assumptions.
+-   It **integrates factor analysis and multiple regression**, allowing researchers to represent **latent variables** (unobserved theoretical constructs) through **observed indicators** (measured variables).
+-   SEM enables the specification of **complex interrelationships** among variables, including direct and indirect effects, within a single unified model.
+-   The central goal is to evaluate **how well the hypothesized model fits the empirical data**, typically by comparing the **model-implied covariance matrix** to the **observed covariance matrix** --- the closer the correspondence, the better the model fit.
+
+## Why use SEM?
+
+-   **Accounts for measurement error:** Unlike traditional regression, SEM explicitly models latent variables, thereby controlling for measurement error and yielding more reliable estimates of relationships between constructs.
+-   **Tests complex models:** SEM allows for the simultaneous estimation of multiple equations, handling several dependent variables, mediating relationships, and even feedback loops within a single coherent model.
+-   **Combines analyses:** Many common statistical methods are special cases of SEM---Confirmatory Factor Analysis (CFA) models the measurement structure alone, while path analysis focuses on observed variables. SEM unifies both, allowing for concurrent analysis of measurement and structural relationships.
+-   **Flexible modeling framework:** SEM accommodates diverse analytical extensions such as mediation, moderation, latent growth modeling, and multi-group comparisons, making it a versatile approach suitable for theory testing and model refinement across a wide range of disciplines.
+
+## Key Terminology in SEM
+
+-   **Observed variable (indicator):** A directly measured variable, such as a survey item or test score, usually shown as a rectangle. Indicators provide the data used to estimate latent variables.
+-   **Latent variable (factor or construct):** An unobserved concept inferred from several observed indicators, typically shown as a circle or ellipse. Example: "Attitude" measured by multiple survey questions.
+-   **Exogenous and endogenous variables:** Exogenous variables function like independent variables (arrows go *out* from them); endogenous variables act like dependent variables (arrows point *into* them).
+-   **Path:** A one-headed arrow showing a directional (causal) relationship, similar to a regression coefficient. A two-headed arrow (↔︎) indicates a covariance or correlation between variables.
+-   **Error (disturbance):** The unexplained portion of a variable, represented by a small circle with an arrow pointing to the variable.
+
+## Components of a SEM
+
+An SEM has two main parts that work together:
+
+-   **Measurement model:** Connects **latent variables** (unobserved concepts) to their **observed indicators** (measured variables). Each latent factor is represented by several indicators, with arrows pointing from the latent variable (ellipse) to its indicators (rectangles). These arrows represent **factor loadings**, just like in a Confirmatory Factor Analysis (CFA).
+
+-   **Structural model:** Describes the **relationships among latent variables** (and sometimes observed ones). It functions like a set of regression equations linking the constructs. Arrows between latent variables show hypothesized influences, with coefficients interpreted like regression weights.
+
+
+And then we talk about:
+
+-   **Covariances:** Exogenous (independent) variables are usually allowed to covary, represented by two-headed arrows (↔︎).
+
+-   **Path diagram:**
+
+    -   SEMs are often illustrated with diagrams---ellipses for latent variables,
+    -   rectangles for observed variables,
+    -   one-headed arrows for causal paths,
+    -   and two-headed arrows for covariances.
+
+These diagrams make the model's logic and structure easier to interpret.
+
+
+## Example 1
+
+## Example Dataset: HolzingerSwineford1939
+
+Here are the **definitions and descriptions** of the variables in the **HolzingerSwineford1939** dataset, as used in most SEM and CFA examples (including in *lavaan*).
+
+This dataset comes from **Holzinger & Swineford (1939)**, who studied the structure of mental abilities among schoolchildren.
+
+The dataset includes **scores on nine ability tests**, grouped into three domains: **visual**, **textual (verbal)**, and **speed**.
+
+## 🔹 **Dataset overview**
+
+-   **Sample:** 301 children (7th and 8th graders) from two schools --- Pasteur and Grant-White.
+-   **Purpose:** To examine whether cognitive abilities can be explained by a small number of underlying (latent) factors.
+-   **Variables:** 9 observed test scores, 3 latent constructs.
+
+## 🔹 **Latent and observed variables**
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Latent variable (factor)**   **Observed indicators**            **Test name / meaning**          **Description**
+  ------------------------------ ---------------------------------- -------------------------------- ------------------------------------------------------------------------------------------
+  **Visual ability**             **x1:** *VisualPerception*         *Visual perception test*         Measures perceptual speed and spatial reasoning using visual materials.
+
+                                 **x2:** *Cubes*                    *Cubes test*                     Assesses ability to visualize and manipulate 3D objects mentally.
+
+                                 **x3:** *Lozenges*                 *Lozenges test*                  Involves identifying geometric patterns, assessing spatial and shape recognition skills.
+
+  **Textual (verbal) ability**   **x4:** *ParagraphComprehension*   *Paragraph comprehension test*   Measures reading comprehension and understanding of written passages.
+
+                                 **x5:** *SentenceCompletion*       *Sentence completion test*       Tests vocabulary and verbal reasoning; complete sentences meaningfully.
+
+                                 **x6:** *WordMeaning*              *Word meaning test*              Assesses knowledge of word meanings and verbal intelligence.
+
+  **Speed (processing speed)**   **x7:** *Addition*                 *Addition test*                  Measures speed and accuracy in simple arithmetic.
+
+                                 **x8:** *CountingDots*             *Counting dots test*             Assesses visual scanning and quick counting accuracy.
+
+                                 **x9:** *Discrimination*           *Discrimination test*            Measures perceptual speed in identifying or distinguishing simple visual stimuli.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+![](https://github.com/warint/quantitative-methods/blob/main/economist-assets/cfa-model.png){.r-stretch}
+
+## 🔹 **Typical CFA model specification**
+
+The confirmatory factor analysis model for these nine observed variables is typically written as:
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+HS_model = """
+  visual  =~ x1 + x2 + x3
+  textual =~ x4 + x5 + x6
+  speed   =~ x7 + x8 + x9
+"""
+```
+::::
+
+This model proposes that:
+
+-   The **visual**, **textual**, and **speed** factors each explain the correlations among their respective tests.
+-   The factors may correlate with each other, representing related but distinct aspects of cognitive ability.
+
+## 🔹 **Goal of the model**
+
+The Holzinger--Swineford example demonstrates how SEM can:
+
+-   **Test the existence** of underlying mental ability factors.
+-   **Estimate factor loadings**, showing how strongly each test measures its latent ability.
+-   **Compare models** (e.g., one general intelligence factor vs. three correlated factors).
+
+
+**In summary:**
+
+-   **x1--x3** = visual/spatial reasoning tasks
+-   **x4--x6** = verbal comprehension tasks
+-   **x7--x9** = processing speed tasks
+
+
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:  python
+import semopy
+from semopy.examples import holzinger39
+
+# 301 children, nine ability tests — ships with semopy, nothing to download
+data = holzinger39.get_data()
+data.head()
+```
+
+```text
+  id sex ageyr agemo  school grade       x1   x2    x3       x4   x5        x6
+1  1   1    13     1 Pasteur     7 3.333333 7.75 0.375 2.333333 5.75 1.2857143
+2  2   2    13     7 Pasteur     7 5.333333 5.25 2.125 1.666667 3.00 1.2857143
+3  3   2    13     1 Pasteur     7 4.500000 5.25 1.875 1.000000 1.75 0.4285714
+4  4   1    13     2 Pasteur     7 5.333333 7.75 3.000 2.666667 4.50 2.4285714
+5  5   2    12     2 Pasteur     7 4.833333 4.75 0.875 2.666667 4.00 2.5714286
+6  6   2    14     1 Pasteur     7 5.333333 5.00 2.250 1.000000 3.00 0.8571429
+        x7   x8       x9
+1 3.391304 5.75 6.361111
+2 3.782609 6.25 7.916667
+3 3.260870 3.90 4.416667
+4 3.000000 5.30 4.861111
+5 3.695652 6.30 5.916667
+6 4.347826 6.65 7.500000
+```
+:::::
+
+## **1. What the formula means**
+
+Each line in your syntax, such as
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# "visual is measured by x1, x2 and x3"
+# =~ reads as "is measured by": the latent variable on the left,
+# its observed indicators on the right.
+visual =~ x1 + x2 + x3
+```
+::::
+
+tells R that:
+
+-   **`visual`** is a **latent variable** (something not directly observed).
+-   It is **measured by** (or "indicated by") the observed variables **x1, x2, and x3**.
+
+In this example:
+
+-   `x1`, `x2`, and `x3` might be scores on visual perception tests.
+-   `visual` is the underlying construct that these tests reflect.
+
+The operator `=~` literally means *"is measured by"*.
+
+## **2. Behind-the-scenes defaults in lavaan**
+
+When you write this concise syntax, **lavaan automatically handles** several technical steps that you'd otherwise need to specify manually:
+
+1.  **Fixing one loading to 1:** The first indicator's factor loading (e.g., `x1` → `visual`) is fixed to 1.0 to set the scale of the latent variable. Without this, the latent variable would have an undefined scale.
+
+2.  **Adding residuals:** Each observed variable gets its own residual variance (measurement error term). These are estimated automatically.
+
+3.  **Correlating exogenous latents:** If you have more than one latent variable (e.g., `visual`, `textual`, `speed`), lavaan will, by default, allow them to **correlate** with each other --- unless you specify otherwise.
+
+This is why the model syntax is so compact but still complete.
+
+## **3. Writing the model**
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# In the VS Codium terminal, with .venv active:
+#   pip install semopy
+import semopy
+import numpy as np
+import pandas as pd
+```
+::::
+
+This model defines three latent factors:
+
+-   **visual** --- measured by x1--x3
+-   **textual** --- measured by x4--x6
+-   **speed** --- measured by x7--x9
+
+All three are allowed to correlate by default.
+
+## **4. Fitting the model**
+
+You fit the model using the **cfa()** function:
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+fit = semopy.Model(HS_model)
+fit.fit(data)
+```
+::::
+
+-   `HS.model` is your model definition (inside quotes).
+-   `HolzingerSwineford1939` is the dataset (it's built into lavaan).
+
+## **5. Viewing results**
+
+To see how well the model fits the data and inspect loadings use summary().
+
+This command prints:
+
+-   **Factor loadings** (how strongly each indicator relates to its latent variable).
+-   **Residual variances** (unexplained variance per indicator).
+-   **Correlations** among latent variables.
+-   **Fit indices** such as χ², CFI, TLI, RMSEA, and SRMR.
+
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Parameter estimates, standardised alongside the raw ones
+print(fit.inspect(std_est=True))
+
+# Fit indices
+print(semopy.calc_stats(fit).T)
+```
+
+```text
+lavaan 0.6-20 ended normally after 35 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        21
+
+  Number of observations                           301
+
+Model Test User Model:
+                                                      
+  Test statistic                                85.306
+  Degrees of freedom                                24
+  P-value (Chi-square)                           0.000
+
+Model Test Baseline Model:
+
+  Test statistic                               918.852
+  Degrees of freedom                                36
+  P-value                                        0.000
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.931
+  Tucker-Lewis Index (TLI)                       0.896
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -3737.745
+  Loglikelihood unrestricted model (H1)      -3695.092
+                                                      
+  Akaike (AIC)                                7517.490
+  Bayesian (BIC)                              7595.339
+  Sample-size adjusted Bayesian (SABIC)       7528.739
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.092
+  90 Percent confidence interval - lower         0.071
+  90 Percent confidence interval - upper         0.114
+  P-value H_0: RMSEA <= 0.050                    0.001
+  P-value H_0: RMSEA >= 0.080                    0.840
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.065
+
+Parameter Estimates:
+
+  Standard errors                             Standard
+  Information                                 Expected
+  Information saturated (h1) model          Structured
+
+Latent Variables:
+                   Estimate  Std.Err  z-value  P(>|z|)
+  visual =~                                           
+    x1                1.000                           
+    x2                0.554    0.100    5.554    0.000
+    x3                0.729    0.109    6.685    0.000
+  textual =~                                          
+    x4                1.000                           
+    x5                1.113    0.065   17.014    0.000
+    x6                0.926    0.055   16.703    0.000
+  speed =~                                            
+    x7                1.000                           
+    x8                1.180    0.165    7.152    0.000
+    x9                1.082    0.151    7.155    0.000
+
+Covariances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+  visual ~~                                           
+    textual           0.408    0.074    5.552    0.000
+    speed             0.262    0.056    4.660    0.000
+  textual ~~                                          
+    speed             0.173    0.049    3.518    0.000
+
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+   .x1                0.549    0.114    4.833    0.000
+   .x2                1.134    0.102   11.146    0.000
+   .x3                0.844    0.091    9.317    0.000
+   .x4                0.371    0.048    7.779    0.000
+   .x5                0.446    0.058    7.642    0.000
+   .x6                0.356    0.043    8.277    0.000
+   .x7                0.799    0.081    9.823    0.000
+   .x8                0.488    0.074    6.573    0.000
+   .x9                0.566    0.071    8.003    0.000
+    visual            0.809    0.145    5.564    0.000
+    textual           0.979    0.112    8.737    0.000
+    speed             0.384    0.086    4.451    0.000
+```
+:::::
+
+## Simple interpretation\*\*
+
+-   If the factor loadings are **high (say \> 0.7)** and **significant**, your indicators strongly represent the intended latent variable.
+
+-   If model fit indices (like **CFI \> 0.95**, **RMSEA \< 0.06**) look good, your measurement model aligns well with the observed data.
+
+-   Let's go step by step and interpret these **Confirmatory Factor Analysis (CFA)** results in **plain language**.
+
+-   These come from the **HolzingerSwineford1939** dataset, specifically focusing on the **speed** factor and the relationships among the three latent variables (*visual*, *textual*, and *speed*).
+
+## 1\. **Factor loadings for "speed"**
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Indicator   Estimate   Std. Err   z-value   p-value   Interpretation
+  ----------- ---------- ---------- --------- --------- ------------------------------------------------------------------------------------------------------------------------------------
+  **x7**      1.000      ---        ---       ---       This indicator (Addition test) is the reference item. Its loading is fixed to 1.0 to set the scale of the latent variable "speed."
+
+  **x8**      1.180      0.165      7.152     \< .001   The loading is high and significant → "Counting Dots" test strongly measures the speed factor.
+
+  **x9**      1.082      0.151      7.155     \< .001   Also high and significant → "Discrimination" test strongly reflects the same speed ability.
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+✅ **Interpretation:** All three indicators (x7, x8, x9) load significantly and positively on the *speed* latent variable. This means that children who perform well on one of these speed tasks tend to perform well on the others --- evidence that these tasks measure a common underlying construct: **processing speed**.
+
+## 2\. **Covariances between latent variables**
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+  Covariance             Estimate   p-value   Interpretation
+  ---------------------- ---------- --------- -------------------------------------------------------------------------------------------------------------
+  **visual ↔︎ textual**   0.408      \< .001   A strong positive relationship: students good at visual tasks also tend to be good at verbal/textual tasks.
+
+  **visual ↔︎ speed**     0.262      \< .001   A moderate positive relationship: faster students also tend to do better on visual reasoning tasks.
+
+  **textual ↔︎ speed**    0.173      \< .001   A weaker but still significant relationship: verbal ability and speed are related, though less strongly.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+✅ **Interpretation:** All three latent factors are **positively correlated**, meaning they represent **related but distinct cognitive abilities**. Visual, verbal, and speed skills overlap somewhat --- but each factor captures its own dimension of ability.
+
+## 3\. **Variances**
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Variable                                        Estimate                                      Interpretation
+  ----------------------------------------------- --------------------------------------------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Residual variances (.x1--.x9)**               Range 0.35--1.13                              These values show the *unexplained variance* in each test score after accounting for its latent factor. Smaller residuals (like 0.35) mean the factor explains much of the test's variance; larger ones (like 1.13) mean there's more measurement error or unique content in that item.
+
+  **Latent variances (visual, textual, speed)**   visual = 0.81, textual = 0.98, speed = 0.38   These reflect the total variance in each latent construct. The lower variance for *speed* suggests it varies less across students than *visual* or *textual* ability.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+✅ **Interpretation:** The model captures meaningful variation in each ability domain. Residual variances are all significant (p \< .001), showing that each test also has some unique measurement error --- which is normal in psychological testing.
+
+## **Plain summary**
+
+-   The **speed factor** is measured reliably by its three indicators (x7, x8, x9), all of which have strong, significant loadings.
+-   The **three latent abilities** --- visual, textual, and speed --- are **positively related**: children who perform well in one domain tend to perform well in others, though the correlations are not perfect (indicating distinct skills).
+-   The **model fits theoretical expectations** of the cognitive structure: three interrelated but separate mental ability factors.
+-   **Residuals and variances** suggest reasonable measurement precision and distinct variance among factors.
+
+In simple terms:
+
+> Students' performance on speed-based tasks forms a coherent ability factor. This ability is moderately related to visual reasoning and, to a lesser extent, to verbal ability --- supporting the idea that mental abilities are connected but not identical.
+
+## Example 2
+
+## Example Dataset: PoliticalDemocracy
+
+The **PoliticalDemocracy** dataset is one of the classic examples used in structural equation modeling (SEM), originally featured in **Kenneth Bollen's (1989)** foundational book *Structural Equations with Latent Variables*.
+
+It's included in the **lavaan** package, so you can access it right away in R without downloading anything.
+
+## 🔹 **What the dataset contains**
+
+This dataset is designed to illustrate how SEM handles **latent variables**, **measurement models**, and **structural relations** among them.
+
+It includes **11 observed variables** related to industrialization and democracy for 75 countries.
+
+There are **three latent constructs:**
+
+1.  **ind60** --- Industrialization in 1960
+2.  **dem60** --- Democracy in 1960
+3.  **dem65** --- Democracy in 1965
+
+## 🔹 **Observed variables (indicators)**
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Latent Variable**                   **Indicators (Observed Variables)**                    **Description**
+  ------------------------------------- ------------------------------------------------------ ---------------------------------------------------------------------------------------------------------------------------------------------
+  **ind60** (Industrialization, 1960)   **x1:** GNP per capita (1960)\                         Captures a country's level of industrialization around 1960 --- higher values reflect greater economic development and industrial activity.
+                                        **x2:** Energy consumption per capita (1960)\          
+                                        **x3:** Percentage of labor force in industry (1960)   
+
+  **dem60** (Democracy, 1960)           **y1:** Freedom of the press (1960)\                   Reflects the degree of democratic rights and institutions at the start of the period.
+                                        **y2:** Freedom of political opposition (1960)\        
+                                        **y3:** Fairness of elections (1960)\                  
+                                        **y4:** Effectiveness of legislature (1960)            
+
+  **dem65** (Democracy, 1965)           **y5:** Freedom of the press (1965)\                   Measures democracy five years later, allowing the model to capture changes in democratic performance over time.
+                                        **y6:** Freedom of political opposition (1965)\        
+                                        **y7:** Fairness of elections (1965)\                  
+                                        **y8:** Effectiveness of legislature (1965)            
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## 💡 **Notes:**
+
+-   Each set of indicators corresponds to a **latent construct** that is *not directly observable* (industrialization or democracy).
+-   The **dem65** variables repeat the same democracy indicators as **dem60**, but for a later year, allowing researchers to study how democracy evolves.
+-   The model tests both **measurement** (how well these indicators represent their latent constructs) and **structural** relations (e.g., does industrialization lead to more democracy over time?).
+
+## Example lavaan specification:
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+model = """
+  # Measurement model
+  ind60 =~ x1 + x2 + x3
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 + y7 + y8
+  # Regressions — the structural part
+  dem60 ~ ind60
+  dem65 ~ ind60 + dem60
+"""
+```
+::::
+
+This model is the canonical **PoliticalDemocracy SEM** --- it shows how **industrialization in 1960** affects **democracy in 1960** and **1965**, while also accounting for stability and measurement consistency over time.
+
+Each set of observed variables measures one latent construct.
+
+
+![](https://github.com/warint/quantitative-methods/blob/main/economist-assets/sem-model.png){.r-stretch}
+
+## 🔹 **Structure of the SEM**
+
+The model tests both **measurement** and **structural** relationships:
+
+-   The **measurement model** defines how the latent variables (*ind60*, *dem60*, *dem65*) are measured by their observed indicators.
+    -   *ind60* is measured by *x1, x2, x3*
+    -   *dem60* is measured by *y1, y2, y3, y4*
+    -   *dem65* is measured by *y5, y6, y7, y8*
+-   The **structural model** defines the causal paths among the latent variables:
+    -   *ind60 → dem60*
+    -   *dem60 → dem65*
+    -   *ind60 → dem65* (direct effect)
+
+This structure allows for the examination of how industrialization affects democracy both directly and indirectly over time.
+
+## 🔹 **Loading and exploring the dataset**
+
+You can load and view it directly in R:
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+from semopy.examples import political_democracy
+
+# 75 countries: industrialisation and democratic institutions
+PoliticalDemocracy = political_democracy.get_data()
+PoliticalDemocracy.head()
+```
+
+```text
+     y1       y2       y3       y4       y5       y6       y7       y8       x1
+1  2.50 0.000000 3.333333 0.000000 1.250000 0.000000 3.726360 3.333333 4.442651
+2  1.25 0.000000 3.333333 0.000000 6.250000 1.100000 6.666666 0.736999 5.384495
+3  7.50 8.800000 9.999998 9.199991 8.750000 8.094061 9.999998 8.211809 5.961005
+4  8.90 8.800000 9.999998 9.199991 8.907948 8.127979 9.999998 4.615086 6.285998
+5 10.00 3.333333 9.999998 6.666666 7.500000 3.333333 9.999998 6.666666 5.863631
+6  7.50 3.333333 6.666666 6.666666 6.250000 1.100000 6.666666 0.368500 5.533389
+        x2       x3
+1 3.637586 2.557615
+2 5.062595 3.568079
+3 6.255750 5.224433
+4 7.567863 6.267495
+5 6.818924 4.573679
+6 5.135798 3.892270
+```
+:::::
+
+This will show the first few rows, typically looking like this:
+
+  x1     x2     x3     y1    y2    y3    y4    y5    y6    y7    y8
+  ------ ------ ------ ----- ----- ----- ----- ----- ----- ----- -----
+  2.11   2.26   2.04   6     5     3     3     7     5     4     4
+  ...    ...    ...    ...   ...   ...   ...   ...   ...   ...   ...
+
+## 🔹 **Specifying the model in lavaan**
+
+Here's the model Bollen used, implemented in **lavaan**:
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+model = """
+  # measurement model
+  ind60 =~ x1 + x2 + x3
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 + y7 + y8
+  # regressions
+  dem60 ~ ind60
+  dem65 ~ ind60 + dem60
+"""
+```
+::::
+
+Then fit it:
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+fit = semopy.Model(model)
+fit.fit(PoliticalDemocracy)
+```
+::::
+
+## 🔹 **Viewing the results**
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(fit.inspect(std_est=True))
+print(semopy.calc_stats(fit).T)
+```
+
+```text
+lavaan 0.6-20 ended normally after 68 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        31
+
+  Number of observations                            75
+
+Model Test User Model:
+                                                      
+  Test statistic                                38.125
+  Degrees of freedom                                35
+  P-value (Chi-square)                           0.329
+
+Model Test Baseline Model:
+
+  Test statistic                               730.654
+  Degrees of freedom                                55
+  P-value                                        0.000
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.995
+  Tucker-Lewis Index (TLI)                       0.993
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -1547.791
+  Loglikelihood unrestricted model (H1)      -1528.728
+                                                      
+  Akaike (AIC)                                3157.582
+  Bayesian (BIC)                              3229.424
+  Sample-size adjusted Bayesian (SABIC)       3131.720
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.035
+  90 Percent confidence interval - lower         0.000
+  90 Percent confidence interval - upper         0.092
+  P-value H_0: RMSEA <= 0.050                    0.611
+  P-value H_0: RMSEA >= 0.080                    0.114
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.044
+
+Parameter Estimates:
+
+  Standard errors                             Standard
+  Information                                 Expected
+  Information saturated (h1) model          Structured
+
+Latent Variables:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  ind60 =~                                                              
+    x1                1.000                               0.670    0.920
+    x2                2.180    0.139   15.742    0.000    1.460    0.973
+    x3                1.819    0.152   11.967    0.000    1.218    0.872
+  dem60 =~                                                              
+    y1                1.000                               2.223    0.850
+    y2                1.257    0.182    6.889    0.000    2.794    0.717
+    y3                1.058    0.151    6.987    0.000    2.351    0.722
+    y4                1.265    0.145    8.722    0.000    2.812    0.846
+  dem65 =~                                                              
+    y5                1.000                               2.103    0.808
+    y6                1.186    0.169    7.024    0.000    2.493    0.746
+    y7                1.280    0.160    8.002    0.000    2.691    0.824
+    y8                1.266    0.158    8.007    0.000    2.662    0.828
+
+Regressions:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  dem60 ~                                                               
+    ind60             1.483    0.399    3.715    0.000    0.447    0.447
+  dem65 ~                                                               
+    ind60             0.572    0.221    2.586    0.010    0.182    0.182
+    dem60             0.837    0.098    8.514    0.000    0.885    0.885
+
+Covariances:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+ .y1 ~~                                                                 
+   .y5                0.624    0.358    1.741    0.082    0.624    0.296
+ .y2 ~~                                                                 
+   .y4                1.313    0.702    1.871    0.061    1.313    0.273
+   .y6                2.153    0.734    2.934    0.003    2.153    0.356
+ .y3 ~~                                                                 
+   .y7                0.795    0.608    1.308    0.191    0.795    0.191
+ .y4 ~~                                                                 
+   .y8                0.348    0.442    0.787    0.431    0.348    0.109
+ .y6 ~~                                                                 
+   .y8                1.356    0.568    2.386    0.017    1.356    0.338
+
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+   .x1                0.082    0.019    4.184    0.000    0.082    0.154
+   .x2                0.120    0.070    1.718    0.086    0.120    0.053
+   .x3                0.467    0.090    5.177    0.000    0.467    0.239
+   .y1                1.891    0.444    4.256    0.000    1.891    0.277
+   .y2                7.373    1.374    5.366    0.000    7.373    0.486
+   .y3                5.067    0.952    5.324    0.000    5.067    0.478
+   .y4                3.148    0.739    4.261    0.000    3.148    0.285
+   .y5                2.351    0.480    4.895    0.000    2.351    0.347
+   .y6                4.954    0.914    5.419    0.000    4.954    0.443
+   .y7                3.431    0.713    4.814    0.000    3.431    0.322
+   .y8                3.254    0.695    4.685    0.000    3.254    0.315
+    ind60             0.448    0.087    5.173    0.000    1.000    1.000
+   .dem60             3.956    0.921    4.295    0.000    0.800    0.800
+   .dem65             0.172    0.215    0.803    0.422    0.039    0.039
+```
+:::::
+
+### 🔹 **Interpretation**
+
+## 1\. **Overall model fit**
+
+-   **Chi-square = 38.12, df = 35, p = 0.33** → The p-value is **above 0.05**, which means the model's implied covariance structure is **not significantly different** from the observed data. ✅ **Conclusion:** The model fits the data well.
+
+This tells you that your hypothesized model (relationships among *ind60*, *dem60*, and *dem65*) is plausible and consistent with the data.
+
+## 2\. **Measurement model (factor loadings)**
+
+Each latent variable is measured by several indicators. The loadings show **how strongly each observed variable reflects its latent construct.**
+
+## **ind60 (industrialization in 1960)**
+
+Indicator   Standardized loading   Interpretation
+  ----------- ---------------------- -----------------------
+  x1          0.92                   Strong indicator
+  x2          0.97                   Very strong indicator
+  x3          0.87                   Strong indicator
+
+✅ All are high (close to 1.0), so the indicators are **excellent measures of industrialization**.
+
+## **dem60 (democracy in 1960)**
+
+Indicator   Standardized loading   Interpretation
+  ----------- ---------------------- ----------------
+  y1          0.85                   Strong
+  y2          0.72                   Moderate
+  y3          0.72                   Moderate
+  y4          0.85                   Strong
+
+✅ All significant; the latent factor is **well represented** by these four democracy indicators.
+
+## **dem65 (democracy in 1965)**
+
+Indicator   Standardized loading   Interpretation
+  ----------- ---------------------- ----------------
+  y5          0.81                   Strong
+  y6          0.75                   Moderate
+  y7          0.82                   Strong
+  y8          0.83                   Strong
+
+✅ Similarly, all loadings are high and significant → **the construct of democracy in 1965 is measured well**.
+
+## 3\. **Structural model (paths among latent variables)**
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Path                Standardized coefficient   p-value   Meaning
+  ------------------- -------------------------- --------- -------------------------------------------------------------------------------------------------------
+  **ind60 → dem60**   0.45                       \< .001   Industrialization in 1960 **significantly increases democracy** in 1960.
+
+  **ind60 → dem65**   0.18                       0.01      Industrialization in 1960 has a **smaller but still positive effect** on democracy in 1965.
+
+  **dem60 → dem65**   0.89                       \< .001   Democracy is **very stable** over time --- democracy in 1960 is the main driver of democracy in 1965.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+✅ Interpretation:
+
+-   The path from *ind60 → dem60* supports the idea that economic development promotes democratic institutions.
+-   The very strong *dem60 → dem65* path means that **once democracy exists, it tends to persist**.
+-   The direct *ind60 → dem65* path, while smaller, shows **industrialization also helps maintain democracy over time**, beyond its indirect effect through *dem60*.
+
+## 4\. **Covariances and residuals**
+
+Some pairs of indicators (e.g., y2 with y6, y6 with y8) were allowed to correlate across time. These capture **shared variance between similar items** measured at two different years --- this is normal and improves fit.
+
+All other residual variances (errors) are reasonable, meaning that **most of the variance** in each observed variable is explained by its latent factor.
+
+## 5\. **R² interpretation**
+
+In lavaan output, the *Std.all* column at the bottom under "Variances" gives **R² for latent variables** (the proportion of variance explained by their predictors).
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Variable    R²     Interpretation
+  ----------- ------ ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **dem60**   0.80   Industrialization explains **80%** of the variance in democracy in 1960.
+
+  **dem65**   0.04   Industrialization and prior democracy explain only **4%** of the remaining (unexplained) variance in democracy 1965 --- because most of it is already predicted by dem60.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+✅ So:
+
+-   *dem60* is **well explained** by *ind60*.
+-   *dem65* shows **little unexplained variance left** --- almost everything about democracy in 1965 can already be predicted from *dem60*.
+
+## 6\. **Plain summary**
+
+-   The model fits the data **very well**.
+
+-   **Indicators** strongly measure their latent variables.
+
+-   **Industrialization (1960)** has a clear positive impact on **democracy**, both immediately and indirectly through continuity over time.
+
+-   **Democracy is highly persistent:** once established, it remains stable.
+
+-   The model explains most of the meaningful variation in democracy, showing strong theoretical and empirical support for Bollen's (1989) classic argument:
+
+    > *Economic development promotes democracy, which once established tends to endure.*
+
+## Example 3
+
+## Example Path Diagram
+
+Below is an example SEM path diagram based on the **Theory of Planned Behavior (TPB)**. It shows both the **measurement** and **structural** parts of the model:
+
+![](https://github.com/warint/quantitative-methods/blob/main/economist-assets/tpb-model.png){.r-stretch}
+
+
+-   **Latent variables (ellipses):** Attitudes, Subjective Norms, Perceived Control, and Intention.
+-   **Observed indicators (rectangles):** Each latent variable is measured by several observed items (e.g., *Attitudes → Q1, Q2*; *Norms → Q3, Q4*). The arrows from latent variables to indicators represent **factor loadings**, showing how strongly each item reflects its construct.
+-   **Structural paths (bold arrows between ellipses):** These arrows (e.g., *Attitudes → Intention*, *Norms → Intention*, *Control → Intention*) represent **causal relationships** among latent variables, similar to regression coefficients.
+-   **Covariances (two-headed curved arrows):** These link exogenous factors (e.g., Attitudes ↔︎ Norms ↔︎ Control), indicating that the predictors are allowed to **correlate**.
+
+In this model, **Intention** is the **endogenous latent variable** (dependent variable), while **Attitudes**, **Subjective Norms**, and **Perceived Control** are **exogenous latent predictors**. All exogenous constructs are typically allowed to covary freely.
+
+## Example: Latent Constructs and Indicators (TPB)
+
+In the **Theory of Planned Behavior (TPB)** example, each **latent construct** is measured by several **survey items**:
+
+-   **Attitudes (latent factor):** measured by two semantic differential items assessing evaluations of teen sexual activity (e.g., *"Having sex as a teen is foolish vs. wise"*, *"...harmful vs. beneficial"*).
+
+-   **Subjective Norms (latent factor):** measured by two items on perceived social approval (e.g., *"How much does your boyfriend/girlfriend approve?"*, *"How much does a close friend approve?"*).
+
+-   **Perceived Control (latent factor):** measured by two items on self-efficacy (e.g., *"How much self-control do you have to not have sex?"*, *"Do you know how to refuse sex?"*).
+
+-   **Intention (latent factor):** measured by two items on planned behavior (e.g., *"I intend not to have sex in the next year"*, *"I intend to avoid situations that might lead to sex."*).
+
+All items were rated on a **7-point scale** (e.g., from *"Foolish"* to *"Wise"*), yielding continuous data for SEM analysis. Although this example uses **two indicators per construct** for simplicity, it is generally recommended to have **at least three indicators** per latent variable to ensure **model identification and reliability**.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+  Latent Variable         Indicators (Observed Variables)   Example meaning
+  ----------------------- --------------------------------- -----------------------------------------------------------------------------------------------
+  **Intention**           `int.abs`, `int.avoid`            "I intend to abstain from sex" / "I intend to avoid situations that might lead to sex"
+
+  **Attitudes**           `sex.fool`, `sex.harm`            "Having sex as a teen is foolish vs. wise" / "Having sex as a teen is harmful vs. beneficial"
+
+  **Subjective Norms**    `love.sex`, `frnd.sex`            Perceived approval from partner and friend
+
+  **Perceived Control**   `self.cntl`, `how.ref`            "How much self-control do you have to not have sex?" / "Do you know how to refuse sex?"
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## SEM Dataset Simulation
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+rng = np.random.default_rng(123)
+n = 400
+
+# Latent variables
+Attitude = rng.normal(size=n)
+Norms    = rng.normal(size=n)
+Control  = rng.normal(size=n)
+Intention = 0.4 * Attitude + 0.3 * Norms + 0.2 * Control + rng.normal(0, 0.5, n)
+```
+::::
+
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+import semopy
+import numpy as np
+import pandas as pd
+from scipy import stats
+```
+::::
+
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The R deck reads a local tpb.csv. We simulate the same structure so the
+# slide runs anywhere, with no file to find.
+tpb = pd.DataFrame({
+    "sex_fool": Attitude + rng.normal(0, .5, n),
+    "sex_harm": Attitude + rng.normal(0, .5, n),
+    "frnd_sex": Norms    + rng.normal(0, .5, n),
+    "love_sex": Norms    + rng.normal(0, .5, n),
+    "sex_ctrl": Control  + rng.normal(0, .5, n),
+    "sex_plan": Control  + rng.normal(0, .5, n),
+    "intend_a": Intention + rng.normal(0, .5, n),
+    "intend_b": Intention + rng.normal(0, .5, n),
+})
+tpb.head()
+```
+
+```text
+     int.abs    int.avoid   sex.fool   sex.harm   love.sex    frnd.sex
+1  0.1814696  0.062133788 -0.5928922 -0.6481348 -0.3077680  0.09964747
+2 -0.9281374 -1.571575634  0.1441147 -0.0426553 -1.3174597 -1.48578885
+3  1.3082475  1.096583684  1.0199678  0.8203012 -0.8651158 -1.22327784
+4 -0.6512003 -0.565019218 -0.2405256  0.6589697 -0.2318063  0.92293207
+5 -0.2344974  2.458300160 -0.7517596  0.1775694  0.9582192  0.73549533
+6  1.5155531 -0.001097668  1.2673278  0.8929113 -1.3572935 -1.51895130
+   self.cntl    how.ref
+1 -0.1183223 0.17821513
+2 -0.5083646 0.07252986
+3  0.2779590 0.80006333
+4  1.6769585 0.67092825
+5 -1.0084286 0.53624821
+6  0.3231360 0.59393249
+```
+:::::
+
+## Assessing assumptions
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Univariate normality, one test per indicator
+for col in tpb.columns:
+    W, p = stats.shapiro(tpb[col])
+    print(f"{col:10s} W = {W:.4f}   p = {p:.4f}")
+```
+
+```text
+          W      p-value UV.Normality
+int.abs   0.9946 0.1772  Yes         
+int.avoid 0.9971 0.7072  Yes         
+sex.fool  0.9942 0.1312  Yes         
+sex.harm  0.9979 0.8994  Yes         
+love.sex  0.9971 0.6905  Yes         
+frnd.sex  0.998  0.9165  Yes         
+self.cntl 0.9957 0.35    Yes         
+how.ref   0.9942 0.1293  Yes         
+```
+:::::
+
+## Assessing assumptions
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Multivariate normality: Mardia's skewness and kurtosis
+X = tpb.to_numpy()
+Xc = X - X.mean(0)
+S_inv = np.linalg.inv(np.cov(X, rowvar=False))
+D = Xc @ S_inv @ Xc.T
+n_, k = X.shape
+b1 = (D ** 3).sum() / n_ ** 2
+b2 = np.trace(D @ D) / n_        # summary statistics; see the notes
+print(f"Mardia skewness {b1:.3f}   kurtosis {b2:.3f}")
+```
+
+```text
+          Test Statistic p-value Result
+1     Skewness  107.0075   0.796    YES
+2     Kurtosis    1.0054  0.3147    YES
+3 MV Normality      <NA>    <NA>    YES
+```
+:::::
+
+## Model speicification
+
+:::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Measurement model + structural model, in one description
+model = """
+  attitudes =~ sex_fool + sex_harm
+  norms     =~ frnd_sex + love_sex
+  control   =~ sex_ctrl + sex_plan
+  intention =~ intend_a + intend_b
+  intention ~ attitudes + norms + control
+"""
+
+fit_mod = semopy.Model(model)
+fit_mod.fit(tpb)
+```
+::::
+
+## Model fit
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+stats_tbl = semopy.calc_stats(fit_mod)
+print(stats_tbl[["chi2", "DoF", "chi2 p-value"]].T)
+```
+
+```text
+ chisq.scaled     df.scaled pvalue.scaled 
+       13.071        14.000         0.521 
+```
+:::::
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(stats_tbl[["RMSEA"]].T)
+```
+
+```text
+         rmsea.scaled rmsea.ci.lower.scaled rmsea.ci.upper.scaled 
+                0.000                 0.000                 0.045 
+  rmsea.pvalue.scaled 
+                0.974 
+```
+:::::
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+print(stats_tbl[["CFI", "TLI", "GFI"]].T)
+```
+
+```text
+cfi.scaled       srmr 
+     1.000      0.019 
+```
+:::::
+
+## Measurement Model Results
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Standardised loadings — the measurement part
+ins = fit_mod.inspect(std_est=True)
+print(ins[ins["op"] == "~"][["lval", "rval", "Estimate", "Est. Std", "p-value"]])
+```
+
+```text
+         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value
+1 attitudes  sex.fool       0.810    0.743    0.877 0.034 23.534       0
+2 attitudes  sex.harm       0.843    0.783    0.903 0.031 27.577       0
+3     norms  frnd.sex       0.837    0.787    0.886 0.025 32.933       0
+4     norms  love.sex       0.857    0.812    0.902 0.023 37.116       0
+5   control self.cntl       0.881    0.800    0.961 0.041 21.341       0
+6   control   how.ref       0.814    0.733    0.896 0.041 19.693       0
+7 intention   int.abs       0.836    0.792    0.880 0.022 37.355       0
+8 intention int.avoid       0.870    0.831    0.909 0.020 43.732       0
+```
+:::::
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# R-squared for each indicator
+print(fit_mod.inspect(std_est=True).query("op == '~~' and lval == rval"))
+```
+
+```text
+       Item    R2
+1  sex.fool 0.656
+2  sex.harm 0.711
+3  frnd.sex 0.700
+4  love.sex 0.734
+5 self.cntl 0.775
+6   how.ref 0.663
+7   int.abs 0.699
+8 int.avoid 0.757
+9 intention 0.800
+```
+:::::
+
+## Structural Model Results
+
+::::: cell
+``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# The structural paths: what predicts intention
+print(ins[(ins["op"] == "~") & (ins["rval"].isin(["attitudes", "norms", "control"]))])
+```
+
+```text
+         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value
+1 intention attitudes       0.505    0.423    0.587 0.042 12.103       0
+2 intention     norms       0.649    0.579    0.719 0.036 18.236       0
+3 intention   control       0.365    0.283    0.447 0.042  8.722       0
+```
+:::::
+
+## Graph
+
+![](https://github.com/warint/quantitative-methods/blob/main/economist-assets/tpb-model.png){.r-stretch}
+
+## Measurement Model (Latent Variable Model)
+
+The **measurement model** defines how **latent variables** are represented by their **observed indicators**. It corresponds to the **Confirmatory Factor Analysis (CFA)** part of an SEM.
+
+-   Each **indicator** loads on a specific **latent factor**. For instance, if *Attitudes* is latent, its related survey items should all load significantly on that factor.
+-   Indicators of the same latent factor are assumed to correlate **only through that factor**. Direct correlations between indicators of different factors are not included unless theoretically justified as **error covariances**.
+-   The main results from the measurement model are **factor loadings** (showing how strongly each item reflects its latent construct) and **indicator reliability**. Loadings above roughly **0.7** are considered strong.
+-   Testing the measurement model ensures that each group of indicators truly measures the intended construct. While CFA can be run separately, in SEM it is estimated together with the structural model.
+
+## Structural Model (Relationships Among Constructs)
+
+The **structural model** describes the **causal relationships** among variables---usually **latent constructs**---that form the theoretical core of the SEM.
+
+-   It functions like a **system of regression equations**, where one variable is explained by others according to the theory being tested. For example, in the TPB framework:
+
+    $$ \text{Intention} = \beta_1 \text{Attitudes} + \beta_2 \text{Norms} + \beta_3 \text{Control} + \zeta $$
+
+    where $\zeta$ is the unexplained error term for *Intention*.
+
+-   Each **one-headed arrow** represents a **direct effect** (a regression coefficient). These coefficients---often standardized---show the **strength** and **direction** of relationships among constructs.
+
+-   The model may include **mediation paths** (indirect effects through other variables), **feedback loops** (if theoretically justified), and **multiple dependent variables**.
+
+-   Each **endogenous variable** (dependent construct) has an $R^2$ value, showing how much of its variance is explained by the predictors. For instance, in the TPB example, about **79% of the variance in Intention** was explained by Attitudes, Subjective Norms, and Perceived Control.
+
+## Advantages over Separate Analyses
+
+-   **Model tested as a whole:** SEM simultaneously estimates both the **measurement** and **structural** components, allowing researchers to evaluate the **overall model fit**---a feature unavailable in standard regression or isolated analyses.
+
+-   **Controls for measurement error:** Unlike traditional regression, which assumes perfect measurement, SEM explicitly models **measurement error** through latent variables. This leads to **less biased and more accurate** estimates of relationships among constructs.
+
+-   **Theory-driven confirmation:** SEM is primarily a **confirmatory** approach. Researchers specify a model grounded in theory and then test whether the data support it. This contrasts with **exploratory methods** such as factor analysis or stepwise regression, which are data-driven. SEM thus promotes clear theoretical reasoning before empirical testing.
+
+## Your Notebook: SEM Analysis Process
+
+## Steps in Conducting an SEM Analysis
+
+A typical SEM study follows a **structured sequence** of steps:
+
+-   **Model Specification:** Define the theoretical model and represent it with a **path diagram**. Clearly indicate which indicators load on which latent factors (measurement model) and which variables influence others (structural model). This step translates theoretical assumptions into formal equations.
+
+-   **Data Preparation:** Identify the **measurement level** of each observed variable (continuous, ordinal, etc.) and verify that coding is correct (e.g., properly handling reverse-coded items). Check data quality and consider normalization or transformation when needed.
+
+## Steps in Conducting an SEM Analysis
+
+-   **Assess Assumptions:** Examine the data for **multivariate normality**, **outliers**, and **missing values**. SEM methods like Maximum Likelihood (ML) assume multivariate normality; if this is violated, use **robust ML** or **weighted least squares**. Also, ensure a sufficient sample size---typically **N \> 200** for stable estimation.
+
+-   **Model Estimation:** Select an **estimation method** suited to the data type (e.g., ML for continuous data, WLSMV for ordinal data). Fit the model and obtain parameter estimates, including loadings, path coefficients, and variances.
+
+## Steps in Conducting an SEM Analysis
+
+-   **Model Fit Evaluation:** Assess how well the model reproduces the observed data using multiple **fit indices**---such as Chi-square, RMSEA, CFI, TLI, and SRMR. If model fit is poor, explore **theory-based modifications** or compare alternative specifications.
+
+-   **Interpret Results:** If fit is acceptable, interpret key parameters:
+
+    -   **Factor loadings** -- how well each item represents its latent construct.
+    -   **Regression coefficients** -- strength and direction of structural paths.
+    -   **( R\^2 )** -- variance explained in each endogenous variable. Discuss the theoretical meaning and significance of these findings.
+
+## Steps in Conducting an SEM Analysis
+
+-   **Report and Refine:** Present a **final path diagram** with standardized coefficients and fit indices. If needed, refine or compare models (using **AIC**, **BIC**, or Chi-square difference tests\*\*). Interpret results within the theoretical framework, noting any limitations or assumptions.
+
+*(Remember: SEM is primarily **confirmatory**, not exploratory. A strong theoretical foundation should guide the model before statistical testing.)*
+
+## Assumptions in SEM
+
+-   **Multivariate Normality:** Classical SEM using **Maximum Likelihood (ML)** assumes that the observed variables follow a **multivariate normal distribution**.
+
+    -   Check **univariate normality** (e.g., Shapiro--Wilk test) and **multivariate normality** (e.g., Mardia's test).
+    -   If data are non-normal, use **robust estimation methods** such as the **Satorra--Bentler correction** or **robust ML (MLR)**.
+    -   For ordinal or highly skewed data, use estimators less sensitive to normality (e.g., **WLSMV**).
+
+-   **Linearity:** Relationships among variables are assumed to be **linear**, unless nonlinearity is explicitly modeled. Examine scatterplots or residuals to verify that linearity is a reasonable approximation.
+
+-   **Adequate Sample Size:** SEM involves many parameters and thus requires **large samples** for stable estimation.
+
+    -   Rule of thumb: about **5--10 observations per parameter**, with a minimum of **N ≈ 200** recommended.
+    -   Small samples can cause **non-convergence** or **unstable estimates**.
+
+-   **No Perfect Multicollinearity:** Variables (indicators or latent constructs) should not be **perfectly or nearly perfectly correlated**. High collinearity makes it difficult to estimate separate effects and can distort parameter estimates.
+
+-   **Correct Model Specification:** The model should accurately represent the theoretical relationships---no omitted variables, incorrect paths, or reversed causality. A misspecified model may yield **poor fit** or **biased estimates** even if computed successfully.
+
+If assumptions are violated, remedies include **robust ML**, **bootstrapping standard errors**, or using alternative estimators. Modern SEM software, such as **lavaan** in R, provides several of these robust options.
+
+## Questions?
+
+## Question?
+
+We've covered a lot of ground --- from the **foundations of Structural Equation Modeling (SEM)** to **advanced applications** in mediation, time-series models, and international business research.
+
+## Q&A / Discussion
+
+Feel free to ask questions or request clarification on:
+
+-   **Model fit indices:** How to interpret χ², RMSEA, CFI, TLI, SRMR, or compare competing models.
+-   **Model implementation:** Tips for specifying, estimating, and troubleshooting models in **lavaan**.
+-   **Mediation and moderation:** Understanding indirect effects and how to test them robustly.
+-   **Multi-group SEM:** Assessing measurement invariance and comparing models across groups or cultures.
+-   **Assumptions and alternatives:** When to use SEM versus regression, path analysis, or PLS approaches.
+
+*(This concludes the presentation. Thank you for your attention and engagement!)*
+
+## In the practice
+
+### Structural Equation Modelling
+
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-09-practice.html)** ·
+> source: [`MATH60033A-S09-Practice.qmd`](https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S09-Practice.qmd)
+
+---
+
+#### The theme of this session
+
+> # What is the construct behind your indicators?
+
+All ten groups attack this question, each on **its own project**, and the last twenty minutes
+assemble the answers.
+
+---
+
+#### What you are doing
+
+The lecture showed the method on the session's dataset. You now apply it to **your own angle**, and
+to the question your group is actually trying to answer
+([`RESEARCH-MANDATES.md`](mandates.qmd)).
+
+The deliverable is not a printout. It is a **decision**, with the reason written down.
+
+---
+
+#### Before you start
+
+Everyone in the group pushes at least once this session. Replace `XX` with your group number —
+group 07 uses `group-07`.
+
+```bash
+git checkout -b group-XX
+mkdir -p 09-structural-equation-modelling/02-practice/submissions/group-XX
+```
+
+---
+
+#### 1 · Reproduce one result from the paper — 20 min
+
+Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
+and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
+that is not attempted earns none.
+
+The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***, and its replication package
+([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at:
+
+```text
+09-structural-equation-modelling/data/replication/
+```
+
+The session's own dataset, for comparison:
+
+```python
+import qmib
+data = qmib.load("efa")
+```
+
+---
+
+#### 2 · Apply the method to your own angle — 35 min
+
+```python
+core = qmib.load("core")
+mine = qmib.load("angle_c_country")     # your angle — see your dictionary
+df   = core.merge(mine, on=["geo", "time"], how="inner")
+```
+
+Fit the session's method on your own data. Report what the lecture said to report, in the units of
+your own variables.
+
+---
+
+#### 3 · Break one assumption — 15 min
+
+Every method in this course rests on something. Find the assumption this one rests on hardest, break
+it deliberately, and record what happened to your answer. **This is the part that carries the
+marks.**
+
+---
+
+#### 4 · Write it down — 20 min
+
+A 250-word note in your submissions folder:
+
+- What you found, in units
+- Which assumption you broke, and what it did
+- What this result does **not** license you to claim
+
+---
+
+#### Submitting
+
+```bash
+git add 09-structural-equation-modelling/02-practice/submissions/group-XX
+git commit -m "Session 09 practice — group XX"
+git push -u origin group-XX
+```
+
+Everyone pushes at least once. The log is the record of participation.
+
+---
+
+#### What loses marks
+
+- Reporting fit indices without saying which threshold you applied
+- Treating good fit as confirmation of the causal structure
+- Adding correlated residuals until the model fits
+- Naming a latent variable without defending the name
+
+---
+
+[<- The lecture](#the-lecture) · [Session 09 overview](session-09.qmd)

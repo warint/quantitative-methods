@@ -1,0 +1,47 @@
+---
+title: "The data API"
+---
+
+Every dataset in this course loads with one call. There is no path to get right, no download step
+in the practice, and no dependence on the room's wifi.
+
+```python
+import qmib
+
+df = qmib.load("core")        # the course spine
+qmib.catalog()                # everything available
+```
+
+::: {.step}
+`load()` resolves in three steps and stops at the first that works: a **parquet cache** in `data/`,
+then the **committed spine** in `data/spine/`, then the **published copy** on GitHub Pages. The
+first call downloads; every call after it reads the cache.
+:::
+
+::: {.check}
+**Why it matters for the practice.** Run `qmib.load()` once at home and the ninety minutes in class
+work offline. A room of thirty people downloading the same file at 15:35 is the single most
+reliable way to lose the first twenty minutes of a session.
+:::
+
+## Outside a clone
+
+In Colab, or anywhere without the repository checked out, point the module at the published copy:
+
+```python
+import qmib
+qmib.REMOTE = "https://warint.github.io/quantitative-methods/data"
+df = qmib.load("core")
+```
+
+## What is where
+
+- Columns, units and traps, per group: [data dictionaries](https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/)
+- Provenance and flags: [`PROVENANCE.md`](https://github.com/warint/quantitative-methods/blob/main/data/spine/PROVENANCE.md)
+- The module itself: [`qmib.py`](https://github.com/warint/quantitative-methods/blob/main/qmib.py)
+
+::: {.warn}
+Raw data files are git-ignored on purpose. Never commit one — `qmib` fetches and caches instead.
+The synthetic spine is the deliberate exception: small, licence-free, and committed so the practice
+runs with no network at all.
+:::
