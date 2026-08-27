@@ -1,5 +1,6 @@
 ---
 title: "Principal Component and Factor Analyses"
+standalone: true
 ---
 
 ## Six columns, how many things?
@@ -18,16 +19,7 @@ axes, ordered by how much variance they capture, with no model and no error term
 them to produce the correlations you see. The first is a description; the second
 is a hypothesis.
 
-::: {.plate}
-![](images/session-07-pearson.jpg){fig-alt="Portrait of Karl Pearson, 1857–1936."}
-
-**Karl Pearson** · 1857–1936
-
-Principal components, 1901 — lines and planes of closest fit.
-
-[Elliott & Fry, undated. Public domain, via Wikimedia Commons.]{.plate-credit}
-:::
-
+{{portrait}}
 
 ::: {.archive}
 [From the archive · Pearson, 1901]{.archive-label}

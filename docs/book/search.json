@@ -724,317 +724,107 @@
     "href": "session-07.html",
     "title": "7  Principal Component and Factor Analyses",
     "section": "",
-    "text": "7.1 Before the session\nTwo things to do before class, and they are the two halves of the practice. Budget 60–90 minutes.",
+    "text": "7.1 Six columns, how many things?\nA dataset with six numeric columns does not necessarily measure six things. Budget, revenue, popularity, runtime, average rating and vote count are six columns describing a film; they are plainly not six independent facts about it, because expensive films earn more, popular films are voted on more, and almost everything correlates with almost everything. The question this chapter answers is how many distinct quantities are actually varying, and what they are.\nTwo methods answer it, they are routinely confused, and the confusion is not harmless. Principal component analysis is a rotation of the data: it finds new axes, ordered by how much variance they capture, with no model and no error term. Factor analysis posits unobserved causes and asks what would have to be true of them to produce the correlations you see. The first is a description; the second is a hypothesis.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#before-the-session",
-    "href": "session-07.html#before-the-session",
+    "objectID": "session-07.html#six-columns-how-many-things",
+    "href": "session-07.html#six-columns-how-many-things",
     "title": "7  Principal Component and Factor Analyses",
     "section": "",
-    "text": "How many independent things are actually being measured?\n\n\nOpen the pre-session slides · source: MATH60033A-S07-Pre-Session.qmd\n\n\n\n\n\n\n\n\n\n\n\nBefore class\nUsed in the practice for\n\n\n\n\n1\nRead the paper\nreproducing one of its results\n\n\n2\nGet both datasets\nthat, and applying the method to your own angle\n\n\n\n\n\n7.1.1 1. The reading — 45–60 min\nKoopman & Mesters (2017), Empirical Bayes Methods for Dynamic Factor Models Read the article\nRead for the argument, not for coverage:\n\n\n\n\nWhat to look for\n\n\n\n\n1\nThe research question, in one sentence\n\n\n2\nThe method or design, and why they chose it\n\n\n3\nThe strongest single piece of evidence\n\n\n4\nOne limitation you would raise as a referee\n\n\n\nAnnotate as you go. You will be asked what you underlined and why.\n\n\n\n7.1.2 2. The data — 10 min\nYou need two datasets in the practice, and both should be on your machine before you arrive.\n\n7.1.2.1 a) The paper’s replication package\nThis is what you reproduce in the first twenty minutes of the practice.\nHarvard Dataverse: 10.7910/DVN/NKWMQM\nDownload it once, and unzip it here — the folder is git-ignored, so nothing large is committed:\n07-pca-and-factor-analysis/data/replication/\nKeep the authors’ own folder structure and README.\n\n\n7.1.2.2 b) The course data, for your own angle\nThis is what you apply the method to in the second half.\nimport qmib\n\ndata = qmib.load(\"movies\")      # what the lecture uses\ncore = qmib.load(\"core\")                 # shared by every group\nmine = qmib.load(\"angle_c_country\")      # YOUR angle — see your dictionary\n\nprint(data.shape, core.shape, mine.shape)\n45,000 films — budget, popularity, revenue, runtime and votes.\n\nRun this before class. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing. qmib.catalog() lists everything available.\n\nYour group’s file, columns, units and traps are in your data dictionary.\n\n\n\n\n7.1.3 3. Self-check — 15 min\nAnswer on paper. If you cannot, that is what the lecture is for.\n\nIn one sentence: what does this session’s method let you claim that the previous one did not?\nWhat must be true of your data for it to apply?\nWhich claim in the paper rests on this method — and how hard does it lean on it?\n\n\n\n\n7.1.4 Arrive with\n\nThe paper read and annotated\nThe replication package downloaded and unzipped\nqmib.load() run at least once, so the cache exists\nYour self-check answers, on paper\n\n\nSession 07 overview · The lecture · The practice",
+    "text": "Karl Pearson · 1857–1936\nPrincipal components, 1901 — lines and planes of closest fit.\nElliott & Fry, undated. Public domain, via Wikimedia Commons.\n\n\nFrom the archive · Pearson, 1901\nKarl Pearson’s paper is called On lines and planes of closest fit to systems of points in space, and the title contains the whole idea (Pearson 1901). He asked what line best fits a cloud of points when there is no distinguished variable to predict — when \\(x\\) and \\(y\\) are on the same footing and the question is the shape of the cloud rather than the conditional mean of one coordinate given the other.\nThe answer differs from regression in a way worth seeing rather than being told. Least squares minimises vertical distances, because it treats \\(y\\) as the thing to be explained and \\(x\\) as given. Pearson’s line minimises perpendicular distances, because neither coordinate is privileged. They are different lines, and the difference grows as the correlation weakens.\nHotelling gave the method its modern algebra and its name three decades later, deriving the components as the eigenvectors of the covariance matrix and establishing that they successively capture maximal variance (Hotelling 1933).\n\n\nShow the code\nimport sys, warnings\nsys.path.insert(0, \"../slides\"); sys.path.insert(0, \"..\")\nwarnings.filterwarnings(\"ignore\")\nfrom plotstyle import setup, CL\nplt = setup()\n\nimport numpy as np, pandas as pd, qmib\n\nrng = np.random.default_rng(60033)\nn = 90\nxs = rng.normal(0, 1, n)\nys = 0.72 * xs + rng.normal(0, 0.72, n)\nxs, ys = xs - xs.mean(), ys - ys.mean()\n\nb_reg = np.polyfit(xs, ys, 1)[0]\nM = np.column_stack([xs, ys])\n_, _, Vt = np.linalg.svd(M, full_matrices=False)\nb_pc = Vt[0, 1] / Vt[0, 0]\n\nfig, ax = plt.subplots(figsize=(6.2, 4.8))\ngx = np.linspace(xs.min() * 1.1, xs.max() * 1.1, 40)\n\n# the residuals each method minimises\nfor xi, yi in zip(xs, ys):\n    ax.plot([xi, xi], [yi, b_reg * xi], color=CL.muted, lw=0.6, alpha=0.55, zorder=1)\nd = np.array([Vt[0, 0], Vt[0, 1]])\nfor xi, yi in zip(xs, ys):\n    proj = (np.array([xi, yi]) @ d) * d\n    ax.plot([xi, proj[0]], [yi, proj[1]], color=CL.warn, lw=0.6, alpha=0.5, zorder=1)\n\nax.plot(gx, b_reg * gx, color=CL.muted, lw=2.2, label=f\"regression  (slope {b_reg:.2f})\")\nax.plot(gx, b_pc * gx, color=CL.warn, lw=2.2, label=f\"first component  (slope {b_pc:.2f})\")\nax.scatter(xs, ys, s=18, color=CL.accent, alpha=0.6, edgecolor=\"none\", zorder=3)\nax.set_xlabel(\"x\"); ax.set_ylabel(\"y\")\nax.legend(frameon=False, fontsize=8.5, loc=\"upper left\")\nax.set_aspect(\"equal\")\nfig.tight_layout()\n\n\n\n\n\n\n\n\nFigure 7.1: Regression and the first principal component are not the same line. Least squares minimises the vertical distances (grey); Pearson’s line minimises the perpendicular ones (red). The regression line is always the flatter of the two.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#the-lecture",
-    "href": "session-07.html#the-lecture",
+    "objectID": "session-07.html#standardise-or-the-biggest-units-win",
+    "href": "session-07.html#standardise-or-the-biggest-units-win",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.2 The lecture",
-    "text": "7.2 The lecture\n\nDelivered from the slides. What follows is the same material as prose.\n\n\n\n\"If you live 5 minutes away from Bill Gates, I bet you are rich.\"\n\nAl-Eryani, Mohammad F. \"Transfer Pricing Determinants of U.S. Multinationals\", Journal of International Business Studies, vol. 21, no. 3 ISSN: 0047-2506",
+    "section": "7.2 Standardise, or the biggest units win",
+    "text": "7.2 Standardise, or the biggest units win\nPCA maximises variance, and variance has units. A variable measured in hundreds of millions will have a variance many orders of magnitude larger than one measured from zero to ten, and the first component will therefore be, almost entirely, that variable. Nothing has been discovered; the units have been reported back.\n\n\nRun it: PCA on raw units, and then on standardised ones\nmovies = qmib.load(\"movies\").select_dtypes(\"number\").dropna()\n\n# A data-quality problem first — see the section at the end of this chapter.\nusable = movies[(movies[\"budget\"] &gt; 0) & (movies[\"revenue\"] &gt; 0)\n                & (movies[\"runtime\"] &gt; 0)].copy()\nX = usable.to_numpy(float)\ncols = list(usable.columns)\nprint(f\"rows used: {len(usable):,} of {len(movies):,}\")\n\ndef eigen(A):\n    ev, V = np.linalg.eigh(A)\n    return ev[::-1], V[:, ::-1]\n\nXc = X - X.mean(0)\nev_raw, V_raw = eigen(np.cov(Xc, rowvar=False))\nprint(f\"\\nRAW UNITS: first component captures {ev_raw[0]/ev_raw.sum():.2%} of variance\")\nprint(\"  its loadings:\")\nfor c, l in sorted(zip(cols, V_raw[:, 0]), key=lambda t: -abs(t[1])):\n    print(f\"    {c:14}{l:+8.4f}\")\n\nZ = (X - X.mean(0)) / X.std(0, ddof=1)\nev, V = eigen(np.corrcoef(Z, rowvar=False))\nprint(f\"\\nSTANDARDISED: first component captures {ev[0]/ev.sum():.2%}\")\nprint(f\"  eigenvalues: {np.round(ev, 3)}\")\n\n\nrows used: 5,369 of 45,203\n\nRAW UNITS: first component captures 97.50% of variance\n  its loadings:\n    revenue        -0.9840\n    budget         -0.1783\n    vote_count     -0.0000\n    popularity     -0.0000\n    runtime        -0.0000\n    vote_average   -0.0000\n\nSTANDARDISED: first component captures 47.32%\n  eigenvalues: [2.839 1.203 0.831 0.632 0.306 0.189]\n\n\nNinety-seven and a half per cent of the variance on one component, loading almost entirely on revenue, and it means nothing at all. Revenue is measured in dollars and runtime in minutes; the analysis has ranked the columns by the size of their units. Standardising each variable to unit variance removes the arbitrariness, and it changes the answer completely: the first component now captures under half the variance, and there is a second worth looking at.\nStandardisation is therefore part of the method rather than a preliminary — the same conclusion chapter 5 reached about the penalties, for the same reason. The practical consequence is that PCA is almost always performed on the correlation matrix, which is the covariance matrix of standardised data.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#outline",
-    "href": "session-07.html#outline",
+    "objectID": "session-07.html#how-many-components",
+    "href": "session-07.html#how-many-components",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.3 Outline",
-    "text": "7.3 Outline",
+    "section": "7.3 How many components?",
+    "text": "7.3 How many components?\n\nEigenvalue — the variance of the data along a component. On standardised data the eigenvalues sum to the number of variables, so an eigenvalue of 1 corresponds to the variance of one original variable — a component that explains no more than a single column would have on its own.\n\nThat gives the oldest rule: keep components with eigenvalue above 1. It is a convention, not a test, and it is known to over-retain. Two better instruments exist, and they disagree usefully.\nCattell’s scree test looks for the elbow: plot the eigenvalues in order and retain those above the point where the curve flattens into rubble (Cattell 1966). It is subjective by construction, which is a fair criticism and not a fatal one — the judgement is at least visible.\nHorn’s parallel analysis makes it empirical (Horn 1965). Generate data of the same shape with no correlation at all, compute its eigenvalues, and retain only components whose eigenvalue exceeds what pure noise of that size produces. It answers the right question — is this component larger than chance — and it is the method to use when you can.\n\n\nShow the code\nn_obs, n_var = Z.shape\nrng2 = np.random.default_rng(7)\nsim = np.array([np.linalg.eigvalsh(np.corrcoef(\n    rng2.normal(size=(n_obs, n_var)), rowvar=False))[::-1] for _ in range(200)])\nnoise_95 = np.percentile(sim, 95, axis=0)\n\nfig, ax = plt.subplots(figsize=(6.6, 4.2))\nk = np.arange(1, n_var + 1)\nax.plot(k, ev, marker=\"o\", ms=6, lw=2, color=CL.accent, label=\"observed\", zorder=3)\nax.plot(k, noise_95, marker=\"s\", ms=4, lw=1.5, ls=\"--\", color=CL.warn,\n        label=\"95th percentile of uncorrelated data\", zorder=2)\nax.axhline(1.0, color=CL.muted, lw=1.2, ls=\":\", label=\"Kaiser: eigenvalue = 1\")\nax.set_xlabel(\"component\"); ax.set_ylabel(\"eigenvalue\")\nax.set_xticks(k)\nax.legend(frameon=False, fontsize=8.5)\nfig.tight_layout()\n\nprint(f\"Kaiser (&gt;1):            retain {(ev &gt; 1).sum()}\")\nprint(f\"parallel analysis:      retain {(ev &gt; noise_95).sum()}\")\nprint(f\"cumulative variance of the first two: {(ev[:2].sum()/ev.sum()):.1%}\")\n\n\nKaiser (&gt;1):            retain 2\nparallel analysis:      retain 2\ncumulative variance of the first two: 67.4%\n\n\n\n\n\n\n\n\nFigure 7.2: Choosing the number of components three ways. The Kaiser line at 1 retains two; the elbow suggests two; parallel analysis against uncorrelated data of the same shape retains the components lying above the dashed noise curve.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#outline-1",
-    "href": "session-07.html#outline-1",
+    "objectID": "session-07.html#loadings-and-scores-are-different-objects",
+    "href": "session-07.html#loadings-and-scores-are-different-objects",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.4 outline",
-    "text": "7.4 outline\n\nIntroduction\nPrincipal Component Analysis\nFactor Analysis\nApplications\n\n\nThe Netflix Recommender System\nFAMD: The Wine Data\nFactor Analysis for Questionnaires\n\n\nComparison and Interpretation: When to Use PCA vs. Factor Analysis",
+    "section": "7.4 Loadings and scores are different objects",
+    "text": "7.4 Loadings and scores are different objects\nThe single most common confusion in applied use, and it has consequences for what you are allowed to plot.\n\nLoading — an element of the eigenvector: how much an original variable contributes to a component. There are as many loadings per component as there are variables, and they describe what the component means.\n\n\nScore — the value of a component for an observation, computed as \\(Z v_j\\). There are as many scores per component as there are rows, and they are the new coordinates you would use in a subsequent regression.\n\nLoadings interpret; scores are data. A biplot shows both at once and is therefore the standard display, but the two are on different scales and the relative lengths of the loading arrows are meaningful only against each other.\n\n\nShow the code\nscores = Z @ V[:, :2]\n\nfig, ax = plt.subplots(figsize=(7.0, 5.4))\nax.scatter(scores[:, 0], scores[:, 1], s=6, color=CL.accent, alpha=0.18,\n           edgecolor=\"none\", zorder=1)\nscale = np.abs(scores).max() * 0.72\nfor j, name in enumerate(cols):\n    ax.arrow(0, 0, V[j, 0] * scale, V[j, 1] * scale, color=CL.warn,\n             width=0.004, head_width=0.10, alpha=0.9, zorder=3)\n    ax.text(V[j, 0] * scale * 1.12, V[j, 1] * scale * 1.12, name,\n            fontsize=8.5, color=CL.ink, ha=\"center\", va=\"center\", zorder=4)\nax.axhline(0, color=CL.line, lw=1); ax.axvline(0, color=CL.line, lw=1)\nax.set_xlabel(f\"component 1 ({ev[0]/ev.sum():.1%} of variance)\")\nax.set_ylabel(f\"component 2 ({ev[1]/ev.sum():.1%})\")\nfig.tight_layout()\n\nprint(\"loadings on the first two components:\")\nprint(f\"{'variable':14}{'PC1':&gt;9}{'PC2':&gt;9}\")\nfor j, name in enumerate(cols):\n    print(f\"{name:14}{V[j,0]:+9.3f}{V[j,1]:+9.3f}\")\n\n\nloadings on the first two components:\nvariable            PC1      PC2\nbudget           -0.462   +0.298\npopularity       -0.370   +0.078\nrevenue          -0.533   +0.182\nruntime          -0.213   -0.605\nvote_average     -0.207   -0.710\nvote_count       -0.526   +0.023\n\n\n\n\n\n\n\n\nFigure 7.3: The first two components. Points are scores — one per film. Arrows are loadings — one per variable. The first component orders films by overall scale and reach; the second separates long, well-rated films from expensive, widely-voted ones.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#introduction",
-    "href": "session-07.html#introduction",
+    "objectID": "session-07.html#pca-is-not-factor-analysis",
+    "href": "session-07.html#pca-is-not-factor-analysis",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.5 Introduction",
-    "text": "7.5 Introduction",
+    "section": "7.5 PCA is not factor analysis",
+    "text": "7.5 PCA is not factor analysis\nThe two are distinguished by what they do with the variance that a variable does not share with the others.\nPCA decomposes all the variance. Every component is a weighted sum of the observed variables, so the components are defined whatever the correlations are — even if there are none, PCA returns six components for six variables and simply reports eigenvalues near 1. It is a rotation, and rotations are always available.\nFactor analysis splits the variance in two. Each observed variable is modelled as a combination of a few common factors plus something specific to itself:\n\\[\nx \\;=\\; \\Lambda f + u,\n\\qquad\n\\operatorname{Var}(x) \\;=\\; \\underbrace{\\Lambda \\Lambda^\\top}_{\\text{common}} + \\underbrace{\\Psi}_{\\text{unique}},\n\\]\nwith \\(\\Psi\\) diagonal. The model asserts that the correlations between variables are produced entirely by the common factors, and that whatever is left is particular to each variable. That is a testable claim: a set of correlations may be incompatible with any small number of factors.\n\nCommunality — the share of a variable’s variance explained by the common factors, \\(\\sum_j \\lambda_{ij}^2\\). Its complement is the uniqueness. A variable with low communality does not belong to the factor structure and is telling you so.\n\nThe practical difference: use PCA when the goal is to compress many correlated columns into a few for prediction or display, and factor analysis when you believe in a latent quantity and want to estimate it. Spearman’s original argument for a general factor of intelligence is the founding example of the second (Spearman 1904), and the tradition of using PCA where the question was really factor-analytic is long and mostly unhelpful (Fabrigar et al. 1999).",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#introduction-1",
-    "href": "session-07.html#introduction-1",
+    "objectID": "session-07.html#a-factor-is-identified-only-up-to-rotation",
+    "href": "session-07.html#a-factor-is-identified-only-up-to-rotation",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.6 Introduction",
-    "text": "7.6 Introduction\n\nConceptsTypes of ML\n\n\n\n\n\nColor (nm)\nAlcohol (%)\nBeer or Wine?\n\n\n\n\n610\n5\nBeer\n\n\n599\n13\nWine\n\n\n693\n14\nWine\n\n\n\n\nLabels\ntraining / testing\n\n\n\n\nsupervised / unsupervised (or self-supervised) / reinforcement learning\nSystem 1 (fast, intuitive) / System 2 (slow, analytical) (D. Kahneman)\n\n\n\n\n\nTheoryPractice",
+    "section": "7.6 A factor is identified only up to rotation",
+    "text": "7.6 A factor is identified only up to rotation\nThis is the deepest fact in the chapter and the one most often glossed.\nIf \\(\\Lambda\\) reproduces the correlations, so does \\(\\Lambda R\\) for any orthogonal matrix \\(R\\), because\n\\[\n(\\Lambda R)(\\Lambda R)^\\top \\;=\\; \\Lambda R R^\\top \\Lambda^\\top \\;=\\; \\Lambda \\Lambda^\\top .\n\\]\nThe model fits exactly as well. Every communality is unchanged. Nothing observable distinguishes them — and yet the loadings, which is to say the interpretation, can be completely different. There is no statistical basis for preferring one rotation; the choice is made on grounds of interpretability, and rotation criteria such as varimax formalise a preference for loadings that are large or near zero rather than middling (Kaiser 1958).\n\n\nRun it: rotate the solution and watch the fit not change\nfrom sklearn.decomposition import FactorAnalysis\nfrom sklearn.preprocessing import StandardScaler\n\n# The car-attribute battery: fourteen rated features, ninety respondents.\ncars = qmib.load(\"efa\").select_dtypes(\"number\").dropna()\nZc = StandardScaler().fit_transform(cars)\n\nfa = FactorAnalysis(n_components=3, random_state=0).fit(Zc)\nL = fa.components_.T\n\n\ndef varimax(L, tol=1e-6, iters=200):\n    \"\"\"Kaiser's criterion, by the standard SVD iteration.\"\"\"\n    p, k = L.shape\n    R, d = np.eye(k), 0.0\n    for _ in range(iters):\n        d_old, Lam = d, L @ R\n        B = L.T @ (Lam**3 - Lam @ np.diag(np.diag(Lam.T @ Lam)) / p)\n        u, s, vt = np.linalg.svd(B)\n        R, d = u @ vt, s.sum()\n        if d_old and d / d_old &lt; 1 + tol:\n            break\n    return L @ R, R\n\n\nLr, R = varimax(L)\n\nprint(f\"n = {len(cars)}, variables = {cars.shape[1]}, factors = 3\\n\")\nprint(f\"{'':22}{'unrotated':&gt;14}{'varimax':&gt;14}\")\nprint(f\"{'||Lambda Lambda^T||':22}{np.linalg.norm(L @ L.T):14.8f}\"\n      f\"{np.linalg.norm(Lr @ Lr.T):14.8f}\")\nprint(f\"{'sum of communalities':22}{(L**2).sum():14.8f}{(Lr**2).sum():14.8f}\")\nprint(f\"\\nR is orthogonal: ||R'R - I|| = {np.linalg.norm(R.T @ R - np.eye(3)):.2e}\")\nprint(\"\\nIdentical fit. Now the interpretation:\")\ntab = pd.DataFrame(Lr, index=cars.columns)\nfor c in tab.columns:\n    print(f\"  factor {c+1}: {', '.join(tab[c].abs().nlargest(3).index)}\")\n\n\nn = 90, variables = 14, factors = 3\n\n                           unrotated       varimax\n||Lambda Lambda^T||       2.79837923    2.79837923\nsum of communalities      4.56171180    4.56171180\n\nR is orthogonal: ||R'R - I|| = 3.96e-16\n\nIdentical fit. Now the interpretation:\n  factor 1: space_comfort, fuel_type, after_sales_service\n  factor 2: resale_value, maintenance, fuel_efficiency\n  factor 3: testimonials, color, fuel_efficiency\n\n\nTwo solutions, the same fit to eight decimal places, and different stories. If a paper reports rotated loadings without naming the rotation, it has not reported its result.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#introduction-2",
-    "href": "session-07.html#introduction-2",
+    "objectID": "session-07.html#what-you-may-not-call-the-components",
+    "href": "session-07.html#what-you-may-not-call-the-components",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.7 Introduction",
-    "text": "7.7 Introduction\n\n\nGathering data\nPre-processing\nChoosing a model\nTraining the model / K-fold cross-validation\nEvaluation\nHyper-parameter tuning\nOut-of-sample Prediction",
+    "section": "7.7 What you may not call the components",
+    "text": "7.7 What you may not call the components\nA component is a weighted sum of variables that happens to capture variance. It is not a thing, it has no units, and its sign is arbitrary — multiply an eigenvector by \\(-1\\) and it is still an eigenvector, so “high on component 1” can be reversed by a convention in the software.\nThe temptation is to name it anyway. The first component above loads positively on budget, revenue, votes and popularity, so it is tempting to call it commercial success and then to treat that name as a measurement. Three things are wrong with doing so.\nThe name is an interpretation, not a finding. It is your reading of a loading pattern, and a different reader may propose a different name that fits the same numbers.\nNaming invites reification. Once “commercial success” has a column, it gets used in regressions, and its coefficient gets discussed as though the quantity existed independently of the six columns it was built from.\nThe component is sample-specific. Add films, drop a variable, or restrict to one decade, and the loadings move. A named factor should be stable across reasonable perturbations, and that is checkable — refit on resamples and look.\nThe disciplined form is to say what the component is: “the first principal component, which loads positively on all six variables and most strongly on revenue and vote count, and accounts for 47% of the standardised variance”. That sentence is defensible. “A film’s commercial success” is a claim about the world.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#introduction-3",
-    "href": "session-07.html#introduction-3",
+    "objectID": "session-07.html#the-zeros-which-are-not-zeros",
+    "href": "session-07.html#the-zeros-which-are-not-zeros",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.8 Introduction",
-    "text": "7.8 Introduction\n\nQuestionAnswer\n\n\n\nA set of principles that can be applied to regression or classification\n\n\nWhat is the difference between regression and classification models?",
+    "section": "7.8 The zeros, which are not zeros",
+    "text": "7.8 The zeros, which are not zeros\nOne data-quality note, because it changes every number in this chapter and it is invisible in a correlation matrix.\n\n\nRun it: count the zeros\nprint(f\"{'variable':14}{'zeros':&gt;10}{'share':&gt;9}\")\nfor c in movies.columns:\n    z = int((movies[c] == 0).sum())\n    print(f\"{c:14}{z:&gt;10,}{z/len(movies):&gt;9.1%}\")\nprint(f\"\\nrows with budget, revenue and runtime all positive: \"\n      f\"{len(usable):,} of {len(movies):,} ({len(usable)/len(movies):.1%})\")\n\n\nvariable           zeros    share\nbudget            36,323    80.4%\npopularity            60     0.1%\nrevenue           37,801    83.6%\nruntime            1,558     3.4%\nvote_average       2,899     6.4%\nvote_count         2,800     6.2%\n\nrows with budget, revenue and runtime all positive: 5,369 of 45,203 (11.9%)\n\n\nFour out of five films in this dataset have a budget of exactly zero, and five out of six have revenue of exactly zero. No film costs nothing. These are missing values recorded as the number 0 — which arithmetic cannot distinguish from a measurement, so every mean, every correlation and every eigenvalue computed on the full table is contaminated.\nThis is chapter 2’s missingness section arriving with consequences. The correlation matrix on the full data is not a weaker version of the truth; it is a description of a mixture of films and non-observations. Dropping to the 5,369 complete rows is the minimum defensible response, and it is not neutral either: films with recorded budgets are larger, better documented and more recent, so the analysis now describes that subset. Say so.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#introduction-4",
-    "href": "session-07.html#introduction-4",
+    "objectID": "session-07.html#a-short-review-of-the-literature",
+    "href": "session-07.html#a-short-review-of-the-literature",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.9 Introduction",
-    "text": "7.9 Introduction",
+    "section": "7.9 A short review of the literature",
+    "text": "7.9 A short review of the literature\n\nPearson (1901) posed the problem geometrically — the best-fitting line and plane to a cloud of points, minimising perpendicular rather than vertical distance — and Hotelling (1933) supplied the eigen-decomposition and the name. The two papers are worth reading in sequence for how differently the same method looks from a geometric and an algebraic starting point.\nFactor analysis has a separate origin in Spearman (1904), whose argument for a general factor from correlations among school subjects established the model of observed variables as combinations of unobserved ones. The distinction from PCA was blurred almost immediately, and Fabrigar et al. (1999) documents how routinely PCA is reported where the research question was factor-analytic, along with the consequences.\nOn how many to retain, Cattell (1966) introduced the scree test, whose subjectivity is its standard criticism and its visible honesty; Horn (1965) replaced the judgement with a comparison against uncorrelated data of the same dimensions, which is the method used above and still the best available.\nKaiser (1958) gave rotation its dominant criterion. The underlying indeterminacy — that loadings are identified only up to an orthogonal transformation — is not a defect of any method but a property of the model, and it means that the interpretive step is a choice the analyst makes and must disclose.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
   },
   {
-    "objectID": "session-07.html#multivariate-statistics",
-    "href": "session-07.html#multivariate-statistics",
+    "objectID": "session-07.html#what-to-report",
+    "href": "session-07.html#what-to-report",
     "title": "7  Principal Component and Factor Analyses",
-    "section": "7.10 Multivariate statistics",
-    "text": "7.10 Multivariate statistics\n\nVisualDefinitionOptions\n\n\n\n\n\nMultivariate Statistics is a group of statistical methods that focus on studying multiple variables together while focusing on the variation that those variables have in common.\n\nDefinition: Multivariate Statistics deals with the treatment of data sets with a large number of dimensions.\n\nIts goals are therefore different from supervised modeling, but also different from segmentation and clustering models.\n\n\nThere are many models in the family of Multivariate Statistics.\n\n\nPCA\n\n\n\n\nFactor Analysis",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#principal-component-analysis",
-    "href": "session-07.html#principal-component-analysis",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.11 Principal Component Analysis",
-    "text": "7.11 Principal Component Analysis",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#principal-component-analysis-1",
-    "href": "session-07.html#principal-component-analysis-1",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.12 Principal Component Analysis",
-    "text": "7.12 Principal Component Analysis\nInteresting book: https://shainarace.github.io/LinearAlgebra/pca.html",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#principal-component-analysis-2",
-    "href": "session-07.html#principal-component-analysis-2",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.13 Principal Component Analysis",
-    "text": "7.13 Principal Component Analysis\n\nIssuesSolution\n\n\n\nModern datasets often have a very large number of variables. This makes it difficult to inspect each of the variables individually, due to the practical fact that the human mind cannot easily digest data on such a large scale.\nWhen a dataset contains a large number of variables, there is often a serious amount of overlap between those variables.\nThe components that are found by PCA are ordered from the highest information content to the lowest information content.\n\n\n\nPCA is a statistical method that allows you to “regroup” your variables into a smaller number of variables, called components.\nThis regrouping is done based on variation that is common to multiple variables.",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#principal-component-analysis-3",
-    "href": "session-07.html#principal-component-analysis-3",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.14 Principal Component Analysis",
-    "text": "7.14 Principal Component Analysis\n\nGoalVisuals\n\n\nThe goal of PCA is to regroup variables in such a way that the first (newly created) component contains a maximum of variation.\n\nThe second component contains the second-largest amount of variation, etc.\n\nThe last component logically contains the smallest amount of variation.\nThanks to this ordering of components, it is made possible to retain only a few of the newly created components, while still retaining a maximum amount of variation.\n\nWe can then use the components rather than the original variables for data exploration.\n\n\n\n\n\n\n\n\n\n\n\n\n\nVarianceHyperplanes\n\n\n\nThe mathematical definition of the PCA problem is to find a linear combination of the original variables with maximum variance.\nThis means that we are going to create a (new) component. Let’s call it \\(z\\). This z is going to be computed based on our original variables \\((X_1, X_2, ...)\\) multiplied by a weight for each of our variables \\((u_1, u_2, ...)\\).\nThis can be written as \\(z = Xu\\).\n[We apply it to cross-section data. For time-series cross-section data, we can use the superPCA package. Not exam material!]",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#mathematical-model-maximize-variance-of-the-new-components",
-    "href": "session-07.html#mathematical-model-maximize-variance-of-the-new-components",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.15 Mathematical Model — Maximize variance of the new components",
-    "text": "7.15 Mathematical Model — Maximize variance of the new components\n\nGoalConditions\n\n\nThe mathematical goal is to find the values for \\(u\\) that will maximize the variance of \\(z\\), with a constraint of unit length on \\(u\\).\n\nThis problem is mathematically called a constrained optimization using Lagrange Multiplier, but in practice, we use computers to do the whole PCA operation at once.\n\nThis can also be described as applying matrix decomposition to the correlation matrix of the original variables.\nPCA is efficient in finding the components that maximize variance.\nThis is great if we are interested in reducing the number of variables while keeping a maximum of variance.\n\n\nSometimes, however, we are not purely interested in maximizing variance: we might want to give the most useful interpretations to our newly defined dimensions.\nAnd this is not always easiest with the solution found by a PCA.\n\nWe can then apply Factor Analysis: an alternative to PCA that has a little bit more flexibility.\n\n\nPCA only works with numeric data\nCategorical data must be encoded as numeric data (e.g. \"one-hot encoding techniques\" = creating dummies from factors, see fastDummies package in R)\nNumeric data must be scaled (otherwise your PCA will be misleading)",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#the-netflixs-recommender-system-through-a-pca",
-    "href": "session-07.html#the-netflixs-recommender-system-through-a-pca",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.16 The Netflix's Recommender System through a PCA",
-    "text": "7.16 The Netflix's Recommender System through a PCA",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#netflixs-recommender-system",
-    "href": "session-07.html#netflixs-recommender-system",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.17 Netflix's Recommender System",
-    "text": "7.17 Netflix's Recommender System\nThese files contain metadata for all 45,000 movies listed in the Full MovieLens Dataset. The dataset consists of movies released on or before July 2017.\nData points include cast, crew, plot keywords, budget, revenue, posters, release dates, languages, production companies, countries, TMDB vote counts and vote averages.\n# In the VS Codium terminal, with .venv active:\n#   pip install scikit-learn prince\nimport qmib\nimport numpy as np\nimport pandas as pd\nStep 1: Collecting the data\n\nCodeOutput\n\n\nmovies = qmib.load(\"movies\")\n\n# Keep the numeric columns and drop rows with holes\ndf = movies[[\"budget\", \"popularity\", \"revenue\", \"runtime\",\n             \"vote_average\", \"vote_count\"]].dropna()\ndf.head()\n\n\n## # A tibble: 6 × 6\n##     budget popularity   revenue runtime vote_average vote_count\n##      &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;\n## 1 30000000      21.9  373554033      81          7.7       5415\n## 2 65000000      17.0  262797249     104          6.9       2413\n## 3        0      11.7          0     101          6.5         92\n## 4 16000000       3.86  81452156     127          6.1         34\n## 5        0       8.39  76578911     106          5.7        173\n## 6 60000000      17.9  187436818     170          7.7       1886",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#netflixs-recommender-system-1",
-    "href": "session-07.html#netflixs-recommender-system-1",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.18 Netflix's Recommender System",
-    "text": "7.18 Netflix's Recommender System\nStep 2: Computing the principal components\nfrom sklearn.decomposition import PCA\nfrom sklearn.preprocessing import StandardScaler\n\n# PCA is scale-dependent: standardise first, always.\nZ = StandardScaler().fit_transform(df)\nres_pca = PCA().fit(Z)\nExtract eigenvalues/variances:\n# Eigenvalues and the variance each component explains\neig = pd.DataFrame({\n    \"eigenvalue\": res_pca.explained_variance_,\n    \"pct_variance\": res_pca.explained_variance_ratio_ * 100,\n    \"cumulative_pct\": np.cumsum(res_pca.explained_variance_ratio_) * 100,\n}, index=[f\"PC{i+1}\" for i in range(len(res_pca.explained_variance_))])\nprint(eig.round(2))\n##       eigenvalue variance.percent cumulative.variance.percent\n## Dim.1  2.9648202        49.413669                    49.41367\n## Dim.2  1.1123203        18.538672                    67.95234\n## Dim.3  0.8495029        14.158382                    82.11072\n## Dim.4  0.5969400         9.949000                    92.05972\n## Dim.5  0.3121479         5.202466                    97.26219\n## Dim.6  0.1642686         2.737811                   100.00000\n\nCodeOutput\n\n\nimport matplotlib.pyplot as plt\n\n# Scree plot: where does the curve flatten?\nplt.bar(range(1, len(res_pca.explained_variance_ratio_) + 1),\n        res_pca.explained_variance_ratio_ * 100)\nplt.xlabel(\"Component\"); plt.ylabel(\"% of variance\")\nplt.show()",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#netflixs-recommender-system-2",
-    "href": "session-07.html#netflixs-recommender-system-2",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.19 Netflix's recommender System",
-    "text": "7.19 Netflix's recommender System\nStep 3: Which variables contribute to the principal components?\nExtract the results for variables\n# The loadings: how each variable relates to each component\nloadings = pd.DataFrame(\n    res_pca.components_.T * np.sqrt(res_pca.explained_variance_),\n    index=df.columns, columns=[f\"PC{i+1}\" for i in range(res_pca.n_components_)])\nprint(loadings.round(3))\n## Principal Component Analysis Results for variables\n##  ===================================================\n##   Name       Description                                    \n## 1 \"$coord\"   \"Coordinates for the variables\"                \n## 2 \"$cor\"     \"Correlations between variables and dimensions\"\n## 3 \"$cos2\"    \"Cos2 for the variables\"                       \n## 4 \"$contrib\" \"contributions of the variables\"\n\nCoordinatesContributions\n\n\n# Coordinates of the variables on the first two components\nprint(loadings[[\"PC1\", \"PC2\"]].round(3))\n##                  Dim.1       Dim.2       Dim.3        Dim.4       Dim.5\n## budget       0.8522103 -0.13304377  0.07422541 -0.271273387  0.40273289\n## popularity   0.7161100  0.06520202 -0.10264410  0.678737307  0.10574635\n## revenue      0.9098097 -0.16064597  0.01395941 -0.190795959 -0.10578536\n## runtime      0.2218354  0.70334681  0.67473039 -0.004130231 -0.02787541\n## vote_average 0.2012077  0.74767729 -0.61399549 -0.152273281  0.01639361\n## vote_count   0.8990523 -0.10413067 -0.03180020 -0.055309149 -0.35571834\n\n\n# Contribution of each variable to each component, in percent\ncontrib = (loadings ** 2)\ncontrib = contrib / contrib.sum() * 100\nprint(contrib.round(2))\n##                  Dim.1      Dim.2       Dim.3        Dim.4      Dim.5\n## budget       24.496003  1.5913261  0.64854535 12.327746737 51.9605486\n## popularity   17.296617  0.3822014  1.24023256 77.174311867  3.5823690\n## revenue      27.919188  2.3201164  0.02293871  6.098284291  3.5850123\n## runtime       1.659829 44.4743043 53.59147040  0.002857709  0.2489328\n## vote_average  1.365497 50.2572249 44.37777244  3.884335489  0.0860971\n## vote_count   27.262866  0.9748269  0.11904054  0.512463908 40.5370401\n\n\n\n\nCodeOutput\n\n\n# Variable plot: arrows on the unit circle, coloured by contribution\nfig, ax = plt.subplots(figsize=(5.5, 5.5))\nfor name, (x, y) in loadings[[\"PC1\", \"PC2\"]].iterrows():\n    ax.arrow(0, 0, x, y, head_width=.02, color=\"#356B8C\")\n    ax.text(x * 1.08, y * 1.08, name, fontsize=9)\nax.add_patch(plt.Circle((0, 0), 1, fill=False, color=\"#B8C0CA\"))\nax.set_xlim(-1.1, 1.1); ax.set_ylim(-1.1, 1.1)\nax.set_xlabel(\"PC1\"); ax.set_ylabel(\"PC2\")\nplt.show()\n\n\n\n\n\n\n\nCodeOutput\n\n\ncontrib[\"PC1\"].sort_values(ascending=False).head(10).plot.bar()\nplt.ylabel(\"% contribution to PC1\"); plt.show()\n\n\n\n\n\n\n\nCodeOutput\n\n\ncontrib[\"PC2\"].sort_values(ascending=False).head(10).plot.bar()\nplt.ylabel(\"% contribution to PC2\"); plt.show()\n\n\n\n\n\n\nStep 4: Which \"variables\"individuals\" contribute to the principal components?\n\nResults for individualsCoordinates for individuals\n\n\n# The scores: where each film sits in the new coordinate system\nscores = pd.DataFrame(res_pca.transform(Z)[:, :5],\n                      columns=[f\"PC{i+1}\" for i in range(5)])\nscores.describe().round(3)\n## Principal Component Analysis Results for individuals\n##  ===================================================\n##   Name       Description                       \n## 1 \"$coord\"   \"Coordinates for the individuals\" \n## 2 \"$cos2\"    \"Cos2 for the individuals\"        \n## 3 \"$contrib\" \"contributions of the individuals\"\n\n\nscores.head().round(3)\n##        Dim.1      Dim.2       Dim.3      Dim.4      Dim.5\n## 1 10.7468471 -1.3765037 -1.49270196 -0.1115660 -6.2270208\n## 2  7.3279480 -0.7093316 -0.33807210 -0.5969450 -0.7600249\n## 3  0.4544490  0.5957983 -0.35789264  1.3256214  0.1630035\n## 4  1.0356193  0.5232758  0.52046056 -0.4126039  0.3728671\n## 5  0.9074839  0.1562641  0.08868175  0.6146029 -0.2909026\n## 6  6.3403964  1.0646766  0.62588178 -0.0882128 -0.1072013\n\n\n\n\nCode\n# Individuals plotted on the first two components\nplt.scatter(scores[\"PC1\"], scores[\"PC2\"], s=4, alpha=.3)\nplt.xlabel(\"PC1\"); plt.ylabel(\"PC2\")\nplt.show()\n\n\nOutput\n\n\n\nCode\n# Biplot: individuals as points, variables as arrows\nfig, ax = plt.subplots(figsize=(6.5, 5.5))\nax.scatter(scores[\"PC1\"], scores[\"PC2\"], s=4, alpha=.2)\nscale = 4\nfor name, (x, y) in loadings[[\"PC1\", \"PC2\"]].iterrows():\n    ax.arrow(0, 0, x * scale, y * scale, head_width=.08, color=\"#E3120B\")\n    ax.text(x * scale * 1.1, y * scale * 1.1, name, fontsize=9, color=\"#E3120B\")\nax.set_xlabel(\"PC1\"); ax.set_ylabel(\"PC2\")\nplt.show()\n\n\nOutput",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis",
-    "href": "session-07.html#factor-analysis",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.20 Factor analysis",
-    "text": "7.20 Factor analysis",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-1",
-    "href": "session-07.html#factor-analysis-1",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.21 Factor analysis",
-    "text": "7.21 Factor analysis\n\nVisualDefinitionCommon Factor Model\n\n\n\n\n\nJust like PCA, Factor Analysis is also a model that allows reducing information in a larger number of variables into a smaller number of variables. In Factor Analysis we call those latent variables.\n\nDefinition: Factor Analysis tries to find latent variables that make sense to us. We can rotate the solution until we find latent variables that have a clear interpretation and “make sense”.\n\nFactor Analysis is based on a model called the common factor model. It starts from the principle that there a certain number of factors in a data set, and that each of the measured variables captures a part of one or more of those factors.\n\n\nWe could imagine having students who are overall good in languages, but bad in technical subjects. In this case, we could try to find a latent variable for language ability and a second latent variable for technical ability.\nWe now have latent variables that measure the general ability of a student for Language and Technical subjects. But it would still be possible that some students are great at languages overall, but that they are just bad at German.\nThis is why the Common Factor Model has specific factors: they measure the impact of one specific measured variable on the measured variable.\n\nWe could describe it as “Ability for learning German while taking into account the general ability for learning languages”.\n\n\n\n\n\nLatent variablesMathematics\n\n\nWhere the PCA model is more of a pragmatic approach, in Factor Analysis we are hypothesizing that latent variables exist.\nIn a case with two latent variables, we can compute our original variables \\(X\\) by attributing one part of its variation to our first common latent variable (let’s call it \\(k_1\\)), part to the second common latent variable (\\(k_2\\)), and part to a specific factor (specific to this variable; called \\(d\\)).\n\n\nIn a case with 4 original variables, the Factor Analysis model would be as follows:\n$$X_1 = c_{11} * k_1 + c_{12} * k_2 + d_1$$\n$$X_2 = c_{21} * k_1 + c_{22} * k_2 + d_2$$\n$$X_3 = c_{31} * k_1 + c_{32} * k_2 + d_3$$\n$$X_4 = c_{41} * k_1 + c_{42} * k_2 + d_4$$\n\\(c\\) are each coefficient of the coefficient matrix, which are the values that we need to estimate.",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#two-examples-the-wine-data-and-the-cars-questionnaire",
-    "href": "session-07.html#two-examples-the-wine-data-and-the-cars-questionnaire",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.22 Two examples : the wine data and the cars questionnaire",
-    "text": "7.22 Two examples : the wine data and the cars questionnaire",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#famd-the-wine-data",
-    "href": "session-07.html#famd-the-wine-data",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.23 FAMD: the wine data",
-    "text": "7.23 FAMD: the wine data",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#famd-the-wine-data-1",
-    "href": "session-07.html#famd-the-wine-data-1",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.24 FAMD: the wine data",
-    "text": "7.24 FAMD: the wine data\n\nCodeOutput\n\n\n# FAMD — factor analysis of mixed (numeric and categorical) data.\n#   pip install prince\nimport prince\n\nwine = qmib.load(\"redwines\")\nwine[\"quality_label\"] = np.where(wine[\"good\"] == 1, \"good\", \"ordinary\")\n\nfamd = prince.FAMD(n_components=5, random_state=0).fit(wine)\n\n\n##           Label      Soil Odor.Intensity.before.shaking\n## 2EL      Saumur      Env1                         3.074\n## 1CHA     Saumur      Env1                         2.964\n## 1FON Bourgueuil      Env1                         2.857\n## 1VAU     Chinon      Env2                         2.808\n## 1DAM     Saumur Reference                         3.607\n## 2BOU Bourgueuil Reference                         2.857\n##      Aroma.quality.before.shaking Fruity.before.shaking Flower.before.shaking\n## 2EL                         3.000                 2.714                 2.280\n## 1CHA                        2.821                 2.375                 2.280\n## 1FON                        2.929                 2.560                 1.960\n## 1VAU                        2.593                 2.417                 1.913\n## 1DAM                        3.429                 3.154                 2.154\n## 2BOU                        3.111                 2.577                 2.040\n##      Spice.before.shaking Visual.intensity Nuance Surface.feeling\n## 2EL                 1.960            4.321  4.000           3.269\n## 1CHA                1.680            3.222  3.000           2.808\n## 1FON                2.077            3.536  3.393           3.000\n## 1VAU                2.160            2.893  2.786           2.538\n## 1DAM                2.040            4.393  4.036           3.385\n## 2BOU                2.077            4.464  4.259           3.407\n##      Odor.Intensity Quality.of.odour Fruity Flower Spice Plante Phenolic\n## 2EL           3.407            3.308  2.885  2.320 1.840  2.000    1.650\n## 1CHA          3.370            3.000  2.560  2.440 1.739  2.000    1.381\n## 1FON          3.250            2.929  2.769  2.192 2.250  1.750    1.250\n## 1VAU          3.160            2.880  2.391  2.083 2.167  2.304    1.476\n## 1DAM          3.536            3.360  3.160  2.231 2.148  1.762    1.600\n## 2BOU          3.179            3.385  2.800  2.240 2.148  1.750    1.476\n##      Aroma.intensity Aroma.persistency Aroma.quality Attack.intensity Acidity\n## 2EL            3.259             2.963         3.200            2.963   2.107\n## 1CHA           2.962             2.808         2.926            3.036   2.107\n## 1FON           3.077             2.800         3.077            3.222   2.179\n## 1VAU           2.542             2.583         2.478            2.704   3.179\n## 1DAM           3.615             3.296         3.462            3.464   2.571\n## 2BOU           3.214             3.148         3.321            3.286   2.393\n##      Astringency Alcohol Balance Smooth Bitterness Intensity Harmony\n## 2EL        2.429   2.500   3.250  2.731      1.926     2.857   3.143\n## 1CHA       2.179   2.654   2.926  2.500      1.926     2.893   2.964\n## 1FON       2.250   2.643   3.321  2.679      2.000     3.074   3.143\n## 1VAU       2.185   2.500   2.333  1.680      1.963     2.462   2.038\n## 1DAM       2.536   2.786   3.464  3.036      2.071     3.643   3.643\n## 2BOU       2.643   2.857   3.286  2.857      2.179     3.464   3.500\n##      Overall.quality Typical\n## 2EL            3.393   3.250\n## 1CHA           3.214   3.036\n## 1FON           3.536   3.179\n## 1VAU           2.464   2.250\n## 1DAM           3.741   3.444\n## 2BOU           3.643   3.393\n\n\n\n\nCodeOutput\n\n\n# Eigenvalues of the FAMD dimensions\nprint(famd.eigenvalues_summary)\n\n\n\n\n\n\n\nCodeOutput\n\n\n# Variable coordinates\nprint(famd.column_coordinates_(wine).round(3).head(12))\n\n\n\n\n\n\n\nCodeOutput\n\n\n# Just the quantitative variables\nnum_cols = [c for c in wine.columns if c not in (\"quality_label\",)]\nprint(famd.column_coordinates_(wine).loc[num_cols].round(3))\n\n\n\n\n\n\n\nCodeOutput\n\n\n# Just the qualitative variable\nprint(famd.column_coordinates_(wine).drop(index=num_cols).round(3))\n\n\n\n\n\n\n\nCodeOutput\n\n\n# Individuals, coloured by how well they are represented\ncoords = famd.row_coordinates(wine)\nplt.scatter(coords[0], coords[1], s=6, alpha=.35,\n            c=wine[\"good\"], cmap=\"RdYlBu_r\")\nplt.xlabel(\"Dim 1\"); plt.ylabel(\"Dim 2\")\nplt.show()",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-for-questionnaires",
-    "href": "session-07.html#factor-analysis-for-questionnaires",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.25 Factor Analysis for Questionnaires",
-    "text": "7.25 Factor Analysis for Questionnaires",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-for-questionnaires-1",
-    "href": "session-07.html#factor-analysis-for-questionnaires-1",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.26 Factor Analysis for Questionnaires",
-    "text": "7.26 Factor Analysis for Questionnaires\n# Exploratory factor analysis\n#   pip install factor_analyzer\nfrom factor_analyzer import FactorAnalyzer\n\ndata = qmib.load(\"efa\")\ndata.head()\n## # A tibble: 6 × 14\n##   Price Safety Exterior_Looks Space_comfort Technology After_Sales_Service\n##   &lt;dbl&gt;  &lt;dbl&gt;          &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;               &lt;dbl&gt;\n## 1     4      4              5             4          3                   4\n## 2     3      5              3             3          4                   4\n## 3     4      4              3             4          5                   5\n## 4     4      4              4             3          3                   4\n## 5     5      5              4             4          5                   4\n## 6     4      4              5             3          4                   5\n## # ℹ 8 more variables: Resale_Value &lt;dbl&gt;, Fuel_Type &lt;dbl&gt;,\n## #   Fuel_Efficiency &lt;dbl&gt;, Color &lt;dbl&gt;, Maintenance &lt;dbl&gt;, Test_drive &lt;dbl&gt;,\n## #   Product_reviews &lt;dbl&gt;, Testimonials &lt;dbl&gt;",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-for-questionnaires-2",
-    "href": "session-07.html#factor-analysis-for-questionnaires-2",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.27 Factor Analysis for Questionnaires",
-    "text": "7.27 Factor Analysis for Questionnaires\n\nCodeOutput\n\n\n# How many factors? A scree plot of the eigenvalues.\nfa = FactorAnalyzer(rotation=None).fit(data)\nev, _ = fa.get_eigenvalues()\nplt.plot(range(1, len(ev) + 1), ev, \"o-\")\nplt.axhline(1, color=\"red\", ls=\"--\")   # Kaiser criterion\nplt.xlabel(\"Factor\"); plt.ylabel(\"Eigenvalue\")\nplt.show()\n\n\n\n## Parallel analysis suggests that the number of factors =  4  and the number of components =  NA\n\n\n\n\nCodeOutput\n\n\nthreefactor = FactorAnalyzer(n_factors=3, rotation=\"oblimin\", method=\"minres\").fit(data)\nloadings3 = pd.DataFrame(threefactor.loadings_, index=data.columns,\n                         columns=[\"MR1\", \"MR2\", \"MR3\"])\nprint(loadings3.round(3))\n\n\n## \n## Loadings:\n##                     MR1    MR2    MR3   \n## Price                0.444              \n## Safety                      0.311       \n## Exterior_Looks                          \n## Space_comfort               0.832       \n## Technology                  0.342       \n## After_Sales_Service         0.460       \n## Resale_Value         0.599              \n## Fuel_Type                   0.573       \n## Fuel_Efficiency      0.655              \n## Color                0.464              \n## Maintenance          0.668              \n## Test_drive                         0.328\n## Product_reviews      0.424              \n## Testimonials                       0.742\n## \n##                  MR1   MR2   MR3\n## SS loadings    2.015 1.605 0.972\n## Proportion Var 0.144 0.115 0.069\n## Cumulative Var 0.144 0.259 0.328\n\n\n\n\nCodeOutput\n\n\nfourfactor = FactorAnalyzer(n_factors=4, rotation=\"oblimin\", method=\"minres\").fit(data)\nloadings4 = pd.DataFrame(fourfactor.loadings_, index=data.columns,\n                         columns=[\"MR1\", \"MR2\", \"MR3\", \"MR4\"])\n\n# Hide the small loadings so the structure is readable\nprint(loadings4.round(3).where(loadings4.abs() &gt; 0.3, \"\"))\n\n\n## Factor Analysis using method =  minres\n## Call: fa(r = data, nfactors = 4, rotate = \"oblimin\", fm = \"minres\")\n## Standardized loadings (pattern matrix) based upon correlation matrix\n##                       MR1   MR2   MR4   MR3   h2   u2 com\n## Price                0.54  0.12 -0.08 -0.05 0.30 0.70 1.2\n## Safety              -0.33  0.36  0.11 -0.25 0.23 0.77 3.0\n## Exterior_Looks       0.12  0.07 -0.55  0.28 0.34 0.66 1.6\n## Space_comfort       -0.04  0.78 -0.13  0.08 0.67 0.33 1.1\n## Technology           0.01  0.36  0.06  0.02 0.13 0.87 1.1\n## After_Sales_Service  0.10  0.54  0.18 -0.05 0.33 0.67 1.3\n## Resale_Value         0.73 -0.14 -0.02 -0.16 0.57 0.43 1.2\n## Fuel_Type            0.01  0.57 -0.01 -0.12 0.32 0.68 1.1\n## Fuel_Efficiency      0.43  0.23  0.31  0.16 0.47 0.53 2.7\n## Color                0.07 -0.06  0.73  0.13 0.61 0.39 1.1\n## Maintenance          0.56  0.08  0.21  0.01 0.44 0.56 1.3\n## Test_drive           0.11  0.16  0.01  0.36 0.20 0.80 1.6\n## Product_reviews      0.34  0.15  0.05  0.36 0.32 0.68 2.4\n## Testimonials        -0.19 -0.01  0.06  0.68 0.51 0.49 1.2\n## \n##                        MR1  MR2  MR4  MR3\n## SS loadings           1.69 1.65 1.10 0.98\n## Proportion Var        0.12 0.12 0.08 0.07\n## Cumulative Var        0.12 0.24 0.32 0.39\n## Proportion Explained  0.31 0.30 0.20 0.18\n## Cumulative Proportion 0.31 0.62 0.82 1.00\n## \n##  With factor correlations of \n##      MR1   MR2   MR4  MR3\n## MR1 1.00  0.05  0.27 0.00\n## MR2 0.05  1.00 -0.02 0.21\n## MR4 0.27 -0.02  1.00 0.12\n## MR3 0.00  0.21  0.12 1.00\n## \n## Mean item complexity =  1.6\n## Test of the hypothesis that 4 factors are sufficient.\n## \n## df null model =  91  with the objective function =  2.97 0.3 with Chi Square =  247.71\n## df of  the model are 41  and the objective function was  0.57 \n##  0.3\n## The root mean square of the residuals (RMSR) is  0.05 \n## The df corrected root mean square of the residuals is  0.07 \n##  0.3\n## The harmonic n.obs is  90 with the empirical chi square  38.46  with prob &lt;  0.58 \n##  0.3The total n.obs was  90  with Likelihood Chi Square =  46.2  with prob &lt;  0.27 \n##  0.3\n## Tucker Lewis Index of factoring reliability =  0.922\n## RMSEA index =  0.036  and the 90 % confidence intervals are  0 0.085 0.3\n## BIC =  -138.29\n## Fit based upon off diagonal values = 0.94\n## Measures of factor score adequacy             \n##                                                    MR1  MR2  MR4  MR3\n## Correlation of (regression) scores with factors   0.87 0.88 0.84 0.80\n## Multiple R square of scores with factors          0.76 0.77 0.70 0.64\n## Minimum correlation of possible factor scores     0.51 0.55 0.40 0.28",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-for-questionnaires-3",
-    "href": "session-07.html#factor-analysis-for-questionnaires-3",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.28 Factor Analysis for Questionnaires",
-    "text": "7.28 Factor Analysis for Questionnaires\n\nCodeOutput\n\n\n# The same loadings, read as a diagram: each item under the factor it loads on\nfor j, col in enumerate(loadings4.columns):\n    items = loadings4.index[loadings4[col].abs() &gt; 0.3].tolist()\n    print(f\"{col}: \" + \", \".join(items))",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#factor-analysis-for-questionnaires-4",
-    "href": "session-07.html#factor-analysis-for-questionnaires-4",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.29 Factor Analysis for Questionnaires",
-    "text": "7.29 Factor Analysis for Questionnaires\n\n\n\n\nNaming the factors:\nMR1 = Economic value\nMR2 = Functional benefits\nMR3 = Credibility\nMR4 = Aesthetics",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#when-to-use-pca-and-when-to-use-factor-analysis",
-    "href": "session-07.html#when-to-use-pca-and-when-to-use-factor-analysis",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.30 When to use PCA and when to use Factor Analysis?",
-    "text": "7.30 When to use PCA and when to use Factor Analysis?\n\nPCA vs FAFA vs PCA\n\n\n\nPCA allows us to find the components that contain the maximum amount of information in fewer variables. This makes it a great tool for dimension reduction.\nPCA on the other hand is used in cases where we want to retain the largest amount of variation in the smallest number of variables possible.\n\n\nPCA is much used in data preparation for Machine Learning tasks, where we want to help the Machine Learning model by already “summarising” the data in an easier to digest form.\n\n\n\n\nThen as a consequence, the mathematics behind the two methods are, while close to each other, not exactly the same. Although both methods use decomposition, they differ in the details.\nThis also causes the fact that Factor Analysis has an additional possibility for rotation of the final solution, while PCA does not. Different Applications\nAs Factor Analysis is more flexible for interpretation, due to the possibility of rotation of the solution, it is very valuable in studies for marketing and psychology.\n\nPCA’s advantage is that it allows for dimension reduction while still keeping a maximum amount of information in a data set. This is often used to simplify exploratory analyses or to prepare data for Machine Learning pipelines.",
-    "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
-    ]
-  },
-  {
-    "objectID": "session-07.html#in-the-practice",
-    "href": "session-07.html#in-the-practice",
-    "title": "7  Principal Component and Factor Analyses",
-    "section": "7.31 In the practice",
-    "text": "7.31 In the practice\n\n7.31.1 Principal Component and Factor Analyses\n\nOpen the practice slides · source: MATH60033A-S07-Practice.qmd\n\n\n\n7.31.1.1 The theme of this session\n\n8 How many distinct dimensions does your angle really have?\n\nAll ten groups attack this question, each on its own project, and the last twenty minutes assemble the answers.\n\n\n\n8.0.0.1 What you are doing\nThe lecture showed the method on the session’s dataset. You now apply it to your own angle, and to the question your group is actually trying to answer (RESEARCH-MANDATES.md).\nThe deliverable is not a printout. It is a decision, with the reason written down.\n\n\n\n8.0.0.2 Before you start\nEveryone in the group pushes at least once this session. Replace XX with your group number — group 07 uses group-07.\ngit checkout -b group-XX\nmkdir -p 07-pca-and-factor-analysis/02-practice/submissions/group-XX\n\n\n\n8.0.0.3 1 · Reproduce one result from the paper — 20 min\nTake the result the pre-session reading rests on, and reproduce it — or establish that you cannot, and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one that is not attempted earns none.\nThe paper is Koopman & Mesters (2017), Empirical Bayes Methods for Dynamic Factor Models, and its replication package (10.7910/DVN/NKWMQM) should already be unzipped at:\n07-pca-and-factor-analysis/data/replication/\nThe session’s own dataset, for comparison:\nimport qmib\ndata = qmib.load(\"movies\")\n\n\n\n8.0.0.4 2 · Apply the method to your own angle — 35 min\ncore = qmib.load(\"core\")\nmine = qmib.load(\"angle_c_country\")     # your angle — see your dictionary\ndf   = core.merge(mine, on=[\"geo\", \"time\"], how=\"inner\")\nFit the session’s method on your own data. Report what the lecture said to report, in the units of your own variables.\n\n\n\n8.0.0.5 3 · Break one assumption — 15 min\nEvery method in this course rests on something. Find the assumption this one rests on hardest, break it deliberately, and record what happened to your answer. This is the part that carries the marks.\n\n\n\n8.0.0.6 4 · Write it down — 20 min\nA 250-word note in your submissions folder:\n\nWhat you found, in units\nWhich assumption you broke, and what it did\nWhat this result does not license you to claim\n\n\n\n\n8.0.0.7 Submitting\ngit add 07-pca-and-factor-analysis/02-practice/submissions/group-XX\ngit commit -m \"Session 07 practice — group XX\"\ngit push -u origin group-XX\nEveryone pushes at least once. The log is the record of participation.\n\n\n\n8.0.0.8 What loses marks\n\nRunning PCA on unstandardised columns\nRetaining components by a rule you did not state\nNaming a component (“this is competitiveness”) with no rotation caveat\nReporting variance explained as though it measured correctness\n\n\n&lt;- The lecture · Session 07 overview",
+    "section": "7.10 What to report",
+    "text": "7.10 What to report\n\nThat the inputs were standardised, and on what matrix the decomposition was performed. Without it the result is a ranking of measurement units.\nThe full eigenvalue spectrum, not only the retained ones, and the cumulative variance.\nHow many components you kept and by what rule — with parallel analysis if you can, and the scree plot either way so the reader can disagree.\nLoadings, with the rotation named. Unrotated, varimax, oblimin: they fit identically and mean different things.\nCommunalities, if the model is factor analysis. A variable the factors do not explain should be discussed, not silently retained.\nThe description rather than the name. What the component loads on, and how much variance it carries. If you must give it a label, mark it as a label.\nWhat the components are not. They are not measurements, they have arbitrary sign, they are specific to this sample and these variables, and a regression using them as predictors inherits all of that.\n\n\n\n\n\nCattell, Raymond B. 1966. “The Scree Test For The Number Of Factors.” Multivariate Behavioral Research 1 (2): 245–76. https://doi.org/10.1207/s15327906mbr0102_10.\n\n\nFabrigar, Leandre R., Duane T. Wegener, Robert C. MacCallum, and Erin J. Strahan. 1999. “Evaluating the Use of Exploratory Factor Analysis in Psychological Research.” Psychological Methods 4 (3): 272–99. https://doi.org/10.1037/1082-989X.4.3.272.\n\n\nHorn, John L. 1965. “A Rationale and Test for the Number of Factors in Factor Analysis.” Psychometrika 30 (2): 179–85. https://doi.org/10.1007/BF02289447.\n\n\nHotelling, H. 1933. “Analysis of a Complex of Statistical Variables into Principal Components.” Journal of Educational Psychology 24 (6): 417–41. https://doi.org/10.1037/h0071325.\n\n\nKaiser, Henry F. 1958. “The Varimax Criterion for Analytic Rotation in Factor Analysis.” Psychometrika 23 (3): 187–200. https://doi.org/10.1007/BF02289233.\n\n\nPearson, Karl. 1901. “LIII. &lt;I&gt;On Lines and Planes of Closest Fit to Systems of Points in Space&lt;/i&gt;.” The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science 2 (11): 559–72. https://doi.org/10.1080/14786440109462720.\n\n\nSpearman, C. 1904. “\"General Intelligence,\" Objectively Determined and Measured.” The American Journal of Psychology 15 (2): 201. https://doi.org/10.2307/1412107.",
     "crumbs": [
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>Principal Component and Factor Analyses</span>"
     ]
