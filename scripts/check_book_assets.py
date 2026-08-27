@@ -35,9 +35,14 @@ def local_refs(html):
         target = m.group(1) or m.group(3)
         if not target:
             continue
-        if target.startswith(("http://", "https://", "//", "data:", "#", "mailto:")):
+        if target.startswith(("//", "#")):
             continue
-        yield unquote(urlparse(target).path)
+        parsed = urlparse(target)
+        # Anything with a scheme is somebody else's problem: http, data,
+        # mailto, and javascript:void(0) from Quarto's own code toggle.
+        if parsed.scheme:
+            continue
+        yield unquote(parsed.path)
 
 
 def main():

@@ -604,9 +604,18 @@ Source: [github.com/warint/quantitative-methods](https://github.com/warint/quant
 def setup_page():
     a = ROOT / "01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md"
     b = ROOT / "02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md"
-    body = ['---\ntitle: "Setting up your tools"\n---\n',
-            "::: {.warn}\nBudget **60–90 minutes for the first half, before Session 1**, and "
-            "**45 minutes for git, before Session 2**. Installation time is not class time.\n:::\n"]
+    body = ['---\ntitle: "Setting up your tools"\n---\n']
+
+    # The rationale comes before the instructions: a reader is owed the reason
+    # for an hour of installation before being asked to spend it.
+    why = ROOT / "TOOLCHAIN.md"
+    if why.exists():
+        text = strip_frontmatter(why.read_text(encoding="utf-8"))
+        body.append(re.sub(r"^#\s+.*\n", "", text, count=1).strip() + "\n")
+
+    body.append("## Doing it\n\n::: {.warn}\nBudget **60–90 minutes for the first half, "
+                "before Session 1**, and **45 minutes for git, before Session 2**. "
+                "Installation time is not class time.\n:::\n")
     for path, anchor in ((a, "vs-codium-python-and-a-local-model"), (b, "git-and-github")):
         if not path.exists():
             continue
@@ -694,8 +703,6 @@ book:
     right: "Built from the course repository"
   chapters:
     - index.qmd
-    - part: "The twelve chapters"
-      chapters:
 {chapters}
   appendices:
     - setup.qmd
@@ -712,6 +719,12 @@ format:
     toc-depth: 3
     code-copy: true
     code-overflow: wrap
+    code-fold: true
+    code-summary: "Show the code"
+    code-tools:
+      source: false
+      toggle: true
+      caption: "Code"
     link-external-newwindow: true
     df-print: kable
 
@@ -888,6 +901,44 @@ pre code { font-size: 0.86em; }
 
   .csl-entry { margin-bottom: 0.7rem; }
 }
+
+/* ---- From the archive -------------------------------------------------- */
+/* A historical result, and the code that reproduces it on this course's own
+   data. The point is that the history is operational rather than decorative:
+   the reader can run the 1886 finding against 2010s European series. */
+
+.archive {
+  margin: 2rem 0;
+  padding: 1.1rem 1.3rem 0.9rem;
+  border: 1px solid $econ-grid;
+  border-top: 3px solid $econ-gold;
+  background: rgba(212, 154, 0, 0.04);
+
+  > p:first-child { margin-top: 0; }
+  > p:last-child  { margin-bottom: 0; }
+
+  .archive-label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: $econ-gold;
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+  }
+}
+
+/* The fold affordance should read as an invitation, not as a warning. */
+details.code-fold {
+  > summary {
+    color: $econ-blue;
+    font-size: 0.88rem;
+    padding: 0.15rem 0;
+    cursor: pointer;
+
+    &:hover { color: $econ-teal; }
+  }
+}
 """
 
 
@@ -940,7 +991,7 @@ def main():
     chapters = []
     for num, s in ordered():
         (BOOK / f"session-{num}.qmd").write_text(chapter(num, s), encoding="utf-8")
-        chapters.append(f"        - session-{num}.qmd")
+        chapters.append(f"    - session-{num}.qmd")
         print(f"  session-{num}.qmd")
 
     (BOOK / "_quarto.yml").write_text(

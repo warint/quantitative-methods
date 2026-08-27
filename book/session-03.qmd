@@ -2,21 +2,6 @@
 title: "Regression: Adequacy, Validity, and Robustness"
 ---
 
-::: {.chapter-meta}
-[Lecture slides](https://warint.github.io/quantitative-methods/session-03-lecture.html) · [Pre-session slides](https://warint.github.io/quantitative-methods/session-03-pre-session.html) · [Practice slides](https://warint.github.io/quantitative-methods/session-03-practice.html)
-:::
-
-> **You have fitted a regression. Can it be trusted?**
-
-
-| | |
-|---|---|
-| **Theme of the practice** | Which model would survive a referee? |
-| **Reading** | Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity* · [article](https://doi.org/10.1080/00103624.2024.2336573) |
-| **Replication package** | [10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP) |
-| **Data** | `qmib.load("core")` — the same regression Session 02 fitted — GDP per capita on productivity |
-
-
 ## The line, and where it came from
 
 Adrien-Marie Legendre published the method of least squares in 1805, in an
@@ -97,6 +82,74 @@ The name stuck to the statistical method he had used to find it, which is why a
 technique for fitting conditional means is called by a word that means moving
 backwards.
 
+::: {.archive}
+[From the archive · Galton, 1886]{.archive-label}
+
+Galton's claim was about heredity, but the phenomenon is general and it is not
+a fact about biology: it follows from the arithmetic of an imperfect
+correlation. Whenever two measurements of the same thing are less than
+perfectly correlated, the extremes of the first are, on average, less extreme
+in the second — not because anything pulled them back, but because part of what
+made them extreme was noise, and noise does not repeat.
+
+It is worth seeing this happen in the data this book uses, a century and a half
+after Galton and in an entirely different domain. Take each country's
+productivity in a given year, expressed as a deviation from that year's
+cross-country average, and ask what that deviation looks like the following
+year.
+
+```{python}
+#| label: fig-galton
+#| code-summary: "Show the code that reproduces Galton's finding"
+#| fig-cap: "Regression towards the mean in European productivity, 2010–2024. Each point is one country-year: its deviation from the cross-country average that year, against its deviation the next. A slope below 1 is Galton's phenomenon."
+
+import sys, warnings
+sys.path.insert(0, "../slides"); sys.path.insert(0, "..")
+warnings.filterwarnings("ignore")
+from plotstyle import setup, CL
+plt = setup()
+
+import qmib, numpy as np, pandas as pd
+
+d = (qmib.load("core").dropna(subset=["productivity_idx"])
+     .sort_values(["geo", "time"]))
+d["next"] = d.groupby("geo")["productivity_idx"].shift(-1)
+pairs = d.dropna(subset=["next"]).copy()
+
+# Deviation from the cross-country mean, this year and the next.
+pairs["dev"] = pairs["productivity_idx"] - pairs.groupby("time")["productivity_idx"].transform("mean")
+pairs["dev_next"] = pairs["next"] - pairs.groupby("time")["next"].transform("mean")
+
+slope, intercept = np.polyfit(pairs["dev"], pairs["dev_next"], 1)
+
+fig, ax = plt.subplots(figsize=(6.0, 4.6))
+lim = np.array([pairs["dev"].min() * 1.05, pairs["dev"].max() * 1.05])
+ax.plot(lim, lim, ls=":", lw=1.3, color=CL.muted, label="no regression to the mean")
+ax.plot(lim, intercept + slope * lim, lw=2, color=CL.warn,
+        label=f"fitted, slope = {slope:.2f}")
+ax.scatter(pairs["dev"], pairs["dev_next"], s=15, color=CL.accent,
+           alpha=0.5, edgecolor="none", zorder=3)
+ax.axhline(0, color=CL.line, lw=1, zorder=1); ax.axvline(0, color=CL.line, lw=1, zorder=1)
+ax.set_xlabel("deviation from the mean, year $t$")
+ax.set_ylabel("deviation from the mean, year $t+1$")
+ax.legend(frameon=False, fontsize=8.5, loc="upper left")
+fig.tight_layout()
+```
+
+The dotted line is what perfect persistence would look like: a country as far
+above average next year as it was this year. The fitted line is flatter. The
+most productive decile keeps about six-sevenths of its lead from one year to
+the next, and the least productive recovers by a comparable amount — with
+nothing whatever having been done to either.
+
+The warning Galton's contemporaries missed is the one to carry forward. If you
+select the extremes and then measure them again, they will improve, and the
+improvement will look like the effect of whatever you did in between. Chapter
+10 returns to this as a threat to causal inference, where it has a name:
+regression to the mean is the reason a single-group before-and-after comparison
+is not evidence.
+:::
+
 ## Adequacy, validity, robustness
 
 These three words get used loosely and they are not synonyms. The distinction
@@ -148,7 +201,7 @@ different [@anscombe1973].
 
 ```{python}
 #| label: fig-anscombe
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Anscombe's quartet. Identical means, variances, correlations, fitted lines and $R^2$ — and only the first is a dataset the line describes. Data from @anscombe1973, Table 1."
 
 import sys, warnings
@@ -262,7 +315,7 @@ so often scales with its level.
 
 ```{python}
 #| label: fig-diagnostics
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Diagnostics for GDP per capita on the productivity index — the regression Session 02 fitted. Left: standardised residuals against fitted values, with a LOWESS smoother [@cleveland1979]. Right: the scale–location plot, which removes the sign so that changing spread is easier to see."
 
 import pandas as pd, statsmodels.api as sm
@@ -389,7 +442,7 @@ is a finding — and often a more interesting one than the coefficient.
 
 ```{python}
 #| label: fig-influence
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Left: the influence plot for the fitted regression — standardised residual against leverage, point area proportional to Cook's distance, dashed contours at $D = 4/n$. Right: the same data with one observation moved to a high-leverage, poorly-fitted position. The right panel is a constructed illustration, not a feature of the data."
 
 lev = infl.hat_matrix_diag
@@ -464,7 +517,7 @@ misspecification — and it is the reason this chapter keeps returning to plots.
 
 ```{python}
 #| label: fig-qq
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Normal quantile–quantile plot of the standardised residuals. Departure at both ends, in opposite directions, is the signature of heavy tails rather than skew."
 
 from scipy import stats
@@ -537,7 +590,7 @@ errors — which are computed from that row count — come out far too small.
 
 ```{python}
 #| label: tbl-clustering
-#| echo: false
+#| code-summary: "Show the code for this table"
 #| output: asis
 
 import scipy.stats as st
@@ -734,933 +787,3 @@ The failure mode this chapter exists to prevent is reporting $R^2$ and stopping.
 The four datasets in @fig-anscombe all have $R^2 = 0.67$. Three of them should
 never be described by a straight line, and no amount of staring at $0.67$ will
 tell you which three.
-
-## The lecture
-
-::: {.muted}
-Delivered from [the slides](https://warint.github.io/quantitative-methods/session-03-lecture.html). What follows is the same material as prose.
-:::
-
-<!-- Source session 4 is taught as course session 3. Content is static so the deck renders without R or Python. -->
-## Course Objectives
-
-![](images/decks/session-03-economist-assets-regression-table.png){.quarto-figure .quarto-figure-center .r-stretch style="width:88.0%"}
-
-## Outline
-
--   Diagnostic tools are as important as regression coefficients.\
--   Today we focus on:
-    1.  Residual diagnostics\
-    2.  Goodness-of-fit measures\
-    3.  Influence diagnostics\
-    4.  Information criteria\
-    5.  Stepwise regression
-
-## Why Evaluate Models?
-
-> "All models are wrong, but some are useful." --- George Box
-
--   Regression results must be tested for adequacy, not just reported.\
--   Ignoring diagnostics can lead to:
-    -   False significance\
-    -   Overconfidence in predictions\
-    -   Poor generalization
-
-## Introduction: Key Aspects of Model Evaluation
-
-## Key Aspects of Model Evaluation
-
--   Model Accuracy (Adequacy): $R^2$, Adjusted $R^2$, RSE.
--   Model Validity (Assumptions): Linearity, homoscedasticity, normality of residuals.
--   Model Robustness: Outliers, leverage, Cook's distance (sensitivity to unusual points).
--   Model Parsimony/Selection: AIC, BIC, stepwise methods.
-
-## Models: Assessing the adequacy
-
-## Models: Assessing the adequacy
-
-::::::::::::: panel-tabset
-### Adequacy 1
-
-We can assess the adequacy of
-
--   the coefficient estimates \[individually\]
-
--   the model \[the whole\]
-
-### A 2
-
-First, assessing the adequacy of the **coefficient estimates**:
-
-We continue the analogy with the estimation of the population mean $\mu$ of a random variable $Y$.
-
-A natural question is as follows:
-
--   how accurate is the sample mean $\hat{\mu}$ as an estimate of $\mu$?
-
-> We have established that the average of $\hat{\mu}$'s over many data sets will be very close to $\mu$, but that a single estimate $\hat{\mu}$ may be a substantial **underestimate** or **overestimate** of $\mu$.
-
-### A 3
-
-::::::: columns
-::: {.column style="width:50%;"}
-**Residual Standard Error**
-
-Residuals are the leftovers from the model fit: Data = Fit + Residual
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-2-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-
-### A 4
-
-::::::: columns
-::: {.column style="width:50%;"}
-A residual is the difference between the observed $y_i$ and predicted $\hat{y}\_i$.
-
-$$\epsilon_i = y_i - \hat{y}\_i$$
-
--   living in poverty in DC is 5.44% more than predicted.
-
--   living in poverty in RI is 4.16% less than predicted.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-3-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-
-### A 5
-
-How far off will that single estimate of $\hat{\mu}$ be?
-
--   In general, we answer this question by computing the standard error of $\hat{\mu}$, written as $SE(\hat{\mu})$.
-
-We have the well-known formula:
-
-$$Var(\hat{\mu}) = SE(\hat{\mu})^2 = \frac{\sigma^2}{n}$$ where $\sigma$ is the standard deviation of each of the realizations $y_i$ of $Y$.
-
-Roughly speaking, the **standard error** tells us the average amount that this estimate $\hat{\mu}$ differs from the actual value of $\mu$.
-
-The previous equation also tells us how this deviation shrinks with $n$ --- **the more observations** we have, **the smaller the standard error** of $\hat{\mu}$.
-
-### A 6
-
-In a similar vein, we can wonder how close $\hat{\beta}\_0$ and $\hat{\beta}\_1$ are to the true values $\beta_0$ and $\beta_1$?
-
--   To compute the standard errors associated with $\hat{\beta}\_1$, it comes down to the following formula:
-
-$$ SE(\hat{\beta_1}) $$
-
-### A 7
-
-**Models: Assessing the adequacy of the coefficient estimates**
-
-Standard errors can be used to compute our *confidence intervals*, i.e. that the true value of $\beta_1$, will within this interval with a 95% chance:
-
-$$ \hat{\beta}\_1 - 1.96 \times SE(\hat{\beta}\_1),~\hat{\beta}\_1 + 1.96 \times SE(\hat{\beta}\_1) $$
-
-Standard errors can also be used for *hypothesis tests*:
-
-$$ H_0:~\beta_1=0 $$
-
-$$ H_1:~\beta_1 \neq 0 $$
-
-As already seen, we compute the the t-statistic, which measures the number of standard deviations that $\hat{\beta}\_1$ is away from 0 (see p-values from last session):
-
-$$ t=\frac{\hat{\beta}\_1-0}{SE(\hat{\beta}\_1)} $$
-:::::::::::::
-
-
-:::::::: panel-tabset
-### adequacy M 1
-
-Assessing the **adequacy of the model** now:
-
-Once we have rejected the null hypothesis in favor of the alternative hypothesis, we want to quantify the *extent to which the model fits the data*.
-
-For that, we use:
-
--   the *residual standard error*, and
-
--   the $R^2$ statistic.
-
-### AM 2
-
-The RSE is an estimate of the standard deviation of $\epsilon$.
-
-> Definition: It is the average amount that the response will deviate from the true regression line.
-
-$$ RSE = \sqrt{\frac{RSS}{n-2}} = \sqrt{\frac{\sum\_{i=1}^{n}(y_i-\hat{y}\_i)^2}{n-2}} $$
-
-recall:
-
-$$ RSS= \sum\_{i=1}^{n}(y_i-\hat{y}\_i)^2 $$
-
-### AM 3
-
-::::::: columns
-::: {.column style="width:50%;"}
-Let's define TSS as the **total sum of squares**.
-
-$$ TSS = \sum\_{i=1}^{n}(y_i - \bar{y})^2 $$
-
--   TSS measures the total variance in the response Y.
-
-> Definition: The $R^2$ statistic is the proportion of variance explained.
-
-To calculate $R^2$, we use the formula:
-
-$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}$$
-
--   It tells us what percent of variability in the dependent variable is explained by the model.
-
--   The remainder of the variability is explained by variables not included in the model or by inherent randomness in the data.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-economist-assets-r-squared.png" style="width:88.0%" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-::::::::
-
-## Goodness-of-Fit --- $R^2$
-
-$$ R^2 = 1 - \frac{RSS}{TSS} $$
-
--   Proportion of variance in Y explained by the model.
--   Example: $R^2$ = 0.62 means 62% of variance explained.
-
-Limitation: $R^2$ always increases with more predictors.
-
-Visual: bar chart comparing variance explained ($R^2$) across models.
-
-## Adjusted $R^2$ and RSE
-
--   **Adjusted $R^2$:** corrects for number of predictors.
--   **RSE (Residual Standard Error):** average deviation from regression line.
-
-::::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-import statsmodels.formula.api as smf
-
-core = qmib.load("core")
-d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
-
-# the model Session 02 fitted — now we ask whether it can be trusted
-fit = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
-fit.rsquared_adj
-```
-
-```text
-[1] 0.5487727
-```
-
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-import numpy as np
-
-np.sqrt(fit.mse_resid)      # residual standard error
-```
-
-```text
-[1] 2.08183
-```
-:::::::
-
-Interpretation:
-
--   Adjusted $R^2$ can *decrease* if irrelevant variables are added.
--   RSE gives an absolute measure, in units of Y.
-
-
-::::::::::::: panel-tabset
-### Quiz
-
-::::::: columns
-::: {.column style="width:50%;"}
-Which of the below is the correct interpretation of $R^2 = 0.38$?
-
--   38% of the variability in the % of HG graduates among the 51 states is explained by the model.
-
--   38% of the variability in the % of residents living in poverty among the 51 states is explained by the model.
-
--   38% of the time % HS graduates predict % living in poverty correctly.
-
--   62% of the variability in the % of residents living in poverty among the 51 states is explained by the model.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-5-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-
-### Answer
-
-::::::: columns
-::: {.column style="width:50%;"}
-Which of the below is the correct interpretation of $R^2 = 0.38$?
-
--   38% of the variability in the % of HG graduates among the 51 states is explained by the model.
-
--   **38% of the variability in the % of residents living in poverty among the 51 states is explained by the model.**
-
--   38% of the time % HS graduates predict % living in poverty correctly.
-
--   62% of the variability in the % of residents living in poverty among the 51 states is explained by the model.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-6-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-:::::::::::::
-
-## Models: assessing the validity
-
-## Models: assessing the validity
-
--   1.  Linearity
--   2.  Nearly normal residuals
--   3.  Constant variability
-
-
-:::::::::: panel-tabset
-### Validity: Linearity 1
-
--   The relationship between the explanatory and the dependent variable should be linear.
-
-> Check using a scatterplot of the data, or a residuals plot.
-
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-7-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-
-### V: L 2
-
-**Anatomy of a residuals plot**
-
-::::::: columns
-::: {.column style="width:50%;"}
-$$\%~HSgrad = 81\%~\&~\%~in~poverty = 10.3$$
-
-$$\widehat{\%~in~poverty} = 64.68 - 0.62 \times 81 = 14.46$$
-
-$$\epsilon = {\%~in~poverty} - \widehat{\%~in~poverty}$$
-
-$$\epsilon = 10.3 - 14.46 = -4.16$$
-
-$$\%~HSgrad = 86\%~\&~\%~in~poverty = 16.8$$
-
-$$\widehat{\%~in~poverty} = 64.68 - 0.62 \times 86 = 11.36$$
-
-$$\epsilon = {\%~in~poverty} - \widehat{\%~in~poverty}$$
-
-$$\epsilon = 16.8 - 11.36 = 5.44$$
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-9-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-
-### V: L 3
-
--   The relationship between predictors and outcome should be linear.
--   Violations show up as **curved patterns** in residuals.
-
-Remedies: add polynomial terms, interactions, or reconsider functional form.
-::::::::::
-
-
-**Validity: Nearly Normal Residuals**
-
-::::::: columns
-::: {.column style="width:50%;"}
--   The residuals should be nearly normal.
-
--   This condition may not be satisfied when there are unusual observations that don't follow the trend of the rest of the data.
-
-> Check using a histogram.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-10-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-
-## Normality of Residuals
-
--   Errors should be normally distributed.
--   Important for valid t-tests and confidence intervals.
-
-![](images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-11-1.png){.r-stretch width="960"}
-
-Visual: Q-Q plot --- left = good (points on line), right = heavy tails.
-
-
-::::::::::: panel-tabset
-### Homoscedasticity (Equal Variance)
-
--   Residuals should have **constant variance** across fitted values.
--   Violation = *heteroscedasticity* (funnel shape).
-
-::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-import matplotlib.pyplot as plt
-
-# Scale-Location: is the spread of the residuals constant?
-plt.scatter(fit.fittedvalues, np.sqrt(np.abs(fit.get_influence().resid_studentized_internal)),
-            s=12, alpha=0.6)
-plt.xlabel("Fitted values"); plt.ylabel("sqrt(|standardised residual|)")
-plt.show()
-```
-
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-12-1.png" width="960" /></p>
-</figure>
-
-</div>
-:::::
-
-Remedies: transform Y, add missing predictors, or use robust errors.
-
-### Validity: Constant Variability
-
-::::::: columns
-::: {.column style="width:50%;"}
--   The variability of points around the least squares line should be roughly constant.
-
--   This implies that the variability of residuals around the 0 line should be roughly constant as well.
-
--   Also called homoskedasticity.
-
-> Check using a residuals plot.
-:::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-13-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::
-:::::::::::
-
-## The Window Into Model Adequacy
-
-Residual = observed $y_i$ -- predicted $\hat{y}\_i$.
-
--   Residuals contain all the information the model *did not explain*.\
--   Checking them reveals whether assumptions of linear regression hold.
-
-:::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Residuals vs Fitted: is there structure the straight line missed?
-plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
-plt.axhline(0, color="black", lw=1)
-plt.xlabel("Fitted values"); plt.ylabel("Residuals")
-plt.show()
-```
-::::
-
-![](images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-14-1.png){.r-stretch width="960"}
-
-Visual: Residuals scattered randomly vs. curved pattern.
-
-
-:::::::::::::::::: panel-tabset
-### Quiz 1
-
-::::: columns
-::: {.column style="width:50%;"}
-What condition is this linear model obviously violating?
-
--   Constant variability
-
--   Relationship
-
--   Normal residuals
-
--   No extreme outliers
-:::
-
-::: {.column style="width:50%;"}
-![](images/decks/session-03-economist-assets-nonlinearity.png){.r-stretch}
-:::
-:::::
-
-### Answer
-
-:::::: columns
-::: {.column style="width:50%;"}
-What condition is this linear model obviously violating?
-
--   Constant variability
-
--   **Relationship**
-
--   Normal residuals
-
--   No extreme outliers
-:::
-
-:::: {.column style="width:50%;"}
-<figure>
-<p><img src="images/decks/session-03-economist-assets-nonlinearity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
-</figure>
-::::
-::::::
-
-### Quiz 3
-
-:::::: columns
-::: {.column style="width:50%;"}
-What condition is this linear model obviously violating?
-
--   Constant variability
-
--   Linear relationship
-
--   Normal residuals
-
--   No extreme outliers
-:::
-
-:::: {.column style="width:50%;"}
-<figure>
-<p><img src="images/decks/session-03-economist-assets-heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
-</figure>
-::::
-::::::
-
-### Answer
-
-:::::: columns
-::: {.column style="width:50%;"}
-What condition is this linear model obviously violating?
-
--   **Constant variability** = heteroskedastic = non-homoskedastic
-
--   Linear relationship
-
--   Normal residuals
-
--   No extreme outliers
-:::
-
-:::: {.column style="width:50%;"}
-<figure>
-<p><img src="images/decks/session-03-economist-assets-heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
-</figure>
-::::
-::::::
-::::::::::::::::::
-
-## Models: assessing the validity
-
-::: {style="text-align:center"}
-[Correlation and Regression Game](http://shiny.calpoly.sh/Corr_Reg_Game/)
-:::
-
-## Model Robustness/Parsimony and Selection
-
-## Outliers vs. Influential Observations
-
--   **Outlier:** unusual Y given X.
--   **Leverage point:** unusual X values.
--   **Influential:** changes regression coefficients significantly.
-
-Visual schematic: regression line with one leverage point pulling the slope.
-
-## Leverage
-
--   Leverage measures how far X is from its mean.
--   Average leverage = (p+1)/n.
-
-:::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-influence = fit.get_influence()
-leverage = influence.hat_matrix_diag
-
-print(f"mean leverage {leverage.mean():.4f}, max {leverage.max():.4f}")
-print(f"rule of thumb 2p/n = {2 * 2 / len(d):.4f}")
-```
-
-```text
-         1          2          3          4          5          6          7 
-0.07341971 0.04993531 0.02665514 0.05725104 0.05436305 0.03001853 0.02279856 
-         8          9         10         11         12         13         14 
-0.03001853 0.01960804 0.02208673 0.02080544 0.02852708 0.02650600 0.01962584 
-        15         16         17         18         19         20         21 
-0.01982498 0.03920450 0.02925840 0.03446830 0.07519505 0.02010632 0.02324176 
-        22         23         24         25         26         27         28 
-0.02131389 0.02324176 0.06459559 0.05296228 0.02715088 0.04368563 0.05263687 
-        29         30         31         32         33         34         35 
-0.01985210 0.07300617 0.01965889 0.04639058 0.02433662 0.05024716 0.03920450 
-        36         37         38         39         40         41         42 
-0.02164184 0.01974787 0.02074443 0.01960804 0.05579264 0.05873826 0.03001853 
-        43         44         45         46         47         48         49 
-0.05579264 0.13146676 0.03614618 0.03162523 0.02421459 0.03334717 0.09662531 
-        50         51 
-0.02925840 0.05403087 
-```
-
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Residuals vs Leverage — the points with the power to move the line
-plt.scatter(leverage, influence.resid_studentized_internal, s=12, alpha=0.6)
-plt.axvline(2 * 2 / len(d), color="red", ls="--")
-plt.xlabel("Leverage"); plt.ylabel("Standardised residual")
-plt.show()
-```
-::::::
-
-![](images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-18-1.png){.r-stretch width="960"}
-
-> Leverage matters because a data point with unusual predictor values can pull the regression line toward itself, changing the story the model tells.
-
-## Cook's Distance
-
--   Combines leverage + residual size.
--   High Cook's D = observation heavily influences coefficients.
-
-:::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-cooks_d = influence.cooks_distance[0]
-
-print(f"largest Cook's D {cooks_d.max():.4f}")
-print(f"above 4/n ({4/len(d):.4f}): {(cooks_d > 4/len(d)).sum()} observations")
-```
-
-```text
-           1            2            3            4            5            6 
-2.938419e-03 2.520652e-04 1.080616e-03 8.976295e-02 1.796106e-02 2.866052e-04 
-           7            8            9           10           11           12 
-1.897199e-02 9.177618e-03 6.974262e-02 1.088291e-05 8.528512e-05 2.213503e-03 
-          13           14           15           16           17           18 
-1.057503e-02 1.124157e-04 1.380196e-02 2.813797e-03 4.169181e-04 2.544101e-04 
-          19           20           21           22           23           24 
-3.257667e-02 2.418426e-04 2.635681e-02 2.955606e-03 1.093662e-05 1.616129e-02 
-          25           26           27           28           29           30 
-7.248277e-02 3.550370e-04 1.318111e-01 8.571111e-03 2.603736e-02 3.791864e-02 
-          31           32           33           34           35           36 
-2.779714e-02 8.375544e-02 6.863630e-03 7.974102e-03 3.957810e-02 6.807620e-04 
-          37           38           39           40           41           42 
-2.363512e-02 4.048523e-04 1.094319e-02 1.250869e-01 9.031568e-03 9.989553e-04 
-          43           44           45           46           47           48 
-4.971505e-04 4.663828e-02 1.398058e-05 4.636273e-04 6.941264e-03 7.721221e-03 
-          49           50           51 
-1.616635e-04 4.664654e-03 9.825004e-03 
-```
-
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-plt.stem(cooks_d)
-plt.axhline(4 / len(d), color="red", ls="--")
-plt.xlabel("Observation"); plt.ylabel("Cook's distance")
-plt.show()
-```
-::::::
-
-![](images/decks/session-03-imported-assets-index_files-figure-revealjs-unnamed-chunk-19-1.png){.r-stretch width="960"}
-
-Cook's distance plot with threshold marked.
-
-> Cook's distance matters because it shows which data points, if removed, would noticeably change the model's results.
-
-## Information Criteria --- AIC
-
-$$ AIC = -2\log(L) + 2k $$
-
--   Balances fit with penalty for number of parameters.
--   Lower AIC = better model (relative).
-
-::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-fit.aic
-```
-
-```text
-[1] 223.4827
-```
-:::::
-
-> AIC matters because it helps us avoid models that are too complicated by rewarding good fit but punishing unnecessary extra variables.
-
-## Information Criteria --- BIC
-
-$$ BIC = -2\log(L) + k\ln(n) $$
-
--   Similar to AIC but harsher penalty (depends on n).
--   Favors simpler models for large samples.
-
-> BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.
-
-## Stepwise Regression
-
--   Automated selection: forward, backward, or both.
--   Based on AIC (or BIC with k = log(n)).
-
-:::::: cell
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Python has no step(); compare candidate models directly, which is
-# clearer about what you are doing and why.
-candidates = [
-    "gdp_pc_eur ~ productivity_idx",
-    "gdp_pc_eur ~ productivity_idx + gfcf_meur",
-    "gdp_pc_eur ~ productivity_idx + gfcf_meur + employment_ths",
-]
-cols = ["gdp_pc_eur", "productivity_idx", "gfcf_meur", "employment_ths"]
-dd = core.dropna(subset=cols)
-
-for formula in candidates:
-    m = smf.ols(formula, data=dd).fit()
-    print(f"AIC {m.aic:9.1f}   adj R2 {m.rsquared_adj:.3f}   {formula}")
-```
-
-```text
-Start:  AIC=76.75
-Poverty ~ Graduates
-
-            Df Sum of Sq    RSS     AIC
-<none>                   212.37  76.751
-- Graduates  1    267.88 480.25 116.366
-```
-
-```text
-Call:
-lm(formula = Poverty ~ Graduates, data = poverty)
-
-Coefficients:
-(Intercept)    Graduates  
-    64.7810      -0.6212  
-```
-::::::
-
-Magic exists... Your first entry into Machine Learning...
-
-## Best Practices and Conclusion
-
-## Key Aspects of Model Evaluation
-
--   Model Adequacy: $R^2$, Adjusted $R^2$, RSE.
--   Model Validity (Assumptions): Linearity, homoscedasticity, normality of residuals.
--   Model Robustness: Outliers, leverage, Cook's distance (sensitivity to unusual points).
--   Model Parsimony/Selection: AIC, BIC, stepwise methods.
-
-## Best Practices
-
--   Check residuals first --- assumptions matter.
--   Use multiple fit criteria, not just $R^2$.
--   Always investigate influential points.
--   Use AIC/BIC to compare, but remember they are relative.
--   Stepwise is exploratory --- combine with theory.
-
-Final message: **Balance predictive adequacy, interpretability, and parsimony.**
-
-## Conclusion
-
-## Conclusion
-
-![](images/decks/session-03-economist-assets-regression-table.png){.quarto-figure .quarto-figure-center .r-stretch style="width:90.0%"}
-
-## One more thing...
-
-::: cell
-![](images/decks/session-03-economist-assets-small-samples.png){.r-stretch}
-:::
-
-https://blog.ephorie.de/the-most-dangerous-equation-or-why-small-is-not-beautiful?utm_source=rss&utm_medium=rss&utm_campaign=the-most-dangerous-equation-or-why-small-is-not-beautiful
-
-## References
-
--   James, G., Witten, D., Hastie, T., & Tibshirani, R. (2021). *An Introduction to Statistical Learning with Applications in R* (2nd ed.). Springer.
--   Kutner, M. H., Nachtsheim, C. J., Neter, J., & Li, W. (2005). *Applied Linear Statistical Models* (5th ed.). McGraw-Hill Irwin.
--   Wooldridge, J. M. (2019). *Introductory Econometrics: A Modern Approach* (7th ed.). Cengage.
-
-## In the practice
-
-### Regression: Adequacy, Validity, and Robustness
-
-> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-03-practice.html)** ·
-> source: [`MATH60033A-S03-Practice.qmd`](https://github.com/warint/quantitative-methods/blob/main/MATH60033A-S03-Practice.qmd)
-
----
-
-#### The theme of this session
-
-> # Which model would survive a referee?
-
-All ten groups attack this question, each on **its own project**, and the last twenty minutes
-assemble the answers.
-
----
-
-#### What you are doing
-
-The lecture showed the method on the session's dataset. You now apply it to **your own angle**, and
-to the question your group is actually trying to answer
-([`RESEARCH-MANDATES.md`](https://github.com/warint/quantitative-methods/blob/main/RESEARCH-MANDATES.md)).
-
-The deliverable is not a printout. It is a **decision**, with the reason written down.
-
----
-
-#### Before you start
-
-Everyone in the group pushes at least once this session. Replace `XX` with your group number —
-group 07 uses `group-07`.
-
-```bash
-git checkout -b group-XX
-mkdir -p 03-regression-adequacy-and-validity/02-practice/submissions/group-XX
-```
-
----
-
-#### 1 · Reproduce one result from the paper — 20 min
-
-Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
-and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
-that is not attempted earns none.
-
-The paper is **Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity***, and its replication package
-([10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)) should already be unzipped at:
-
-```text
-03-regression-adequacy-and-validity/data/replication/
-```
-
-The session's own dataset, for comparison:
-
-```python
-import qmib
-data = qmib.load("core")
-```
-
----
-
-#### 2 · Apply the method to your own angle — 35 min
-
-```python
-core = qmib.load("core")
-mine = qmib.load("angle_c_country")     # your angle — see your dictionary
-df   = core.merge(mine, on=["geo", "time"], how="inner")
-```
-
-Fit the session's method on your own data. Report what the lecture said to report, in the units of
-your own variables.
-
----
-
-#### 3 · Break one assumption — 15 min
-
-Every method in this course rests on something. Find the assumption this one rests on hardest, break
-it deliberately, and record what happened to your answer. **This is the part that carries the
-marks.**
-
----
-
-#### 4 · Write it down — 20 min
-
-A 250-word note in your submissions folder:
-
-- What you found, in units
-- Which assumption you broke, and what it did
-- What this result does **not** license you to claim
-
----
-
-#### Submitting
-
-```bash
-git add 03-regression-adequacy-and-validity/02-practice/submissions/group-XX
-git commit -m "Session 03 practice — group XX"
-git push -u origin group-XX
-```
-
-Everyone pushes at least once. The log is the record of participation.
-
----
-
-#### What loses marks
-
-- Reporting $R^2$ without a single diagnostic plot
-- Deleting an influential point without saying what it was
-- Reading a residual plot as "looks fine" with no statement of what you looked for
-- Choosing a model on AIC and reporting it as though the data selected it
-
----
-
-[<- The lecture](#the-lecture) · [Session 03 overview](session-03.qmd)

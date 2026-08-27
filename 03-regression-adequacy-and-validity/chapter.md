@@ -1,3 +1,8 @@
+---
+title: "Regression: Adequacy, Validity, and Robustness"
+standalone: true
+---
+
 ## The line, and where it came from
 
 Adrien-Marie Legendre published the method of least squares in 1805, in an
@@ -69,6 +74,74 @@ The name stuck to the statistical method he had used to find it, which is why a
 technique for fitting conditional means is called by a word that means moving
 backwards.
 
+::: {.archive}
+[From the archive · Galton, 1886]{.archive-label}
+
+Galton's claim was about heredity, but the phenomenon is general and it is not
+a fact about biology: it follows from the arithmetic of an imperfect
+correlation. Whenever two measurements of the same thing are less than
+perfectly correlated, the extremes of the first are, on average, less extreme
+in the second — not because anything pulled them back, but because part of what
+made them extreme was noise, and noise does not repeat.
+
+It is worth seeing this happen in the data this book uses, a century and a half
+after Galton and in an entirely different domain. Take each country's
+productivity in a given year, expressed as a deviation from that year's
+cross-country average, and ask what that deviation looks like the following
+year.
+
+```{python}
+#| label: fig-galton
+#| code-summary: "Show the code that reproduces Galton's finding"
+#| fig-cap: "Regression towards the mean in European productivity, 2010–2024. Each point is one country-year: its deviation from the cross-country average that year, against its deviation the next. A slope below 1 is Galton's phenomenon."
+
+import sys, warnings
+sys.path.insert(0, "../slides"); sys.path.insert(0, "..")
+warnings.filterwarnings("ignore")
+from plotstyle import setup, CL
+plt = setup()
+
+import qmib, numpy as np, pandas as pd
+
+d = (qmib.load("core").dropna(subset=["productivity_idx"])
+     .sort_values(["geo", "time"]))
+d["next"] = d.groupby("geo")["productivity_idx"].shift(-1)
+pairs = d.dropna(subset=["next"]).copy()
+
+# Deviation from the cross-country mean, this year and the next.
+pairs["dev"] = pairs["productivity_idx"] - pairs.groupby("time")["productivity_idx"].transform("mean")
+pairs["dev_next"] = pairs["next"] - pairs.groupby("time")["next"].transform("mean")
+
+slope, intercept = np.polyfit(pairs["dev"], pairs["dev_next"], 1)
+
+fig, ax = plt.subplots(figsize=(6.0, 4.6))
+lim = np.array([pairs["dev"].min() * 1.05, pairs["dev"].max() * 1.05])
+ax.plot(lim, lim, ls=":", lw=1.3, color=CL.muted, label="no regression to the mean")
+ax.plot(lim, intercept + slope * lim, lw=2, color=CL.warn,
+        label=f"fitted, slope = {slope:.2f}")
+ax.scatter(pairs["dev"], pairs["dev_next"], s=15, color=CL.accent,
+           alpha=0.5, edgecolor="none", zorder=3)
+ax.axhline(0, color=CL.line, lw=1, zorder=1); ax.axvline(0, color=CL.line, lw=1, zorder=1)
+ax.set_xlabel("deviation from the mean, year $t$")
+ax.set_ylabel("deviation from the mean, year $t+1$")
+ax.legend(frameon=False, fontsize=8.5, loc="upper left")
+fig.tight_layout()
+```
+
+The dotted line is what perfect persistence would look like: a country as far
+above average next year as it was this year. The fitted line is flatter. The
+most productive decile keeps about six-sevenths of its lead from one year to
+the next, and the least productive recovers by a comparable amount — with
+nothing whatever having been done to either.
+
+The warning Galton's contemporaries missed is the one to carry forward. If you
+select the extremes and then measure them again, they will improve, and the
+improvement will look like the effect of whatever you did in between. Chapter
+10 returns to this as a threat to causal inference, where it has a name:
+regression to the mean is the reason a single-group before-and-after comparison
+is not evidence.
+:::
+
 ## Adequacy, validity, robustness
 
 These three words get used loosely and they are not synonyms. The distinction
@@ -120,7 +193,7 @@ different [@anscombe1973].
 
 ```{python}
 #| label: fig-anscombe
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Anscombe's quartet. Identical means, variances, correlations, fitted lines and $R^2$ — and only the first is a dataset the line describes. Data from @anscombe1973, Table 1."
 
 import sys, warnings
@@ -234,7 +307,7 @@ so often scales with its level.
 
 ```{python}
 #| label: fig-diagnostics
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Diagnostics for GDP per capita on the productivity index — the regression Session 02 fitted. Left: standardised residuals against fitted values, with a LOWESS smoother [@cleveland1979]. Right: the scale–location plot, which removes the sign so that changing spread is easier to see."
 
 import pandas as pd, statsmodels.api as sm
@@ -361,7 +434,7 @@ is a finding — and often a more interesting one than the coefficient.
 
 ```{python}
 #| label: fig-influence
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Left: the influence plot for the fitted regression — standardised residual against leverage, point area proportional to Cook's distance, dashed contours at $D = 4/n$. Right: the same data with one observation moved to a high-leverage, poorly-fitted position. The right panel is a constructed illustration, not a feature of the data."
 
 lev = infl.hat_matrix_diag
@@ -436,7 +509,7 @@ misspecification — and it is the reason this chapter keeps returning to plots.
 
 ```{python}
 #| label: fig-qq
-#| echo: false
+#| code-summary: "Show the code for this figure"
 #| fig-cap: "Normal quantile–quantile plot of the standardised residuals. Departure at both ends, in opposite directions, is the signature of heavy tails rather than skew."
 
 from scipy import stats
@@ -509,7 +582,7 @@ errors — which are computed from that row count — come out far too small.
 
 ```{python}
 #| label: tbl-clustering
-#| echo: false
+#| code-summary: "Show the code for this table"
 #| output: asis
 
 import scipy.stats as st
