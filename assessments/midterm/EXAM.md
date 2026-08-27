@@ -155,26 +155,25 @@ that explains it.
 
 <br><br><br><br>
 
-## B4. Bias–variance decomposition *(6 points)*
+## B4. Describing a variable before you model it *(6 points)*
 
-A simulation with known truth and $\sigma^2 = 0.09$ gives:
+A country indicator is observed for $n = 30$ country-years. From the sample:
 
-| polynomial degree | bias² | variance | total expected error |
-|---|---|---|---|
-| 1 | 0.64 | 0.02 | 0.75 |
-| 3 | 0.09 | 0.06 | **(i)** |
-| 5 | 0.02 | 0.14 | **(ii)** |
-| 7 | 0.01 | 0.31 | 0.41 |
-| 9 | 0.00 | 0.62 | **(iii)** |
+$$\bar x = 42.0,\qquad \text{median} = 38.0,\qquad s = 12.0$$
+$$\sum_i (x_i - \bar x)^3 = 62,208,\qquad \sum_i (x_i - \bar x)^4 = 1,140,480$$
 
-**(a)** *(3)* Fill in (i), (ii) and (iii).
+> Recall $g_1 = \dfrac{1}{n}\dfrac{\sum_i (x_i-\bar x)^3}{s^3}$ and
+> $g_2 = \dfrac{1}{n}\dfrac{\sum_i (x_i-\bar x)^4}{s^4} - 3$.
 
-**(b)** *(1)* At which degree is expected error minimised?
+**(a)** *(2)* Compute $g_1$ and test it against $2\sqrt{6/n}$. Is the variable substantially
+skewed, and in which direction?
 
-**(c)** *(2)* The minimum is not sharp. What does that imply for how you should report a chosen
-model complexity, and which selection convention from Session 5 embodies the same idea?
+**(b)** *(2)* Compute $g_2$ and test it against $4\sqrt{6/n}$. Is it substantially kurtic?
 
-<br><br><br>
+**(c)** *(2)* The mean exceeds the median. Reconcile that with your answer to (a), and say which
+measure of centre you would report — and why.
+
+<br><br><br><br>
 
 ## B5. Omitted variable bias *(6 points)*
 

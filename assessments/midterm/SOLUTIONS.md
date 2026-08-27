@@ -158,19 +158,35 @@ correlated predictors receive similar coefficients rather than the lasso's arbit
 
 ## B4 *(6)*
 
-**(a)** (i) $0.09 + 0.06 + 0.09 = \mathbf{0.24}$ · (ii) $0.02 + 0.14 + 0.09 = \mathbf{0.25}$ ·
-(iii) $0.00 + 0.62 + 0.09 = \mathbf{0.71}$.
+**(a)** $g_1 = \dfrac{1}{30}\cdot\dfrac{62,208}{12.0^3}
+= \dfrac{2,073.6}{1,728} = \mathbf{1.20}$.
 
-**(b)** Degree **3** (0.24).
+Threshold: $2\sqrt{6/30} = 0.894$. Since $1.20 > 0.894$, the variable is
+**substantially skewed**, and $g_1 > 0$ means a **long right tail**.
 
-**(c)** Degree 5 is within 0.01 of the minimum, which is well inside Monte Carlo noise — the data do
-not distinguish them. You should therefore report the *range* of complexities that are
-statistically indistinguishable and, when they are, **prefer the simpler model**. The convention
-embodying this is the **one-standard-error rule** ($\lambda_{1se}$): choose the largest penalty
-whose CV error is within one standard error of the minimum.
+**(b)** $g_2 = \dfrac{1}{30}\cdot\dfrac{1,140,480}{12.0^4} - 3
+= \dfrac{38,016}{20,736} - 3 = \mathbf{-1.167}$.
 
-> *(c) is the discriminating part. 2 marks: 1 for noticing the flatness, 1 for naming
-> $\lambda_{1se}$ or the 1-SE rule.*
+Threshold: $4\sqrt{6/30} = 1.789$. Since $|-1.167| < 1.789$, it is **not** substantially
+kurtic.
+
+**(c)** A long right tail pulls the **mean** away from the bulk of the data while leaving the
+**median** where most observations sit — so mean $>$ median is exactly what (a) predicts. The gap
+here is 4.0, about a third of a standard deviation, which is large enough to matter.
+
+Report the **median** as the measure of centre — or report all three (mean, trimmed mean, median)
+and let the disagreement be the finding. What you must not do is report the mean alone and call it
+"the average", having just established the distribution is skewed.
+
+> *Marking: (a) 2 — 1 for the value, 1 for the comparison **and** the direction. (b) 2 — 1 for the
+> value, 1 for the comparison. (c) 2 — 1 for linking the gap to the right tail, 1 for a defended
+> choice of summary.*
+>
+> *A common error is comparing $|g_2|$ against the skewness threshold. Deduct 1, follow through.*
+>
+> *Note the pattern: **substantially skewed, ordinary tails**. Asymmetry and heavy tails are
+> different defects, and a student who says "it is skewed, therefore non-normal, therefore
+> heavy-tailed" has conflated them.*
 
 ## B5 *(6)*
 
