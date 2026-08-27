@@ -1,5 +1,6 @@
 ---
 title: "K-Nearest Neighbours and the Bias–Variance Trade-off"
+standalone: true
 ---
 
 ## A method with no model
