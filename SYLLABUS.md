@@ -248,8 +248,9 @@ engagement**, and it is earned in three ways — any of which counts:
 > between them. A room where nobody challenges anybody produces ten monologues and learns a
 > fraction of what it could. Participation is graded because the collision is the point.
 
-**The optional labs.** The QMIB Lab App is an at-home knowledge check that follows each session. It
-is **never a prerequisite** for the next lecture and never assessed for correctness — a completed
+**The optional labs.** The QMIB Lab App is an at-home knowledge check that follows each session.
+**It opens during the term, and the link is announced in class when it does** — nothing is expected
+of you before then. It is **never a prerequisite** for the next lecture and never assessed for correctness — a completed
 report counts because attempting it is the engagement being measured. It exists for two reasons: it
 gives you a private way to find out whether you actually followed the session, and it gives a route
 to full participation marks that does not depend on speaking in a room of thirty.

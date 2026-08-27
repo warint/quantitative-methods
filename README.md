@@ -281,7 +281,8 @@ memo 3 · presentation and defence 3.
 
 **Participation (10) is active engagement, earned by any of three routes:** contributing in the
 room, engaging in the 90-minute practice, or submitting an optional QMIB Lab App report after a
-session. What is marked is **sustained engagement across the term**, not a count of interventions,
+session (the Lab App opens during the term; the link is announced in class). What is marked is
+**sustained engagement across the term**, not a count of interventions,
 and never a ranking against other students. Note that the practices themselves are **formative**:
 the analysis is commented on, not marked. What is recorded is that you engaged with it.
 
