@@ -64,6 +64,39 @@ $$
 \hat\beta \;=\; (X^{\top}X)^{-1} X^{\top} y .
 $$
 
+Every equation in this chapter is something you can execute, and executing it
+is the fastest way to find out whether you have understood what it claims. The
+normal equations are the first: solve them by hand and the answer must be, to
+floating-point precision, whatever `statsmodels` returns.
+
+```{python}
+#| label: check-ols
+#| code-summary: "Run it: solve the normal equations by hand"
+
+import sys, warnings
+sys.path.insert(0, "../slides"); sys.path.insert(0, "..")
+warnings.filterwarnings("ignore")
+from plotstyle import setup, CL
+plt = setup()
+
+import numpy as np, pandas as pd, statsmodels.api as sm, qmib
+
+d = (qmib.load("core")
+     .dropna(subset=["gdp_pc_eur", "productivity_idx"])
+     .reset_index(drop=True))
+X = sm.add_constant(d["productivity_idx"]).to_numpy()
+y = d["gdp_pc_eur"].to_numpy()
+
+# beta_hat = (X'X)^-1 X'y — written as solve(), never as inv(), because
+# inverting a matrix to multiply it by a vector is slower and less stable.
+beta_hand = np.linalg.solve(X.T @ X, X.T @ y)
+beta_sm = sm.OLS(y, X).fit().params
+
+print("by hand      ", np.round(beta_hand, 6))
+print("statsmodels  ", np.round(beta_sm, 6))
+print("agree to     ", f"{np.abs(beta_hand - beta_sm).max():.2e}")
+```
+
 That is an algebraic fact. It requires no assumption about the world, no
 probability, no error term. Feed it any numbers and it returns coefficients.
 This is exactly why diagnostics are necessary: **the formula never refuses.** It
@@ -373,6 +406,77 @@ Neither finding is fatal. Both change what you are allowed to say — the first
 about the functional form, the second about the standard errors — and the rest
 of this chapter is about what to do with each.
 
+## Goodness of fit, and what it cannot tell you
+
+Before the diagnostics, the summary statistics they are meant to supplement.
+The total variation in $y$ splits into the part the model accounts for and the
+part it does not,
+
+$$
+\underbrace{\textstyle\sum_i (y_i - \bar y)^2}_{\text{TSS}}
+\;=\;
+\underbrace{\textstyle\sum_i (\hat y_i - \bar y)^2}_{\text{ESS}}
+\;+\;
+\underbrace{\textstyle\sum_i e_i^2}_{\text{RSS}},
+\qquad
+R^2 = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}} .
+$$
+
+That decomposition holds *only* because the residuals are orthogonal to the
+fitted values, which is a property of least squares with an intercept and not a
+law of nature. Fit without an intercept and $R^2$ can be negative.
+
+Its defect is the one Anscombe exploited: $R^2$ cannot fall when a predictor is
+added, however irrelevant, because the extra column can always be given a
+coefficient of zero. Two corrections are standard.
+
+::: {.definition}
+[**Adjusted $R^2$**]{.term} — $R^2$ with a penalty for the parameters spent:
+$$
+R^2_{\text{adj}} \;=\; 1 - \frac{\mathrm{RSS}/(n-p)}{\mathrm{TSS}/(n-1)} .
+$$
+It can decrease when a useless variable is added, which is the point. It is
+still not a model-selection criterion — see AIC below.
+:::
+
+::: {.definition}
+[**Residual standard error**]{.term} — the typical size of a residual, in the
+units of $y$:
+$$
+\mathrm{RSE} \;=\; s \;=\; \sqrt{\frac{\mathrm{RSS}}{n-p}} .
+$$
+Unlike $R^2$ it is not unitless, which makes it the more honest number to
+report: "typically wrong by 6,000 euros" means something, where "$R^2 = 0.63$"
+means something only relative to the variance of this particular sample.
+:::
+
+```{python}
+#| label: check-fit
+#| code-summary: "Run it: the three fit statistics from their definitions"
+
+model = sm.OLS(d["gdp_pc_eur"], sm.add_constant(d["productivity_idx"])).fit()
+n, p = int(model.nobs), int(model.df_model) + 1
+resid = model.resid.to_numpy()
+
+rss = (resid ** 2).sum()
+tss = ((d["gdp_pc_eur"] - d["gdp_pc_eur"].mean()) ** 2).sum()
+
+r2_hand = 1 - rss / tss
+adj_hand = 1 - (rss / (n - p)) / (tss / (n - 1))
+rse_hand = np.sqrt(rss / (n - p))
+
+print(f"{'':14}{'by hand':>14}{'statsmodels':>14}")
+print(f"{'R²':14}{r2_hand:14.6f}{model.rsquared:14.6f}")
+print(f"{'adjusted R²':14}{adj_hand:14.6f}{model.rsquared_adj:14.6f}")
+print(f"{'RSE':14}{rse_hand:14.4f}{np.sqrt(model.mse_resid):14.4f}")
+print(f"\nTypical miss: {rse_hand:,.0f} euros of GDP per capita, "
+      f"against a mean of {d['gdp_pc_eur'].mean():,.0f}.")
+```
+
+Note what the last line does that $R^2 = 0.63$ does not: it puts the error in
+euros, next to the quantity being predicted, where a reader can judge whether
+it is tolerable for the decision at hand.
+
 ## Leverage: which observations *can* move the line
 
 ::: {.definition}
@@ -407,6 +511,37 @@ from it. And it is *relative* — the same observation is high-leverage in a nar
 sample and unremarkable in a wide one, so leverage is a statement about the
 design, not about the observation.
 
+```{python}
+#| label: check-leverage
+#| code-summary: "Run it: leverage and standardised residuals from their definitions"
+
+infl = model.get_influence()
+
+# h_ii is the diagonal of X(X'X)^-1 X'. Forming the full n x n hat matrix to
+# read its diagonal would be wasteful; einsum takes the diagonal directly.
+Xd = sm.add_constant(d["productivity_idx"]).to_numpy()
+XtX_inv = np.linalg.inv(Xd.T @ Xd)
+h_hand = np.einsum("ij,jk,ik->i", Xd, XtX_inv, Xd)
+
+s = np.sqrt(rss / (n - p))
+r_hand = resid / (s * np.sqrt(1 - h_hand))
+
+print(f"leverage    max |hand - statsmodels| = "
+      f"{np.abs(h_hand - infl.hat_matrix_diag).max():.2e}")
+print(f"std. resid  max |hand - statsmodels| = "
+      f"{np.abs(r_hand - infl.resid_studentized_internal).max():.2e}")
+print(f"\nsum of h_ii = {h_hand.sum():.4f}, and p = {p}  "
+      f"(they are equal by construction)")
+print(f"average leverage p/n = {p/n:.5f};  "
+      f"{(h_hand > 2*p/n).sum()} observations exceed the 2p/n convention")
+```
+
+The check on the second-to-last line is worth pausing on. $\sum_i h_{ii} = p$ is
+not an empirical finding about this dataset; it is the trace of a projection
+onto a $p$-dimensional space, and it must hold exactly for every regression you
+ever fit. If your own implementation does not reproduce it, the implementation
+is wrong.
+
 The fourth Anscombe panel is the extreme case: one point at $x = 19$ among ten at
 $x = 8$ has leverage close to 1, and the line has no choice but to pass through
 it. Leverage is *potential*. It says an observation is positioned to move the
@@ -440,6 +575,25 @@ students conflate are genuinely different:
   robustness problem precisely because nothing looks wrong.
 - **High on both** — the case that changes conclusions, and what Cook's distance
   is built to find.
+
+```{python}
+#| label: check-cook
+#| code-summary: "Run it: Cook's distance, both ways"
+
+# D_i = (r_i^2 / p) * (h_ii / (1 - h_ii)) — the product form from the definition.
+cook_hand = (r_hand ** 2 / p) * (h_hand / (1 - h_hand))
+print(f"Cook's D    max |hand - statsmodels| = "
+      f"{np.abs(cook_hand - infl.cooks_distance[0]).max():.2e}")
+
+worst = int(np.argmax(cook_hand))
+print(f"\nlargest D_i = {cook_hand[worst]:.4f}  "
+      f"({d.loc[worst, 'geo']} {int(d.loc[worst, 'time'])})")
+print(f"  its residual  r = {r_hand[worst]:+.2f}")
+print(f"  its leverage  h = {h_hand[worst]:.4f}  "
+      f"({h_hand[worst] / (p/n):.1f}x the average)")
+print(f"  conventional flags: D > 1 → {(cook_hand > 1).sum()}, "
+      f"D > 4/n → {(cook_hand > 4/n).sum()}")
+```
 
 Note how the leverage factor behaves: $h/(1-h)$ is 0.11 at $h = 0.1$, but 9 at
 $h = 0.9$. Influence does not rise gently with leverage, it explodes as $h_{ii}$
@@ -572,6 +726,32 @@ $$
 (X^{\top}X)^{-1}.
 $$
 
+```{python}
+#| label: check-hc
+#| code-summary: "Run it: build the sandwich estimator from the definition"
+
+# The meat of the sandwich: sum_i e_i^2 x_i x_i', which is X' diag(e^2) X.
+bread = np.linalg.inv(Xd.T @ Xd)
+meat = Xd.T @ (Xd * (resid ** 2)[:, None])
+V_hc0 = bread @ meat @ bread
+se_hc0_hand = np.sqrt(np.diag(V_hc0))
+
+fits = {
+    "classical": model,
+    "HC0 (White)": model.get_robustcov_results(cov_type="HC0"),
+    "HC3 (use this)": model.get_robustcov_results(cov_type="HC3"),
+}
+print(f"{'':18}{'slope SE':>12}{'t':>9}")
+for name, f in fits.items():
+    # params is a Series for the pandas fit and an array for the robust ones,
+    # so index positionally through numpy rather than by label.
+    b, se = np.asarray(f.params)[1], np.asarray(f.bse)[1]
+    print(f"{name:18}{se:12.3f}{b/se:9.2f}")
+se_hc0_sm = np.asarray(fits["HC0 (White)"].bse)[1]
+print(f"\nHC0 by hand      {se_hc0_hand[1]:12.3f}   "
+      f"(matches statsmodels to {abs(se_hc0_hand[1] - se_hc0_sm):.1e})")
+```
+
 Look at what that does. The classical formula assumes every observation
 contributes the same $\sigma^2$ to the middle; the sandwich lets each contribute
 its own $e_i^2$. It is consistent whatever the pattern of the variance, without
@@ -668,12 +848,49 @@ $$
 $$
 
 for a model with $k$ estimated parameters and maximised likelihood $\hat L$
-[@akaike1974]. The first term rewards fit, the second charges two units per
+[@akaike1974]. Be careful with $k$: the variance $\sigma^2$ was estimated from
+the data too, so a strict count includes it, while `statsmodels` counts only the
+regression coefficients for OLS. The two differ by a constant — 2 in AIC — which
+is invisible in any comparison and alarming the first time you find your own
+calculation disagreeing with the library. The cell below shows both. The first term rewards fit, the second charges two units per
 parameter, and lower is better. The Bayesian criterion replaces the penalty with
 $k \log n$, harsher for any $n > 7$, and aims at a different target — the true
 model, if one is among the candidates, rather than the best predictor
 [@schwarz1978]. They disagree by construction, and which you use should follow
 from which question you are asking.
+
+```{python}
+#| label: check-aic
+#| code-summary: "Run it: AIC from the log-likelihood, and a model comparison"
+
+# For Gaussian OLS the maximised log-likelihood has a closed form.
+loglik = -0.5 * n * (np.log(2 * np.pi) + np.log(rss / n) + 1)
+print(f"log-likelihood: hand {loglik:.4f}  statsmodels {model.llf:.4f}")
+
+# How many parameters were estimated? Two coefficients — and sigma^2, which was
+# also estimated from the data. Counting it is the stricter reading; statsmodels
+# does not, for OLS. The two conventions differ by a constant.
+for k, label in ((p, "k = p     (statsmodels)"), (p + 1, "k = p + 1 (counting σ²)")):
+    print(f"{label:26} AIC {-2*loglik + 2*k:10.3f}   BIC {-2*loglik + k*np.log(n):10.3f}")
+print(f"{'statsmodels reports':26} AIC {model.aic:10.3f}   BIC {model.bic:10.3f}")
+print(f"\nThe gap is 2 in AIC and log(n) = {np.log(n):.2f} in BIC — one parameter's")
+print("worth. It is the same for every model fitted to these rows, so it cancels")
+print("in any difference, which is the only way AIC is ever read.")
+
+# A comparison must use the same rows, so build the candidates on one frame.
+cand = d.assign(prod2=d["productivity_idx"] ** 2)
+models = {
+    "linear":        ["productivity_idx"],
+    "with quadratic": ["productivity_idx", "prod2"],
+}
+fitted = {name: sm.OLS(cand["gdp_pc_eur"], sm.add_constant(cand[cols])).fit()
+          for name, cols in models.items()}
+best = min(f.aic for f in fitted.values())
+print(f"\n{'':18}{'AIC':>12}{'Δ':>8}")
+for name, f in fitted.items():
+    print(f"{name:18}{f.aic:12.1f}{f.aic - best:8.1f}")
+print("\nΔ under about 2 is weak evidence of any difference at all.")
+```
 
 Three cautions, in order of how often they are violated.
 
@@ -699,6 +916,16 @@ $p$-values are reported as if they had not — the "garden of forking paths", wh
 requires no dishonesty at all, only the ordinary practice of looking at your data
 before deciding what to fit [@gelman2014]. If you select on AIC, say so, and
 treat the resulting inference as exploratory.
+
+::: {.step}
+**Stepwise selection is not here.** The deck this chapter grew from covered it
+alongside AIC, and it does not belong in a chapter on diagnostics: it is not a
+check on a fitted model but a procedure for choosing one. It opens chapter 5
+instead, where it does real work — the first, almost mechanical attempt to
+automate variable selection, whose instability under resampling is precisely
+the argument for shrinking coefficients continuously rather than including or
+excluding them.
+:::
 
 ## When a diagnostic fails, what to actually do
 
