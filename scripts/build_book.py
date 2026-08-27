@@ -41,6 +41,7 @@ contents would collapse into a flat list in the sidebar.
 """
 
 import datetime
+import json
 import re
 import shutil
 import sys
@@ -52,6 +53,7 @@ from course_spec import (SESSIONS, ordered, DATES, ASYNCHRONOUS,  # noqa: E402
                          WHEN, ROOM, MIDTERM_DATE, MIDTERM_AFTER)
 
 BOOK = ROOT / "book"
+PORTRAITS = ROOT / "assets" / "portraits"
 GH = "https://github.com/warint/quantitative-methods/blob/main/"
 PAGES = "https://warint.github.io/quantitative-methods/"
 
@@ -304,6 +306,48 @@ def _decks(num):
     return " · ".join(f"[{label}]({PAGES}session-{num}-{slug}.html)" for slug, label in kinds)
 
 
+def plate(num):
+    """The chapter's portrait, with its attribution taken from credits.json.
+
+    The credit is not decoration. These are real paintings and photographs by
+    named artists, and the licence that lets the book use them is conditional
+    on saying so.
+    """
+    creds = PORTRAITS / "credits.json"
+    if not creds.exists():
+        return ""
+    entry = json.loads(creds.read_text(encoding="utf-8")).get(f"session-{num}")
+    if not entry:
+        return ""
+
+    src = Path(entry["file"]).name
+    artist = entry["artist"]
+    when = entry["date"]
+    return (
+        '::: {.plate}\n'
+        f'![](images/{src}){{fig-alt="Portrait of {entry["name"]}, {entry["dates"]}."}}\n\n'
+        f'**{entry["name"]}** · {entry["dates"]}\n\n'
+        f'{entry["why"]}\n\n'
+        f'[{artist}, {when}. {entry["licence"]}, via Wikimedia Commons.]'
+        '{.plate-credit}\n'
+        ':::\n'
+    )
+
+
+def chapter_prose(d, num):
+    """The authored chapter, if one has been written for this session.
+
+    book/ is generated, so nothing written into book/session-NN.qmd survives a
+    rebuild. Long-form prose therefore lives beside the deck and the brief, in
+    the session's own directory, and is assembled in like everything else.
+    """
+    path = d / "chapter.md"
+    if not path.exists():
+        return None
+    text = strip_frontmatter(path.read_text(encoding="utf-8"))
+    return text.replace("{{portrait}}", plate(num)).strip()
+
+
 def chapter(num, s):
     d = ROOT / s["dir"]
     parts = [f"""---
@@ -341,6 +385,10 @@ Session 1 to here is examinable.
     pre = d / "00-pre-session/README.md"
     if pre.exists():
         parts.append("## Before the session\n\n" + normalise_brief(pre, num, 2))
+
+    prose = chapter_prose(d, num)
+    if prose:
+        parts.append(prose)
 
     deck = d / f"01-lecture/MATH60033A-S{num}-Lecture.qmd"
     if deck.exists():
@@ -538,7 +586,8 @@ book:
     - mandates.qmd
     - group-assessment.qmd
 
-bibliography: []
+bibliography: references.bib
+link-citations: true
 
 format:
   html:
@@ -639,6 +688,90 @@ pre code { font-size: 0.86em; }
 .cell-output pre { background: none; border-left: 3px solid $econ-grid; border-width: 0 0 0 3px; }
 
 .sidebar-title { font-weight: 700; letter-spacing: -0.015em; }
+
+/* ---- Chapter plates ---------------------------------------------------- */
+/* The portraits are already framed and toned by scripts/build_portraits.py.
+   All the page adds is the measure, the caption register and the credit. */
+
+.plate {
+  margin: 2.4rem auto;
+  max-width: 24rem;
+  text-align: center;
+
+  img {
+    width: 100%;
+    height: auto;
+    box-shadow: 0 2px 10px rgba(34, 26, 12, 0.22);
+  }
+
+  p { margin: 0.55rem 0 0; }
+
+  strong {
+    font-size: 1.02rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* The 'why this person' line. */
+  p:nth-of-type(2) {
+    color: $econ-muted;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    font-style: italic;
+  }
+}
+
+.plate-credit {
+  display: block;
+  margin-top: 0.5rem;
+  color: $econ-muted;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+/* ---- Definitions ------------------------------------------------------- */
+/* A term being defined, not an aside. Marked with a rule in the accent colour
+   so a reader scanning for "what does leverage actually mean" can find it. */
+
+.definition {
+  margin: 1.6rem 0;
+  padding: 0.85rem 1.1rem;
+  border-left: 3px solid $econ-blue;
+  background: rgba(53, 107, 140, 0.05);
+
+  > p:first-child { margin-top: 0; }
+  > p:last-child  { margin-bottom: 0; }
+
+  .term {
+    font-weight: 600;
+    color: $econ-blue;
+  }
+}
+
+/* ---- Literature review ------------------------------------------------- */
+/* Slightly tighter than body text: it is a survey, read faster than argument. */
+
+.lit {
+  margin: 1.6rem 0;
+  padding-left: 1.1rem;
+  border-left: 1px solid $econ-grid;
+  font-size: 0.95rem;
+
+  p { line-height: 1.55; }
+}
+
+/* Citations should be visible as citations without shouting. */
+.citation a {
+  color: $econ-teal;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(42, 140, 130, 0.5);
+}
+
+/* The reference list at the end of the book. */
+#refs {
+  font-size: 0.92rem;
+
+  .csl-entry { margin-bottom: 0.7rem; }
+}
 """
 
 
@@ -659,6 +792,16 @@ def main():
     (BOOK / "group-assessment.qmd").write_text(
         flat_page("How group work is assessed", ROOT / "GROUP-ASSESSMENT.md"), encoding="utf-8")
     (BOOK / "book.scss").write_text(BOOK_SCSS, encoding="utf-8")
+
+    bib = ROOT / "assets" / "references.bib"
+    if bib.exists():
+        shutil.copy2(bib, BOOK / "references.bib")
+
+    if PORTRAITS.exists():
+        images = BOOK / "images"
+        images.mkdir(exist_ok=True)
+        for jpg in sorted(PORTRAITS.glob("*.jpg")):
+            shutil.copy2(jpg, images / jpg.name)
 
     chapters = []
     for num, s in ordered():

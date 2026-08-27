@@ -39,6 +39,13 @@ if [ -n "$missing" ]; then
 fi
 
 if [ "${1:-}" != "--render-only" ]; then
+    # The bibliography is fetched from Crossref, so only rebuild it when the
+    # DOI list has actually changed. A render should not need the network.
+    if [ ! -f assets/references.bib ] || [ references.dois -nt assets/references.bib ]; then
+        echo "=== fetching bibliography from Crossref"
+        "$python_bin" scripts/build_bibliography.py
+    fi
+
     echo "=== assembling book/ from the decks and briefs"
     "$python_bin" scripts/build_book.py
 fi
