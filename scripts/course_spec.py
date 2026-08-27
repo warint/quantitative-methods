@@ -40,6 +40,7 @@ SESSIONS = {
         dataset_note="the course spine — thirty European countries, 2010–2024",
         deliverable=("a profile of your project's three key variables — centre, spread and shape, "
                      "thresholds tested — and the summary you would defend in print"),
+        pre_session_extra="git",   # Session 02 is where the group repository is set up
         loses_marks=[
             "`df.describe()` pasted with no interpretation",
             "A skewness reported without its threshold",

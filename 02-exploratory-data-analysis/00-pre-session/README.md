@@ -22,27 +22,34 @@ Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
 
 ## Step 1 — Reading
 
-**ISLR ch. 3.1-3.2**  
-Source: https://www.statlearning.com/  
-*Why:* Applied framing of the multiple regression model.
+**Fraiberger et al. (2021), *Media sentiment and international asset prices***
+Source: <https://doi.org/10.1016/j.jinteco.2021.103526> · replication package in
+[`REPLICATIONS.md`](../../REPLICATIONS.md)
 
-**Hastie, Tibshirani & Friedman, *Elements of Statistical Learning* (ESL), sec. 3.2**  
-Source: https://hastie.su.domains/ElemStatLearn/  
-*Why:* The projection-geometry treatment we develop in the lecture.
+Read for the **argument**, not for coverage. Annotate four things:
 
+| | |
+|---|---|
+| **1** | The research question, in one sentence |
+| **2** | How they build the sentiment measure |
+| **3** | The strongest single piece of evidence |
+| **4** | One limitation you would raise as a referee |
+
+*Optional background:* **ISLR ch. 2** — <https://www.statlearning.com/> — for the vocabulary
+Session 02 uses.
 
 ---
 
 ## Step 2 — Concepts to review
 
-Refresh these before class - we will use them without re-deriving them.
+Refresh these before class; we will use them without re-deriving them.
 
-- **Inner product and orthogonality.** $\langle a, b\rangle = a^\top b$; $a \perp b \iff a^\top b = 0$.
-- **Column space.** $\mathcal{C}(X) = \{X\beta : \beta \in \mathbb{R}^p\}$, a subspace of $\mathbb{R}^n$.
-- **Idempotent matrices.** $P$ is a projection iff $P^2 = P$; it is an *orthogonal* projection iff also $P^\top = P$.
-- **Rank and invertibility.** $X^\top X$ is invertible iff $X$ has full column rank.
+- **Mean and median.** The mean is the balance point; the median is the middle of the ordering.
+- **Variance and standard deviation.** $s^2 = \frac{1}{n-1}\sum_i (x_i - \bar x)^2$ — note the $n-1$.
+- **Quantiles.** $\tilde q_p$ is the value below which about $100p\%$ of the data falls.
+- **A straight line.** $y = \beta_0 + \beta_1 x$: what the intercept and the slope each mean.
 
-If any of these is unfamiliar, work through them with your local LLM *before* class, and bring your
+If any of these is unfamiliar, work through it with your local LLM *before* class, and bring your
 worked notes.
 
 ---

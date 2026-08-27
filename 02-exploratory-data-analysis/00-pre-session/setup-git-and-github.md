@@ -65,8 +65,27 @@ you did not do.
 
 ## Step 1 — Install Git
 
-Download from <https://git-scm.com/downloads> and accept every default. macOS may already have it;
-Step 2 tells you.
+**Check first — you may already have it.** In the VS Codium terminal:
+
+```bash
+git --version
+```
+
+If that prints a version number, git is installed and you are done with this step.
+
+**macOS.** Git ships with Apple's Command Line Tools, so most Macs already have it. If the command
+above is not found, macOS will offer to install the tools itself — accept — or run:
+
+```bash
+xcode-select --install
+```
+
+You do **not** need Homebrew for this course.
+
+**Windows.** Download from <https://git-scm.com/downloads> and accept every default. Restart VS
+Codium afterwards so the new `PATH` is picked up.
+
+**Linux.** `sudo apt install git`, or your distribution's equivalent.
 
 All commands below go in the **VS Codium integrated terminal** (``View → Terminal``, or
 ``Ctrl+` ``), never the macOS Terminal app.
@@ -187,6 +206,54 @@ Refresh the repository page in your browser, switch to your group's branch, and 
 there.
 
 **Each of the three of you does this at least once, from your own machine.** Not one per group.
+
+---
+
+## If your group of three is already formed — do a trial run now
+
+Groups are confirmed in Session 04, but if the three of you have already agreed to work together,
+you can rehearse the whole cycle before class. It takes ten minutes and it removes the one thing
+that reliably eats practice time: discovering in the room that two of you cannot push.
+
+**One person, once.** Create the branch and push it:
+
+```bash
+git checkout -b group-07              # your number, not 07
+git push -u origin group-07
+```
+
+**The other two, after that.** Fetch it and switch to it:
+
+```bash
+git fetch origin
+git checkout group-07
+```
+
+**Then each of you, one at a time**, adds a line with your own name and pushes:
+
+```bash
+git pull                              # always pull before you start
+echo "- Ana tested the push, 2 September" >> \
+  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+
+git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+git commit -m "Ana: trial push"
+git push
+```
+
+Wait for each person to finish before the next starts. When all three are done:
+
+```bash
+git pull
+git log --oneline -5
+```
+
+> **You should see three commits, with three different author names.** That is exactly what the
+> participation record looks like, and confirming it now is worth more than any amount of reading
+> about git.
+
+If someone's push is rejected, they almost certainly need to `git pull` first — someone else pushed
+in between. That is normal, not a fault; see [Working together](#working-together) below.
 
 ---
 
