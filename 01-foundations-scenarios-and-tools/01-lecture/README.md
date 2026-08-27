@@ -64,10 +64,17 @@ Full detail, including your group's allocation: [`RESEARCH-MANDATES.md`](../../R
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | 10% | individual, continuous |
+| **Participation** | 10% | individual, continuous — in the room, in the practice, or via the optional labs |
 | **Midterm exam** | 30% | individual, in class, **Wed 28 October** |
 | **Team work** | 20% | groups of three, presented Session 12 |
 | **Final exam** | 40% | **individual** research paper (25) + individual oral, 15 min (15) |
+
+Participation is **active engagement**, and three routes count equally: contributing in the room,
+engaging in the 90-minute practice, and completing an optional QMIB Lab App knowledge check after a
+session. The bar is six of the ten practices; clear it and the 10 is yours.
+
+The final mark out of 100 is converted to a **letter grade on a curve, with the class median at
+B+**. Nothing is curved *within* a component — the curve applies once, at that conversion.
 
 Reasoning behind each component, and the late-work rules:
 [`SYLLABUS.md`](../../SYLLABUS.md).

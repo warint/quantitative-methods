@@ -271,14 +271,23 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | **10%** | individual, continuous; optional QMIB Lab App reports may be submitted for credit |
+| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional QMIB Lab App reports |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet · **Wed 28 October** |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
 
 Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
-memo 3 · presentation and defence 3. The 90-minute group practices are **formative** — commented on,
-not marked. Optional post-class lab reports contribute to participation.
+memo 3 · presentation and defence 3.
+
+**Participation (10) is active engagement, earned by any of three routes:** contributing in the
+room, engaging in the 90-minute practice, or submitting an optional QMIB Lab App report after a
+session. The bar is a recorded contribution in **six of the ten practices**, and clearing it earns
+the full 10 — it is scored against that published bar, never against other students. Note that the
+practices themselves are **formative**: the analysis is commented on, not marked. What is recorded
+is that you engaged with it.
+
+**Letter grades are curved**, with the class **median at B+**. The curve applies once, at the
+conversion from the mark out of 100 to a letter — never inside a single component.
 
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)
 - Final exam brief (paper + oral): [`assessments/final-paper/`](assessments/final-paper/README.md)

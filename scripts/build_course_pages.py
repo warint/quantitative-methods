@@ -361,7 +361,7 @@ def session_table(link_prefix=""):
         rows.append(f"| [{num}]({link_prefix}{s['dir']}/README.md) | {s['title']} | "
                     f"{s['methods']} | {s['question'] if num in ('01', '12') else s['theme']} |")
         if num == MIDTERM_AFTER:
-            rows.append("| — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |")
+            rows.append(f"| — | **MIDTERM** *(in class, covering Sessions 1–{MIDTERM_AFTER.lstrip("0")})* | | |")
     return "\n".join(rows)
 
 

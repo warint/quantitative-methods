@@ -188,10 +188,27 @@ Sessions 10 and 11 confront the question the first nine sessions cannot answer �
 
 | Component | Weight | Form | When |
 |---|---|---|---|
-| **Participation** | **10%** | individual, continuous | every session |
+| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional labs | every session |
 | **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | Wed 28 October |
 | **Team work** | **20%** | groups of three (practice groups) | Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | end of term |
+
+### From a numerical mark to a letter
+
+The four components give a mark out of 100. That mark is then **converted to a letter grade, and
+the conversion is curved**, with the class **median at B+**.
+
+> **What that does and does not mean.** It does not mean a fixed quota of each letter, and it does
+> not mean you are competing with the person next to you for a place. It means the mapping from
+> numbers to letters is set once, at the end, against how the class as a whole performed on this
+> particular set of assessments — so an exam that turned out harder than intended does not cost you
+> a letter.
+>
+> **Within each component, nothing is curved.** Participation is scored against the published
+> absolute bar; the midterm and the paper are marked against their rubrics. The curve applies once,
+> at the final conversion, and never to a single piece of work.
+
+---
 
 **Team work, 20%**, broken down:
 
@@ -217,14 +234,25 @@ reasoning, in full.
 
 ### Participation — 10%
 
-Attendance is assumed at HEC Montréal, so participation cannot mean turning up. It means
-contributing to the room: a question that changed how another group saw their result, a connection
-between two angles, a correction that landed. After each practice session the instructor records who did that.
+Attendance is assumed at HEC Montréal, so participation cannot mean turning up. It means **active
+engagement**, and it is earned in three ways — any of which counts:
+
+| | | |
+|---|---|---|
+| **In the room** | a question that changed how another group saw their result, a connection between two angles, a correction that landed | every session |
+| **In the practice** | working the ninety minutes with your group: pushing your own commits, taking the two-minute report when drawn, engaging with what other groups found | Sessions 02–11 |
+| **In the optional lab** | a completed **QMIB Lab App** knowledge check, submitted after a session | any session, at home |
 
 > **Why it is graded at all.** The second half of this course is a joint enterprise. Ten groups
 > produce five perspectives on one question, and the value of the session comes from the collision
 > between them. A room where nobody challenges anybody produces ten monologues and learns a
 > fraction of what it could. Participation is graded because the collision is the point.
+
+**The optional labs.** The QMIB Lab App is an at-home knowledge check that follows each session. It
+is **never a prerequisite** for the next lecture and never assessed for correctness — a completed
+report counts because attempting it is the engagement being measured. It exists for two reasons: it
+gives you a private way to find out whether you actually followed the session, and it gives a route
+to full participation marks that does not depend on speaking in a room of thirty.
 
 **How the 10% is earned.** Against an **absolute, published bar** — never against each other:
 
@@ -233,20 +261,21 @@ between two angles, a correction that landed. After each practice session the in
 | Bar met | **10 / 10** |
 | Within one contribution of the bar | 7 / 10 |
 | Roughly half the bar | 5 / 10 |
-| Little or no recorded contribution | 0–3 / 10 |
+| Little or no recorded engagement | 0–3 / 10 |
 
-The bar is a recorded contribution in at least **N of the ten practice sessions**, and no more than one
-failure to deliver the two-minute report when drawn.
+The bar is **a recorded contribution in at least six of the ten practice sessions** — from any of
+the three routes above — and no more than one failure to deliver the two-minute report when drawn.
 
 > **Why an absolute bar rather than a ranking.** Because a participation score that ranks students
 > against one another measures confidence and extraversion as much as engagement, and it makes
 > helping another group personally costly — the exact opposite of what the course design requires.
-> Everyone who clears the bar gets the full 10. There is no curve and no quota.
+> Everyone who clears the bar gets the full 10 for this component. (The curve described
+> above applies only to the final letter conversion, never to this score.)
 
-If you contribute mainly in writing or within your group, say so — being quiet is not being absent,
-and the record should reflect what you actually did. A student who delivered every time they were
-drawn and worked steadily is flagged for **review, never auto-zeroed**: the instructor's attention
-is the measuring instrument, and it is imperfect.
+If you contribute mainly in writing, within your group, or through the labs, say so — being quiet is
+not being absent, and the record should reflect what you actually did. A student who delivered every
+time they were drawn and worked steadily is flagged for **review, never auto-zeroed**: the
+instructor's attention is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
