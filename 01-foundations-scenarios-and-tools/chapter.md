@@ -184,12 +184,35 @@ countries that join a series halfway through. Data constructed for teaching are
 clean and therefore false, and they train an intuition that fails on contact
 with anything real [@warin-statcan].
 
-This book resolves the tension toward the mess. Every method is applied to
-actual European economic series, with the awkwardness left in, because handling
-the awkwardness *is* the skill. The influential observation is not removed
-before you see it. The panel structure is not flattened away. When a diagnostic
-reveals a problem in the running example — and in chapter 3 it does, twice —
-the problem is reported rather than engineered out.
+This book resolves the tension toward the mess, and does it in a specific way
+that you need to understand before reading a single result.
+
+The data used throughout are **teaching fixtures**, not observations. They are
+generated from a known latent structure, and they carry the schema, the country
+and year coverage, the observation flags, the missingness patterns and the
+structural breaks of the real European sources they stand in for. What they do
+not carry is the values. Poland does not have the GDP per capita this book
+prints for it.
+
+That is a deliberate trade, and it buys two things. Every method behaves as it
+would on the real series — the missingness is awkward in the same places, the
+panel structure bites in the same way, the influential observations are
+influential for the same reasons — while the ground truth is known, so a
+diagnostic can be checked against what actually generated the data. And nobody
+is tempted to cite a course exercise as a finding about Europe.
+
+::: {.warn}
+**Do not cite any number in this book as a fact about Europe.** The tables in
+`data/spine/` are fixtures. `scripts/build_spine/build.py` replaces them with
+live Eurostat, Comtrade and ECB data, at which point every figure in the book
+re-renders against the real thing — and the numbers change.
+:::
+
+The awkwardness is left in, because handling it *is* the skill. The influential
+observation is not removed before you see it. The panel structure is not
+flattened away. When a diagnostic reveals a problem in the running example —
+and in chapter 3 it does, twice — the problem is reported rather than
+engineered out.
 
 ::: {.step}
 **A result that does not reproduce is not a result.** Every analysis in this
