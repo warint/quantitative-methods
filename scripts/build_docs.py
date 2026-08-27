@@ -1,4 +1,4 @@
-"""Assemble docs/ — the GitHub Pages site that serves the lecture slides.
+"""Assemble docs/ — the GitHub Pages site that serves the book and the slides.
 
 GitHub will not render an HTML file stored in a repository: clicking one shows
 the source, and the raw URL is served as text/plain. Pages is the way round
@@ -155,13 +155,13 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quantitative Methods in International Business with Python — Lecture slides</title>
+<title>Quantitative Methods in International Business with Python — MATH60033A</title>
 <style>{STYLE}</style>
 </head>
 <body>
   <div class="wrap">
     <h1>Quantitative Methods in International Business with Python</h1>
-    <p class="sub">Lecture slides — MATH60033A</p>
+    <p class="sub">The course book and the lecture slides — MATH60033A</p>
     <p class="by">Thierry Warin, PhD · HEC Montréal</p>
 
     <a class="card book" href="book/">
@@ -176,6 +176,7 @@ def main():
 
 {cards}
     <footer>
+      The book is the same material as continuous prose, searchable across every session.
       Slides open in the browser; press <strong>F</strong> for full screen, <strong>S</strong> for
       speaker notes, <strong>Esc</strong> for the overview.<br>
       The same material as a book: <a class="plain" href="book/">the course book</a>.<br>
