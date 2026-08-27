@@ -88,8 +88,8 @@ European one.
 
 ## 3. Why a literature review
 
-You are asked for a literature review of at least **fifteen** substantive sources. Here is the
-argument for it, because "because papers have them" is not an argument.
+You are asked for a literature review of **10 to 15** academic articles. Here is the argument for
+it, because "because papers have them" is not an argument.
 
 ### The old reason, which no longer holds
 
@@ -104,7 +104,7 @@ efficient way to acquire expertise in a domain you did not previously know.
 
 Consider what a review actually gives you:
 
-- **A prior over magnitudes.** After fifteen papers on agricultural yield prediction you know that
+- **A prior over magnitudes.** After a dozen papers on agricultural yield prediction you know that
   a rainfall elasticity of 0.3 is ordinary and one of 3.0 is a bug. Without that prior, 3.0 is just
   a number your code produced.
 - **The standard controls.** You learn which variables every serious paper in the field includes,
@@ -139,8 +139,11 @@ what puts you in the first category.
 You will also, in the course of it, discover that your assistant invents citations. Finding one is
 a required element of your LLM statement (§8).
 
-**Minimum:** fifteen substantive sources, of which at least eight peer-reviewed and at least four
+**Range: 10 to 15 academic articles**, of which at least eight peer-reviewed and at least four
 concerning the African context specifically. A source you cite is a source you have read.
+
+> The range is a range, not a target to max out. Fifteen articles you have read and organised by
+> argument beats twenty-five you have skimmed and listed alphabetically.
 
 ---
 
@@ -158,16 +161,20 @@ a proposed alternative is welcome and often better.
 | **D** Trade & dependence | concentration measures; clustering | Intra-African trade and import dependence | How concentrated is dependence on non-African suppliers in essential goods, and is it falling? |
 | **E** Policy language | measurement and validity | African policy, media or open-ended survey text | Can an attention index built from national policy text be validated against outcomes? |
 
-**Whatever you choose, the question must satisfy four tests.**
+**Whatever you choose, the question must satisfy five tests.**
 
-1. **Public and downloadable.** Someone in Cotonou with an intermittent connection must be able to
+1. **International.** This is a course in quantitative methods for **international business**, and
+   the paper must show it: a cross-border comparison, a question about trade, investment, migration,
+   policy diffusion or firm behaviour across countries — not a purely domestic question that happens
+   to use data from one African country.
+2. **Public and downloadable.** Someone in Cotonou with an intermittent connection must be able to
    obtain your data. No institutional subscriptions, no datasets over a few hundred megabytes.
-2. **Locally meaningful.** The question should be one an SDAfrique student might plausibly have
+3. **Locally meaningful.** The question should be one an SDAfrique student might plausibly have
    chosen herself. If it is only interesting from Montréal, choose again.
-3. **Answerable with your method.** Do not bend the question to fit a method you like. If the honest
+4. **Answerable with your method.** Do not bend the question to fit a method you like. If the honest
    answer is that your method is the wrong tool, that is a paper — but say so in the introduction,
    not the conclusion.
-4. **Modest in compute.** Must run on a laptop without a GPU, in under an hour.
+5. **Modest in compute.** Must run on a laptop without a GPU, in under an hour.
 
 Confirm your question with the instructor by the date in §10.
 
@@ -209,13 +216,13 @@ All open, all reachable from most of Africa.
 
 ## 6. Structure of the paper
 
-**8,000 words**, excluding references, tables and appendices. Standard academic format, single-authored.
+**Between 6,000 and 8,000 words, including references and appendices.** Standard academic format, single-authored. The research question must be on an **international** topic.
 
 | § | Section | Guidance |
 |---|---|---|
 | — | **Title, author, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
 | 1 | **Introduction** | The question, why it matters, what you contribute, and — in the last paragraph — what you found. Do not withhold the finding for suspense; this is not a novel. |
-| 2 | **Literature** | Fifteen+ sources. Organised by argument, not by author. It must end with the gap your paper addresses. |
+| 2 | **Literature** | 10–15 academic articles. Organised by argument, not by author. It must end with the gap your paper addresses. |
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations. Include the descriptive table a referee will ask for. |
 | 4 | **Method** | **Derive it.** Not "we use elastic net (Zou and Hastie 2005)" but the objective function, what the penalty does, why the tuning parameter is chosen as it is. Assume a reader who knows regression but not your method. |
 | 5 | **Results** | Main result with uncertainty and against a named benchmark. Figures with captions that say what they *show*. |
@@ -310,7 +317,7 @@ Out of 100, for the 25 points the paper carries.
 | Component | Weight | What earns full marks |
 |---|---|---|
 | **Question and contribution** | 10 | A specific, answerable question that matters locally, with the contribution stated plainly in the introduction |
-| **Literature review** | 15 | Fifteen+ read sources organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
+| **Literature review** | 15 | 10–15 read articles organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
 | **Data and provenance** | 10 | Full provenance; missingness confronted rather than concealed; survey design respected |
 | **Method** | 20 | Derived, not cited. Assumptions stated. Choice of method defended against the obvious alternative |
 | **Results and honest evaluation** | 20 | Uncertainty reported; named benchmark; evaluation design matching the data's dependence structure; no leakage |

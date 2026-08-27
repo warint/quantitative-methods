@@ -128,21 +128,24 @@ answerable question, where to find data, and what each session asks of you.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| — | | *midterm follows, covering Sessions 1–6* |
 | **07** | Wed 14 Oct | PCA and factor analysis |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
 | **12** | Wed 2 Dec | Final group presentations |
 
-**No class** on 30 September, 21 October, 28 October.
+**No class** on 30 September, 21 October.
 
 **Oral examination:** Monday 14 December 2026 (to be confirmed).
 
 > Session 06 (7 October) is **asynchronous** — the lecture deck, the pre-session and the practice
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
+>
+> The **midterm is written on 28 October**, after Session 07. It examines **Sessions 1–6 only**:
+> Session 07 is taught before the paper but is not on it.
 
 ---
 
@@ -269,7 +272,7 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 | Component | Weight | Form |
 |---|---|---|
 | **Participation** | **10%** | individual, continuous; optional QMIB Lab App reports may be submitted for credit |
-| **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet — after Session 06 |
+| **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet · **Wed 28 October** |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
 

@@ -135,21 +135,24 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| — | | *midterm follows, covering Sessions 1–6* |
 | **07** | Wed 14 Oct | PCA and factor analysis |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
 | **12** | Wed 2 Dec | Final group presentations |
 
-**No class** on 30 September, 21 October, 28 October.
+**No class** on 30 September, 21 October.
 
 **Oral examination:** Monday 14 December 2026 (to be confirmed).
 
 > Session 06 (7 October) is **asynchronous** — the lecture deck, the pre-session and the practice
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
+>
+> The **midterm is written on 28 October**, after Session 07. It examines **Sessions 1–6 only**:
+> Session 07 is taught before the paper but is not on it.
 
 ---
 
@@ -186,7 +189,7 @@ Sessions 10 and 11 confront the question the first nine sessions cannot answer �
 | Component | Weight | Form | When |
 |---|---|---|---|
 | **Participation** | **10%** | individual, continuous | every session |
-| **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | after Session 06 |
+| **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | Wed 28 October |
 | **Team work** | **20%** | groups of three (practice groups) | Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | end of term |
 
@@ -345,8 +348,9 @@ break the result — and half on the course, Sessions 02 to 11.
 > This is also why the individual multiplier does not apply to the final: both components already
 > measure you individually, so there is nothing to correct.
 
-**The shape of the paper.** **8,000 words**, excluding references and tables: a research
-question, a literature review, the data, the model, the results, and references. Full brief:
+**The shape of the paper.** **6,000–8,000 words, including references and appendices**: a research
+question on an **international** topic, a literature review of **10 to 15 academic articles**, the
+data, the model, the results, and references. Full brief:
 [`assessments/final-paper/`](assessments/final-paper/README.md).
 
 ---
@@ -398,7 +402,7 @@ You are never penalised for using the model. You are penalised for using it uncr
 > volunteered it. **You have to know enough to ask.**
 >
 > This is precisely why the final paper requires a literature review, and why the review is not a
-> formality. Fifteen papers on your topic give you priors: the standard controls, the usual data
+> formality. A dozen papers on your topic give you priors: the standard controls, the usual data
 > problems, the range in which a coefficient is plausible. Armed with those, you can ask your
 > assistant *"why is my estimate three times what the literature reports?"* — and that question is
 > the one that finds the bug. Without the review you would not have known the estimate was strange.

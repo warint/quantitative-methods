@@ -324,8 +324,8 @@ SESSIONS = {
 }
 
 # The timetable, as published. Wednesdays 15:30–18:30, Décelles — Victoriaville,
-# except where noted. Two Wednesdays have no class: 30 September, and 21 and 28
-# October.
+# except where noted. Two Wednesdays have no class: 30 September and 21 October.
+# The midterm is written on 28 October.
 WHEN = "Wednesdays 15:30–18:30"
 ROOM = "Décelles — Victoriaville"
 
@@ -346,7 +346,12 @@ DATES = {
 
 ASYNCHRONOUS = {"06"}
 
-NO_CLASS = ["2026-09-30", "2026-10-21", "2026-10-28"]
+NO_CLASS = ["2026-09-30", "2026-10-21"]
+
+# The midterm sits after Session 07 in the calendar but examines Sessions 1–6:
+# Session 07 is taught before it and is not on the paper.
+MIDTERM_DATE = "2026-10-28"
+MIDTERM_ROOM = "room to be announced"
 
 ORAL_EXAM = "Monday 14 December 2026 (to be confirmed)"
 

@@ -65,7 +65,7 @@ Full detail, including your group's allocation: [`RESEARCH-MANDATES.md`](../../R
 | Component | Weight | Form |
 |---|---|---|
 | **Participation** | 10% | individual, continuous |
-| **Midterm exam** | 30% | individual, in class, after Session 06 |
+| **Midterm exam** | 30% | individual, in class, **Wed 28 October** |
 | **Team work** | 20% | groups of three, presented Session 12 |
 | **Final exam** | 40% | **individual** research paper (25) + individual oral, 15 min (15) |
 
