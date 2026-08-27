@@ -1,5 +1,6 @@
 ---
 title: "Regression: Advanced Considerations"
+standalone: true
 ---
 
 ## One relationship, or thirty?
