@@ -13,16 +13,27 @@ question is the subject of this chapter.
 {{portrait}}
 
 Set the problem up. You have $n$ observations, a response $y$, and a matrix $X$
-holding a column of ones and $p-1$ predictors. You want coefficients $\beta$
-such that $X\beta$ is close to $y$. Least squares defines "close" as the sum of
+holding a column of ones and $p-1$ predictors. You want coefficients $\beta$ such
+that $X\beta$ is close to $y$. Least squares defines "close" as the sum of
 squared vertical distances, and chooses
 
 $$
 \hat\beta \;=\; \arg\min_{\beta} \; \lVert y - X\beta \rVert^2 .
 $$
 
-Differentiate, set to zero, and you get the *normal equations* $X^{\top}X\beta =
-X^{\top}y$, whose solution — whenever $X^{\top}X$ can be inverted — is
+Squared, rather than absolute, distance is worth pausing on, because the choice
+is not obvious and it has consequences you will meet later in the chapter.
+Squaring makes the objective differentiable everywhere, which is what delivers
+the closed-form solution below; it also makes the fitted values a *linear*
+function of $y$, which is what makes the whole diagnostic apparatus possible. The
+price is that squaring gives a doubled error four times the weight of a single
+one, so least squares is structurally sensitive to observations far from the
+line. Every technique in this chapter for finding influential points is, in a
+sense, paying off the debt incurred by that square.
+
+Differentiating and setting to zero gives the *normal equations*
+$X^{\top}X\beta = X^{\top}y$, whose solution — whenever $X^{\top}X$ can be
+inverted — is
 
 $$
 \hat\beta \;=\; (X^{\top}X)^{-1} X^{\top} y .
@@ -30,10 +41,10 @@ $$
 
 That is an algebraic fact. It requires no assumption about the world, no
 probability, no error term. Feed it any numbers and it returns coefficients.
-This is exactly why diagnostics are necessary: **the formula never refuses.**
-It has no way to tell you that the relationship is curved, that one country is
-dragging the whole line, or that the standard errors it reports are fiction.
-It returns the same confident four decimal places either way.
+This is exactly why diagnostics are necessary: **the formula never refuses.** It
+has no way to tell you that the relationship is curved, that one country is
+dragging the whole line, or that the standard errors it reports are fiction. It
+returns the same confident four decimal places either way.
 
 The statistical content arrives only when you attach a model,
 
@@ -85,9 +96,26 @@ does not depend on a single influential observation, one functional form, or one
 way of computing standard errors. Robustness is a question about *stability*.
 :::
 
-A model with $R^2 = 0.95$ can fail all three. This is not a hypothetical:
-Anscombe's celebrated four datasets share, to two decimal places, the same
-means, variances, correlation, regression line and $R^2$, and they are utterly
+Keeping them apart tells you what a given failure actually costs, and this is
+the part most often got wrong. The four classical assumptions do not all protect
+the same thing:
+
+| If this fails | $\hat\beta$ is | Standard errors are | So the damage is to |
+|---|---|---|---|
+| Correct specification | **biased** | meaningless | the estimate itself |
+| Constant variance | unbiased | **wrong** | validity only |
+| Independent errors | unbiased | **wrong**, usually far too small | validity only |
+| Normal errors | unbiased | fine in large samples | almost nothing, if $n$ is large |
+
+Read the table twice. Only the first row damages the coefficient. Rows two and
+three leave your estimate untouched and destroy your uncertainty — you have the
+right number with the wrong error bar, which matters enormously if the question
+is whether an effect can be distinguished from zero. Row four, the assumption
+students worry about most, is the one that matters least.
+
+A model with $R^2 = 0.95$ can fail all of it. This is not hypothetical:
+Anscombe's four datasets share, to two decimal places, the same means,
+variances, correlation, regression line and $R^2$, and they are utterly
 different [@anscombe1973].
 
 ```{python}
@@ -128,14 +156,18 @@ fig.tight_layout()
 Every one of those four panels reports $R^2 = 0.67$ and the same fitted line.
 Only in the first is that line a description of the data. In the second the
 relationship is deterministic and curved — the model is not wrong about the
-strength of the association so much as wrong about its *shape*. In the third a
-single aberrant point has tilted a line that would otherwise pass almost exactly
-through the rest. In the fourth every $x$ but one is identical, so the slope is
-determined entirely by one observation: delete it and the slope is undefined.
+strength of the association so much as wrong about its *shape*, and no amount of
+extra data will fix it, because more observations of a parabola still make a
+parabola. In the third a single aberrant point has tilted a line that would
+otherwise pass almost exactly through the rest; delete it and both the slope and
+the residual variance change sharply. In the fourth every $x$ but one is
+identical, so the slope is determined entirely by one observation: delete it and
+the slope is not merely different, it is undefined, because $X^{\top}X$ becomes
+singular.
 
 Anscombe's point was not that summary statistics are useless. It was that they
-are *insufficient*, and that the missing information is available for the cost
-of a plot.
+are *insufficient*, and that the missing information is available for the cost of
+a plot.
 
 ## What the residual knows
 
@@ -146,17 +178,28 @@ $$
 $$
 
 where $H = X(X^{\top}X)^{-1}X^{\top}$ is the *hat matrix* — so named because it
-puts the hat on $y$. It is the orthogonal projection onto the column space of
-$X$, which gives it two properties worth remembering: it is symmetric
-($H = H^{\top}$) and idempotent ($HH = H$). The residual vector is what is left
-after the projection,
+puts the hat on $y$. Geometrically it is the orthogonal projection onto the
+column space of $X$: it takes the $n$-dimensional vector of observations and
+casts its shadow onto the $p$-dimensional subspace the model can reach. That
+picture is worth holding, because it makes the next two properties obvious
+rather than algebraic. $H$ is symmetric ($H = H^{\top}$) and idempotent
+($HH = H$) — projecting a shadow again does nothing, since it is already flat.
+
+The residual vector is what the projection could not reach,
 
 $$
-e \;=\; y - \hat y \;=\; (I - H)\, y .
+e \;=\; y - \hat y \;=\; (I - H)\, y ,
 $$
 
-Now the useful consequence. If $\operatorname{Var}(\varepsilon) = \sigma^2 I$,
-then
+and it is orthogonal to every column of $X$ by construction. That orthogonality
+is the reason residual plots are informative *and* the reason they can mislead:
+$e$ is guaranteed to be uncorrelated with each predictor whether or not the model
+is right, so a flat residual plot against $x$ is not evidence of anything. What
+is *not* guaranteed is the absence of non-linear structure, which is exactly what
+you are looking for.
+
+Now the consequence that governs every diagnostic below. If
+$\operatorname{Var}(\varepsilon) = \sigma^2 I$, then
 
 $$
 \operatorname{Var}(e) \;=\; \sigma^{2}(I - H),
@@ -165,97 +208,124 @@ $$
 $$
 
 **The residuals do not have constant variance even when the errors do.** An
-observation with large $h_{ii}$ has a residual that is squeezed towards zero as
-a matter of arithmetic, not because the model fits it well. This is why raw
-residuals are the wrong thing to plot, and why every diagnostic below is built
-on the *standardised* residual
+observation with large $h_{ii}$ has a residual squeezed towards zero as a matter
+of arithmetic, not because the model fits it well. The most dangerous points
+therefore look like the best-behaved ones. This is why raw residuals are the
+wrong thing to plot, and why everything below is built on the *standardised*
+residual
 
 $$
 r_i \;=\; \frac{e_i}{s\sqrt{1 - h_{ii}}},
+\qquad s^2 = \frac{e^{\top}e}{n-p},
 $$
 
-with $s^2 = e^{\top}e/(n-p)$. Plotting $r_i$ against $\hat y_i$ is the single
-most informative diagnostic there is [@anscombe1963]. Under an adequate model
-the cloud is structureless: flat, centred on zero, of even width. Curvature
-means the functional form is wrong. A widening fan means the variance is not
-constant. Both are visible instantly and neither is visible in $R^2$.
+which divides out the arithmetic squeeze and restores comparability. Plotting
+$r_i$ against $\hat y_i$ is the single most informative diagnostic there is
+[@anscombe1963]. Under an adequate model the cloud is structureless: flat,
+centred on zero, of even width. Curvature means the functional form is wrong. A
+widening fan means the variance is not constant. Both are visible instantly and
+neither is visible in $R^2$.
+
+Why plot against $\hat y$ rather than against $x$? Because with several
+predictors there is no single $x$ to use, and $\hat y$ is the one-dimensional
+summary the model actually commits to. It is also the axis along which
+heteroscedasticity usually manifests, since the spread of an economic quantity
+so often scales with its level.
 
 ```{python}
 #| label: fig-diagnostics
 #| echo: false
-#| fig-cap: "Diagnostics for GDP per capita on the productivity index, the regression Session 02 fitted. Left: standardised residuals against fitted values. Right: the scale–location plot, which makes non-constant variance easier to see by removing the sign."
+#| fig-cap: "Diagnostics for GDP per capita on the productivity index — the regression Session 02 fitted. Left: standardised residuals against fitted values, with a LOWESS smoother [@cleveland1979]. Right: the scale–location plot, which removes the sign so that changing spread is easier to see."
 
 import pandas as pd, statsmodels.api as sm
+from statsmodels.nonparametric.smoothers_lowess import lowess
 import qmib
 
-d = qmib.load("core").dropna(subset=["gdp_pc_eur", "productivity_idx"])
+d = qmib.load("core").dropna(subset=["gdp_pc_eur", "productivity_idx"]).reset_index(drop=True)
 X = sm.add_constant(d["productivity_idx"])
 model = sm.OLS(d["gdp_pc_eur"], X).fit()
 infl = model.get_influence()
 std_resid = infl.resid_studentized_internal
-fitted = model.fittedvalues
+fitted = model.fittedvalues.values
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.2, 3.9))
 
 ax1.axhline(0, color=CL.muted, lw=1, zorder=1)
-ax1.scatter(fitted, std_resid, s=16, color=CL.accent, alpha=0.55,
-            edgecolor="none", zorder=3)
-lo = pd.Series(std_resid).rolling(45, center=True, min_periods=10).mean()
-ax1.plot(np.sort(fitted), lo[np.argsort(fitted)], color=CL.warn, lw=1.8, zorder=4)
+ax1.scatter(fitted, std_resid, s=16, color=CL.accent, alpha=0.5, edgecolor="none", zorder=3)
+sm_line = lowess(std_resid, fitted, frac=0.5, return_sorted=True)
+ax1.plot(sm_line[:, 0], sm_line[:, 1], color=CL.warn, lw=1.9, zorder=4)
 ax1.set_xlabel("fitted value"); ax1.set_ylabel("standardised residual")
 ax1.set_title("Residuals vs fitted", fontsize=10, loc="left")
 
-ax2.scatter(fitted, np.sqrt(np.abs(std_resid)), s=16, color=CL.accent,
-            alpha=0.55, edgecolor="none", zorder=3)
-lo2 = pd.Series(np.sqrt(np.abs(std_resid))).rolling(45, center=True, min_periods=10).mean()
-ax2.plot(np.sort(fitted), lo2[np.argsort(fitted)], color=CL.warn, lw=1.8, zorder=4)
+root = np.sqrt(np.abs(std_resid))
+ax2.scatter(fitted, root, s=16, color=CL.accent, alpha=0.5, edgecolor="none", zorder=3)
+sm2 = lowess(root, fitted, frac=0.5, return_sorted=True)
+ax2.plot(sm2[:, 0], sm2[:, 1], color=CL.warn, lw=1.9, zorder=4)
 ax2.set_xlabel("fitted value"); ax2.set_ylabel(r"$\sqrt{|\,r_i\,|}$")
 ax2.set_title("Scale–location", fontsize=10, loc="left")
 
 fig.tight_layout()
 ```
 
-Read @fig-diagnostics the way a referee would. The left panel is not flat: the
-smoothed line drifts, which says the straight line is missing curvature in the
-relationship between productivity and income. The right panel trends upward,
-which says the spread of the residuals grows with the fitted value. Neither
-finding is fatal. Both change what you are allowed to say.
+Read @fig-diagnostics the way a referee would, which means saying what you looked
+for before saying what you saw. In the left panel you are looking for curvature
+in the smoother and for a cloud of even vertical width; the smoother drifts
+rather than sitting flat, which says a straight line is missing some of the
+shape of the relationship between productivity and income. In the right panel
+you are looking for a trend, and there is one: the spread of the residuals grows
+with the fitted value. Richer countries are not merely richer, they are more
+variable.
+
+Neither finding is fatal. Both change what you are allowed to say — the first
+about the functional form, the second about the standard errors — and the rest
+of this chapter is about what to do with each.
 
 ## Leverage: which observations *can* move the line
 
 ::: {.definition}
-[**Leverage**]{.term} — the diagonal element $h_{ii}$ of the hat matrix, equal
-to $\partial \hat y_i / \partial y_i$: how much the fitted value at observation
-$i$ responds to a change in the observed value at $i$. Leverage is a property of
-$X$ alone. It does not involve $y$, so an observation can have high leverage
-while fitting perfectly.
+[**Leverage**]{.term} — the diagonal element $h_{ii}$ of the hat matrix, equal to
+$\partial \hat y_i / \partial y_i$: how much the fitted value at observation $i$
+responds to a change in the observed value at $i$. Leverage is a property of $X$
+alone. It does not involve $y$ at all, so an observation can have high leverage
+and fit perfectly.
 :::
 
-Because $H$ is a projection onto a $p$-dimensional space,
-$\sum_i h_{ii} = \operatorname{tr}(H) = p$, so the average leverage is exactly
-$p/n$ and each $h_{ii}$ lies in $[0, 1]$. The conventional flag is $h_{ii} >
-2p/n$ — twice the average — which is a rule of thumb and nothing more
-[@hoaglin1978]. In simple regression it has a transparent form,
+That derivative reading is the one to carry. If $h_{ii} = 0.9$, then moving that
+observation's $y$ up by one unit drags its own fitted value up by 0.9 — the line
+follows it almost exactly, which is another way of saying the line is not being
+constrained by anything else in that region.
+
+Because $H$ projects onto a $p$-dimensional space,
+$\sum_i h_{ii} = \operatorname{tr}(H) = p$, so leverage is a fixed budget of $p$
+shared among $n$ observations. The average is exactly $p/n$, and each $h_{ii}$
+lies in $[0,1]$. The conventional flag is $h_{ii} > 2p/n$ — twice the average —
+which is a rule of thumb and nothing more [@hoaglin1978]. In simple regression it
+has a transparent form,
 
 $$
 h_{ii} \;=\; \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j - \bar x)^2},
 $$
 
-which says exactly what leverage means: distance from the centre of the
-predictor space, in units of the spread of the predictors. The fourth Anscombe
-panel is the extreme case — one point at $x = 19$ among ten at $x = 8$ carries
-leverage close to 1, and the line has no choice but to pass through it.
+which says exactly what leverage means: a floor of $1/n$ that everyone gets, plus
+a term that grows with squared distance from the centre of the predictor space,
+measured in units of the predictors' own spread. Two consequences follow
+directly. Leverage is minimised at $x_i = \bar x$ and grows quadratically away
+from it. And it is *relative* — the same observation is high-leverage in a narrow
+sample and unremarkable in a wide one, so leverage is a statement about the
+design, not about the observation.
 
-Leverage is *potential*. It says an observation is positioned to move the line.
-Whether it actually does depends on whether its $y$ is surprising, and that
+The fourth Anscombe panel is the extreme case: one point at $x = 19$ among ten at
+$x = 8$ has leverage close to 1, and the line has no choice but to pass through
+it. Leverage is *potential*. It says an observation is positioned to move the
+line. Whether it actually does depends on whether its $y$ is surprising, and that
 requires combining leverage with the residual.
 
 ## Influence: separating the outlier from the point that matters
 
 ::: {.definition}
-[**Cook's distance**]{.term} — a measure of how much the entire vector of fitted
-values changes when observation $i$ is deleted, scaled so that it is comparable
-across observations and models:
+[**Cook's distance**]{.term} — how much the entire vector of fitted values moves
+when observation $i$ is deleted, scaled to be comparable across observations and
+models:
 $$
 D_i \;=\; \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y_{(i)})}{p\,s^2}
 \;=\; \frac{r_i^{2}}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} .
@@ -263,31 +333,36 @@ $$
 :::
 
 The second form is the one to internalise [@cook1977]. Cook's distance is a
-product of two things: how badly the point is fitted ($r_i^2$) and how much
-power it has to pull ($h_{ii}/(1-h_{ii})$). Either factor alone is harmless.
+*product* of two quantities: how badly the point is fitted, $r_i^2$, and how much
+power it has to pull, $h_{ii}/(1-h_{ii})$. Because it is a product, either factor
+being near zero makes the whole thing near zero — which is why the two things
+students conflate are genuinely different:
 
-- **High residual, low leverage** — an outlier sitting in the middle of the
-  predictor range. It inflates $s$ and hurts your standard errors, but it barely
-  moves $\hat\beta$, because it has no lever to pull on.
+- **High residual, low leverage** — an outlier in the middle of the predictor
+  range. It inflates $s$ and therefore widens every standard error in the model,
+  but it barely moves $\hat\beta$, because it has no lever to pull on.
 - **Low residual, high leverage** — a point far out in $X$ that the line happens
-  to pass through. It is *supporting* your slope rather than distorting it, but
-  your slope now depends on it, which is a robustness problem even though no
-  diagnostic will flag it as misfit.
-- **High on both** — the case that changes conclusions. This is what Cook's
-  distance is built to find.
+  to pass through. It is *supporting* your slope rather than distorting it, and
+  no misfit diagnostic will flag it. But your slope now rests on it, which is a
+  robustness problem precisely because nothing looks wrong.
+- **High on both** — the case that changes conclusions, and what Cook's distance
+  is built to find.
 
-Common cutoffs are $D_i > 1$ or $D_i > 4/n$; both are conventions, and
-[@belsley1980] is properly sceptical of treating any of them as a test. The
-useful discipline is not the threshold. It is that you *look*, you *name* the
-observations that stand out, and you say what happens to your conclusion with
-and without them. Deleting an influential point silently is misconduct.
-Reporting that Luxembourg is influential, and that your slope falls by a third
-without it, is a finding.
+Note how the leverage factor behaves: $h/(1-h)$ is 0.11 at $h = 0.1$, but 9 at
+$h = 0.9$. Influence does not rise gently with leverage, it explodes as $h_{ii}$
+approaches 1. Common cutoffs are $D_i > 1$ or $D_i > 4/n$; both are conventions,
+and @belsley1980 is properly sceptical about treating any of them as a test.
+
+The useful discipline is not the threshold. It is that you *look*, you *name* the
+observations that stand out, and you report what happens to your conclusion with
+and without them. Deleting an influential point silently is misconduct. Reporting
+that Luxembourg is influential, and that your slope falls by a third without it,
+is a finding — and often a more interesting one than the coefficient.
 
 ```{python}
 #| label: fig-influence
 #| echo: false
-#| fig-cap: "Left: the influence plot for the fitted regression — standardised residual against leverage, point area proportional to Cook's distance, dashed contours at $D=4/n$. Right: the same data with a single observation moved to a high-leverage position, to show what influence looks like when it is present. The right panel is a constructed illustration, not a feature of the data."
+#| fig-cap: "Left: the influence plot for the fitted regression — standardised residual against leverage, point area proportional to Cook's distance, dashed contours at $D = 4/n$. Right: the same data with one observation moved to a high-leverage, poorly-fitted position. The right panel is a constructed illustration, not a feature of the data."
 
 lev = infl.hat_matrix_diag
 cooks = infl.cooks_distance[0]
@@ -298,23 +373,21 @@ fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 4.0))
 
 def influence_panel(ax, lev, resid, cooks, title, hi=None):
     ax.axhline(0, color=CL.muted, lw=1)
-    size = 18 + 900 * np.clip(cooks, 0, None)
-    ax.scatter(lev, resid, s=size, color=CL.accent, alpha=0.45,
-               edgecolor="white", linewidth=0.6, zorder=3)
+    ax.scatter(lev, resid, s=18 + 900 * np.clip(cooks, 0, None), color=CL.accent,
+               alpha=0.45, edgecolor="white", linewidth=0.6, zorder=3)
     gl = np.linspace(max(lev.min(), 1e-4), lev.max() * 1.05, 200)
     for sign in (1, -1):
         ax.plot(gl, sign * np.sqrt(thresh * p * (1 - gl) / gl),
                 ls="--", lw=1.1, color=CL.warn, zorder=2)
     if hi is not None:
-        ax.scatter([lev[hi]], [resid[hi]], s=90, facecolor="none",
+        ax.scatter([lev[hi]], [resid[hi]], s=95, facecolor="none",
                    edgecolor=CL.warn, linewidth=1.8, zorder=5)
     ax.set_xlabel("leverage $h_{ii}$"); ax.set_ylabel("standardised residual")
-    ax.set_title(title, fontsize=10, loc="left")
-    ax.set_xlim(left=0)
+    ax.set_title(title, fontsize=10, loc="left"); ax.set_xlim(left=0)
 
 influence_panel(axL, lev, std_resid, cooks, f"As fitted — max $D_i$ = {cooks.max():.3f}")
 
-d2 = d.copy().reset_index(drop=True)
+d2 = d.copy()
 j = int(d2["productivity_idx"].idxmax())
 d2.loc[j, "productivity_idx"] = d2["productivity_idx"].max() * 2.1
 d2.loc[j, "gdp_pc_eur"] = d2["gdp_pc_eur"].min()
@@ -328,33 +401,73 @@ fig.tight_layout()
 ```
 
 The left panel of @fig-influence is what a clean diagnostic looks like: maximum
-Cook's distance around 0.04, every point comfortably inside the contours, no
-single observation carrying the result. That is a reportable finding in its own
-right, and it is worth saying explicitly rather than leaving as an absence. The
-right panel moves one observation to a position of high leverage and poor fit;
-its Cook's distance jumps by two orders of magnitude and the fitted slope moves
-with it. Nothing about $R^2$ warns you which panel you are in.
+Cook's distance around 0.04, every point inside the contours, no observation
+carrying the result. That is a reportable finding in its own right and worth
+stating explicitly rather than leaving as an absence — "no observation had Cook's
+distance above 0.05" is a sentence a referee can check. The right panel moves one
+observation to high leverage and poor fit; its Cook's distance jumps by two
+orders of magnitude and the slope moves with it. Nothing about $R^2$ warns you
+which panel you are in.
+
+## Normality, and why it matters least
+
+Of the four assumptions this is the one students check first and the one that
+matters least. It is not needed for unbiasedness, not needed for Gauss–Markov,
+and not needed for the standard errors to be right. It is needed for the $t$ and
+$F$ statistics to follow exactly the distributions their tables assume — and only
+in small samples, because the central limit theorem takes over as $n$ grows.
+$\hat\beta$ is a weighted sum of the $y_i$, and sums tend to normality whatever
+they are sums of.
+
+The right check is a normal quantile–quantile plot: sort the standardised
+residuals, plot them against the quantiles a normal sample of that size would be
+expected to produce, and look for departure from the diagonal. What you are
+looking for is not perfection but the *shape* of the departure. Points curving
+above the line at the right and below at the left mean heavy tails — more extreme
+observations than a normal would give — which is a robustness concern, since
+least squares weights those heavily. A systematic S-shape means skew.
+
+Formal tests exist [@shapiro1965], and their weakness is instructive: with
+$n = 428$ a Shapiro–Wilk test will reject normality on a departure far too small
+to affect any inference, while with $n = 20$ it will fail to reject a departure
+large enough to matter. This is the general pathology of diagnostic testing —
+the null is never exactly true, so the test measures sample size as much as
+misspecification — and it is the reason this chapter keeps returning to plots.
+
+```{python}
+#| label: fig-qq
+#| echo: false
+#| fig-cap: "Normal quantile–quantile plot of the standardised residuals. Departure at both ends, in opposite directions, is the signature of heavy tails rather than skew."
+
+from scipy import stats
+
+fig, ax = plt.subplots(figsize=(5.4, 4.2))
+osm, osr = stats.probplot(std_resid, dist="norm", fit=False)
+ax.plot([-3.4, 3.4], [-3.4, 3.4], color=CL.warn, lw=1.5, zorder=2)
+ax.scatter(osm, osr, s=15, color=CL.accent, alpha=0.6, edgecolor="none", zorder=3)
+ax.set_xlabel("theoretical normal quantile")
+ax.set_ylabel("standardised residual")
+ax.set_title("Normal Q–Q", fontsize=10, loc="left")
+fig.tight_layout()
+```
 
 ## When the variance is not constant
 
 Heteroscedasticity is the failure most often misdiagnosed, so be precise about
-what it costs. Under heteroscedasticity, $\hat\beta$ remains **unbiased** and
+what it costs. Under heteroscedasticity $\hat\beta$ remains **unbiased** and
 **consistent**. The coefficients are not wrong. What breaks is
-$\operatorname{Var}(\hat\beta)$: the usual formula $s^2 (X^{\top}X)^{-1}$ is no
-longer the right one, so the standard errors, the $t$ statistics, the
-confidence intervals and the $p$-values are all computed from a formula that
-does not apply. You have the right answer with the wrong uncertainty attached to
-it — which, if the question is whether an effect is distinguishable from zero,
-is the part that matters.
+$\operatorname{Var}(\hat\beta)$: the usual $s^2 (X^{\top}X)^{-1}$ is no longer the
+right formula, so the standard errors, $t$ statistics, confidence intervals and
+$p$-values are all computed from an expression that does not apply. You have the
+right answer with the wrong uncertainty attached — which, if the question is
+whether an effect is distinguishable from zero, is the part that matters.
 
 The formal test regresses the squared residuals on the predictors and asks
-whether they explain anything [@breusch1979]. It is worth running, but the
-scale–location plot usually tells you first, and the test has the usual
-weakness of all diagnostic tests: with $n = 428$ it will reject on
-heteroscedasticity too mild to matter, and with $n = 30$ it will fail to reject
-heteroscedasticity severe enough to invalidate everything.
+whether they explain anything [@breusch1979]. Worth running, but the
+scale–location plot usually tells you first, and the test carries the same
+sample-size pathology as every other.
 
-The modern response is not to fix the variance but to stop relying on the
+The modern response is not to model the variance but to stop relying on the
 assumption. White's heteroscedasticity-consistent estimator replaces the
 misapplied middle of the sandwich with the squared residuals themselves
 [@white1980]:
@@ -366,25 +479,92 @@ $$
 (X^{\top}X)^{-1}.
 $$
 
-This is consistent whatever the pattern of the variance, without your having to
-model that pattern. Its small-sample behaviour is poor, however, which motivated
-the corrected variants HC1, HC2 and HC3 [@mackinnon1985]. The practical
-recommendation is settled and worth memorising: **use HC3 by default**, and
-certainly whenever $n < 250$ [@long2000]. In `statsmodels` that is
-`fit(cov_type="HC3")`, a single argument, and there is no good reason to omit
-it.
+Look at what that does. The classical formula assumes every observation
+contributes the same $\sigma^2$ to the middle; the sandwich lets each contribute
+its own $e_i^2$. It is consistent whatever the pattern of the variance, without
+your having to know or model that pattern — which is why it is called *robust*
+rather than *efficient*. Its small-sample behaviour is poor, because $e_i^2$
+underestimates the variance at high-leverage points, and the corrections HC1, HC2
+and HC3 exist to compensate [@mackinnon1985]. The practical recommendation is
+settled: **use HC3 by default**, certainly whenever $n < 250$ [@long2000]. In
+`statsmodels` that is `fit(cov_type="HC3")` — one argument, no good reason to
+omit it.
 
-Non-constant variance is not the only specification failure worth a test. The
+Non-constant variance is not the only specification failure worth testing. The
 RESET procedure adds powers of the fitted values back into the regression and
-tests whether they matter [@ramsey1969]; if $\hat y^2$ has explanatory power,
-some non-linearity you have not modelled remains.
+asks whether they matter [@ramsey1969]; if $\hat y^2$ has explanatory power, some
+non-linearity remains unmodelled.
+
+## The assumption nobody plots
+
+Independence has no standard diagnostic plot, which is most of why it goes
+unexamined — and in this dataset it is the assumption that actually fails.
+
+The `core` table is not 428 independent observations. It is 30 countries observed
+over 15 years. Germany in 2014 and Germany in 2015 are not two independent draws
+from anything: whatever makes German GDP per capita high in one year makes it
+high in the next. If the errors within a country are positively correlated, the
+sample carries far less information than its row count suggests, and the standard
+errors — which are computed from that row count — come out far too small.
+
+```{python}
+#| label: tbl-clustering
+#| echo: false
+#| output: asis
+
+import scipy.stats as st
+
+resid = pd.Series(model.resid.values, index=d.index)
+by_country = d.assign(r=resid).sort_values(["geo", "time"]).groupby("geo")["r"]
+rho = by_country.apply(lambda s: s.autocorr(1)).dropna()
+
+fits = {
+    "Classical OLS": sm.OLS(d["gdp_pc_eur"], X).fit(),
+    "HC3 (heteroscedasticity)": sm.OLS(d["gdp_pc_eur"], X).fit(cov_type="HC3"),
+    "Clustered by country": sm.OLS(d["gdp_pc_eur"], X).fit(
+        cov_type="cluster", cov_kwds={"groups": d["geo"]}),
+}
+rows = []
+for name, f in fits.items():
+    b, se = f.params.iloc[1], f.bse.iloc[1]
+    rows.append(f"| {name} | {b:,.1f} | {se:,.1f} | {b/se:.1f} | ±{1.96*se:,.0f} |")
+
+print(f"Median within-country lag-1 residual autocorrelation: "
+      f"**{rho.median():.2f}** across {len(rho)} countries.\n")
+print("| Standard errors | Coefficient | SE | $t$ | 95% CI half-width |")
+print("|---|---|---|---|---|")
+print("\n".join(rows))
+```
+
+The numbers make the point better than any argument. The coefficient is identical
+in all three rows — as promised, dependence does not bias it. The classical
+standard error and the HC3 standard error are nearly the same, because HC3 fixes
+heteroscedasticity and this is not heteroscedasticity. Clustering by country
+raises the standard error by about three quarters, and the confidence interval
+widens accordingly. Had the finding been marginal, the classical version would
+have declared significance that the clustered version withdraws.
+
+This is Moulton's warning [@moulton1990], and it is the single most consequential
+correction in applied panel work. @bertrand2004 showed the same mechanism
+producing spurious significance in difference-in-differences studies at
+alarming rates; @cameron2015 is the practitioner's reference for what to cluster
+on and when the cluster count is too small to trust. The rule of thumb is to
+cluster at the level at which treatment is assigned or shocks arrive — here, the
+country. For pure time-series dependence, the classical test is Durbin–Watson
+[@durbin1950], which detects lag-1 autocorrelation in ordered residuals.
+
+You will meet clustering properly in Session 11. The point here is that a
+diagnostic chapter that stopped at residual plots would have missed the largest
+inferential problem in its own running example, because the largest problem does
+not show up in a residual plot at all. **Some assumptions are checked by looking
+at the data. Independence is checked by knowing how the data were collected.**
 
 ## Comparing models: what AIC is, and what it is not
 
-Having diagnosed a problem, you will usually fit an alternative — a quadratic
-term, a log transform, an extra control. You now need a basis for preferring
-one. $R^2$ cannot supply it, because adding any variable, however irrelevant,
-cannot decrease $R^2$.
+Having diagnosed a problem you will usually fit an alternative — a quadratic
+term, a log transform, an extra control — and need a basis for preferring one.
+$R^2$ cannot supply it, because adding any variable, however irrelevant, cannot
+decrease $R^2$.
 
 Akaike's criterion comes at it from prediction rather than fit. It estimates the
 expected Kullback–Leibler divergence between the fitted model and the process
@@ -395,36 +575,69 @@ $$
 $$
 
 for a model with $k$ estimated parameters and maximised likelihood $\hat L$
-[@akaike1974]. The first term rewards fit; the second charges two units per
-parameter. Lower is better. The Bayesian criterion replaces the penalty with
-$k \log n$, which is harsher for any $n > 7$ and is aiming at a different
-target — the true model, if one is in the candidate set, rather than the best
-predictor [@schwarz1978].
+[@akaike1974]. The first term rewards fit, the second charges two units per
+parameter, and lower is better. The Bayesian criterion replaces the penalty with
+$k \log n$, harsher for any $n > 7$, and aims at a different target — the true
+model, if one is among the candidates, rather than the best predictor
+[@schwarz1978]. They disagree by construction, and which you use should follow
+from which question you are asking.
 
 Three cautions, in order of how often they are violated.
 
-First, **AIC is comparative and unitless**. A single AIC value means nothing
-whatsoever. Only differences between models fitted to *the same observations*
-are interpretable, which means that dropping rows through missing data
-invalidates the comparison. As a convention, $\Delta_i = \mathrm{AIC}_i -
-\mathrm{AIC}_{\min}$ below about 2 is weak evidence of any difference
-[@burnham2004].
+First, **AIC is comparative and unitless**. A single AIC value means nothing.
+Only differences between models fitted to *the same observations* are
+interpretable — so dropping rows through missing data silently invalidates the
+comparison, a mistake that is easy to make and invisible afterwards. By
+convention $\Delta_i = \mathrm{AIC}_i - \mathrm{AIC}_{\min}$ below about 2 is
+weak evidence of any difference [@burnham2004].
 
 Second, **AIC does not check adequacy**. It ranks the candidates you supply. If
-every model you supply is misspecified, it will rank them and hand you a winner,
-in exactly the confident tone it uses when one of them is right. It is a
-comparison, not a diagnostic, and it is not a substitute for the plots.
+every model you supply is misspecified it will rank them and hand you a winner,
+in the same confident tone it uses when one of them is right. It is a comparison,
+not a diagnostic, and no substitute for the plots.
 
 Third — the one that ends careers — **selecting a model and then reporting its
-$p$-values as though the specification were chosen in advance is invalid.**
-Freedman demonstrated the size of the problem with pure noise: regress a random
+$p$-values as though the specification had been chosen in advance is invalid.**
+Freedman demonstrated the scale of the problem with pure noise: regress a random
 $y$ on 50 random predictors, keep the significant ones, refit, and the second
 regression looks impressive [@freedman1983]. Nothing was there. The same
 mechanism operates whenever the data guide the specification and the resulting
-$p$-values are reported as if they had not — the "garden of forking paths",
-which requires no dishonesty at all, only the ordinary practice of looking at
-your data before deciding what to fit [@gelman2014]. If you select on AIC, say
-so, and treat the resulting inference as exploratory.
+$p$-values are reported as if they had not — the "garden of forking paths", which
+requires no dishonesty at all, only the ordinary practice of looking at your data
+before deciding what to fit [@gelman2014]. If you select on AIC, say so, and
+treat the resulting inference as exploratory.
+
+## When a diagnostic fails, what to actually do
+
+Diagnosis without a remedy is just anxiety. The response depends entirely on
+which assumption failed, which is why the table at the start of this chapter
+matters.
+
+**Curvature in the residuals** — the functional form is wrong, and this is the
+only failure that biases the coefficient, so it is the only one you must fix
+rather than accommodate. Add a quadratic term, take logs of a variable whose
+effect is plausibly proportional rather than additive, or fit a spline. Logs are
+the usual answer in economics because so many relationships are multiplicative;
+@box1964 gives the systematic treatment. Report that you transformed, and why,
+before you report the result.
+
+**Non-constant variance** — do not transform to fix it, since that changes the
+quantity you are modelling in order to repair its error term. Use HC3 standard
+errors and say so.
+
+**Dependence** — cluster at the level at which the dependence arises, or model it
+explicitly with fixed effects or a panel estimator.
+
+**Heavy tails or an influential point** — first identify the observation and ask
+what it is. An influential point is frequently the most informative observation
+in the dataset rather than an error: Luxembourg's productivity figures are
+strange because of cross-border commuting, which is a fact about the economy, not
+a data problem. Report the result with and without it. Delete only for a reason
+you can state in the text, and state it there.
+
+**Everything at once** — reconsider whether one linear model over pooled
+heterogeneous units is the right object. Often it is not, and the honest answer
+is a different specification rather than a patched one.
 
 ## A short review of the literature
 
@@ -434,27 +647,34 @@ should be examined systematically rather than summarised, and set out the plots
 still in use. @anscombe1973 made the case unforgettable with four datasets
 constructed to share every conventional summary while differing completely — a
 demonstration reproduced in @fig-anscombe and in nearly every regression text
-since.
+since. The smoother that makes such plots readable is @cleveland1979.
 
 The geometry was formalised in the 1970s. @hoaglin1978 gave the hat matrix its
-expository treatment and the $2p/n$ convention. @cook1977 introduced the
-distance measure that separates outlying from influential observations, and
-@belsley1980 assembled the apparatus into a book-length treatment, with a
-scepticism about mechanical cutoffs that has aged well.
+expository treatment and the $2p/n$ convention. @cook1977 introduced the distance
+that separates outlying from influential observations, and @belsley1980 assembled
+the apparatus into a book-length treatment, with a scepticism about mechanical
+cutoffs that has aged well.
 
 Robust inference developed in parallel. @white1980 provided a covariance
 estimator consistent under arbitrary heteroscedasticity, complementing the
-earlier @breusch1979 test. @mackinnon1985 showed White's estimator performs
-badly in small samples and proposed corrections; @long2000 evaluated them in
-practice and recommended HC3, which is now the applied default. Specification
-error more broadly is treated by @ramsey1969.
+earlier @breusch1979 test. @mackinnon1985 showed White's estimator behaves badly
+in small samples and proposed corrections; @long2000 evaluated them and
+recommended HC3, now the applied default. Specification error more broadly is
+treated by @ramsey1969, and transformation by @box1964.
+
+Dependence has a separate and more consequential literature. @durbin1950 gave the
+classical serial-correlation test; @moulton1990 showed how badly standard errors
+mislead when observations cluster within groups; @bertrand2004 demonstrated the
+same failure producing spurious significance in difference-in-differences at
+alarming rates; and @cameron2015 is the practical reference for cluster-robust
+inference and its limits.
 
 Model comparison follows @akaike1974 and @schwarz1978, whose criteria differ in
 penalty and in target — prediction against identification — a distinction
-@burnham2004 makes carefully and much applied work does not. The cost of
-ignoring it was quantified early by @freedman1983 and framed for a modern
-audience by @gelman2014: inference conditional on a specification chosen from
-the data is not the inference the $p$-value describes.
+@burnham2004 makes carefully and much applied work does not. The cost of ignoring
+it was quantified early by @freedman1983 and framed for a modern audience by
+@gelman2014: inference conditional on a specification chosen from the data is not
+the inference the $p$-value describes.
 
 The through-line, from 1963 to now, is a single claim — that a fitted model is a
 hypothesis about the data, not a summary of it, and that the residuals are where
@@ -463,19 +683,22 @@ that hypothesis is tested.
 
 ## What to report
 
-A diagnostic section that earns its place answers four questions in order, and
+A diagnostic section that earns its place answers five questions in order, and
 takes about a page.
 
 1. **Is the functional form right?** Residuals against fitted, with a smoother.
    Say what structure you looked for and whether you found it.
-2. **Is the variance constant?** Scale–location. If it is not, report HC3
-   standard errors and say that you did — do not quietly switch and leave the
-   reader to notice the numbers changed.
-3. **Does any observation carry the result?** Leverage against standardised
-   residual, sized by Cook's distance. Name the observations that stand out,
-   identify them substantively — Luxembourg, Ireland, 2020 — and report the
-   coefficient with and without them.
-4. **Would a different specification do better?** Compare on AIC over the same
+2. **Is the variance constant?** Scale–location. If not, report HC3 standard
+   errors and say that you did — do not quietly switch and leave the reader to
+   notice the numbers moved.
+3. **Are the observations independent?** This one you answer from how the data
+   were collected, not from a plot. If they cluster, cluster the standard errors
+   and report both.
+4. **Does any observation carry the result?** Leverage against standardised
+   residual, sized by Cook's distance. Name what stands out, identify it
+   substantively — Luxembourg, Ireland, 2020 — and give the coefficient with and
+   without it.
+5. **Would a different specification do better?** Compare on AIC over the same
    rows, report $\Delta$, and state plainly whether the specification was chosen
    before or after seeing the data.
 

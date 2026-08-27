@@ -382,11 +382,16 @@ Session 1 to here is examinable.
 :::
 """)
 
+    # Pre-session logistics — download the package, unzip it here, arrive with
+    # these four things — is instruction for the week, not part of a chapter.
+    # It stays in the deck and the session README, where a student looks for it.
+    # A chapter that has been written keeps the space for explanation instead.
+    prose = chapter_prose(d, num)
+
     pre = d / "00-pre-session/README.md"
-    if pre.exists():
+    if pre.exists() and not prose:
         parts.append("## Before the session\n\n" + normalise_brief(pre, num, 2))
 
-    prose = chapter_prose(d, num)
     if prose:
         parts.append(prose)
 
@@ -420,15 +425,16 @@ def preface():
     for num, s in ordered():
         d = datetime.date.fromisoformat(DATES[num])
         star = " *(asynchronous)*" if num in ASYNCHRONOUS else ""
-        rows.append(f"| [{int(num)}](session-{num}.qmd) | {d:%-d %b}{star} | "
-                    f"{s['title']} | {s['question']} |")
+        rows.append(f"| [{int(num)}](session-{num}.qmd) | "
+                    f"{s['title']}{star} | {s['question']} |")
         if num == MIDTERM_AFTER:
             md = datetime.date.fromisoformat(MIDTERM_DATE)
-            rows.append(f"| — | **{md:%-d %b}** | **Midterm** — on paper, closed book | "
-                        f"**Sessions 1–{int(MIDTERM_AFTER)}** |")
+            rows.append(f"| — | **Midterm** — on paper, closed book | "
+                        f"**Chapters 1–{int(MIDTERM_AFTER)}** |")
     table = "\n".join(rows)
     return f"""---
 title: "Preface"
+number-sections: false
 ---
 
 # Preface {{.unnumbered}}
@@ -467,10 +473,10 @@ Each chapter links to the three decks it was built from. The slides remain the v
 in class; the book is the same material set as continuous prose, which is the better form for
 reading afterwards.
 
-## The twelve sessions
+## The twelve chapters
 
-| | Date | Session | Question |
-|---|---|---|---|
+| | Chapter | Question |
+|---|---|---|
 {table}
 
 ::: {{.muted}}
@@ -577,7 +583,7 @@ book:
       chapters:
         - syllabus.qmd
         - setup.qmd
-    - part: "The twelve sessions"
+    - part: "The twelve chapters"
       chapters:
 {chapters}
   appendices:
