@@ -116,6 +116,36 @@ answerable question, where to find data, and what each session asks of you.
 
 ---
 
+## Schedule
+
+**Wednesdays 15:30–18:30** · Décelles — Victoriaville · autumn 2026
+
+| Session | Date | Topic |
+|---|---|---|
+| **01** | Wed 26 Aug | Syllabus and Europe 2031 |
+| **02** | Wed 2 Sep | Exploratory data analysis |
+| **03** | Wed 9 Sep | Regression diagnostics |
+| **04** | Wed 16 Sep | Logistic regression |
+| **05** | Wed 23 Sep | Regularisation |
+| **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
+| — | | *midterm follows, covering Sessions 1–6* |
+| **07** | Wed 14 Oct | PCA and factor analysis |
+| **08** | Wed 4 Nov | KNN and bias–variance |
+| **09** | Wed 11 Nov | Structural equation modelling |
+| **10** | Wed 18 Nov | Causal inference (1/2) |
+| **11** | Wed 25 Nov | Causal inference (2/2) |
+| **12** | Wed 2 Dec | Final group presentations |
+
+**No class** on 30 September, 21 October, 28 October.
+
+**Oral examination:** Monday 14 December 2026 (to be confirmed).
+
+> Session 06 (7 October) is **asynchronous** — the lecture deck, the pre-session and the practice
+> brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
+> the same three hours as booked.
+
+---
+
 ## The twelve sessions
 
 | # | Session | The method | The question it answers |

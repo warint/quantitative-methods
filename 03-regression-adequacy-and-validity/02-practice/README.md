@@ -2,6 +2,9 @@
 
 # Regression: Adequacy, Validity, and Robustness
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-03-practice.html)** ·
+> source: [`MATH60033A-S03-Practice.qmd`](MATH60033A-S03-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 03-regression-adequacy-and-validity/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity***, and its replication package
+([10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)) should already be unzipped at:
+
+```text
+03-regression-adequacy-and-validity/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

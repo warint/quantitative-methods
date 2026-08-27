@@ -2,6 +2,9 @@
 
 # Regression: Advanced Considerations
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-06-practice.html)** ·
+> source: [`MATH60033A-S06-Practice.qmd`](MATH60033A-S06-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 06-advanced-regression/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity***, and its replication package
+([10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD)) should already be unzipped at:
+
+```text
+06-advanced-regression/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

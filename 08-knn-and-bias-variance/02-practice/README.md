@@ -2,6 +2,9 @@
 
 # K-Nearest Neighbours and the Bias–Variance Trade-off
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-08-practice.html)** ·
+> source: [`MATH60033A-S08-Practice.qmd`](MATH60033A-S08-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 08-knn-and-bias-variance/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling***, and its replication package
+([10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW)) should already be unzipped at:
+
+```text
+08-knn-and-bias-variance/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

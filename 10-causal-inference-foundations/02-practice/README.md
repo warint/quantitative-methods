@@ -2,6 +2,9 @@
 
 # Causal Inference I: Counterfactuals, Randomisation, Matching
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-10-practice.html)** ·
+> source: [`MATH60033A-S10-Practice.qmd`](MATH60033A-S10-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 10-causal-inference-foundations/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning***, and its replication package
+([10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA)) should already be unzipped at:
+
+```text
+10-causal-inference-foundations/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

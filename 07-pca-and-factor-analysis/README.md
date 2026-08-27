@@ -5,6 +5,8 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-07-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S07-Lecture.qmd`](01-lecture/MATH60033A-S07-Lecture.qmd).
 
+**Wednesday 14 October 2026** · 15:30–18:30 · Décelles — Victoriaville
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

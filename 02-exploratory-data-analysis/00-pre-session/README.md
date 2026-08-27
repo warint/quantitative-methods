@@ -1,6 +1,15 @@
 # Session 02 — Pre-session preparation
 
-> Complete **all four steps** before class. Expect 90–120 minutes, plus 45 for the setup below.
+> **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-02-pre-session.html)** ·
+> source: [`MATH60033A-S02-Pre-Session.qmd`](MATH60033A-S02-Pre-Session.qmd)
+
+> Complete **all four steps** before class. Expect 90–120 minutes, plus 45 for the git setup below.
+
+| | Before class | Used in the practice for |
+|---|---|---|
+| **1** | Read the paper | reproducing one of its results |
+| **2** | Get **both** datasets | that, and profiling your own angle |
+| **3** | Set up git and your group repository | pushing your work, this session and every session after |
 
 ---
 
@@ -23,8 +32,10 @@ Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
 ## Step 1 — Reading
 
 **Fraiberger et al. (2021), *Media sentiment and international asset prices***
-Source: <https://doi.org/10.1016/j.jinteco.2021.103526> · replication package in
-[`REPLICATIONS.md`](../../REPLICATIONS.md)
+[Read the article](https://doi.org/10.1016/j.jinteco.2021.103526)
+
+You reproduce one of its results in the first twenty minutes of the practice, so read it with that
+in mind.
 
 Read for the **argument**, not for coverage. Annotate four things:
 
@@ -54,9 +65,23 @@ worked notes.
 
 ---
 
-## Step 3 — Your data this week
+## Step 3 — Get both datasets
 
-Your data are **already cleaned and cached**. There is nothing to download.
+The practice uses **two**, and both should be on your machine before you arrive.
+
+### a) The paper's replication package
+
+This is what you reproduce in the first twenty minutes.
+
+**Harvard Dataverse: [10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF)**
+
+Download once and unzip into `02-exploratory-data-analysis/data/replication/`. That folder is
+git-ignored, so nothing large is committed. Keep the authors' own structure and README.
+
+### b) The course data, for your own angle
+
+This is what you apply the method to in the second half. It is **already cleaned and cached** —
+one line, nothing to download.
 
 | Group | Angle | Your file | Unit | Columns |
 |---|---|---|---|---|
@@ -72,13 +97,21 @@ Your data are **already cleaned and cached**. There is nothing to download.
 | **G10** | E | `angle_e_national.parquet` | document | [dictionary](../../data/spine/dictionaries/G10.md) |
 
 ```python
-import pandas as pd
-core = pd.read_parquet("data/spine/core.parquet")
-mine = pd.read_parquet("data/spine/<your file>.parquet")
-df   = mine.merge(core, on=["geo", "time"], how="left")   # not for angle E
+import qmib
+
+core = qmib.load("core")                 # shared by every group
+mine = qmib.load("angle_c_country")      # YOUR file — see the table above
+df   = core.merge(mine, on=["geo", "time"], how="inner")   # not for angle E
+
+print(core.shape, mine.shape, df.shape)
 ```
 
-**Before class:** Load your file, join to `core.parquet`, and identify **one outcome** and **three structural controls** you could partial out. Write the regression equation you intend to estimate. Bring it written down.
+> `qmib.load()` resolves the local cache first, so after the first run the practice works with the
+> wifi off. `qmib.catalog()` lists everything available.
+
+**Before class:** load your file, join it to `core`, and pick the **three variables** your research
+question depends on most — the outcome, and the two you most expect to explain it. Write down one
+sentence on why you chose each. That is what you profile in the practice.
 
 > Read your [data dictionary](../../data/spine/dictionaries/) first. Its **Traps** section lists
 > the things that have cost somebody a week, and its **First look** items take ten minutes. Knowing

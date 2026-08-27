@@ -146,7 +146,7 @@ def pre_session_deck(num, s):
 | | | |
 |---|---|---|
 | **1** | Read the paper | 45–60 min |
-| **2** | Load the data | 10 min |
+| **2** | Get **both** datasets — the paper's, and your own angle | 10 min |
 | **3** | Attempt the self-check | 15 min |
 
 ::: {{.warn}}
@@ -156,8 +156,11 @@ machine.
 
 ## 1 · Read the paper
 
-The article and its replication package are listed in
-[`REPLICATIONS.md`](../../REPLICATIONS.md).
+**{s['reading']}**
+
+::: {{.muted}}
+[Read the article]({s['reading_url']})
+:::
 
 Read for the **argument**, not for coverage. Annotate four things:
 
@@ -168,28 +171,41 @@ Read for the **argument**, not for coverage. Annotate four things:
 | **3** | The strongest single piece of evidence |
 | **4** | One limitation you would raise as a referee |
 
-::: {{.muted}}
-You will be asked what you underlined, and why. Two minutes, three students, at the start.
+## 2 · Get BOTH datasets
+
+::: {{.warn}}
+The practice uses two: the **paper's data**, to reproduce one of its results, and **your own
+angle**, to apply the method. Have both before you arrive.
 :::
 
-## 2 · Load the data
+**a) The paper's replication package** — Harvard Dataverse
 
-{s['dataset_note'].capitalize()}.
+::: {{.step}}
+[{s['dataverse']}](https://doi.org/{s['dataverse']})
+:::
+
+Unzip it into `{s['dir']}/data/replication/` — that folder is git-ignored, so nothing large is
+committed. Keep the authors' own structure.
+
+## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")
-print(data.shape)
+data = qmib.load("{s['dataset']}")     # what the lecture uses
+core = qmib.load("core")                # shared by every group
+mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+
+print(data.shape, core.shape, mine.shape)
 ```
 
 ::: {{.check}}
-Run this **before** you arrive. It downloads once and caches locally, so the practice works
+Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
 :::
 
 ::: {{.muted}}
-Everything available: `qmib.catalog()`
+{s['dataset_note'].capitalize()} · everything available: `qmib.catalog()`
 :::
 
 ## 3 · Self-check
@@ -211,7 +227,8 @@ By the end you should be able to:
 :::
 
 ::: {{.get}}
-Bring: the annotated paper, the cached data, and your self-check answers.
+**Arrive with:** the paper read and annotated · the replication package unzipped ·
+`qmib.load()` run at least once · your self-check answers on paper.
 :::
 
 ## Running the code
@@ -271,13 +288,18 @@ The git log is the participation record. It is not a formality.
 
 ## 1 · Reproduce — 20 min
 
-Take the result the paper rests on, and reproduce it.
+Take the result the paper rests on, and reproduce it. The package you downloaded is at
+`{s['dir']}/data/replication/`.
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")
+data = qmib.load("{s['dataset']}")     # the session's own data, for comparison
 ```
+
+::: {{.muted}}
+Paper: {s['reading']} · [{s['dataverse']}](https://doi.org/{s['dataverse']})
+:::
 
 ::: {{.check}}
 A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.

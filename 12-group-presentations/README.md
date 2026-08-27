@@ -2,6 +2,8 @@
 
 > **Can you make a decision-maker act on this — and tell them honestly what would change your mind?**
 
+**Wednesday 2 December 2026** · 15:30–18:30 · Décelles — Victoriaville
+
 Quantitative Methods in International Business · duration 3h00
 
 ---

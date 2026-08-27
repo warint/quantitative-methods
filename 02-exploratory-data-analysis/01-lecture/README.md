@@ -26,6 +26,7 @@ column of data:
 | **Centre** | where does the distribution sit? | §2.1 |
 | **Spread** | how far from there does it reach? | §2.2 |
 | **Shape** | is it symmetric, and how heavy are the tails? | §2.3 |
+| **Inference** | what does this sample say about the population? | §2.4 |
 
 ---
 
@@ -227,7 +228,179 @@ flinching.
 
 ---
 
-### 2.4 From data to models: fitting a straight line
+### 2.4 Distributions, z-scores, and what a sample tells you
+
+Sections 2.1–2.3 described the data **in front of you**. This section is the bridge to the data you
+do not have — which is the only reason anyone summarises anything.
+
+#### Why a distribution at all
+
+The **normal** distribution is unimodal, symmetric and bell-shaped, written $N(\mu, \sigma)$;
+$N(0,1)$ is the *standard* normal. Very few real variables are exactly normal. Many are close
+enough that the approximation earns its keep — and §2.3 is how you check whether yours is one of
+them.
+
+#### The z-score: comparing things measured on different scales
+
+$$z = \frac{\text{observation} - \text{mean}}{\text{standard deviation}}$$
+
+A z-score is **how many standard deviations an observation sits above or below the mean**. Because
+it is unit-free, it lets you compare measurements that share no scale at all.
+
+> **Two candidates, two different tests.** Pam scored 1800 on the SAT ($\mu = 1500$,
+> $\sigma = 300$). Jim scored 24 on the ACT ($\mu = 21$, $\sigma = 5$). Who did better?
+
+$$z_{\text{Pam}} = \frac{1800 - 1500}{300} = 1.0
+\qquad
+z_{\text{Jim}} = \frac{24 - 21}{5} = 0.6$$
+
+Pam is one standard deviation above her cohort; Jim is 0.6 above his. **Pam did better** — a
+conclusion the raw numbers 1800 and 24 cannot support.
+
+```python
+from scipy import stats
+
+# What share of candidates score below 1800?
+print(f"{stats.norm.cdf(1800, loc=1500, scale=300):.4f}")   # 0.8413
+print(f"{stats.norm.cdf(1.0):.4f}")                          # 0.8413 — same, via the z-score
+```
+
+`norm.cdf` is the area to the *left*: 84.13% score below Pam.
+
+#### Application: quality control
+
+A juice line fills bottles to a target of 36 oz, normally distributed with $\sigma = 0.11$. A
+bottle fails inspection below 35.8 oz or above 36.2 oz. **What share passes?**
+
+$$z_{35.8} = \frac{35.8 - 36}{0.11} = -1.82
+\qquad
+z_{36.2} = \frac{36.2 - 36}{0.11} = +1.82$$
+
+```python
+lo = stats.norm.cdf(35.8, loc=36, scale=0.11)
+hi = stats.norm.cdf(36.2, loc=36, scale=0.11)
+
+print(f"below 35.8: {lo:.4f}")      # 0.0345
+print(f"below 36.2: {hi:.4f}")      # 0.9655
+print(f"pass rate : {hi - lo:.4f}") # 0.9310
+```
+
+**93.1% pass** — so roughly one bottle in fourteen is rejected, which is a number an operations
+manager can act on. Tighten $\sigma$ and that fraction falls.
+
+#### Application: reading a percentile backwards
+
+Salaries in a firm are approximately $N(98.2, 0.73)$, in thousands. Where do the bottom 3% and the
+top 10% cut off? This is the inverse question, so it needs the inverse function — `ppf`, the
+percent-point function, R's `qnorm`.
+
+```python
+z_low  = stats.norm.ppf(0.03)     # -1.8808
+z_high = stats.norm.ppf(0.90)     # +1.2816
+
+print(f"lowest 3%  below {z_low  * 0.73 + 98.2:.1f}K")   # 96.8K
+print(f"highest 10% above {z_high * 0.73 + 98.2:.1f}K")  # 99.1K
+```
+
+> **`cdf` and `ppf` are inverses.** `cdf` takes a value and returns a proportion; `ppf` takes a
+> proportion and returns a value. Almost every mistake in this material is using one where the
+> other was meant.
+
+---
+
+#### From a sample to a population
+
+Everything so far treated $\mu$ and $\sigma$ as known. They never are. You have a **sample**, and
+you use its statistics to say something about the **population** you cannot observe.
+
+| Term | Meaning |
+|---|---|
+| **Error** | the difference between the population parameter and your sample statistic |
+| **Bias** | *systematic* over- or under-estimation — it does not average away |
+| **Sampling variability** | how much the estimate moves from one sample to the next |
+
+> **Bias and sampling variability are different problems.** A bigger sample shrinks the second and
+does nothing at all to the first.
+
+#### The sampling distribution
+
+Draw a sample, compute its mean, write it down. Draw another. The distribution of those means is
+the **sampling distribution** — and it has two properties worth memorising:
+
+$$\mathbb{E}[\bar X] = \mathbb{E}[X], \qquad \mathrm{Var}(\bar X) = \frac{\mathrm{Var}(X)}{n}$$
+
+The mean of the sample mean is the population mean — it is unbiased. Its *variance* is smaller by a
+factor of $n$, so its standard deviation is smaller by $\sqrt{n}$.
+
+```python
+import numpy as np
+import statsmodels.api as sm
+
+x = sm.datasets.stackloss.load_pandas().data["STACKLOSS"]
+print(f"population   mean {x.mean():.3f}   sd {x.std(ddof=1):.3f}")
+
+rng = np.random.default_rng(0)
+xbar = [rng.choice(x, size=5, replace=True).mean() for _ in range(10_000)]
+
+print(f"sample means mean {np.mean(xbar):.3f}   sd {np.std(xbar, ddof=1):.3f}")
+print(f"theory  sd/sqrt(n) = {x.std(ddof=1) / np.sqrt(5):.3f}")
+```
+
+```
+population   mean 17.524   sd 10.172
+sample means mean 17.542   sd 4.442
+theory  sd/sqrt(n) = 4.549
+```
+
+The means centre on the population mean, and their spread is close to $\sigma/\sqrt{n}$. That
+quantity is the **standard error** — not a different kind of thing from a standard deviation, just
+the standard deviation *of an estimate*.
+
+> **You never see this distribution.** You have one sample, not ten thousand. Its value is as a way
+> of thinking: your estimate is one draw from a distribution you can reason about but not observe.
+
+#### The Central Limit Theorem
+
+$$\bar X \;\approx\; N\!\left(\mu,\; \frac{\sigma}{\sqrt n}\right)$$
+
+As $n$ grows, the standardised sample average
+
+$$z = \frac{\bar X - \mathbb{E}[X]}{\sigma/\sqrt n} = \frac{\sqrt n\,(\bar X - \mathbb{E}[X])}{\sigma}$$
+
+converges to the standard normal — **whatever the shape of the underlying variable**. That is why
+the normal distribution keeps appearing in a course about data that is mostly not normal: it is not
+a claim about your variable, it is a claim about your *estimate*.
+
+**The conditions are not decoration.**
+
+::: {.tight}
+- **Independence** — random sampling or random assignment. Sampling without replacement needs
+  $n$ below about 10% of the population
+- **Enough of both outcomes**, for a proportion — at least ten expected successes and ten expected
+  failures
+:::
+
+#### Eight ways data goes wrong
+
+Before any of the above means anything, the sample has to be worth analysing:
+
+::: {.tight}
+1. **Unrepresentative sample** — it does not stand for the population you mean to describe
+2. **Data quality** — entry errors, form-handling errors, silent coercions
+3. **Self-selection** — call-in and voluntary-response samples answer a different question
+4. **Sample size** — too small to distinguish signal from noise
+5. **Undue influence** — how the question was framed changed the answer
+6. **Correlation read as causation** — the theme of Sessions 10 and 11
+7. **Self-funded studies** — assess the design, not the sponsor's conclusion
+8. **Confounding** — two effects that cannot be separated in the data you have
+:::
+
+> **Every one of these survives a perfectly executed calculation.** None of them is detectable in the
+output.
+
+---
+
+### 2.5 From data to models: fitting a straight line
 
 Everything so far described **one variable at a time**. The moment you ask whether two things move
 together, you are building a model. This section is the smallest possible one — and every method in
@@ -410,7 +583,7 @@ then, write **"is associated with"**, and mean it.
 
 ---
 
-### 2.5 What this buys you in the rest of the course
+### 2.6 What this buys you in the rest of the course
 
 Every later session assumes you have done this first.
 

@@ -2,6 +2,9 @@
 
 # Logistic Regression: Binary, Ordinal, and Multinomial
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-04-practice.html)** ·
+> source: [`MATH60033A-S04-Practice.qmd`](MATH60033A-S04-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 04-logistic-ordinal-multinomial/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks***, and its replication package
+([10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)) should already be unzipped at:
+
+```text
+04-logistic-ordinal-multinomial/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

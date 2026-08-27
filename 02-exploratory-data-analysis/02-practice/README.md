@@ -2,6 +2,9 @@
 
 # Profiling a variable you will have to defend
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-02-practice.html)** ·
+> source: [`MATH60033A-S02-Practice.qmd`](MATH60033A-S02-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -35,15 +38,31 @@ mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-XX
 
 ---
 
+## 0 · Reproduce one result from the paper — 20 min
+
+Fraiberger et al. build a sentiment index and relate it to returns. Take the descriptive result the
+paper opens with — the distribution of the sentiment measure — and reproduce it from the
+replication package you downloaded:
+
+```text
+02-exploratory-data-analysis/data/replication/
+```
+
+A failed reproduction that you **diagnose** earns full marks; one you do not attempt earns none.
+"It did not work" is not a diagnosis — where did it stop, and what did you check?
+
+---
+
 ## 1 · Load your angle and pick three variables — 15 min
 
 ```python
 import numpy as np
 import pandas as pd
+import qmib
 from scipy import stats
 
-core = pd.read_parquet("data/spine/core.parquet")
-mine = pd.read_parquet("data/spine/angle_c_country.parquet")   # your angle — see your dictionary
+core = qmib.load("core")                  # shared by every group
+mine = qmib.load("angle_c_country")       # your angle — see your dictionary
 df   = core.merge(mine, on=["geo", "time"], how="inner")
 ```
 

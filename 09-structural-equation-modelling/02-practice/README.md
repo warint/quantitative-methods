@@ -2,6 +2,9 @@
 
 # Structural Equation Modelling
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-09-practice.html)** ·
+> source: [`MATH60033A-S09-Practice.qmd`](MATH60033A-S09-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 09-structural-equation-modelling/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***, and its replication package
+([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at:
+
+```text
+09-structural-equation-modelling/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

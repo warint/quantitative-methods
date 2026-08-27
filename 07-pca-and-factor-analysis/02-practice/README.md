@@ -2,6 +2,9 @@
 
 # Principal Component and Factor Analyses
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-07-practice.html)** ·
+> source: [`MATH60033A-S07-Practice.qmd`](MATH60033A-S07-Practice.qmd)
+
 ---
 
 ## The theme of this session
@@ -40,6 +43,15 @@ mkdir -p 07-pca-and-factor-analysis/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models***, and its replication package
+([10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM)) should already be unzipped at:
+
+```text
+07-pca-and-factor-analysis/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

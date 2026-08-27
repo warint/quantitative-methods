@@ -8,14 +8,23 @@ data page — is regenerated, and the session tables in README.md and SYLLABUS.m
 are rewritten between markers so the three can never disagree.
 """
 
+import datetime
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import SESSIONS, ordered, generated, MIDTERM_AFTER  # noqa: E402
+from course_spec import (SESSIONS, ordered, generated, MIDTERM_AFTER,  # noqa: E402
+                         DATES, ASYNCHRONOUS, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
+
+
+def _when(num):
+    """The scheduled date line, so a session page always states when it runs."""
+    d = datetime.date.fromisoformat(DATES[num])
+    tail = " · **asynchronous**" if num in ASYNCHRONOUS else ""
+    return f"**{d:%A %-d %B %Y}** · {WHEN.split()[1]} · {ROOM}{tail}"
 
 
 def link(num):
@@ -32,6 +41,8 @@ def session_readme(num, s):
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-{num}-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S{num}-Lecture.qmd`](01-lecture/MATH60033A-S{num}-Lecture.qmd).
+
+{_when(num)}
 
 Quantitative Methods in International Business · duration 3h00
 
@@ -96,14 +107,25 @@ def pre_session(num, s):
 
 > **{s['question']}**
 
-Budget **60–90 minutes**. None of it is optional.
+> **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-{num}-pre-session.html)** ·
+> source: [`MATH60033A-S{num}-Pre-Session.qmd`](MATH60033A-S{num}-Pre-Session.qmd)
+
+Two things to do before class, and they are the two halves of the practice.
+Budget **60–90 minutes**.
+
+| | Before class | Used in the practice for |
+|---|---|---|
+| **1** | Read the paper | reproducing one of its results |
+| **2** | Get both datasets | that, and applying the method to your own angle |
 
 ---
 
-## 1. Read the paper — 45–60 min
+## 1. The reading — 45–60 min
 
-See [`REPLICATIONS.md`](../../REPLICATIONS.md) for this session's article and its replication
-package. Read it for the **argument**, not for coverage:
+**{s['reading']}**
+[Read the article]({s['reading_url']})
+
+Read for the **argument**, not for coverage:
 
 | | What to look for |
 |---|---|
@@ -116,40 +138,69 @@ package. Read it for the **argument**, not for coverage:
 
 ---
 
-## 2. Load the data — 10 min
+## 2. The data — 10 min
 
-The practice uses the same data the lecture does. Load it once so it is cached before class:
+You need **two** datasets in the practice, and both should be on your machine before you arrive.
+
+### a) The paper's replication package
+
+This is what you reproduce in the first twenty minutes of the practice.
+
+**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**
+
+Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
+
+```text
+{s['dir']}/data/replication/
+```
+
+Keep the authors' own folder structure and README.
+
+### b) The course data, for your own angle
+
+This is what you apply the method to in the second half.
 
 ```python
 import qmib
-data = qmib.load("{s['dataset']}")
-print(data.shape)
+
+data = qmib.load("{s['dataset']}")      # what the lecture uses
+core = qmib.load("core")                 # shared by every group
+mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
+
+print(data.shape, core.shape, mine.shape)
 ```
 
 {s['dataset_note'].capitalize()}.
 
-> Run this **before** you arrive. It downloads once and caches locally, so the practice works
-> whatever the room's wifi is doing.
+> Run this **before** class. It downloads once and caches as parquet, so the practice works
+> whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
+
+Your group's file, columns, units and traps are in your
+[data dictionary](../../data/spine/dictionaries/).
 
 ---
 
 ## 3. Self-check — 15 min
 
-Answer on paper, before the lecture. If you cannot, that is what the lecture is for.
+Answer on paper. If you cannot, that is what the lecture is for.
 
 1. In one sentence: what does this session's method let you claim that the previous one did not?
 2. What must be true of your data for it to apply?
-3. Which of the four evaluations in the paper above rests on this method?
+3. Which claim in the paper rests on this method — and how hard does it lean on it?
 
 ---
 
-## What the lecture assumes
+## Arrive with
 
-That you have read the paper, run the two lines above, and attempted the self-check.
+- [ ] The paper read and annotated
+- [ ] The replication package downloaded and unzipped
+- [ ] `qmib.load()` run at least once, so the cache exists
+- [ ] Your self-check answers, on paper
 
 ---
 
-[Session {num} overview](../README.md) · [The lecture](../01-lecture/README.md)
+[Session {num} overview](../README.md) · [The lecture](../01-lecture/README.md) ·
+[The practice](../02-practice/README.md)
 """
 
 
@@ -158,6 +209,9 @@ def practice(num, s):
     return f"""# Session {num} — Group practice (second half, ~90 min)
 
 # {s['title']}
+
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-{num}-practice.html)** ·
+> source: [`MATH60033A-S{num}-Practice.qmd`](MATH60033A-S{num}-Practice.qmd)
 
 ---
 
@@ -197,6 +251,15 @@ mkdir -p {s['dir']}/02-practice/submissions/group-XX
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
+
+The paper is **{s['reading']}**, and its replication package
+([{s['dataverse']}](https://doi.org/{s['dataverse']})) should already be unzipped at:
+
+```text
+{s['dir']}/data/replication/
+```
+
+The session's own dataset, for comparison:
 
 ```python
 import qmib

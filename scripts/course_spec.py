@@ -36,6 +36,9 @@ SESSIONS = {
             "Compute **skewness** and **excess kurtosis**, and test each against its threshold",
             "Fit a simple regression and state the slope **in units**",
         ],
+        reading="Fraiberger et al. (2021), *Media sentiment and international asset prices*",
+        reading_url="https://doi.org/10.1016/j.jinteco.2021.103526",
+        dataverse="10.7910/DVN/QNKFJF",
         dataset="core",
         dataset_note="the course spine — thirty European countries, 2010–2024",
         deliverable=("a profile of your project's three key variables — centre, spread and shape, "
@@ -62,6 +65,9 @@ SESSIONS = {
             "Use **Cook's distance** to separate an outlier from an influential point",
             "Compare candidate models on **AIC**, and say why that is not model selection",
         ],
+        reading="Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity*",
+        reading_url="https://doi.org/10.1080/00103624.2024.2336573",
+        dataverse="10.7910/DVN/U5DAEP",
         dataset="core",
         dataset_note="the same regression Session 02 fitted — GDP per capita on productivity",
         deliverable=("a diagnostic report on your group's own regression: four plots, the "
@@ -88,6 +94,9 @@ SESSIONS = {
             "Compare nested models with a **likelihood-ratio test**",
             "Extend the model to **ordinal** and **multinomial** outcomes, and say what each assumes",
         ],
+        reading="Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks*",
+        reading_url="https://doi.org/10.1371/journal.pone.0224194",
+        dataverse="10.7910/DVN/ONOFS7",
         dataset="loans",
         dataset_note="Lending Club — 9,578 three-year loans, FICO scores and default",
         deliverable=("a logistic model of a binary outcome in your own project data, with the "
@@ -115,6 +124,9 @@ SESSIONS = {
             "Choose between lasso and elastic net from the **correlation structure**",
             "Report $\\lambda$ by cross-validation, and know why post-selection inference is invalid",
         ],
+        reading="Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee*",
+        reading_url="https://doi.org/10.1007/s10994-016-5578-4",
+        dataverse="10.7910/DVN/QJEUKR",
         dataset="core",
         dataset_note="a wide slice of the spine — more candidate indicators than usable rows",
         deliverable=("a penalised fit on your own angle: the path, the chosen $\\lambda$, what "
@@ -140,6 +152,9 @@ SESSIONS = {
             "Read an **interaction** as a slope that differs between groups",
             "Compare non-nested models on information criteria rather than an F-test",
         ],
+        reading="Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity*",
+        reading_url="https://doi.org/10.1162/REST_a_00095",
+        dataverse="10.7910/DVN/8WEXYD",
         dataset="panel",
         dataset_note="a country panel of government debt and economic-freedom indices",
         deliverable=("a panel specification of your project's core relationship, fitted with both "
@@ -166,6 +181,9 @@ SESSIONS = {
             "State the difference between **PCA** and **factor analysis**, and when each applies",
             "Say why a factor is identified only **up to rotation**",
         ],
+        reading="Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models*",
+        reading_url="https://doi.org/10.1162/REST_a_00614",
+        dataverse="10.7910/DVN/NKWMQM",
         dataset="movies",
         dataset_note="45,000 films — budget, popularity, revenue, runtime and votes",
         deliverable=("a dimension-reduction of your project's indicators: the scree plot, the "
@@ -192,6 +210,9 @@ SESSIONS = {
             "Choose $k$ by cross-validation, and read the trade-off the curve shows",
             "Say what happens to KNN as the number of predictors grows",
         ],
+        reading="Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling*",
+        reading_url="https://doi.org/10.1080/00103624.2025.2454015",
+        dataverse="10.7910/DVN/HGBPCW",
         dataset="core",
         dataset_note="the course spine, plus the Smarket returns used in the lecture",
         deliverable=("a KNN classifier on a binary outcome from your angle, with $k$ chosen by "
@@ -218,6 +239,9 @@ SESSIONS = {
             "Report **CFI, TLI and RMSEA**, and say what each would have to be",
             "State why good fit is not evidence that the model is correct",
         ],
+        reading="Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings*",
+        reading_url="https://doi.org/10.1016/j.jimonfin.2024.103161",
+        dataverse="10.7910/DVN/TZEN38",
         dataset="efa",
         dataset_note="a 14-item questionnaire on purchase decisions, plus semopy's bundled examples",
         deliverable=("a measurement model for one construct in your project, with the loadings "
@@ -244,6 +268,9 @@ SESSIONS = {
             "Check **overlap** and **balance**, and say what to do when they fail",
             "Report an **ATT**, and state the assumption it rests on",
         ],
+        reading="Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning*",
+        reading_url="https://doi.org/10.1093/ectj/utac018",
+        dataverse="10.7910/DVN/FS0KBA",
         dataset="core",
         dataset_note="the spine's documented treatment, with a known effect to recover",
         deliverable=("a matched comparison on your own data: the naive difference, the overlap "
@@ -270,6 +297,9 @@ SESSIONS = {
             "Explain what an **instrument** must satisfy, and why good ones are rare",
             "Say what neither design can rescue",
         ],
+        reading="Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity*",
+        reading_url="https://doi.org/10.1162/rest_a_00759",
+        dataverse="10.7910/DVN/PIAZWN",
         dataset="core",
         dataset_note="the spine's post-2021 structural break, treated as a policy change",
         deliverable=("a difference-in-differences estimate on your angle, with the parallel-trends "
@@ -292,6 +322,33 @@ SESSIONS = {
         generated=False,
     ),
 }
+
+# The timetable, as published. Wednesdays 15:30–18:30, Décelles — Victoriaville,
+# except where noted. Two Wednesdays have no class: 30 September, and 21 and 28
+# October.
+WHEN = "Wednesdays 15:30–18:30"
+ROOM = "Décelles — Victoriaville"
+
+DATES = {
+    "01": "2026-08-26",
+    "02": "2026-09-02",
+    "03": "2026-09-09",
+    "04": "2026-09-16",
+    "05": "2026-09-23",
+    "06": "2026-10-07",   # asynchronous
+    "07": "2026-10-14",
+    "08": "2026-11-04",
+    "09": "2026-11-11",
+    "10": "2026-11-18",
+    "11": "2026-11-25",
+    "12": "2026-12-02",
+}
+
+ASYNCHRONOUS = {"06"}
+
+NO_CLASS = ["2026-09-30", "2026-10-21", "2026-10-28"]
+
+ORAL_EXAM = "Monday 14 December 2026 (to be confirmed)"
 
 MIDTERM_AFTER = "06"
 

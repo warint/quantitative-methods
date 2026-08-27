@@ -2,6 +2,10 @@
 
 # Elastic net on a wide macro panel
 
+> **[Open the practice slides](https://warint.github.io/quantitative-methods/session-05-practice.html)** ·
+> source: [`MATH60033A-S05-Practice.qmd`](MATH60033A-S05-Practice.qmd)
+
+
 ---
 
 ## The theme of this session

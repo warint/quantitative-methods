@@ -6,6 +6,10 @@
 
 ## Step 1 — Reading
 
+> **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-05-pre-session.html)** ·
+> source: [`MATH60033A-S05-Pre-Session.qmd`](MATH60033A-S05-Pre-Session.qmd)
+
+
 **ISLR ch. 6.2**  
 Source: https://www.statlearning.com/  
 *Why:* Ridge, lasso, and the tuning-parameter picture.
