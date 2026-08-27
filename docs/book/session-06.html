@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -670,7 +699,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Fixed effects: one intercept per country, absorbed</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>fixed <span class="op">=</span> PanelOLS(y, X, entity_effects<span class="op">=</span><span class="va">True</span>).fit()</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(fixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Considering the results of the Hausman test with a \(p-value &gt;0.05\), we need a random effects model.</p>
+<p>Considering the results of the Hausman test with a <span class="math inline">\(p-value &gt;0.05\)</span>, we need a random effects model.</p>
 </div>
 </div>
 </div>
@@ -732,15 +761,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>A quadratic effects regression model is a regression model that has one of the independent variable squared.</p>
 <ul>
-<li>Thus the mean of the dependent variable \(Y\) can be modeled with predictor x1 as:</li>
+<li>Thus the mean of the dependent variable <span class="math inline">\(Y\)</span> can be modeled with predictor x1 as:</li>
 </ul>
 <p>$$\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_1^2$$</p>
-<p>\(\beta_2\) measures the amount of non-linearity in the relationship between \(Y\) and \(x_1\).</p>
-<p>If \(\beta_2\) is zero, then the relationship simplifies to a linear one.</p>
-<p>So we can perform a \(t-test\) for \(\beta_2\) to determine if the relationship is non-linear in this fashion.</p>
+<p><span class="math inline">\(\beta_2\)</span> measures the amount of non-linearity in the relationship between <span class="math inline">\(Y\)</span> and <span class="math inline">\(x_1\)</span>.</p>
+<p>If <span class="math inline">\(\beta_2\)</span> is zero, then the relationship simplifies to a linear one.</p>
+<p>So we can perform a <span class="math inline">\(t-test\)</span> for <span class="math inline">\(\beta_2\)</span> to determine if the relationship is non-linear in this fashion.</p>
 </div>
 <div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
-<p>Let’s fit a regression model to predict Price from both \(Living.area\) and \(Living.area^2\).</p>
+<p>Let’s fit a regression model to predict Price from both <span class="math inline">\(Living.area\)</span> and <span class="math inline">\(Living.area^2\)</span>.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>re2 <span class="op">=</span> smf.ols(<span class="st">"price ~ living_area + I(living_area**2)"</span>, data<span class="op">=</span>re_data).fit()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(re2.summary())   <span class="co"># the quadratic term is very significant</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre><code>## 
@@ -765,10 +794,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="tabset-3-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-5-tab">
 <p>Since quadratic effect is positive and the trend is positive for all reasonable values of Living.area, then we can say the association <strong>accelerates</strong> as Living.area increases.</p>
-<p>The \(t-test\) associated with \(\beta_2 = .04083\) is very significant (p-value = 0.00001), and thus the quadratic effect is important.</p>
+<p>The <span class="math inline">\(t-test\)</span> associated with <span class="math inline">\(\beta_2 = .04083\)</span> is very significant (p-value = 0.00001), and thus the quadratic effect is important.</p>
 <p>This model predicts Price better than just a linear one!</p>
 <p>The name ‘linear’ regression is actually a little misleading.</p>
-<p>It is called <strong>linear regression</strong> because the coefficients are linear terms, but the independent variable can be transformed in any fashion: \(x_2\), \(log(x)\), etc.</p>
+<p>It is called <strong>linear regression</strong> because the coefficients are linear terms, but the independent variable can be transformed in any fashion: <span class="math inline">\(x_2\)</span>, <span class="math inline">\(log(x)\)</span>, etc.</p>
 <p>Thus linear regression is actually quite powerful and flexible to model other associations, which is why it is used so often in practice.</p>
 </div>
 </div>
@@ -788,11 +817,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="what-is-a-dummy-variable" class="level5" data-number="9.14.0.1.1">
 <h5 data-number="9.14.0.1.1" class="anchored" data-anchor-id="what-is-a-dummy-variable"><span class="header-section-number">9.14.0.1.1</span> What is a Dummy Variable?</h5>
 <p>A dummy variable (aka, an indicator variable) is a numeric variable that represents categorical data, such as gender, race, political affiliation, etc.</p>
-<p>Technically, dummy variables are dichotomous, quantitative variables. Their range of values is small; they can take on only two quantitative values. As a practical matter, regression results are easiest to interpret when dummy variables are limited to two specific values, \(1\) or \(0\). Typically, \(1\) represents the presence of a qualitative attribute, and \(0\) represents the absence.</p>
+<p>Technically, dummy variables are dichotomous, quantitative variables. Their range of values is small; they can take on only two quantitative values. As a practical matter, regression results are easiest to interpret when dummy variables are limited to two specific values, <span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>. Typically, <span class="math inline">\(1\)</span> represents the presence of a qualitative attribute, and <span class="math inline">\(0\)</span> represents the absence.</p>
 </section>
 <section id="how-many-dummy-variables" class="level4" data-number="9.14.0.2">
 <h4 data-number="9.14.0.2" class="anchored" data-anchor-id="how-many-dummy-variables"><span class="header-section-number">9.14.0.2</span> How Many Dummy Variables?</h4>
-<p>The number of dummy variables required to represent a particular categorical variable depends on the number of values that the categorical variable can assume. To represent a categorical variable that can assume \(k\) different values, a researcher would need to define \(k - 1\) dummy variables.</p>
+<p>The number of dummy variables required to represent a particular categorical variable depends on the number of values that the categorical variable can assume. To represent a categorical variable that can assume <span class="math inline">\(k\)</span> different values, a researcher would need to define <span class="math inline">\(k - 1\)</span> dummy variables.</p>
 </section>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
@@ -801,7 +830,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>$$X_1 = 1,~if~Republican;~X_1 = 0,~otherwise.$$</p>
 <p>$$X_2 = 1,~if~Democrat;~X_2 = 0,~otherwise.$$</p>
 <p>In this example, notice that we don't have to create a dummy variable to represent the "Independent" category of political affiliation.</p>
-<p>If \(X_1=0\) and \(X_2=0\), we know the voter is neither Republican nor Democrat. Therefore, voter must be Independent.</p>
+<p>If <span class="math inline">\(X_1=0\)</span> and <span class="math inline">\(X_2=0\)</span>, we know the voter is neither Republican nor Democrat. Therefore, voter must be Independent.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>glassdoor <span class="op">=</span> qmib.load(<span class="st">"glassdoor"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The R deck uses totalpay; here it is income plus bonus</span></span>
@@ -842,14 +871,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="tabset-4-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-5-tab">
 <p><strong>Avoid the Dummy Variable Trap</strong></p>
 <ul>
-<li><p>When defining dummy variables, a common mistake is to define too many variables. If a categorical variable can take on k values, it is tempting to define \(k\) dummy variables.</p></li>
-<li><p>Resist this urge. Remember, you only need \(k - 1\) dummy variables.</p></li>
+<li><p>When defining dummy variables, a common mistake is to define too many variables. If a categorical variable can take on k values, it is tempting to define <span class="math inline">\(k\)</span> dummy variables.</p></li>
+<li><p>Resist this urge. Remember, you only need <span class="math inline">\(k - 1\)</span> dummy variables.</p></li>
 </ul>
 <blockquote class="blockquote">
-<p>A \(k^{th}\) dummy variable is redundant; it carries no new information.</p>
+<p>A <span class="math inline">\(k^{th}\)</span> dummy variable is redundant; it carries no new information.</p>
 <p>And it creates a severe multicollinearity problem for the analysis.</p>
 </blockquote>
-<p>Using \(k\) dummy variables when only \(k - 1\) dummy variables are required is known as the dummy variable trap.</p>
+<p>Using <span class="math inline">\(k\)</span> dummy variables when only <span class="math inline">\(k - 1\)</span> dummy variables are required is known as the dummy variable trap.</p>
 </div>
 </div>
 </div>
@@ -861,7 +890,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Once a categorical variable has been recoded as a dummy variable, the dummy variable can be used in regression analysis just like any other quantitative variable.</p>
 <p>For example, suppose we wanted to assess the relationship between household income and political affiliation (i.e., Republican, Democrat, or Independent). The regression equation might be:</p>
 <p>$$Income = \beta_0 + \beta_1 X_1+ \beta_2 X_2$$</p>
-<p>where \(\beta_0\), \(\beta_1\), and \(\beta_2\) are regression coefficients. \(X_1\) and \(X_2\) are regression coefficients defined as:</p>
+<p>where <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, and <span class="math inline">\(\beta_2\)</span> are regression coefficients. <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are regression coefficients defined as:</p>
 <p>$$X_1 = 1,~if~Republican;~X_1=0,~otherwise.$$ $$X_2 = 1,~if~Democrat;~X_2 = 0,~otherwise.$$</p>
 <p>The value of the categorical variable that is not represented explicitly by a dummy variable is called the reference group. In this example, the reference group consists of Independent voters.</p>
 </div>
@@ -922,7 +951,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>R will create the binary independent variable behind the scene, but may not choose the reference group you like.</p>
 <p>R chooses the reference group to be the one that is first in alphabetical order. You can override the default choice by R.</p>
-<p>Here R chooses college to be the reference group, and all the \(\beta\) estimates are in reference to it.</p>
+<p>Here R chooses college to be the reference group, and all the <span class="math inline">\(\beta\)</span> estimates are in reference to it.</p>
 <p>But the group means are all estimated the same as before. For the masters degree group:</p>
 <p>$$Ans: 98,673 + 5,386 = $104,058.$$</p>
 </div>
@@ -933,9 +962,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
 <p>We may want to predict <strong>pay</strong> based on <strong>gender, education, and age</strong> all at once:</p>
-<p>The estimate \(10633.59\) for phd now represents the extra pay for employees with a phd relative to a high school degree while controlling for age and gender.</p>
+<p>The estimate <span class="math inline">\(10633.59\)</span> for phd now represents the extra pay for employees with a phd relative to a high school degree while controlling for age and gender.</p>
 <p>$$\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3$$</p>
-<p>where \(x_1\) is the indicator for ‘college’, \(x_2\) for ‘masters’, and \(x_3\) for ‘phd’.</p>
+<p>where <span class="math inline">\(x_1\)</span> is the indicator for ‘college’, <span class="math inline">\(x_2\)</span> for ‘masters’, and <span class="math inline">\(x_3\)</span> for ‘phd’.</p>
 <p>The group that is left out is called the <strong>reference group</strong>.</p>
 <p>For the model with one categorical predictor, the intercept represents the mean of the reference group (the ‘high school’ group here).</p>
 <p>Note:</p>
@@ -980,7 +1009,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Context</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">Question</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false">Code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-4" role="tab" aria-controls="tabset-7-4" aria-selected="false">Interpretation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-5" role="tab" aria-controls="tabset-7-5" aria-selected="false">Wow!</a></li></ul>
 <div class="tab-content">
 <div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
-<p>Let’s look at a multiple regression to predict Y = bonus of employees based on \(x_1 = age\) and an \(x_2 =female\):</p>
+<p>Let’s look at a multiple regression to predict Y = bonus of employees based on <span class="math inline">\(x_1 = age\)</span> and an <span class="math inline">\(x_2 =female\)</span>:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fit5 <span class="op">=</span> smf.ols(<span class="st">"bonus ~ age + female"</span>, data<span class="op">=</span>glassdoor).fit()</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(fit5.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre><code>## 
@@ -1013,8 +1042,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>To incorporate this into a regression model, we use the product of the two independent variable we think have an interaction effect.</p>
 <p>The model for the mean of the dependent variable, Y, can be written as:</p>
 <p>$$\mu = \beta_0 + \beta_1 x_1 +\beta_2 x_2 + \beta_3 (x_1 \times x_2)$$</p>
-<p>\(\beta_3\) measures this interaction effect. If \(\beta_3 = 0\), then the effects of \(x_1\) and \(x_2\) do not ‘interact.’</p>
-<p>We can perform a \(t-test\) to see if this interaction effect is significant.</p>
+<p><span class="math inline">\(\beta_3\)</span> measures this interaction effect. If <span class="math inline">\(\beta_3 = 0\)</span>, then the effects of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> do not ‘interact.’</p>
+<p>We can perform a <span class="math inline">\(t-test\)</span> to see if this interaction effect is significant.</p>
 </section>
 </div>
 <div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
@@ -1095,11 +1124,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ## F-statistic: 70.36 on 3 and 996 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
-<p>Bonus pay is negatively associated with age for men with a \(p-value &lt; 0.0001\).</p>
-<p>The \(-15.379\) estimate for the interaction term means this relationship is more severe for women, but is not significant \(p-value = 0.0592\).</p>
+<p>Bonus pay is negatively associated with age for men with a <span class="math inline">\(p-value &lt; 0.0001\)</span>.</p>
+<p>The <span class="math inline">\(-15.379\)</span> estimate for the interaction term means this relationship is more severe for women, but is not significant <span class="math inline">\(p-value = 0.0592\)</span>.</p>
 <p>Be careful interpreting the positive coefficient for female:</p>
 <ul>
-<li>this is the estimate when \(age = 0\), which is difficult to interpret in this model.</li>
+<li>this is the estimate when <span class="math inline">\(age = 0\)</span>, which is difficult to interpret in this model.</li>
 </ul>
 </div>
 <div id="tabset-8-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-3-tab">
@@ -1159,7 +1188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Model B:</p>
 <p>$$\mu = \beta_0 + \beta_1(beds) + \beta_2(baths) + \beta_3(area)$$</p>
 <blockquote class="blockquote">
-<p>What is the main difference in the interpretation of \(\beta_1\) in each of these models?</p>
+<p>What is the main difference in the interpretation of <span class="math inline">\(\beta_1\)</span> in each of these models?</p>
 </blockquote>
 <p>Click here for answer</p>
 <p>It is the effect of beds on mean price, controlling for number of baths and living area in Model B (uncontrolled in Model A).</p>
@@ -1230,20 +1259,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true">F-test 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false">2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-3" role="tab" aria-controls="tabset-10-3" aria-selected="false">3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-4" role="tab" aria-controls="tabset-10-4" aria-selected="false">4</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-5" role="tab" aria-controls="tabset-10-5" aria-selected="false">5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-6" role="tab" aria-controls="tabset-10-6" aria-selected="false">6</a></li></ul>
 <div class="tab-content">
 <div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
-<p>\(F-test\) to compare <strong>nested models</strong>.</p>
+<p><span class="math inline">\(F-test\)</span> to compare <strong>nested models</strong>.</p>
 <blockquote class="blockquote">
 <p>Two models are nested if all of the variables in the smaller model are also in the larger model.</p>
 </blockquote>
 <p>To formally compare two nested models, an F-test can be used to determine if the added variables provide extra predictive power.</p>
-<p>The <strong>F-test</strong> is essentially testing if the improvement in \(R^2\) is significant (better than chance alone: if the added variables were truly unrelated to the dependent variable).</p>
+<p>The <strong>F-test</strong> is essentially testing if the improvement in <span class="math inline">\(R^2\)</span> is significant (better than chance alone: if the added variables were truly unrelated to the dependent variable).</p>
 </div>
 <div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
 <p>In the multiple linear regression model setup, the F-test measures the potential relationship between the dependent variable and ALL the independent variables:</p>
 <p>$$H_0: \beta_1=\beta_2=...=\beta_n=0$$</p>
 <p>$$H_1:~at~least~one~\beta_j~is~non~zero.$$</p>
-<p>Thus hypothesis test is performed by computing the \(F-statistics\):</p>
+<p>Thus hypothesis test is performed by computing the <span class="math inline">\(F-statistics\)</span>:</p>
 <p>$$F=\frac{(TSS-RSS)}{RSS} = \frac{TSS}{RSS} - 1$$</p>
-<p>where \(TSS=\sum(y_i-\bar{y})^2\) and \(RSS=\sum(y_i-\hat{y})^2\).</p>
+<p>where <span class="math inline">\(TSS=\sum(y_i-\bar{y})^2\)</span> and <span class="math inline">\(RSS=\sum(y_i-\hat{y})^2\)</span>.</p>
 <p>It is an analysis in fact of variance. Well, guess what? There is way to do it.</p>
 <p>Click here for answer</p>
 <p>The F-test is based on something called the analysis of variance (ANOVA) of the residuals in regression.</p>
@@ -1266,7 +1295,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="tabset-10-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-4-tab">
 <p>If two models are <strong>not nested</strong>, then the Akaike’s Information Criterion (AIC) is often used to determine which model is a better predictive one.</p>
-<p>The basic idea is that it adds a penalty factor to \(1 – R^2\) of a regression model based on the number of independent variable in the model.</p>
+<p>The basic idea is that it adds a penalty factor to <span class="math inline">\(1 -- R^2\)</span> of a regression model based on the number of independent variable in the model.</p>
 <p>The lower the AIC for a model, the better.</p>
 <p>Let’s consider a third model to predict the mean selling price of homes:</p>
 <p>$$\mu + \beta_0 + \beta(area) + \beta_2(area^2) + \beta_3(bathrooms) + \beta_4(bathrooms^2)$$</p>
@@ -1406,11 +1435,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </div>
 <div id="tabset-13-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-2-tab">
-<p>When you perform <strong>automatic stepwise regression</strong>, you should report model estimates and \(R^2\).</p>
+<p>When you perform <strong>automatic stepwise regression</strong>, you should report model estimates and <span class="math inline">\(R^2\)</span>.</p>
 <ul>
-<li>You should <strong>not report</strong> the \(p-values\) from the regression output table.</li>
+<li>You should <strong>not report</strong> the <span class="math inline">\(p-values\)</span> from the regression output table.</li>
 </ul>
-<p>This is a very subtle issue: we have considered many models so \(p-values\) lose their interpretation.</p>
+<p>This is a very subtle issue: we have considered many models so <span class="math inline">\(p-values\)</span> lose their interpretation.</p>
 <p>This is related to the idea of <strong>p-hacking</strong>:</p>
 <ul>
 <li>searching through many independent variables and only reporting the significant ones.</li>
