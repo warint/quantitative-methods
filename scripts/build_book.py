@@ -213,10 +213,7 @@ def strip_frontmatter(text):
 # link degrades to "the file on GitHub" rather than to a 404.
 # ---------------------------------------------------------------------------
 CHAPTER_LINKS = {
-    "SYLLABUS.md": "syllabus.qmd",
-    "RESEARCH-MANDATES.md": "mandates.qmd",
     "REPLICATIONS.md": "replications.qmd",
-    "GROUP-ASSESSMENT.md": "group-assessment.qmd",
     "setup-vscodium-local-llm.md": "setup.qmd",
     "setup-git-and-github.md": "setup.qmd#git-and-github",
 }
@@ -351,12 +348,10 @@ def chapter_prose(d, num):
 def chapter(num, s):
     d = ROOT / s["dir"]
     parts = [f"""---
-title: "Session {int(num)} — {s['title']}"
+title: "{s['title']}"
 ---
 
 ::: {{.chapter-meta}}
-{_when(num)}
-
 {_decks(num)}
 :::
 
@@ -433,22 +428,55 @@ def preface():
                         f"**Chapters 1–{int(MIDTERM_AFTER)}** |")
     table = "\n".join(rows)
     return f"""---
-title: "Preface"
+title: "Foreword"
 number-sections: false
 ---
 
-# Preface {{.unnumbered}}
+# Foreword {{.unnumbered}}
 
-This is the course book for **MATH60033A, Quantitative Methods in International Business**, at
-HEC Montréal. It collects the twelve sessions into one searchable document: for each session, the
-paper to read beforehand, the lecture as prose rather than slides, and the brief for the ninety
-minutes of group work that follow.
+Ukraine supplied around seventy per cent of the world's neon. Russia controlled some forty-four
+per cent of its palladium. Taiwan fabricates close to two-thirds of its semiconductors. None of
+those three facts was secret, and none of them appeared on the balance sheet of a company that
+depended on all three — until a pandemic and a war made them appear at once [@warin-supplychains].
+Firms discovered the shape of their own supply chains by watching them break.
+
+That is the difficulty this book is written against. The transformations that matter most in
+international business are not hidden. They are *unmeasured* by the people they will affect, and
+the received account of how the world economy works quietly supplies the missing numbers with
+assumptions. Chief among them is the assumption that global value chains, having been optimised
+for decades, must be efficient — an assumption that survives largely because so few people test
+it against data [@warin-notefficient].
+
+A second difficulty is that the unit of analysis is wrong in most public discussion. Countries do
+not trade; firms do [@warin-firms]. Aggregate statistics on bilateral flows describe the sum of
+decisions taken inside firms, under constraints — freight, insurance, policy wedges, the cost of
+switching a supplier — that the aggregate cannot show [@warin-gravity]. Work at the level where
+the decision is actually made requires data at that level, and methods equal to it.
+
+And the ground itself is moving. The central economic shift of this decade is not digitisation
+but a pivot from producing goods and knowledge toward *valuing the data generated in the course of
+producing them* — in agriculture, manufacturing, health, logistics and public administration
+alike [@warin-middlepowers]. An economy organised around data capture and platform intermediation
+concentrates advantage differently than one organised around factories, and it rewards the
+institutions and the analysts who can read what the data say [@warin-economiedonnees].
+
+None of that is an argument that quantitative methods produce certainty. It is an argument that
+they are the only way to hold a claim about the world economy to account — to say what would have
+to be true for it to hold, and to notice when it stops holding. Trade theory has been rewritten
+repeatedly, from the mercantilists through Ricardo to the platform economy, and each rewriting
+followed evidence that the previous account could not absorb [@warin-evolution].
 
 ::: {{.step}}
-**Everything here is assembled from the course repository**, not maintained separately. If a page
-here disagrees with the repository, the repository is right and this is a bug — the book is
-rebuilt from it.
+**This book teaches the methods, on real data, from the first week.** Teaching statistics in a
+business school pulls in two directions: real data are messy, and pedagogical data are false. This
+course resolves it in favour of the mess [@warin-statcan]. Every technique here is applied to
+actual European economic series, with the missing values, the influential observations and the
+awkward panel structure left in.
 :::
+
+Twelve chapters follow the arc from describing data to defending a causal claim. Each one asks a
+single question — *can this regression be trusted?*, *did the policy do anything?* — and each ends
+where a referee would begin.
 
 ## How to use it
 
@@ -458,7 +486,7 @@ rebuilt from it.
 | Re-read a derivation you lost in class | the session's lecture sections |
 | Know what the group work asks for | the session's **In the practice** |
 | Find where something was covered | the **search box**, top of the sidebar |
-| Know how you are graded | [The syllabus](syllabus.qmd) |
+| Know how you are graded | [the syllabus](https://github.com/warint/quantitative-methods/blob/main/SYLLABUS.md), in the course repository |
 | Get your machine working | [Setting up your tools](setup.qmd) |
 
 ::: {{.check}}
@@ -579,9 +607,8 @@ book:
     right: "Built from the course repository"
   chapters:
     - index.qmd
-    - part: "The course"
+    - part: "Getting started"
       chapters:
-        - syllabus.qmd
         - setup.qmd
     - part: "The twelve chapters"
       chapters:
@@ -589,8 +616,6 @@ book:
   appendices:
     - data-api.qmd
     - replications.qmd
-    - mandates.qmd
-    - group-assessment.qmd
 
 bibliography: references.bib
 link-citations: true
@@ -811,16 +836,10 @@ def main():
     clean()
 
     (BOOK / "index.qmd").write_text(preface(), encoding="utf-8")
-    (BOOK / "syllabus.qmd").write_text(
-        flat_page("The syllabus", ROOT / "SYLLABUS.md"), encoding="utf-8")
     (BOOK / "setup.qmd").write_text(setup_page(), encoding="utf-8")
     (BOOK / "data-api.qmd").write_text(data_api_page(), encoding="utf-8")
     (BOOK / "replications.qmd").write_text(
         flat_page("Replication packages", ROOT / "REPLICATIONS.md"), encoding="utf-8")
-    (BOOK / "mandates.qmd").write_text(
-        flat_page("The ten research mandates", ROOT / "RESEARCH-MANDATES.md"), encoding="utf-8")
-    (BOOK / "group-assessment.qmd").write_text(
-        flat_page("How group work is assessed", ROOT / "GROUP-ASSESSMENT.md"), encoding="utf-8")
     (BOOK / "book.scss").write_text(BOOK_SCSS, encoding="utf-8")
 
     bib = ROOT / "assets" / "references.bib"

@@ -3,7 +3,13 @@
     python scripts/build_bibliography.py
 
 The source of truth is references.dois at the repository root: one DOI per
-line, blank lines and # comments ignored. Every entry in the bibliography is
+line, blank lines and # comments ignored. A line may name its own citation key,
+
+    10.1017/dap.2026.10085   key=warin-middlepowers
+
+which matters once several works share a first author and a year: family+year
+keys then collide and get disambiguated a, b, c by position in the file, so
+inserting one reference silently renumbers the others. Every entry in the bibliography is
 fetched from Crossref at build time and written out from the metadata the
 publisher registered.
 
@@ -40,7 +46,12 @@ TYPES = {
 }
 
 
-def citekey(msg, taken):
+def citekey(msg, taken, explicit=None):
+    if explicit:
+        if explicit in taken:
+            raise SystemExit(f"duplicate key in references.dois: {explicit}")
+        taken.add(explicit)
+        return explicit
     author = msg.get("author") or [{}]
     family = author[0].get("family") or msg.get("publisher") or "anon"
     family = re.sub(r"[^A-Za-z]", "", family).lower() or "anon"
@@ -108,20 +119,28 @@ def main():
     if not DOIS.exists():
         raise SystemExit(f"missing {DOIS.relative_to(ROOT)}")
 
-    dois = [ln.split("#")[0].strip() for ln in DOIS.read_text().splitlines()]
-    dois = [d for d in dois if d]
+    wanted = []
+    for line in DOIS.read_text().splitlines():
+        line = line.split("#")[0].strip()
+        if not line:
+            continue
+        parts = line.split()
+        key = next((p[4:] for p in parts[1:] if p.startswith("key=")), None)
+        wanted.append((parts[0], key))
+
+    dois = [d for d, _ in wanted]
     if len(set(dois)) != len(dois):
         dupes = {d for d in dois if dois.count(d) > 1}
         raise SystemExit(f"duplicate DOIs in references.dois: {', '.join(sorted(dupes))}")
 
     entries, taken, failed = [], set(), []
-    for doi in dois:
+    for doi, explicit in wanted:
         r = requests.get(API.format(doi), headers=UA, timeout=45)
         if r.status_code != 200:
             failed.append((doi, f"HTTP {r.status_code}"))
             continue
         msg = r.json()["message"]
-        key = citekey(msg, taken)
+        key = citekey(msg, taken, explicit)
         entries.append((key, entry(doi, msg, key)))
         first = (msg.get("author") or [{}])[0].get("family", "?")
         year = (msg.get("issued", {}).get("date-parts") or [[None]])[0][0]
