@@ -954,687 +954,97 @@
     "href": "session-09.html",
     "title": "9  Structural Equation Modelling",
     "section": "",
-    "text": "9.1 Before the session\nTwo things to do before class, and they are the two halves of the practice. Budget 60–90 minutes.",
+    "text": "9.1 Measuring what cannot be observed\nSome of the most important quantities in international business are not measured, because they cannot be. Absorptive capacity, institutional quality, brand strength, digital maturity — each is meant to be a real property of a firm or a country, each is invoked in explanations, and none of them appears in any dataset. What appears instead is a set of indicators, each a noisy and partial reflection of the thing.\nChapter 7 met this and handled it descriptively: factor analysis found a small number of common factors behind a battery of correlated items. This chapter takes the same idea and makes it a model you can state and test — a set of explicit claims about which indicators measure which construct, and about how the constructs relate to one another.\nThe apparatus divides into two parts, and keeping them apart is the first thing to learn.\nA model can have both, and much of what makes SEM valuable is estimating them jointly: the structural relationships are corrected for the unreliability of the measurement, which a two-step approach of “build a scale, then regress it” does not do.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#before-the-session",
-    "href": "session-09.html#before-the-session",
+    "objectID": "session-09.html#measuring-what-cannot-be-observed",
+    "href": "session-09.html#measuring-what-cannot-be-observed",
     "title": "9  Structural Equation Modelling",
     "section": "",
-    "text": "Can you measure something you cannot observe?\n\n\nOpen the pre-session slides · source: MATH60033A-S09-Pre-Session.qmd\n\n\n\n\n\n\n\n\n\n\n\nBefore class\nUsed in the practice for\n\n\n\n\n1\nRead the paper\nreproducing one of its results\n\n\n2\nGet both datasets\nthat, and applying the method to your own angle\n\n\n\n\n\n9.1.1 1. The reading — 45–60 min\nBennani & Romelli (2024), Exploring the informativeness and drivers of tone during committee meetings Read the article\nRead for the argument, not for coverage:\n\n\n\n\nWhat to look for\n\n\n\n\n1\nThe research question, in one sentence\n\n\n2\nThe method or design, and why they chose it\n\n\n3\nThe strongest single piece of evidence\n\n\n4\nOne limitation you would raise as a referee\n\n\n\nAnnotate as you go. You will be asked what you underlined and why.\n\n\n\n9.1.2 2. The data — 10 min\nYou need two datasets in the practice, and both should be on your machine before you arrive.\n\n9.1.2.1 a) The paper’s replication package\nThis is what you reproduce in the first twenty minutes of the practice.\nHarvard Dataverse: 10.7910/DVN/TZEN38\nDownload it once, and unzip it here — the folder is git-ignored, so nothing large is committed:\n09-structural-equation-modelling/data/replication/\nKeep the authors’ own folder structure and README.\n\n\n9.1.2.2 b) The course data, for your own angle\nThis is what you apply the method to in the second half.\nimport qmib\n\ndata = qmib.load(\"efa\")      # what the lecture uses\ncore = qmib.load(\"core\")                 # shared by every group\nmine = qmib.load(\"angle_c_country\")      # YOUR angle — see your dictionary\n\nprint(data.shape, core.shape, mine.shape)\nA 14-item questionnaire on purchase decisions, plus semopy’s bundled examples.\n\nRun this before class. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing. qmib.catalog() lists everything available.\n\nYour group’s file, columns, units and traps are in your data dictionary.\n\n\n\n\n9.1.3 3. Self-check — 15 min\nAnswer on paper. If you cannot, that is what the lecture is for.\n\nIn one sentence: what does this session’s method let you claim that the previous one did not?\nWhat must be true of your data for it to apply?\nWhich claim in the paper rests on this method — and how hard does it lean on it?\n\n\n\n\n9.1.4 Arrive with\n\nThe paper read and annotated\nThe replication package downloaded and unzipped\nqmib.load() run at least once, so the cache exists\nYour self-check answers, on paper\n\n\nSession 09 overview · The lecture · The practice",
+    "text": "Measurement model — the part that links unobserved constructs to observed indicators. It answers: does this battery of questions measure one thing, and how well does each item measure it? Its coefficients are loadings.\n\n\nStructural model — the part that links constructs to each other. It answers: does this construct predict that one? Its coefficients are path coefficients, and they are regression coefficients between quantities that were never observed.\n\n\n\nNo portrait accompanies this chapter. The natural figure is Charles Spearman, whose 1904 argument for a general factor began the tradition; the only photograph of him on Wikimedia Commons is licensed CC BY-SA 4.0 rather than released into the public domain, so the plate builder refuses it. The rule is a real portrait, freely licensed, or none.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#the-lecture",
-    "href": "session-09.html#the-lecture",
+    "objectID": "session-09.html#wrights-diagrams-and-what-a-path-meant",
+    "href": "session-09.html#wrights-diagrams-and-what-a-path-meant",
     "title": "9  Structural Equation Modelling",
-    "section": "9.2 The lecture",
-    "text": "9.2 The lecture\n\nDelivered from the slides. What follows is the same material as prose.",
+    "section": "9.2 Wright’s diagrams, and what a path meant",
+    "text": "9.2 Wright’s diagrams, and what a path meant\n\nFrom the archive · Wright, 1918–1934\nSewall Wright was a geneticist working on the inheritance of coat colour in guinea pigs, and he needed to express something regression could not: a system in which variables cause each other in a specified pattern, some directly and some through intermediaries. He drew it — variables as boxes, causal claims as arrows — and worked out the algebra that lets the correlations be decomposed along the paths (Wright 1934).\nTwo features of that invention survive intact into every SEM package in use today. The diagram is the model: each arrow is a parameter to be estimated, and an arrow you do not draw is a claim that the effect is zero. And the implied correlation between any two variables is the sum of the contributions along every path connecting them, which is what makes the model testable — it predicts a whole covariance matrix, not a single coefficient.\nWright was explicit that the method could not discover the diagram. It required the causal structure to be supplied from outside, on subject-matter grounds, and it then estimated the strengths and checked the implications. Ninety years of software has not changed that, and the section on equivalent models below is what happens when it is forgotten.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#learning-objectives",
-    "href": "session-09.html#learning-objectives",
+    "objectID": "session-09.html#reading-a-model-description",
+    "href": "session-09.html#reading-a-model-description",
     "title": "9  Structural Equation Modelling",
-    "section": "9.3 Learning Objectives",
-    "text": "9.3 Learning Objectives\n\nUnderstand the fundamental concepts and terminology of Structural Equation Modeling (SEM)\nDistinguish between the measurement model and the structural model components of SEM\nLearn about key SEM considerations: identification, estimation methods, and model fit indices\nSee how to specify and estimate an SEM in R using the lavaan package (with well-commented code)\nExplore advanced topics: mediation analysis and applications of SEM in international business research",
+    "section": "9.3 Reading a model description",
+    "text": "9.3 Reading a model description\nThe notation, standard since lavaan made it so (Rosseel 2012) and used by semopy in Python, is close to readable English:\n\n\n\noperator\nmeans\n\n\n\n\n=~\nis measured by — a latent construct and its indicators\n\n\n~\nis regressed on — a structural path\n\n\n~~\ncovaries with — an unanalysed association\n\n\n\nSo value =~ price + resale_value + maintenance asserts that a construct called value exists, that these three observed items are reflections of it, and — by what is absent — that nothing else in the model measures it.\nThe corresponding equation for indicator \\(j\\) of construct \\(\\xi\\) is\n\\[\nx_j \\;=\\; \\lambda_j \\xi + \\delta_j ,\n\\]\nwith \\(\\lambda_j\\) the loading and \\(\\delta_j\\) everything specific to that indicator: its own content, and its measurement error. This is chapter 7’s factor model written one indicator at a time, and the interpretive move is the same — the construct is what the indicators have in common, and nothing else.\nIdentification. A latent variable has no units, so a scale must be imposed before anything can be estimated. Two conventions exist: fix one loading to 1, which gives the construct the units of that indicator, or fix the construct’s variance to 1, which makes it standardised. Software picks the first by default, which is why one loading in every output has no standard error — it was not estimated. Reading it as “the strongest indicator” is a common and complete misunderstanding.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#outline",
-    "href": "session-09.html#outline",
+    "objectID": "session-09.html#what-is-actually-being-fitted",
+    "href": "session-09.html#what-is-actually-being-fitted",
     "title": "9  Structural Equation Modelling",
-    "section": "9.4 Outline",
-    "text": "9.4 Outline\n\nSEM Basics: What is SEM, why use it, key terms, and components\nSEM Analysis Process: Steps in conducting SEM – from model specification to fit evaluation\nSEM Example in R: A hands-on example using lavaan (with path diagrams and interpretation)\nMediation & Advanced Topics: Mediation analysis and other advanced extensions of SEM",
+    "section": "9.4 What is actually being fitted",
+    "text": "9.4 What is actually being fitted\nThe model does not fit the data. It fits the covariance matrix of the data.\nEvery parameter set \\(\\theta\\) implies a covariance matrix \\(\\Sigma(\\theta)\\) among the observed variables, and estimation chooses \\(\\theta\\) to make that as close as possible to the observed \\(S\\). The discrepancy is what all the fit statistics measure, and the \\(\\chi^2\\) test is a formal test of\n\\[\nH_0: \\; \\Sigma = \\Sigma(\\theta) ,\n\\]\nthat is, of exact fit. Its degrees of freedom are the number of distinct elements in the covariance matrix minus the number of free parameters, which is why a model can be tested at all: it says more about the covariances than it has parameters to absorb.\n\n\nRun it: a two-factor measurement model\nimport sys, warnings\nsys.path.insert(0, \"../slides\"); sys.path.insert(0, \"..\")\nwarnings.filterwarnings(\"ignore\")\nfrom plotstyle import setup, CL\nplt = setup()\n\nimport numpy as np, pandas as pd, qmib, semopy\n\nsurvey = qmib.load(\"efa\").select_dtypes(\"number\").dropna()\nqmib.view(survey, n=6)\n\n# Two constructs, built from the varimax groupings chapter 7 found.\ndescription = \"\"\"\nvalue      =~ price + resale_value + maintenance + fuel_efficiency\nexperience =~ safety + space_comfort + technology + after_sales_service\n\"\"\"\nmodel = semopy.Model(description)\nmodel.fit(survey)\n\nest = model.inspect(std_est=True)\nloadings = est[(est[\"op\"] == \"~\") & (est[\"rval\"].isin([\"value\", \"experience\"]))]\nprint(f\"n = {len(survey)}\\n\")\nprint(f\"{'construct':12}{'indicator':22}{'loading':&gt;9}{'std':&gt;8}{'p':&gt;10}\")\nfor _, r in loadings.iterrows():\n    p = \"fixed\" if r[\"p-value\"] == \"-\" else f\"{float(r['p-value']):.4f}\"\n    print(f\"{r['rval']:12}{r['lval']:22}{r['Estimate']:9.3f}{r['Est. Std']:8.3f}{p:&gt;10}\")\n\n\n\n\n\n\n\nTable 9.1: efa: 90 rows x 14 columns (0.0% missing overall)\n\n\n\n\n\n \nprice\nsafety\nexterior_looks\nspace_comfort\ntechnology\nafter_sales_service\nresale_value\nfuel_type\nfuel_efficiency\ncolor\nmaintenance\ntest_drive\nproduct_reviews\ntestimonials\n\n\n\n\n0\n4\n4\n5\n4\n3\n4\n5\n4\n4\n2\n4\n2\n4\n3\n\n\n1\n3\n5\n3\n3\n4\n4\n3\n4\n3\n4\n3\n2\n2\n2\n\n\n2\n4\n4\n3\n4\n5\n5\n5\n4\n5\n4\n5\n4\n4\n3\n\n\n3\n4\n4\n4\n3\n3\n4\n5\n5\n4\n4\n4\n2\n5\n3\n\n\n4\n5\n5\n4\n4\n5\n4\n5\n3\n4\n5\n5\n5\n5\n2\n\n\n5\n4\n4\n5\n3\n4\n5\n3\n4\n3\n2\n3\n2\n2\n3\n\n\n\n\n\n\n\n\n\n\ncolumns, types and missingness\n\n\n\n\ndtype\nmissing\ndistinct\n\n\n\n\nprice\nint64\n0.0%\n3\n\n\nsafety\nint64\n0.0%\n3\n\n\nexterior_looks\nint64\n0.0%\n5\n\n\nspace_comfort\nint64\n0.0%\n4\n\n\ntechnology\nint64\n0.0%\n5\n\n\nafter_sales_service\nint64\n0.0%\n4\n\n\nresale_value\nint64\n0.0%\n5\n\n\nfuel_type\nint64\n0.0%\n3\n\n\nfuel_efficiency\nint64\n0.0%\n5\n\n\ncolor\nint64\n0.0%\n5\n\n\nmaintenance\nint64\n0.0%\n4\n\n\ntest_drive\nint64\n0.0%\n5\n\n\nproduct_reviews\nint64\n0.0%\n4\n\n\ntestimonials\nint64\n0.0%\n5\n\n\n\n\n\n\nn = 90\n\nconstruct   indicator               loading     std         p\nvalue       price                     1.000   0.532     fixed\nvalue       resale_value              2.650   0.679    0.0005\nvalue       maintenance               1.535   0.620    0.0005\nvalue       fuel_efficiency           1.331   0.503    0.0017\nexperience  safety                    1.000   0.291     fixed\nexperience  space_comfort             1.941   0.553    0.0604\nexperience  technology                2.054   0.437    0.0726\nexperience  after_sales_service       2.215   0.632    0.0628",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#part-i-sem-basics",
-    "href": "session-09.html#part-i-sem-basics",
+    "objectID": "session-09.html#the-fit-indices-and-what-each-would-have-to-be",
+    "href": "session-09.html#the-fit-indices-and-what-each-would-have-to-be",
     "title": "9  Structural Equation Modelling",
-    "section": "9.5 Part I: SEM Basics",
-    "text": "9.5 Part I: SEM Basics",
+    "section": "9.5 The fit indices, and what each would have to be",
+    "text": "9.5 The fit indices, and what each would have to be\nThe \\(\\chi^2\\) test is the only one with a null hypothesis, and it is almost never used alone, for a reason worth being honest about: with a large sample it rejects models that are approximately right, and with a small one it fails to reject models that are badly wrong. It is a test of exact fit, and no model is exactly right.\nThe alternatives are approximate fit indices, and three are conventionally reported together.\n\nCFI — comparative fit index (Bentler 1990). How far the model has moved from a baseline in which all observed variables are uncorrelated, toward perfect fit. Scaled to \\([0,1]\\); above about 0.95 is the modern convention.\n\n\nTLI — Tucker–Lewis index, the same comparison with a penalty for parameters, so adding a path that does not help can lower it. Not bounded above by 1 in practice. Above about 0.95.\n\n\nRMSEA — root mean square error of approximation (Browne and Cudeck 1992). The misfit per degree of freedom, so it rewards parsimony directly. Below about 0.06 is good, above 0.10 poor, and it comes with a confidence interval that should be reported with it.\n\nThose thresholds come from a simulation study (Hu and Bentler 1999) that has been cited tens of thousands of times and whose authors were careful to say they were not proposing universal cut-offs. They are conventions, and the honest use is to report the numbers and let the reader apply their own judgement.\n\n\nRun it: the fit of the model just estimated\nstats = semopy.calc_stats(model)\nget = lambda k: float(stats[k].iloc[0])\n\nprint(f\"{'index':10}{'value':&gt;10}{'convention':&gt;14}   verdict\")\nrows = [\n    (\"chi2\",   get(\"chi2\"),   \"p &gt; 0.05\",  get(\"chi2 p-value\") &gt; 0.05),\n    (\"CFI\",    get(\"CFI\"),    \"&gt; 0.95\",    get(\"CFI\") &gt; 0.95),\n    (\"TLI\",    get(\"TLI\"),    \"&gt; 0.95\",    get(\"TLI\") &gt; 0.95),\n    (\"RMSEA\",  get(\"RMSEA\"),  \"&lt; 0.06\",    get(\"RMSEA\") &lt; 0.06),\n]\nfor name, val, rule, ok in rows:\n    print(f\"{name:10}{val:10.4f}{rule:&gt;14}   {'pass' if ok else 'FAIL'}\")\nprint(f\"\\nchi2 p-value {get('chi2 p-value'):.6f} on {int(get('DoF'))} degrees of freedom\")\n\n\nindex          value    convention   verdict\nchi2         47.0473      p &gt; 0.05   FAIL\nCFI           0.7078        &gt; 0.95   FAIL\nTLI           0.5694        &gt; 0.95   FAIL\nRMSEA         0.1288        &lt; 0.06   FAIL\n\nchi2 p-value 0.000352 on 19 degrees of freedom\n\n\nEvery index fails. That is the useful outcome, and it is worth dwelling on because published papers rarely show one.\nThe model was not invented arbitrarily — it was taken from the varimax solution in chapter 7, which grouped these items in exactly this way. An exploratory factor analysis suggested a structure; stated as a confirmatory model and tested, the structure is rejected. That is precisely what the two methods are for, and it is why running EFA and CFA on the same sample and reporting the confirmation is circular: the second was fitted to the pattern the first found.\nWhat to do about a failing model. Not, in the first instance, to modify it until it passes. Software offers modification indices — the improvement in \\(\\chi^2\\) from freeing each fixed parameter — and following them is how a theoretical model becomes an atheoretical one that fits this sample. If you use them, say so, and treat the result as exploratory.\nThe disciplined diagnosis starts with the indicators.\n\n\nRun it: which indicators are pulling their weight?\nstd = loadings.assign(std=loadings[\"Est. Std\"].astype(float))\nstd[\"communality\"] = std[\"std\"] ** 2\n\nprint(f\"{'indicator':22}{'std loading':&gt;13}{'shared var':&gt;12}   assessment\")\nfor _, r in std.sort_values(\"std\").iterrows():\n    if r[\"std\"] &lt; 0.4:\n        verdict = \"weak — consider dropping\"\n    elif r[\"std\"] &lt; 0.7:\n        verdict = \"acceptable\"\n    else:\n        verdict = \"strong\"\n    print(f\"{r['lval']:22}{r['std']:13.3f}{r['communality']:12.3f}   {verdict}\")\n\n\nindicator               std loading  shared var   assessment\nsafety                        0.291       0.085   weak — consider dropping\ntechnology                    0.437       0.191   acceptable\nfuel_efficiency               0.503       0.253   acceptable\nprice                         0.532       0.283   acceptable\nspace_comfort                 0.553       0.305   acceptable\nmaintenance                   0.620       0.384   acceptable\nafter_sales_service           0.632       0.400   acceptable\nresale_value                  0.679       0.461   acceptable\n\n\nA standardised loading is the correlation between the indicator and the construct; its square is the share of the indicator’s variance the construct explains. Below about 0.4 the item has little to do with the thing it is supposed to measure, and keeping it degrades the construct rather than enriching it. Here safety loads at 0.29 — it shares under a tenth of its variance with the construct it was assigned to, which is a substantive finding about the questionnaire rather than a technical nuisance.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#what-is-sem",
-    "href": "session-09.html#what-is-sem",
+    "objectID": "session-09.html#good-fit-is-not-evidence-that-the-model-is-correct",
+    "href": "session-09.html#good-fit-is-not-evidence-that-the-model-is-correct",
     "title": "9  Structural Equation Modelling",
-    "section": "9.6 What is SEM?",
-    "text": "9.6 What is SEM?\n\nStructural Equation Modeling (SEM) is a comprehensive statistical framework used to test and estimate causal relationships based on both statistical data and theoretically grounded assumptions.\nIt integrates factor analysis and multiple regression, allowing researchers to represent latent variables (unobserved theoretical constructs) through observed indicators (measured variables).\nSEM enables the specification of complex interrelationships among variables, including direct and indirect effects, within a single unified model.\nThe central goal is to evaluate how well the hypothesized model fits the empirical data, typically by comparing the model-implied covariance matrix to the observed covariance matrix — the closer the correspondence, the better the model fit.",
+    "section": "9.6 Good fit is not evidence that the model is correct",
+    "text": "9.6 Good fit is not evidence that the model is correct\nThis is the chapter’s most important section and the objective most often recited without being understood.\nA model that fits well has demonstrated one thing: the covariances it implies are close to the covariances observed. It has not demonstrated that its causal structure is right, because other models — with different, even opposite, causal claims — can imply exactly the same covariance matrix. They are called equivalent models, they exist for almost every model anyone fits, and no amount of data distinguishes them.\n\n\nRun it: two opposite causal stories, one fit\nthree = survey[[\"price\", \"resale_value\", \"maintenance\"]].copy()\nthree.columns = [\"x\", \"y\", \"z\"]\n\ncandidates = {\n    \"x → y → z\": \"y ~ x\\nz ~ y\",\n    \"z → y → x\": \"y ~ z\\nx ~ y\",\n}\nprint(f\"{'model':14}{'chi2':&gt;10}{'dof':&gt;6}{'CFI':&gt;9}{'AIC':&gt;10}\")\nfor name, desc in candidates.items():\n    m = semopy.Model(desc)\n    m.fit(three)\n    s = semopy.calc_stats(m)\n    print(f\"{name:14}{float(s['chi2'].iloc[0]):10.4f}{int(s['DoF'].iloc[0]):6d}\"\n          f\"{float(s['CFI'].iloc[0]):9.4f}{float(s['AIC'].iloc[0]):10.4f}\")\n\nprint(\"\\nIdentical, to four decimal places, on every index including AIC.\")\nprint(\"One says price drives resale value drives maintenance cost;\")\nprint(\"the other says the causation runs the other way. The data are silent.\")\n\n\nmodel               chi2   dof      CFI       AIC\nx → y → z         2.4889     2   0.9845    7.9447\nz → y → x         2.4889     2   0.9845    7.9447\n\nIdentical, to four decimal places, on every index including AIC.\nOne says price drives resale value drives maintenance cost;\nthe other says the causation runs the other way. The data are silent.\n\n\nIdentical \\(\\chi^2\\), identical degrees of freedom, identical CFI, identical AIC — for two models asserting opposite causal directions. No fit index can prefer one, because fit indices measure distance from the observed covariances and both reproduce them equally.\nThis is the same structural fact as chapter 7’s rotation indeterminacy, in a more dangerous costume: there, the alternatives were obviously arbitrary and everyone knew a rotation had been chosen; here, the alternative is a different theory of how the world works, and the output looks like a result.\nThe consequence for practice is exact. The direction of the arrows is an assumption you supply, and the fit statistics cannot audit it. What can audit it is subject knowledge, temporal order — a cause cannot follow its effect — and design, which is what chapters 10 and 11 are about.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#why-use-sem",
-    "href": "session-09.html#why-use-sem",
+    "objectID": "session-09.html#what-sem-does-not-fix",
+    "href": "session-09.html#what-sem-does-not-fix",
     "title": "9  Structural Equation Modelling",
-    "section": "9.7 Why use SEM?",
-    "text": "9.7 Why use SEM?\n\nAccounts for measurement error: Unlike traditional regression, SEM explicitly models latent variables, thereby controlling for measurement error and yielding more reliable estimates of relationships between constructs.\nTests complex models: SEM allows for the simultaneous estimation of multiple equations, handling several dependent variables, mediating relationships, and even feedback loops within a single coherent model.\nCombines analyses: Many common statistical methods are special cases of SEM—Confirmatory Factor Analysis (CFA) models the measurement structure alone, while path analysis focuses on observed variables. SEM unifies both, allowing for concurrent analysis of measurement and structural relationships.\nFlexible modeling framework: SEM accommodates diverse analytical extensions such as mediation, moderation, latent growth modeling, and multi-group comparisons, making it a versatile approach suitable for theory testing and model refinement across a wide range of disciplines.",
+    "section": "9.7 What SEM does not fix",
+    "text": "9.7 What SEM does not fix\nIt does not make cross-sectional data longitudinal. Estimating a path from \\(A\\) to \\(B\\) measured at the same moment identifies a direction only because you declared one.\nIt does not remove confounding. An omitted common cause of two constructs biases the path between them exactly as it biases a regression coefficient. The latent variables absorb measurement error, not confounders.\nIt is demanding of sample size. With a small \\(n\\) the \\(\\chi^2\\) test has little power to reject a wrong model, and the fit indices are themselves unstable — so “good fit” in a small sample is the weakest possible evidence.\nComparisons across groups require an extra assumption. Comparing a construct between, say, countries presumes it is measured the same way in each. That is measurement invariance, it is testable by fitting the model with loadings constrained equal across groups, and comparing means without testing it can manufacture a difference out of a translation (Cheung and Rensvold 2002).",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#key-terminology-in-sem",
-    "href": "session-09.html#key-terminology-in-sem",
+    "objectID": "session-09.html#a-short-review-of-the-literature",
+    "href": "session-09.html#a-short-review-of-the-literature",
     "title": "9  Structural Equation Modelling",
-    "section": "9.8 Key Terminology in SEM",
-    "text": "9.8 Key Terminology in SEM\n\nObserved variable (indicator): A directly measured variable, such as a survey item or test score, usually shown as a rectangle. Indicators provide the data used to estimate latent variables.\nLatent variable (factor or construct): An unobserved concept inferred from several observed indicators, typically shown as a circle or ellipse. Example: “Attitude” measured by multiple survey questions.\nExogenous and endogenous variables: Exogenous variables function like independent variables (arrows go out from them); endogenous variables act like dependent variables (arrows point into them).\nPath: A one-headed arrow showing a directional (causal) relationship, similar to a regression coefficient. A two-headed arrow (↔︎) indicates a covariance or correlation between variables.\nError (disturbance): The unexplained portion of a variable, represented by a small circle with an arrow pointing to the variable.",
+    "section": "9.8 A short review of the literature",
+    "text": "9.8 A short review of the literature\n\nThe method has two ancestors that met in the 1970s. Wright (1934) developed path analysis in genetics, with the diagram as the model and the decomposition of correlations along paths; Spearman (1904) and the factor-analytic tradition supplied latent variables measured by indicators. Jöreskog (1971) combined them into the general covariance-structure model that all current software implements, and Rosseel (2012) gave the modern open-source implementation whose syntax semopy follows in Python.\nAssessment of fit is where the applied literature has moved most. Bentler (1990) introduced the comparative fit index and Browne and Cudeck (1992) the RMSEA, both as responses to the chi-square test’s sensitivity to sample size. Hu and Bentler (1999) proposed the cut-offs now universally quoted — CFI and TLI above 0.95, RMSEA below 0.06 — while cautioning against exactly the mechanical application that followed.\nMacCallum and Austin (2000) reviewed a decade of applied practice and found the recurring faults to be the ones this chapter warns about: models modified until they fit and then reported as though specified in advance, equivalent models never considered, and causal language attached to cross-sectional designs. Cheung and Rensvold (2002) supplies the invariance testing that any cross-group comparison requires and most omit.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]
   },
   {
-    "objectID": "session-09.html#components-of-a-sem",
-    "href": "session-09.html#components-of-a-sem",
+    "objectID": "session-09.html#what-to-report",
+    "href": "session-09.html#what-to-report",
     "title": "9  Structural Equation Modelling",
-    "section": "9.9 Components of a SEM",
-    "text": "9.9 Components of a SEM\nAn SEM has two main parts that work together:\n\nMeasurement model: Connects latent variables (unobserved concepts) to their observed indicators (measured variables). Each latent factor is represented by several indicators, with arrows pointing from the latent variable (ellipse) to its indicators (rectangles). These arrows represent factor loadings, just like in a Confirmatory Factor Analysis (CFA).\nStructural model: Describes the relationships among latent variables (and sometimes observed ones). It functions like a set of regression equations linking the constructs. Arrows between latent variables show hypothesized influences, with coefficients interpreted like regression weights.\n\nAnd then we talk about:\n\nCovariances: Exogenous (independent) variables are usually allowed to covary, represented by two-headed arrows (↔︎).\nPath diagram:\n\nSEMs are often illustrated with diagrams—ellipses for latent variables,\nrectangles for observed variables,\none-headed arrows for causal paths,\nand two-headed arrows for covariances.\n\n\nThese diagrams make the model’s logic and structure easier to interpret.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-1",
-    "href": "session-09.html#example-1",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.10 Example 1",
-    "text": "9.10 Example 1",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-dataset-holzingerswineford1939",
-    "href": "session-09.html#example-dataset-holzingerswineford1939",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.11 Example Dataset: HolzingerSwineford1939",
-    "text": "9.11 Example Dataset: HolzingerSwineford1939\nHere are the definitions and descriptions of the variables in the HolzingerSwineford1939 dataset, as used in most SEM and CFA examples (including in lavaan).\nThis dataset comes from Holzinger & Swineford (1939), who studied the structure of mental abilities among schoolchildren.\nThe dataset includes scores on nine ability tests, grouped into three domains: visual, textual (verbal), and speed.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#dataset-overview",
-    "href": "session-09.html#dataset-overview",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.12 🔹 Dataset overview",
-    "text": "9.12 🔹 Dataset overview\n\nSample: 301 children (7th and 8th graders) from two schools — Pasteur and Grant-White.\nPurpose: To examine whether cognitive abilities can be explained by a small number of underlying (latent) factors.\nVariables: 9 observed test scores, 3 latent constructs.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#latent-and-observed-variables",
-    "href": "session-09.html#latent-and-observed-variables",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.13 🔹 Latent and observed variables",
-    "text": "9.13 🔹 Latent and observed variables\n\n\n\n\n\n\n\n\n\nLatent variable (factor)\nObserved indicators\nTest name / meaning\nDescription\n\n\n\n\nVisual ability\nx1: VisualPerception\nVisual perception test\nMeasures perceptual speed and spatial reasoning using visual materials.\n\n\n\nx2: Cubes\nCubes test\nAssesses ability to visualize and manipulate 3D objects mentally.\n\n\n\nx3: Lozenges\nLozenges test\nInvolves identifying geometric patterns, assessing spatial and shape recognition skills.\n\n\nTextual (verbal) ability\nx4: ParagraphComprehension\nParagraph comprehension test\nMeasures reading comprehension and understanding of written passages.\n\n\n\nx5: SentenceCompletion\nSentence completion test\nTests vocabulary and verbal reasoning; complete sentences meaningfully.\n\n\n\nx6: WordMeaning\nWord meaning test\nAssesses knowledge of word meanings and verbal intelligence.\n\n\nSpeed (processing speed)\nx7: Addition\nAddition test\nMeasures speed and accuracy in simple arithmetic.\n\n\n\nx8: CountingDots\nCounting dots test\nAssesses visual scanning and quick counting accuracy.\n\n\n\nx9: Discrimination\nDiscrimination test\nMeasures perceptual speed in identifying or distinguishing simple visual stimuli.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#typical-cfa-model-specification",
-    "href": "session-09.html#typical-cfa-model-specification",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.14 🔹 Typical CFA model specification",
-    "text": "9.14 🔹 Typical CFA model specification\nThe confirmatory factor analysis model for these nine observed variables is typically written as:\n\nHS_model = \"\"\"\n  visual  =~ x1 + x2 + x3\n  textual =~ x4 + x5 + x6\n  speed   =~ x7 + x8 + x9\n\"\"\"\n\nThis model proposes that:\n\nThe visual, textual, and speed factors each explain the correlations among their respective tests.\nThe factors may correlate with each other, representing related but distinct aspects of cognitive ability.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#goal-of-the-model",
-    "href": "session-09.html#goal-of-the-model",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.15 🔹 Goal of the model",
-    "text": "9.15 🔹 Goal of the model\nThe Holzinger–Swineford example demonstrates how SEM can:\n\nTest the existence of underlying mental ability factors.\nEstimate factor loadings, showing how strongly each test measures its latent ability.\nCompare models (e.g., one general intelligence factor vs. three correlated factors).\n\nIn summary:\n\nx1–x3 = visual/spatial reasoning tasks\nx4–x6 = verbal comprehension tasks\nx7–x9 = processing speed tasks\n\n\n# In the VS Codium terminal, with .venv active:  python\nimport semopy\nfrom semopy.examples import holzinger39\n\n# 301 children, nine ability tests — ships with semopy, nothing to download\ndata = holzinger39.get_data()\ndata.head()\n  id sex ageyr agemo  school grade       x1   x2    x3       x4   x5        x6\n1  1   1    13     1 Pasteur     7 3.333333 7.75 0.375 2.333333 5.75 1.2857143\n2  2   2    13     7 Pasteur     7 5.333333 5.25 2.125 1.666667 3.00 1.2857143\n3  3   2    13     1 Pasteur     7 4.500000 5.25 1.875 1.000000 1.75 0.4285714\n4  4   1    13     2 Pasteur     7 5.333333 7.75 3.000 2.666667 4.50 2.4285714\n5  5   2    12     2 Pasteur     7 4.833333 4.75 0.875 2.666667 4.00 2.5714286\n6  6   2    14     1 Pasteur     7 5.333333 5.00 2.250 1.000000 3.00 0.8571429\n        x7   x8       x9\n1 3.391304 5.75 6.361111\n2 3.782609 6.25 7.916667\n3 3.260870 3.90 4.416667\n4 3.000000 5.30 4.861111\n5 3.695652 6.30 5.916667\n6 4.347826 6.65 7.500000",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#what-the-formula-means",
-    "href": "session-09.html#what-the-formula-means",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.16 1. What the formula means",
-    "text": "9.16 1. What the formula means\nEach line in your syntax, such as\n\n# \"visual is measured by x1, x2 and x3\"\n# =~ reads as \"is measured by\": the latent variable on the left,\n# its observed indicators on the right.\nvisual =~ x1 + x2 + x3\n\ntells R that:\n\nvisual is a latent variable (something not directly observed).\nIt is measured by (or “indicated by”) the observed variables x1, x2, and x3.\n\nIn this example:\n\nx1, x2, and x3 might be scores on visual perception tests.\nvisual is the underlying construct that these tests reflect.\n\nThe operator =~ literally means “is measured by”.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#behind-the-scenes-defaults-in-lavaan",
-    "href": "session-09.html#behind-the-scenes-defaults-in-lavaan",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.17 2. Behind-the-scenes defaults in lavaan",
-    "text": "9.17 2. Behind-the-scenes defaults in lavaan\nWhen you write this concise syntax, lavaan automatically handles several technical steps that you’d otherwise need to specify manually:\n\nFixing one loading to 1: The first indicator’s factor loading (e.g., x1 → visual) is fixed to 1.0 to set the scale of the latent variable. Without this, the latent variable would have an undefined scale.\nAdding residuals: Each observed variable gets its own residual variance (measurement error term). These are estimated automatically.\nCorrelating exogenous latents: If you have more than one latent variable (e.g., visual, textual, speed), lavaan will, by default, allow them to correlate with each other — unless you specify otherwise.\n\nThis is why the model syntax is so compact but still complete.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#writing-the-model",
-    "href": "session-09.html#writing-the-model",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.18 3. Writing the model",
-    "text": "9.18 3. Writing the model\n\n# In the VS Codium terminal, with .venv active:\n#   pip install semopy\nimport semopy\nimport numpy as np\nimport pandas as pd\n\nThis model defines three latent factors:\n\nvisual — measured by x1–x3\ntextual — measured by x4–x6\nspeed — measured by x7–x9\n\nAll three are allowed to correlate by default.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#fitting-the-model",
-    "href": "session-09.html#fitting-the-model",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.19 4. Fitting the model",
-    "text": "9.19 4. Fitting the model\nYou fit the model using the cfa() function:\n\nfit = semopy.Model(HS_model)\nfit.fit(data)\n\n\nHS.model is your model definition (inside quotes).\nHolzingerSwineford1939 is the dataset (it’s built into lavaan).",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#viewing-results",
-    "href": "session-09.html#viewing-results",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.20 5. Viewing results",
-    "text": "9.20 5. Viewing results\nTo see how well the model fits the data and inspect loadings use summary().\nThis command prints:\n\nFactor loadings (how strongly each indicator relates to its latent variable).\nResidual variances (unexplained variance per indicator).\nCorrelations among latent variables.\nFit indices such as χ², CFI, TLI, RMSEA, and SRMR.\n\n\n# Parameter estimates, standardised alongside the raw ones\nprint(fit.inspect(std_est=True))\n\n# Fit indices\nprint(semopy.calc_stats(fit).T)\nlavaan 0.6-20 ended normally after 35 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        21\n\n  Number of observations                           301\n\nModel Test User Model:\n                                                      \n  Test statistic                                85.306\n  Degrees of freedom                                24\n  P-value (Chi-square)                           0.000\n\nModel Test Baseline Model:\n\n  Test statistic                               918.852\n  Degrees of freedom                                36\n  P-value                                        0.000\n\nUser Model versus Baseline Model:\n\n  Comparative Fit Index (CFI)                    0.931\n  Tucker-Lewis Index (TLI)                       0.896\n\nLoglikelihood and Information Criteria:\n\n  Loglikelihood user model (H0)              -3737.745\n  Loglikelihood unrestricted model (H1)      -3695.092\n                                                      \n  Akaike (AIC)                                7517.490\n  Bayesian (BIC)                              7595.339\n  Sample-size adjusted Bayesian (SABIC)       7528.739\n\nRoot Mean Square Error of Approximation:\n\n  RMSEA                                          0.092\n  90 Percent confidence interval - lower         0.071\n  90 Percent confidence interval - upper         0.114\n  P-value H_0: RMSEA &lt;= 0.050                    0.001\n  P-value H_0: RMSEA &gt;= 0.080                    0.840\n\nStandardized Root Mean Square Residual:\n\n  SRMR                                           0.065\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  visual =~                                           \n    x1                1.000                           \n    x2                0.554    0.100    5.554    0.000\n    x3                0.729    0.109    6.685    0.000\n  textual =~                                          \n    x4                1.000                           \n    x5                1.113    0.065   17.014    0.000\n    x6                0.926    0.055   16.703    0.000\n  speed =~                                            \n    x7                1.000                           \n    x8                1.180    0.165    7.152    0.000\n    x9                1.082    0.151    7.155    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  visual ~~                                           \n    textual           0.408    0.074    5.552    0.000\n    speed             0.262    0.056    4.660    0.000\n  textual ~~                                          \n    speed             0.173    0.049    3.518    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.549    0.114    4.833    0.000\n   .x2                1.134    0.102   11.146    0.000\n   .x3                0.844    0.091    9.317    0.000\n   .x4                0.371    0.048    7.779    0.000\n   .x5                0.446    0.058    7.642    0.000\n   .x6                0.356    0.043    8.277    0.000\n   .x7                0.799    0.081    9.823    0.000\n   .x8                0.488    0.074    6.573    0.000\n   .x9                0.566    0.071    8.003    0.000\n    visual            0.809    0.145    5.564    0.000\n    textual           0.979    0.112    8.737    0.000\n    speed             0.384    0.086    4.451    0.000",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#simple-interpretation",
-    "href": "session-09.html#simple-interpretation",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.21 Simple interpretation**",
-    "text": "9.21 Simple interpretation**\n\nIf the factor loadings are high (say &gt; 0.7) and significant, your indicators strongly represent the intended latent variable.\nIf model fit indices (like CFI &gt; 0.95, RMSEA &lt; 0.06) look good, your measurement model aligns well with the observed data.\nLet’s go step by step and interpret these Confirmatory Factor Analysis (CFA) results in plain language.\nThese come from the HolzingerSwineford1939 dataset, specifically focusing on the speed factor and the relationships among the three latent variables (visual, textual, and speed).",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#factor-loadings-for-speed",
-    "href": "session-09.html#factor-loadings-for-speed",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.22 1. Factor loadings for “speed”",
-    "text": "9.22 1. Factor loadings for “speed”\n\n\n\n\n\n\n\n\n\n\n\nIndicator\nEstimate\nStd. Err\nz-value\np-value\nInterpretation\n\n\n\n\nx7\n1.000\n—\n—\n—\nThis indicator (Addition test) is the reference item. Its loading is fixed to 1.0 to set the scale of the latent variable “speed.”\n\n\nx8\n1.180\n0.165\n7.152\n&lt; .001\nThe loading is high and significant → “Counting Dots” test strongly measures the speed factor.\n\n\nx9\n1.082\n0.151\n7.155\n&lt; .001\nAlso high and significant → “Discrimination” test strongly reflects the same speed ability.\n\n\n\n✅ Interpretation: All three indicators (x7, x8, x9) load significantly and positively on the speed latent variable. This means that children who perform well on one of these speed tasks tend to perform well on the others — evidence that these tasks measure a common underlying construct: processing speed.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#covariances-between-latent-variables",
-    "href": "session-09.html#covariances-between-latent-variables",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.23 2. Covariances between latent variables",
-    "text": "9.23 2. Covariances between latent variables\n\n\n\n\n\n\n\n\n\nCovariance\nEstimate\np-value\nInterpretation\n\n\n\n\nvisual ↔︎ textual\n0.408\n&lt; .001\nA strong positive relationship: students good at visual tasks also tend to be good at verbal/textual tasks.\n\n\nvisual ↔︎ speed\n0.262\n&lt; .001\nA moderate positive relationship: faster students also tend to do better on visual reasoning tasks.\n\n\ntextual ↔︎ speed\n0.173\n&lt; .001\nA weaker but still significant relationship: verbal ability and speed are related, though less strongly.\n\n\n\n✅ Interpretation: All three latent factors are positively correlated, meaning they represent related but distinct cognitive abilities. Visual, verbal, and speed skills overlap somewhat — but each factor captures its own dimension of ability.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#variances",
-    "href": "session-09.html#variances",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.24 3. Variances",
-    "text": "9.24 3. Variances\n\n\n\n\n\n\n\n\nVariable\nEstimate\nInterpretation\n\n\n\n\nResidual variances (.x1–.x9)\nRange 0.35–1.13\nThese values show the unexplained variance in each test score after accounting for its latent factor. Smaller residuals (like 0.35) mean the factor explains much of the test’s variance; larger ones (like 1.13) mean there’s more measurement error or unique content in that item.\n\n\nLatent variances (visual, textual, speed)\nvisual = 0.81, textual = 0.98, speed = 0.38\nThese reflect the total variance in each latent construct. The lower variance for speed suggests it varies less across students than visual or textual ability.\n\n\n\n✅ Interpretation: The model captures meaningful variation in each ability domain. Residual variances are all significant (p &lt; .001), showing that each test also has some unique measurement error — which is normal in psychological testing.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#plain-summary",
-    "href": "session-09.html#plain-summary",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.25 Plain summary",
-    "text": "9.25 Plain summary\n\nThe speed factor is measured reliably by its three indicators (x7, x8, x9), all of which have strong, significant loadings.\nThe three latent abilities — visual, textual, and speed — are positively related: children who perform well in one domain tend to perform well in others, though the correlations are not perfect (indicating distinct skills).\nThe model fits theoretical expectations of the cognitive structure: three interrelated but separate mental ability factors.\nResiduals and variances suggest reasonable measurement precision and distinct variance among factors.\n\nIn simple terms:\n\nStudents’ performance on speed-based tasks forms a coherent ability factor. This ability is moderately related to visual reasoning and, to a lesser extent, to verbal ability — supporting the idea that mental abilities are connected but not identical.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-2",
-    "href": "session-09.html#example-2",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.26 Example 2",
-    "text": "9.26 Example 2",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-dataset-politicaldemocracy",
-    "href": "session-09.html#example-dataset-politicaldemocracy",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.27 Example Dataset: PoliticalDemocracy",
-    "text": "9.27 Example Dataset: PoliticalDemocracy\nThe PoliticalDemocracy dataset is one of the classic examples used in structural equation modeling (SEM), originally featured in Kenneth Bollen’s (1989) foundational book Structural Equations with Latent Variables.\nIt’s included in the lavaan package, so you can access it right away in R without downloading anything.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#what-the-dataset-contains",
-    "href": "session-09.html#what-the-dataset-contains",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.28 🔹 What the dataset contains",
-    "text": "9.28 🔹 What the dataset contains\nThis dataset is designed to illustrate how SEM handles latent variables, measurement models, and structural relations among them.\nIt includes 11 observed variables related to industrialization and democracy for 75 countries.\nThere are three latent constructs:\n\nind60 — Industrialization in 1960\ndem60 — Democracy in 1960\ndem65 — Democracy in 1965",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#observed-variables-indicators",
-    "href": "session-09.html#observed-variables-indicators",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.29 🔹 Observed variables (indicators)",
-    "text": "9.29 🔹 Observed variables (indicators)\n\n\n\n\n\n\n\n\nLatent Variable\nIndicators (Observed Variables)\nDescription\n\n\n\n\nind60 (Industrialization, 1960)\nx1: GNP per capita (1960)\nx2: Energy consumption per capita (1960)\nx3: Percentage of labor force in industry (1960)\nCaptures a country’s level of industrialization around 1960 — higher values reflect greater economic development and industrial activity.\n\n\ndem60 (Democracy, 1960)\ny1: Freedom of the press (1960)\ny2: Freedom of political opposition (1960)\ny3: Fairness of elections (1960)\ny4: Effectiveness of legislature (1960)\nReflects the degree of democratic rights and institutions at the start of the period.\n\n\ndem65 (Democracy, 1965)\ny5: Freedom of the press (1965)\ny6: Freedom of political opposition (1965)\ny7: Fairness of elections (1965)\ny8: Effectiveness of legislature (1965)\nMeasures democracy five years later, allowing the model to capture changes in democratic performance over time.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#notes",
-    "href": "session-09.html#notes",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.30 💡 Notes:",
-    "text": "9.30 💡 Notes:\n\nEach set of indicators corresponds to a latent construct that is not directly observable (industrialization or democracy).\nThe dem65 variables repeat the same democracy indicators as dem60, but for a later year, allowing researchers to study how democracy evolves.\nThe model tests both measurement (how well these indicators represent their latent constructs) and structural relations (e.g., does industrialization lead to more democracy over time?).",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-lavaan-specification",
-    "href": "session-09.html#example-lavaan-specification",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.31 Example lavaan specification:",
-    "text": "9.31 Example lavaan specification:\n\nmodel = \"\"\"\n  # Measurement model\n  ind60 =~ x1 + x2 + x3\n  dem60 =~ y1 + y2 + y3 + y4\n  dem65 =~ y5 + y6 + y7 + y8\n  # Regressions — the structural part\n  dem60 ~ ind60\n  dem65 ~ ind60 + dem60\n\"\"\"\n\nThis model is the canonical PoliticalDemocracy SEM — it shows how industrialization in 1960 affects democracy in 1960 and 1965, while also accounting for stability and measurement consistency over time.\nEach set of observed variables measures one latent construct.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#structure-of-the-sem",
-    "href": "session-09.html#structure-of-the-sem",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.32 🔹 Structure of the SEM",
-    "text": "9.32 🔹 Structure of the SEM\nThe model tests both measurement and structural relationships:\n\nThe measurement model defines how the latent variables (ind60, dem60, dem65) are measured by their observed indicators.\n\nind60 is measured by x1, x2, x3\ndem60 is measured by y1, y2, y3, y4\ndem65 is measured by y5, y6, y7, y8\n\nThe structural model defines the causal paths among the latent variables:\n\nind60 → dem60\ndem60 → dem65\nind60 → dem65 (direct effect)\n\n\nThis structure allows for the examination of how industrialization affects democracy both directly and indirectly over time.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#loading-and-exploring-the-dataset",
-    "href": "session-09.html#loading-and-exploring-the-dataset",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.33 🔹 Loading and exploring the dataset",
-    "text": "9.33 🔹 Loading and exploring the dataset\nYou can load and view it directly in R:\n\nfrom semopy.examples import political_democracy\n\n# 75 countries: industrialisation and democratic institutions\nPoliticalDemocracy = political_democracy.get_data()\nPoliticalDemocracy.head()\n     y1       y2       y3       y4       y5       y6       y7       y8       x1\n1  2.50 0.000000 3.333333 0.000000 1.250000 0.000000 3.726360 3.333333 4.442651\n2  1.25 0.000000 3.333333 0.000000 6.250000 1.100000 6.666666 0.736999 5.384495\n3  7.50 8.800000 9.999998 9.199991 8.750000 8.094061 9.999998 8.211809 5.961005\n4  8.90 8.800000 9.999998 9.199991 8.907948 8.127979 9.999998 4.615086 6.285998\n5 10.00 3.333333 9.999998 6.666666 7.500000 3.333333 9.999998 6.666666 5.863631\n6  7.50 3.333333 6.666666 6.666666 6.250000 1.100000 6.666666 0.368500 5.533389\n        x2       x3\n1 3.637586 2.557615\n2 5.062595 3.568079\n3 6.255750 5.224433\n4 7.567863 6.267495\n5 6.818924 4.573679\n6 5.135798 3.892270\n\nThis will show the first few rows, typically looking like this:\n\n\n\nx1\nx2\nx3\ny1\ny2\ny3\ny4\ny5\ny6\ny7\ny8\n\n\n\n\n2.11\n2.26\n2.04\n6\n5\n3\n3\n7\n5\n4\n4\n\n\n…\n…\n…\n…\n…\n…\n…\n…\n…\n…\n…",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#specifying-the-model-in-lavaan",
-    "href": "session-09.html#specifying-the-model-in-lavaan",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.34 🔹 Specifying the model in lavaan",
-    "text": "9.34 🔹 Specifying the model in lavaan\nHere’s the model Bollen used, implemented in lavaan:\n\nmodel = \"\"\"\n  # measurement model\n  ind60 =~ x1 + x2 + x3\n  dem60 =~ y1 + y2 + y3 + y4\n  dem65 =~ y5 + y6 + y7 + y8\n  # regressions\n  dem60 ~ ind60\n  dem65 ~ ind60 + dem60\n\"\"\"\n\nThen fit it:\n\nfit = semopy.Model(model)\nfit.fit(PoliticalDemocracy)",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#viewing-the-results",
-    "href": "session-09.html#viewing-the-results",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.35 🔹 Viewing the results",
-    "text": "9.35 🔹 Viewing the results\n\nprint(fit.inspect(std_est=True))\nprint(semopy.calc_stats(fit).T)\nlavaan 0.6-20 ended normally after 68 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        31\n\n  Number of observations                            75\n\nModel Test User Model:\n                                                      \n  Test statistic                                38.125\n  Degrees of freedom                                35\n  P-value (Chi-square)                           0.329\n\nModel Test Baseline Model:\n\n  Test statistic                               730.654\n  Degrees of freedom                                55\n  P-value                                        0.000\n\nUser Model versus Baseline Model:\n\n  Comparative Fit Index (CFI)                    0.995\n  Tucker-Lewis Index (TLI)                       0.993\n\nLoglikelihood and Information Criteria:\n\n  Loglikelihood user model (H0)              -1547.791\n  Loglikelihood unrestricted model (H1)      -1528.728\n                                                      \n  Akaike (AIC)                                3157.582\n  Bayesian (BIC)                              3229.424\n  Sample-size adjusted Bayesian (SABIC)       3131.720\n\nRoot Mean Square Error of Approximation:\n\n  RMSEA                                          0.035\n  90 Percent confidence interval - lower         0.000\n  90 Percent confidence interval - upper         0.092\n  P-value H_0: RMSEA &lt;= 0.050                    0.611\n  P-value H_0: RMSEA &gt;= 0.080                    0.114\n\nStandardized Root Mean Square Residual:\n\n  SRMR                                           0.044\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all\n  ind60 =~                                                              \n    x1                1.000                               0.670    0.920\n    x2                2.180    0.139   15.742    0.000    1.460    0.973\n    x3                1.819    0.152   11.967    0.000    1.218    0.872\n  dem60 =~                                                              \n    y1                1.000                               2.223    0.850\n    y2                1.257    0.182    6.889    0.000    2.794    0.717\n    y3                1.058    0.151    6.987    0.000    2.351    0.722\n    y4                1.265    0.145    8.722    0.000    2.812    0.846\n  dem65 =~                                                              \n    y5                1.000                               2.103    0.808\n    y6                1.186    0.169    7.024    0.000    2.493    0.746\n    y7                1.280    0.160    8.002    0.000    2.691    0.824\n    y8                1.266    0.158    8.007    0.000    2.662    0.828\n\nRegressions:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all\n  dem60 ~                                                               \n    ind60             1.483    0.399    3.715    0.000    0.447    0.447\n  dem65 ~                                                               \n    ind60             0.572    0.221    2.586    0.010    0.182    0.182\n    dem60             0.837    0.098    8.514    0.000    0.885    0.885\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all\n .y1 ~~                                                                 \n   .y5                0.624    0.358    1.741    0.082    0.624    0.296\n .y2 ~~                                                                 \n   .y4                1.313    0.702    1.871    0.061    1.313    0.273\n   .y6                2.153    0.734    2.934    0.003    2.153    0.356\n .y3 ~~                                                                 \n   .y7                0.795    0.608    1.308    0.191    0.795    0.191\n .y4 ~~                                                                 \n   .y8                0.348    0.442    0.787    0.431    0.348    0.109\n .y6 ~~                                                                 \n   .y8                1.356    0.568    2.386    0.017    1.356    0.338\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all\n   .x1                0.082    0.019    4.184    0.000    0.082    0.154\n   .x2                0.120    0.070    1.718    0.086    0.120    0.053\n   .x3                0.467    0.090    5.177    0.000    0.467    0.239\n   .y1                1.891    0.444    4.256    0.000    1.891    0.277\n   .y2                7.373    1.374    5.366    0.000    7.373    0.486\n   .y3                5.067    0.952    5.324    0.000    5.067    0.478\n   .y4                3.148    0.739    4.261    0.000    3.148    0.285\n   .y5                2.351    0.480    4.895    0.000    2.351    0.347\n   .y6                4.954    0.914    5.419    0.000    4.954    0.443\n   .y7                3.431    0.713    4.814    0.000    3.431    0.322\n   .y8                3.254    0.695    4.685    0.000    3.254    0.315\n    ind60             0.448    0.087    5.173    0.000    1.000    1.000\n   .dem60             3.956    0.921    4.295    0.000    0.800    0.800\n   .dem65             0.172    0.215    0.803    0.422    0.039    0.039\n\n\n9.35.1 🔹 Interpretation",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#overall-model-fit",
-    "href": "session-09.html#overall-model-fit",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.36 1. Overall model fit",
-    "text": "9.36 1. Overall model fit\n\nChi-square = 38.12, df = 35, p = 0.33 → The p-value is above 0.05, which means the model’s implied covariance structure is not significantly different from the observed data. ✅ Conclusion: The model fits the data well.\n\nThis tells you that your hypothesized model (relationships among ind60, dem60, and dem65) is plausible and consistent with the data.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#measurement-model-factor-loadings",
-    "href": "session-09.html#measurement-model-factor-loadings",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.37 2. Measurement model (factor loadings)",
-    "text": "9.37 2. Measurement model (factor loadings)\nEach latent variable is measured by several indicators. The loadings show how strongly each observed variable reflects its latent construct.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#ind60-industrialization-in-1960",
-    "href": "session-09.html#ind60-industrialization-in-1960",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.38 ind60 (industrialization in 1960)",
-    "text": "9.38 ind60 (industrialization in 1960)\n\n\n\ndicator St\nandardized loading In\nterpretation\n\n\n\n\nx1\n0.92\nStrong indicator\n\n\nx2\n0.97\nVery strong indicator\n\n\nx3\n0.87\nStrong indicator\n\n\n\n✅ All are high (close to 1.0), so the indicators are excellent measures of industrialization.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#dem60-democracy-in-1960",
-    "href": "session-09.html#dem60-democracy-in-1960",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.39 dem60 (democracy in 1960)",
-    "text": "9.39 dem60 (democracy in 1960)\n\n\n\ndicator St\nandardized loading In\nterpretation\n\n\n\n\ny1\n0.85\nStrong\n\n\ny2\n0.72\nModerate\n\n\ny3\n0.72\nModerate\n\n\ny4\n0.85\nStrong\n\n\n\n✅ All significant; the latent factor is well represented by these four democracy indicators.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#dem65-democracy-in-1965",
-    "href": "session-09.html#dem65-democracy-in-1965",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.40 dem65 (democracy in 1965)",
-    "text": "9.40 dem65 (democracy in 1965)\n\n\n\ndicator St\nandardized loading In\nterpretation\n\n\n\n\ny5\n0.81\nStrong\n\n\ny6\n0.75\nModerate\n\n\ny7\n0.82\nStrong\n\n\ny8\n0.83\nStrong\n\n\n\n✅ Similarly, all loadings are high and significant → the construct of democracy in 1965 is measured well.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#structural-model-paths-among-latent-variables",
-    "href": "session-09.html#structural-model-paths-among-latent-variables",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.41 3. Structural model (paths among latent variables)",
-    "text": "9.41 3. Structural model (paths among latent variables)\n\n\n\n\n\n\n\n\n\nPath\nStandardized coefficient\np-value\nMeaning\n\n\n\n\nind60 → dem60\n0.45\n&lt; .001\nIndustrialization in 1960 significantly increases democracy in 1960.\n\n\nind60 → dem65\n0.18\n0.01\nIndustrialization in 1960 has a smaller but still positive effect on democracy in 1965.\n\n\ndem60 → dem65\n0.89\n&lt; .001\nDemocracy is very stable over time — democracy in 1960 is the main driver of democracy in 1965.\n\n\n\n✅ Interpretation:\n\nThe path from ind60 → dem60 supports the idea that economic development promotes democratic institutions.\nThe very strong dem60 → dem65 path means that once democracy exists, it tends to persist.\nThe direct ind60 → dem65 path, while smaller, shows industrialization also helps maintain democracy over time, beyond its indirect effect through dem60.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#covariances-and-residuals",
-    "href": "session-09.html#covariances-and-residuals",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.42 4. Covariances and residuals",
-    "text": "9.42 4. Covariances and residuals\nSome pairs of indicators (e.g., y2 with y6, y6 with y8) were allowed to correlate across time. These capture shared variance between similar items measured at two different years — this is normal and improves fit.\nAll other residual variances (errors) are reasonable, meaning that most of the variance in each observed variable is explained by its latent factor.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#r²-interpretation",
-    "href": "session-09.html#r²-interpretation",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.43 5. R² interpretation",
-    "text": "9.43 5. R² interpretation\nIn lavaan output, the Std.all column at the bottom under “Variances” gives R² for latent variables (the proportion of variance explained by their predictors).\n\n\n\n\n\n\n\n\nVariable\nR²\nInterpretation\n\n\n\n\ndem60\n0.80\nIndustrialization explains 80% of the variance in democracy in 1960.\n\n\ndem65\n0.04\nIndustrialization and prior democracy explain only 4% of the remaining (unexplained) variance in democracy 1965 — because most of it is already predicted by dem60.\n\n\n\n✅ So:\n\ndem60 is well explained by ind60.\ndem65 shows little unexplained variance left — almost everything about democracy in 1965 can already be predicted from dem60.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#plain-summary-1",
-    "href": "session-09.html#plain-summary-1",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.44 6. Plain summary",
-    "text": "9.44 6. Plain summary\n\nThe model fits the data very well.\nIndicators strongly measure their latent variables.\nIndustrialization (1960) has a clear positive impact on democracy, both immediately and indirectly through continuity over time.\nDemocracy is highly persistent: once established, it remains stable.\nThe model explains most of the meaningful variation in democracy, showing strong theoretical and empirical support for Bollen’s (1989) classic argument:\n\nEconomic development promotes democracy, which once established tends to endure.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-3",
-    "href": "session-09.html#example-3",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.45 Example 3",
-    "text": "9.45 Example 3",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-path-diagram",
-    "href": "session-09.html#example-path-diagram",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.46 Example Path Diagram",
-    "text": "9.46 Example Path Diagram\nBelow is an example SEM path diagram based on the Theory of Planned Behavior (TPB). It shows both the measurement and structural parts of the model:\n\n\nLatent variables (ellipses): Attitudes, Subjective Norms, Perceived Control, and Intention.\nObserved indicators (rectangles): Each latent variable is measured by several observed items (e.g., Attitudes → Q1, Q2; Norms → Q3, Q4). The arrows from latent variables to indicators represent factor loadings, showing how strongly each item reflects its construct.\nStructural paths (bold arrows between ellipses): These arrows (e.g., Attitudes → Intention, Norms → Intention, Control → Intention) represent causal relationships among latent variables, similar to regression coefficients.\nCovariances (two-headed curved arrows): These link exogenous factors (e.g., Attitudes ↔︎ Norms ↔︎ Control), indicating that the predictors are allowed to correlate.\n\nIn this model, Intention is the endogenous latent variable (dependent variable), while Attitudes, Subjective Norms, and Perceived Control are exogenous latent predictors. All exogenous constructs are typically allowed to covary freely.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#example-latent-constructs-and-indicators-tpb",
-    "href": "session-09.html#example-latent-constructs-and-indicators-tpb",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.47 Example: Latent Constructs and Indicators (TPB)",
-    "text": "9.47 Example: Latent Constructs and Indicators (TPB)\nIn the Theory of Planned Behavior (TPB) example, each latent construct is measured by several survey items:\n\nAttitudes (latent factor): measured by two semantic differential items assessing evaluations of teen sexual activity (e.g., “Having sex as a teen is foolish vs. wise”, “…harmful vs. beneficial”).\nSubjective Norms (latent factor): measured by two items on perceived social approval (e.g., “How much does your boyfriend/girlfriend approve?”, “How much does a close friend approve?”).\nPerceived Control (latent factor): measured by two items on self-efficacy (e.g., “How much self-control do you have to not have sex?”, “Do you know how to refuse sex?”).\nIntention (latent factor): measured by two items on planned behavior (e.g., “I intend not to have sex in the next year”, “I intend to avoid situations that might lead to sex.”).\n\nAll items were rated on a 7-point scale (e.g., from “Foolish” to “Wise”), yielding continuous data for SEM analysis. Although this example uses two indicators per construct for simplicity, it is generally recommended to have at least three indicators per latent variable to ensure model identification and reliability.\n\n\n\n\n\n\n\n\nLatent Variable\nIndicators (Observed Variables)\nExample meaning\n\n\n\n\nIntention\nint.abs, int.avoid\n“I intend to abstain from sex” / “I intend to avoid situations that might lead to sex”\n\n\nAttitudes\nsex.fool, sex.harm\n“Having sex as a teen is foolish vs. wise” / “Having sex as a teen is harmful vs. beneficial”\n\n\nSubjective Norms\nlove.sex, frnd.sex\nPerceived approval from partner and friend\n\n\nPerceived Control\nself.cntl, how.ref\n“How much self-control do you have to not have sex?” / “Do you know how to refuse sex?”",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#sem-dataset-simulation",
-    "href": "session-09.html#sem-dataset-simulation",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.48 SEM Dataset Simulation",
-    "text": "9.48 SEM Dataset Simulation\n\nrng = np.random.default_rng(123)\nn = 400\n\n# Latent variables\nAttitude = rng.normal(size=n)\nNorms    = rng.normal(size=n)\nControl  = rng.normal(size=n)\nIntention = 0.4 * Attitude + 0.3 * Norms + 0.2 * Control + rng.normal(0, 0.5, n)\n\n\nimport semopy\nimport numpy as np\nimport pandas as pd\nfrom scipy import stats\n\n\n# The R deck reads a local tpb.csv. We simulate the same structure so the\n# slide runs anywhere, with no file to find.\ntpb = pd.DataFrame({\n    \"sex_fool\": Attitude + rng.normal(0, .5, n),\n    \"sex_harm\": Attitude + rng.normal(0, .5, n),\n    \"frnd_sex\": Norms    + rng.normal(0, .5, n),\n    \"love_sex\": Norms    + rng.normal(0, .5, n),\n    \"sex_ctrl\": Control  + rng.normal(0, .5, n),\n    \"sex_plan\": Control  + rng.normal(0, .5, n),\n    \"intend_a\": Intention + rng.normal(0, .5, n),\n    \"intend_b\": Intention + rng.normal(0, .5, n),\n})\ntpb.head()\n     int.abs    int.avoid   sex.fool   sex.harm   love.sex    frnd.sex\n1  0.1814696  0.062133788 -0.5928922 -0.6481348 -0.3077680  0.09964747\n2 -0.9281374 -1.571575634  0.1441147 -0.0426553 -1.3174597 -1.48578885\n3  1.3082475  1.096583684  1.0199678  0.8203012 -0.8651158 -1.22327784\n4 -0.6512003 -0.565019218 -0.2405256  0.6589697 -0.2318063  0.92293207\n5 -0.2344974  2.458300160 -0.7517596  0.1775694  0.9582192  0.73549533\n6  1.5155531 -0.001097668  1.2673278  0.8929113 -1.3572935 -1.51895130\n   self.cntl    how.ref\n1 -0.1183223 0.17821513\n2 -0.5083646 0.07252986\n3  0.2779590 0.80006333\n4  1.6769585 0.67092825\n5 -1.0084286 0.53624821\n6  0.3231360 0.59393249",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#assessing-assumptions",
-    "href": "session-09.html#assessing-assumptions",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.49 Assessing assumptions",
-    "text": "9.49 Assessing assumptions\n\n# Univariate normality, one test per indicator\nfor col in tpb.columns:\n    W, p = stats.shapiro(tpb[col])\n    print(f\"{col:10s} W = {W:.4f}   p = {p:.4f}\")\n          W      p-value UV.Normality\nint.abs   0.9946 0.1772  Yes         \nint.avoid 0.9971 0.7072  Yes         \nsex.fool  0.9942 0.1312  Yes         \nsex.harm  0.9979 0.8994  Yes         \nlove.sex  0.9971 0.6905  Yes         \nfrnd.sex  0.998  0.9165  Yes         \nself.cntl 0.9957 0.35    Yes         \nhow.ref   0.9942 0.1293  Yes",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#assessing-assumptions-1",
-    "href": "session-09.html#assessing-assumptions-1",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.50 Assessing assumptions",
-    "text": "9.50 Assessing assumptions\n\n# Multivariate normality: Mardia's skewness and kurtosis\nX = tpb.to_numpy()\nXc = X - X.mean(0)\nS_inv = np.linalg.inv(np.cov(X, rowvar=False))\nD = Xc @ S_inv @ Xc.T\nn_, k = X.shape\nb1 = (D ** 3).sum() / n_ ** 2\nb2 = np.trace(D @ D) / n_        # summary statistics; see the notes\nprint(f\"Mardia skewness {b1:.3f}   kurtosis {b2:.3f}\")\n          Test Statistic p-value Result\n1     Skewness  107.0075   0.796    YES\n2     Kurtosis    1.0054  0.3147    YES\n3 MV Normality      &lt;NA&gt;    &lt;NA&gt;    YES",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#model-speicification",
-    "href": "session-09.html#model-speicification",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.51 Model speicification",
-    "text": "9.51 Model speicification\n\n# Measurement model + structural model, in one description\nmodel = \"\"\"\n  attitudes =~ sex_fool + sex_harm\n  norms     =~ frnd_sex + love_sex\n  control   =~ sex_ctrl + sex_plan\n  intention =~ intend_a + intend_b\n  intention ~ attitudes + norms + control\n\"\"\"\n\nfit_mod = semopy.Model(model)\nfit_mod.fit(tpb)",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#model-fit",
-    "href": "session-09.html#model-fit",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.52 Model fit",
-    "text": "9.52 Model fit\n\nstats_tbl = semopy.calc_stats(fit_mod)\nprint(stats_tbl[[\"chi2\", \"DoF\", \"chi2 p-value\"]].T)\n chisq.scaled     df.scaled pvalue.scaled \n       13.071        14.000         0.521 \n\n\nprint(stats_tbl[[\"RMSEA\"]].T)\n         rmsea.scaled rmsea.ci.lower.scaled rmsea.ci.upper.scaled \n                0.000                 0.000                 0.045 \n  rmsea.pvalue.scaled \n                0.974 \n\n\nprint(stats_tbl[[\"CFI\", \"TLI\", \"GFI\"]].T)\ncfi.scaled       srmr \n     1.000      0.019",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#measurement-model-results",
-    "href": "session-09.html#measurement-model-results",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.53 Measurement Model Results",
-    "text": "9.53 Measurement Model Results\n\n# Standardised loadings — the measurement part\nins = fit_mod.inspect(std_est=True)\nprint(ins[ins[\"op\"] == \"~\"][[\"lval\", \"rval\", \"Estimate\", \"Est. Std\", \"p-value\"]])\n         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value\n1 attitudes  sex.fool       0.810    0.743    0.877 0.034 23.534       0\n2 attitudes  sex.harm       0.843    0.783    0.903 0.031 27.577       0\n3     norms  frnd.sex       0.837    0.787    0.886 0.025 32.933       0\n4     norms  love.sex       0.857    0.812    0.902 0.023 37.116       0\n5   control self.cntl       0.881    0.800    0.961 0.041 21.341       0\n6   control   how.ref       0.814    0.733    0.896 0.041 19.693       0\n7 intention   int.abs       0.836    0.792    0.880 0.022 37.355       0\n8 intention int.avoid       0.870    0.831    0.909 0.020 43.732       0\n\n\n# R-squared for each indicator\nprint(fit_mod.inspect(std_est=True).query(\"op == '~~' and lval == rval\"))\n       Item    R2\n1  sex.fool 0.656\n2  sex.harm 0.711\n3  frnd.sex 0.700\n4  love.sex 0.734\n5 self.cntl 0.775\n6   how.ref 0.663\n7   int.abs 0.699\n8 int.avoid 0.757\n9 intention 0.800",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#structural-model-results",
-    "href": "session-09.html#structural-model-results",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.54 Structural Model Results",
-    "text": "9.54 Structural Model Results\n\n# The structural paths: what predicts intention\nprint(ins[(ins[\"op\"] == \"~\") & (ins[\"rval\"].isin([\"attitudes\", \"norms\", \"control\"]))])\n         LV      Item Coefficient ci.lower ci.upper    SE      Z p.value\n1 intention attitudes       0.505    0.423    0.587 0.042 12.103       0\n2 intention     norms       0.649    0.579    0.719 0.036 18.236       0\n3 intention   control       0.365    0.283    0.447 0.042  8.722       0",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#graph",
-    "href": "session-09.html#graph",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.55 Graph",
-    "text": "9.55 Graph",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#measurement-model-latent-variable-model",
-    "href": "session-09.html#measurement-model-latent-variable-model",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.56 Measurement Model (Latent Variable Model)",
-    "text": "9.56 Measurement Model (Latent Variable Model)\nThe measurement model defines how latent variables are represented by their observed indicators. It corresponds to the Confirmatory Factor Analysis (CFA) part of an SEM.\n\nEach indicator loads on a specific latent factor. For instance, if Attitudes is latent, its related survey items should all load significantly on that factor.\nIndicators of the same latent factor are assumed to correlate only through that factor. Direct correlations between indicators of different factors are not included unless theoretically justified as error covariances.\nThe main results from the measurement model are factor loadings (showing how strongly each item reflects its latent construct) and indicator reliability. Loadings above roughly 0.7 are considered strong.\nTesting the measurement model ensures that each group of indicators truly measures the intended construct. While CFA can be run separately, in SEM it is estimated together with the structural model.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#structural-model-relationships-among-constructs",
-    "href": "session-09.html#structural-model-relationships-among-constructs",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.57 Structural Model (Relationships Among Constructs)",
-    "text": "9.57 Structural Model (Relationships Among Constructs)\nThe structural model describes the causal relationships among variables—usually latent constructs—that form the theoretical core of the SEM.\n\nIt functions like a system of regression equations, where one variable is explained by others according to the theory being tested. For example, in the TPB framework:\n\\[ \\text{Intention} = \\beta_1 \\text{Attitudes} + \\beta_2 \\text{Norms} + \\beta_3 \\text{Control} + \\zeta \\]\nwhere \\(\\zeta\\) is the unexplained error term for Intention.\nEach one-headed arrow represents a direct effect (a regression coefficient). These coefficients—often standardized—show the strength and direction of relationships among constructs.\nThe model may include mediation paths (indirect effects through other variables), feedback loops (if theoretically justified), and multiple dependent variables.\nEach endogenous variable (dependent construct) has an \\(R^2\\) value, showing how much of its variance is explained by the predictors. For instance, in the TPB example, about 79% of the variance in Intention was explained by Attitudes, Subjective Norms, and Perceived Control.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#advantages-over-separate-analyses",
-    "href": "session-09.html#advantages-over-separate-analyses",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.58 Advantages over Separate Analyses",
-    "text": "9.58 Advantages over Separate Analyses\n\nModel tested as a whole: SEM simultaneously estimates both the measurement and structural components, allowing researchers to evaluate the overall model fit—a feature unavailable in standard regression or isolated analyses.\nControls for measurement error: Unlike traditional regression, which assumes perfect measurement, SEM explicitly models measurement error through latent variables. This leads to less biased and more accurate estimates of relationships among constructs.\nTheory-driven confirmation: SEM is primarily a confirmatory approach. Researchers specify a model grounded in theory and then test whether the data support it. This contrasts with exploratory methods such as factor analysis or stepwise regression, which are data-driven. SEM thus promotes clear theoretical reasoning before empirical testing.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#your-notebook-sem-analysis-process",
-    "href": "session-09.html#your-notebook-sem-analysis-process",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.59 Your Notebook: SEM Analysis Process",
-    "text": "9.59 Your Notebook: SEM Analysis Process",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#steps-in-conducting-an-sem-analysis",
-    "href": "session-09.html#steps-in-conducting-an-sem-analysis",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.60 Steps in Conducting an SEM Analysis",
-    "text": "9.60 Steps in Conducting an SEM Analysis\nA typical SEM study follows a structured sequence of steps:\n\nModel Specification: Define the theoretical model and represent it with a path diagram. Clearly indicate which indicators load on which latent factors (measurement model) and which variables influence others (structural model). This step translates theoretical assumptions into formal equations.\nData Preparation: Identify the measurement level of each observed variable (continuous, ordinal, etc.) and verify that coding is correct (e.g., properly handling reverse-coded items). Check data quality and consider normalization or transformation when needed.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#steps-in-conducting-an-sem-analysis-1",
-    "href": "session-09.html#steps-in-conducting-an-sem-analysis-1",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.61 Steps in Conducting an SEM Analysis",
-    "text": "9.61 Steps in Conducting an SEM Analysis\n\nAssess Assumptions: Examine the data for multivariate normality, outliers, and missing values. SEM methods like Maximum Likelihood (ML) assume multivariate normality; if this is violated, use robust ML or weighted least squares. Also, ensure a sufficient sample size—typically N &gt; 200 for stable estimation.\nModel Estimation: Select an estimation method suited to the data type (e.g., ML for continuous data, WLSMV for ordinal data). Fit the model and obtain parameter estimates, including loadings, path coefficients, and variances.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#steps-in-conducting-an-sem-analysis-2",
-    "href": "session-09.html#steps-in-conducting-an-sem-analysis-2",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.62 Steps in Conducting an SEM Analysis",
-    "text": "9.62 Steps in Conducting an SEM Analysis\n\nModel Fit Evaluation: Assess how well the model reproduces the observed data using multiple fit indices—such as Chi-square, RMSEA, CFI, TLI, and SRMR. If model fit is poor, explore theory-based modifications or compare alternative specifications.\nInterpret Results: If fit is acceptable, interpret key parameters:\n\nFactor loadings – how well each item represents its latent construct.\nRegression coefficients – strength and direction of structural paths.\n( R^2 ) – variance explained in each endogenous variable. Discuss the theoretical meaning and significance of these findings.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#steps-in-conducting-an-sem-analysis-3",
-    "href": "session-09.html#steps-in-conducting-an-sem-analysis-3",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.63 Steps in Conducting an SEM Analysis",
-    "text": "9.63 Steps in Conducting an SEM Analysis\n\nReport and Refine: Present a final path diagram with standardized coefficients and fit indices. If needed, refine or compare models (using AIC, BIC, or Chi-square difference tests**). Interpret results within the theoretical framework, noting any limitations or assumptions.\n\n(Remember: SEM is primarily confirmatory, not exploratory. A strong theoretical foundation should guide the model before statistical testing.)",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#assumptions-in-sem",
-    "href": "session-09.html#assumptions-in-sem",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.64 Assumptions in SEM",
-    "text": "9.64 Assumptions in SEM\n\nMultivariate Normality: Classical SEM using Maximum Likelihood (ML) assumes that the observed variables follow a multivariate normal distribution.\n\nCheck univariate normality (e.g., Shapiro–Wilk test) and multivariate normality (e.g., Mardia’s test).\nIf data are non-normal, use robust estimation methods such as the Satorra–Bentler correction or robust ML (MLR).\nFor ordinal or highly skewed data, use estimators less sensitive to normality (e.g., WLSMV).\n\nLinearity: Relationships among variables are assumed to be linear, unless nonlinearity is explicitly modeled. Examine scatterplots or residuals to verify that linearity is a reasonable approximation.\nAdequate Sample Size: SEM involves many parameters and thus requires large samples for stable estimation.\n\nRule of thumb: about 5–10 observations per parameter, with a minimum of N ≈ 200 recommended.\nSmall samples can cause non-convergence or unstable estimates.\n\nNo Perfect Multicollinearity: Variables (indicators or latent constructs) should not be perfectly or nearly perfectly correlated. High collinearity makes it difficult to estimate separate effects and can distort parameter estimates.\nCorrect Model Specification: The model should accurately represent the theoretical relationships—no omitted variables, incorrect paths, or reversed causality. A misspecified model may yield poor fit or biased estimates even if computed successfully.\n\nIf assumptions are violated, remedies include robust ML, bootstrapping standard errors, or using alternative estimators. Modern SEM software, such as lavaan in R, provides several of these robust options.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#questions",
-    "href": "session-09.html#questions",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.65 Questions?",
-    "text": "9.65 Questions?",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#question",
-    "href": "session-09.html#question",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.66 Question?",
-    "text": "9.66 Question?\nWe’ve covered a lot of ground — from the foundations of Structural Equation Modeling (SEM) to advanced applications in mediation, time-series models, and international business research.",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#qa-discussion",
-    "href": "session-09.html#qa-discussion",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.67 Q&A / Discussion",
-    "text": "9.67 Q&A / Discussion\nFeel free to ask questions or request clarification on:\n\nModel fit indices: How to interpret χ², RMSEA, CFI, TLI, SRMR, or compare competing models.\nModel implementation: Tips for specifying, estimating, and troubleshooting models in lavaan.\nMediation and moderation: Understanding indirect effects and how to test them robustly.\nMulti-group SEM: Assessing measurement invariance and comparing models across groups or cultures.\nAssumptions and alternatives: When to use SEM versus regression, path analysis, or PLS approaches.\n\n(This concludes the presentation. Thank you for your attention and engagement!)",
-    "crumbs": [
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
-    ]
-  },
-  {
-    "objectID": "session-09.html#in-the-practice",
-    "href": "session-09.html#in-the-practice",
-    "title": "9  Structural Equation Modelling",
-    "section": "9.68 In the practice",
-    "text": "9.68 In the practice\n\n9.68.1 Structural Equation Modelling\n\nOpen the practice slides · source: MATH60033A-S09-Practice.qmd\n\n\n\n9.68.1.1 The theme of this session\n\n10 What is the construct behind your indicators?\n\nAll ten groups attack this question, each on its own project, and the last twenty minutes assemble the answers.\n\n\n\n10.0.0.1 What you are doing\nThe lecture showed the method on the session’s dataset. You now apply it to your own angle, and to the question your group is actually trying to answer (RESEARCH-MANDATES.md).\nThe deliverable is not a printout. It is a decision, with the reason written down.\n\n\n\n10.0.0.2 Before you start\nEveryone in the group pushes at least once this session. Replace XX with your group number — group 07 uses group-07.\ngit checkout -b group-XX\nmkdir -p 09-structural-equation-modelling/02-practice/submissions/group-XX\n\n\n\n10.0.0.3 1 · Reproduce one result from the paper — 20 min\nTake the result the pre-session reading rests on, and reproduce it — or establish that you cannot, and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one that is not attempted earns none.\nThe paper is Bennani & Romelli (2024), Exploring the informativeness and drivers of tone during committee meetings, and its replication package (10.7910/DVN/TZEN38) should already be unzipped at:\n09-structural-equation-modelling/data/replication/\nThe session’s own dataset, for comparison:\nimport qmib\ndata = qmib.load(\"efa\")\n\n\n\n10.0.0.4 2 · Apply the method to your own angle — 35 min\ncore = qmib.load(\"core\")\nmine = qmib.load(\"angle_c_country\")     # your angle — see your dictionary\ndf   = core.merge(mine, on=[\"geo\", \"time\"], how=\"inner\")\nFit the session’s method on your own data. Report what the lecture said to report, in the units of your own variables.\n\n\n\n10.0.0.5 3 · Break one assumption — 15 min\nEvery method in this course rests on something. Find the assumption this one rests on hardest, break it deliberately, and record what happened to your answer. This is the part that carries the marks.\n\n\n\n10.0.0.6 4 · Write it down — 20 min\nA 250-word note in your submissions folder:\n\nWhat you found, in units\nWhich assumption you broke, and what it did\nWhat this result does not license you to claim\n\n\n\n\n10.0.0.7 Submitting\ngit add 09-structural-equation-modelling/02-practice/submissions/group-XX\ngit commit -m \"Session 09 practice — group XX\"\ngit push -u origin group-XX\nEveryone pushes at least once. The log is the record of participation.\n\n\n\n10.0.0.8 What loses marks\n\nReporting fit indices without saying which threshold you applied\nTreating good fit as confirmation of the causal structure\nAdding correlated residuals until the model fits\nNaming a latent variable without defending the name\n\n\n&lt;- The lecture · Session 09 overview",
+    "section": "9.9 What to report",
+    "text": "9.9 What to report\n\nThe model, as a diagram or as its description. Every arrow is a claim; a reader cannot evaluate claims they cannot see.\nHow the latent scale was set — a fixed loading or a fixed variance — so nobody misreads the parameter without a standard error.\nStandardised loadings for every indicator, not only the significant ones, and what you did about weak items. Dropping an indicator after seeing its loading is a data-dependent decision; say so.\nThe chi-square with its degrees of freedom and p-value, alongside CFI, TLI and RMSEA with its confidence interval. Reporting only the indices that pass is the single most common failure.\nWhether the model was modified after fitting, and on what grounds. A model reached through modification indices is exploratory whatever its fit.\nAt least one equivalent model, named. If you cannot think of one, that is a reason to look harder rather than evidence there is none.\nWhat the arrows do not license. Direction was assumed, not discovered. With cross-sectional data the model estimates the strength of a relationship under a causal structure you supplied, and a good fit is consistent with that structure being wrong.\n\n\n\n\n\nBentler, P. M. 1990. “Comparative Fit Indexes in Structural Models.” Psychological Bulletin 107 (2): 238–46. https://doi.org/10.1037/0033-2909.107.2.238.\n\n\nBrowne, Michael W., and Robert Cudeck. 1992. “Alternative Ways of Assessing Model Fit.” Sociological Methods & Research 21 (2): 230–58. https://doi.org/10.1177/0049124192021002005.\n\n\nCheung, Gordon W., and Roger B. Rensvold. 2002. “Evaluating Goodness-of-Fit Indexes for Testing Measurement Invariance.” Structural Equation Modeling: A Multidisciplinary Journal 9 (2): 233–55. https://doi.org/10.1207/S15328007SEM0902_5.\n\n\nHu, Li‐tze, and Peter M. Bentler. 1999. “Cutoff Criteria for Fit Indexes in Covariance Structure Analysis: Conventional Criteria Versus New Alternatives.” Structural Equation Modeling: A Multidisciplinary Journal 6 (1): 1–55. https://doi.org/10.1080/10705519909540118.\n\n\nJöreskog, K. G. 1971. “Statistical Analysis of Sets of Congeneric Tests.” Psychometrika 36 (2): 109–33. https://doi.org/10.1007/BF02291393.\n\n\nMacCallum, Robert C., and James T. Austin. 2000. “Applications of Structural Equation Modeling in Psychological Research.” Annual Review of Psychology 51 (1): 201–26. https://doi.org/10.1146/annurev.psych.51.1.201.\n\n\nRosseel, Yves. 2012. “&lt;B&gt;lavaan&lt;/b&gt; : An &lt;i&gt;r&lt;/i&gt; Package for Structural Equation Modeling.” Journal of Statistical Software 48 (2). https://doi.org/10.18637/jss.v048.i02.\n\n\nSpearman, C. 1904. “\"General Intelligence,\" Objectively Determined and Measured.” The American Journal of Psychology 15 (2): 201. https://doi.org/10.2307/1412107.\n\n\nWright, Sewall. 1934. “The Method of Path Coefficients.” The Annals of Mathematical Statistics 5 (3): 161–215. https://doi.org/10.1214/aoms/1177732676.",
     "crumbs": [
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>Structural Equation Modelling</span>"
     ]

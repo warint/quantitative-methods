@@ -1,5 +1,6 @@
 ---
 title: "Structural Equation Modelling"
+standalone: true
 ---
 
 ## Measuring what cannot be observed
