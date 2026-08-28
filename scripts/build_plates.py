@@ -179,16 +179,37 @@ def main():
     import numpy as np
     from PIL import Image
 
+    import json
+    credits_path = OUT / "credits.json"
+    credits = json.loads(credits_path.read_text()) if credits_path.exists() else {}
+
     for ch in chapters:
         if ch not in PROMPTS:
             raise SystemExit(f"no prompt for chapter {ch}")
+        slug, title, why, subject, kind = PROMPTS[ch]
         raw = generate(ch)
         img = Image.open(raw).convert("RGB").resize((W, H), Image.LANCZOS)
         rng = np.random.default_rng(int(ch))
         out = OUT / f"session-{ch}-{PROMPTS[ch][0]}.jpg"
         album_leaf(wash(img), rng).save(out, "JPEG", quality=90, optimize=True)
         raw.unlink(missing_ok=True)
-        print(f"  wrote {out.relative_to(ROOT)}")
+
+        # The disclosure travels with the image, so a caption can never be
+        # rendered without it.
+        note = ("Generated image — a free interpretation based on various "
+                "sources, not a likeness." if kind == "invented"
+                else "Generated image — an emblem, not a historical document.")
+        credits[f"session-{ch}"] = {
+            "slug": slug, "name": title, "why": why, "kind": kind,
+            "file": out.relative_to(ROOT).as_posix(),
+            "generated": True, "note": note,
+            "model": "Z-Image-Turbo via mflux, locally",
+            "prompt": prompt_for(ch),
+        }
+        print(f"  wrote {out.relative_to(ROOT)}  [{kind}]")
+
+    credits_path.write_text(json.dumps(credits, indent=2, ensure_ascii=False) + "\n")
+    print(f"\ncredits written to {credits_path.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

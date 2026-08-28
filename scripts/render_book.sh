@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rebuild the course book: assemble book/ from the decks and the briefs, then
 # render it into docs/book/ where GitHub Pages serves it.
-# Usage: scripts/render_book.sh [--render-only]
+# Usage: scripts/render_book.sh [--render-only] [--html-only]
 #
 # Nothing in book/ is authored — scripts/build_book.py regenerates every
 # chapter from files that already exist, so edit the deck or the brief and run
@@ -51,7 +51,13 @@ if [ "${1:-}" != "--render-only" ]; then
 fi
 
 echo "=== rendering to docs/book/"
-(cd book && quarto render)
+# Both formats. The PDF is the slow one — XeLaTeX runs three passes — so
+# --html-only skips it when you are iterating on prose.
+if [ "${1:-}" = "--html-only" ] || [ "${2:-}" = "--html-only" ]; then
+    (cd book && quarto render --to html)
+else
+    (cd book && quarto render)
+fi
 
 echo "=== checking every referenced asset exists"
 "$python_bin" scripts/check_book_assets.py
@@ -61,6 +67,7 @@ cat <<'DONE'
 Book written to docs/book/.
 
   preview   open docs/book/index.html
+  the PDF   docs/book/Quantitative-Methods-in-International-Business-with-Python.pdf
   publish   git add docs/book && git commit && git push
 
 docs/book/ is committed on purpose — Pages serves it from main. The .gitignore

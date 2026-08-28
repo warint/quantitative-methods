@@ -530,11 +530,7 @@ def preface():
             rows.append(f"| — | **Midterm** — on paper, closed book | "
                         f"**Chapters 1–{int(MIDTERM_AFTER)}** |")
     table = "\n".join(rows)
-    return f"""---
-number-sections: false
----
-
-# Foreword {{.unnumbered}}
+    return f"""# Foreword {{.unnumbered}}
 
 Ukraine supplied around seventy per cent of the world's neon. Russia controlled some forty-four
 per cent of its palladium. Taiwan fabricates close to two-thirds of its semiconductors. None of
@@ -608,7 +604,7 @@ in structure, so a reader fluent in one can follow the other and see what is a p
 method and what is a property of the tooling. This one is the Python volume.
 :::
 
-## How to use it
+## How to use it {{.unnumbered}}
 
 | If you want to | Go to |
 |---|---|
@@ -625,13 +621,13 @@ something three weeks later. Search covers every session at once, so a term you 
 *leverage*, *soft-thresholding*, *parallel trends* — takes you to the session that introduced it.
 :::
 
-## The slides
+## The slides {{.unnumbered}}
 
 Each chapter links to the three decks it was built from. The slides remain the version delivered
 in class; the book is the same material set as continuous prose, which is the better form for
 reading afterwards.
 
-## The twelve chapters
+## The twelve chapters {{.unnumbered}}
 
 | | Chapter | Question |
 |---|---|---|
@@ -737,6 +733,7 @@ book:
   repo-url: https://github.com/warint/quantitative-methods
   repo-branch: main
   repo-actions: [source, issue]
+  downloads: [pdf]
   page-navigation: true
   sidebar:
     style: docked
@@ -756,6 +753,9 @@ book:
 bibliography: references.bib
 link-citations: true
 
+filters:
+  - divs-to-latex.lua
+
 format:
   html:
     theme: [cosmo, book.scss]
@@ -770,6 +770,31 @@ format:
       toggle: true
       caption: "Code"
     link-external-newwindow: true
+    df-print: kable
+
+  pdf:
+    documentclass: scrbook
+    classoption: [10pt, twoside, openright, numbers=noenddot, chapterprefix=true]
+    pdf-engine: xelatex
+    mainfont: "Times New Roman"
+    sansfont: "Helvetica Neue"
+    monofont: "Menlo"
+    monofontoptions: [Scale=0.82]
+    include-in-header: preamble.tex
+    keep-tex: false
+    colorlinks: true
+    linkcolor: econblue
+    citecolor: econblue
+    urlcolor: econblue
+    toc: true
+    toc-depth: 2
+    lof: false
+    number-sections: true
+    fig-pos: "htbp"
+    fig-width: 5.0
+    fig-height: 3.4
+    code-overflow: wrap
+    highlight-style: github
     df-print: kable
 
 execute:
@@ -1003,7 +1028,8 @@ details.code-fold {
 
 # What a build owns, and may therefore delete. Everything else in book/ —
 # _freeze/ and .quarto/ — belongs to Quarto and must survive.
-GENERATED = ("*.qmd", "*.scss", "_quarto.yml", "references.bib")
+GENERATED = ("*.qmd", "*.scss", "_quarto.yml", "references.bib",
+             "preamble.tex", "divs-to-latex.lua")
 
 
 def clean():
@@ -1045,6 +1071,14 @@ def main():
     bib = ROOT / "assets" / "references.bib"
     if bib.exists():
         shutil.copy2(bib, BOOK / "references.bib")
+
+    # The PDF needs a LaTeX preamble and the filter that turns the book's
+    # fenced divs into environments. Both live in assets/ and are copied in,
+    # for the same reason the bibliography is: clean() empties book/.
+    for name in ("preamble.tex", "divs-to-latex.lua"):
+        src = ROOT / "assets" / name
+        if src.exists():
+            shutil.copy2(src, BOOK / name)
 
     if PORTRAITS.exists():
         images = BOOK / "images"
