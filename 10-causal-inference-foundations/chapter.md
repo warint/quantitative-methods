@@ -1,5 +1,6 @@
 ---
 title: "Causal Inference I: Counterfactuals, Randomisation, Matching"
+standalone: true
 ---
 
 ## The question the first nine chapters could not answer
@@ -14,16 +15,7 @@ The reason for all that caution is that the question — *did the policy do
 anything?* — is not a question about the data you have. It is a question about
 data you do not have and cannot get.
 
-::: {.plate}
-![](images/session-10-hume.jpg){fig-alt="Portrait of David Hume, 1711–1776."}
-
-**David Hume** · 1711–1776
-
-Asked what entitles us to say one thing causes another, and did not find a satisfying answer. Neither has anyone since.
-
-[Allan Ramsay, 1766. Public domain, via Wikimedia Commons.]{.plate-credit}
-:::
-
+{{portrait}}
 
 ::: {.archive}
 [From the archive · Hume, 1739]{.archive-label}

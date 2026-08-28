@@ -1054,597 +1054,107 @@
     "href": "session-10.html",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
     "section": "",
-    "text": "10.1 Before the session\nTwo things to do before class, and they are the two halves of the practice. Budget 60–90 minutes.",
+    "text": "10.1 The question the first nine chapters could not answer\nEvery method so far has described an association and then, carefully, declined to call it an effect. Chapter 2 insisted on “associated with” rather than “causes”. Chapter 6 showed the same association taking four different values depending on which variation identified it. Chapter 9 produced two models with identical fit and opposite causal arrows.\nThe reason for all that caution is that the question — did the policy do anything? — is not a question about the data you have. It is a question about data you do not have and cannot get.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#before-the-session",
-    "href": "session-10.html#before-the-session",
+    "objectID": "session-10.html#the-question-the-first-nine-chapters-could-not-answer",
+    "href": "session-10.html#the-question-the-first-nine-chapters-could-not-answer",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
     "section": "",
-    "text": "Did the policy do anything, or were the groups different to begin with?\n\n\nOpen the pre-session slides · source: MATH60033A-S10-Pre-Session.qmd\n\n\n\n\n\n\n\n\n\n\n\nBefore class\nUsed in the practice for\n\n\n\n\n1\nRead the paper\nreproducing one of its results\n\n\n2\nGet both datasets\nthat, and applying the method to your own angle\n\n\n\n\n\n10.1.1 1. The reading — 45–60 min\nBodory, Huber & Lafférs (2022), Evaluating (weighted) dynamic treatment effects by double machine learning Read the article\nRead for the argument, not for coverage:\n\n\n\n\nWhat to look for\n\n\n\n\n1\nThe research question, in one sentence\n\n\n2\nThe method or design, and why they chose it\n\n\n3\nThe strongest single piece of evidence\n\n\n4\nOne limitation you would raise as a referee\n\n\n\nAnnotate as you go. You will be asked what you underlined and why.\n\n\n\n10.1.2 2. The data — 10 min\nYou need two datasets in the practice, and both should be on your machine before you arrive.\n\n10.1.2.1 a) The paper’s replication package\nThis is what you reproduce in the first twenty minutes of the practice.\nHarvard Dataverse: 10.7910/DVN/FS0KBA\nDownload it once, and unzip it here — the folder is git-ignored, so nothing large is committed:\n10-causal-inference-foundations/data/replication/\nKeep the authors’ own folder structure and README.\n\n\n10.1.2.2 b) The course data, for your own angle\nThis is what you apply the method to in the second half.\nimport qmib\n\ndata = qmib.load(\"core\")      # what the lecture uses\ncore = qmib.load(\"core\")                 # shared by every group\nmine = qmib.load(\"angle_c_country\")      # YOUR angle — see your dictionary\n\nprint(data.shape, core.shape, mine.shape)\nThe spine’s documented treatment, with a known effect to recover.\n\nRun this before class. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing. qmib.catalog() lists everything available.\n\nYour group’s file, columns, units and traps are in your data dictionary.\n\n\n\n\n10.1.3 3. Self-check — 15 min\nAnswer on paper. If you cannot, that is what the lecture is for.\n\nIn one sentence: what does this session’s method let you claim that the previous one did not?\nWhat must be true of your data for it to apply?\nWhich claim in the paper rests on this method — and how hard does it lean on it?\n\n\n\n\n10.1.4 Arrive with\n\nThe paper read and annotated\nThe replication package downloaded and unzipped\nqmib.load() run at least once, so the cache exists\nYour self-check answers, on paper\n\n\nSession 10 overview · The lecture · The practice",
+    "text": "David Hume · 1711–1776\nAsked what entitles us to say one thing causes another, and did not find a satisfying answer. Neither has anyone since.\nAllan Ramsay, 1766. Public domain, via Wikimedia Commons.\n\n\nFrom the archive · Hume, 1739\nDavid Hume asked what we actually observe when we say one thing causes another, and answered: contiguity, succession, and constant conjunction. The billiard ball moves; another moves after it; this has always happened. What we never observe is the necessary connection — the thing that would make the second event have to follow.\nHis second formulation is the one that founded modern causal inference, though it took two centuries to be taken up. A cause, he wrote, is an object followed by another, and where, if the first object had not been, the second never had existed. That subordinate clause is a counterfactual: a statement about a world that did not happen. It cannot be observed, in principle, for the same reason a road not taken has no destination.\nHume treated this as a sceptical problem about knowledge. Modern statistics treats it as a missing data problem, which turns out to be the more productive framing — because missing data can sometimes be recovered, under assumptions you can state, defend and occasionally test.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#the-lecture",
-    "href": "session-10.html#the-lecture",
+    "objectID": "session-10.html#potential-outcomes",
+    "href": "session-10.html#potential-outcomes",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.2 The lecture",
-    "text": "10.2 The lecture\n\nDelivered from the slides. What follows is the same material as prose.",
+    "section": "10.2 Potential outcomes",
+    "text": "10.2 Potential outcomes\nThe framework that formalises Hume’s clause is due to Neyman and, in its modern form, to Rubin (Rubin 1974). For each unit \\(i\\) define two quantities:\n\\[\nY_i(1) = \\text{the outcome if unit } i \\text{ is treated},\n\\qquad\nY_i(0) = \\text{the outcome if it is not}.\n\\]\nBoth are properties of the unit, defined whether or not the treatment happens. The causal effect for that unit is the difference\n\\[\n\\tau_i \\;=\\; Y_i(1) - Y_i(0),\n\\]\nand it is exactly what Hume said we cannot observe: whichever treatment the unit receives, the other potential outcome is missing, permanently and by construction. This is the fundamental problem of causal inference (Holland 1986), and it means that no individual causal effect is ever identified. What we can hope for is an average.\n\nATE — average treatment effect, \\(\\operatorname{E}[Y(1) - Y(0)]\\) over the whole population. What would happen if everyone were treated versus no one.\n\n\nATT — average treatment effect on the treated, \\(\\operatorname{E}[Y(1) - Y(0) \\mid T = 1]\\). What the treatment did for those who actually received it. Usually the policy-relevant quantity, and usually not equal to the ATE.\n\nNow the arithmetic that explains why naive comparisons fail. What you can compute from data is the difference in observed means. Add and subtract the same term:\n\\[\n\\underbrace{\\operatorname{E}[Y \\mid T{=}1] - \\operatorname{E}[Y \\mid T{=}0]}_{\\text{what you can compute}}\n=\n\\underbrace{\\operatorname{E}[Y(1) - Y(0) \\mid T{=}1]}_{\\text{ATT}}\n+\n\\underbrace{\\operatorname{E}[Y(0) \\mid T{=}1] - \\operatorname{E}[Y(0) \\mid T{=}0]}_{\\text{selection bias}} .\n\\]\nThe second term is the difference between the treated and untreated groups in the absence of treatment. If countries that adopt a policy would have differed from those that did not even without it, the observed difference is the effect plus that gap, and nothing in the data separates them.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#causal-inference-logic-and-tools",
-    "href": "session-10.html#causal-inference-logic-and-tools",
+    "objectID": "session-10.html#randomisation-and-what-it-buys",
+    "href": "session-10.html#randomisation-and-what-it-buys",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.3 Causal Inference: Logic and Tools",
-    "text": "10.3 Causal Inference: Logic and Tools",
+    "section": "10.3 Randomisation, and what it buys",
+    "text": "10.3 Randomisation, and what it buys\nRandomised assignment sets the selection term to zero, and it is worth being precise about why. If treatment is assigned by a coin flip, then \\(T\\) is independent of everything about the unit — including \\(Y(0)\\) and \\(Y(1)\\) — so \\(\\operatorname{E}[Y(0) \\mid T{=}1] = \\operatorname{E}[Y(0) \\mid T{=}0]\\) and the bias term vanishes.\nNote what randomisation does not do. It does not make the groups identical; in any finite sample they will differ, sometimes substantially. It makes them differ in a way unrelated to the outcome, so the difference is noise rather than bias — and noise is what standard errors are for. It also balances variables nobody measured or thought of, which is the property no observational method can replicate.\nWhen randomisation is unavailable, and in international business it usually is — countries are not randomly assigned national strategies — the alternative is to assume something strong enough to recover the same result.\n\nConditional independence (unconfoundedness, ignorability) — given a set of covariates \\(X\\), treatment is as good as random: \\(\\{Y(0), Y(1)\\} \\perp T \\mid X\\). Every determinant of both treatment and outcome is in \\(X\\). This assumption is not testable, because it concerns the missing potential outcome.\n\n\nOverlap (common support) — for every value of \\(X\\), the probability of treatment is strictly between 0 and 1. If some countries would never adopt under any circumstances, there is no comparison to be made for them, and an estimate that includes them is extrapolating rather than comparing. Unlike conditional independence, overlap is checkable.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#session-overview",
-    "href": "session-10.html#session-overview",
+    "objectID": "session-10.html#a-treatment-with-a-known-answer",
+    "href": "session-10.html#a-treatment-with-a-known-answer",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.4 Session Overview",
-    "text": "10.4 Session Overview\n\nMotivation: Why regression isn’t enough\nKey Concepts: Counterfactuals, potential outcomes, Rubin Causal Model\nCore Methods: RCTs, Matching, IV, DiD\nAssumptions & Validity: Parallel trends, exclusion restriction, internal vs. external validity\nApplications in Policy and Management",
+    "section": "10.4 A treatment with a known answer",
+    "text": "10.4 A treatment with a known answer\nEverything above is standard and abstract. What follows is not available in real work: an evaluation where the true effect is known, so each method can be marked rather than argued about.\nThe course fixture contains a national AI strategy, adopted by some countries in 2021, 2022 or 2023 and never by others. The generator that built it did three things deliberately. It assigned treatment as a function of two baseline country characteristics — development and institutional capacity — so the data are confounded by construction. It set the true effect at +2.4 percentage points on AI use. And it kept the infrastructure indicators free of any treatment effect, so they are legitimate pre-treatment controls, while the adoption indicators are downstream of treatment and are not.\n\n\nRun it: the treatment, and how it was assigned\nimport sys, warnings\nsys.path.insert(0, \"../slides\"); sys.path.insert(0, \"..\")\nwarnings.filterwarnings(\"ignore\")\nfrom plotstyle import setup, CL\nplt = setup()\n\nimport numpy as np, pandas as pd, statsmodels.api as sm, qmib\n\nY, T = \"ai_use_any\", \"has_ai_strategy\"\nPRE = [\"cloud_use\", \"ict_specialists\", \"digital_intensity\"]\nTRUE_EFFECT = 2.4          # from scripts/build_spine/make_fixtures.py\n\npanel = qmib.load(\"angle_c_country\").dropna(\n    subset=[Y, T, \"ai_use_ml\"] + PRE).copy()\n\nprint(f\"country-years: {len(panel)}   treated: {int(panel[T].sum())}   \"\n      f\"years {panel.time.min()}–{panel.time.max()}\")\nprint(f\"\\nadopting countries differ before treatment — standardised differences:\")\nfor c in PRE:\n    a, b = panel.loc[panel[T] == 1, c], panel.loc[panel[T] == 0, c]\n    smd = (a.mean() - b.mean()) / np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)\n    print(f\"   {c:22}{smd:+7.3f}\")\nprint(\"\\nA standardised difference near 1 is a large imbalance. These countries\")\nprint(\"were already more digital before any strategy existed — which is exactly\")\nprint(\"the selection term in the decomposition above.\")\n\n\ncountry-years: 91   treated: 49   years 2021–2024\n\nadopting countries differ before treatment — standardised differences:\n   cloud_use              +0.972\n   ict_specialists        +0.998\n   digital_intensity      +1.138\n\nA standardised difference near 1 is a large imbalance. These countries\nwere already more digital before any strategy existed — which is exactly\nthe selection term in the decomposition above.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#objectives",
-    "href": "session-10.html#objectives",
+    "objectID": "session-10.html#four-estimates-one-truth",
+    "href": "session-10.html#four-estimates-one-truth",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.5 Objectives",
-    "text": "10.5 Objectives\n\nDistinguish correlation from causation\nExplain potential outcomes and counterfactuals\nApply causal inference techniques in R\nEvaluate assumptions and threats to identification\nInterpret empirical strategies in applied research",
+    "section": "10.5 Four estimates, one truth",
+    "text": "10.5 Four estimates, one truth\n\n\nRun it: score the estimators against the known effect\ndef report(label, estimate, se=None):\n    tail = f\"   (SE {se:.3f})\" if se is not None else \"\"\n    print(f\"{label:38}{estimate:+8.3f}{estimate - TRUE_EFFECT:+10.3f}{tail}\")\n\nprint(f\"{'method':38}{'estimate':&gt;8}{'bias':&gt;10}\")\nreport(\"the truth (from the generator)\", TRUE_EFFECT)\n\nnaive = panel.loc[panel[T] == 1, Y].mean() - panel.loc[panel[T] == 0, Y].mean()\nreport(\"naive difference in means\", naive)\n\nadj = sm.OLS(panel[Y], sm.add_constant(panel[[T] + PRE])).fit(\n    cov_type=\"cluster\", cov_kwds={\"groups\": panel[\"geo\"]})\nreport(\"regression on pre-treatment controls\", adj.params[T], adj.bse[T])\n\n# 1:1 nearest-neighbour matching on the estimated propensity score\nps = sm.Logit(panel[T], sm.add_constant(panel[PRE])).fit(disp=0).predict()\npanel = panel.assign(ps=ps)\ntr, co = panel[panel[T] == 1], panel[panel[T] == 0]\nnn = np.abs(tr[\"ps\"].values[:, None] - co[\"ps\"].values[None, :]).argmin(axis=1)\nmatched = co.iloc[nn]\nreport(\"propensity-score matching (ATT)\",\n       (tr[Y].values - matched[Y].values).mean())\n\nbad = sm.OLS(panel[Y], sm.add_constant(panel[[T] + PRE + [\"ai_use_ml\"]])).fit(\n    cov_type=\"cluster\", cov_kwds={\"groups\": panel[\"geo\"]})\nreport(\"+ a post-treatment control\", bad.params[T], bad.bse[T])\n\n\nmethod                                estimate      bias\nthe truth (from the generator)          +2.400    +0.000\nnaive difference in means               +6.069    +3.669\nregression on pre-treatment controls    +3.101    +0.701   (SE 0.365)\npropensity-score matching (ATT)         +2.678    +0.278\n+ a post-treatment control              +2.153    -0.247   (SE 0.433)\n\n\nThe naive comparison overstates the effect by more than 150%. That is the selection term made visible: adopting countries were already more digital, and the difference in outcomes is mostly the difference in countries.\nAdjusting for the pre-treatment indicators removes most of it but not all, leaving about +0.7 percentage points of bias. The reason is worth stating, because it is the normal situation and not a defect of this example: the observed indicators are noisy proxies for the latent characteristics that actually drove adoption. Conditioning on a proxy removes the part of the confounding it captures and leaves the rest.\nMatching does best. And the last line is the interesting one.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#counterfactual-framework",
-    "href": "session-10.html#counterfactual-framework",
+    "objectID": "session-10.html#the-control-that-improves-the-number-and-ruins-the-estimate",
+    "href": "session-10.html#the-control-that-improves-the-number-and-ruins-the-estimate",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.6 Counterfactual Framework",
-    "text": "10.6 Counterfactual Framework",
+    "section": "10.6 The control that improves the number and ruins the estimate",
+    "text": "10.6 The control that improves the number and ruins the estimate\nAdding a post-treatment variable moved the estimate closer to the truth. It is still wrong to do it, and understanding why is more valuable than the number.\nai_use_ml is a consequence of the strategy, not a cause of it. Conditioning on it blocks part of the causal path from treatment to outcome, so the coefficient on treatment no longer measures the total effect — it measures whatever is left after the mediated portion has been removed. That it lands near the truth here is a coincidence: the downward bias from blocking the path happened to offset the residual upward bias from imperfect proxies.\n\n“Closer to the right answer” is not the same as “the right method.” In real work the truth is unknown, so the only evidence available is whether the procedure is justified. A procedure that is wrong for a reason you can state will be wrong by an unknown amount in the next dataset, and no diagnostic will announce it.\n\nThis is the general problem of bad controls. The instinct that adding covariates is prudent is wrong in two specific cases: a mediator, which sits on the causal path and whose inclusion removes part of the effect you are estimating; and a collider, a common consequence of treatment and outcome, whose inclusion creates an association that does not exist (Elwert and Winship 2014). Deciding what belongs in the regression is a claim about causal structure, not a statistical choice, and Cinelli, Forney, and Pearl (2022) is the short guide worth keeping beside the keyboard.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#the-rubin-causal-model",
-    "href": "session-10.html#the-rubin-causal-model",
+    "objectID": "session-10.html#balance-is-the-diagnostic-not-fit",
+    "href": "session-10.html#balance-is-the-diagnostic-not-fit",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.7 The Rubin Causal Model",
-    "text": "10.7 The Rubin Causal Model\nCausal inference is fundamentally about comparison—understanding what would have happened to the same unit had it experienced a different condition.\nIn the potential outcomes framework, each unit \\(i\\) has two potential outcomes:\n\n\\(Y_i(1)\\): the outcome if treated\n\\(Y_i(0)\\): the outcome if untreated\n\nThe causal effect for unit \\(i\\) is defined as \\(Y_i(1) - Y_i(0)\\).\n\nHowever, only one of these outcomes is ever observed; the other remains a counterfactual. This is the core problem that causal inference aims to address.",
+    "section": "10.7 Balance is the diagnostic, not fit",
+    "text": "10.7 Balance is the diagnostic, not fit\nThe most important shift in this chapter is what counts as evidence that the estimate is any good. Chapter 3 judged a model by its residuals. A matching estimator is judged by whether the groups it compares are actually comparable.\n\n\nShow the code\ndef smd(a, b):\n    return (a.mean() - b.mean()) / np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)\n\nnames = PRE + [\"ps\"]\nbefore = [smd(tr[c], co[c]) for c in names]\nafter = [smd(tr[c], matched[c]) for c in names]\n\nfig, ax = plt.subplots(figsize=(7.0, 3.4))\nyy = np.arange(len(names))\nax.axvline(0, color=CL.line, lw=1)\nfor x in (-0.1, 0.1):\n    ax.axvline(x, color=CL.muted, lw=1, ls=\"--\")\nax.scatter(before, yy, s=58, color=CL.warn, label=\"before matching\", zorder=3)\nax.scatter(after, yy, s=58, color=CL.good, label=\"after matching\", zorder=3)\nfor i, (b_, a_) in enumerate(zip(before, after)):\n    ax.plot([b_, a_], [i, i], color=CL.muted, lw=1, alpha=0.5, zorder=2)\nax.set_yticks(yy); ax.set_yticklabels(names)\nax.set_xlabel(\"standardised mean difference\")\nax.legend(frameon=False, fontsize=8.5, loc=\"lower right\")\nfig.tight_layout()\n\nprint(f\"{'covariate':22}{'before':&gt;9}{'after':&gt;9}\")\nfor n, b_, a_ in zip(names, before, after):\n    print(f\"{n:22}{b_:+9.3f}{a_:+9.3f}\")\nprint(f\"\\noverlap in the propensity score:\")\nprint(f\"   treated  {tr['ps'].min():.3f} – {tr['ps'].max():.3f}\")\nprint(f\"   control  {co['ps'].min():.3f} – {co['ps'].max():.3f}\")\n\n\ncovariate                before    after\ncloud_use                +0.972   +0.033\nict_specialists          +0.998   -0.061\ndigital_intensity        +1.138   +0.037\nps                       +1.200   +0.019\n\noverlap in the propensity score:\n   treated  0.245 – 0.970\n   control  0.051 – 0.931\n\n\n\n\n\n\n\n\nFigure 10.1: Covariate balance before and after matching. Each point is the standardised difference between treated and control groups; the dashed lines mark the conventional 0.1 threshold. Before matching every covariate is imbalanced by around one standard deviation; after, all lie inside the threshold.\n\n\n\n\n\nThe convention is that a standardised difference below 0.1 is acceptable balance. Before matching, every covariate is out by around a full standard deviation; after, all four sit inside the threshold. That is the result to report — not the R² of the propensity model, which is irrelevant, and not its coefficients, which are a means and not an end.\nThe overlap figures matter too. The treated propensity scores span a range the controls also cover, so every treated unit has a plausible comparison. Had the treated run from 0.9 to 1.0 while controls stopped at 0.4, there would be no comparable units and the honest response is to restrict the sample and say the estimate applies only to the region where comparison was possible.\nOne caution about the method itself. Propensity-score matching is the most popular approach here and not the best one: matching on a scalar score discards information and can increase imbalance as the caliper tightens, a pathology documented at length by King and Nielsen (2019). Matching directly on the covariates, or weighting rather than matching, generally does better. The score remains a good diagnostic for overlap even where it is a poor matching device.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#why-it-matters",
-    "href": "session-10.html#why-it-matters",
+    "objectID": "session-10.html#what-none-of-this-fixes",
+    "href": "session-10.html#what-none-of-this-fixes",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.8 Why It Matters",
-    "text": "10.8 Why It Matters\nWithout this framework, we cannot articulate what it means for a treatment to have an effect. Understanding causal effects requires us to think explicitly about what did not happen.",
+    "section": "10.8 What none of this fixes",
+    "text": "10.8 What none of this fixes\nThe estimate above came within 0.3 percentage points of the truth. It would be a mistake to conclude that matching solved the problem, because the assumption that licensed it was true by construction — the generator used exactly those covariates to assign treatment, so conditioning on them is sufficient.\nIn real work you never know that. Conditional independence is untestable, and the honest response is to ask how wrong it could be. Sensitivity analysis asks: how strong would an unobserved confounder have to be — how strongly associated with both treatment and outcome — to overturn the conclusion? If the answer is “about as strong as the covariates already controlled for”, the finding is fragile. If it is “stronger than any known determinant”, it is robust. Either way the reader learns something a point estimate does not tell them.\nThe deeper limitation is that matching and regression adjustment are the same assumption in different clothing. Both require that conditioning on observed covariates suffices. Neither creates identification; they only implement it. When the assumption fails, both fail, and they fail in the same direction.\nChapter 11 takes the other route: rather than assuming the confounders are all observed, it uses the structure of when treatment arrived — the staggered adoption in this very dataset — to difference the unobserved ones away.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#real-example-of-observed-and-counterfactual-outcomes",
-    "href": "session-10.html#real-example-of-observed-and-counterfactual-outcomes",
+    "objectID": "session-10.html#a-short-review-of-the-literature",
+    "href": "session-10.html#a-short-review-of-the-literature",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.9 Real Example of Observed and Counterfactual Outcomes",
-    "text": "10.9 Real Example of Observed and Counterfactual Outcomes\nConsider a public policy intervention such as a subsidy for electric-vehicle (EV) purchases. Suppose the government introduces a financial incentive intended to increase EV adoption among households. For each household (i), we can define two potential outcomes:\n\\[ Y_i(1) = \\text{EV adoption if the household receives the subsidy}, \\]\n\\[ Y_i(0) = \\text{EV adoption if the household does not receive the subsidy}. \\]",
+    "section": "10.9 A short review of the literature",
+    "text": "10.9 A short review of the literature\n\nThe potential-outcomes notation is Rubin (1974), though the idea traces to Neyman’s 1923 work on agricultural experiments. Holland (1986) named the fundamental problem and drew the boundary the discipline still uses — “no causation without manipulation” — which remains contested and clarifying.\nRosenbaum and Rubin (1983) proved the result that made observational adjustment tractable: if treatment is unconfounded given a covariate vector, it is unconfounded given the scalar propensity score alone, so a many-dimensional matching problem collapses to one dimension. Imbens (2004) surveys the estimators that followed and Stuart (2010) is the practical review, covering matching, weighting and the diagnostics that should accompany them.\nThe corrective literature is as important as the constructive one. King and Nielsen (2019) argues that propensity-score matching specifically — as opposed to matching in general — often increases imbalance and should be replaced by methods that match on covariates directly. Elwert and Winship (2014) sets out endogenous selection bias, the family of errors created by conditioning on colliders, and Cinelli, Forney, and Pearl (2022) gives the compact treatment of which controls help and which do damage.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
   },
   {
-    "objectID": "session-10.html#observed-vs.-counterfactual",
-    "href": "session-10.html#observed-vs.-counterfactual",
+    "objectID": "session-10.html#what-to-report",
+    "href": "session-10.html#what-to-report",
     "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.10 Observed vs. Counterfactual",
-    "text": "10.10 Observed vs. Counterfactual\nImagine a specific household, say Household 27. After the policy is implemented, Household 27 does receive the subsidy and purchases an electric vehicle. Therefore, we observe:\n\\[ Y\\_{27}(1) = 1. \\]\nBut we never observe the counterfactual outcome:\n\\[ Y\\_{27}(0) = ? \\]",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#the-missing-counterfactual",
-    "href": "session-10.html#the-missing-counterfactual",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.11 The Missing Counterfactual",
-    "text": "10.11 The Missing Counterfactual\nThis non-observed outcome represents what would have happened to the same household had it not received the subsidy. It is fundamentally unobservable, because the household cannot simultaneously be treated and untreated. Yet this is precisely the comparison needed to identify the causal effect for that household:\n\\[ \\text{Causal Effect}*{27} = Y*{27}(1) - Y\\_{27}(0). \\]\nSince \\(Y\\_{27}(0)\\) is missing by design—not due to lack of data but because of the logic of causality—researchers must rely on techniques such as randomized controlled trials, matching, instrumental variables, or difference-in-differences to recover credible approximations of this unobserved counterfactual.\nThis tension between observed reality and missing counterfactuals encapsulates the fundamental problem of causal inference articulated by Rubin (1974) and formalized in the potential-outcomes framework.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#how-to-proceed",
-    "href": "session-10.html#how-to-proceed",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.12 How to Proceed",
-    "text": "10.12 How to Proceed\n\nWe aim to estimate the average causal effect (ATE) by constructing designs or assumptions that allow us to approximate the missing counterfactuals.\n\nHow? By creating comparable groups through randomization, matching, or leveraging natural experiments.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#randomized-controlled-trials-rcts",
-    "href": "session-10.html#randomized-controlled-trials-rcts",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.13 Randomized Controlled Trials (RCTs)",
-    "text": "10.13 Randomized Controlled Trials (RCTs)",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#why-randomize",
-    "href": "session-10.html#why-randomize",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.14 Why Randomize?",
-    "text": "10.14 Why Randomize?\nRandomization is the most reliable method for ensuring that treated and control groups are comparable.\n\nIt removes systematic differences between groups, which means that any observed difference in outcomes can be attributed to the treatment.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#what-for",
-    "href": "session-10.html#what-for",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.15 What For?",
-    "text": "10.15 What For?\nRCTs allow us to isolate the effect of a single intervention, making them the gold standard for internal validity.\nThey are widely used in medicine, economics, and the social sciences.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#how-it-works",
-    "href": "session-10.html#how-it-works",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.16 How It Works",
-    "text": "10.16 How It Works\nUnits are assigned to treatment or control groups purely by chance.\n\nThis ensures balance on both observed and unobserved confounders.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#example-in-r",
-    "href": "session-10.html#example-in-r",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.17 Example in R",
-    "text": "10.17 Example in R\nSuppose an employer offers an intensive data-analytics training course aimed at improving employees’ performance in tasks that rely on quantitative analysis and digital tools. The variable treat indicates whether an employee participated in the training (1) or not (0). The variables age, education, and experience describe each employee’s profile: age in years, education as years of schooling, and experience as years of labour-market experience, approximately measured as age minus 18 with some noise, which is standard in labour economics.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#data-generation-process",
-    "href": "session-10.html#data-generation-process",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.18 Data Generation Process",
-    "text": "10.18 Data Generation Process\nIn this organization, employees who are slightly older and more educated are more likely to be selected or to self-select into the training programme. This is reflected in the way treat is generated: the probability of being treated increases with age and education through the propensity score ps. This captures realistic selection mechanisms, such as managers prioritizing “high-potential” workers or those already in more skilled positions.\nThe outcome variable, outcome, can be interpreted as an index of job performance or productivity, for example a standardized annual performance score used in internal evaluations, or an objective productivity measure (such as the number of correctly processed files, resolved cases, or successfully completed projects). The data-generating process assumes that performance increases with age, education, and experience, which is consistent with human capital theory. On top of these effects, the training programme has a true causal effect of +3 units on the performance index for those who participate. This models the idea that, after controlling for their characteristics, employees who receive the training perform systematically better than similar employees who do not.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#data-simulation",
-    "href": "session-10.html#data-simulation",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.19 Data Simulation",
-    "text": "10.19 Data Simulation\n\n# In the VS Codium terminal, with .venv active:  python\nimport numpy as np, pandas as pd\nfrom scipy.special import expit\n\nrng = np.random.default_rng(123)\nn = 800\n\n# Covariates\nage        = np.round(rng.normal(40, 10, n))\neducation  = np.round(rng.normal(14, 2, n))\nexperience = np.maximum(0, age - 18 + rng.normal(0, 3, n))\n\n# Treatment is NOT random: older, more educated people take it up more often.\nps_true = expit(-5 + 0.05 * age + 0.15 * education)\ntreat   = rng.binomial(1, ps_true)\n\n# The true effect we are trying to recover is +2.5\noutcome = 20 + 2.5 * treat + 0.3 * age + 0.8 * education + rng.normal(0, 5, n)\n\ndf = pd.DataFrame(dict(age=age, education=education, experience=experience,\n                       treat=treat, outcome=outcome))\n  treat age education experience  outcome\n1     0  34        15   15.13293 51.35139\n2     0  38        13   21.96954 47.27609\n3     1  56        16   36.63801 63.76421\n4     0  41        16   21.21841 65.16926\n5     0  41        15   17.86886 55.22382\n6     0  57        14   38.37165 65.50069",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#estimating-the-treatment-effect",
-    "href": "session-10.html#estimating-the-treatment-effect",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.20 Estimating the Treatment Effect",
-    "text": "10.20 Estimating the Treatment Effect\n\nrng = np.random.default_rng(42)\nn = 100\ntreatment = rng.binomial(1, 0.5, n)          # randomised: no confounding\ny = 50 + 5 * treatment + rng.normal(0, 10, n)\n\ny[treatment == 1].mean() - y[treatment == 0].mean()\n[1] 6.975967",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpretation",
-    "href": "session-10.html#interpretation",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.21 Interpretation",
-    "text": "10.21 Interpretation\nHere, the difference in means provides an unbiased estimate of the Average Treatment Effect (ATE).",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#observational-data-challenges",
-    "href": "session-10.html#observational-data-challenges",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.22 Observational Data: Challenges",
-    "text": "10.22 Observational Data: Challenges",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#why-not-always-use-rcts",
-    "href": "session-10.html#why-not-always-use-rcts",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.23 Why Not Always Use RCTs?",
-    "text": "10.23 Why Not Always Use RCTs?\nRCTs are not always feasible due to ethical, financial, or logistical constraints. In many real-world settings, we rely on observational data.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#whats-the-risk",
-    "href": "session-10.html#whats-the-risk",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.24 What’s the Risk?",
-    "text": "10.24 What’s the Risk?\nIn observational studies, treatment assignment is not random. This introduces selection bias: treated and control units may differ systematically in ways that affect the outcome.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#what-we-need",
-    "href": "session-10.html#what-we-need",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.25 What We Need",
-    "text": "10.25 What We Need\nTo estimate causal effects from observational data, we need methods that adjust for these differences or mimic randomization.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#matching-methods",
-    "href": "session-10.html#matching-methods",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.26 Matching Methods",
-    "text": "10.26 Matching Methods",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#why-use-matching",
-    "href": "session-10.html#why-use-matching",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.27 Why Use Matching?",
-    "text": "10.27 Why Use Matching?\nMatching is a technique designed to reduce selection bias in observational studies by creating a control group that is comparable to the treated group on observed characteristics.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#what-for-1",
-    "href": "session-10.html#what-for-1",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.28 What For?",
-    "text": "10.28 What For?\nIt aims to emulate the balance achieved in RCTs, making the treatment and control groups as similar as possible in terms of observable covariates.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#how-it-works-1",
-    "href": "session-10.html#how-it-works-1",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.29 How It Works",
-    "text": "10.29 How It Works\nWe calculate a propensity score—the probability of receiving treatment given observed covariates—and match each treated unit to one or more control units with a similar score.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#r-example",
-    "href": "session-10.html#r-example",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.30 R Example",
-    "text": "10.30 R Example\nImagine that a large public-sector organization has implemented an advanced data-analytics training programme for its employees. Participation is voluntary but encouraged for individuals working in analytically demanding units. As a result, the employees who choose to enrol tend to be somewhat older, more educated, and more experienced—characteristics that are also associated with better job performance. This creates a confounding problem: treated and untreated employees differ in systematic ways that also predict outcomes.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#objective",
-    "href": "session-10.html#objective",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.31 Objective",
-    "text": "10.31 Objective\nThe HR analytics team wants to estimate whether the training actually improves job performance, measured by a standardized annual performance index. They cannot rely on simple mean comparisons, because employees who enrolled in the training differ on observable dimensions that are associated with performance. To obtain a more credible estimate of the causal effect, they apply nearest-neighbour propensity score matching.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#the-model",
-    "href": "session-10.html#the-model",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.32 The model",
-    "text": "10.32 The model\n\nfrom sklearn.neighbors import NearestNeighbors\nimport statsmodels.formula.api as smf\n\n# 1:1 nearest-neighbour matching on the propensity score\ntreated, control = df[df.treat == 1], df[df.treat == 0]\nnn = NearestNeighbors(n_neighbors=1).fit(control[[\"pscore\"]])\n_, idx = nn.kneighbors(treated[[\"pscore\"]])\nmatched = pd.concat([treated, control.iloc[idx.ravel()]])\n\nsmf.ols(\"outcome ~ treat\", data=matched).fit().summary()\n    Welch Two Sample t-test\n\ndata:  outcome by treat\nt = -3.0569, df = 463.82, p-value = 0.002366\nalternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0\n95 percent confidence interval:\n -4.4337743 -0.9638923\nsample estimates:\nmean in group 0 mean in group 1 \n       57.18446        59.88329 \n\nimplements the following reasoning. The matchit() function constructs a matched sample in which treated and untreated employees are paired with others who have similar values of age, education, and experience. This aims to approximate the conditions of a randomized experiment by balancing key covariates. After matching, the organization compares the performance outcomes between the two groups using a t-test. The goal is to estimate how much of the performance difference can plausibly be attributed to the training rather than to pre-existing differences in employee characteristics.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpretation-1",
-    "href": "session-10.html#interpretation-1",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.33 Interpretation",
-    "text": "10.33 Interpretation\nIn this scenario, the matching procedure is understood as a method for approximating the unobserved counterfactual—what treated employees’ performance would have been had they not participated.\n\nThe resulting matched estimate provides a substantively meaningful measure of the programme’s effectiveness under the assumption of conditional independence.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#limitations",
-    "href": "session-10.html#limitations",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.34 Limitations",
-    "text": "10.34 Limitations\n\nMatching only accounts for observed variables. Any unmeasured confounder can still bias the results.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#exercise-propensity-score-matching-and-post-matching-estimation",
-    "href": "session-10.html#exercise-propensity-score-matching-and-post-matching-estimation",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.35 Exercise: Propensity Score Matching and Post-Matching Estimation",
-    "text": "10.35 Exercise: Propensity Score Matching and Post-Matching Estimation",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#problem-statement",
-    "href": "session-10.html#problem-statement",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.36 Problem Statement",
-    "text": "10.36 Problem Statement\nYou are given a dataframe named df with the following variables:\n\ntreat: a binary treatment indicator equal to 1 for treated units and 0 for control units.\noutcome: a continuous outcome.\nage, education, experience: pre-treatment covariates that may jointly influence both treatment assignment and the outcome.\n\nYour task is to estimate the causal effect of the treatment on the outcome using propensity score matching. Use the MatchIt package to implement nearest-neighbor matching without replacement, and evaluate the quality of the matching using PSAgraphics. Then, run a linear regression of the outcome on the treatment in the matched sample.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#steps-to-follow",
-    "href": "session-10.html#steps-to-follow",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.37 Steps to Follow",
-    "text": "10.37 Steps to Follow\nPerform the following steps:\n\nEstimate a propensity score using a logit model with covariates x1, x2, and x3.\nPerform nearest-neighbor matching (one-to-one) using the estimated propensity score.\nAssess covariate balance before and after matching using graphical diagnostics.\nExtract the matched dataset and estimate the average treatment effect on the treated (ATT) using a linear regression of y on treat.\nInterpret the results substantively.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#solution",
-    "href": "session-10.html#solution",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.38 Solution",
-    "text": "10.38 Solution",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-1.-estimating-the-propensity-score",
-    "href": "session-10.html#step-1.-estimating-the-propensity-score",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.39 Step 1. Estimating the propensity score",
-    "text": "10.39 Step 1. Estimating the propensity score\nPropensity scores summarize the probability of receiving treatment conditional on observable covariates. Here, the probability is modeled via a logistic regression. This corresponds to the classical Rosenbaum and Rubin (1983) framework in which identification requires unconfoundedness and overlap.\n\nimport statsmodels.formula.api as smf\n\n# Estimate the propensity score: the probability of treatment given covariates\nps_model = smf.logit(\"treat ~ age + education + experience\", data=df).fit()\ndf[\"pscore\"] = ps_model.predict(df)\n\nprint(ps_model.summary())\nCall:\nglm(formula = treat ~ age + education + experience, family = binomial(), \n    data = df)\n\nCoefficients:\n            Estimate Std. Error z value Pr(&gt;|z|)    \n(Intercept) -4.47646    0.85261  -5.250 1.52e-07 ***\nage          0.02815    0.02818   0.999 0.317732    \neducation    0.13609    0.04076   3.339 0.000841 ***\nexperience   0.02170    0.02669   0.813 0.416268    \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n(Dispersion parameter for binomial family taken to be 1)\n\n    Null deviance: 965.23  on 799  degrees of freedom\nResidual deviance: 918.46  on 796  degrees of freedom\nAIC: 926.46\n\nNumber of Fisher Scoring iterations: 4\n\nThis output provides the estimated influence of each covariate on the likelihood of receiving the treatment. Covariates should be selected based on theoretical arguments regarding confounding, rather than any predictive purpose.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-2.-performing-nearest-neighbor-matching",
-    "href": "session-10.html#step-2.-performing-nearest-neighbor-matching",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.40 Step 2. Performing nearest-neighbor matching",
-    "text": "10.40 Step 2. Performing nearest-neighbor matching\nUsing the estimated scores, nearest-neighbor matching without replacement is implemented. This aligns each treated unit with a similar untreated unit based on the estimated propensity score.\n\nfrom sklearn.neighbors import NearestNeighbors\n\ntreated, control = df[df.treat == 1], df[df.treat == 0]\nnn = NearestNeighbors(n_neighbors=1).fit(control[[\"pscore\"]])\n_, idx = nn.kneighbors(treated[[\"pscore\"]])\nmatched = pd.concat([treated, control.iloc[idx.ravel()]])\n\nprint(f\"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct controls\")\nCall:\nmatchit(formula = treat ~ age + education + experience, data = df, \n    method = \"nearest\", distance = \"logit\", replace = FALSE)\n\nSummary of Balance for All Data:\n           Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean\ndistance          0.3319        0.2745          0.5083     1.1864    0.1450\nage              43.2661       38.8025          0.4570     1.0457    0.0792\neducation        14.4206       13.9436          0.2416     0.9749    0.0370\nexperience       25.4287       20.7730          0.4478     1.0897    0.1282\n           eCDF Max\ndistance     0.2264\nage          0.1986\neducation    0.1070\nexperience   0.2060\n\nSummary of Balance for Matched Data:\n           Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean\ndistance          0.3319        0.3288          0.0277     1.0908    0.0035\nage              43.2661       43.2661          0.0000     1.1483    0.0136\neducation        14.4206       14.3648          0.0283     1.0448    0.0109\nexperience       25.4287       25.1901          0.0230     1.1726    0.0188\n           eCDF Max Std. Pair Dist.\ndistance     0.0429          0.0295\nage          0.0472          5.6738\neducation    0.0258          0.9932\nexperience   0.0515          0.5554\n\nSample Sizes:\n          Control Treated\nAll           567     233\nMatched       233     233\nUnmatched     334       0\nDiscarded       0       0",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpreting-the-balance-table-before-matching",
-    "href": "session-10.html#interpreting-the-balance-table-before-matching",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.41 Interpreting the Balance Table Before Matching",
-    "text": "10.41 Interpreting the Balance Table Before Matching\nYou have the following results:\n\n\n\n\n\n\n\n\n\n\n\n\nVariable\nTreated Mean\nControl Mean\nStd. Mean Diff.\nVar. Ratio\neCDF Mean\neCDF Max\n\n\n\n\ndistance\n0.3319\n0.2745\n0.5083\n1.1864\n0.1450\n0.2264\n\n\nage\n43.2661\n38.8025\n0.4570\n1.0457\n0.0792\n0.1986\n\n\neducation\n14.4206\n13.9436\n0.2416\n0.9749\n0.0370\n0.1070\n\n\nexperience\n25.4287\n20.7730\n0.4478\n1.0897\n0.1282\n0.2060\n\n\n\nThese numbers reflect the balance before matching, meaning how different the treated and control groups are in the raw data.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#means-treated-vs.-control",
-    "href": "session-10.html#means-treated-vs.-control",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.42 Means (Treated vs. Control)",
-    "text": "10.42 Means (Treated vs. Control)\nThese columns simply report the average value of each variable in the treated and control groups.\nFor example:\n\nAge: Treated = 43.27, Control = 38.80 On average, treated individuals are older.\nExperience: Treated = 25.43, Control = 20.77 Treated individuals have more prior experience.\n\nThese raw differences suggest selection into treatment: people with higher age and experience are more likely to be treated.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#standardized-mean-difference-smd",
-    "href": "session-10.html#standardized-mean-difference-smd",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.43 Standardized Mean Difference (SMD)",
-    "text": "10.43 Standardized Mean Difference (SMD)\nThis is the most important measure. It shows the difference in means in units of standard deviations. The rule of thumb:\n\n|SMD| &lt; 0.10 → excellent balance\n|SMD| &lt; 0.20 → acceptable\n|SMD| &gt; 0.25 → problematic imbalance\n|SMD| &gt; 0.40 → severe imbalance\n\nour values:\n\ndistance: 0.5083 → severe imbalance\nage: 0.4570 → severe imbalance\nexperience: 0.4478 → severe imbalance\neducation: 0.2416 → moderate imbalance",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpretation-2",
-    "href": "session-10.html#interpretation-2",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.44 Interpretation",
-    "text": "10.44 Interpretation\nBefore matching, the treated and control groups differ substantially on the covariates and on the propensity score. The matching procedure has a lot of work to do.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#variance-ratio",
-    "href": "session-10.html#variance-ratio",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.45 Variance Ratio",
-    "text": "10.45 Variance Ratio\nVariance ratio = Var(treated) / Var(control)\nGuidelines:\n\nBetween 0.80 and 1.25 → good\nBelow 0.60 or above 1.40 → problematic\n\nour values:\n\nage: 1.0457 → good\neducation: 0.9749 → excellent\nexperience: 1.0897 → acceptable\ndistance: 1.1864 → acceptable",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpretation-3",
-    "href": "session-10.html#interpretation-3",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.46 Interpretation",
-    "text": "10.46 Interpretation\nVariances are fairly similar across groups. The main problem is mean differences, not dispersion.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#ecdf-mean-and-ecdf-max",
-    "href": "session-10.html#ecdf-mean-and-ecdf-max",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.47 eCDF Mean and eCDF Max",
-    "text": "10.47 eCDF Mean and eCDF Max\nThese measure differences between the treated and control entire distributions:\n\neCDF Mean: average difference in cumulative distribution functions\neCDF Max: maximum difference between distributions (Kolmogorov–Smirnov distance)\n\nInterpretation thresholds are less formal, but:\n\nValues &lt; 0.10 → good\nValues between 0.10 and 0.20 → moderate imbalance\nValues &gt; 0.20 → problematic imbalance\n\nour values:\n\ndistance eCDF Max = 0.2264 → problematic\nexperience eCDF Max = 0.2060 → problematic\nage eCDF Max = 0.1986 → moderate-to-high\neducation eCDF Max = 0.1070 → acceptable",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#interpretation-4",
-    "href": "session-10.html#interpretation-4",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.48 Interpretation",
-    "text": "10.48 Interpretation\nAge, experience, and the propensity score distributions differ notably between groups.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#overall-interpretation",
-    "href": "session-10.html#overall-interpretation",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.49 Overall Interpretation",
-    "text": "10.49 Overall Interpretation\nour pre-matching table shows substantial imbalance between treated and control units:\n\nAge and experience show large standardized mean differences (&gt; 0.45).\nThe propensity score (distance) also shows a very large SMD (&gt; 0.50).\nDistributional metrics (eCDF Max) confirm these differences.\nVariance ratios are acceptable, so the issue is not variance but mean shifts.\n\nBefore matching, treated and untreated groups are not comparable.\nMatching is therefore necessary to construct a credible counterfactual.\nThis table is exactly what we expect in observational data: the treatment is not randomized, so individuals self-select into treatment based on characteristics like age and experience.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-3.-covariate-balance-assessment",
-    "href": "session-10.html#step-3.-covariate-balance-assessment",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.50 Step 3. Covariate balance assessment",
-    "text": "10.50 Step 3. Covariate balance assessment\nDiagnosing the quality of matching is essential. Graphical tools from PSAgraphics are particularly useful for evaluating whether the pre-treatment covariates are better aligned post-matching.\n\nimport matplotlib.pyplot as plt\n\n# Before matching: do the two groups even overlap?\ndf[df.treat == 1][\"pscore\"].plot.density(label=\"Treated\")\ndf[df.treat == 0][\"pscore\"].plot.density(label=\"Control\")\nplt.xlabel(\"Propensity score\"); plt.title(\"Before matching\"); plt.legend()\nplt.show()",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-4.-covariate-balance-assessment-continued",
-    "href": "session-10.html#step-4.-covariate-balance-assessment-continued",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.51 Step 4. Covariate balance assessment (continued)",
-    "text": "10.51 Step 4. Covariate balance assessment (continued)\n\n# After matching: the two distributions should sit on top of each other\nmatched[matched.treat == 1][\"pscore\"].plot.density(label=\"Treated\")\nmatched[matched.treat == 0][\"pscore\"].plot.density(label=\"Control\")\nplt.xlabel(\"Propensity score\"); plt.title(\"After matching\"); plt.legend()\nplt.show()",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-5.-covariate-balance-assessment-continued",
-    "href": "session-10.html#step-5.-covariate-balance-assessment-continued",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.52 Step 5. Covariate balance assessment (continued)",
-    "text": "10.52 Step 5. Covariate balance assessment (continued)\n\ndf.boxplot(column=\"age\", by=\"treat\")\nplt.suptitle(\"\"); plt.title(\"Before matching: age\"); plt.show()",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-6.-covariate-balance-assessment-continued",
-    "href": "session-10.html#step-6.-covariate-balance-assessment-continued",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.53 Step 6. Covariate balance assessment (continued)",
-    "text": "10.53 Step 6. Covariate balance assessment (continued)\n\nmatched.boxplot(column=\"age\", by=\"treat\")\nplt.suptitle(\"\"); plt.title(\"After matching: age\"); plt.show()\n\n\nOther diagnostic visuals include mirrored histograms or the “love plot” from the cobalt package, though the exercise here focuses on PSAgraphics.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-4.-estimating-the-treatment-effect-on-the-matched-sample",
-    "href": "session-10.html#step-4.-estimating-the-treatment-effect-on-the-matched-sample",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.54 Step 4. Estimating the treatment effect on the matched sample",
-    "text": "10.54 Step 4. Estimating the treatment effect on the matched sample\nAfter matching, the dataset contains reweighted or selected observations reflecting similarity in covariate distributions. The linear model now approximates the average treatment effect on the treated (ATT). The regression does not have a causal interpretation unless matching succeeded in balancing confounders.\n\n# The ATT: the treatment effect on the matched sample\natt = smf.ols(\"outcome ~ treat\", data=matched).fit()\nprint(att.summary())\n\nprint(f\"\\nATT = {att.params['treat']:+.3f}   (the truth we simulated is +2.5)\")\nCall:\nlm(formula = outcome ~ treat, data = matched_df, weights = weights)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-24.486  -6.996   0.210   6.624  33.139 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  57.1845     0.6243  91.599  &lt; 2e-16 ***\ntreat         2.6988     0.8829   3.057  0.00237 ** \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 9.529 on 464 degrees of freedom\nMultiple R-squared:  0.01974,   Adjusted R-squared:  0.01763 \nF-statistic: 9.344 on 1 and 464 DF,  p-value: 0.002366\n\nThe coefficient on treat corresponds to the estimated ATT. Weighting is recommended because MatchIt may assign non-unit weights even under nearest-neighbor algorithms.\nHigh R² is not the goal in causal inference; unbiased estimation of the treatment effect is.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#step-5.-interpretation",
-    "href": "session-10.html#step-5.-interpretation",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.55 Step 5. Interpretation",
-    "text": "10.55 Step 5. Interpretation\nIf the coefficient on treat is positive and statistically significant, this indicates that, conditional on observable characteristics and after matching treated individuals with comparable untreated individuals, the treatment led to an increase in the outcome y for the treated group. The magnitude represents the estimated average causal effect among those who actually received the treatment.\nInterpretation must emphasize the assumptions underlying matching: unconfoundedness cannot be tested statistically, and overlap must be verified graphically. When these assumptions are plausible, propensity score matching constitutes an effective strategy for reducing selection bias in observational studies.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#additional-note-on-naive-difference-in-means",
-    "href": "session-10.html#additional-note-on-naive-difference-in-means",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.56 Additional Note on Naive Difference-in-Means",
-    "text": "10.56 Additional Note on Naive Difference-in-Means\n\n# The naive comparison, for contrast\ndf.loc[df.treat == 1, \"outcome\"].mean() - df.loc[df.treat == 0, \"outcome\"].mean()\n[1] 6.471933\n\nThis does not invalidate matching.\nIt demonstrates that:\n\nalthough the two groups were imbalanced on age, education, and experience, these variables happened not to create a major numerical bias in the naive difference-in-means but matching greatly improves internal validity and design transparency\n\n\nMatching primarily improves credibility, not necessarily magnitude.",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#your-turn",
-    "href": "session-10.html#your-turn",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.57 Your turn",
-    "text": "10.57 Your turn",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#team-work",
-    "href": "session-10.html#team-work",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.58 Team Work",
-    "text": "10.58 Team Work\nTeam 1: https://cran.r-project.org/web/packages/MatchIt/vignettes/MatchIt.html\nTeam 2: https://dlab.berkeley.edu/news/introduction-propensity-score-matching-matchit\nTeam 3: https://simonejdemyr.com/r-tutorials/statistics/tutorial8.html data here\nTeam 4: https://psa.bryer.org/effects-of-tutoring-on-course-grades.html",
-    "crumbs": [
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
-    ]
-  },
-  {
-    "objectID": "session-10.html#in-the-practice",
-    "href": "session-10.html#in-the-practice",
-    "title": "10  Causal Inference I: Counterfactuals, Randomisation, Matching",
-    "section": "10.59 In the practice",
-    "text": "10.59 In the practice\n\n10.59.1 Causal Inference I: Counterfactuals, Randomisation, Matching\n\nOpen the practice slides · source: MATH60033A-S10-Practice.qmd\n\n\n\n10.59.1.1 The theme of this session\n\n11 Can your project support a causal claim at all?\n\nAll ten groups attack this question, each on its own project, and the last twenty minutes assemble the answers.\n\n\n\n11.0.0.1 What you are doing\nThe lecture showed the method on the session’s dataset. You now apply it to your own angle, and to the question your group is actually trying to answer (RESEARCH-MANDATES.md).\nThe deliverable is not a printout. It is a decision, with the reason written down.\n\n\n\n11.0.0.2 Before you start\nEveryone in the group pushes at least once this session. Replace XX with your group number — group 07 uses group-07.\ngit checkout -b group-XX\nmkdir -p 10-causal-inference-foundations/02-practice/submissions/group-XX\n\n\n\n11.0.0.3 1 · Reproduce one result from the paper — 20 min\nTake the result the pre-session reading rests on, and reproduce it — or establish that you cannot, and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one that is not attempted earns none.\nThe paper is Bodory, Huber & Lafférs (2022), Evaluating (weighted) dynamic treatment effects by double machine learning, and its replication package (10.7910/DVN/FS0KBA) should already be unzipped at:\n10-causal-inference-foundations/data/replication/\nThe session’s own dataset, for comparison:\nimport qmib\ndata = qmib.load(\"core\")\n\n\n\n11.0.0.4 2 · Apply the method to your own angle — 35 min\ncore = qmib.load(\"core\")\nmine = qmib.load(\"angle_c_country\")     # your angle — see your dictionary\ndf   = core.merge(mine, on=[\"geo\", \"time\"], how=\"inner\")\nFit the session’s method on your own data. Report what the lecture said to report, in the units of your own variables.\n\n\n\n11.0.0.5 3 · Break one assumption — 15 min\nEvery method in this course rests on something. Find the assumption this one rests on hardest, break it deliberately, and record what happened to your answer. This is the part that carries the marks.\n\n\n\n11.0.0.6 4 · Write it down — 20 min\nA 250-word note in your submissions folder:\n\nWhat you found, in units\nWhich assumption you broke, and what it did\nWhat this result does not license you to claim\n\n\n\n\n11.0.0.7 Submitting\ngit add 10-causal-inference-foundations/02-practice/submissions/group-XX\ngit commit -m \"Session 10 practice — group XX\"\ngit push -u origin group-XX\nEveryone pushes at least once. The log is the record of participation.\n\n\n\n11.0.0.8 What loses marks\n\nReporting a matched estimate with no overlap diagnostic\nMatching on a variable affected by the treatment\nCalling an association causal because you controlled for something\nOmitting the balance table\n\n\n&lt;- The lecture · Session 10 overview",
+    "section": "10.10 What to report",
+    "text": "10.10 What to report\n\nThe estimand, named. ATE or ATT — they answer different questions and matching usually estimates the second.\nThe identifying assumption, in words. Which variables are claimed to close every path from treatment to outcome, and why that list is complete. This is an argument, not a table.\nBalance before and after, for every covariate, with standardised differences. Not the propensity model’s coefficients or its fit.\nOverlap, with the range of the score in both groups, and what you did about units outside common support.\nThe naive estimate alongside the adjusted one. The distance between them is the size of the selection problem, and hiding it hides the reason for the analysis.\nA sensitivity analysis. How strong an unobserved confounder would need to be to overturn the result.\nThat every control is pre-treatment, and that you know it. If a covariate is measured after treatment, say why it is not a mediator or a collider — and if you cannot, drop it, even when it improves the number.\n\n\n\n\n\nCinelli, Carlos, Andrew Forney, and Judea Pearl. 2022. “A Crash Course in Good and Bad Controls.” Sociological Methods & Research 53 (3): 1071–1104. https://doi.org/10.1177/00491241221099552.\n\n\nElwert, Felix, and Christopher Winship. 2014. “Endogenous Selection Bias: The Problem of Conditioning on a Collider Variable.” Annual Review of Sociology 40 (1): 31–53. https://doi.org/10.1146/annurev-soc-071913-043455.\n\n\nHolland, Paul W. 1986. “Statistics and Causal Inference.” Journal of the American Statistical Association 81 (396): 945–60. https://doi.org/10.1080/01621459.1986.10478354.\n\n\nImbens, Guido W. 2004. “Nonparametric Estimation of Average Treatment Effects Under Exogeneity: A Review.” Review of Economics and Statistics 86 (1): 4–29. https://doi.org/10.1162/003465304323023651.\n\n\nKing, Gary, and Richard Nielsen. 2019. “Why Propensity Scores Should Not Be Used for Matching.” Political Analysis 27 (4): 435–54. https://doi.org/10.1017/pan.2019.11.\n\n\nRosenbaum, PAUL R., and DONALD B. Rubin. 1983. “The Central Role of the Propensity Score in Observational Studies for Causal Effects.” Biometrika 70 (1): 41–55. https://doi.org/10.1093/biomet/70.1.41.\n\n\nRubin, Donald B. 1974. “Estimating Causal Effects of Treatments in Randomized and Nonrandomized Studies.” Journal of Educational Psychology 66 (5): 688–701. https://doi.org/10.1037/h0037350.\n\n\nStuart, Elizabeth A. 2010. “Matching Methods for Causal Inference: A Review and a Look Forward.” Statistical Science 25 (1). https://doi.org/10.1214/09-STS313.",
     "crumbs": [
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Causal Inference I: Counterfactuals, Randomisation, Matching</span>"
     ]
