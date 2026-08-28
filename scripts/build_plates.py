@@ -220,7 +220,16 @@ def main():
             raise SystemExit(f"no prompt for chapter {ch}")
         slug, title, why, subject, kind = PROMPTS[ch]
         raw = generate(ch)
-        img = Image.open(raw).convert("RGB").resize((W, H), Image.LANCZOS)
+        img = Image.open(raw).convert("RGB")
+
+        # FLUX signs its portraits — an illegible scrawl in a bottom corner —
+        # despite the prompt asking it not to. A fabricated signature implies a
+        # real artist, which is exactly the false authenticity these captions
+        # exist to prevent, so the bottom eighth is cropped away before framing.
+        if kind == "invented":
+            w0, h0 = img.size
+            img = img.crop((0, 0, w0, int(h0 * 0.88)))
+        img = img.resize((W, H), Image.LANCZOS)
         rng = np.random.default_rng(int(ch))
         out = OUT / f"session-{ch}-{PROMPTS[ch][0]}.jpg"
         album_leaf(wash(img), rng).save(out, "JPEG", quality=90, optimize=True)

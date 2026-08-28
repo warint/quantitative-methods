@@ -41,3 +41,34 @@ function Span(el)
   end
   return nil
 end
+
+
+-- Wide tables get a page of their own, rotated.
+--
+-- The book prints dataframe previews — qmib.view() on the eleven-column course
+-- spine, the fourteen-column questionnaire — and at a 6x9 trim those run off
+-- the paper: one reached 871pt on a 432pt page. Rotating the page is the
+-- conventional fix and keeps the table legible instead of shrinking it to
+-- nothing. Narrow tables are untouched; only LaTeX is affected, since HTML
+-- scrolls them sideways already.
+local LANDSCAPE_MIN_COLUMNS = 7
+
+function Table(el)
+  if not FORMAT:match("latex") then return nil end
+
+  local columns = 0
+  if el.colspecs then
+    columns = #el.colspecs
+  end
+  if columns < LANDSCAPE_MIN_COLUMNS then return nil end
+
+  -- Rotating alone is not enough: eleven columns still overrun a rotated 6x9
+  -- page. Shrink the type inside the environment, and drop the running head,
+  -- which pdflscape otherwise rotates into the side of the table.
+  return {
+    pandoc.RawBlock("latex",
+      "\\begin{landscape}\\thispagestyle{empty}\\begingroup\\scriptsize"),
+    el,
+    pandoc.RawBlock("latex", "\\endgroup\\end{landscape}"),
+  }
+end

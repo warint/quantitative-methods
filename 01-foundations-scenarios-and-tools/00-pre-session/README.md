@@ -1,6 +1,6 @@
 # Session 01 — Pre-session preparation
 
-> Four things, in this order. Budget **2–3 hours** in total. None of it is optional.
+> Five things, in this order. Budget **2.5–3.5 hours** in total. None of it is optional.
 
 ---
 
@@ -55,7 +55,26 @@ fact-based prologue, a speculative scenario, an epilogue.
 
 ---
 
-## 3. Read the critical brief — 45–60 min
+## 3. Read *A turbulent AI era and critical choices to make* — 20–30 min
+
+**<https://www.gatesnotes.com/a-turbulent-ai-era-and-critical-choices-to-make>**
+
+A short piece from Gates Notes, set beside *Europe 2031* deliberately. The two are
+different kinds of document about the same subject: one is a constructed scenario with
+dated chapters and an explicit epistemic seam, written by a foundation; the other is an
+argument by a named individual with a particular vantage point and particular interests.
+
+Read the second the way the first taught you to. What is asserted as fact and what is
+projection. Which claims could be checked, and by when. What the author is in a position
+to know, and what they are in a position to want. Where the two documents agree, ask
+whether that is corroboration or a shared assumption neither examines.
+
+**Bring one point of disagreement** between the two texts — or between either text and
+your own view — to the conversation in the second half.
+
+---
+
+## 4. Read the critical brief — 45–60 min
 
 [`reading-europe-2031.md`](reading-europe-2031.md)
 
@@ -65,7 +84,7 @@ scenario.
 
 ---
 
-## 4. Run the verification script — 5 min
+## 5. Run the verification script — 5 min
 
 From the course folder, with your environment activated:
 

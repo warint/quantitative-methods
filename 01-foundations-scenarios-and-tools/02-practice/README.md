@@ -13,10 +13,13 @@
 ## What you should have read
 
 **[Europe 2031](https://europe2031.ai)** — online, as a [PDF](https://europe2031.ai/europe-2031.pdf),
-in [French](https://europe2031.ai/fr), or as audio. Then the critical brief,
+in [French](https://europe2031.ai/fr), or as audio. Then
+**[A turbulent AI era and critical choices to make](https://www.gatesnotes.com/a-turbulent-ai-era-and-critical-choices-to-make)**,
+and the critical brief,
 [`00-pre-session/reading-europe-2031.md`](../00-pre-session/reading-europe-2031.md).
 
-Bring your annotations. You will be asked what you underlined and why.
+Bring your annotations. You will be asked what you underlined and why — and where the two
+texts disagree.
 
 ---
 

@@ -792,7 +792,7 @@ format:
     monofont: "Menlo"
     monofontoptions: [Scale=0.82]
     include-in-header: preamble.tex
-    keep-tex: false
+    keep-tex: true
     colorlinks: true
     linkcolor: econblue
     citecolor: econblue

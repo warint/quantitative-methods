@@ -216,10 +216,16 @@ def view(df: pd.DataFrame, n: int = 12, name: str | None = None):
         print(df.head(n).to_string())
         return df
 
+    # The caption is emitted beside the table rather than inside it: a Styler
+    # caption survives into LaTeX and collides with Quarto's own table caption,
+    # printing the number twice.
     styled = (df.head(n).style
-              .set_caption(header)
               .set_table_attributes('style="font-size:0.82rem"')
               .format(precision=3, na_rep="&mdash;"))
+    # Printed, not marked up: a <p> is dropped by the LaTeX writer, and a Styler
+    # caption collides with Quarto's own table caption. Printed output survives
+    # into both formats intact.
+    print(header)
     display(HTML(f'<div style="max-height:22rem;overflow:auto">'
                  f'{styled.to_html()}</div>'))
     display(HTML('<details style="font-size:0.85rem;margin-top:.3rem">'
