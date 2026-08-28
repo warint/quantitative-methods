@@ -2,6 +2,15 @@
 
 ### Econometrics and machine learning, taught the way the work is now done — in an IDE, with an LLM beside you, on your own machine.
 
+> **In Python — and there is a companion volume in R.**
+> The course book is [Quantitative Methods in International Business with
+> Python](https://warint.github.io/quantitative-methods/book/). Its counterpart,
+> [*Data Science for International Business with R*](https://warin.ca/ds4ibr/), covers much of
+> the same ground in the other language of the field: exploratory analysis, regression and panel
+> data, logistic models, unsupervised learning, structural equation modelling. The two are close
+> enough in structure to read side by side, which is the fastest way to see what belongs to the
+> method and what belongs to the tooling.
+
 A twelve-session graduate course in which every method is **derived** before it is **used**, every
 result is produced on the student's own laptop, and the AI assistant is treated as what it is: a
 fast, confident, unaccountable collaborator whose output you are answerable for.

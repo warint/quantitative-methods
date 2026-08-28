@@ -42,7 +42,7 @@ import pathlib
 
 import pandas as pd
 
-__all__ = ["load", "catalog", "path", "ROOT", "REMOTE"]
+__all__ = ["load", "view", "catalog", "path", "ROOT", "REMOTE"]
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -141,11 +141,11 @@ def load(name: str) -> pd.DataFrame:
     """
     p = path(name)
     if p.exists():
-        return pd.read_parquet(p)
+        return _label(pd.read_parquet(p), name)
 
     if name in SPINE_FILES:
         if REMOTE:
-            return pd.read_parquet(f"{REMOTE}/{SPINE_FILES[name]}")
+            return _label(pd.read_parquet(f"{REMOTE}/{SPINE_FILES[name]}"), name)
         raise FileNotFoundError(
             f"{p} is missing. The spine is committed to the repository — run this "
             f"from the course folder, or set qmib.REMOTE to fetch it over HTTPS."
@@ -168,8 +168,64 @@ def load(name: str) -> pd.DataFrame:
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(p)
     print(f"  cached {name} -> {p.relative_to(ROOT)}  ({len(df):,} rows)")
+    return _label(df, name)
+
+
+
+
+def _label(df: pd.DataFrame, name: str) -> pd.DataFrame:
+    """Remember which dataset this is, so view() can say so without being told."""
+    df.attrs["qmib_name"] = name
     return df
 
+def view(df: pd.DataFrame, n: int = 12, name: str | None = None):
+    """Look at a dataframe — the equivalent of R's `View()`.
+
+    >>> core = qmib.load("core")
+    >>> qmib.view(core)
+
+    R users reach for `View(df)` and get a scrollable window. Python has no
+    single answer: a notebook renders the last expression, a script prints
+    nothing at all, and `print(df)` truncates to whatever fits the terminal.
+    This gives the same information in every context — the shape, what each
+    column is, how much of it is missing, and the first rows.
+
+    In a notebook or a rendered Quarto chapter it returns a styled, scrollable
+    table. In a plain terminal it prints a summary and returns the frame, so
+    `qmib.view(df)` is safe to leave in a script.
+    """
+    label = name or getattr(df, "attrs", {}).get("qmib_name", "dataframe")
+    missing = df.isna().mean()
+
+    header = (f"{label}: {len(df):,} rows x {df.shape[1]} columns"
+              f"  ({missing.mean():.1%} missing overall)")
+
+    summary = pd.DataFrame({
+        "dtype": df.dtypes.astype(str),
+        "missing": (missing * 100).round(1).astype(str) + "%",
+        "distinct": df.nunique(dropna=True),
+    })
+
+    try:                                     # notebook / Quarto
+        from IPython.display import display, HTML
+        get_ipython                          # noqa: F821 - defined only in IPython
+    except (ImportError, NameError):
+        print(header)
+        print(summary.to_string())
+        print()
+        print(df.head(n).to_string())
+        return df
+
+    styled = (df.head(n).style
+              .set_caption(header)
+              .set_table_attributes('style="font-size:0.82rem"')
+              .format(precision=3, na_rep="&mdash;"))
+    display(HTML(f'<div style="max-height:22rem;overflow:auto">'
+                 f'{styled.to_html()}</div>'))
+    display(HTML('<details style="font-size:0.85rem;margin-top:.3rem">'
+                 '<summary>columns, types and missingness</summary>'
+                 f'{summary.to_html()}</details>'))
+    return None
 
 def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
     """Normalise the published files so the column names are predictable."""

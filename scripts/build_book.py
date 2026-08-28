@@ -599,6 +599,15 @@ Twelve chapters follow the arc from describing data to defending a causal claim.
 single question — *can this regression be trusted?*, *did the policy do anything?* — and each ends
 where a referee would begin.
 
+::: {{.muted}}
+**There is a companion volume in R.** *Data Science for International Business with R*
+([warin.ca/ds4ibr](https://warin.ca/ds4ibr/)) covers much of the same ground — exploratory
+analysis, regression and panel data, logistic models, unsupervised learning, structural equation
+modelling — in the other language this field is written in. The two books are deliberately close
+in structure, so a reader fluent in one can follow the other and see what is a property of the
+method and what is a property of the tooling. This one is the Python volume.
+:::
+
 ## How to use it
 
 | If you want to | Go to |
