@@ -751,6 +751,7 @@ book:
     - setup.qmd
     - data-api.qmd
     - replications.qmd
+    - further-reading.qmd
 
 bibliography: references.bib
 link-citations: true
@@ -1034,6 +1035,11 @@ def main():
     (BOOK / "data-api.qmd").write_text(data_api_page(), encoding="utf-8")
     (BOOK / "replications.qmd").write_text(
         flat_page("Replication packages", ROOT / "REPLICATIONS.md"), encoding="utf-8")
+
+    further = ROOT / "FURTHER-READING.md"
+    if further.exists():
+        (BOOK / "further-reading.qmd").write_text(
+            flat_page("Further reading", further), encoding="utf-8")
     (BOOK / "book.scss").write_text(BOOK_SCSS, encoding="utf-8")
 
     bib = ROOT / "assets" / "references.bib"
