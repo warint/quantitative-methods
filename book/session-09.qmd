@@ -156,6 +156,102 @@ for _, r in loadings.iterrows():
     print(f"{r['rval']:12}{r['lval']:22}{r['Estimate']:9.3f}{r['Est. Std']:8.3f}{p:>10}")
 ```
 
+The two halves are easier to see than to describe. Wright's convention, still
+universal, is that observed variables are drawn as rectangles, unobserved ones
+as ellipses, a single-headed arrow is a directed effect and a double-headed one
+an unanalysed covariance.
+
+```{python}
+#| label: fig-path-diagram
+#| code-summary: "Show the code that draws the diagram"
+#| fig-cap: "The two halves of a structural equation model, drawn from the fitted estimates. Left, the measurement model: each construct with its indicators, labelled with the standardised loadings estimated above, and $\\delta$ for what each indicator does not share with its construct. Right, the structural model schematically: the path between constructs, with $\\zeta$ for what the path leaves unexplained."
+
+from matplotlib.patches import FancyBboxPatch, Ellipse, FancyArrowPatch
+
+# The loadings drawn below are the ones estimated above — the diagram is built
+# from the fitted model, so it cannot drift out of step with the numbers.
+std = {r["lval"]: float(r["Est. Std"]) for _, r in loadings.iterrows()}
+groups = {c: list(loadings[loadings["rval"] == c]["lval"]) for c in ["value", "experience"]}
+
+def box(ax, x, y, text, w=1.5, h=0.38):
+    ax.add_patch(FancyBboxPatch((x-w/2, y-h/2), w, h, boxstyle="round,pad=0.02",
+                                fc="white", ec=CL.ink, lw=1.1, zorder=3))
+    ax.text(x, y, text, ha="center", va="center", fontsize=7.6, zorder=4)
+
+def oval(ax, x, y, text, w=1.5, h=0.62):
+    ax.add_patch(Ellipse((x, y), w, h, fc=CL.accent, alpha=0.14,
+                         ec=CL.accent, lw=1.6, zorder=3))
+    ax.text(x, y, text, ha="center", va="center", fontsize=8.6,
+            style="italic", color=CL.ink, zorder=4)
+
+def arrow(ax, p0, p1, label=None, style="-|>", color=None, dash=False):
+    color = color or CL.muted
+    ax.add_patch(FancyArrowPatch(p0, p1, arrowstyle=style, mutation_scale=11,
+                                 lw=1.2, color=color, zorder=2,
+                                 linestyle="--" if dash else "-",
+                                 shrinkA=2, shrinkB=2))
+    if label:
+        f = 0.55
+        mx = p0[0] + f*(p1[0]-p0[0]); my = p0[1] + f*(p1[1]-p0[1])
+        ax.text(mx, my, label, fontsize=7, color=CL.ink, ha="center",
+                va="center", zorder=5,
+                bbox=dict(fc="white", ec="none", pad=0.8))
+
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10.4, 5.0))
+
+# ---- measurement model
+ys = {"value": 1.6, "experience": -1.6}
+for ci, (con, yc) in enumerate(ys.items()):
+    oval(a1, 0, yc, con)
+    items = groups[con]
+    for i, it in enumerate(items):
+        yi = yc + (i - (len(items)-1)/2) * 0.62
+        box(a1, 3.0, yi, it)
+        arrow(a1, (0.78, yc), (2.25, yi), f"{std[it]:.2f}")
+        arrow(a1, (3.9, yi), (3.78, yi), style="-|>", color=CL.line)
+        a1.text(4.05, yi, "δ", fontsize=7.5, color=CL.muted, va="center")
+arrow(a1, (0, 1.28), (0, -1.28), style="<|-|>", color=CL.warn, dash=True)
+a1.text(-0.16, 0, "covariance", rotation=90, fontsize=7, color=CL.warn,
+        ha="right", va="center")
+a1.set_title("measurement model — what the indicators measure", fontsize=10, loc="left")
+
+# ---- structural model
+LX, RX = -2.3, 2.3
+oval(a2, LX, 0, "value"); oval(a2, RX, 0, "experience")
+arrow(a2, (LX+0.8, 0), (RX-0.8, 0), style="-|>", color=CL.warn)
+a2.text(0, 0.16, "path coefficient", fontsize=7.6, color=CL.warn,
+        ha="center", va="bottom")
+# Generic indicator labels here: the structural panel is schematic, and the
+# real indicator names are on the measurement panel beside it.
+for cx, con, sym in ((LX, "value", "x"), (RX, "experience", "y")):
+    for i in range(3):
+        xi = cx + (i - 1) * 1.12
+        box(a2, xi, -1.55, f"${sym}_{i+1}$", w=0.82, h=0.34)
+        arrow(a2, (cx, -0.34), (xi, -1.36))
+a2.add_patch(FancyArrowPatch((RX, 1.15), (RX, 0.34), arrowstyle="-|>",
+                             mutation_scale=11, lw=1.2, color=CL.muted, zorder=2))
+a2.text(RX + 0.16, 0.95, r"$\zeta$ — what the path leaves unexplained",
+        fontsize=7.2, color=CL.muted, va="center")
+a2.set_title("structural model — how the constructs relate", fontsize=10, loc="left")
+
+for ax, xl, yl in ((a1, (-1.0, 4.6), (-3.1, 3.1)), (a2, (-4.3, 6.4), (-2.3, 1.7))):
+    ax.set_xlim(*xl); ax.set_ylim(*yl); ax.axis("off")
+fig.tight_layout()
+```
+
+Reading the left panel is the whole of measurement. Each arrow carries the
+standardised loading, so `safety` at 0.29 is visibly the weak indicator and
+`resale_value` at 0.68 the strong one, and the dashed double-headed arrow
+between the constructs says they are allowed to correlate without either
+causing the other. Every $\delta$ is a reminder that the indicator is not the
+construct.
+
+The right panel is the structural half, drawn schematically. One arrow between
+the constructs replaces what would otherwise be sixteen arrows between
+indicators, which is the economy the latent-variable approach buys — and the
+$\zeta$ is the honest part, standing for everything about *experience* that
+*value* does not account for.
+
 ## The fit indices, and what each would have to be
 
 The $\chi^2$ test is the only one with a null hypothesis, and it is almost never
