@@ -1,5 +1,6 @@
 ---
 title: "Conclusion"
+standalone: true
 ---
 
 ## One argument, twelve times
