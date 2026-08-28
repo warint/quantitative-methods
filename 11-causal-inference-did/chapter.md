@@ -1,5 +1,6 @@
 ---
 title: "Causal Inference II: Difference-in-Differences"
+standalone: true
 ---
 
 ## What would have happened otherwise
@@ -18,16 +19,7 @@ not adopt.
 
 Two differences, hence the name.
 
-::: {.plate}
-![](images/session-11-snow.jpg){fig-alt="Portrait of John Snow, 1813–1858."}
-
-**John Snow** · 1813–1858
-
-Mapped cholera deaths in 1854 and read a natural experiment off the water supply — before the statistics existed to justify it.
-
-[unknown, Autotype 1856, published in 1887. Public domain, via Wikimedia Commons.]{.plate-credit}
-:::
-
+{{portrait}}
 
 ::: {.archive}
 [From the archive · Snow, 1855]{.archive-label}
