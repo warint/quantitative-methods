@@ -28,6 +28,7 @@ be regenerated, criticised and changed like any other build artefact — the sam
 reason the figures are computed rather than pasted in.
 """
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -35,6 +36,36 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "plates"
 MFLUX = ROOT / ".venv" / "bin" / "mflux-generate"
+
+# A pre-quantised, ungated mirror. black-forest-labs/FLUX.1-schnell is gated and
+# needs a Hugging Face login; this is the same model at 4-bit, about 9.6 GB
+# rather than 24, published by the mflux community organisation.
+MODEL_REPO = "mflux-community/flux-1-schnell-mflux-q4"
+MODEL_GB = 9.7
+HEADROOM_GB = 5.0
+
+
+def check_disk():
+    """Refuse to start if the download would leave the disk uncomfortably full.
+
+    Written after a previous run pulled a 31 GB model in the background and took
+    the machine to 98% full before anyone noticed. A model download is the one
+    thing this repository does that can fill a disk, so it asks first.
+    """
+    free_gb = shutil.disk_usage(ROOT).free / 1e9
+    cached = Path.home() / ".cache/huggingface/hub" / ("models--" + MODEL_REPO.replace("/", "--"))
+    if cached.exists():
+        return
+    needed = MODEL_GB + HEADROOM_GB
+    if free_gb < needed:
+        raise SystemExit(
+            f"Not enough disk. {MODEL_REPO} is about {MODEL_GB:.0f} GB and this "
+            f"leaves {HEADROOM_GB:.0f} GB of headroom, so {needed:.0f} GB is "
+            f"wanted and {free_gb:.1f} GB is free.\n"
+            f"Free some space, or generate the plates elsewhere and drop them in "
+            f"{OUT.relative_to(ROOT)}/."
+        )
+    print(f"  disk: {free_gb:.1f} GB free, model is about {MODEL_GB:.0f} GB")
 
 # One house style, appended to every prompt, so eleven plates look like one set.
 # It deliberately echoes the treatment applied to the real portraits: ink and
@@ -142,10 +173,11 @@ def generate(chapter, steps=4, seed=None):
     OUT.mkdir(parents=True, exist_ok=True)
     raw = OUT / f"session-{chapter}-{slug}-raw.png"
 
+    check_disk()
     cmd = [
         str(MFLUX),
-        "--model", "schnell",
-        "--quantize", "4",
+        "--model", MODEL_REPO,
+        "--base-model", "schnell",
         "--steps", str(steps),
         "--height", "1024", "--width", "832",     # 4:5, the album proportion
         "--seed", str(seed if seed is not None else 60033 + int(chapter)),
@@ -203,7 +235,7 @@ def main():
             "slug": slug, "name": title, "why": why, "kind": kind,
             "file": out.relative_to(ROOT).as_posix(),
             "generated": True, "note": note,
-            "model": "Z-Image-Turbo via mflux, locally",
+            "model": "FLUX.1-schnell at 4-bit, via mflux",
             "prompt": prompt_for(ch),
         }
         print(f"  wrote {out.relative_to(ROOT)}  [{kind}]")

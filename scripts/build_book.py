@@ -372,25 +372,36 @@ def plate(num):
     decoration: these are real paintings and drawings by named artists, and the
     licence that lets the book use them is conditional on saying so.
     """
-    creds = PORTRAITS / "credits.json"
-    if not creds.exists():
-        return ""
-    entries = json.loads(creds.read_text(encoding="utf-8")).get(f"session-{num}")
+    entries = []
+    for folder in (PORTRAITS, ROOT / "assets" / "plates"):
+        creds = folder / "credits.json"
+        if not creds.exists():
+            continue
+        found = json.loads(creds.read_text(encoding="utf-8")).get(f"session-{num}")
+        if not found:
+            continue
+        entries.extend(found if isinstance(found, list) else [found])
     if not entries:
         return ""
-    if isinstance(entries, dict):          # single-sitter chapters
-        entries = [entries]
 
     plates = []
     for e in entries:
         src = Path(e["file"]).name
+        if e.get("generated"):
+            # The disclosure is not optional and not a footnote: a reader must
+            # be able to tell an 1840 oil from an image made this year.
+            heading = e["name"]
+            credit = f'{e["note"]} Made locally with {e["model"]}.'
+        else:
+            heading = f'{e["name"]}** · **{e["dates"]}'
+            credit = (f'{e["artist"]}, {e["date"] or "undated"}. '
+                      f'{e["licence"]}, via Wikimedia Commons.')
         plates.append(
             '::: {.plate}\n'
-            f'![](images/{src}){{fig-alt="Portrait of {e["name"]}, {e["dates"]}."}}\n\n'
-            f'**{e["name"]}** · {e["dates"]}\n\n'
+            f'![](images/{src}){{fig-alt="{heading}."}}\n\n'
+            f'**{heading}**\n\n'
             f'{e["why"]}\n\n'
-            f'[{e["artist"]}, {e["date"] or "undated"}. {e["licence"]}, '
-            'via Wikimedia Commons.]{.plate-credit}\n'
+            f'[{credit}]{{.plate-credit}}\n'
             ':::\n'
         )
 
@@ -1080,11 +1091,12 @@ def main():
         if src.exists():
             shutil.copy2(src, BOOK / name)
 
-    if PORTRAITS.exists():
-        images = BOOK / "images"
-        images.mkdir(exist_ok=True)
-        for jpg in sorted(PORTRAITS.glob("*.jpg")):
-            shutil.copy2(jpg, images / jpg.name)
+    images = BOOK / "images"
+    images.mkdir(exist_ok=True)
+    for folder in (PORTRAITS, ROOT / "assets" / "plates"):
+        if folder.exists():
+            for jpg in sorted(folder.glob("*.jpg")):
+                shutil.copy2(jpg, images / jpg.name)
 
     chapters = []
     for num, s in ordered():
