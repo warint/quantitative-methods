@@ -742,8 +742,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 core = pd.read_parquet("data/spine/core.parquet")
+
+# Drop rows missing either variable. subset= matters: without it, a row missing
+# any column at all would go, and you would silently lose a third of the panel.
 d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
 
+# Look before you model. s= is the marker size and alpha= the transparency —
+# with 428 points, overlapping markers hide density unless you can see through
+# them.
 plt.scatter(d["productivity_idx"], d["gdp_pc_eur"], s=12, alpha=0.6)
 plt.xlabel("Labour productivity index (EU average = 100)")
 plt.ylabel("GDP per capita (EUR)")
@@ -786,7 +792,13 @@ minimises the same quantity over *lines*.
 ```python
 import statsmodels.formula.api as smf
 
+# The formula reads "gdp_pc_eur explained by productivity_idx". statsmodels
+# adds the intercept for you; write ~ 0 + x if you ever want it suppressed,
+# and know that R-squared stops being interpretable when you do.
 model = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+
+# .params holds the two coefficients. The slope is in euros of GDP per capita
+# per one index point — always say the units.
 print(model.params)
 ```
 
@@ -829,6 +841,8 @@ productivity alone does not account for — and reading residuals is most of Ses
 ## How much did the line explain?
 
 ```python
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape. Session 03 is about that difference.
 print(f"R-squared = {model.rsquared:.3f}")
 ```
 
@@ -848,6 +862,9 @@ predict a new country well.
 ## Two predictors: what "controlling for" means
 
 ```python
+# Adding a second predictor changes what the first coefficient means: it is now
+# the association holding investment fixed, not the raw association. The two
+# answer different questions, and the number will move.
 model2 = smf.ols("gdp_pc_eur ~ productivity_idx + gfcf_meur", data=d2).fit()
 ```
 

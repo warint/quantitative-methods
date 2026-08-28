@@ -153,10 +153,16 @@ prior about which columns matter.
 ```{python}
 #| echo: true
 raw = pd.read_parquet("../../data/spine/angle_c_country.parquet")
-YCOL  = "rd_pct_gdp"
+
+YCOL  = "rd_pct_gdp"                           # what we are trying to explain
+# Everything that is not the outcome, a key, or a status flag is a candidate.
+# Note what this does NOT do: it applies no judgement about which predictors
+# belong. That judgement is the thing this session is about automating.
 XCOLS = [c for c in raw.columns if c not in ("geo", "time", "flag", YCOL)]
 
-d = raw.dropna(subset=[YCOL] + XCOLS)          # keep only fully observed rows
+# Complete-case only. Chapter 2's warning applies: dropping incomplete rows is
+# not neutral, and here it costs most of the sample.
+d = raw.dropna(subset=[YCOL] + XCOLS)
 print(f"usable rows n = {len(d)},  candidate predictors p = {len(XCOLS)}")
 ```
 
@@ -169,6 +175,10 @@ time a new survey wave meets an old panel.
 
 ```{python}
 #| echo: true
+# The condition number is the ratio of the largest singular value to the
+# smallest: how much a small wobble in the data can be amplified in the
+# coefficients. Under about 30 is comfortable; 1e3 and above means the design
+# is nearly collinear and OLS coefficients are being solved out of noise.
 print(f"condition number of the standardised design: {np.linalg.cond(Ztr):.1e}")
 ```
 
@@ -190,10 +200,16 @@ for next**.
 #| echo: true
 def test_rmse(model):
     """Fit on the training split, score on the untouched 30%."""
-    model.fit(Xtr, ytr)
+    model.fit(Xtr, ytr)                        # the model never sees Xte here
     return np.sqrt(mean_squared_error(yte, model.predict(Xte)))
 
+# A log grid, because what matters is the order of magnitude of the penalty,
+# not its arithmetic spacing: 0.001 to 0.01 is the same size of step as 100 to
+# 1000. Sixty points is plenty for a curve this smooth.
 ALPHAS = np.logspace(-3, 3, 60)
+
+# The mixing weight for the elastic net. 1.0 is pure lasso; the lower values
+# let the ridge penalty share the work when predictors are correlated.
 L1S    = [0.1, 0.5, 0.7, 0.9, 0.95, 1.0]
 
 scores = {
@@ -328,6 +344,9 @@ It is not a blunt instrument, and describing it as "shrinking the coefficients" 
 
 ```{python}
 #| echo: true
+# A pipeline, not three separate steps, because the scaler must be fitted on
+# the training rows only. Fit it on everything and the test set has leaked into
+# the training procedure, and the honest 30% you held out is no longer honest.
 mod = make_pipeline(
     StandardScaler(),                       # 1. penalty is scale-dependent: standardise first
     RidgeCV(alphas=np.logspace(-3, 3, 60))  # 2. pick lambda by leave-one-out CV over a log grid
@@ -548,7 +567,13 @@ increasing penalty.
 
 ```{python}
 #| echo: true
+# LassoCV does two things at once: it fits the whole path of lambdas, and it
+# uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the
+# penalty is on coefficient size, so the columns must be on a common scale.
 lcv = LassoCV(cv=5, random_state=0, max_iter=50_000).fit(Ztr, ytr)
+
+# "Kept" means a coefficient the optimiser did not drive to zero. The 1e-8
+# threshold is guarding against floating-point dust, not making a judgement.
 kept = [(c, b) for c, b in zip(XCOLS, lcv.coef_) if abs(b) > 1e-8]
 
 print(f"lambda = {lcv.alpha_:.4f}   kept {len(kept)} of {P}")
@@ -583,8 +608,12 @@ Our five AI-adoption columns are all measuring roughly the same thing:
 
 ```{python}
 #| echo: true
+# Five columns that are all, in substance, "how much AI does this country use".
 GRP = ["ai_use_any", "ai_use_ml", "ai_use_ge3", "ai_text_mining", "ai_image_reco"]
+
 C = d[GRP].corr().to_numpy()
+# triu_indices(5, 1) takes the strict upper triangle: the ten distinct pairs,
+# without the diagonal of ones and without counting each pair twice.
 print(f"pairwise correlations within the group: {C[np.triu_indices(5, 1)].min():.2f}"
       f" to {C[np.triu_indices(5, 1)].max():.2f}")
 ```
