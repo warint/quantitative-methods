@@ -24,7 +24,31 @@ format:
     footer: "MATH60033A · Session 04 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Source session 5 is taught as course session 4. Content is static so the deck renders without R or Python. -->
+<!-- Source session 5 is taught as course session 4. The code cells are live: they
+     execute against the course data at render time, so the output on the slides is
+     the output the students' own machines produce. The imported version of this deck
+     showed R output under Python code — lm() summaries, 1st Qu., dotted column
+     names — because the source was an R course. -->
+```{python}
+#| label: setup
+#| echo: false
+
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+import qmib
+
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+
+loans = qmib.load("loans")
+```
+
 ## {#imported-s04-001 .scrollable}
 
 > The greatest adventure is what lies ahead. Today and tomorrow are yet to be said. The chances, the changes are all yours to make. The mold of your life is in your hands to break.
@@ -190,18 +214,15 @@ As we saw in the two previous modules, linear regression allows us to model the 
 
 > Which loans are successfull and which one are not successful?
 
-:::: cell
-::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
+```{python}
+#| echo: true
+
 import qmib
 
 # One call. Downloaded once, then read from the local cache.
 loans = qmib.load("loans")
 loans.describe()
 ```
-:::
-::::
 
 ### 2
 
@@ -222,76 +243,12 @@ It is called a binary variable since it only takes on the values 0 or 1:
 
 When working with a binary dependent variable, a scatter plot is often not that useful.
 
-:::: cell
-::: {#cb2 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-::::
 
 ### 4
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-     credit.policy     purpose             int.rate       installment    
-     Min.   :0.000   Length:9578        Min.   :0.0600   Min.   : 15.67  
-     1st Qu.:1.000   Class :character   1st Qu.:0.1039   1st Qu.:163.77  
-     Median :1.000   Mode  :character   Median :0.1221   Median :268.95  
-     Mean   :0.805                      Mean   :0.1226   Mean   :319.09  
-     3rd Qu.:1.000                      3rd Qu.:0.1407   3rd Qu.:432.76  
-     Max.   :1.000                      Max.   :0.2164   Max.   :940.14  
-     log.annual.inc        dti              fico       days.with.cr.line
-     Min.   : 7.548   Min.   : 0.000   Min.   :612.0   Min.   :  179    
-     1st Qu.:10.558   1st Qu.: 7.213   1st Qu.:682.0   1st Qu.: 2820    
-     Median :10.929   Median :12.665   Median :707.0   Median : 4140    
-     Mean   :10.932   Mean   :12.607   Mean   :710.8   Mean   : 4561    
-     3rd Qu.:11.291   3rd Qu.:17.950   3rd Qu.:737.0   3rd Qu.: 5730    
-     Max.   :14.528   Max.   :29.960   Max.   :827.0   Max.   :17640    
-       revol.bal         revol.util    inq.last.6mths    delinq.2yrs     
-     Min.   :      0   Min.   :  0.0   Min.   : 0.000   Min.   : 0.0000  
-     1st Qu.:   3187   1st Qu.: 22.6   1st Qu.: 0.000   1st Qu.: 0.0000  
-     Median :   8596   Median : 46.3   Median : 1.000   Median : 0.0000  
-     Mean   :  16914   Mean   : 46.8   Mean   : 1.577   Mean   : 0.1637  
-     3rd Qu.:  18250   3rd Qu.: 70.9   3rd Qu.: 2.000   3rd Qu.: 0.0000  
-     Max.   :1207359   Max.   :119.0   Max.   :33.000   Max.   :13.0000  
-        pub.rec        not.fully.paid      default      
-     Min.   :0.00000   Min.   :0.0000   Min.   :0.0000  
-     1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000  
-     Median :0.00000   Median :0.0000   Median :0.0000  
-     Mean   :0.06212   Mean   :0.1601   Mean   :0.1601  
-     3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.0000  
-     Max.   :5.00000   Max.   :1.0000   Max.   :1.0000  
-:::
-::::
 
 ### 5
 
-::::: cell
-::: {#cb4 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-
-<div>
-
-<figure>
-<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" /></p>
-</figure>
-
-</div>
-:::::
 
 ### 6
 
@@ -299,41 +256,18 @@ loans.describe()
 
 -   Let's see how linear regression would address this problem.
 
-:::: cell
-::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import statsmodels.formula.api as smf
 
 # The linear probability model: a straight line through 0/1 outcomes
 m1 = smf.ols("default ~ fico", data=loans).fit()
 print(m1.summary())
 ```
-:::
-::::
 
 ### 7
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    lm(formula = default ~ fico, data = loans)
-
-    Residuals:
-        Min      1Q  Median      3Q     Max 
-    -0.3029 -0.1945 -0.1512 -0.0789  1.0006 
-
-    Coefficients:
-                  Estimate Std. Error t value Pr(>|t|)    
-    (Intercept)  1.187e+00  6.946e-02   17.10   <2e-16 ***
-    fico        -1.445e-03  9.757e-05  -14.81   <2e-16 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    Residual standard error: 0.3626 on 9576 degrees of freedom
-    Multiple R-squared:  0.0224,    Adjusted R-squared:  0.0223 
-    F-statistic: 219.4 on 1 and 9576 DF,  p-value: < 2.2e-16
-:::
-::::
 
 ### 8
 
@@ -479,42 +413,9 @@ The logistic regression model can be estimated by the method of **maximum likeli
 
 For our loan default data, the R output from estimating a logistic regression is as follows:
 
-:::: cell
-::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-::::
 
 ### LR 7
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico, family = "binomial", data = loans)
-
-    Coefficients:
-                  Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)  6.7188776  0.5768348   11.65   <2e-16 ***
-    fico        -0.0118775  0.0008231  -14.43   <2e-16 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424.0  on 9577  degrees of freedom
-    Residual deviance: 8196.1  on 9576  degrees of freedom
-    AIC: 8200.1
-
-    Number of Fisher Scoring iterations: 4
-:::
-::::
 
 ### LR 8
 
@@ -554,38 +455,6 @@ With this equation we can predict probability of loan default for any FICO score
 :::::::::::::::::: panel-tabset
 ### 1
 
-::::: cell
-::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico, family = "binomial", data = loans)
-
-    Coefficients:
-                  Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)  6.7188776  0.5768348   11.65   <2e-16 ***
-    fico        -0.0118775  0.0008231  -14.43   <2e-16 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424.0  on 9577  degrees of freedom
-    Residual deviance: 8196.1  on 9576  degrees of freedom
-    AIC: 8200.1
-
-    Number of Fisher Scoring iterations: 4
-:::
-:::::
 
 ### 2
 
@@ -605,27 +474,6 @@ We could construct a confidence interval for [\\(\\beta_1\\)]{.math .inline} usi
 
 ::::::: columns
 ::::: {.column style="width:50%;"}
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico, family = "binomial", data = loans)
-
-    Coefficients:
-                  Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)  6.7188776  0.5768348   11.65   <2e-16 ***
-    fico        -0.0118775  0.0008231  -14.43   <2e-16 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424.0  on 9577  degrees of freedom
-    Residual deviance: 8196.1  on 9576  degrees of freedom
-    AIC: 8200.1
-
-    Number of Fisher Scoring iterations: 4
-:::
-::::
 :::::
 
 ::: {.column style="width:50%;"}
@@ -669,33 +517,25 @@ Instead of a point estimate of [\\(\\pi\\)]{.math .inline}, [\\(p\\)]{.math .inl
 
 The formula for SE(p) is complex, so we let R do the work:
 
-::::: cell
-::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-import pandas as pd
+```{python}
+#| echo: true
 
+# The logistic fit this slide predicts from. It is fitted again later for the
+# likelihood-ratio test; defining it here keeps the deck runnable in slide
+# order, which the imported version was not.
+m2 = smf.logit("default ~ fico", data=loans).fit(disp=0)
+
+# get_prediction returns the interval as well as the point estimate. On the
+# probability scale that interval is asymmetric — which is correct, and the
+# reason not to build it by hand as estimate +/- 1.96 * se.
 pred = m2.get_prediction(pd.DataFrame({"fico": [700]})).summary_frame()
 print(pred[["predicted", "ci_lower", "ci_upper"]].round(4))
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-      Fit Lower Upper 
-    0.169 0.161 0.176 
-:::
-:::::
 
 The 95% confidence interval for [\\(\\pi\\)]{.math .inline} is (0.161, 0.177).
 
 > We are 95% confident that the probability that a borrower with a FICO score of 700 would default is between 0.161 and 0.177.
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-                      2.5 %      97.5 %
-    (Intercept)  5.59461730  7.85621388
-    fico        -0.01350184 -0.01027486
-:::
-::::
 
 ### 7
 
@@ -759,9 +599,9 @@ This calculation looks similar to that of [\\(R\^2\\)]{.math .inline} for linear
 
 -   Analysis of goodness-of-fit for loan default logistic regression:
 
-::::: cell
-::: {#cb15 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 m2 = smf.logit("default ~ fico", data=loans).fit()
 null = smf.logit("default ~ 1", data=loans).fit()
 
@@ -769,12 +609,6 @@ null = smf.logit("default ~ 1", data=loans).fit()
 pseudo_r2 = 1 - m2.llf / null.llf
 print(f"pseudo R2 = {pseudo_r2:.4f}")
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    'log Lik.' 0.0271 (df=2)
-:::
-:::::
 
 Value is computed to be 0.0271
 
@@ -814,93 +648,52 @@ Can we use analytics to predict quality from physio-chemical content of red wine
 
 ### 2
 
-:::: cell
-::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import qmib
 
+# A second binary outcome, deliberately unlike the loans one: the classes are
+# closer to balanced here, so accuracy is a less dishonest measure than it was.
 redwines = qmib.load("redwines")
-redwines.describe()
+redwines.describe().round(2)
 ```
-:::
-::::
 
 ### 3
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-     fixed.acidity   volatile.acidity residual.sugar     chlorides      
-     Min.   : 4.60   Min.   :0.1200   Min.   : 0.900   Min.   :0.01200  
-     1st Qu.: 7.10   1st Qu.:0.3900   1st Qu.: 1.900   1st Qu.:0.07000  
-     Median : 7.90   Median :0.5200   Median : 2.200   Median :0.07900  
-     Mean   : 8.32   Mean   :0.5278   Mean   : 2.539   Mean   :0.08747  
-     3rd Qu.: 9.20   3rd Qu.:0.6400   3rd Qu.: 2.600   3rd Qu.:0.09000  
-     Max.   :15.90   Max.   :1.5800   Max.   :15.500   Max.   :0.61100  
-     total.sulfur.dioxide    density         sulphates         alcohol     
-     Min.   :  6.00       Min.   :0.9901   Min.   :0.3300   Min.   : 8.40  
-     1st Qu.: 22.00       1st Qu.:0.9956   1st Qu.:0.5500   1st Qu.: 9.50  
-     Median : 38.00       Median :0.9968   Median :0.6200   Median :10.20  
-     Mean   : 46.47       Mean   :0.9967   Mean   :0.6581   Mean   :10.42  
-     3rd Qu.: 62.00       3rd Qu.:0.9978   3rd Qu.:0.7300   3rd Qu.:11.10  
-     Max.   :289.00       Max.   :1.0037   Max.   :2.0000   Max.   :14.90  
-         good          
-     Length:1599       
-     Class :character  
-     Mode  :character  
-                       
-                       
-                       
-:::
-::::
 
 ### 4
 
-::::: cell
-::: {#cb19 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-import qmib
-
-redwines = qmib.load("redwines")
-redwines.describe()
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-     [1] "No"  "No"  "No"  "No"  "No"  "No"  "No"  "Yes" "Yes" "No"  "No"  "No" 
-    [13] "No"  "No"  "No"  "No"  "Yes" "No"  "No"  "No" 
-:::
-:::::
 
 ### 5
 
 -   We will consider eight predictors listed above of good wine quality (No/Yes) for this example. We will let Y = 1 to represent "Yes" and Y = 0 to represent "No."
 
-:::: cell
-::: {#cb21 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # qmib.load() already returns good as 0/1, so no recoding is needed.
 redwines["good"].value_counts()
 ```
-:::
-::::
 
 ### 6
 
 ::::::::: columns
 ::::: {.column style="width:50%;"}
-:::: cell
-::: {#cb22 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import matplotlib.pyplot as plt
 
+# Boxplots by outcome, before any model. If a predictor's two boxes sit on top
+# of one another, no coefficient is going to rescue it — and if they separate
+# cleanly, you should expect the model to find that and be suspicious if not.
 fig, axes = plt.subplots(1, 3, figsize=(11, 3.4))
 for ax, col in zip(axes, ["fixed_acidity", "volatile_acidity", "alcohol"]):
     redwines.boxplot(column=col, by="good", ax=ax)
     ax.set_title(col); ax.set_xlabel("good")
 plt.suptitle(""); plt.tight_layout(); plt.show()
 ```
-:::
-::::
 :::::
 
 ::::: {.column style="width:50%;"}
@@ -936,50 +729,20 @@ Similar goals:
 
 ### 8
 
-:::: cell
-::: {#cb23 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+# Eight chemical measurements. Note what is absent: price, region, vintage.
+# The model can only speak about what is in this list.
 predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
               "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
 
 w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit()
 print(w1.summary())
 ```
-:::
-::::
 
 ### 9
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = good ~ fixed.acidity + volatile.acidity + residual.sugar + 
-        chlorides + total.sulfur.dioxide + density + sulphates + 
-        alcohol, family = "binomial", data = redwines)
-
-    Coefficients:
-                           Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)           2.268e+02  9.163e+01   2.475 0.013336 *  
-    fixed.acidity         2.812e-01  8.029e-02   3.502 0.000462 ***
-    volatile.acidity     -2.913e+00  6.467e-01  -4.504 6.66e-06 ***
-    residual.sugar        2.328e-01  7.009e-02   3.322 0.000893 ***
-    chlorides            -8.441e+00  3.259e+00  -2.590 0.009593 ** 
-    total.sulfur.dioxide -1.360e-02  3.447e-03  -3.946 7.95e-05 ***
-    density              -2.409e+02  9.202e+01  -2.618 0.008835 ** 
-    sulphates             3.699e+00  5.287e-01   6.997 2.62e-12 ***
-    alcohol               7.823e-01  1.120e-01   6.983 2.88e-12 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 1269.92  on 1598  degrees of freedom
-    Residual deviance:  872.08  on 1590  degrees of freedom
-    AIC: 890.08
-
-    Number of Fisher Scoring iterations: 6
-:::
-::::
 
 ### 10
 
@@ -1003,36 +766,6 @@ An increase in volatile acidity, chlorides, total sulfur dioxide and density cor
 
 ### 12
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = good ~ fixed.acidity + volatile.acidity + residual.sugar + 
-        chlorides + total.sulfur.dioxide + density + sulphates + 
-        alcohol, family = "binomial", data = redwines)
-
-    Coefficients:
-                           Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)           2.268e+02  9.163e+01   2.475 0.013336 *  
-    fixed.acidity         2.812e-01  8.029e-02   3.502 0.000462 ***
-    volatile.acidity     -2.913e+00  6.467e-01  -4.504 6.66e-06 ***
-    residual.sugar        2.328e-01  7.009e-02   3.322 0.000893 ***
-    chlorides            -8.441e+00  3.259e+00  -2.590 0.009593 ** 
-    total.sulfur.dioxide -1.360e-02  3.447e-03  -3.946 7.95e-05 ***
-    density              -2.409e+02  9.202e+01  -2.618 0.008835 ** 
-    sulphates             3.699e+00  5.287e-01   6.997 2.62e-12 ***
-    alcohol               7.823e-01  1.120e-01   6.983 2.88e-12 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 1269.92  on 1598  degrees of freedom
-    Residual deviance:  872.08  on 1590  degrees of freedom
-    AIC: 890.08
-
-    Number of Fisher Scoring iterations: 6
-:::
-::::
 
 ### 13
 
@@ -1046,47 +779,25 @@ Interpreting the magnitude of the coefficients:
 
 The coefficients are called the log-odds
 
-::::: cell
-::: {#cb26 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Log-odds: the coefficients as fitted
 w1.params
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-             (Intercept)        fixed.acidity     volatile.acidity 
-            226.75035047           0.28116907          -2.91283364 
-          residual.sugar            chlorides total.sulfur.dioxide 
-              0.23284320          -8.44080365          -0.01359982 
-                 density            sulphates              alcohol 
-           -240.94649105           3.69873557           0.78225259 
-:::
-:::::
 
 ### 15
 
 To get the "odds", we just to take the exponential value of the coefficients:
 
-::::: cell
-::: {#cb28 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import numpy as np
 
 # Odds ratios: exponentiate. Above 1 raises the odds, below 1 lowers them.
 np.exp(w1.params)
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-             (Intercept)        fixed.acidity     volatile.acidity 
-            2.995201e+98         1.324678e+00         5.432158e-02 
-          residual.sugar            chlorides total.sulfur.dioxide 
-            1.262184e+00         2.158766e-04         9.864922e-01 
-                 density            sulphates              alcohol 
-           2.281752e-105         4.039619e+01         2.186392e+00 
-:::
-:::::
 
 > For one unit increase in alcohol, the odds of the wine being qualified as good increase by a factor of 2.18.
 
@@ -1094,9 +805,9 @@ np.exp(w1.params)
 
 To get the predicted probabilities:
 
-::::: cell
-::: {#cb30 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Hold every other predictor at its mean and vary alcohol alone
 grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
 grid["alcohol"] = range(8, 16)
@@ -1104,32 +815,11 @@ grid["alcohol"] = range(8, 16)
 grid["p_good"] = w1.predict(grid)
 print(grid[["alcohol", "p_good"]].round(3))
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-              1           2           3           4           5           6 
-    0.009037878 0.019550710 0.041776513 0.087026502 0.172467214 0.313030560 
-              7           8 
-    0.499065901 0.685360230 
-:::
-:::::
 
 ### 17
 
 To get the predicted probabilities:
 
-:::: cell
-::: {#cb32 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Hold every other predictor at its mean and vary alcohol alone
-grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
-grid["alcohol"] = range(8, 16)
-
-grid["p_good"] = w1.predict(grid)
-print(grid[["alcohol", "p_good"]].round(3))
-```
-:::
-::::
 
 ### 18
 
@@ -1227,18 +917,6 @@ This results in the estimated residuals, [\\(e\\)]{.math .inline}, only being ab
 ::::: {.column style="width:50%;"}
 Let us use our *loans* dataset.
 
-:::: cell
-::: {#cb33 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-::::
 :::::
 
 ::::: {.column style="width:50%;"}
@@ -1266,17 +944,22 @@ Because of this pattern (based on the response being binary), performing model d
 
 Using logistic regression as a predictive model is still valid.
 
-:::: cell
-::: {#cb34 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+import matplotlib.pyplot as plt
+
+# Predict across the whole FICO range rather than only where data sit, so the
+# S-shape is visible instead of implied.
 grid = pd.DataFrame({"fico": range(550, 901)})
+
+# alpha=0.2 because 9,578 points at exactly 0 and 1 would otherwise be two
+# solid bars, hiding where the mass actually is.
 plt.scatter(loans["fico"], loans["default"], s=4, alpha=0.2)
 plt.plot(grid["fico"], m2.predict(grid), color="blue", lw=3)
 plt.xlabel("FICO"); plt.ylabel("P(default)")
 plt.show()
 ```
-:::
-::::
 :::::
 
 ::::: {.column style="width:50%;"}
@@ -1334,18 +1017,19 @@ Formally the hypotheses being tested in a chi-squared test in logistic regressio
 
 Comparing two models to predict defaulted loans in R:
 
-:::: cell
-::: {#cb35 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+# Two nested models: m3 is m2 plus the loan purpose. C() tells the formula that
+# purpose is categorical, so it becomes a set of indicator columns rather than
+# being read as a number — the most common silent error in formula syntax.
 m2 = smf.logit("default ~ fico", data=loans).fit()
 m3 = smf.logit("default ~ fico + C(purpose)", data=loans).fit()
 ```
-:::
-::::
 
-:::: cell
-::: {#cb36 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 from scipy import stats
 
 # Likelihood-ratio test: does purpose earn its extra parameters?
@@ -1353,35 +1037,9 @@ lr = 2 * (m3.llf - m2.llf)
 df = int(m3.df_model - m2.df_model)
 print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
 ```
-:::
-::::
 
 ### 9
 
-::::: cell
-::: {#cb37 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-from scipy import stats
-
-# Likelihood-ratio test: does purpose earn its extra parameters?
-lr = 2 * (m3.llf - m2.llf)
-df = int(m3.df_model - m2.df_model)
-print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Analysis of Deviance Table
-
-    Model 1: default ~ fico
-    Model 2: default ~ fico + purpose
-      Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
-    1      9576     8196.1                          
-    2      9570     8077.9  6   118.16 < 2.2e-16 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-:::
-:::::
 
 The chi-squared test has a very small p-value (certainly less than 0.0001).
 
@@ -1421,9 +1079,9 @@ To predict whether a borrower defaults on a loan, let's start with a 'full model
 
 ### 3
 
-:::: cell
-::: {#cb39 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Compare candidate models on AIC rather than running an automatic search:
 # it is clearer what you chose, and why.
 candidates = [
@@ -1435,42 +1093,9 @@ for formula in candidates:
     m = smf.logit(formula, data=loans).fit(disp=0)
     print(f"AIC {m.aic:9.1f}   {formula}")
 ```
-:::
-::::
 
 ### 4
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico + dti + log.annual.inc + int.rate + 
-        purpose, family = "binomial", data = loans)
-
-    Coefficients:
-                               Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)                4.697208   1.014115   4.632 3.62e-06 ***
-    fico                      -0.008248   0.001180  -6.990 2.74e-12 ***
-    dti                        0.005858   0.004299   1.363 0.172981    
-    log.annual.inc            -0.137702   0.048142  -2.860 0.004232 ** 
-    int.rate                   7.911574   1.567205   5.048 4.46e-07 ***
-    purposecredit_card        -0.470383   0.106820  -4.404 1.07e-05 ***
-    purposedebt_consolidation -0.261531   0.073679  -3.550 0.000386 ***
-    purposeeducational         0.125278   0.149362   0.839 0.401608    
-    purposehome_improvement    0.148847   0.123822   1.202 0.229321    
-    purposemajor_purchase     -0.388134   0.163949  -2.367 0.017913 *  
-    purposesmall_business      0.610618   0.114703   5.323 1.02e-07 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424.0  on 9577  degrees of freedom
-    Residual deviance: 8045.1  on 9567  degrees of freedom
-    AIC: 8067.1
-
-    Number of Fisher Scoring iterations: 5
-:::
-::::
 
 ### 5
 
@@ -1480,104 +1105,9 @@ Looks like 'dti' is unimportant. Let's see what gets removed after performing a 
 
 ### 6
 
-:::: cell
-::: {#cb41 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import qmib
-
-# One call. Downloaded once, then read from the local cache.
-loans = qmib.load("loans")
-loans.describe()
-```
-:::
-::::
 
 ### 7
 
-:::::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico + dti + log.annual.inc + int.rate + 
-        purpose, family = "binomial", data = loans)
-
-    Coefficients:
-                               Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)                4.697208   1.014115   4.632 3.62e-06 ***
-    fico                      -0.008248   0.001180  -6.990 2.74e-12 ***
-    dti                        0.005858   0.004299   1.363 0.172981    
-    log.annual.inc            -0.137702   0.048142  -2.860 0.004232 ** 
-    int.rate                   7.911574   1.567205   5.048 4.46e-07 ***
-    purposecredit_card        -0.470383   0.106820  -4.404 1.07e-05 ***
-    purposedebt_consolidation -0.261531   0.073679  -3.550 0.000386 ***
-    purposeeducational         0.125278   0.149362   0.839 0.401608    
-    purposehome_improvement    0.148847   0.123822   1.202 0.229321    
-    purposemajor_purchase     -0.388134   0.163949  -2.367 0.017913 *  
-    purposesmall_business      0.610618   0.114703   5.323 1.02e-07 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424.0  on 9577  degrees of freedom
-    Residual deviance: 8045.1  on 9567  degrees of freedom
-    AIC: 8067.1
-
-    Number of Fisher Scoring iterations: 5
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Start:  AIC=8067.13
-    default ~ fico + dti + log.annual.inc + int.rate + purpose
-
-                     Df Deviance    AIC
-    - dti             1   8047.0 8067.0
-    <none>                8045.1 8067.1
-    - log.annual.inc  1   8053.3 8073.3
-    - int.rate        1   8070.4 8090.4
-    - fico            1   8095.5 8115.5
-    - purpose         6   8136.1 8146.1
-
-    Step:  AIC=8066.99
-    default ~ fico + log.annual.inc + int.rate + purpose
-
-                     Df Deviance    AIC
-    <none>                8047.0 8067.0
-    - log.annual.inc  1   8055.4 8073.4
-    - int.rate        1   8073.9 8091.9
-    - fico            1   8098.9 8116.9
-    - purpose         6   8136.2 8144.2
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = default ~ fico + log.annual.inc + int.rate + purpose, 
-        family = "binomial", data = loans)
-
-    Coefficients:
-                               Estimate Std. Error z value Pr(>|z|)    
-    (Intercept)                4.808434   1.007669   4.772 1.83e-06 ***
-    fico                      -0.008328   0.001175  -7.088 1.36e-12 ***
-    log.annual.inc            -0.138768   0.048014  -2.890 0.003850 ** 
-    int.rate                   8.114300   1.557021   5.211 1.87e-07 ***
-    purposecredit_card        -0.454342   0.106169  -4.279 1.87e-05 ***
-    purposedebt_consolidation -0.247504   0.072951  -3.393 0.000692 ***
-    purposeeducational         0.123510   0.149385   0.827 0.408357    
-    purposehome_improvement    0.145575   0.123755   1.176 0.239471    
-    purposemajor_purchase     -0.394170   0.163895  -2.405 0.016171 *  
-    purposesmall_business      0.604124   0.114593   5.272 1.35e-07 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 8424  on 9577  degrees of freedom
-    Residual deviance: 8047  on 9568  degrees of freedom
-    AIC: 8067
-
-    Number of Fisher Scoring iterations: 5
-:::
-::::::
 
 ### 8
 
@@ -1601,76 +1131,53 @@ A study looks at factors that influence the decision of whether to apply to grad
 
 -   For example, the "distance" between "unlikely" and "somewhat likely" may be shorter than the distance between "somewhat likely" and "very likely".
 
-:::: cell
-::: {#cb45 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import qmib
 
+# An ordered outcome: how likely a student says they are to apply to graduate
+# school. Unlikely < somewhat likely < very likely — an ordering the data carry
+# and that a plain multinomial model would throw away.
 dat = qmib.load("ologit")
 dat.head()
 ```
-:::
-::::
 
 ### 2
 
 ::::::::::: columns
 :::::: {.column style="width:50%;"}
-::::: cell
-::: {#cb46 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+# Three ordered categories and three predictors. Look at `apply` before
+# modelling it: the ordering of those labels is the entire reason an ordinal
+# model applies rather than a multinomial one.
 dat.head()
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    # A tibble: 6 × 4
-      apply           pared public   gpa
-      <chr>           <dbl>  <dbl> <dbl>
-    1 very likely         0      0  3.26
-    2 somewhat likely     1      0  3.21
-    3 unlikely            1      1  3.94
-    4 somewhat likely     0      0  2.81
-    5 somewhat likely     0      0  2.53
-    6 unlikely            0      1  2.59
-:::
-:::::
 ::::::
 
 :::::: {.column style="width:50%;"}
-::::: cell
-::: {#cb48 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+# Cross-tabulate before fitting. A cell with almost no observations is where an
+# ordinal model will produce a large coefficient and a larger standard error.
 pd.crosstab([dat["public"], dat["pared"]], dat["apply"])
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-                           pared   0   1
-    public apply                        
-    0      somewhat likely        98  26
-           unlikely              175  14
-           very likely            20  10
-    1      somewhat likely        12   4
-           unlikely               25   6
-           very likely             7   3
-:::
-:::::
 ::::::
 :::::::::::
 
 ### 3
 
-:::: cell
-::: {#cb50 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Keep the order — "unlikely" < "somewhat likely" < "very likely".
 # An ordinal model needs the ordering, not just the labels.
 order = ["unlikely", "somewhat likely", "very likely"]
 dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
 ```
-:::
-::::
 
 ### 4
 
@@ -1686,57 +1193,30 @@ dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
 
 ### 5
 
-:::: cell
-::: {#cb51 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 from statsmodels.miscmodels.ordinal_model import OrderedModel
 
+# One slope per predictor and two cutpoints, not three separate models. The
+# single slope is the proportional-odds restriction: the effect is assumed the
+# same at every cut. It is testable, and it is usually assumed instead.
 om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
                   distr="logit").fit(method="bfgs", disp=0)
 print(om.summary())
 ```
-:::
-::::
 
 ### 6
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    Call:
-    polr(formula = as.factor(apply) ~ pared + public + gpa, data = dat, 
-        Hess = TRUE)
-
-    Coefficients:
-              Value Std. Error t value
-    pared   1.04769     0.2658  3.9418
-    public -0.05879     0.2979 -0.1974
-    gpa     0.61594     0.2606  2.3632
-
-    Intercepts:
-        Value   Std. Error t value
-    0|1  2.2039  0.7795     2.8272
-    1|2  4.2994  0.8043     5.3453
-
-    Residual Deviance: 717.0249 
-    AIC: 727.0249 
-:::
-::::
 
 ### 7
 
-::::: cell
-::: {#cb53 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Proportional-odds ratios
 np.exp(om.params[["pared", "public", "gpa"]])
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-        pared    public       gpa 
-    2.8510579 0.9429088 1.8513972 
-:::
-:::::
 
 Parental Education
 
@@ -1746,19 +1226,6 @@ Parental Education
 
 ### 8
 
-::::: cell
-::: {#cb55 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Proportional-odds ratios
-np.exp(om.params[["pared", "public", "gpa"]])
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-        pared    public       gpa 
-    2.8510579 0.9429088 1.8513972 
-:::
-:::::
 
 School Type
 
@@ -1772,19 +1239,6 @@ School Type
 
 ### 9
 
-::::: cell
-::: {#cb57 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# Proportional-odds ratios
-np.exp(om.params[["pared", "public", "gpa"]])
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-        pared    public       gpa 
-    2.8510579 0.9429088 1.8513972 
-:::
-:::::
 
 GPA
 
@@ -1804,51 +1258,20 @@ People's occupational choices might be influenced by their parents' occupations 
 
 We can study the relationship of one's occupation choice with education level and father's occupation. The occupational choices will be the outcome variable which consists of categories of occupations.
 
-:::: cell
-::: {#cb59 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import qmib
 
+# An unordered outcome: which programme a student is in. There is no sense in
+# which vocation is "more" than general, so the ordinal machinery above does
+# not apply and the multinomial model is the right one.
 ml = qmib.load("hsbdemo")
 ml.describe()
 ```
-:::
-::::
 
 ### 2
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-           id            female              ses               schtyp         
-     Min.   :  1.00   Length:200         Length:200         Length:200        
-     1st Qu.: 50.75   Class :character   Class :character   Class :character  
-     Median :100.50   Mode  :character   Mode  :character   Mode  :character  
-     Mean   :100.50                                                           
-     3rd Qu.:150.25                                                           
-     Max.   :200.00                                                           
-         prog                read           write            math      
-     Length:200         Min.   :28.00   Min.   :31.00   Min.   :33.00  
-     Class :character   1st Qu.:44.00   1st Qu.:45.75   1st Qu.:45.00  
-     Mode  :character   Median :50.00   Median :54.00   Median :52.00  
-                        Mean   :52.23   Mean   :52.77   Mean   :52.65  
-                        3rd Qu.:60.00   3rd Qu.:60.00   3rd Qu.:59.00  
-                        Max.   :76.00   Max.   :67.00   Max.   :75.00  
-        science          socst          honors              awards    
-     Min.   :26.00   Min.   :26.00   Length:200         Min.   :0.00  
-     1st Qu.:44.00   1st Qu.:46.00   Class :character   1st Qu.:0.00  
-     Median :53.00   Median :52.00   Mode  :character   Median :1.00  
-     Mean   :51.85   Mean   :52.41                      Mean   :1.67  
-     3rd Qu.:58.00   3rd Qu.:61.00                      3rd Qu.:2.00  
-     Max.   :74.00   Max.   :71.00                      Max.   :7.00  
-          cid       
-     Min.   : 1.00  
-     1st Qu.: 5.00  
-     Median :10.50  
-     Mean   :10.43  
-     3rd Qu.:15.00  
-     Max.   :20.00  
-:::
-::::
 
 ### 3
 
@@ -1856,39 +1279,27 @@ ml.describe()
 
 -   The outcome variable is [\\(prog\\)]{.math .inline}, program type. The predictor variables are social economic status, [\\(ses\\)]{.math .inline}, a three-level categorical variable and writing score, [\\(write\\)]{.math .inline}, a continuous variable.
 
-::::: cell
-::: {#cb61 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
+# Unordered outcome this time: academic, general, vocation have no natural
+# ranking, so the ordinal model above would impose one that is not there.
 pd.crosstab(ml["ses"], ml["prog"])
 ```
-:::
 
-::: {.cell-output .cell-output-stdout}
-            prog
-    ses      academic general vocation
-      high         42       9        7
-      low          19      16       12
-      middle       44      20       31
-:::
-:::::
-
-:::: cell
-::: {.cell-output .cell-output-stdout}
-                 Mean       SD
-    academic 56.25714 7.943343
-    general  51.33333 9.397775
-    vocation 46.76000 9.318754
-:::
-::::
 
 ### 4
 
 First, we need to choose the level of our outcome that we wish to use as our baseline and specify this in the relevel function.
 
-:::: cell
-::: {#cb64 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# academic is the reference outcome; middle is the reference ses
+```{python}
+#| echo: true
+
+import statsmodels.api as sm
+
+# The first level of a Categorical becomes the reference, so every coefficient
+# below reads "relative to academic". Reorder this list and every number
+# changes meaning, with nothing in the output to warn you.
 levels = ["academic", "general", "vocation"]
 ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
 
@@ -1896,78 +1307,32 @@ X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_low", "ses_high"]].astype(floa
 X["write"] = ml["write"].astype(float)
 X = sm.add_constant(X)
 ```
-:::
-::::
 
 Then, we run our model using multinom. The multinom package does not include p-value calculation for the regression coefficients, so we calculate p-values using Wald tests (here z-tests).
 
-:::: cell
-::: {#cb65 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 import statsmodels.api as sm
 
+# MNLogit estimates J-1 sets of coefficients at once — here two, each against
+# the academic baseline. Every number that follows is a comparison with that
+# baseline, which is why naming it is not optional when reporting.
 mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
 print(mn.summary())
 ```
-:::
-::::
 
 ### 5
 
-::::: cell
-::: {.cell-output .cell-output-stdout}
-    # weights:  15 (8 variable)
-    initial  value 219.722458 
-    iter  10 value 179.982880
-    final  value 179.981726 
-    converged
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Call:
-    multinom(formula = prog2 ~ ses2 + write, data = ml)
-
-    Coefficients:
-             (Intercept)   ses2high ses2middle      write
-    general     2.852198 -1.1628226 -0.5332810 -0.0579287
-    vocation    5.218260 -0.9826649  0.2913859 -0.1136037
-
-    Std. Errors:
-             (Intercept)  ses2high ses2middle      write
-    general     1.166441 0.5142196  0.4437323 0.02141097
-    vocation    1.163552 0.5955665  0.4763739 0.02221996
-
-    Residual Deviance: 359.9635 
-    AIC: 375.9635 
-:::
-:::::
 
 ### 6
 
-::::: cell
-::: {#cb68 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # z-tests come with the summary in statsmodels
 mn.summary()
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    z test of coefficients:
-
-                          Estimate Std. Error z value  Pr(>|z|)    
-    general:(Intercept)   2.852198   1.166441  2.4452  0.014477 *  
-    general:ses2high     -1.162823   0.514220 -2.2613  0.023739 *  
-    general:ses2middle   -0.533281   0.443732 -1.2018  0.229438    
-    general:write        -0.057929   0.021411 -2.7056  0.006819 ** 
-    vocation:(Intercept)  5.218260   1.163552  4.4848 7.299e-06 ***
-    vocation:ses2high    -0.982665   0.595567 -1.6500  0.098950 .  
-    vocation:ses2middle   0.291386   0.476374  0.6117  0.540753    
-    vocation:write       -0.113604   0.022220 -5.1127 3.176e-07 ***
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-:::
-:::::
 
 ### 7
 
@@ -1993,20 +1358,12 @@ The model summary output has a block of coefficients and a block of standard err
 
 ### 9
 
-::::: cell
-::: {#cb70 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+```{python}
+#| echo: true
+
 # Column 0 is general vs academic; column 1 is vocation vs academic
 np.exp(mn.params)
 ```
-:::
-
-::: {.cell-output .cell-output-stdout}
-             (Intercept)  ses2high ses2middle     write
-    general     17.32582 0.3126026  0.5866769 0.9437172
-    vocation   184.61262 0.3743123  1.3382809 0.8926116
-:::
-:::::
 
 -   The odds (also called the relative risk ratio) for a one-unit increase in the variable [\\(write\\)]{.math .inline} is [\\(.9437\\)]{.math .inline} for being in general program vs. academic program.
 
