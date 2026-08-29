@@ -1,0 +1,615 @@
+---
+title: "What the Twelve Weeks Were For"
+subtitle: "Session 12 · Closing address"
+author: "Thierry Warin"
+institute: "HEC Montréal"
+date: last-modified
+date-format: "D MMMM YYYY"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+format:
+  revealjs:
+    theme: [default, ../../slides/economist.scss]
+    embed-resources: true
+    slide-number: true
+    slide-level: 2
+    history: false
+    width: 1280
+    height: 760
+    margin: 0.07
+    footer: "Quantitative Methods in International Business · Session 12 · Thierry Warin, PhD · HEC Montréal"
+  pptx:
+    slide-level: 2
+    reference-doc: ../../slides/reference.pptx
+---
+
+```{python}
+#| label: setup
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import qmib
+```
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. The question session 1 asked, twelve weeks on
+2. Five things that kept happening
+3. What we could check, and what no course can check for you
+4. Why this matters in private organisations
+5. Why this matters in public organisations
+6. What the course did not cover
+7. Six habits to carry
+8. *Europe 2031*, one more time
+
+## What session 12 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Say which of the term's methods your question actually required
+- State a result with its uncertainty, and name the kind of uncertainty
+- Name the assumption that identifies your estimate, and whether it is testable
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Hand over work that runs on someone else's machine
+- Show the specification alongside the coefficient
+- Make the figure that carries the argument without the code
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Present to a decision-maker who will not read your code
+- State a recommendation, its confidence, and its falsifier, in twelve minutes
+- Defend an identification choice under questioning
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 57 names below came out of sessions 2–10. Today's slides assume them, and add to them. The ones marked are the newest, from session 10.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
+- `pd.concat` — stack the matched sample back together · *new in session 10*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+- `np.cov` — the matrix the model is trying to reproduce
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `semopy.Model` — from a model description string
+- `expit` — the inverse logit, when you need it directly · *new in session 10*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
+- `.inspect()` — loadings and paths, estimated
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `semopy.calc_stats` — CFI, TLI, RMSEA — report all three
+- `.kneighbors` — who got matched to whom · *new in session 10*
+- `NearestNeighbors` — match treated to control · *new in session 10*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+- `.boxplot` — balance, before and after matching · *new in session 10*
+
+<!-- END deck-frontmatter -->
+
+# 1 · The question we started with {background-color="#16181A" style="color:#F7F6F3"}
+
+### Twelve weeks later, it is still the question
+
+## Session 1 asked one thing
+
+> When can a number about the past be used to make a claim about the future?
+
+Every method since has been an answer to some version of it, and **every answer came with
+conditions attached**.
+
+::: {.check}
+The methods will be looked up again. The conditions will not. That is why the conditions are the
+thing worth carrying out of this room.
+:::
+
+## The sentence the course has been making
+
+::: {.tight}
+A quantitative result is an **argument**, and the arithmetic is only its smallest part.
+:::
+
+What makes a number worth acting on is the case that can be made for the conditions under which it
+means what it appears to mean.
+
+::: {.warn}
+That case is constructed by the analyst. It is not computed by the software.
+:::
+
+# 2 · Five things that kept happening {background-color="#16181A" style="color:#F7F6F3"}
+
+### Not five techniques — five recurring facts
+
+## One · The arithmetic never refuses
+
+::: {.tight}
+- The normal equations return coefficients for **any** numbers you feed them
+- Logistic regression on separated data runs its coefficients to infinity — and reports a large
+  number, not an error
+- Nearest neighbours predicts confidently **outside** the range of its training data
+- A structural equation model fits the covariance matrix implied by an **entirely wrong** causal
+  diagram
+:::
+
+::: {.warn}
+A misspecified model does not raise an exception. It returns four decimal places in the same
+typeface as a correct one.
+:::
+
+## Which is why diagnostics are a discipline
+
+Not a formality, and not a box to tick after the interesting work is done.
+
+::: {.check}
+"The model says" is never a complete sentence.
+:::
+
+## Two · The same data answer differently
+
+Session 6, on one dataset and one pair of variables:
+
+| Specification | Estimate |
+|---|---|
+| Pooled | 1,111 |
+| Country effects | 275 |
+| Country **and** year effects | 1,149 |
+
+Each was correct for the question its identifying variation could answer. A reader shown any one
+alone would draw a different conclusion.
+
+## And it was not an isolated case
+
+::: {.tight}
+- Session 2 — the slope fell **26%** when two controls were added, because "controlling for" is
+  literally a residual regression
+- Session 7 — the first component explained **97.5%** or **47%** of variance, depending only on
+  whether the columns had been standardised
+- Session 10 — the estimate ran from **+6.07** to **+2.68**, depending on whether selection was
+  addressed
+:::
+
+::: {.warn}
+A coefficient is meaningless without the specification that produced it. Reporting one without the
+other is reporting half a result.
+:::
+
+## Three · Fit does not identify structure
+
+::: {.tight}
+- Session 7 — a factor solution and its rotation fit **identically to eight decimal places**, while
+  telling different stories
+- Session 9 — two structural models with **opposite causal arrows** returned identical $\chi^2$,
+  identical degrees of freedom, identical CFI, identical AIC
+- Session 3 — four datasets shared every summary statistic and differed completely
+:::
+
+## The data were silent between the alternatives
+
+The choice was made by the analyst, on grounds **outside** the data.
+
+::: {.check}
+That is not a defect to be engineered away. It is the permanent condition of empirical work.
+:::
+
+The honest response is to **name the alternative you rejected, and say why** — which is a different
+activity from reporting a fit index.
+
+## Four · Flexibility is a purchase, not a virtue
+
+Session 5 introduced a deliberately **biased** estimator and watched it beat the unbiased one,
+because unbiasedness is worth nothing if the variance is large enough.
+
+Session 8 made the trade explicit and then measured it: squared bias, variance and irreducible
+error summing to test error at every $k$, with a minimum somewhere in the middle.
+
+## Then session 8 sent itself the bill
+
+On real data, nearest neighbours scored an **AUC of 0.51** — a coin flip — where logistic
+regression, the rigid method with the strong assumption, reached **0.68**.
+
+::: {.warn}
+On accuracy alone, the comparison would have shown all methods identical and concluded that nothing
+worked.
+:::
+
+::: {.check}
+Complexity has to be justified against a simpler alternative that was **actually fitted**. Not
+against an imagined one.
+:::
+
+## Five · Selection is the problem
+
+In session 10 the naive comparison overstated a known effect of **+2.4 percentage points** by more
+than **150%** — because the countries that adopted the policy were already different.
+
+::: {.warn}
+Nothing in the fit statistics of that naive comparison would have suggested a problem.
+:::
+
+That gap is the reason for matching, balance diagnostics, parallel trends and event studies — none
+of which removes the need for an argument about **why** treatment arrived where it did.
+
+# 3 · What we could check {background-color="#16181A" style="color:#F7F6F3"}
+
+### And what no course can check for you
+
+## Some things are not opinions
+
+Because the course data are fixtures generated from a known structure, several claims could be
+**verified** rather than asserted.
+
+```{python}
+#| echo: true
+#| code-summary: "Three identities, one last time"
+
+core = qmib.load("core").dropna(
+    subset=["gdp_pc_eur", "productivity_idx", "employment_ths", "population"])
+y = core["gdp_pc_eur"]
+
+# 1. Pythagoras (session 2). The residual is orthogonal to the fit, so the
+#    sums of squares add exactly — not approximately.
+fit = sm.OLS(y, sm.add_constant(core[["productivity_idx"]])).fit()
+tss = ((y - y.mean()) ** 2).sum()
+ess = ((fit.fittedvalues - y.mean()) ** 2).sum()
+rss = (fit.resid ** 2).sum()
+
+# 2. Frisch-Waugh-Lovell (session 2). "Controlling for" IS residual regression.
+others = sm.add_constant(core[["employment_ths", "population"]])
+multi = sm.OLS(y, sm.add_constant(
+    core[["productivity_idx", "employment_ths", "population"]])).fit()
+fwl = sm.OLS(sm.OLS(y, others).fit().resid,
+             sm.OLS(core["productivity_idx"], others).fit().resid).fit()
+
+# 3. Leverage (session 3). The hat matrix diagonal sums to the number of
+#    parameters. Always. For every regression ever fitted.
+X = sm.add_constant(core[["productivity_idx"]]).to_numpy()
+h = np.einsum("ij,jk,ik->i", X, np.linalg.inv(X.T @ X), X)
+
+print(f"{'identity':44}{'discrepancy':>14}")
+print(f"{'TSS - (ESS + RSS)':44}{tss - ess - rss:14.3e}")
+print(f"{'multiple regression - FWL slope':44}"
+      f"{abs(multi.params['productivity_idx'] - fwl.params.iloc[0]):14.3e}")
+print(f"{'sum of leverages - p':44}{abs(h.sum() - X.shape[1]):14.3e}")
+```
+
+::: {.check}
+These are algebraic identities. They hold for every regression, on every dataset, forever.
+:::
+
+## The failures were more instructive
+
+::: {.tight}
+- The lasso retained **three pure-noise columns** out of ten after cross-validated selection
+- Regression adjustment on proxy covariates left **0.7 percentage points** of bias
+- A measurement model taken from an exploratory factor solution failed **every** fit index
+- A post-treatment control moved an estimate **closer to the truth** while being methodologically wrong
+:::
+
+## That last one is the course's most useful result
+
+::: {.tight}
+Being closer to the right answer is not the same as using the right method.
+:::
+
+::: {.warn}
+Outside a textbook, you never learn which one you had.
+:::
+
+## A standing caveat
+
+The course data in `data/spine/` are **teaching fixtures**, generated from a known structure with a
+fixed seed. They are not observations of Europe.
+
+::: {.warn}
+Every number quoted in these twelve weeks is a fact about a simulation, not a fact about the world.
+Do not cite one in a paper. The *reasoning* transfers; the *numbers* do not.
+:::
+
+# 4 · Why this matters in private organisations {background-color="#16181A" style="color:#F7F6F3"}
+
+### Where the estimate meets a decision with money on it
+
+## The firm's questions are this course's questions
+
+| The decision | The session it belongs to |
+|---|---|
+| Should we enter this market, and what happens if we do? | 10, 11 — effects, not correlations |
+| Which of forty indicators actually predicts default? | 5, 8 — selection and the bias–variance trade |
+| Did the pricing change work, or did the market move? | 11 — difference-in-differences |
+| What is "brand strength", and can we measure it? | 7, 9 — latent constructs |
+| Which countries behave alike for planning purposes? | 6, 7 — structure across a panel |
+
+## What a manager is actually buying from you
+
+Not a model. **A defensible answer, and an honest account of its limits.**
+
+::: {.tight}
+- A point estimate with **no interval** cannot be planned against
+- A coefficient with **no units** cannot be checked against what the business already knows
+- A result with **no named assumption** cannot be revisited when conditions change
+:::
+
+::: {.check}
+The most expensive analytical failures in business are not arithmetic errors. They are confident
+answers to questions the data could not address.
+:::
+
+## The asymmetry that should govern your caution
+
+::: {.tight}
+- A model that is **wrong and uncertain** gets challenged
+- A model that is **wrong and confident** gets implemented
+:::
+
+::: {.warn}
+Your job includes making sure the second case is not you.
+:::
+
+# 5 · Why this matters in public organisations {background-color="#16181A" style="color:#F7F6F3"}
+
+### Where the stakes are different in kind, not degree
+
+## Public decisions raise the bar
+
+A firm that misprices a product loses money and adjusts. A ministry that misreads an evaluation
+**sets a policy that affects people who did not choose it**, and often cannot adjust for years.
+
+::: {.tight}
+- The counterfactual is rarely available — programmes are not randomly assigned
+- The people affected are not the people who chose
+- The decision is **public**, so the reasoning must survive being read by opponents
+:::
+
+## Which makes session 10 and 11 the centre of gravity
+
+::: {.tight}
+- Did the subsidy raise employment, or did healthier regions take up the subsidy?
+- Did the regulation change behaviour, or was behaviour changing already?
+- Would the trend have been parallel? **Say how you would probe it, not that you assumed it.**
+:::
+
+::: {.check}
+In public work, "we could not identify this effect from these data" is not a failure to deliver.
+It is often the single most valuable thing you can report.
+:::
+
+## Both sectors, one standard
+
+Whether the reader is a CFO or a director general, the same three questions decide whether your
+number survives contact with them:
+
+::: {.step}
+**What exactly is being claimed**, in units, with an interval?
+:::
+
+::: {.step}
+**What has to be true** for that claim to hold?
+:::
+
+::: {.step}
+**What would change your mind**, and would you notice if it happened?
+:::
+
+# 6 · What this course did not cover {background-color="#16181A" style="color:#F7F6F3"}
+
+### Knowing the shape of the gap
+
+## Five absences worth naming
+
+::: {.tight}
+- **Time series proper** — autocorrelation, unit roots, cointegration, forecasting. Our panels are
+  short and wide; session 6 only gestures at it
+- **Bayesian inference** — everything here is frequentist, and the Bayesian framing is often the
+  more natural one for a decision problem
+- **Machine learning at scale** — gradient boosting, random forests, neural networks. Session 8's
+  framework is their foundation; the methods are a course of their own
+- **Text, networks, unstructured data** — where much of the growth in this field now is
+- **Causal machine learning** — double ML and causal forests sit exactly at the junction of
+  sessions 5, 8 and 10, and are the natural next thing to read
+:::
+
+# 7 · What to carry {background-color="#16181A" style="color:#F7F6F3"}
+
+### Six habits that outlast every technique here
+
+## The six
+
+::: {.tight}
+1. **Look at the data before modelling it.** Nearly every analysis that goes wrong went wrong before
+   the model was fitted.
+2. **Say the units.** Checking against what you already know is the fastest way to catch an
+   implausible result.
+3. **Report the uncertainty, and say what kind.** Classical, robust, clustered — they differed by
+   more than a factor of two on one coefficient in session 6.
+4. **Name the assumption that identifies the estimate**, and say whether it is testable. Most of the
+   important ones are not — which is exactly why they must be argued.
+5. **Fit the simpler thing too.** Complexity should have to beat something.
+6. **Say what the result does not license.**
+:::
+
+## And the one that contains them
+
+::: {.tight}
+A well-argued refusal is a complete result.
+:::
+
+"This cannot be claimed from these data, and here is what would be needed."
+
+::: {.check}
+That is often the most valuable output of a serious analysis — and the answer that takes the most
+expertise to produce.
+:::
+
+# 8 · Europe 2031, one more time {background-color="#16181A" style="color:#F7F6F3"}
+
+### The course opened with it. It closes with it.
+
+## In session 1 you had no tools
+
+You read *Europe 2031* and were asked to separate four kinds of statement that the text moves
+between without announcing it.
+
+| | |
+|---|---|
+| **Evidence** | A claim tied to a source and an observed period |
+| **Scenario** | A coherent imagined future — not a forecast by default |
+| **Prediction** | A dated, testable statement about an outcome |
+| **AI** | A computational system producing outputs from inputs and learned parameters |
+
+::: {.check}
+Read it again this week. You will find seams you could not see in August.
+:::
+
+## It is an optimistic document
+
+And that is a feature of it, not a flaw — a scenario is meant to make a future feel *thinkable*.
+
+::: {.warn}
+But the optimism is carried by the **assumptions**, not by the evidence. Several of them are
+inflated, and a diagnosis built on inflated assumptions is sometimes simply wrong.
+:::
+
+## Take the compute assumption
+
+The scenario assigns the United States roughly **12 times** Europe's AI compute stock in 2031, and
+treats compute as the dominant measure of geopolitical capability.
+
+::: {.tight}
+- Where does the ratio come from — measured, or assumed?
+- Is compute the right measure of capability, or the *available* one?
+- What observation would count as **evidence against** it?
+:::
+
+::: {.check}
+You now have the training to ask that in the form of a testable statement. In August you did not.
+That is the distance you have travelled.
+:::
+
+## Actual AI is not the AI of the discourse
+
+| The buzz | The thing itself |
+|---|---|
+| A system that "understands" | A function fitted to data, producing outputs from learned parameters |
+| Reasoning, in the human sense | Very good conditional prediction over patterns it has seen |
+| Improvement without limit | Improvement bounded by data, compute, and an irreducible error term |
+| Ground truth | Confident output, whether or not the question was answerable |
+
+::: {.warn}
+Session 8's bias–variance decomposition applies to every one of these systems. The irreducible error
+does not go away because the model got larger.
+:::
+
+## Which is the same lesson as week one
+
+The model on your laptop does not refuse either. It answers fluently when it should not, exactly as
+the normal equations do.
+
+::: {.check}
+The skill this course built — *knowing which question a given number can answer, and saying so when
+it cannot* — is precisely the skill that the arrival of these systems has made **scarcer and more
+valuable**, not less.
+:::
+
+## Where the work goes now
+
+Language models have made the arithmetic and the code effectively free. They have **not** made the
+judgement free, and there is no sign that they will.
+
+::: {.tight}
+That is the argument for learning to derive a method before using it. Not because the derivation
+will be needed at the keyboard — but because it is what lets you notice that the answer on the
+screen cannot be right.
+:::
+
+## Thank you
+
+You arrived able to run a regression. You leave able to say what one is entitled to claim.
+
+::: {.check}
+That is a much rarer thing, and it is the whole point.
+:::
+
+*Europe 2031* · [europe2031.ai](https://europe2031.ai) — read it again, and mark the seams.

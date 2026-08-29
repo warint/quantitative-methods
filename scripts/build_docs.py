@@ -52,6 +52,9 @@ SESSIONS = {
            "Counterfactuals, randomised trials, matching and propensity scores"),
     "11": ("Causal Inference (2/2)",
            "Difference-in-differences and instrumental variables"),
+    "12": ("What the Twelve Weeks Were For",
+           "The closing address: what the term established, why it matters in private "
+           "and public organisations, and Europe 2031 read with the tools you now have"),
 }
 
 STYLE = """

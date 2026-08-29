@@ -141,7 +141,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
-| **12** | Wed 2 Dec | Final group presentations |
+| **12** | Wed 2 Dec | Final group presentations, and the closing address |
 
 **No class** on 30 September, 21 October.
 
@@ -172,7 +172,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | 10 | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
 | 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
-| 12 | Final Group Presentations | — | — |
+| 12 | Final Group Presentations | Closing address | What the twelve weeks established |
 
 **The arc.** Session 2 describes one variable, then relates two — the smallest possible model.
 Session 3 asks whether that model can be trusted, which is where diagnostics live. Session 4 carries

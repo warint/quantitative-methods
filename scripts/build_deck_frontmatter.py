@@ -305,7 +305,7 @@ def render_toolkit(sess):
     for group, entries in by_group.items():
         rows.append(f"\n### {group}\n")
         for name, when, gloss in entries:
-            mark = " · *new last week*" if mark_new and when == newest else ""
+            mark = f" · *new in session {int(newest)}*" if mark_new and when == newest else ""
             rows.append(f"- `{name}` — {gloss}{mark}")
 
     n = len(earlier)
@@ -314,7 +314,7 @@ def render_toolkit(sess):
     lead = (f"The {n} names below came out of {where}. Today's slides assume them, "
             "and add to them.")
     if mark_new:
-        lead += " The ones marked arrived last week."
+        lead += f" The ones marked are the newest, from session {int(newest)}."
     return f"## Your Python so far {{.scrollable}}\n\n{lead}\n" + "\n".join(rows) + "\n"
 
 
@@ -341,7 +341,7 @@ def block_for(sess, kind, text, plan):
             parts.append(tk)
     if not parts:
         return None
-    return BEGIN + "\n\n" + "\n".join(parts) + "\n" + END + "\n"
+    return BEGIN + "\n\n" + "\n".join(parts) + "\n" + END + "\n\n"
 
 
 def insert(text, block):

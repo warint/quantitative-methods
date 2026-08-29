@@ -315,9 +315,9 @@ SESSIONS = {
     "12": dict(
         dir="12-group-presentations",
         title="Final Group Presentations",
-        short="Final group presentations",
+        short="Final group presentations, and the closing address",
         question="Can you make a decision-maker act on this — and say what would change your mind?",
-        methods="—",
+        methods="Closing address: what the twelve weeks established",
         theme="—",
         generated=False,
     ),

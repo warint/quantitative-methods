@@ -144,7 +144,7 @@ answerable question, where to find data, and what each session asks of you.
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
-| **12** | Wed 2 Dec | Final group presentations |
+| **12** | Wed 2 Dec | Final group presentations, and the closing address |
 
 **No class** on 30 September, 21 October.
 
@@ -174,7 +174,7 @@ answerable question, where to find data, and what each session asks of you.
 | [09](09-structural-equation-modelling/README.md) | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | [10](10-causal-inference-foundations/README.md) | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
 | [11](11-causal-inference-did/README.md) | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
-| [12](12-group-presentations/README.md) | Final Group Presentations | — | Can you make a decision-maker act on this — and say what would change your mind? |
+| [12](12-group-presentations/README.md) | Final Group Presentations | Closing address | Can you make a decision-maker act on this — and say what would change your mind? |
 
 **The arc.** Sessions 2–3 build the classical estimator and its inference. Session 4 is the hinge:
 in-sample fit stops being evidence. Sessions 5–7 buy flexibility and pay for it in interpretability.
