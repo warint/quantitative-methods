@@ -23,21 +23,128 @@ format:
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session9_cours/. Content is static so the deck renders without R or Python. -->
-## Learning Objectives {#imported-s09-001 .center .scrollable}
 
--   Understand the fundamental concepts and terminology of Structural Equation Modeling (SEM)
--   Distinguish between the measurement model and the structural model components of SEM
--   Learn about key SEM considerations: identification, estimation methods, and model fit indices
--   See how to specify and estimate an SEM in R using the lavaan package (with well-commented code)
--   Explore advanced topics: mediation analysis and applications of SEM in international business research
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
-## Outline {#imported-s09-002 .center .scrollable}
+## Outline · The hour ahead {.center .scrollable}
 
--   SEM Basics: What is SEM, why use it, key terms, and components
--   SEM Analysis Process: Steps in conducting SEM -- from model specification to fit evaluation
--   SEM Example in R: A hands-on example using lavaan (with path diagrams and interpretation)
--   Mediation & Advanced Topics: Mediation analysis and other advanced extensions of SEM
+1. Part I: SEM Basics
+2. Example 1
+3. Example 2
+4. Example 3
+5. Your Notebook: SEM Analysis Process
 
+## What session 9 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Distinguish the **measurement** model from the **structural** model
+- Read `=~` as "is measured by", and write a model description
+- Interpret a **standardised loading**, and say when an indicator is weak
+- Report **CFI, TLI and RMSEA**, and say what each would have to be
+- Decompose a **mediation** into direct and indirect paths
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Specify and fit a model with `semopy.Model`, and read `.inspect()`
+- Pull fit indices with `semopy.calc_stats` and report them all
+- Fit two models with opposite arrows and watch the fit not decide between them
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Measure a construct — trust, capability, institutional quality — you cannot observe
+- State why good fit is not evidence that the model is correct
+- Name the alternative model you rejected, and on what grounds
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 48 names below came out of sessions 2–5. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise · *new last week*
+- `make_pipeline` — so the scaler is fitted on train only · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params` · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times · *new last week*
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation · *new last week*
+- `lasso_path` — the whole coefficient path · *new last week*
+- `mean_squared_error` — score it on the held-out part · *new last week*
+- `np.logspace` — a grid that is even in $\log\lambda$ · *new last week*
+- `train_test_split` — hold something back · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+
+<!-- END deck-frontmatter -->
 ## Part I: SEM Basics {#imported-s09-003 .center .scrollable}
 
 ## What is SEM? {#imported-s09-004 .scrollable}
@@ -70,7 +177,7 @@ An SEM has two main parts that work together:
 
 -   **Structural model:** Describes the **relationships among latent variables** (and sometimes observed ones). It functions like a set of regression equations linking the constructs. Arrows between latent variables show hypothesized influences, with coefficients interpreted like regression weights.
 
-## {#imported-s09-008 .scrollable}
+## Components of a SEM (cont.) {#imported-s09-008 .scrollable}
 
 And then we talk about:
 
@@ -85,7 +192,7 @@ And then we talk about:
 
 These diagrams make the model's logic and structure easier to interpret.
 
-## {#imported-s09-009 .scrollable}
+## Components of a SEM (cont.) {#imported-s09-009 .scrollable}
 
 ## Example 1 {#imported-s09-010 .center .scrollable}
 
@@ -127,7 +234,7 @@ The dataset includes **scores on nine ability tests**, grouped into three domain
                                  **x9:** *Discrimination*           *Discrimination test*            Measures perceptual speed in identifying or distinguishing simple visual stimuli.
   ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## {#imported-s09-014 .scrollable}
+## 🔹 **Latent and observed variables** (cont.) {#imported-s09-014 .scrollable}
 
 ![](economist-assets/cfa-model.png){.r-stretch}
 
@@ -160,7 +267,7 @@ The Holzinger--Swineford example demonstrates how SEM can:
 -   **Estimate factor loadings**, showing how strongly each test measures its latent ability.
 -   **Compare models** (e.g., one general intelligence factor vs. three correlated factors).
 
-## {#imported-s09-017 .scrollable}
+## 🔹 **Goal of the model** (cont.) {#imported-s09-017 .scrollable}
 
 **In summary:**
 
@@ -168,9 +275,9 @@ The Holzinger--Swineford example demonstrates how SEM can:
 -   **x4--x6** = verbal comprehension tasks
 -   **x7--x9** = processing speed tasks
 
-## {#imported-s09-018 .scrollable}
+## 🔹 **Goal of the model** (cont.) {#imported-s09-018 .scrollable}
 
-## {#imported-s09-019 .scrollable}
+## 🔹 **Goal of the model** (cont.) {#imported-s09-019 .scrollable}
 
 ::::: cell
 ::: {#cb2 .sourceCode .cell-code}
@@ -291,7 +398,7 @@ This command prints:
 -   **Correlations** among latent variables.
 -   **Fit indices** such as χ², CFI, TLI, RMSEA, and SRMR.
 
-## {#imported-s09-025 .scrollable}
+## **5. Viewing results** (cont.) {#imported-s09-025 .scrollable}
 
 ::::: cell
 ::: {#cb7 .sourceCode .cell-code}
@@ -526,7 +633,7 @@ This model is the canonical **PoliticalDemocracy SEM** --- it shows how **indust
 
 Each set of observed variables measures one latent construct.
 
-## {#imported-s09-037 .scrollable}
+## Example lavaan specification: (cont.) {#imported-s09-037 .scrollable}
 
 ![](economist-assets/sem-model.png){.r-stretch}
 
@@ -844,7 +951,7 @@ Below is an example SEM path diagram based on the **Theory of Planned Behavior (
 
 ![](economist-assets/tpb-model.png){.r-stretch}
 
-## {#imported-s09-053 .scrollable}
+## Example Path Diagram (cont.) {#imported-s09-053 .scrollable}
 
 -   **Latent variables (ellipses):** Attitudes, Subjective Norms, Perceived Control, and Intention.
 -   **Observed indicators (rectangles):** Each latent variable is measured by several observed items (e.g., *Attitudes → Q1, Q2*; *Norms → Q3, Q4*). The arrows from latent variables to indicators represent **factor loadings**, showing how strongly each item reflects its construct.
@@ -867,7 +974,7 @@ In the **Theory of Planned Behavior (TPB)** example, each **latent construct** i
 
 All items were rated on a **7-point scale** (e.g., from *"Foolish"* to *"Wise"*), yielding continuous data for SEM analysis. Although this example uses **two indicators per construct** for simplicity, it is generally recommended to have **at least three indicators** per latent variable to ensure **model identification and reliability**.
 
-## {#imported-s09-055 .scrollable}
+## Example: Latent Constructs and Indicators (TPB) (cont.) {#imported-s09-055 .scrollable}
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
   Latent Variable         Indicators (Observed Variables)   Example meaning
@@ -898,7 +1005,7 @@ Intention = 0.4 * Attitude + 0.3 * Norms + 0.2 * Control + rng.normal(0, 0.5, n)
 :::
 ::::
 
-## {#imported-s09-057 .scrollable}
+## Latent variables (cont.) {#imported-s09-057 .scrollable}
 
 :::: cell
 ::: {#cb17 .sourceCode .cell-code}
@@ -911,7 +1018,7 @@ from scipy import stats
 :::
 ::::
 
-## {#imported-s09-058 .scrollable}
+## Latent variables (cont.) {#imported-s09-058 .scrollable}
 
 ::::: cell
 ::: {#cb18 .sourceCode .cell-code}

@@ -1,0 +1,222 @@
+# Per-session front matter for the lecture, pre-session and practice decks.
+#
+# scripts/build_deck_frontmatter.py reads this file and writes three slides into
+# the top of every deck: an outline, a goals slide with one column per
+# perspective, and — for lecture and practice decks — a cumulative recap of the
+# Python seen in earlier sessions.
+#
+# The goals are authored here rather than in the decks so that the three
+# perspectives stay parallel across twelve sessions: a student should be able to
+# ask "what am I supposed to be able to *do* after this?" and get an answer in
+# the same three registers every week.
+#
+#   maths  — what you should be able to derive, state or prove
+#   python — what you should be able to make the machine do
+#   ib     — what claim about international business it licenses
+#
+# Outlines are derived from each deck's own section slides unless `outline:` is
+# given here, which overrides the derivation.
+
+01:
+  # The session-one deck has no divider slides — it is one continuous run
+  # through the syllabus — so its outline is written rather than derived.
+  outline:
+    - The organising question, and what this course is actually for
+    - What makes the course unusual, and the rule behind it
+    - The arc of the twelve sessions
+    - How a session runs — pre-session, lecture, practice
+    - The four evaluations, and how a number becomes a letter
+    - Ethics, integrity, and what loses marks everywhere
+    - The second half — building your workstation
+  maths:
+    - Separate a **scenario** from a **forecast**, and say why only one carries a probability
+    - State the **prediction / inference** split and say which one a question needs
+    - Recognise where, in a published study, the evidence stops and the construction begins
+  python:
+    - Run a local analytical workstation: VS Codium, a virtual environment, a locally hosted model
+    - Load the course data with one line, `qmib.load(...)`, and know where the file actually is
+    - Read a traceback as information rather than as failure
+  ib:
+    - Say what a number about the past is entitled to claim about the future
+    - Name the decision your project's estimate is supposed to inform
+    - Judge whether a strategic question wants an effect or a forecast
+
+02:
+  maths:
+    - Distinguish **mean, median and trimmed mean**, and say which question each answers
+    - Explain why the sample variance divides by $n-1$
+    - Test **skewness** and **excess kurtosis** against $2\sqrt{6/n}$ and $4\sqrt{6/n}$
+    - Derive the least-squares slope, and read "controlling for" as a residual regression
+  python:
+    - Compute the moments directly, and check them against a library
+    - Fit a simple and a multiple regression with `smf.ols`, and read `.params`
+    - Draw a scatter and a fitted line, and label both axes in units
+  ib:
+    - Quote a slope **in units** a manager can act on
+    - Read a mean–median gap as evidence about a distribution's shape
+    - Say why a slope is an association, and what more is needed to call it a cause
+
+03:
+  maths:
+    - Read **residuals versus fitted** and say what structure it reveals
+    - Compute **leverage** from the hat matrix, and show it sums to $p$
+    - Separate an outlier from an influential point with **Cook's distance**
+    - Compare models on **AIC**, and say why that is not model selection
+  python:
+    - Pull diagnostics from a fitted model with `get_influence()`
+    - Build the four diagnostic plots yourself rather than calling one function
+    - Compare candidate specifications side by side on AIC and BIC
+  ib:
+    - Say whether a published coefficient survives its own diagnostics
+    - Decide what to do about the one country that moves the whole result
+    - Refuse a model whose residuals show it has missed the structure
+
+04:
+  maths:
+    - Say why the **linear probability model** fails, and where it fails worst
+    - Read a coefficient as a **log-odds** and its exponential as an odds ratio
+    - Compute a fitted probability by hand from $x^\top\hat\beta$
+    - Compare nested models with a **likelihood-ratio test**
+    - Separate a **Wald** test from a **likelihood-ratio** test, and report McFadden's pseudo-$R^2$ for what it is
+  python:
+    - Fit binary, **ordinal** and **multinomial** logits with `smf.logit`, `OrderedModel`, `sm.MNLogit`
+    - Turn coefficients into odds ratios and predicted probabilities
+    - Build the likelihood-ratio test from two models' `.llf`
+  ib:
+    - Model a categorical business outcome — enter or not, which mode, which grade
+    - Report an odds ratio to someone who will not read the appendix
+    - State what the proportional-odds assumption costs when it fails
+
+05:
+  # Written rather than derived: this deck runs thirty-five slides without a
+  # divider, so the derivation would list every one of them.
+  outline:
+    - Where we are, and the opening claim that turns out to be wrong
+    - A situation you will meet — more candidate predictors than countries
+    - Ridge, and what it does to the SVD spectrum
+    - Lasso, and why corners produce exact zeros
+    - Soft-thresholding, and the coefficient path
+    - The elastic net, and the grouping effect
+    - Choosing $(\alpha, \lambda)$ by cross-validation
+    - Three limitations to state out loud
+    - Key takeaways, and on to the practice
+  maths:
+    - Derive the ridge estimator and show how it shrinks the **SVD spectrum**
+    - Explain geometrically why the lasso produces exact zeros and ridge does not
+    - State the **elastic net** objective and what $\ell_2$ adds under correlation
+    - Derive the coordinate-descent update, including **soft-thresholding**
+  python:
+    - Standardise before penalising, with `StandardScaler` inside a pipeline
+    - Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
+    - Read a coefficient path and a cross-validation curve
+  ib:
+    - Work with more candidate predictors than countries
+    - Say why a variable the lasso dropped is not thereby irrelevant
+    - Report a penalised model honestly, including what selection did
+
+06:
+  maths:
+    - State what a **panel** is, and why pooling understates uncertainty
+    - Distinguish **fixed** from **random** effects, and say what each assumes
+    - Read an **interaction** as a slope that differs between groups
+    - Compare non-nested models on information criteria rather than an $F$-test
+    - Use the **Hausman test** to choose between fixed and random effects, and say what it assumes
+    - Name the two pitfalls this session is really about — **multicollinearity** and **overfitting**
+  python:
+    - Fit pooled, fixed-effects and two-way models, and cluster the errors
+    - Write a quadratic and an interaction in a formula, and interpret them in units
+    - Put three specifications in one table and let the reader see the spread
+  ib:
+    - Separate within-country change from between-country difference
+    - Say which specification your identifying variation can actually support
+    - Report the estimate *and* the specification, because neither means much alone
+
+07:
+  maths:
+    - Explain why PCA requires **standardised** inputs, and what happens if you forget
+    - Read a **scree plot** and defend the number of components retained
+    - Distinguish a **loading** from a **score**
+    - Say why a factor is identified only **up to rotation**
+  python:
+    - Compute components from the correlation matrix, and check against a library
+    - Plot the scree and the loadings, and label the axes with variance explained
+    - Rotate a factor solution and watch the fit stay identical
+  ib:
+    - Build an index — competitiveness, openness, capability — from correlated indicators
+    - Defend the name you gave a component to a sceptical reader
+    - Say what a composite indicator hides as well as what it summarises
+
+08:
+  maths:
+    - State the **Bayes classifier** and say why no rule can beat it
+    - Find nearest neighbours **by hand** from a Euclidean distance
+    - Decompose test error into **squared bias, variance and irreducible error**
+    - Say what happens to KNN as the number of predictors grows
+  python:
+    - Standardise, split, and choose $k$ by cross-validation
+    - Measure a classifier with **AUC** rather than accuracy alone
+    - Fit the simple alternative too, and let it win if it does
+  ib:
+    - Classify firms or countries when you have no theory of the boundary
+    - Say why a flexible method that scores 0.51 has told you something
+    - Justify complexity against a simpler model that was actually fitted
+
+09:
+  maths:
+    - Distinguish the **measurement** model from the **structural** model
+    - Read `=~` as "is measured by", and write a model description
+    - Interpret a **standardised loading**, and say when an indicator is weak
+    - Report **CFI, TLI and RMSEA**, and say what each would have to be
+    - Decompose a **mediation** into direct and indirect paths
+  python:
+    - Specify and fit a model with `semopy.Model`, and read `.inspect()`
+    - Pull fit indices with `semopy.calc_stats` and report them all
+    - Fit two models with opposite arrows and watch the fit not decide between them
+  ib:
+    - Measure a construct — trust, capability, institutional quality — you cannot observe
+    - State why good fit is not evidence that the model is correct
+    - Name the alternative model you rejected, and on what grounds
+
+10:
+  maths:
+    - State the **fundamental problem of causal inference**
+    - Explain why **randomisation** solves it, and what it costs
+    - Estimate a **propensity score** and match treated to control units
+    - Report an **ATT**, and state the assumption it rests on
+  python:
+    - Fit a propensity model and match with `NearestNeighbors`
+    - Check **overlap** and **balance** before reading any estimate
+    - Compare the naive difference with the matched one, and quantify the gap
+  ib:
+    - Estimate the effect of a policy that countries chose rather than drew
+    - Say why the countries that adopted were already different
+    - Report how far the naive comparison would have been wrong
+
+11:
+  maths:
+    - Set up a **difference-in-differences** design and identify the four cells
+    - Read the **interaction coefficient** as the estimate
+    - State the **parallel-trends** assumption and how you would probe it
+    - Say what an **instrument** must satisfy, and why good ones are rare
+  python:
+    - Build the four cells, then get the same number from an interaction in `smf.ols`
+    - Plot an event study and let the pre-period speak for the design
+    - Handle staggered adoption without letting the cohorts blur
+  ib:
+    - Evaluate a policy that arrived in different countries at different times
+    - Defend parallel trends as an argument, not as a test that passed
+    - Say plainly what the design cannot rescue
+
+12:
+  maths:
+    - Say which of the term's methods your question actually required
+    - State a result with its uncertainty, and name the kind of uncertainty
+    - Name the assumption that identifies your estimate, and whether it is testable
+  python:
+    - Hand over work that runs on someone else's machine
+    - Show the specification alongside the coefficient
+    - Make the figure that carries the argument without the code
+  ib:
+    - Present to a decision-maker who will not read your code
+    - State a recommendation, its confidence, and its falsifier, in twelve minutes
+    - Defend an identification choice under questioning

@@ -1070,9 +1070,136 @@ Thierry Warin, PhD
 <section class="slide level2">
 
 <!-- Imported from https://warin.ca/quant/en/session8_cours/. Content is static so the deck renders without R or Python. -->
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+</section>
+<section id="outline-the-hour-ahead" class="slide level2 center scrollable">
+<h2>Outline · The hour ahead</h2>
+<ol type="1">
+<li>Quote of the day</li>
+<li>Bias — Variance Trade-off</li>
+<li>Classification</li>
+<li>Classification (cont.)</li>
+<li>The Bayes Classifier</li>
+<li>The Bayes Classifier (cont.)</li>
+<li>K-Nearest Neighbors</li>
+<li>K-Nearest Neighbors (cont.)</li>
+<li>KNN by hand (you are the algorithm)</li>
+<li>KNN by hand (you are the algorithm) (cont.)</li>
+<li>KNN by hand</li>
+<li>KNN in R code (you are not longer the algorithm)</li>
+<li>Machine Learning: using KNN as an example</li>
+<li>Smarket: 1,250 daily S&amp;P 500 returns. ISLR ships it as a CSV. (cont.)</li>
+<li>Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)</li>
+<li>KNN has no coefficients — importance is measured by scrambling a column (cont.)</li>
+<li>The confusion matrix, and the accuracy that goes with it (cont.)</li>
+<li>Big lessons from ML</li>
+<li>Big lessons</li>
+<li>Big lessons (cont.)</li>
+</ol>
+</section>
+<section id="what-session-8-is-for" class="slide level2 scrollable">
+<h2>What session 8 is for</h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<h3 id="the-mathematics">The mathematics</h3>
+<ul>
+<li>State the <strong>Bayes classifier</strong> and say why no rule can beat it</li>
+<li>Find nearest neighbours <strong>by hand</strong> from a Euclidean distance</li>
+<li>Decompose test error into <strong>squared bias, variance and irreducible error</strong></li>
+<li>Say what happens to KNN as the number of predictors grows</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-python">The Python</h3>
+<ul>
+<li>Standardise, split, and choose <span class="math inline">\(k\)</span> by cross-validation</li>
+<li>Measure a classifier with <strong>AUC</strong> rather than accuracy alone</li>
+<li>Fit the simple alternative too, and let it win if it does</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-international-business">The international business</h3>
+<ul>
+<li>Classify firms or countries when you have no theory of the boundary</li>
+<li>Say why a flexible method that scores 0.51 has told you something</li>
+<li>Justify complexity against a simpler model that was actually fitted</li>
+</ul>
+</div></div>
+</section>
+<section id="your-python-so-far" class="slide level2 scrollable">
+<h2>Your Python so far</h2>
+<p>The 48 names below came out of sessions 2–5. Today’s slides assume them, and add to them. The ones marked arrived last week.</p>
+<h3 id="load-and-shape">Load and shape</h3>
+<ul>
+<li><code>.dropna</code> — drop rows with missing values</li>
+<li><code>.merge</code> — join two frames on a key</li>
+<li><code>.shape</code> — rows and columns</li>
+<li><code>pd.read_parquet</code> — a parquet file, directly</li>
+<li><code>qmib.load</code> — a course dataset, by name</li>
+<li><code>pd.get_dummies</code> — categories to indicator columns</li>
+<li><code>StandardScaler</code> — standardise before you penalise · <em>new last week</em></li>
+<li><code>make_pipeline</code> — so the scaler is fitted on train only · <em>new last week</em></li>
+</ul>
+<h3 id="describe">Describe</h3>
+<ul>
+<li><code>.mean / .median</code> — the two centres, and their gap</li>
+<li><code>.quantile</code> — any quantile, including the median</li>
+<li><code>.std / .var</code> — spread, dividing by <span class="math inline">\(n-1\)</span></li>
+<li><code>stats.trim_mean</code> — the mean after cutting both tails</li>
+<li><code>.value_counts</code> — how unbalanced is the outcome</li>
+<li><code>pd.crosstab</code> — a contingency table in one call</li>
+</ul>
+<h3 id="fit">Fit</h3>
+<ul>
+<li><code>.fit()</code> — estimate the model you specified</li>
+<li><code>smf.ols</code> — least squares, from a formula</li>
+<li><code>OrderedModel</code> — ordered categories, proportional odds</li>
+<li><code>sm.MNLogit</code> — unordered categories, one baseline</li>
+<li><code>sm.add_constant</code> — the intercept, when there is no formula</li>
+<li><code>smf.logit</code> — binary outcome, from a formula</li>
+<li><code>Ridge / Lasso / ElasticNet</code> — the three penalties · <em>new last week</em></li>
+</ul>
+<h3 id="read-the-fit">Read the fit</h3>
+<ul>
+<li><code>.params</code> — the coefficients, in units of <span class="math inline">\(y\)</span></li>
+<li><code>.rsquared</code> — share of variance explained</li>
+<li><code>.mse_resid</code> — its square root is the RSE, in units</li>
+<li><code>.resid / .fittedvalues</code> — what is left, and what was predicted</li>
+<li><code>.rsquared_adj</code> — penalised for the extra predictor</li>
+<li><code>.get_prediction</code> — with an interval, via <code>.summary_frame()</code></li>
+<li><code>.predict</code> — fitted probabilities, not classes</li>
+<li><code>np.exp</code> — a log-odds becomes an odds ratio</li>
+<li><code>.coef_ / .alpha_</code> — scikit-learn’s spelling of <code>.params</code> · <em>new last week</em></li>
+</ul>
+<h3 id="diagnose">Diagnose</h3>
+<ul>
+<li><code>.cooks_distance</code> — influence: leverage <span class="math inline">\(\times\)</span> residual</li>
+<li><code>.get_influence()</code> — the whole diagnostic bundle</li>
+<li><code>.hat_matrix_diag</code> — leverage; sums to <span class="math inline">\(p\)</span>, always</li>
+<li><code>.resid_studentized_internal</code> — residuals on a common scale</li>
+</ul>
+<h3 id="choose-and-validate">Choose and validate</h3>
+<ul>
+<li><code>.aic / .bic</code> — compare non-nested models</li>
+<li><code>.llf</code> — log-likelihood, for the LR test</li>
+<li><code>stats.chi2.sf</code> — the <span class="math inline">\(p\)</span>-value of that test</li>
+<li><code>KFold</code> — and do it <span class="math inline">\(k\)</span> times · <em>new last week</em></li>
+<li><code>RidgeCV / LassoCV / ElasticNetCV</code> — <span class="math inline">\(\lambda\)</span> by cross-validation · <em>new last week</em></li>
+<li><code>lasso_path</code> — the whole coefficient path · <em>new last week</em></li>
+<li><code>mean_squared_error</code> — score it on the held-out part · <em>new last week</em></li>
+<li><code>np.logspace</code> — a grid that is even in <span class="math inline">\(\log\lambda\)</span> · <em>new last week</em></li>
+<li><code>train_test_split</code> — hold something back · <em>new last week</em></li>
+</ul>
+<h3 id="plot">Plot</h3>
+<ul>
+<li><code>plt.scatter</code> — the data, before anything else</li>
+<li><code>plt.xlabel / plt.ylabel</code> — say the units, every time</li>
+<li><code>plt.axhline / plt.axvline</code> — draw the threshold you are judging against</li>
+<li><code>plt.stem</code> — one spike per observation</li>
+<li><code>plt.subplots</code> — several panels, one figure</li>
+</ul>
+<!-- END deck-frontmatter -->
 </section>
 <section id="imported-s08-001" class="slide level2 scrollable">
-<h2></h2>
+<h2>Quote of the day</h2>
 <blockquote>
 <p>&quot;If you live 5 minutes away from Bill Gates, I bet you are rich.&quot;</p>
 </blockquote>
@@ -1105,7 +1232,7 @@ Thierry Warin, PhD
 <h2>Classification</h2>
 </section>
 <section id="imported-s08-009" class="slide level2 scrollable">
-<h2></h2>
+<h2>Classification (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">Principle</a></li><li><a href="#tabset-1-2">The test error</a></li></ul>
 <div class="tab-content">
@@ -1167,7 +1294,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-011" class="slide level2 scrollable">
-<h2></h2>
+<h2>The Bayes Classifier (cont.)</h2>
 <blockquote>
 <p>&quot;If you live 5 minutes away from Bill Gates, I bet you are rich.&quot;</p>
 </blockquote>
@@ -1196,7 +1323,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-013" class="slide level2 scrollable">
-<h2></h2>
+<h2>K-Nearest Neighbors (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">Goal</a></li><li><a href="#tabset-4-2">Example</a></li></ul>
 <div class="tab-content">
@@ -1219,7 +1346,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-014" class="slide level2 scrollable">
-<h2></h2>
+<h2>K-Nearest Neighbors (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-5-1">Efficiency</a></li><li><a href="#tabset-5-2">Choice of K</a></li></ul>
 <div class="tab-content">
@@ -1249,7 +1376,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-015" class="slide level2 scrollable">
-<h2></h2>
+<h2>K-Nearest Neighbors (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-6-1">Goal</a></li><li><a href="#tabset-6-2">Errors</a></li></ul>
 <div class="tab-content">
@@ -1281,7 +1408,7 @@ Thierry Warin, PhD
 <h2>KNN by hand (you are the algorithm)</h2>
 </section>
 <section id="imported-s08-017" class="slide level2 scrollable">
-<h2></h2>
+<h2>KNN by hand (you are the algorithm) (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-7-1">Example</a></li><li><a href="#tabset-7-2">Euclidean distance</a></li></ul>
 <div class="tab-content">
@@ -1680,7 +1807,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-024" class="slide level2 scrollable">
-<h2></h2>
+<h2>Smarket: 1,250 daily S&amp;P 500 returns. ISLR ships it as a CSV. (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-11" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-11-1">Steps</a></li><li><a href="#tabset-11-2">Confusion Matrix</a></li><li><a href="#tabset-11-3">Interpretation</a></li><li><a href="#tabset-11-4">Pre-processing</a></li></ul>
 <div class="tab-content">
@@ -1715,7 +1842,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-025" class="slide level2 scrollable">
-<h2></h2>
+<h2>Smarket: 1,250 daily S&amp;P 500 returns. ISLR ships it as a CSV. (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-12" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-12-1">Steps</a></li><li><a href="#tabset-12-2">Step 1: Data collection</a></li></ul>
 <div class="tab-content">
@@ -1748,7 +1875,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-026" class="slide level2 scrollable">
-<h2></h2>
+<h2>Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-13" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-13-1">Step 2: Code</a></li><li><a href="#tabset-13-2">Step 2: Output</a></li><li><a href="#tabset-13-3">Step 2: Plot</a></li><li><a href="#tabset-13-4">Step 2: TL;DR</a></li></ul>
 <div class="tab-content">
@@ -1882,7 +2009,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-027" class="slide level2 scrollable">
-<h2></h2>
+<h2>KNN has no coefficients — importance is measured by scrambling a column (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-14" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-14-1">Step 3: Test</a></li><li><a href="#tabset-14-2">Step 3: Code - Test</a></li><li><a href="#tabset-14-3">Step 3: Output - Test</a></li></ul>
 <div class="tab-content">
@@ -1941,7 +2068,7 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-028" class="slide level2 scrollable">
-<h2></h2>
+<h2>The confusion matrix, and the accuracy that goes with it (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-15" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-15-1">Step 4: Prediction - Code</a></li><li><a href="#tabset-15-2">Step 4: Output</a></li><li><a href="#tabset-15-3">Step 4: Visual</a></li></ul>
 <div class="tab-content">
@@ -1976,11 +2103,11 @@ Thierry Warin, PhD
 </div>
 </section>
 <section id="imported-s08-029" class="slide level2 scrollable">
-<h2></h2>
+<h2>The confusion matrix, and the accuracy that goes with it (cont.)</h2>
 <p>You survived your second session on Machine Learning! Congrats!</p>
 </section>
 <section id="imported-s08-030" class="slide level2 scrollable">
-<h2></h2>
+<h2>The confusion matrix, and the accuracy that goes with it (cont.)</h2>
 <p>You survived your second session on Machine Learning! Congrats!</p>
 <blockquote>
 <p>Wait! I am not an expert! I will never be!!!</p>
@@ -1988,7 +2115,7 @@ Thierry Warin, PhD
 </blockquote>
 </section>
 <section id="imported-s08-031" class="slide level2 scrollable">
-<h2></h2>
+<h2>The confusion matrix, and the accuracy that goes with it (cont.)</h2>
 <p>You survived your second session on Machine Learning! Congrats!</p>
 <blockquote>
 <p>Wait! I am not an expert! I will never be!!!</p>
@@ -2020,7 +2147,7 @@ Thierry Warin, PhD
 </ul>
 </section>
 <section id="imported-s08-034" class="slide level2 scrollable">
-<h2></h2>
+<h2>Big lessons (cont.)</h2>
 <div class="panel-tabset">
 <ul id="tabset-16" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-16-1">Neural Network - Not exam material</a></li><li><a href="#tabset-16-2">ML Regression</a></li><li><a href="#tabset-16-3">glmboost</a></li><li><a href="#tabset-16-4">RF</a></li></ul>
 <div class="tab-content">

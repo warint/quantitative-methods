@@ -1069,59 +1069,121 @@ Thierry Warin
 
   <p class="date">28 August 2026</p>
 </section>
+<section class="slide level2">
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+</section>
+<section id="outline-the-hour-ahead" class="slide level2 center scrollable">
+<h2>Outline · The hour ahead</h2>
+<ol type="1">
+<li>Where we are, and the opening claim that turns out to be wrong</li>
+<li>A situation you will meet — more candidate predictors than countries</li>
+<li>Ridge, and what it does to the SVD spectrum</li>
+<li>Lasso, and why corners produce exact zeros</li>
+<li>Soft-thresholding, and the coefficient path</li>
+<li>The elastic net, and the grouping effect</li>
+<li>Choosing <span class="math inline">\((\alpha, \lambda)\)</span> by cross-validation</li>
+<li>Three limitations to state out loud</li>
+<li>Key takeaways, and on to the practice</li>
+</ol>
+</section>
+<section id="what-session-5-is-for" class="slide level2 scrollable">
+<h2>What session 5 is for</h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<h3 id="the-mathematics">The mathematics</h3>
+<ul>
+<li>Derive the ridge estimator and show how it shrinks the <strong>SVD spectrum</strong></li>
+<li>Explain geometrically why the lasso produces exact zeros and ridge does not</li>
+<li>State the <strong>elastic net</strong> objective and what <span class="math inline">\(\ell_2\)</span> adds under correlation</li>
+<li>Derive the coordinate-descent update, including <strong>soft-thresholding</strong></li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-python">The Python</h3>
+<ul>
+<li>Standardise before penalising, with <code>StandardScaler</code> inside a pipeline</li>
+<li>Choose <span class="math inline">\((\alpha,\lambda)\)</span> with <code>RidgeCV</code>, <code>LassoCV</code>, <code>ElasticNetCV</code></li>
+<li>Read a coefficient path and a cross-validation curve</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-international-business">The international business</h3>
+<ul>
+<li>Work with more candidate predictors than countries</li>
+<li>Say why a variable the lasso dropped is not thereby irrelevant</li>
+<li>Report a penalised model honestly, including what selection did</li>
+</ul>
+</div></div>
+</section>
+<section id="your-python-so-far" class="slide level2 scrollable">
+<h2>Your Python so far</h2>
+<p>The 38 names below came out of sessions 2–4. Today’s slides assume them, and add to them. The ones marked arrived last week.</p>
+<h3 id="load-and-shape">Load and shape</h3>
+<ul>
+<li><code>.dropna</code> — drop rows with missing values</li>
+<li><code>.merge</code> — join two frames on a key</li>
+<li><code>.shape</code> — rows and columns</li>
+<li><code>pd.read_parquet</code> — a parquet file, directly</li>
+<li><code>qmib.load</code> — a course dataset, by name</li>
+<li><code>pd.get_dummies</code> — categories to indicator columns · <em>new last week</em></li>
+</ul>
+<h3 id="describe">Describe</h3>
+<ul>
+<li><code>.mean / .median</code> — the two centres, and their gap</li>
+<li><code>.quantile</code> — any quantile, including the median</li>
+<li><code>.std / .var</code> — spread, dividing by <span class="math inline">\(n-1\)</span></li>
+<li><code>stats.trim_mean</code> — the mean after cutting both tails</li>
+<li><code>.value_counts</code> — how unbalanced is the outcome · <em>new last week</em></li>
+<li><code>pd.crosstab</code> — a contingency table in one call · <em>new last week</em></li>
+</ul>
+<h3 id="fit">Fit</h3>
+<ul>
+<li><code>.fit()</code> — estimate the model you specified</li>
+<li><code>smf.ols</code> — least squares, from a formula</li>
+<li><code>OrderedModel</code> — ordered categories, proportional odds · <em>new last week</em></li>
+<li><code>sm.MNLogit</code> — unordered categories, one baseline · <em>new last week</em></li>
+<li><code>sm.add_constant</code> — the intercept, when there is no formula · <em>new last week</em></li>
+<li><code>smf.logit</code> — binary outcome, from a formula · <em>new last week</em></li>
+</ul>
+<h3 id="read-the-fit">Read the fit</h3>
+<ul>
+<li><code>.params</code> — the coefficients, in units of <span class="math inline">\(y\)</span></li>
+<li><code>.rsquared</code> — share of variance explained</li>
+<li><code>.mse_resid</code> — its square root is the RSE, in units</li>
+<li><code>.resid / .fittedvalues</code> — what is left, and what was predicted</li>
+<li><code>.rsquared_adj</code> — penalised for the extra predictor</li>
+<li><code>.get_prediction</code> — with an interval, via <code>.summary_frame()</code> · <em>new last week</em></li>
+<li><code>.predict</code> — fitted probabilities, not classes · <em>new last week</em></li>
+<li><code>np.exp</code> — a log-odds becomes an odds ratio · <em>new last week</em></li>
+</ul>
+<h3 id="diagnose">Diagnose</h3>
+<ul>
+<li><code>.cooks_distance</code> — influence: leverage <span class="math inline">\(\times\)</span> residual</li>
+<li><code>.get_influence()</code> — the whole diagnostic bundle</li>
+<li><code>.hat_matrix_diag</code> — leverage; sums to <span class="math inline">\(p\)</span>, always</li>
+<li><code>.resid_studentized_internal</code> — residuals on a common scale</li>
+</ul>
+<h3 id="choose-and-validate">Choose and validate</h3>
+<ul>
+<li><code>.aic / .bic</code> — compare non-nested models</li>
+<li><code>.llf</code> — log-likelihood, for the LR test · <em>new last week</em></li>
+<li><code>stats.chi2.sf</code> — the <span class="math inline">\(p\)</span>-value of that test · <em>new last week</em></li>
+</ul>
+<h3 id="plot">Plot</h3>
+<ul>
+<li><code>plt.scatter</code> — the data, before anything else</li>
+<li><code>plt.xlabel / plt.ylabel</code> — say the units, every time</li>
+<li><code>plt.axhline / plt.axvline</code> — draw the threshold you are judging against</li>
+<li><code>plt.stem</code> — one spike per observation</li>
+<li><code>plt.subplots</code> — several panels, one figure · <em>new last week</em></li>
+</ul>
+<!-- END deck-frontmatter -->
+</section>
 <section>
 <section id="section" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
 <h1></h1>
 
 </section>
-<h3 style="color:#F7F6F3" id="when-is-a-deliberately-biased-estimator-the-better-one">When is a deliberately biased estimator the better one?</h3>
-<section id="outline" class="slide level2">
-<h2>Outline</h2>
-<table class="caption-top">
-<tbody>
-<tr class="odd">
-<td><strong>1</strong></td>
-<td>Where we are, and what this adds</td>
-</tr>
-<tr class="even">
-<td><strong>2</strong></td>
-<td>The problem, on real data</td>
-</tr>
-<tr class="odd">
-<td><strong>3</strong></td>
-<td>Ridge — shrink everything, a little</td>
-</tr>
-<tr class="even">
-<td><strong>4</strong></td>
-<td>Lasso — shrink some things to nothing</td>
-</tr>
-<tr class="odd">
-<td><strong>5</strong></td>
-<td>Elastic net — when predictors come in families</td>
-</tr>
-<tr class="even">
-<td><strong>6</strong></td>
-<td>Choosing <span class="math inline">\(\lambda\)</span> honestly</td>
-</tr>
-<tr class="odd">
-<td><strong>7</strong></td>
-<td>Key takeaways</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="learning-objectives" class="slide level2">
-<h2>Learning objectives</h2>
-<div class="tight">
-<ul>
-<li>State the ridge and lasso objectives and say <strong>what each penalty buys</strong></li>
-<li>Explain, in the SVD basis, why ridge shrinkage is <strong>targeted</strong> rather than blunt</li>
-<li>Derive <strong>soft-thresholding</strong> and use it to explain why the lasso produces exact zeros</li>
-<li>Choose between lasso and elastic net by looking at the <strong>correlation structure</strong></li>
-<li>Report <span class="math inline">\(\lambda\)</span> by cross-validation, and know why the standard errors afterwards are <strong>not valid</strong></li>
-</ul>
-</div>
-</section></section>
+<h3 style="color:#F7F6F3" id="when-is-a-deliberately-biased-estimator-the-better-one">When is a deliberately biased estimator the better one?</h3></section>
 <section>
 <section id="what-this-adds" class="title-slide slide level1 center" data-background-color="#16181A" style="color:#F7F6F3">
 <h1>1 · What this adds</h1>
@@ -1206,7 +1268,7 @@ Thierry Warin
 </section>
 <section id="what-complete-case-analysis-leaves-you" class="slide level2">
 <h2>What complete-case analysis leaves you</h2>
-<div id="e1b120f5" class="cell" data-execution_count="2">
+<div id="88293653" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>raw <span class="op">=</span> pd.read_parquet(<span class="st">&quot;../../data/spine/angle_c_country.parquet&quot;</span>)</span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a>YCOL  <span class="op">=</span> <span class="st">&quot;rd_pct_gdp&quot;</span>                           <span class="co"># what we are trying to explain</span></span>
@@ -1229,7 +1291,7 @@ Thierry Warin
 </section>
 <section id="why-ols-cannot-cope-here" class="slide level2">
 <h2>Why OLS cannot cope here</h2>
-<div id="b29709a8" class="cell" data-execution_count="3">
+<div id="bcf0396b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># The condition number is the ratio of the largest singular value to the</span></span>
 <span id="cb3-2"><a href></a><span class="co"># smallest: how much a small wobble in the data can be amplified in the</span></span>
 <span id="cb3-3"><a href></a><span class="co"># coefficients. Under about 30 is comfortable; 1e3 and above means the design</span></span>
@@ -1252,7 +1314,7 @@ Thierry Warin
 </section>
 <section id="four-estimators-one-held-out-test-set" class="slide level2">
 <h2>Four estimators, one held-out test set</h2>
-<div id="57718f51" class="cell" data-execution_count="4">
+<div id="2b7b6eab" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
 <span id="cb5-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
 <span id="cb5-3"><a href></a>    model.fit(Xtr, ytr)                        <span class="co"># the model never sees Xte here</span></span>
@@ -1347,7 +1409,7 @@ Thierry Warin
 </section>
 <section id="ridge-in-three-lines-explained" class="slide level2">
 <h2>Ridge in three lines, explained</h2>
-<div id="38e944d1" class="cell" data-execution_count="7">
+<div id="93fe17ee" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># A pipeline, not three separate steps, because the scaler must be fitted on</span></span>
 <span id="cb6-2"><a href></a><span class="co"># the training rows only. Fit it on everything and the test set has leaked into</span></span>
 <span id="cb6-3"><a href></a><span class="co"># the training procedure, and the honest 30% you held out is no longer honest.</span></span>
@@ -1492,7 +1554,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </section>
 <section id="what-survived-on-our-data" class="slide level2">
 <h2>What survived, on our data</h2>
-<div id="03dbf533" class="cell" data-execution_count="11">
+<div id="4c78e48b" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># LassoCV does two things at once: it fits the whole path of lambdas, and it</span></span>
 <span id="cb8-2"><a href></a><span class="co"># uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the</span></span>
 <span id="cb8-3"><a href></a><span class="co"># penalty is on coefficient size, so the columns must be on a common scale.</span></span>
@@ -1542,7 +1604,7 @@ auxiliary series kept: 0 of 15</code></pre>
 <section id="limitation-2-is-not-academic" class="slide level2">
 <h2>Limitation 2 is not academic</h2>
 <p>Our five AI-adoption columns are all measuring roughly the same thing:</p>
-<div id="f3756684" class="cell" data-execution_count="12">
+<div id="eff78b69" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Five columns that are all, in substance, &quot;how much AI does this country use&quot;.</span></span>
 <span id="cb10-2"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
 <span id="cb10-3"><a href></a></span>

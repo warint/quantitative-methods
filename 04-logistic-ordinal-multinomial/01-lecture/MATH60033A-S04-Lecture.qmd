@@ -49,115 +49,116 @@ pd.set_option("display.max_columns", 10)
 loans = qmib.load("loans")
 ```
 
-## {#imported-s04-001 .scrollable}
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
+## Outline · The hour ahead {.center .scrollable}
+
+1. Introduction
+2. Let's start with an example
+3. The basics of logistic regression
+4. Let's use another example
+5. Inference and goodness of fit
+6. Let's see another example
+7. Comparing logistic models
+8. Model selection
+9. Ordinal logistic regression
+10. Multinomial logistic regression
+11. Conclusion
+
+## What session 4 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Say why the **linear probability model** fails, and where it fails worst
+- Read a coefficient as a **log-odds** and its exponential as an odds ratio
+- Compute a fitted probability by hand from $x^\top\hat\beta$
+- Compare nested models with a **likelihood-ratio test**
+- Separate a **Wald** test from a **likelihood-ratio** test, and report McFadden's pseudo-$R^2$ for what it is
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Fit binary, **ordinal** and **multinomial** logits with `smf.logit`, `OrderedModel`, `sm.MNLogit`
+- Turn coefficients into odds ratios and predicted probabilities
+- Build the likelihood-ratio test from two models' `.llf`
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Model a categorical business outcome — enter or not, which mode, which grade
+- Report an odds ratio to someone who will not read the appendix
+- State what the proportional-odds assumption costs when it fails
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 25 names below came out of sessions 2–3. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units · *new last week*
+- `.resid / .fittedvalues` — what is left, and what was predicted · *new last week*
+- `.rsquared_adj` — penalised for the extra predictor · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual · *new last week*
+- `.get_influence()` — the whole diagnostic bundle · *new last week*
+- `.hat_matrix_diag` — leverage; sums to $p$, always · *new last week*
+- `.resid_studentized_internal` — residuals on a common scale · *new last week*
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against · *new last week*
+- `plt.stem` — one spike per observation · *new last week*
+
+<!-- END deck-frontmatter -->
+## Quote of the day {#imported-s04-001 .scrollable}
 > The greatest adventure is what lies ahead. Today and tomorrow are yet to be said. The chances, the changes are all yours to make. The mold of your life is in your hands to break.
 
 [J. R. R. Tolkien](https://en.wikipedia.org/wiki/J._R._R._Tolkien)
 
-## Outline {#imported-s04-002 .center .scrollable}
-
--   Introduction
--   Business example (loan defaults)
--   Basics of logistic regression
--   Inference and goodness of fit
--   Comparing logistic models (χ² tests, AIC, stepwise)
--   Ordinal logistic regression
--   Multinomial logistic regression
-
-## Learning objectives {#imported-s04-003 .center .scrollable}
-
-By the end of this session:
-
--   students should be able to articulate the conceptual differences between linear and logistic regression for binary outcomes;
-
--   derive and interpret the logistic link, odds, log-odds, and odds ratios;
-
--   estimate simple and multiple logistic regression models in R and report coefficient estimates, standard errors, and confidence intervals;
-
--   compute and interpret predicted probabilities with associated uncertainty for specified covariate profiles; assess model fit using likelihood-based diagnostics, including McFadden's pseudo-R², and conduct inference using Wald tests and likelihood ratio (χ²) tests;
-
--   compare nested and non-nested specifications via likelihood ratio tests and AIC, including stepwise selection when appropriate;
-
--   generalize the binary logit to ordinal and multinomial settings and interpret coefficients within these frameworks;
-
--   and critically evaluate model assumptions, data limitations, and construct validity in applied international business research contexts.
-
 ## Introduction {#imported-s04-004 .center .scrollable}
-
-## Introduction {#imported-s04-005 .scrollable}
-
-:::: panel-tabset
-### Reading
-
--   Musteen, Martina "[The influence of international networks on internationalization speed and performance: A study of Czech SMEs](https://www.sciencedirect.com/science/article/pii/S1090951609001138?via%3Dihub)", Journal of World Business, vol. 45 , no. 3
-
-### Contrib
-
-*The influence of international networks on internationalization speed and performance: A study of Czech SMEs*
-
--   **Speed of entry**: Firms with CEOs sharing a common language with international contacts internationalize faster.
--   **Performance**: Broader geographic diversity in networks improves outcomes; over-reliance on personal ties can hinder performance.
--   **Contribution**: Not all network ties are equally valuable --- structure, diversity, and quality of ties shape how SMEs succeed abroad.
-
-### Hyp
-
--   CEOs' **international networks** influence both the **speed** of SME internationalization and the **performance** of the first foreign venture.
--   **Language commonality** between CEOs and their network partners accelerates international entry.
--   **Geographic diversity** of networks improves performance.
--   **Reliance on personal ties** may hinder performance by limiting access to diverse, novel resources.
-
-### Models
-
--   Dependent variables:
-
-    -   **Internationalization speed** (time until first foreign market entry).
-    -   **Internationalization performance** (success of first international venture).
-
--   Independent variables:
-
-    -   Network characteristics (language commonality, geographic diversity, reliance on personal ties, size of network).
-
--   Analytical framework: **social capital theory**; estimated with regression models on survey data from 155 Czech SMEs.
-
-### Accuracy
-
--   Measures of accuracy focus on **statistical significance** of predictors and **model fit** in explaining variance in speed and performance.
--   Results show robust effects for language and diversity, but mixed/negative for personal ties.
-
-### Validity
-
--   **Internal validity**: Reasonable given the focus on first internationalization and careful measurement of CEO networks.
--   **External validity**: Limited by context (Czech manufacturing SMEs in the late transition economy period).
--   **Construct validity**: Network measures are self-reported and retrospective, raising risks of recall bias.
--   **Conclusion validity**: Results support differentiated roles of network dimensions, but caution is needed in generalizing beyond early-stage internationalization.
-
-### Conclusion
-
-::: cell
-```{dot}
-digraph international_networks {
-
-  graph [layout = dot, rankdir = LR]
-
-  node [shape = box, fontname = Helvetica, style = filled, fillcolor = lightgrey]
-
-  # Nodes
-  language   [label = "Language Commonality"]
-  diversity  [label = "Geographic Diversity"]
-  personal   [label = "Reliance on Personal Ties"]
-  speed      [label = "Speed of Internationalization"]
-  performance[label = "Performance of First Venture"]
-
-  # Edges with labels
-  language   -> speed      [label = "faster entry", color = green, fontcolor = green]
-  diversity  -> performance[label = "better outcomes", color = green, fontcolor = green]
-  personal   -> performance[label = "weaker outcomes", color = red, fontcolor = red]
-
-}
-```
-:::
-::::
 
 ## Introduction {#imported-s04-006 .scrollable}
 
@@ -207,7 +208,7 @@ As we saw in the two previous modules, linear regression allows us to model the 
 
 -   Peer-to-peer network
 
-## {#imported-s04-011 .scrollable}
+## Lending Club (cont.) {#imported-s04-011 .scrollable}
 
 :::::::::::::::::: panel-tabset
 ### 1
@@ -244,12 +245,6 @@ It is called a binary variable since it only takes on the values 0 or 1:
 When working with a binary dependent variable, a scatter plot is often not that useful.
 
 
-### 4
-
-
-### 5
-
-
 ### 6
 
 > If the only tool we have is a hammer, we are tempted to use it for every problem.
@@ -265,9 +260,6 @@ import statsmodels.formula.api as smf
 m1 = smf.ols("default ~ fico", data=loans).fit()
 print(m1.summary())
 ```
-
-### 7
-
 
 ### 8
 
@@ -342,7 +334,7 @@ although a FICO score of 825 represents a great credit score, the probability ca
 
 ## The basics of logistic regression {#imported-s04-012 .center .scrollable}
 
-## {#imported-s04-013 .scrollable}
+## The basics of logistic regression {#imported-s04-013 .scrollable}
 
 ::::::::::::: panel-tabset
 ### LR 1
@@ -414,9 +406,6 @@ The logistic regression model can be estimated by the method of **maximum likeli
 For our loan default data, the R output from estimating a logistic regression is as follows:
 
 
-### LR 7
-
-
 ### LR 8
 
 Using the R output, the estimated equation for the probability of a loan default is:
@@ -455,9 +444,6 @@ With this equation we can predict probability of loan default for any FICO score
 :::::::::::::::::: panel-tabset
 ### 1
 
-
-### 2
-
 The estimate [\\(b_1 = - 0.0119\\)]{.math .inline} is difficult to interpret exactly.
 
 But an important question is whether the data provide evidence that [\\(\\beta_1 \\neq 0\\)]{.math .inline}, which would imply that FICO scores are related to the probability of a loan default.
@@ -470,7 +456,7 @@ We could construct a confidence interval for [\\(\\beta_1\\)]{.math .inline} usi
 
 -   However, we can assess whether [\\(\\beta_1\\)]{.math .inline} is positive or negative through a confidence interval.
 
-### 3
+### 2
 
 ::::::: columns
 ::::: {.column style="width:50%;"}
@@ -487,7 +473,7 @@ We could construct a confidence interval for [\\(\\beta_1\\)]{.math .inline} usi
 :::
 :::::::
 
-### 4
+### 3
 
 we are usually interested in the following test:
 
@@ -499,7 +485,7 @@ we are usually interested in the following test:
 
 Therefore FICO score is a statistically significant predictor of the probability of a loan default.
 
-### 5
+### 4
 
 Estimating [\\(\\pi\\)]{.math .inline}
 
@@ -509,7 +495,7 @@ Estimating [\\(\\pi\\)]{.math .inline}
 
 [\\\[\\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1x)}}\\\]]{.math .display}
 
-### 6
+### 5
 
 Instead of a point estimate of [\\(\\pi\\)]{.math .inline}, [\\(p\\)]{.math .inline}, we can also compute a 95% confidence interval:
 
@@ -552,7 +538,7 @@ The 95% confidence interval for [\\(\\pi\\)]{.math .inline} is (0.161, 0.177).
 
 ## Inference and goodness of fit {#imported-s04-016 .center .scrollable}
 
-## {#imported-s04-017 .scrollable}
+## Inference and goodness of fit {#imported-s04-017 .scrollable}
 
 :::::: panel-tabset
 ### IGF 1
@@ -635,7 +621,7 @@ Value is computed to be 0.0271
 
     -   With large data, computing-intensive to fit
 
-## {#imported-s04-020 .scrollable}
+## Portugal's Red Wines (cont.) {#imported-s04-020 .scrollable}
 
 :::::::::::::::::::::::::::::::::::::: panel-tabset
 ### Wine 1
@@ -658,12 +644,6 @@ import qmib
 redwines = qmib.load("redwines")
 redwines.describe().round(2)
 ```
-
-### 3
-
-
-### 4
-
 
 ### 5
 
@@ -741,9 +721,6 @@ w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit()
 print(w1.summary())
 ```
 
-### 9
-
-
 ### 10
 
 The estimated multiple logistic regression is therefore:
@@ -763,9 +740,6 @@ A negative value of a coefficient means:
 An increase in fixed acidity, residual sugar, sulphates, and alcohol content correspond to higher wine quality, holding all other variables fixed.
 
 An increase in volatile acidity, chlorides, total sulfur dioxide and density correspond to lower wine quality, holding all other variables fixed.
-
-### 12
-
 
 ### 13
 
@@ -995,8 +969,6 @@ The variable 'purpose' has 7 categories, so R will create 6 binary predictors to
 
 -   To determine if it is important, a single test for one coefficient is not possible since there are six of them, so we need a different approach.
 
-### 7
-
 #### Chi-squared test {#chi-squared-test .unnumbered}
 
 Formally the hypotheses being tested in a chi-squared test in logistic regression are:
@@ -1010,8 +982,6 @@ Formally the hypotheses being tested in a chi-squared test in logistic regressio
 -   If the [\\(p-value\\)]{.math .inline} is small, then there is evidence to suggest that the extra variables are important.
 
 -   The chi-squared test in logistic regression is the analog to the F-test in linear regression.
-
-### 8
 
 #### Chi-squared test {#chi-squared-test-1 .unnumbered}
 
@@ -1048,7 +1018,7 @@ The chi-squared test has a very small p-value (certainly less than 0.0001).
 
 ## Model selection {#imported-s04-023 .center .scrollable}
 
-## {#imported-s04-024 .scrollable}
+## Model selection {#imported-s04-024 .scrollable}
 
 ::::::::::::: panel-tabset
 ### Stepwise 1
@@ -1094,20 +1064,11 @@ for formula in candidates:
     print(f"AIC {m.aic:9.1f}   {formula}")
 ```
 
-### 4
-
-
 ### 5
 
 AIC was calculated to be 8067.1.
 
 Looks like 'dti' is unimportant. Let's see what gets removed after performing a backward stepwise approach
-
-### 6
-
-
-### 7
-
 
 ### 8
 
@@ -1206,9 +1167,6 @@ om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
 print(om.summary())
 ```
 
-### 6
-
-
 ### 7
 
 ```{python}
@@ -1270,9 +1228,6 @@ ml = qmib.load("hsbdemo")
 ml.describe()
 ```
 
-### 2
-
-
 ### 3
 
 -   The data set contains variables on 200 students.
@@ -1321,9 +1276,6 @@ import statsmodels.api as sm
 mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
 print(mn.summary())
 ```
-
-### 5
-
 
 ### 6
 

@@ -23,8 +23,143 @@ format:
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session8_cours/. Content is static so the deck renders without R or Python. -->
-## {#imported-s08-001 .scrollable}
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. Quote of the day
+2. Bias — Variance Trade-off
+3. Classification
+4. Classification (cont.)
+5. The Bayes Classifier
+6. The Bayes Classifier (cont.)
+7. K-Nearest Neighbors
+8. K-Nearest Neighbors (cont.)
+9. KNN by hand (you are the algorithm)
+10. KNN by hand (you are the algorithm) (cont.)
+11. KNN by hand
+12. KNN in R code (you are not longer the algorithm)
+13. Machine Learning: using KNN as an example
+14. Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.)
+15. Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)
+16. KNN has no coefficients — importance is measured by scrambling a column (cont.)
+17. The confusion matrix, and the accuracy that goes with it (cont.)
+18. Big lessons from ML
+19. Big lessons
+20. Big lessons (cont.)
+
+## What session 8 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- State the **Bayes classifier** and say why no rule can beat it
+- Find nearest neighbours **by hand** from a Euclidean distance
+- Decompose test error into **squared bias, variance and irreducible error**
+- Say what happens to KNN as the number of predictors grows
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Standardise, split, and choose $k$ by cross-validation
+- Measure a classifier with **AUC** rather than accuracy alone
+- Fit the simple alternative too, and let it win if it does
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Classify firms or countries when you have no theory of the boundary
+- Say why a flexible method that scores 0.51 has told you something
+- Justify complexity against a simpler model that was actually fitted
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 48 names below came out of sessions 2–5. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise · *new last week*
+- `make_pipeline` — so the scaler is fitted on train only · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params` · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times · *new last week*
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation · *new last week*
+- `lasso_path` — the whole coefficient path · *new last week*
+- `mean_squared_error` — score it on the held-out part · *new last week*
+- `np.logspace` — a grid that is even in $\log\lambda$ · *new last week*
+- `train_test_split` — hold something back · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+
+<!-- END deck-frontmatter -->
+## Quote of the day {#imported-s08-001 .scrollable}
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
 
 ## Bias--Variance Trade-off {#imported-s08-002 .scrollable}
@@ -53,7 +188,7 @@ format:
 
 ## Classification {#imported-s08-008 .scrollable}
 
-## {#imported-s08-009 .scrollable}
+## Classification (cont.) {#imported-s08-009 .scrollable}
 
 ::: panel-tabset
 ### Principle
@@ -125,7 +260,7 @@ This figure provides an example using a simulated data set in a two-dimensional 
 :::
 :::::
 
-## {#imported-s08-011 .scrollable}
+## The Bayes Classifier (cont.) {#imported-s08-011 .scrollable}
 
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
 
@@ -155,7 +290,7 @@ It then estimates the conditional probability for class [j]{.MathJax_Preview} as
 Finally, KNN applies Bayes rule and classifies the test observation [x_0]{.MathJax_Preview} to the class with the largest probability.
 :::
 
-## {#imported-s08-013 .scrollable}
+## K-Nearest Neighbors (cont.) {#imported-s08-013 .scrollable}
 
 ::::: panel-tabset
 ### Goal
@@ -181,7 +316,7 @@ Right-hand panel of the figure: we have applied the KNN approach with [K = 3]{.M
 ![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="78%"}
 :::::
 
-## {#imported-s08-014 .scrollable}
+## K-Nearest Neighbors (cont.) {#imported-s08-014 .scrollable}
 
 ::::::: panel-tabset
 ### Efficiency
@@ -217,7 +352,7 @@ This corresponds to a low-variance but high-bias classifier.
 :::
 :::::::
 
-## {#imported-s08-015 .scrollable}
+## K-Nearest Neighbors (cont.) {#imported-s08-015 .scrollable}
 
 ::::::: panel-tabset
 ### Goal
@@ -253,7 +388,7 @@ The bias-variance tradeoff, and the resulting U-shape in the test error, can mak
 
 ## KNN by hand (you are the algorithm) {#imported-s08-016 .scrollable}
 
-## {#imported-s08-017 .scrollable}
+## KNN by hand (you are the algorithm) (cont.) {#imported-s08-017 .scrollable}
 
 ::::::: panel-tabset
 ### Example
@@ -413,7 +548,7 @@ We have a labeled dataset here about the stock market. A data frame with 1250 ob
 Pre-processing means that we will create the train and the test datasets (they will be called train and test). We also need to consider a variable with the labeled value, here \"Direction\" (it is a factor with the \"up\" and \"down\" values).
 :::
 
-## {#imported-s08-024 .scrollable}
+## Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.) {#imported-s08-024 .scrollable}
 
 ::: panel-tabset
 ### Steps
@@ -459,7 +594,7 @@ Centering/standardization:
 [x\_{standardized} = \\frac{x - \\mu}{\\sigma}]{.MathJax_Preview}
 :::
 
-## {#imported-s08-025 .scrollable}
+## Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.) {#imported-s08-025 .scrollable}
 
 ::: panel-tabset
 ### Steps
@@ -494,7 +629,7 @@ train.head()
     ## 6 2001  0.213  0.614 -0.623  1.032  0.959 1.3491  1.392        Up
 :::
 
-## {#imported-s08-026 .scrollable}
+## Train on everything before 2005, test on 2005 — a time split, not a random one (cont.) {#imported-s08-026 .scrollable}
 
 ::: panel-tabset
 ### Step 2: Code
@@ -646,7 +781,7 @@ for name, m in zip(X_tr.columns, imp.importances_mean):
     ## Lag2          0
 :::
 
-## {#imported-s08-027 .scrollable}
+## KNN has no coefficients — importance is measured by scrambling a column (cont.) {#imported-s08-027 .scrollable}
 
 ::: panel-tabset
 ### Step 3: Test
@@ -715,7 +850,7 @@ print(classification_report(y_te, knn_predict))
     ##
 :::
 
-## {#imported-s08-028 .scrollable}
+## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-028 .scrollable}
 
 ::: panel-tabset
 ### Step 4: Prediction - Code
@@ -752,11 +887,11 @@ modelknn = GridSearchCV(
 ![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="100%"}
 :::
 
-## {#imported-s08-029 .scrollable}
+## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-029 .scrollable}
 
 You survived your second session on Machine Learning! Congrats!
 
-## {#imported-s08-030 .scrollable}
+## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-030 .scrollable}
 
 You survived your second session on Machine Learning! Congrats!
 
@@ -764,7 +899,7 @@ You survived your second session on Machine Learning! Congrats!
 >
 > I only know the K-Nearest-Neighbor classification technique!!!
 
-## {#imported-s08-031 .scrollable}
+## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-031 .scrollable}
 
 You survived your second session on Machine Learning! Congrats!
 
@@ -796,7 +931,7 @@ OK, let\'s step back first\...
 
     -   as such, it is a **GIGANTIC improvement** of current quantitative studies
 
-## {#imported-s08-034 .scrollable}
+## Big lessons (cont.) {#imported-s08-034 .scrollable}
 
 ::: panel-tabset
 ### Neural Network - Not exam material

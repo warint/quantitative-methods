@@ -23,14 +23,152 @@ format:
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session6_cours/. Content is static so the deck renders without R or Python. -->
-## {#imported-s06-001 .scrollable}
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. Quote of the day
+2. Where we left off
+3. Over to you
+4. Getting your hands dirty with Money Ball
+5. Panel data analysis
+6. Step 1. Running a TSCS model
+7. Step 2. Fixed effects versus random effects
+8. To go further
+9. To go further (cont.)
+10. Binary and categorical independent variables
+11. Binary and categorical independent variables (cont.)
+12. The R deck uses totalpay; here it is income plus bonus (cont.)
+13. Dummy variables for each level of education (cont.)
+14. Interaction terms
+15. Interaction terms (cont.)
+16. age * female expands to age + female + age:female — the interaction (cont.)
+17. Comparing models
+18. Comparing models (cont.)
+19. Lower AIC is better. The comparison only makes sense on the same rows. (cont.)
+20. Automatic model selection
+21. Python has no step(); choose among candidates explicitly. (cont.)
+22. Conclusion
+
+## What session 6 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- State what a **panel** is, and why pooling understates uncertainty
+- Distinguish **fixed** from **random** effects, and say what each assumes
+- Read an **interaction** as a slope that differs between groups
+- Compare non-nested models on information criteria rather than an $F$-test
+- Use the **Hausman test** to choose between fixed and random effects, and say what it assumes
+- Name the two pitfalls this session is really about — **multicollinearity** and **overfitting**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Fit pooled, fixed-effects and two-way models, and cluster the errors
+- Write a quadratic and an interaction in a formula, and interpret them in units
+- Put three specifications in one table and let the reader see the spread
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Separate within-country change from between-country difference
+- Say which specification your identifying variation can actually support
+- Report the estimate *and* the specification, because neither means much alone
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 48 names below came out of sessions 2–5. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise · *new last week*
+- `make_pipeline` — so the scaler is fitted on train only · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params` · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times · *new last week*
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation · *new last week*
+- `lasso_path` — the whole coefficient path · *new last week*
+- `mean_squared_error` — score it on the held-out part · *new last week*
+- `np.logspace` — a grid that is even in $\log\lambda$ · *new last week*
+- `train_test_split` — hold something back · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+
+<!-- END deck-frontmatter -->
+## Quote of the day {#imported-s06-001 .scrollable}
 > True education is a kind of never ending story --- a matter of continual beginnings, of habitual fresh starts, of persistent newness.
 >
 > [J. R. R. Tolkien](https://en.wikipedia.org/wiki/J._R._R._Tolkien){target="_blank"}
 
-## {#imported-s06-002 .scrollable}
-
+## Where we left off {#imported-s06-002 .scrollable}
 > Latest session
 >
 > from a sample to a predicted value
@@ -39,50 +177,12 @@ format:
 >
 > model validity
 
-## Goals {#imported-s06-003 .scrollable}
-
-This session deepens students' understanding of regression analysis by moving beyond introductory applications toward more advanced modeling strategies.
-
-The first part introduces the **treatment of panel data**, emphasizing the distinction between **fixed effects and random effects**, the rationale behind each approach, and the use of diagnostic tools such as the Hausman test.
-
-## Goals {#imported-s06-004 .scrollable}
-
-The session then addresses the extension of linear regression to **non-linear and categorical contexts**.
-
-**Quadratic effects** are introduced to capture curvilinear relationships, while **binary and categorical predictors are formalized through dummy variables**, with careful attention to the interpretation of coefficients and the avoidance of multicollinearity.
-
-Building on these foundations, **interaction terms** are explored as a means of modeling heterogeneous effects across groups or conditions.
-
-## Goals {#imported-s06-005 .scrollable}
-
-Finally, the session focuses on the comparison of alternative models. You will learn to distinguish between **nested and non-nested models**, to apply formal statistical tests such as the F-test and to interpret information criteria such as AIC.
-
-The pitfalls of **multicollinearity and overfitting** are discussed, and methods for automatic model selection are demonstrated, with an emphasis on balancing predictive accuracy with parsimony.
-
-Throughout, practical applications---including the "Moneyball" case study---provide you with opportunities to translate theoretical insights into hands-on analytical practice.
-
-## Outline {#imported-s06-006 .scrollable}
-
-1.  Panel data analysis
-
-2.  To go further
-
-    2.1 Quadratic effects
-
-    2.2 Binary and categorical independent variables
-
-    2.3 Interaction terms
-
-3.  Comparing models
-
-## {#imported-s06-007 .scrollable}
-
+## Over to you {#imported-s06-007 .scrollable}
 > Wait!
 >
 > I want to do it myself!
 
-## {#imported-s06-008 .scrollable}
-
+## Getting your hands dirty with Money Ball {#imported-s06-008 .scrollable}
 > Getting your hands dirty with Money Ball
 
 ::: center
@@ -211,13 +311,7 @@ Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need
 
 ## 2\. To go further {#imported-s06-015 .scrollable}
 
-### 2.1 Quadratic effects {#2-1-quadratic-effects}
-
-### 2.2 Dummies {#2-2-dummies}
-
-### 2.3 Interaction terms {#2-3-interaction-terms}
-
-## {#imported-s06-016 .scrollable}
+## 2\. To go further (cont.) {#imported-s06-016 .scrollable}
 
 #### 2.1 Quadratic effects {#2-1-quadratic-effects-detail}
 
@@ -331,7 +425,7 @@ Thus linear regression is actually quite powerful and flexible to model other as
 
 ## 2.2 Binary and categorical independent variables {#imported-s06-017 .scrollable}
 
-## {#imported-s06-018 .scrollable}
+## 2.2 Binary and categorical independent variables (cont.) {#imported-s06-018 .scrollable}
 
 #### 2.2 Binary and categorical independent variables {#2-2-binary-and-categorical-independent-variables}
 
@@ -426,7 +520,7 @@ print(lm1.summary())
 Using \\(k\\) dummy variables when only \\(k - 1\\) dummy variables are required is known as the dummy variable trap.
 :::
 
-## {#imported-s06-019 .scrollable}
+## The R deck uses totalpay; here it is income plus bonus (cont.) {#imported-s06-019 .scrollable}
 
 ::: panel-tabset
 ### Example
@@ -452,8 +546,6 @@ In this analysis, each dummy variable is compared with the **reference group**.
 In this example, a **positive regression coefficient** means that income is higher for the dummy variable political affiliation than for the reference group; a **negative regression coefficient** means that income is lower.
 
 If the regression coefficient is statistically significant, the income discrepancy with the reference group is also statistically significant.
-
-### Code
 
 #### Categorical variables
 
@@ -529,7 +621,7 @@ But the group means are all estimated the same as before. For the masters degree
 \$\$Ans: 98,673 + 5,386 = \$104,058.\$\$
 :::
 
-## {#imported-s06-020 .scrollable}
+## Dummy variables for each level of education (cont.) {#imported-s06-020 .scrollable}
 
 ::: panel-tabset
 ### Prediction
@@ -584,7 +676,7 @@ print(lm3.summary())
 
 ## 2.3 Interaction terms {#imported-s06-021 .scrollable}
 
-## {#imported-s06-022 .scrollable}
+## 2.3 Interaction terms (cont.) {#imported-s06-022 .scrollable}
 
 #### 2.3 Interaction terms {#2-3-interaction-terms-detail}
 
@@ -621,8 +713,6 @@ print(fit5.summary())
 \"A 1-year increase in age is associated with a 58.15 dollar decrease in bonus pay, controlling for gender.\"
 
 Key: this assumes the magnitude of the effect is the same for men as it is for women!
-
-### Question
 
 #### How can we allow for the relationship of bonus pay with age to be different for men and women? {#how-can-we-allow-for-the-relationship-of-bonus-pay-with-age-to-be-different-for-men-and-women-}
 
@@ -706,7 +796,7 @@ Women (red):
 :::
 :::::
 
-## {#imported-s06-023 .scrollable}
+## age * female expands to age + female + age:female — the interaction (cont.) {#imported-s06-023 .scrollable}
 
 ::: panel-tabset
 ### Conclusion 1
@@ -784,11 +874,7 @@ Be careful interpreting the positive coefficient for female:
 
 ## 3\. Comparing models {#imported-s06-024 .scrollable}
 
-### Linear regressions
-
-### TSCS
-
-## {#imported-s06-025 .scrollable}
+## 3\. Comparing models (cont.) {#imported-s06-025 .scrollable}
 
 #### 3.1 Comparing models done with lm() {#3-1-comparing-models-done-with-lm-}
 
@@ -886,7 +972,7 @@ Click here for answer
 Both! There is really no such thing as a single correct model, only useful models. And both models are useful. - Model A suggests that adding a bedroom to a house is associated with a higher selling price. - Model B suggests that adding a bedroom without adding bathrooms or to the size of the living area is associated with a lower selling price. Both models provide insight into how these variables relate.
 :::::
 
-## {#imported-s06-026 .scrollable}
+## 3\. Comparing models (cont.) {#imported-s06-026 .scrollable}
 
 ::: panel-tabset
 ### F-test 1
@@ -1010,7 +1096,7 @@ Model B has the lowest AIC, Model A has the highest AIC, and Model C is in betwe
 Note: 'df' here represents the number of independent variable + 2.
 :::
 
-## {#imported-s06-027 .scrollable}
+## Lower AIC is better. The comparison only makes sense on the same rows. (cont.) {#imported-s06-027 .scrollable}
 
 #### 3.2 Comparing models for TSCS {#3-2-comparing-models-for-tscs}
 
@@ -1099,7 +1185,7 @@ for k in range(1, len(predictors) + 1):
 :::
 :::::::
 
-## {#imported-s06-029 .scrollable}
+## Python has no step(); choose among candidates explicitly. (cont.) {#imported-s06-029 .scrollable}
 
 ::: panel-tabset
 ### Results

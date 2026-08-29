@@ -22,6 +22,120 @@ format:
     footer: "MATH60033A · Session 05 practice · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The workshop {.center .scrollable}
+
+1. Ninety minutes
+2. Before you start
+3. Reproduce — 20 min
+4. Apply to your own angle — 35 min
+5. Break one assumption — 15 min
+6. Write it down — 20 min
+7. Submitting
+8. What loses marks
+9. Two-minute report
+
+## What session 5 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Derive the ridge estimator and show how it shrinks the **SVD spectrum**
+- Explain geometrically why the lasso produces exact zeros and ridge does not
+- State the **elastic net** objective and what $\ell_2$ adds under correlation
+- Derive the coordinate-descent update, including **soft-thresholding**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Standardise before penalising, with `StandardScaler` inside a pipeline
+- Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
+- Read a coefficient path and a cross-validation curve
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Work with more candidate predictors than countries
+- Say why a variable the lasso dropped is not thereby irrelevant
+- Report a penalised model honestly, including what selection did
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 38 names below came out of sessions 2–4. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome · *new last week*
+- `pd.crosstab` — a contingency table in one call · *new last week*
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds · *new last week*
+- `sm.MNLogit` — unordered categories, one baseline · *new last week*
+- `sm.add_constant` — the intercept, when there is no formula · *new last week*
+- `smf.logit` — binary outcome, from a formula · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()` · *new last week*
+- `.predict` — fitted probabilities, not classes · *new last week*
+- `np.exp` — a log-odds becomes an odds ratio · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test · *new last week*
+- `stats.chi2.sf` — the $p$-value of that test · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure · *new last week*
+
+<!-- END deck-frontmatter -->
 # Practice {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}

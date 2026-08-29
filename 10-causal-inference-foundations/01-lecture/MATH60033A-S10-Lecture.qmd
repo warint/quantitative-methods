@@ -23,6 +23,134 @@ format:
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session10_cours/. Content is static so the deck renders without R or Python. -->
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. Causal Inference: Logic and Tools
+2. Counterfactual Framework
+3. Randomized Controlled Trials (RCTs)
+4. Observational Data: Challenges
+5. Matching Methods
+6. Exercise: Propensity Score Matching and Post-Matching Estimation
+7. Solution
+8. Your turn
+
+## What session 10 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- State the **fundamental problem of causal inference**
+- Explain why **randomisation** solves it, and what it costs
+- Estimate a **propensity score** and match treated to control units
+- Report an **ATT**, and state the assumption it rests on
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Fit a propensity model and match with `NearestNeighbors`
+- Check **overlap** and **balance** before reading any estimate
+- Compare the naive difference with the matched one, and quantify the gap
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Estimate the effect of a policy that countries chose rather than drew
+- Say why the countries that adopted were already different
+- Report how far the naive comparison would have been wrong
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 52 names below came out of sessions 2–9. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+- `np.cov` — the matrix the model is trying to reproduce · *new last week*
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `semopy.Model` — from a model description string · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
+- `.inspect()` — loadings and paths, estimated · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `semopy.calc_stats` — CFI, TLI, RMSEA — report all three · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+
+<!-- END deck-frontmatter -->
 ## Causal Inference: Logic and Tools {#imported-s10-001 .center .scrollable}
 
 ## Session Overview {#imported-s10-002 .scrollable}
@@ -41,7 +169,7 @@ format:
 -   Evaluate assumptions and threats to identification
 -   Interpret empirical strategies in applied research
 
-## {#imported-s10-004 .scrollable}
+## Objectives (cont.) {#imported-s10-004 .scrollable}
 
 ![](economist-assets/potential-outcomes.png){.r-stretch}
 
@@ -64,7 +192,7 @@ The causal effect for unit [\\(i\\)]{.math .inline} is defined as [\\(Y_i(1) - Y
 
 Without this framework, we cannot articulate what it means for a treatment to have an effect. Understanding causal effects requires us to think explicitly about what did *not* happen.
 
-## {#imported-s10-008 .scrollable}
+## Why It Matters (cont.) {#imported-s10-008 .scrollable}
 
 ## Real Example of Observed and Counterfactual Outcomes {#imported-s10-009 .scrollable}
 
@@ -499,7 +627,7 @@ our pre-matching table shows **substantial imbalance** between treated and contr
 3.  Distributional metrics (eCDF Max) confirm these differences.
 4.  Variance ratios are acceptable, so the issue is not variance but **mean shifts**.
 
-## {#imported-s10-050 .scrollable}
+## **Overall Interpretation** (cont.) {#imported-s10-050 .scrollable}
 
 Before matching, treated and untreated groups are **not comparable**.
 

@@ -58,32 +58,124 @@ Ztr, Zte = sc.transform(Xtr), sc.transform(Xte)
 Z = StandardScaler().fit_transform(X)
 ```
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. Where we are, and the opening claim that turns out to be wrong
+2. A situation you will meet — more candidate predictors than countries
+3. Ridge, and what it does to the SVD spectrum
+4. Lasso, and why corners produce exact zeros
+5. Soft-thresholding, and the coefficient path
+6. The elastic net, and the grouping effect
+7. Choosing $(\alpha, \lambda)$ by cross-validation
+8. Three limitations to state out loud
+9. Key takeaways, and on to the practice
+
+## What session 5 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Derive the ridge estimator and show how it shrinks the **SVD spectrum**
+- Explain geometrically why the lasso produces exact zeros and ridge does not
+- State the **elastic net** objective and what $\ell_2$ adds under correlation
+- Derive the coordinate-descent update, including **soft-thresholding**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Standardise before penalising, with `StandardScaler` inside a pipeline
+- Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
+- Read a coefficient path and a cross-validation curve
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Work with more candidate predictors than countries
+- Say why a variable the lasso dropped is not thereby irrelevant
+- Report a penalised model honestly, including what selection did
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 38 names below came out of sessions 2–4. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome · *new last week*
+- `pd.crosstab` — a contingency table in one call · *new last week*
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds · *new last week*
+- `sm.MNLogit` — unordered categories, one baseline · *new last week*
+- `sm.add_constant` — the intercept, when there is no formula · *new last week*
+- `smf.logit` — binary outcome, from a formula · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()` · *new last week*
+- `.predict` — fitted probabilities, not classes · *new last week*
+- `np.exp` — a log-odds becomes an odds ratio · *new last week*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test · *new last week*
+- `stats.chi2.sf` — the $p$-value of that test · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure · *new last week*
+
+<!-- END deck-frontmatter -->
 # {background-color="#16181A" style="color:#F7F6F3"}
 
 ::: {style="margin-top: 1.2em"}
 ### When is a deliberately biased estimator the better one? {style="color:#F7F6F3"}
-:::
-
-## Outline
-
-| | |
-|---|---|
-| **1** | Where we are, and what this adds |
-| **2** | The problem, on real data |
-| **3** | Ridge — shrink everything, a little |
-| **4** | Lasso — shrink some things to nothing |
-| **5** | Elastic net — when predictors come in families |
-| **6** | Choosing $\lambda$ honestly |
-| **7** | Key takeaways |
-
-## Learning objectives
-
-::: {.tight}
-- State the ridge and lasso objectives and say **what each penalty buys**
-- Explain, in the SVD basis, why ridge shrinkage is **targeted** rather than blunt
-- Derive **soft-thresholding** and use it to explain why the lasso produces exact zeros
-- Choose between lasso and elastic net by looking at the **correlation structure**
-- Report $\lambda$ by cross-validation, and know why the standard errors afterwards are **not valid**
 :::
 
 # 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}

@@ -23,20 +23,138 @@ format:
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session11_cours/. Content is static so the deck renders without R or Python. -->
-## {#imported-s11-001 .scrollable}
 
-**Learning objectives**
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
--   Understand the scope of a difference-in-difference (DiD) model
--   Understand when a DiD design is appropriate
--   Understand how to structure data before estimating a DiD model
--   Identify and interpret the key coefficients in a DiD regression
--   Understand the parallel trends assumption
--   Apply a DiD model to data in R
+## Outline · The hour ahead {.center .scrollable}
 
+1. The key concept
+2. A Difference-in-Difference model
+3. Instrumental Variables: Your turn!
+4. Conclusion
+
+## What session 11 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Set up a **difference-in-differences** design and identify the four cells
+- Read the **interaction coefficient** as the estimate
+- State the **parallel-trends** assumption and how you would probe it
+- Say what an **instrument** must satisfy, and why good ones are rare
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Build the four cells, then get the same number from an interaction in `smf.ols`
+- Plot an event study and let the pre-period speak for the design
+- Handle staggered adoption without letting the cohorts blur
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Evaluate a policy that arrived in different countries at different times
+- Defend parallel trends as an argument, not as a test that passed
+- Say plainly what the design cannot rescue
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 57 names below came out of sessions 2–10. Today's slides assume them, and add to them. The ones marked arrived last week.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
+- `pd.concat` — stack the matched sample back together · *new last week*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+- `np.cov` — the matrix the model is trying to reproduce
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `semopy.Model` — from a model description string
+- `expit` — the inverse logit, when you need it directly · *new last week*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
+- `.inspect()` — loadings and paths, estimated
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `semopy.calc_stats` — CFI, TLI, RMSEA — report all three
+- `.kneighbors` — who got matched to whom · *new last week*
+- `NearestNeighbors` — match treated to control · *new last week*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+- `.boxplot` — balance, before and after matching · *new last week*
+
+<!-- END deck-frontmatter -->
 ## The key concept {#imported-s11-002 .center .scrollable}
 
-## {#imported-s11-003 .scrollable}
+## The key concept {#imported-s11-003 .scrollable}
 
 The difference-in-difference model is used to estimate the effect of a policy intervention or treatment by comparing changes over time in an outcome for a treated group to changes over time for a comparison (control) group.
 
@@ -45,13 +163,13 @@ The difference-in-difference model is used to estimate the effect of a policy in
 
 We observe average outcomes for two groups, before and after the intervention.
 
-## {#imported-s11-004 .scrollable}
+## The key concept (cont.) {#imported-s11-004 .scrollable}
 
 Difference in difference model
 
 ![](economist-assets/did-basic.png){.r-stretch}
 
-## {#imported-s11-005 .scrollable}
+## The key concept (cont.) {#imported-s11-005 .scrollable}
 
 The DiD estimator is the difference between the average change in the treatment group and the average change in the control group:
 
@@ -61,7 +179,7 @@ Using the values in :
 
 [\\\[ (85 - 50) - (55 - 35) = 15 \\\]]{.math .display}
 
-## {#imported-s11-006 .scrollable}
+## The key concept (cont.) {#imported-s11-006 .scrollable}
 
 A more detailed representation is shown in the following table.
 
@@ -71,7 +189,7 @@ Difference in difference, an example
 
 The red number in the bottom-right cell represents the DiD estimator. When this estimator is different from zero, the treatment is interpreted as having an effect.
 
-## {#imported-s11-007 .scrollable}
+## The key concept (cont.) {#imported-s11-007 .scrollable}
 
 In this simple DiD setup:
 
@@ -91,7 +209,7 @@ Where:
 -   `Post` is a dummy variable equal to 1 for the post-treatment period and 0 for the pre-treatment period.
 -   `Treatment × Post` is an interaction term, equal to 1 only for treated units observed after the intervention.
 
-## {#imported-s11-009 .scrollable}
+## The statistical model (cont.) {#imported-s11-009 .scrollable}
 
 A schematic dataset for a simple DiD design is:
 
@@ -121,7 +239,7 @@ We can estimate a simple DiD model corresponding to
 
 **Note:** p\<0.1; p\<0.05; p\<0.01
 
-## {#imported-s11-011 .scrollable}
+## The coefficients (cont.) {#imported-s11-011 .scrollable}
 
 Each coefficient corresponds to a group mean or a difference between group means.
 
@@ -150,7 +268,7 @@ Each coefficient corresponds to a group mean or a difference between group means
 
 -   [\\(\\beta_3\\)]{.math .inline} is the DiD estimator: it measures how much the average outcome in the treatment group changes in the post-treatment period relative to what would have happened in the absence of treatment.
 
-## {#imported-s11-012 .scrollable}
+## The coefficients (cont.) {#imported-s11-012 .scrollable}
 
 Diff-in-Diff, beta 3
 
@@ -178,13 +296,13 @@ To interpret [\\(\\beta_3\\)]{.math .inline}, it is useful to consider the count
 
 The counterfactual is the outcome the treatment group would have experienced in the absence of the policy intervention. In the DiD framework, the counterfactual is inferred from the time trend observed in the control group.
 
-## {#imported-s11-014 .scrollable}
+## The counterfactual (cont.) {#imported-s11-014 .scrollable}
 
 DID counterfactual
 
 ![](economist-assets/did-counterfactual.png){.r-stretch}
 
-## {#imported-s11-015 .scrollable}
+## The counterfactual (cont.) {#imported-s11-015 .scrollable}
 
 Using the simple four-cell example:
 
@@ -192,7 +310,7 @@ Using the simple four-cell example:
 
 So the counterfactual outcome for the treatment group in the post-treatment period is 70.
 
-## {#imported-s11-016 .scrollable}
+## The counterfactual (cont.) {#imported-s11-016 .scrollable}
 
 Using the regression coefficients, the counterfactual can also be written as:
 
@@ -202,7 +320,7 @@ Counterfactual, betas
 
 ## A Difference-in-Difference model {#imported-s11-017 .center .scrollable}
 
-## {#imported-s11-018 .scrollable}
+## A Difference-in-Difference model {#imported-s11-018 .scrollable}
 
 Figure 1: A housing project in New York
 
@@ -216,7 +334,7 @@ Critics of such programs often argue that the construction of affordable housing
 -   Congestion effects due to higher local population
 -   Architectural mismatch between new projects and the existing housing stock
 
-## {#imported-s11-019 .scrollable}
+## A Difference-in-Difference model (cont.) {#imported-s11-019 .scrollable}
 
 A DiD design can be used to examine whether housing projects reduce nearby house prices, as in Ellen et al. (2007).
 
@@ -225,7 +343,7 @@ We simulate data on housing prices for:
 -   Houses located close to a subsidized housing project (treatment group)
 -   Houses located far from such projects (control group)
 
-## {#imported-s11-020 .scrollable}
+## A Difference-in-Difference model (cont.) {#imported-s11-020 .scrollable}
 
 Prices are observed before and after the construction of the subsidized housing site.
 
@@ -293,7 +411,7 @@ print(f"\nDiD estimate = {reg_housing.params['Group:Post_Treatment']:+,.0f}")
 :::
 ::::
 
-## {#imported-s11-023 .scrollable}
+## The interaction IS the difference-in-differences estimate (cont.) {#imported-s11-023 .scrollable}
 
 :::: cell
 ::: {.cell-output .cell-output-stdout}
@@ -321,7 +439,7 @@ print(f"\nDiD estimate = {reg_housing.params['Group:Post_Treatment']:+,.0f}")
 :::
 ::::
 
-## {#imported-s11-024 .scrollable}
+## The interaction IS the difference-in-differences estimate (cont.) {#imported-s11-024 .scrollable}
 
 Illustrative table (as in the original document):
 
@@ -339,7 +457,7 @@ With the housing example, the main questions are:
 -   Did the control group experience a significant change in average price between time 1 and time 2?
 -   Does the treatment group at time 2 differ from its counterfactual?
 
-## {#imported-s11-026 .scrollable}
+## Discussion of the results (cont.) {#imported-s11-026 .scrollable}
 
 Interpretation (following the original text):
 
@@ -358,7 +476,7 @@ Because the intervention occurred, the observed average price is:
 
 [\\\[ 268,364.7 + 34,066.0 = 302,430.7 \\\]]{.math .display}
 
-## {#imported-s11-028 .scrollable}
+## The counterfactual (cont.) {#imported-s11-028 .scrollable}
 
 These values are summarized graphically:
 
@@ -366,7 +484,7 @@ Results from the working example
 
 ## Instrumental Variables: Your turn! {#imported-s11-029 .center .scrollable}
 
-## {#imported-s11-030 .scrollable}
+## Instrumental Variables: Your turn! {#imported-s11-030 .scrollable}
 
 -   <https://rpubs.com/Sternonyos/913599>
 
@@ -407,7 +525,7 @@ data
 
 ## Conclusion {#imported-s11-031 .center .scrollable}
 
-## {#imported-s11-032 .scrollable}
+## Conclusion {#imported-s11-032 .scrollable}
 
 -   The difference-in-difference model is a powerful tool for estimating causal effects in observational data.
 -   It relies on the parallel trends assumption, which must be carefully considered and validated.
@@ -417,6 +535,6 @@ data
 -   IV models are another tool for causal inference when endogeneity is a concern.
 -   Continue practicing with real-world datasets to solidify your understanding of these methods.
 
-## {#imported-s11-033 .scrollable}
+## Conclusion (cont.) {#imported-s11-033 .scrollable}
 
 -   You have now an incredible toolbox to analyse social and business phenomena! I am really proud of you! You will change the world!
