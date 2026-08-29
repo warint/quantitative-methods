@@ -8,15 +8,17 @@ Quantitative Methods in International Business · duration 3h00
 
 ---
 
-**Presentations fill most of the session**, and a closing address ends it. There is no practice.
+**Presentations fill most of the session.** There is no practice.
 
-Twelve groups × **13 minutes** each: **8 minutes** of presentation, **5 minutes** of questions from
-the other groups and the instructor. Two short breaks. The schedule is tight and will be kept to;
-a group that overruns loses its question time, not the next group's.
+Ten groups × **13 minutes** each: **8 minutes** of presentation, **5 minutes** of questions from
+the other groups and the instructor. The schedule is tight and will be kept to; a group that
+overruns loses its question time, not the next group's.
 
-The session ends with the **closing address** — what the twelve weeks were for, why it matters in
+The **closing address** opens the second half — what the twelve weeks were for, why it matters in
 private and public organisations, and a return to *Europe 2031* with the tools you did not have in
-August. See the note under the schedule about how long it runs.
+August. It sits there rather than at the end for two reasons: it is the last teaching of the
+course, and the argument it makes deserves a room that has just come back from a break rather than
+one that has been listening to presentations for three hours.
 
 > **[Open the closing address](https://warint.github.io/quantitative-methods/session-12-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S12-Lecture.qmd`](01-lecture/MATH60033A-S12-Lecture.qmd).
@@ -34,20 +36,18 @@ August. See the note under the schedule about how long it runs.
 
 ## Schedule
 
-| Time | |
-|---|---|
-| 0:00–0:05 | Opening and running order |
-| 0:05–1:11 | Presentations 1–5 |
-| 1:11–1:21 | Break |
-| 1:21–2:14 | Presentations 6–9 |
-| 2:14–2:24 | Break |
-| 2:24–2:55 | Presentations 10–12 |
-| 2:55–3:00 | Closing address — *What the twelve weeks were for* |
+| Time | | |
+|---|---|---|
+| 0:00–0:05 | Opening and running order | |
+| 0:05–1:10 | Presentations 1–5 | *first half* |
+| 1:10–1:25 | Break | |
+| 1:25–1:45 | **Closing address** — *What the twelve weeks were for* | *second half opens* |
+| 1:45–2:50 | Presentations 6–10 | |
+| 2:50–3:00 | Results, next steps, and the final paper | |
 
-> **The arithmetic here is already tight.** Twelve groups at 13 minutes is 2h36, plus two breaks and
-> the opening, which leaves five minutes at the end. The closing address is written longer than
-> that. Either run it short — sections 1, 2 and 8 stand alone — or take the twenty minutes back from
-> somewhere, most easily by moving the address to the start of the session's second half.
+Ten presentations at 13 minutes is 2h10; with the opening, the break, the address and the close
+that is exactly three hours, and there is no slack in it. A group that runs long is taking the time
+out of the address or out of another group.
 
 ---
 
