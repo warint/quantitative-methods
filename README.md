@@ -27,7 +27,7 @@ So this course does four unusual things:
 | **The model runs on your machine** | Ollama + Qwen 2.5 Coder. No API key, no per-token bill, no data leaving the room. You also learn what is achievable *without* a frontier system, which is the realistic institutional constraint. |
 | **You work in a real IDE, from the terminal** | VS Codium, git, and an agent (`aider`) that reads and edits your files while you steer it in prose. Not notebooks; the workflow you will actually be hired into. |
 | **Catching the model is graded** | Every practice session deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
-| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY 4.0 / MIT). Published articles with their replication data, cited by DOI. The practice sessions are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
+| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY-NC 4.0 / MIT). Published articles with their replication data, cited by DOI. The practice sessions are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
 
 Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Markov, the bias–variance
 decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
@@ -39,8 +39,9 @@ ends in a research paper written for a real reader, and an
 oral defence of it. Nothing here is a toy problem with a number at the back of the book.
 
 **Open by construction.** No proprietary software, no API keys, no cloud accounts, no per-token
-bills — and no dependency that stops the course working in a room with no internet. The whole
-repository is licensed for reuse, including commercially: take it, translate it, teach it.
+bills — and no dependency that stops the course working in a room with no internet. The materials
+are licensed for reuse in teaching: take them, translate them, teach them. Commercial use needs a
+word first; the code is MIT and needs nothing.
 
 **Who it is for.** Graduate students in economics and international business who will be expected to
 produce a defensible number, on real European data, and say out loud what it does not license.
@@ -436,11 +437,12 @@ exposing assumptions — because that is also what a statistical model is.
 
 | | |
 |---|---|
-| Teaching materials (`*.md`, rubrics, the synthetic data spine) | **CC BY 4.0** — [`LICENSE`](LICENSE) |
+| Teaching materials (`*.md`, rubrics, the synthetic data spine) | **CC BY-NC 4.0** — [`LICENSE`](LICENSE) |
 | Code (`scripts/`, `**/starter/`, `*.py`) | **MIT** — [`LICENSE-CODE`](LICENSE-CODE) |
 
-Use it, adapt it, translate it, teach it — including commercially — provided you credit the author,
-link the licence and indicate what you changed. Attribution is not endorsement. Scope, exceptions
+Use it, adapt it, translate it, teach it — including at an institution that charges tuition —
+provided you credit the author, link the licence and indicate what you changed. Selling it, or
+selling access to it, needs permission first. Attribution is not endorsement. Scope, exceptions
 (quoted readings, live source data, student submissions) and the citation formats are set out in
 [`LICENSING.md`](LICENSING.md); GitHub's *Cite this repository* button reads
 [`CITATION.cff`](CITATION.cff).
