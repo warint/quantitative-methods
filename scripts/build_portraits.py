@@ -50,8 +50,11 @@ FREE = ("public domain", "pd", "cc0")
 # one leaf, so Legendre is the left half of it.
 ROSTER = {
     "02": [
+        # Hering photographed her twice in 1858. The other frame is a
+        # full-length carte-de-visite, in which the face is a few dozen pixels
+        # across at plate size; this is the bust portrait from the same sitting.
         ("nightingale", "Florence Nightingale", "1820–1910",
-         "File:Florence Nightingale by Henry Hering, 1858.jpg",
+         "File:Florence Nightingale (H Hering NPG x82368).jpg",
          "Made the case with a chart rather than a table, and changed policy with it.",
          None),
     ],
