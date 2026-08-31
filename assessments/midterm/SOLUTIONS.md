@@ -2,7 +2,7 @@
 
 **Every numerical answer here was verified programmatically.**
 
-> Use this to practise, not to read. Sit the paper first — closed book, two hours, pen and a
+> Use this to practise, not to read. Sit the paper first — closed book, three hours, pen and a
 > non-programmable calculator — and only then open this file. Marks are shown per sub-part so you
 > can see exactly where credit is earned.
 
@@ -342,39 +342,58 @@ A full-credit answer contains, in substance:
 
 ## D2 *(8)*
 
-**(a)** *(3)* A testable restatement is something like: *"a country's or bloc's economic and
-strategic outcomes are more strongly associated with its installed AI compute than with other
-measures of capability."* Any indicator is acceptable if it is **observable, attributed to a named
-publisher, and on a stated schedule** — for example data-centre electricity demand from IEA or
-Eurostat energy balances, or accelerator import volumes under HS 8542 from UN Comtrade. A trigger
-must have a number and a date: *"if the EU:US ratio of data-centre electricity demand falls below
-0.10 before end-2029, the assumption gains support."*
+**(a)** *(3)* The question is whether a number built from word counts measures investor sentiment.
+Two threats that are genuinely distinct — the mark is for the *distinctness*, not the vocabulary:
 
-> *Award 1 each for indicator, named publisher and frequency, and for a trigger with both a
-> threshold and a horizon. A vague "look at compute investment" earns 1.*
+- **Construct validity.** The scoring rule may be picking up something adjacent: news *volume*
+  rather than tone, or the tone of the *reporting outlet* rather than of investors. Coverage rises
+  in turbulent months, so an index that averages over articles can move with attention alone.
+  *Evidence that would reduce the concern:* the index still predicts returns after conditioning on
+  article count; the result survives an alternative scoring dictionary.
+- **Measurement error and its direction.** A noisy regressor attenuates its own coefficient toward
+  zero (classical error), so 0.4 may understate the true relation — but if the noise is correlated
+  with the outcome, through outlets reacting to prices, the bias runs the other way and the
+  coefficient is partly the outcome predicting itself. *Evidence:* a strict publication timestamp
+  showing the text precedes the return window; an instrument or a second independent index.
+- Also creditable: **coverage/selection** — countries and periods with thin English-language press
+  are measured worse than others, so the panel's measurement quality is correlated with the units;
+  **aggregation** — one mean per country-month discards disagreement, and a wide distribution and a
+  narrow one give the same number.
 
-**(b)** *(3)* The strongest answers name a method and say what the alternative would miss:
+> *1 mark per genuine threat with its evidence, to a maximum of 2; the third mark is for the two
+> being distinct in kind. Two restatements of "the index might be inaccurate" earn 1 in total.*
 
-- **Session 2–3 (regression with FWL)** — to ask whether a compute gap survives after partialling
-  out economic size and sector composition. *Preferred over raw comparison because the raw ratio
-  confounds capability with the size of the economy.*
-- **Session 5 (elastic net with stability)** — to ask whether compute is selected ahead of energy,
-  talent, data and industrial-integration measures when all compete. *Preferred over a single
-  bivariate regression, which cannot adjudicate between rival measures.*
-- **Session 4 (honest out-of-sample evaluation)** — to ask whether compute has *predictive* content
-  for the outcome or only in-sample fit.
+**(b)** *(3)* What it licenses: a **conditional association**, within country and within month, of
+the sign and rough size stated. What it does **not** license: a tradeable strategy. The specification
+detail required is the **timing of the index relative to the return window** — whether the text is
+available before the return it is being related to, in real time and not merely in the dataset.
 
-> *3 marks: 1 for a named method, 2 for a comparative justification. A method named without
-> justification earns 1.*
+The reason it decides the question, and the $p$-value does not, is that significance describes how
+unlikely the coefficient is under a null, and says nothing about whether the information existed
+when the trade would have had to be placed. An index built from a revised, back-filled or
+same-window text corpus can be strongly significant and entirely untradeable — this is Session 4's
+leakage, arriving in a new costume.
 
-**(c)** *(2)* Acceptable falsifiers include: a country in the bottom quartile of compute achieving
-top-quartile productivity growth over the horizon; or compute failing to be selected ahead of energy
-and talent measures in a stability analysis.
+Also full marks for naming the **fixed effects** as the detail, provided the reason is right: with
+country and month effects the estimate uses only within-country deviation from the month's common
+movement, so it is not a claim about which countries return more, and a strategy that trades across
+countries is not the thing that was estimated.
 
-**Also full marks:** arguing that the assumption *as stated in the scenario* is not falsifiable —
-because "dominant measure of geopolitical power" names no outcome variable, so no observation can
-contradict it — provided the student states what would have to be specified (a named outcome, a
-horizon, a comparison class) to make it testable.
+> *1 for what it licenses, 1 for the refusal, 1 for the detail with a correct reason. Naming a
+> detail without saying why it beats the p-value earns 2.*
+
+**(c)** *(2)* Acceptable answers show the coefficient surviving while the interpretation fails:
+
+- The index correlates as strongly with **article count** as with tone, and the coefficient
+  disappears once count is included — sentiment was proxying attention.
+- Shuffling the sentiment *scores* while keeping the article-selection pattern reproduces a similar
+  coefficient — the signal is in which countries get covered when, not in what is said.
+- The index predicts returns equally well when computed from articles published **after** the return
+  window, which no measure of prior sentiment should do.
+
+**Also full marks:** observing that (c) as posed is the general problem with any named latent
+quantity — the name is not identified by the fit, which is Session 7's rotation problem in another
+setting — provided the student gives one concrete observation as well.
 
 > *This is the best answer available on the paper. If you found it unprompted, you are ready for the
 > final paper.*

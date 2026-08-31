@@ -7,7 +7,7 @@
 |  |  |
 |---|---|
 | **Format** | **Paper. Handwritten, in pen.** |
-| **Duration** | 2 hours |
+| **Duration** | 3 hours |
 | **Total** | 100 points |
 | **Permitted** | a pen, and a **non-programmable calculator** |
 | **Not permitted** | any computer, phone, tablet or smartwatch · any networked device · **no internet** · notes, textbooks, formula sheets |
@@ -45,7 +45,7 @@
 > **Part D — judgement.** Knowing what a number does *not* license you to say. The hardest part,
 > and the one that separates an analyst from a technician.
 >
-> Suggested timing: **A 20 min · B 40 min · C 35 min · D 20 min**, leaving five to check.
+> Suggested timing: **A 30 min · B 60 min · C 45 min · D 35 min**, leaving ten to check.
 
 ---
 
@@ -321,19 +321,27 @@ meantime.
 
 <br><br><br><br><br><br>
 
-## D2. From a narrative claim to a testable one *(8 points)*
+## D2. What a constructed measure licenses *(8 points)*
 
-The *Europe 2031* scenario assigns the United States roughly 12 times Europe's AI compute stock in
-2031, and treats compute as the dominant measure of geopolitical capability.
+Fraiberger, Lee, Puy and Sahay (2021), your Session 2 reading, build a **sentiment index** from the
+text of news articles about a country and relate it to that country's asset prices. Sentiment is
+never observed: it is constructed from word counts by a scoring rule the authors chose, then
+averaged over articles to give one number per country per period.
 
-**(a)** *(3)* State the assumption in a form that could be tested. Name one observable indicator,
-its publishing institution, and a trigger point with a horizon.
+Suppose the paper reports that a one-standard-deviation rise in the index is associated with a
+**0.4 percentage point** rise in next-month equity returns, significant at 1%, in a panel regression
+with country and month fixed effects.
 
-**(b)** *(3)* Which method from Sessions 1–7 would you use, and why that one rather than the
-obvious alternative?
+**(a)** *(3)* The index is a **measurement**, and the regression assumes it measures what its name
+says. Name **two distinct** threats to that assumption — not two versions of the same one — and for
+each, state the evidence that would reduce your concern.
 
-**(c)** *(2)* State one observation that would count as evidence **against** the assumption. If you
-believe the assumption is not falsifiable as stated, say so and explain what would have to change.
+**(b)** *(3)* A fund manager reads the result and proposes trading on the index. State what the
+0.4 points does and does **not** license, and name the **one specification detail** you would need
+before answering at all. Say why that detail, rather than the $p$-value, is what decides it.
+
+**(c)** *(2)* State one observation that would count as evidence that the index is capturing
+**something other than sentiment** while still producing this coefficient.
 
 <br><br><br><br><br><br>
 
