@@ -130,6 +130,34 @@ TOOLKIT = {
     ".coef_ / .alpha_": ("05", "Read the fit", "scikit-learn's spelling of `.params`"),
     "np.logspace": ("05", "Choose and validate", "a grid that is even in $\\log\\lambda$"),
 
+    # ---- Session 06 · panel data and interactions ------------------------
+    "PanelOLS": ("06", "Fit", "fixed effects, entity intercepts absorbed"),
+    "RandomEffects": ("06", "Fit", "the other panel estimator, and its assumption"),
+    "I(x**2)": ("06", "Fit", "a quadratic term, inside a formula"),
+    "a * b": ("06", "Fit", "interaction — expands to `a + b + a:b`"),
+    ".compare_f_test": ("06", "Choose and validate", "an F-test, for nested models only"),
+    "np.linalg.pinv": ("06", "Choose and validate", "pseudo-inverse, for the Hausman statistic"),
+
+    # ---- Session 07 · PCA and factor analysis ----------------------------
+    "PCA": ("07", "Fit", "components, on standardised columns"),
+    ".explained_variance_ratio_": ("07", "Read the fit", "what the scree plot is drawn from"),
+    ".components_": ("07", "Read the fit", "the loadings — variables on components"),
+    "prince.FAMD": ("07", "Fit", "when the columns are mixed numeric and categorical"),
+    "Factor": ("07", "Fit", "statsmodels' factor analysis, by maximum likelihood"),
+    ".rotate('varimax')": ("07", "Read the fit", "same fit, readable loadings — and no new evidence"),
+    "np.linalg.eigvalsh": ("07", "Describe", "eigenvalues of a symmetric matrix"),
+
+    # ---- Session 08 · nearest neighbours and the trade-off ---------------
+    "KNeighborsClassifier": ("08", "Fit", "predict a class from the k closest rows"),
+    "KNeighborsRegressor": ("08", "Fit", "the same idea, averaging a number"),
+    "GridSearchCV": ("08", "Choose and validate", "search a hyperparameter by cross-validation"),
+    ".best_params_ / .best_score_": ("08", "Choose and validate", "what the search chose, and how it scored"),
+    "cross_val_score": ("08", "Choose and validate", "one number, k folds, any scorer"),
+    "permutation_importance": ("08", "Diagnose", "importance without coefficients: scramble a column"),
+    "confusion_matrix": ("08", "Diagnose", "the four cells accuracy hides"),
+    "classification_report": ("08", "Diagnose", "precision and recall, per class"),
+    "RandomForestClassifier": ("08", "Fit", "the comparison that complexity has to beat"),
+
     # ---- Session 09 · structural equation modelling ----------------------
     "semopy.Model": ("09", "Fit", "from a model description string"),
     ".inspect()": ("09", "Read the fit", "loadings and paths, estimated"),
@@ -142,6 +170,18 @@ TOOLKIT = {
     ".kneighbors": ("10", "Choose and validate", "who got matched to whom"),
     "pd.concat": ("10", "Load and shape", "stack the matched sample back together"),
     ".boxplot": ("10", "Plot", "balance, before and after matching"),
+}
+
+
+# A few registry entries are written schematically, because that is how they
+# are worth reading on a slide — `a * b` says what an interaction is, where
+# `age * female` says what one particular interaction was. Those entries can
+# never be found by searching for themselves, so they name the literal string
+# --check should look for instead.
+PROBES = {
+    "I(x**2)": "I(living_area**2)",
+    "a * b": "age * female",
+    ".rotate('varimax')": 'rotate("varimax")',
 }
 
 
@@ -249,15 +289,24 @@ def api_names(code):
 
 
 def surface():
-    """The real API surface, per session, from every code block in the repo."""
+    """The real API surface, per session, from every code block in the repo.
+
+    Two views of the same code are collected. `names` is what the AST sees, and
+    is what catches a renamed method. `raw` is the source text, which is the
+    only place some entries can be found at all: formula syntax like `I(x**2)`
+    or `a * b` lives inside a *string* passed to `smf.ols`, and no amount of
+    parsing the Python will surface it.
+    """
     per = {}
     for sess, _kind, q in decks():
-        got = per.setdefault(sess, set())
+        names, raw = per.setdefault(sess, (set(), []))
         for m in FENCE.finditer(q.read_text()):
             body = next(g for g in m.groups() if g is not None)
-            got |= api_names("\n".join(
-                l for l in body.splitlines() if not l.lstrip().startswith("#|")))
-    return per
+            code = "\n".join(
+                l for l in body.splitlines() if not l.lstrip().startswith("#|"))
+            names |= api_names(code)
+            raw.append(code)
+    return {s: (n, "\n".join(r)) for s, (n, r) in per.items()}
 
 
 # ---------------------------------------------------------------------------
@@ -411,8 +460,9 @@ def main():
     if check:
         real = surface()
         cumulative, unknown = set(), {}
+        all_raw = "\n".join(r for _n, r in real.values())
         for sess in sorted(real):
-            cumulative |= real[sess]
+            cumulative |= real[sess][0]
         print("── registry entries the code no longer contains")
         for name, (when, _g, _d) in sorted(TOOLKIT.items()):
             probes = [p.strip() for p in name.replace("/", " ").split()]
@@ -424,13 +474,16 @@ def main():
                 n = name.rstrip("()")
                 return (n in cumulative or n + "()" in cumulative
                         or ("." + n.rsplit(".", 1)[-1]) in cumulative)
-            hit = any(seen(p) for p in probes)
+            # Fall back to the raw source for anything the AST cannot express:
+            # formula syntax, and entries written with their argument.
+            hit = (any(seen(p) for p in probes)
+                   or PROBES.get(name, name.split(" / ")[0]) in all_raw)
             if not hit:
                 print(f"     S{when}  {name}")
         print("\n── frequent names the registry has never heard of")
         known = " ".join(TOOLKIT)
         for sess in sorted(real):
-            new = {n for n in real[sess]
+            new = {n for n in real[sess][0]
                    if n.startswith((".", "np.", "pd.", "plt.", "sm.", "smf."))
                    and n not in known and len(n) > 4}
             if new:

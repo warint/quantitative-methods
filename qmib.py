@@ -68,6 +68,13 @@ PUBLISHED = {
     "glassdoor":  (f"{_BASE}/session5/glassdoordata.csv", None),
     "movies":     (f"{_BASE}/session9/movies_metadata.csv", None),
     "efa":        (f"{_BASE}/session9/EFA.csv", None),
+    # Smarket, from ISLR. The URL the R course used — statlearning.com/s/Smarket.csv
+    # — now 404s, so the primary is the ISLP authors' own copy and the mirror is
+    # the Rdatasets archive, which carries an extra `rownames` column that
+    # _read() drops along with the other index columns.
+    "smarket":    ("https://raw.githubusercontent.com/intro-stat-learning/ISLP/"
+                   "main/ISLP/data/Smarket.csv",
+                   "https://vincentarelbundock.github.io/Rdatasets/csv/ISLR/Smarket.csv"),
 }
 
 # The spine: committed, synthetic, safe to ship. `core` is shared by every
@@ -242,6 +249,9 @@ def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
         df = df.rename(columns={"quality": "good"})
         if df["good"].dtype == object:
             df["good"] = (df["good"].astype(str).str.strip().str.lower() == "yes").astype(int)
+    if name == "smarket":
+        # The Rdatasets mirror carries R's row numbers as a first column.
+        df = df.drop(columns=[c for c in ("rownames", "unnamed:_0") if c in df.columns])
     if name == "movies":
         # The raw file mixes numbers and strings in several columns, which
         # parquet will not store. Coerce the numeric ones and drop the rest.

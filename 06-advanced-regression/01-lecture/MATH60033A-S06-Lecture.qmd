@@ -22,7 +22,26 @@ format:
     footer: "MATH60033A · Session 06 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Imported from https://warin.ca/quant/en/session6_cours/. Content is static so the deck renders without R or Python. -->
+<!-- Imported from https://warin.ca/quant/en/session6_cours/. The code cells below are live: they execute
+     against the course data at render time, so the output on the slides is the
+     output the students' own machines produce. -->
+```{python}
+#| label: setup
+#| echo: false
+
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import qmib
+
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
@@ -213,8 +232,9 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 
 ## Step 1. Running a TSCS model {#imported-s06-012 .scrollable}
 
-``` python
-# In the VS Codium terminal, with .venv active:  python
+```{python}
+#| echo: true
+
 import qmib
 
 # Country panel: government debt and economic-freedom indices
@@ -222,29 +242,14 @@ mydata1 = qmib.load("panel")
 mydata1.head()
 ```
 
-    ## # A tibble: 6 × 45
-    ##     obs name    country  year lngdppc3    va    ps    ge    rq    rl    cc   inv
-    ##   <dbl> <chr>     <dbl> <dbl>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-    ## 1     1 Albania       1  1989     6.76    NA    NA    NA    NA    NA    NA 44.8 
-    ## 2     2 Albania       1  1990     6.52    NA    NA    NA    NA    NA    NA 49.8 
-    ## 3     3 Albania       1  1991     6.01    NA    NA    NA    NA    NA    NA  9.51
-    ## 4     4 Albania       1  1992     5.56    NA    NA    NA    NA    NA    NA  7.44
-    ## 5     5 Albania       1  1993     6.12    NA    NA    NA    NA    NA    NA 18.9 
-    ## 6     6 Albania       1  1994     6.60    NA    NA    NA    NA    NA    NA 25.6 
-    ## # ℹ 33 more variables: gns <dbl>, lninfl <dbl>, govrev <dbl>, govexp <dbl>,
-    ## #   fb <dbl>, strfb <dbl>, netdebt <dbl>, grossdebt <dbl>, cab <dbl>,
-    ## #   ief <dbl>, property <dbl>, integrity <dbl>, taxburden <dbl>,
-    ## #   govspend <dbl>, busfreedom <dbl>, labfreedom <dbl>, monfreedom <dbl>,
-    ## #   tradefreedom <dbl>, invfreedom <dbl>, finfreedom <dbl>, dcr <dbl>,
-    ## #   emplpop <dbl>, schooling1 <dbl>, to <dbl>, fdinet <dbl>, secondenrol <dbl>,
-    ## #   tertenrol <dbl>, incomeind <dbl>, lfp <dbl>, schooling2 <dbl>, …
-
 ## Step 1. Running a TSCS model {#imported-s06-013 .scrollable}
 
 ::::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 from linearmodels.panel import RandomEffects
 import pandas as pd
 
@@ -259,13 +264,17 @@ re_model = RandomEffects(y, X).fit()
 
 Also, remember how useful this command can be:
 
-``` python
+```{python}
+#| echo: true
+
 help(RandomEffects)
 ```
 
 ### Code 2
 
-``` python
+```{python}
+#| echo: true
+
 print(re_model)
 ```
 
@@ -299,13 +308,48 @@ Another important assumption of the FE model is that those time-invariant charac
 
 Each entity is different therefore the entity's error term and the constant (which captures individual characteristics) should not be correlated with the others. If the error terms are correlated, then FE is no suitable since inferences may not be correct and you need to model that relationship (probably using random-effects), this is the main rationale for the Hausman test.
 
-``` python
+```{python}
+#| echo: true
+
 from linearmodels.panel import PanelOLS
 
-# Fixed effects: one intercept per country, absorbed
+# Fixed effects: one intercept per country, absorbed rather than estimated.
+# Only within-country variation identifies the slopes now.
 fixed = PanelOLS(y, X, entity_effects=True).fit()
 print(fixed)
 ```
+
+## Step 2. Fixed effects versus random effects {.scrollable}
+
+The two estimators disagree. The **Hausman test** asks whether the disagreement
+is larger than sampling noise — and if it is, random effects is inconsistent.
+
+```{python}
+#| echo: true
+
+import numpy as np
+from scipy import stats
+
+# H = (b_FE - b_RE)' [Var(b_FE) - Var(b_RE)]^-1 (b_FE - b_RE), distributed chi2
+# with one degree of freedom per coefficient under the null. Note pinv, not inv:
+# the difference of two estimated covariance matrices is near-singular.
+diff  = fixed.params - re_model.params
+vdiff = fixed.cov - re_model.cov
+H = float(diff.values @ np.linalg.pinv(vdiff.values) @ diff.values)
+pval = 1 - stats.chi2.cdf(H, len(diff))
+
+for k in fixed.params.index:
+    print(f"{k:12}  FE {fixed.params[k]:8.3f}   RE {re_model.params[k]:8.3f}"
+          f"   diff {diff[k]:8.3f}")
+print(f"\nHausman H = {H:.2f} on {len(diff)} df,  p = {pval:.4f}")
+```
+
+::: {.warn}
+Rejecting tells you random effects is **wrong** here — not that fixed effects is
+right. What it leaves you with is an estimator that uses only within-country
+variation, and therefore cannot answer a question about differences *between*
+countries.
+:::
 
 Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need a random effects model.
 :::
@@ -322,7 +366,9 @@ Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need
 ::: pull-left
 Let's go to the real estate data. Let's see if selling price is related to Living.area. First visualize this relationship:
 
-``` python
+```{python}
+#| echo: true
+
 import qmib
 import statsmodels.formula.api as smf
 
@@ -337,28 +383,11 @@ re1 = smf.ols("price ~ living_area", data=re_data).fit()
 
 ### Results 1
 
-``` python
+```{python}
+#| echo: true
+
 print(re1.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = Price ~ Living.area, data = re)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -419227 -199480  -66272  145020 1066479 
-    ## 
-    ## Coefficients:
-    ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 2.003e+05  2.608e+04   7.679  4.2e-14 ***
-    ## Living.area 1.137e+02  9.619e+00  11.818  < 2e-16 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 268400 on 892 degrees of freedom
-    ## Multiple R-squared:  0.1354,    Adjusted R-squared:  0.1344 
-    ## F-statistic: 139.7 on 1 and 892 DF,  p-value: < 2.2e-16
 
 ### 2
 
@@ -384,30 +413,12 @@ So we can perform a \\(t-test\\) for \\(\\beta_2\\) to determine if the relation
 
 Let's fit a regression model to predict Price from both \\(Living.area\\) and \\(Living.area\^2\\).
 
-``` python
+```{python}
+#| echo: true
+
 re2 = smf.ols("price ~ living_area + I(living_area**2)", data=re_data).fit()
 print(re2.summary())   # the quadratic term is very significant
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = Price ~ Living.area + I(Living.area^2), data = re)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -502546 -188483  -61968  142600 1051018 
-    ## 
-    ## Coefficients:
-    ##                    Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)       4.714e+05  6.611e+04   7.130 2.07e-12 ***
-    ## Living.area      -1.107e+02  5.127e+01  -2.160   0.0311 *  
-    ## I(Living.area^2)  4.083e-02  9.165e-03   4.454 9.48e-06 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 265700 on 891 degrees of freedom
-    ## Multiple R-squared:  0.1542,    Adjusted R-squared:  0.1523 
-    ## F-statistic: 81.23 on 2 and 891 DF,  p-value: < 2.2e-16
 
 ### 4
 
@@ -459,7 +470,9 @@ In this example, notice that we don\'t have to create a dummy variable to repres
 
 If \\(X_1=0\\) and \\(X_2=0\\), we know the voter is neither Republican nor Democrat. Therefore, voter must be Independent.
 
-``` python
+```{python}
+#| echo: true
+
 glassdoor = qmib.load("glassdoor")
 
 # The R deck uses totalpay; here it is income plus bonus
@@ -469,7 +482,9 @@ glassdoor.head()
 
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 import matplotlib.pyplot as plt
 
 glassdoor["female"] = (glassdoor["gender"].str.lower() == "female").astype(int)
@@ -483,28 +498,11 @@ lm1 = smf.ols("totalpay ~ female", data=glassdoor).fit()
 
 ### Results
 
-``` python
+```{python}
+#| echo: true
+
 print(lm1.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = totalpay ~ female, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##    Min     1Q Median     3Q    Max 
-    ## -63889 -16432    182  16471  79091 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)   104919       1076  97.546   <2e-16 ***
-    ## female         -8502       1572  -5.407    8e-08 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 24810 on 998 degrees of freedom
-    ## Multiple R-squared:  0.02847,    Adjusted R-squared:  0.02749 
-    ## F-statistic: 29.24 on 1 and 998 DF,  p-value: 8e-08
 
 ### Lessons
 
@@ -558,7 +556,9 @@ If we define a new variable where 1 = high school, 2 = college, etc. and use it 
 
 By creating 3 binary independent variable to represent the 4 groups, we can estimate the mean salary for each group separately.
 
-``` python
+```{python}
+#| echo: true
+
 # Dummy variables for each level of education
 glassdoor["college"] = (glassdoor["education"] == "College").astype(int)
 glassdoor["masters"] = (glassdoor["education"] == "Masters").astype(int)
@@ -571,31 +571,12 @@ We use the following regression to model the mean of total pay:
 
 \$\$\\mu = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_3\$\$
 
-``` python
+```{python}
+#| echo: true
+
 fit2 = smf.ols("totalpay ~ college + masters + phd", data=glassdoor).fit()
 print(fit2.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = totalpay ~ college + masters + phd, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##    Min     1Q Median     3Q    Max 
-    ## -62000 -17433   -523  16918  77372 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)    94871       1522  62.354  < 2e-16 ***
-    ## college         3801       2205   1.724    0.085 .  
-    ## masters         9187       2170   4.232 2.52e-05 ***
-    ## phd            11766       2212   5.320 1.28e-07 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 24770 on 996 degrees of freedom
-    ## Multiple R-squared:  0.03356,    Adjusted R-squared:  0.03064 
-    ## F-statistic: 11.53 on 3 and 996 DF,  p-value: 1.97e-07
 
 ### Interpretation
 
@@ -641,38 +622,16 @@ For the model with one categorical predictor, the intercept represents the mean 
 
 Note:
 
-We can also use the fastDummies package: glassdoor \<- fastDummies::dummy_cols(glassdoor, select_columns = \'education\')
+In Python you rarely build these by hand: `pd.get_dummies(glassdoor, columns=["education"], drop_first=True)` makes the same columns in one call, and a formula like `totalpay ~ C(education)` makes them implicitly.
 
 ### results
 
-``` python
+```{python}
+#| echo: true
+
 lm3 = smf.ols("totalpay ~ female + college + masters + phd + age", data=glassdoor).fit()
 print(lm3.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = totalpay ~ female + college + masters + phd + age, 
-    ##     data = glassdoor)
-    ## 
-    ## Residuals:
-    ##    Min     1Q Median     3Q    Max 
-    ## -52301 -14148   -304  13654  60890 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 60501.98    2317.98  26.101  < 2e-16 ***
-    ## female      -8789.09    1298.00  -6.771 2.18e-11 ***
-    ## college      3906.31    1817.03   2.150   0.0318 *  
-    ## masters      8077.39    1792.02   4.507 7.34e-06 ***
-    ## phd         10633.59    1824.55   5.828 7.57e-09 ***
-    ## age           942.46      45.21  20.846  < 2e-16 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 20410 on 994 degrees of freedom
-    ## Multiple R-squared:  0.3449,    Adjusted R-squared:  0.3416 
-    ## F-statistic: 104.7 on 5 and 994 DF,  p-value: < 2.2e-16
 :::
 
 ## 2.3 Interaction terms {#imported-s06-021 .scrollable}
@@ -686,30 +645,12 @@ print(lm3.summary())
 
 Let's look at a multiple regression to predict Y = bonus of employees based on \\(x_1 = age\\) and an \\(x_2 =female\\):
 
-``` python
+```{python}
+#| echo: true
+
 fit5 = smf.ols("bonus ~ age + female", data=glassdoor).fit()
 print(fit5.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = bonus ~ age + female, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -4118.9 -1497.5    47.8  1463.1  4006.9 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 8846.138    183.717  48.151   <2e-16 ***
-    ## age          -58.158      4.043 -14.386   <2e-16 ***
-    ## female        60.549    115.759   0.523    0.601    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1826 on 997 degrees of freedom
-    ## Multiple R-squared:  0.1719,    Adjusted R-squared:  0.1702 
-    ## F-statistic: 103.5 on 2 and 997 DF,  p-value: < 2.2e-16
 
 \"A 1-year increase in age is associated with a 58.15 dollar decrease in bonus pay, controlling for gender.\"
 
@@ -735,32 +676,13 @@ We can perform a \\(t-test\\) to see if this interaction effect is significant.
 
 Let's look at a multiple regression **to predict bonus of employees based on age, an indicator for female, and the interaction between the two**:
 
-``` python
+```{python}
+#| echo: true
+
 # age * female expands to age + female + age:female — the interaction
 fit6 = smf.ols("bonus ~ age * female", data=glassdoor).fit()
 print(fit6.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = bonus ~ age * female, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -4192.7 -1482.3    45.8  1455.5  4060.4 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 8570.983    234.272  36.586   <2e-16 ***
-    ## age          -51.448      5.378  -9.567   <2e-16 ***
-    ## female       698.327    356.879   1.957   0.0507 .  
-    ## age:female   -15.379      8.141  -1.889   0.0592 .  
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1823 on 996 degrees of freedom
-    ## Multiple R-squared:  0.1749,    Adjusted R-squared:  0.1724 
-    ## F-statistic: 70.36 on 3 and 996 DF,  p-value: < 2.2e-16
 
 ### Interpretation
 
@@ -804,31 +726,17 @@ Women (red):
 
 What can we conclude?
 
-``` python
-fit6 = smf.ols("bonus ~ age * female", data=glassdoor).fit()
-print(fit6.summary())
-```
+```{python}
+#| echo: true
 
-    ## 
-    ## Call:
-    ## lm(formula = bonus ~ age * female, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -4192.7 -1482.3    45.8  1455.5  4060.4 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 8570.983    234.272  36.586   <2e-16 ***
-    ## age          -51.448      5.378  -9.567   <2e-16 ***
-    ## female       698.327    356.879   1.957   0.0507 .  
-    ## age:female   -15.379      8.141  -1.889   0.0592 .  
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1823 on 996 degrees of freedom
-    ## Multiple R-squared:  0.1749,    Adjusted R-squared:  0.1724 
-    ## F-statistic: 70.36 on 3 and 996 DF,  p-value: < 2.2e-16
+# An interaction is two slopes reported as one number plus a difference.
+# `age` is now the slope for men; add the interaction for the women's slope.
+b = fit6.params
+print(f"slope in age, men    : {b['age']:8.2f}  per year")
+print(f"slope in age, women  : {b['age'] + b['age:female']:8.2f}  per year")
+print(f"difference           : {b['age:female']:8.2f}  <- the interaction")
+print(f"p on the difference  : {fit6.pvalues['age:female']:8.4f}")
+```
 
 ### 2
 
@@ -841,36 +749,6 @@ Be careful interpreting the positive coefficient for female:
 -   this is the estimate when \\(age = 0\\), which is difficult to interpret in this model.
 
 ### 3
-
-    ## 
-    ## Call:
-    ## lm(formula = bonus ~ (age + female + education)^2, data = glassdoor)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -3924.0 -1457.5    37.2  1440.9  3970.7 
-    ## 
-    ## Coefficients:
-    ##                             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                 8123.322    415.098  19.570  < 2e-16 ***
-    ## age                          -41.079      9.377  -4.381 1.31e-05 ***
-    ## female                       936.240    407.670   2.297   0.0219 *  
-    ## educationHigh School           2.963    522.171   0.006   0.9955    
-    ## educationMasters             642.744    523.416   1.228   0.2197    
-    ## educationPhD                1024.073    528.263   1.939   0.0528 .  
-    ## age:female                   -17.205      8.127  -2.117   0.0345 *  
-    ## age:educationHigh School      -7.866     11.493  -0.684   0.4939    
-    ## age:educationMasters         -15.282     11.565  -1.321   0.1867    
-    ## age:educationPhD             -15.228     11.700  -1.301   0.1934    
-    ## female:educationHigh School -179.601    322.879  -0.556   0.5782    
-    ## female:educationMasters     -127.314    327.773  -0.388   0.6978    
-    ## female:educationPhD         -274.127    333.101  -0.823   0.4107    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1813 on 987 degrees of freedom
-    ## Multiple R-squared:  0.192,    Adjusted R-squared:  0.1821 
-    ## F-statistic: 19.54 on 12 and 987 DF,  p-value: < 2.2e-16
 :::
 
 ## 3\. Comparing models {#imported-s06-024 .scrollable}
@@ -904,57 +782,21 @@ It is the effect of beds on mean price, controlling for number of baths and livi
 
 ### Code model A
 
-``` python
+```{python}
+#| echo: true
+
 model_a = smf.ols("price ~ bedrooms", data=re_data).fit()
 print(model_a.summary())
 ```
 
-    ## 
-    ## Call:
-    ## lm(formula = Price ~ bedrooms, data = re)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -450481 -210012  -77595  158854 1030556 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)   338975      44117   7.684 4.07e-14 ***
-    ## bedrooms       40234      11499   3.499  0.00049 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 286700 on 892 degrees of freedom
-    ## Multiple R-squared:  0.01354,    Adjusted R-squared:  0.01243 
-    ## F-statistic: 12.24 on 1 and 892 DF,  p-value: 0.00049
-
 ### Code model B
 
-``` python
+```{python}
+#| echo: true
+
 model_b = smf.ols("price ~ bedrooms + bathrooms + living_area", data=re_data).fit()
 print(model_b.summary())
 ```
-
-    ## 
-    ## Call:
-    ## lm(formula = Price ~ bedrooms + bathrooms + Living.area, data = re)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -602343 -188383  -60367  144332 1133878 
-    ## 
-    ## Coefficients:
-    ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 289913.73   40344.96   7.186 1.41e-12 ***
-    ## bedrooms    -67709.57   13120.94  -5.160 3.04e-07 ***
-    ## bathrooms    84762.80   13175.46   6.433 2.04e-10 ***
-    ## Living.area     89.69      13.26   6.764 2.43e-11 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 261000 on 890 degrees of freedom
-    ## Multiple R-squared:  0.1842,    Adjusted R-squared:  0.1815 
-    ## F-statistic:    67 on 3 and 890 DF,  p-value: < 2.2e-16
 
 ### Warning
 
@@ -1010,21 +852,7 @@ The F-test is based on something called the analysis of variance (ANOVA) of the 
 
 If the p-value is small, then there is evidence to suggest that the extra variables are important.
 
-Comparing Model A and Model B from before in R:
-
-``` python
-re_data = qmib.load("realestate")
-```
-
-    ## Analysis of Variance Table
-    ## 
-    ## Model 1: Price ~ bedrooms
-    ## Model 2: Price ~ bedrooms + bathrooms + Living.area
-    ##   Res.Df        RSS Df Sum of Sq      F    Pr(>F)    
-    ## 1    892 7.3341e+13                                  
-    ## 2    890 6.0650e+13  2 1.269e+13 93.112 < 2.2e-16 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Comparing Model A and Model B from before:
 
 Click here for answer
 
@@ -1046,49 +874,25 @@ Model C is not nested with either Model A (using bedrooms as a predictor alone) 
 
 ### 5
 
-``` python
+```{python}
+#| echo: true
+
 model_c = smf.ols("price ~ living_area + I(living_area**2) + bathrooms + I(bathrooms**2)",
                   data=re_data).fit()
 print(model_c.summary())
 ```
 
-    ## 
-    ## Call:
-    ## lm(formula = Price ~ Living.area + I(Living.area^2) + bathrooms + 
-    ##     I(bathrooms^2), data = re)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -519726 -187181  -61978  132937 1152903 
-    ## 
-    ## Coefficients:
-    ##                    Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)       3.858e+05  6.740e+04   5.724 1.42e-08 ***
-    ## Living.area      -2.149e+02  5.594e+01  -3.841 0.000131 ***
-    ## I(Living.area^2)  5.064e-02  9.717e-03   5.211 2.33e-07 ***
-    ## bathrooms         1.367e+05  3.334e+04   4.100 4.51e-05 ***
-    ## I(bathrooms^2)   -1.064e+04  4.721e+03  -2.253 0.024476 *  
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 261100 on 889 degrees of freedom
-    ## Multiple R-squared:  0.1848,    Adjusted R-squared:  0.1812 
-    ## F-statistic: 50.39 on 4 and 889 DF,  p-value: < 2.2e-16
-
 ### 6
 
 Here is the R output for calculating AIC for these 3 models:
 
-``` python
+```{python}
+#| echo: true
+
 # Lower AIC is better. The comparison only makes sense on the same rows.
 for name, m in [("A", model_a), ("B", model_b), ("C", model_c)]:
     print(f"model {name}:  AIC {m.aic:10.1f}   adj R2 {m.rsquared_adj:.4f}")
 ```
-
-    ##        df      AIC
-    ## modelA  3 25009.67
-    ## modelB  5 24843.81
-    ## modelC  6 24845.16
 
 Click here for answer
 
@@ -1104,14 +908,18 @@ Note: 'df' here represents the number of independent variable + 2.
 ::: panel-tabset
 ### Nested models
 
-``` python
+```{python}
+#| echo: true
+
 # An F-test for nested models: does B earn its extra terms over A?
 print(model_b.compare_f_test(model_a))
 ```
 
 ### Non-nested models
 
-``` python
+```{python}
+#| echo: true
+
 # Non-nested models are compared on information criteria, not an F-test
 print(f"AIC  B {model_b.aic:.1f}   C {model_c.aic:.1f}")
 ```
@@ -1168,7 +976,9 @@ One approach is **backward stepwise regression:**
 
 R prints out all of the steps in the backward stepwise command. This is just the first step:
 
-``` python
+```{python}
+#| echo: true
+
 # Python has no step(); choose among candidates explicitly.
 predictors = ["living_area", "bedrooms", "bathrooms", "year", "garage"]
 for k in range(1, len(predictors) + 1):

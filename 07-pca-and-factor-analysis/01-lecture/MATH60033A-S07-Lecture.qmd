@@ -22,7 +22,26 @@ format:
     footer: "MATH60033A · Session 07 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Imported from https://warin.ca/quant/en/session7_cours/. Content is static so the deck renders without R or Python. -->
+<!-- Imported from https://warin.ca/quant/en/session7_cours/. The code cells below are live: they execute
+     against the course data at render time, so the output on the slides is the
+     output the students' own machines produce. -->
+```{python}
+#| label: setup
+#| echo: false
+
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import qmib
+
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
@@ -96,7 +115,7 @@ format:
 
 ## Your Python so far {.scrollable}
 
-The 48 names below came out of sessions 2–5. Today's slides assume them, and add to them. The ones marked are the newest, from session 5.
+The 54 names below came out of sessions 2–6. Today's slides assume them, and add to them. The ones marked are the newest, from session 6.
 
 ### Load and shape
 
@@ -106,8 +125,8 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `pd.read_parquet` — a parquet file, directly
 - `qmib.load` — a course dataset, by name
 - `pd.get_dummies` — categories to indicator columns
-- `StandardScaler` — standardise before you penalise · *new in session 5*
-- `make_pipeline` — so the scaler is fitted on train only · *new in session 5*
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
 
 ### Describe
 
@@ -126,7 +145,11 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `sm.MNLogit` — unordered categories, one baseline
 - `sm.add_constant` — the intercept, when there is no formula
 - `smf.logit` — binary outcome, from a formula
-- `Ridge / Lasso / ElasticNet` — the three penalties · *new in session 5*
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `I(x**2)` — a quadratic term, inside a formula · *new in session 6*
+- `PanelOLS` — fixed effects, entity intercepts absorbed · *new in session 6*
+- `RandomEffects` — the other panel estimator, and its assumption · *new in session 6*
+- `a * b` — interaction — expands to `a + b + a:b` · *new in session 6*
 
 ### Read the fit
 
@@ -138,7 +161,7 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `.get_prediction` — with an interval, via `.summary_frame()`
 - `.predict` — fitted probabilities, not classes
 - `np.exp` — a log-odds becomes an odds ratio
-- `.coef_ / .alpha_` — scikit-learn's spelling of `.params` · *new in session 5*
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
 
 ### Diagnose
 
@@ -152,12 +175,14 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `.aic / .bic` — compare non-nested models
 - `.llf` — log-likelihood, for the LR test
 - `stats.chi2.sf` — the $p$-value of that test
-- `KFold` — and do it $k$ times · *new in session 5*
-- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation · *new in session 5*
-- `lasso_path` — the whole coefficient path · *new in session 5*
-- `mean_squared_error` — score it on the held-out part · *new in session 5*
-- `np.logspace` — a grid that is even in $\log\lambda$ · *new in session 5*
-- `train_test_split` — hold something back · *new in session 5*
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `.compare_f_test` — an F-test, for nested models only · *new in session 6*
+- `np.linalg.pinv` — pseudo-inverse, for the Hausman statistic · *new in session 6*
 
 ### Plot
 
@@ -395,9 +420,9 @@ These files contain metadata for all 45,000 movies listed in the Full MovieLens 
 
 Data points include cast, crew, plot keywords, budget, revenue, posters, release dates, languages, production companies, countries, TMDB vote counts and vote averages.
 
-``` python
-# In the VS Codium terminal, with .venv active:
-#   pip install scikit-learn prince
+```{python}
+#| echo: true
+
 import qmib
 import numpy as np
 import pandas as pd
@@ -410,7 +435,9 @@ import pandas as pd
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 movies = qmib.load("movies")
 
 # Keep the numeric columns and drop rows with holes
@@ -420,23 +447,15 @@ df.head()
 ```
 
 ### Output
-
-    ## # A tibble: 6 × 6
-    ##     budget popularity   revenue runtime vote_average vote_count
-    ##      <dbl>      <dbl>     <dbl>   <dbl>        <dbl>      <dbl>
-    ## 1 30000000      21.9  373554033      81          7.7       5415
-    ## 2 65000000      17.0  262797249     104          6.9       2413
-    ## 3        0      11.7          0     101          6.5         92
-    ## 4 16000000       3.86  81452156     127          6.1         34
-    ## 5        0       8.39  76578911     106          5.7        173
-    ## 6 60000000      17.9  187436818     170          7.7       1886
 :::
 
 ## Netflix\'s Recommender System {#imported-s07-023 .scrollable}
 
 **Step 2: Computing the principal components**
 
-``` python
+```{python}
+#| echo: true
+
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
@@ -447,7 +466,9 @@ res_pca = PCA().fit(Z)
 
 Extract eigenvalues/variances:
 
-``` python
+```{python}
+#| echo: true
+
 # Eigenvalues and the variance each component explains
 eig = pd.DataFrame({
     "eigenvalue": res_pca.explained_variance_,
@@ -457,20 +478,14 @@ eig = pd.DataFrame({
 print(eig.round(2))
 ```
 
-    ##       eigenvalue variance.percent cumulative.variance.percent
-    ## Dim.1  2.9648202        49.413669                    49.41367
-    ## Dim.2  1.1123203        18.538672                    67.95234
-    ## Dim.3  0.8495029        14.158382                    82.11072
-    ## Dim.4  0.5969400         9.949000                    92.05972
-    ## Dim.5  0.3121479         5.202466                    97.26219
-    ## Dim.6  0.1642686         2.737811                   100.00000
-
 ## Eigenvalues and the variance each component explains (cont.) {#imported-s07-024 .scrollable}
 
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 import matplotlib.pyplot as plt
 
 # Scree plot: where does the curve flatten?
@@ -491,7 +506,9 @@ plt.show()
 
 Extract the results for variables
 
-``` python
+```{python}
+#| echo: true
+
 # The loadings: how each variable relates to each component
 loadings = pd.DataFrame(
     res_pca.components_.T * np.sqrt(res_pca.explained_variance_),
@@ -499,48 +516,28 @@ loadings = pd.DataFrame(
 print(loadings.round(3))
 ```
 
-    ## Principal Component Analysis Results for variables
-    ##  ===================================================
-    ##   Name       Description                                    
-    ## 1 "$coord"   "Coordinates for the variables"                
-    ## 2 "$cor"     "Correlations between variables and dimensions"
-    ## 3 "$cos2"    "Cos2 for the variables"                       
-    ## 4 "$contrib" "contributions of the variables"
-
 ## The loadings: how each variable relates to each component (cont.) {#imported-s07-026 .scrollable}
 
 ::: panel-tabset
 ### Coordinates
 
-``` python
+```{python}
+#| echo: true
+
 # Coordinates of the variables on the first two components
 print(loadings[["PC1", "PC2"]].round(3))
 ```
 
-    ##                  Dim.1       Dim.2       Dim.3        Dim.4       Dim.5
-    ## budget       0.8522103 -0.13304377  0.07422541 -0.271273387  0.40273289
-    ## popularity   0.7161100  0.06520202 -0.10264410  0.678737307  0.10574635
-    ## revenue      0.9098097 -0.16064597  0.01395941 -0.190795959 -0.10578536
-    ## runtime      0.2218354  0.70334681  0.67473039 -0.004130231 -0.02787541
-    ## vote_average 0.2012077  0.74767729 -0.61399549 -0.152273281  0.01639361
-    ## vote_count   0.8990523 -0.10413067 -0.03180020 -0.055309149 -0.35571834
-
 ### Contributions
 
-``` python
+```{python}
+#| echo: true
+
 # Contribution of each variable to each component, in percent
 contrib = (loadings ** 2)
 contrib = contrib / contrib.sum() * 100
 print(contrib.round(2))
 ```
-
-    ##                  Dim.1      Dim.2       Dim.3        Dim.4      Dim.5
-    ## budget       24.496003  1.5913261  0.64854535 12.327746737 51.9605486
-    ## popularity   17.296617  0.3822014  1.24023256 77.174311867  3.5823690
-    ## revenue      27.919188  2.3201164  0.02293871  6.098284291  3.5850123
-    ## runtime       1.659829 44.4743043 53.59147040  0.002857709  0.2489328
-    ## vote_average  1.365497 50.2572249 44.37777244  3.884335489  0.0860971
-    ## vote_count   27.262866  0.9748269  0.11904054  0.512463908 40.5370401
 :::
 
 ## Contribution of each variable to each component, in percent (cont.) {#imported-s07-027 .scrollable}
@@ -548,7 +545,9 @@ print(contrib.round(2))
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 # Variable plot: arrows on the unit circle, coloured by contribution
 fig, ax = plt.subplots(figsize=(5.5, 5.5))
 for name, (x, y) in loadings[["PC1", "PC2"]].iterrows():
@@ -570,7 +569,9 @@ plt.show()
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 contrib["PC1"].sort_values(ascending=False).head(10).plot.bar()
 plt.ylabel("% contribution to PC1"); plt.show()
 ```
@@ -585,7 +586,9 @@ plt.ylabel("% contribution to PC1"); plt.show()
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 contrib["PC2"].sort_values(ascending=False).head(10).plot.bar()
 plt.ylabel("% contribution to PC2"); plt.show()
 ```
@@ -602,33 +605,22 @@ plt.ylabel("% contribution to PC2"); plt.show()
 ::: panel-tabset
 ### Results for individuals
 
-``` python
+```{python}
+#| echo: true
+
 # The scores: where each film sits in the new coordinate system
 scores = pd.DataFrame(res_pca.transform(Z)[:, :5],
                       columns=[f"PC{i+1}" for i in range(5)])
 scores.describe().round(3)
 ```
 
-    ## Principal Component Analysis Results for individuals
-    ##  ===================================================
-    ##   Name       Description                       
-    ## 1 "$coord"   "Coordinates for the individuals" 
-    ## 2 "$cos2"    "Cos2 for the individuals"        
-    ## 3 "$contrib" "contributions of the individuals"
-
 ### Coordinates for individuals
 
-``` python
+```{python}
+#| echo: true
+
 scores.head().round(3)
 ```
-
-    ##        Dim.1      Dim.2       Dim.3      Dim.4      Dim.5
-    ## 1 10.7468471 -1.3765037 -1.49270196 -0.1115660 -6.2270208
-    ## 2  7.3279480 -0.7093316 -0.33807210 -0.5969450 -0.7600249
-    ## 3  0.4544490  0.5957983 -0.35789264  1.3256214  0.1630035
-    ## 4  1.0356193  0.5232758  0.52046056 -0.4126039  0.3728671
-    ## 5  0.9074839  0.1562641  0.08868175  0.6146029 -0.2909026
-    ## 6  6.3403964  1.0646766  0.62588178 -0.0882128 -0.1072013
 :::
 
 ## The scores: where each film sits in the new coordinate system (cont.) {#imported-s07-031 .scrollable}
@@ -636,7 +628,9 @@ scores.head().round(3)
 ::: panel
 [Code]{.panel-name}
 
-``` python
+```{python}
+#| echo: true
+
 # Individuals plotted on the first two components
 plt.scatter(scores["PC1"], scores["PC2"], s=4, alpha=.3)
 plt.xlabel("PC1"); plt.ylabel("PC2")
@@ -655,7 +649,9 @@ plt.show()
 ::: panel
 [Code]{.panel-name}
 
-``` python
+```{python}
+#| echo: true
+
 # Biplot: individuals as points, variables as arrows
 fig, ax = plt.subplots(figsize=(6.5, 5.5))
 ax.scatter(scores["PC1"], scores["PC2"], s=4, alpha=.2)
@@ -735,68 +731,24 @@ In a case with 4 original variables, the Factor Analysis model would be as follo
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 # FAMD — factor analysis of mixed (numeric and categorical) data.
-#   pip install prince
 import prince
 
 wine = qmib.load("redwines")
+
+# FAMD wants the mix: the chemistry as numbers, the verdict as a category.
+# `good` is dropped once it has become a label, or the same information enters
+# twice and the first dimension is simply that duplication.
 wine["quality_label"] = np.where(wine["good"] == 1, "good", "ordinary")
+wine = wine.drop(columns=["good"])
 
 famd = prince.FAMD(n_components=5, random_state=0).fit(wine)
 ```
 
 ### Output
-
-    ##           Label      Soil Odor.Intensity.before.shaking
-    ## 2EL      Saumur      Env1                         3.074
-    ## 1CHA     Saumur      Env1                         2.964
-    ## 1FON Bourgueuil      Env1                         2.857
-    ## 1VAU     Chinon      Env2                         2.808
-    ## 1DAM     Saumur Reference                         3.607
-    ## 2BOU Bourgueuil Reference                         2.857
-    ##      Aroma.quality.before.shaking Fruity.before.shaking Flower.before.shaking
-    ## 2EL                         3.000                 2.714                 2.280
-    ## 1CHA                        2.821                 2.375                 2.280
-    ## 1FON                        2.929                 2.560                 1.960
-    ## 1VAU                        2.593                 2.417                 1.913
-    ## 1DAM                        3.429                 3.154                 2.154
-    ## 2BOU                        3.111                 2.577                 2.040
-    ##      Spice.before.shaking Visual.intensity Nuance Surface.feeling
-    ## 2EL                 1.960            4.321  4.000           3.269
-    ## 1CHA                1.680            3.222  3.000           2.808
-    ## 1FON                2.077            3.536  3.393           3.000
-    ## 1VAU                2.160            2.893  2.786           2.538
-    ## 1DAM                2.040            4.393  4.036           3.385
-    ## 2BOU                2.077            4.464  4.259           3.407
-    ##      Odor.Intensity Quality.of.odour Fruity Flower Spice Plante Phenolic
-    ## 2EL           3.407            3.308  2.885  2.320 1.840  2.000    1.650
-    ## 1CHA          3.370            3.000  2.560  2.440 1.739  2.000    1.381
-    ## 1FON          3.250            2.929  2.769  2.192 2.250  1.750    1.250
-    ## 1VAU          3.160            2.880  2.391  2.083 2.167  2.304    1.476
-    ## 1DAM          3.536            3.360  3.160  2.231 2.148  1.762    1.600
-    ## 2BOU          3.179            3.385  2.800  2.240 2.148  1.750    1.476
-    ##      Aroma.intensity Aroma.persistency Aroma.quality Attack.intensity Acidity
-    ## 2EL            3.259             2.963         3.200            2.963   2.107
-    ## 1CHA           2.962             2.808         2.926            3.036   2.107
-    ## 1FON           3.077             2.800         3.077            3.222   2.179
-    ## 1VAU           2.542             2.583         2.478            2.704   3.179
-    ## 1DAM           3.615             3.296         3.462            3.464   2.571
-    ## 2BOU           3.214             3.148         3.321            3.286   2.393
-    ##      Astringency Alcohol Balance Smooth Bitterness Intensity Harmony
-    ## 2EL        2.429   2.500   3.250  2.731      1.926     2.857   3.143
-    ## 1CHA       2.179   2.654   2.926  2.500      1.926     2.893   2.964
-    ## 1FON       2.250   2.643   3.321  2.679      2.000     3.074   3.143
-    ## 1VAU       2.185   2.500   2.333  1.680      1.963     2.462   2.038
-    ## 1DAM       2.536   2.786   3.464  3.036      2.071     3.643   3.643
-    ## 2BOU       2.643   2.857   3.286  2.857      2.179     3.464   3.500
-    ##      Overall.quality Typical
-    ## 2EL            3.393   3.250
-    ## 1CHA           3.214   3.036
-    ## 1FON           3.536   3.179
-    ## 1VAU           2.464   2.250
-    ## 1DAM           3.741   3.444
-    ## 2BOU           3.643   3.393
 :::
 
 ## pip install prince (cont.) {#imported-s07-039 .scrollable}
@@ -804,7 +756,9 @@ famd = prince.FAMD(n_components=5, random_state=0).fit(wine)
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 # Eigenvalues of the FAMD dimensions
 print(famd.eigenvalues_summary)
 ```
@@ -819,9 +773,12 @@ print(famd.eigenvalues_summary)
 ::: panel-tabset
 ### Code
 
-``` python
-# Variable coordinates
-print(famd.column_coordinates_(wine).round(3).head(12))
+```{python}
+#| echo: true
+
+# Variable coordinates: how much of each variable each dimension carries.
+# `column_coordinates_` is a fitted attribute, not a method — no argument.
+print(famd.column_coordinates_.round(3).to_string())
 ```
 
 ### Output
@@ -834,10 +791,12 @@ print(famd.column_coordinates_(wine).round(3).head(12))
 ::: panel-tabset
 ### Code
 
-``` python
-# Just the quantitative variables
-num_cols = [c for c in wine.columns if c not in ("quality_label",)]
-print(famd.column_coordinates_(wine).loc[num_cols].round(3))
+```{python}
+#| echo: true
+
+# Just the quantitative variables — the chemistry
+num_cols = [c for c in wine.columns if c != "quality_label"]
+print(famd.column_coordinates_.loc[num_cols].round(3).to_string())
 ```
 
 ### Output
@@ -850,9 +809,12 @@ print(famd.column_coordinates_(wine).loc[num_cols].round(3))
 ::: panel-tabset
 ### Code
 
-``` python
-# Just the qualitative variable
-print(famd.column_coordinates_(wine).drop(index=num_cols).round(3))
+```{python}
+#| echo: true
+
+# Just the qualitative variable — the verdict. It takes a dimension largely of
+# its own, which is the finding: the label is not reducible to the chemistry.
+print(famd.column_coordinates_.drop(index=num_cols).round(3).to_string())
 ```
 
 ### Output
@@ -865,11 +827,14 @@ print(famd.column_coordinates_(wine).drop(index=num_cols).round(3))
 ::: panel-tabset
 ### Code
 
-``` python
+```{python}
+#| echo: true
+
 # Individuals, coloured by how well they are represented
 coords = famd.row_coordinates(wine)
+plt.figure(figsize=(7, 4))
 plt.scatter(coords[0], coords[1], s=6, alpha=.35,
-            c=wine["good"], cmap="RdYlBu_r")
+            c=(wine["quality_label"] == "good").astype(int), cmap="RdYlBu_r")
 plt.xlabel("Dim 1"); plt.ylabel("Dim 2")
 plt.show()
 ```
@@ -883,48 +848,47 @@ plt.show()
 
 ## Factor Analysis for Questionnaires {#imported-s07-045 .scrollable}
 
-``` python
-# Exploratory factor analysis
-#   pip install factor_analyzer
-from factor_analyzer import FactorAnalyzer
+```{python}
+#| echo: true
 
-data = qmib.load("efa")
+# Exploratory factor analysis. statsmodels does this, so there is nothing to
+# install: factor_analyzer, which this deck's first translation reached for,
+# calls a scikit-learn function renamed in 1.7 and no longer runs.
+from statsmodels.multivariate.factor import Factor
+
+data = qmib.load("efa").dropna()
+
+# Factor analysis is scale-dependent for the same reason PCA is. Standardise,
+# so the factors describe correlation and not which item has the big numbers.
+z = (data - data.mean()) / data.std()
 data.head()
 ```
-
-    ## # A tibble: 6 × 14
-    ##   Price Safety Exterior_Looks Space_comfort Technology After_Sales_Service
-    ##   <dbl>  <dbl>          <dbl>         <dbl>      <dbl>               <dbl>
-    ## 1     4      4              5             4          3                   4
-    ## 2     3      5              3             3          4                   4
-    ## 3     4      4              3             4          5                   5
-    ## 4     4      4              4             3          3                   4
-    ## 5     5      5              4             4          5                   4
-    ## 6     4      4              5             3          4                   5
-    ## # ℹ 8 more variables: Resale_Value <dbl>, Fuel_Type <dbl>,
-    ## #   Fuel_Efficiency <dbl>, Color <dbl>, Maintenance <dbl>, Test_drive <dbl>,
-    ## #   Product_reviews <dbl>, Testimonials <dbl>
 
 ## Factor Analysis for Questionnaires {#imported-s07-046 .scrollable}
 
 ::: panel-tabset
 ### Code
 
-``` python
-# How many factors? A scree plot of the eigenvalues.
-fa = FactorAnalyzer(rotation=None).fit(data)
-ev, _ = fa.get_eigenvalues()
+```{python}
+#| echo: true
+
+# How many factors? The scree plot is the eigenvalues of the correlation
+# matrix, largest first — no model has to be fitted to draw it.
+ev = np.linalg.eigvalsh(np.corrcoef(z.to_numpy(), rowvar=False))[::-1]
+
+plt.figure(figsize=(7, 3.6))
 plt.plot(range(1, len(ev) + 1), ev, "o-")
-plt.axhline(1, color="red", ls="--")   # Kaiser criterion
+plt.axhline(1, color="red", ls="--")   # Kaiser: keep eigenvalues above 1
 plt.xlabel("Factor"); plt.ylabel("Eigenvalue")
-plt.show()
+plt.tight_layout(); plt.show()
+
+print(f"Kaiser keeps {(ev > 1).sum()} factors; the elbow is nearer 3.")
+print("The two rules disagree, which is why the number is argued and not read off.")
 ```
 
 ### Output
 
 ![](imported-assets/index_files/figure-html/unnamed-chunk-38-1.png)
-
-    ## Parallel analysis suggests that the number of factors =  4  and the number of components =  NA
 :::
 
 ## How many factors? A scree plot of the eigenvalues. (cont.) {#imported-s07-047 .scrollable}
@@ -932,37 +896,27 @@ plt.show()
 ::: panel-tabset
 ### Code
 
-``` python
-threefactor = FactorAnalyzer(n_factors=3, rotation="oblimin", method="minres").fit(data)
-loadings3 = pd.DataFrame(threefactor.loadings_, index=data.columns,
-                         columns=["MR1", "MR2", "MR3"])
-print(loadings3.round(3))
+```{python}
+#| echo: true
+
+def efa(k):
+    """Fit k factors by maximum likelihood, then rotate for readability.
+
+    Rotation changes the loadings without changing the fit — the same solution
+    in different coordinates. That is why a factor's *name* is never a result.
+    """
+    res = Factor(z.to_numpy(), n_factor=k, method="ml").fit()
+    res.rotate("varimax")
+    # statsmodels returns loadings as complex numbers with a zero imaginary
+    # part; np.real drops it rather than printing `0.37+0.00j` on a slide.
+    return pd.DataFrame(np.real(res.loadings), index=data.columns,
+                        columns=[f"F{i + 1}" for i in range(k)])
+
+loadings3 = efa(3)
+print(loadings3.round(3).to_string())
 ```
 
 ### Output
-
-    ## 
-    ## Loadings:
-    ##                     MR1    MR2    MR3   
-    ## Price                0.444              
-    ## Safety                      0.311       
-    ## Exterior_Looks                          
-    ## Space_comfort               0.832       
-    ## Technology                  0.342       
-    ## After_Sales_Service         0.460       
-    ## Resale_Value         0.599              
-    ## Fuel_Type                   0.573       
-    ## Fuel_Efficiency      0.655              
-    ## Color                0.464              
-    ## Maintenance          0.668              
-    ## Test_drive                         0.328
-    ## Product_reviews      0.424              
-    ## Testimonials                       0.742
-    ## 
-    ##                  MR1   MR2   MR3
-    ## SS loadings    2.015 1.605 0.972
-    ## Proportion Var 0.144 0.115 0.069
-    ## Cumulative Var 0.144 0.259 0.328
 :::
 
 ## How many factors? A scree plot of the eigenvalues. (cont.) {#imported-s07-048 .scrollable}
@@ -970,71 +924,18 @@ print(loadings3.round(3))
 ::: panel-tabset
 ### Code
 
-``` python
-fourfactor = FactorAnalyzer(n_factors=4, rotation="oblimin", method="minres").fit(data)
-loadings4 = pd.DataFrame(fourfactor.loadings_, index=data.columns,
-                         columns=["MR1", "MR2", "MR3", "MR4"])
+```{python}
+#| echo: true
 
-# Hide the small loadings so the structure is readable
-print(loadings4.round(3).where(loadings4.abs() > 0.3, ""))
+loadings4 = efa(4)
+
+# Blanking the small loadings is how a factor table is normally read, and it is
+# a presentational choice with teeth: 0.3 is a convention with no theory behind
+# it, and moving it moves which items appear to belong together.
+print(loadings4.round(2).where(loadings4.abs() > 0.3, "").to_string())
 ```
 
 ### Output
-
-    ## Factor Analysis using method =  minres
-    ## Call: fa(r = data, nfactors = 4, rotate = "oblimin", fm = "minres")
-    ## Standardized loadings (pattern matrix) based upon correlation matrix
-    ##                       MR1   MR2   MR4   MR3   h2   u2 com
-    ## Price                0.54  0.12 -0.08 -0.05 0.30 0.70 1.2
-    ## Safety              -0.33  0.36  0.11 -0.25 0.23 0.77 3.0
-    ## Exterior_Looks       0.12  0.07 -0.55  0.28 0.34 0.66 1.6
-    ## Space_comfort       -0.04  0.78 -0.13  0.08 0.67 0.33 1.1
-    ## Technology           0.01  0.36  0.06  0.02 0.13 0.87 1.1
-    ## After_Sales_Service  0.10  0.54  0.18 -0.05 0.33 0.67 1.3
-    ## Resale_Value         0.73 -0.14 -0.02 -0.16 0.57 0.43 1.2
-    ## Fuel_Type            0.01  0.57 -0.01 -0.12 0.32 0.68 1.1
-    ## Fuel_Efficiency      0.43  0.23  0.31  0.16 0.47 0.53 2.7
-    ## Color                0.07 -0.06  0.73  0.13 0.61 0.39 1.1
-    ## Maintenance          0.56  0.08  0.21  0.01 0.44 0.56 1.3
-    ## Test_drive           0.11  0.16  0.01  0.36 0.20 0.80 1.6
-    ## Product_reviews      0.34  0.15  0.05  0.36 0.32 0.68 2.4
-    ## Testimonials        -0.19 -0.01  0.06  0.68 0.51 0.49 1.2
-    ## 
-    ##                        MR1  MR2  MR4  MR3
-    ## SS loadings           1.69 1.65 1.10 0.98
-    ## Proportion Var        0.12 0.12 0.08 0.07
-    ## Cumulative Var        0.12 0.24 0.32 0.39
-    ## Proportion Explained  0.31 0.30 0.20 0.18
-    ## Cumulative Proportion 0.31 0.62 0.82 1.00
-    ## 
-    ##  With factor correlations of 
-    ##      MR1   MR2   MR4  MR3
-    ## MR1 1.00  0.05  0.27 0.00
-    ## MR2 0.05  1.00 -0.02 0.21
-    ## MR4 0.27 -0.02  1.00 0.12
-    ## MR3 0.00  0.21  0.12 1.00
-    ## 
-    ## Mean item complexity =  1.6
-    ## Test of the hypothesis that 4 factors are sufficient.
-    ## 
-    ## df null model =  91  with the objective function =  2.97 0.3 with Chi Square =  247.71
-    ## df of  the model are 41  and the objective function was  0.57 
-    ##  0.3
-    ## The root mean square of the residuals (RMSR) is  0.05 
-    ## The df corrected root mean square of the residuals is  0.07 
-    ##  0.3
-    ## The harmonic n.obs is  90 with the empirical chi square  38.46  with prob <  0.58 
-    ##  0.3The total n.obs was  90  with Likelihood Chi Square =  46.2  with prob <  0.27 
-    ##  0.3
-    ## Tucker Lewis Index of factoring reliability =  0.922
-    ## RMSEA index =  0.036  and the 90 % confidence intervals are  0 0.085 0.3
-    ## BIC =  -138.29
-    ## Fit based upon off diagonal values = 0.94
-    ## Measures of factor score adequacy             
-    ##                                                    MR1  MR2  MR4  MR3
-    ## Correlation of (regression) scores with factors   0.87 0.88 0.84 0.80
-    ## Multiple R square of scores with factors          0.76 0.77 0.70 0.64
-    ## Minimum correlation of possible factor scores     0.51 0.55 0.40 0.28
 :::
 
 ## Factor Analysis for Questionnaires {#imported-s07-049 .scrollable}
@@ -1042,11 +943,20 @@ print(loadings4.round(3).where(loadings4.abs() > 0.3, ""))
 ::: panel-tabset
 ### Code
 
-``` python
-# The same loadings, read as a diagram: each item under the factor it loads on
-for j, col in enumerate(loadings4.columns):
+```{python}
+#| echo: true
+
+# The same table read as a diagram: each item under the factor it loads on.
+# An item appearing twice is cross-loading; an item appearing nowhere is not
+# measured by this solution at all. Both are findings, not untidiness.
+for col in loadings4.columns:
     items = loadings4.index[loadings4[col].abs() > 0.3].tolist()
-    print(f"{col}: " + ", ".join(items))
+    print(f"{col}: " + (", ".join(items) if items else "(nothing above 0.3)"))
+
+placed = {i for c in loadings4.columns
+          for i in loadings4.index[loadings4[c].abs() > 0.3]}
+orphans = [i for i in loadings4.index if i not in placed]
+print(f"\nnot placed by any factor: {', '.join(orphans) if orphans else 'none'}")
 ```
 
 ### Output

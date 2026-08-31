@@ -22,7 +22,26 @@ format:
     footer: "MATH60033A · Session 08 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Imported from https://warin.ca/quant/en/session8_cours/. Content is static so the deck renders without R or Python. -->
+<!-- Imported from https://warin.ca/quant/en/session8_cours/. The code cells below are live: they execute
+     against the course data at render time, so the output on the slides is the
+     output the students' own machines produce. -->
+```{python}
+#| label: setup
+#| echo: false
+
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import qmib
+
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
@@ -39,7 +58,7 @@ format:
 9. KNN by hand (you are the algorithm)
 10. KNN by hand (you are the algorithm) (cont.)
 11. KNN by hand
-12. KNN in R code (you are not longer the algorithm)
+12. KNN in code (you are no longer the algorithm)
 13. Machine Learning: using KNN as an example
 14. Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.)
 15. Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)
@@ -87,7 +106,7 @@ format:
 
 ## Your Python so far {.scrollable}
 
-The 48 names below came out of sessions 2–5. Today's slides assume them, and add to them. The ones marked are the newest, from session 5.
+The 61 names below came out of sessions 2–7. Today's slides assume them, and add to them. The ones marked are the newest, from session 7.
 
 ### Load and shape
 
@@ -97,8 +116,8 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `pd.read_parquet` — a parquet file, directly
 - `qmib.load` — a course dataset, by name
 - `pd.get_dummies` — categories to indicator columns
-- `StandardScaler` — standardise before you penalise · *new in session 5*
-- `make_pipeline` — so the scaler is fitted on train only · *new in session 5*
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
 
 ### Describe
 
@@ -108,6 +127,7 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `stats.trim_mean` — the mean after cutting both tails
 - `.value_counts` — how unbalanced is the outcome
 - `pd.crosstab` — a contingency table in one call
+- `np.linalg.eigvalsh` — eigenvalues of a symmetric matrix · *new in session 7*
 
 ### Fit
 
@@ -117,7 +137,14 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `sm.MNLogit` — unordered categories, one baseline
 - `sm.add_constant` — the intercept, when there is no formula
 - `smf.logit` — binary outcome, from a formula
-- `Ridge / Lasso / ElasticNet` — the three penalties · *new in session 5*
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `I(x**2)` — a quadratic term, inside a formula
+- `PanelOLS` — fixed effects, entity intercepts absorbed
+- `RandomEffects` — the other panel estimator, and its assumption
+- `a * b` — interaction — expands to `a + b + a:b`
+- `Factor` — statsmodels' factor analysis, by maximum likelihood · *new in session 7*
+- `PCA` — components, on standardised columns · *new in session 7*
+- `prince.FAMD` — when the columns are mixed numeric and categorical · *new in session 7*
 
 ### Read the fit
 
@@ -129,7 +156,10 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `.get_prediction` — with an interval, via `.summary_frame()`
 - `.predict` — fitted probabilities, not classes
 - `np.exp` — a log-odds becomes an odds ratio
-- `.coef_ / .alpha_` — scikit-learn's spelling of `.params` · *new in session 5*
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
+- `.components_` — the loadings — variables on components · *new in session 7*
+- `.explained_variance_ratio_` — what the scree plot is drawn from · *new in session 7*
+- `.rotate('varimax')` — same fit, readable loadings — and no new evidence · *new in session 7*
 
 ### Diagnose
 
@@ -143,12 +173,14 @@ The 48 names below came out of sessions 2–5. Today's slides assume them, and a
 - `.aic / .bic` — compare non-nested models
 - `.llf` — log-likelihood, for the LR test
 - `stats.chi2.sf` — the $p$-value of that test
-- `KFold` — and do it $k$ times · *new in session 5*
-- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation · *new in session 5*
-- `lasso_path` — the whole coefficient path · *new in session 5*
-- `mean_squared_error` — score it on the held-out part · *new in session 5*
-- `np.logspace` — a grid that is even in $\log\lambda$ · *new in session 5*
-- `train_test_split` — hold something back · *new in session 5*
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `.compare_f_test` — an F-test, for nested models only
+- `np.linalg.pinv` — pseudo-inverse, for the Hausman statistic
 
 ### Plot
 
@@ -420,8 +452,9 @@ Suppose we wish to use this data set to make a prediction for [Y]{.MathJax_Previ
 ::: pull-left
 [d(a,b) = d(b,a) = \\sqrt{\\sum\_{i=1}\^{p}(a_i - b_i)\^2}]{.MathJax_Preview}
 
-``` python
-# In the VS Codium terminal, with .venv active:  python
+```{python}
+#| echo: true
+
 import numpy as np
 
 # Six observations in three dimensions — we will find the nearest neighbours by hand
@@ -504,7 +537,7 @@ Solution
 
 We would expect a small K to perform better for a nonlinear decision boundary. A small \`[K]{.MathJax_Preview}\` would be more 'flexible' and the KNN boundary would be pulled in different directions easier, whereas a large K would have a 'smoothing' effect and produce a more linear boundary (hence, a worse classifier), because it takes more points into account.
 
-## KNN in R code (you are not longer the algorithm) {#imported-s08-021 .scrollable}
+## KNN in code (you are no longer the algorithm) {#imported-s08-021 .scrollable}
 
 ## Machine Learning: using KNN as an example {#imported-s08-022 .scrollable}
 
@@ -517,22 +550,15 @@ We would expect a small K to perform better for a nonlinear decision boundary. A
 ::: panel-tabset
 ### Data collection
 
-``` python
-import pandas as pd
+```{python}
+#| echo: true
 
-# Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV.
-Smarket = pd.read_csv(
-    "https://www.statlearning.com/s/Smarket.csv")
-Smarket.head()
+# Smarket: 1,250 daily S&P 500 returns, 2001-2005, from ISLR. Loaded through
+# qmib so it is downloaded once and then read from the local cache — the deck
+# must render in a room with no internet, and the URL the R course used is dead.
+smarket = qmib.load("smarket")
+smarket.head()
 ```
-
-    ##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
-    ## 1 2001  0.381 -0.192 -2.624 -1.055  5.010 1.1913  0.959        Up
-    ## 2 2001  0.959  0.381 -0.192 -2.624 -1.055 1.2965  1.032        Up
-    ## 3 2001  1.032  0.959  0.381 -0.192 -2.624 1.4112 -0.623      Down
-    ## 4 2001 -0.623  1.032  0.959  0.381 -0.192 1.2760  0.614        Up
-    ## 5 2001  0.614 -0.623  1.032  0.959  0.381 1.2057  0.213        Up
-    ## 6 2001  0.213  0.614 -0.623  1.032  0.959 1.3491  1.392        Up
 
 ### Data description
 
@@ -610,24 +636,18 @@ Centering/standardization:
 
 ### Step 1: Data collection
 
-``` python
-import pandas as pd
+```{python}
+#| echo: true
 
-Smarket = pd.read_csv("https://www.statlearning.com/s/Smarket.csv")
+# Train on everything before 2005, test on 2005 — a time split, not a random
+# one. Shuffling would let tomorrow's market help predict yesterday's, which is
+# leakage: the model would score well and be worthless.
+train = smarket[smarket["year"] < 2005]
+test  = smarket[smarket["year"] == 2005]
 
-# Train on everything before 2005, test on 2005 — a time split, not a random one
-train = Smarket[Smarket["Year"] < 2005]
-test  = Smarket[Smarket["Year"] == 2005]
+print(f"train {len(train)} days (2001-2004)   test {len(test)} days (2005)")
 train.head()
 ```
-
-    ##   Year   Lag1   Lag2   Lag3   Lag4   Lag5 Volume  Today Direction
-    ## 1 2001  0.381 -0.192 -2.624 -1.055  5.010 1.1913  0.959        Up
-    ## 2 2001  0.959  0.381 -0.192 -2.624 -1.055 1.2965  1.032        Up
-    ## 3 2001  1.032  0.959  0.381 -0.192 -2.624 1.4112 -0.623      Down
-    ## 4 2001 -0.623  1.032  0.959  0.381 -0.192 1.2760  0.614        Up
-    ## 5 2001  0.614 -0.623  1.032  0.959  0.381 1.2057  0.213        Up
-    ## 6 2001  0.213  0.614 -0.623  1.032  0.959 1.3491  1.392        Up
 :::
 
 ## Train on everything before 2005, test on 2005 — a time split, not a random one (cont.) {#imported-s08-026 .scrollable}
@@ -635,120 +655,66 @@ train.head()
 ::: panel-tabset
 ### Step 2: Code
 
-``` python
+```{python}
+#| echo: true
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-train = Smarket[Smarket["Year"] < 2005]
-test_set = Smarket[Smarket["Year"] == 2005]
-X_tr, y_tr = train[["Lag1", "Lag2"]], train["Direction"]
+X_tr, y_tr = train[["lag1", "lag2"]], train["direction"]
+X_te, y_te = test[["lag1", "lag2"]],  test["direction"]
 
-# KNN needs standardised inputs: distance is meaningless in mixed units.
+# KNN needs standardised inputs: distance is meaningless in mixed units, and
+# whichever column happens to have the larger numbers would decide every
+# neighbour. The scaler goes INSIDE the pipeline so it is refitted on the
+# training part of each CV fold — fitting it once on everything would leak the
+# test fold's mean and standard deviation into training.
 pipe = make_pipeline(StandardScaler(), KNeighborsClassifier())
 grid = GridSearchCV(pipe, {"kneighborsclassifier__n_neighbors": range(1, 26)}, cv=5)
 modelknn = grid.fit(X_tr, y_tr)
+
+print(f"best k = {modelknn.best_params_['kneighborsclassifier__n_neighbors']}")
 ```
 
 or with k-fold cross-validation:
 
-``` python
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+```{python}
+#| echo: true
 
-X_tr, y_tr = train[["Lag1", "Lag2"]], train["Direction"]
-
-# StandardScaler inside the pipeline, so it is refitted in every CV fold
-modelknn = GridSearchCV(
+# A wider search, over odd k only — an even k can tie on a two-class problem.
+wide = GridSearchCV(
     make_pipeline(StandardScaler(), KNeighborsClassifier()),
     {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
     cv=3).fit(X_tr, y_tr)
 
-print(modelknn.best_params_, round(modelknn.best_score_, 4))
+best_k = wide.best_params_["kneighborsclassifier__n_neighbors"]
+print(f"best k over 1..101 = {best_k},  CV accuracy = {wide.best_score_:.4f}")
+print(f"always predicting the majority class = {y_tr.value_counts(normalize=True).max():.4f}")
+print("\nThe search picks a large k, and it barely beats the constant rule.")
 ```
 
 ### Step 2: Output
 
-    ## k-Nearest Neighbors 
-    ## 
-    ## 998 samples
-    ##   2 predictor
-    ##   2 classes: 'Down', 'Up' 
-    ## 
-    ## Pre-processing: centered (2), scaled (2) 
-    ## Resampling: Bootstrapped (25 reps) 
-    ## Summary of sample sizes: 998, 998, 998, 998, 998, 998, ... 
-    ## Resampling results across tuning parameters:
-    ## 
-    ##   k    Accuracy   Kappa        
-    ##     1  0.5077431   1.599383e-02
-    ##     3  0.4919940  -1.512538e-02
-    ##     5  0.4917264  -1.577724e-02
-    ##     7  0.4784333  -4.190927e-02
-    ##     9  0.4809359  -3.675615e-02
-    ##    11  0.4814100  -3.579917e-02
-    ##    13  0.4830695  -3.260827e-02
-    ##    15  0.4861415  -2.581052e-02
-    ##    17  0.4901345  -1.755719e-02
-    ##    19  0.4933934  -1.116671e-02
-    ##    21  0.4990181   2.010178e-05
-    ##    23  0.4969327  -4.049311e-03
-    ##    25  0.5002967   2.613570e-03
-    ##    27  0.5029592   7.997583e-03
-    ##    29  0.4982065  -1.298930e-03
-    ##    31  0.5045753   1.167676e-02
-    ##    33  0.5025924   7.565307e-03
-    ##    35  0.5011583   4.917095e-03
-    ##    37  0.5033302   9.090351e-03
-    ##    39  0.4990326   7.128709e-04
-    ##    41  0.5027772   7.862683e-03
-    ##    43  0.5020358   6.557758e-03
-    ##    45  0.4990432   5.371903e-04
-    ##    47  0.4992148   8.371058e-04
-    ##    49  0.4947610  -7.758225e-03
-    ##    51  0.4918414  -1.356142e-02
-    ##    53  0.4962420  -4.504979e-03
-    ##    55  0.4962089  -4.540006e-03
-    ##    57  0.4938731  -9.126126e-03
-    ##    59  0.4930313  -1.098474e-02
-    ##    61  0.4924355  -1.204873e-02
-    ##    63  0.4882357  -2.030122e-02
-    ##    65  0.4916030  -1.348158e-02
-    ##    67  0.4909612  -1.493990e-02
-    ##    69  0.4887982  -1.894524e-02
-    ##    71  0.4937787  -9.054955e-03
-    ##    73  0.4946094  -7.184378e-03
-    ##    75  0.4935163  -9.257376e-03
-    ##    77  0.4933196  -9.723898e-03
-    ##    79  0.4934470  -9.291803e-03
-    ##    81  0.4937045  -9.057264e-03
-    ##    83  0.4946732  -7.218470e-03
-    ##    85  0.4965836  -3.461526e-03
-    ##    87  0.4964156  -3.797219e-03
-    ##    89  0.4938407  -8.835032e-03
-    ##    91  0.4997053   2.765046e-03
-    ##    93  0.4997206   2.993713e-03
-    ##    95  0.5013862   6.431938e-03
-    ##    97  0.4949097  -6.424768e-03
-    ##    99  0.4936504  -9.192792e-03
-    ##   101  0.4948240  -6.543159e-03
-    ## 
-    ## Accuracy was used to select the optimal model using the largest value.
-    ## The final value used for the model was k = 1.
-
 ### Step 2: Plot
 
-``` python
+```{python}
+#| echo: true
+
 import matplotlib.pyplot as plt
 
-k_values = range(1, 26)
+# Read the k values back off the fitted search rather than retyping the range,
+# so the axis cannot silently disagree with what was actually fitted.
+ks = [p["kneighborsclassifier__n_neighbors"] for p in modelknn.cv_results_["params"]]
 scores = modelknn.cv_results_["mean_test_score"]
-plt.plot(k_values, scores, "o-")
+
+plt.figure(figsize=(7, 3.6))
+plt.plot(ks, scores, "o-")
+plt.axhline(y_tr.value_counts(normalize=True).max(), color="red", ls="--",
+            label="majority class")
 plt.xlabel("k (number of neighbours)"); plt.ylabel("CV accuracy")
-plt.show()
+plt.legend(); plt.tight_layout(); plt.show()
 ```
 
 ![](imported-assets/index_files/figure-html/unnamed-chunk-26-1.png)
@@ -757,29 +723,31 @@ plt.show()
 
 Best tuning:
 
-``` python
+```{python}
+#| echo: true
+
+# Small k = low bias, high variance: the boundary follows single observations.
+# Large k = high bias, low variance: it flattens toward the majority class.
+# The chosen k is where that trade-off bottomed out on held-out folds.
 modelknn.best_params_
 ```
 
-    ##   k
-    ## 1 1
-
 Variable importance?
 
-``` python
+```{python}
+#| echo: true
+
 from sklearn.inspection import permutation_importance
 
-# KNN has no coefficients — importance is measured by scrambling a column
-imp = permutation_importance(modelknn, X_tr, y_tr, n_repeats=10, random_state=0)
-for name, m in zip(X_tr.columns, imp.importances_mean):
-    print(f"{name}: {m:.4f}")
+# KNN has no coefficients, so importance is measured by scrambling a column and
+# seeing how much accuracy falls. Measured on the TEST set: on training data a
+# flexible model can look important about noise it has memorised.
+imp = permutation_importance(modelknn, X_te, y_te, n_repeats=10, random_state=0)
+for name, m, s in zip(X_te.columns, imp.importances_mean, imp.importances_std):
+    print(f"{name}: {m:+.4f}  (sd {s:.4f})")
+print("\nBoth are near zero, and a negative mean is not a paradox —")
+print("it says scrambling the column *helped*, which is what noise does.")
 ```
-
-    ## ROC curve variable importance
-    ## 
-    ##      Importance
-    ## Lag1        100
-    ## Lag2          0
 :::
 
 ## KNN has no coefficients — importance is measured by scrambling a column (cont.) {#imported-s08-027 .scrollable}
@@ -789,66 +757,46 @@ for name, m in zip(X_tr.columns, imp.importances_mean):
 
 Let us predict the Direction, and see what it does predict indeed.
 
-``` python
-X_te, y_te = test[["Lag1", "Lag2"]], test["Direction"]
+```{python}
+#| echo: true
+
 knn_predict = modelknn.predict(X_te)
 
-df_knn_predict = test.assign(knnPredict=knn_predict)
-df_knn_predict["Direction"].head()
+# Put the prediction beside the truth and look at the first few days.
+df_knn_predict = test.assign(knn_predict=knn_predict)
+df_knn_predict[["year", "lag1", "lag2", "direction", "knn_predict"]].head()
 ```
 
-    ## [1] Down Down Down Up   Down Up  
-    ## Levels: Down Up
+```{python}
+#| echo: true
 
-``` python
-knn_predict = modelknn.predict(test_set[["Lag1", "Lag2"]])
 knn_predict[:6]
 ```
-
-    ## [1] Down Down Up   Up   Down Up  
-    ## Levels: Down Up
 
 ### Step 3: Code - Test
 
 Since we have the actual labels with in the test\$Direction variable for the test dataset, we will be able to check the performance of the prediction on the test dataset. Let\'s produce the confusion matrix based on the optimal parameters from the knnfit with the new dataset called test_final:
 
-``` python
+```{python}
+#| echo: true
+
 from sklearn.metrics import confusion_matrix, classification_report
 
-# The confusion matrix, and the accuracy that goes with it
-print(confusion_matrix(y_te, knn_predict))
+# The confusion matrix, and the accuracy that goes with it.
+labels = ["Down", "Up"]
+cm = confusion_matrix(y_te, knn_predict, labels=labels)
+print(pd.DataFrame(cm, index=[f"true {l}" for l in labels],
+                   columns=[f"pred {l}" for l in labels]).to_string())
+print()
 print(classification_report(y_te, knn_predict))
+
+# The number to compare against is not 50%: it is the majority class.
+base = y_te.value_counts(normalize=True).max()
+acc = (knn_predict == y_te).mean()
+print(f"KNN accuracy {acc:.4f}   always-predict-{y_te.mode()[0]} {base:.4f}")
 ```
 
 ### Step 3: Output - Test
-
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction Down Up
-    ##       Down   43 60
-    ##       Up     68 81
-    ##                                           
-    ##                Accuracy : 0.4921          
-    ##                  95% CI : (0.4288, 0.5555)
-    ##     No Information Rate : 0.5595          
-    ##     P-Value [Acc > NIR] : 0.9866          
-    ##                                           
-    ##                   Kappa : -0.0384         
-    ##                                           
-    ##  Mcnemar's Test P-Value : 0.5361          
-    ##                                           
-    ##             Sensitivity : 0.3874          
-    ##             Specificity : 0.5745          
-    ##          Pos Pred Value : 0.4175          
-    ##          Neg Pred Value : 0.5436          
-    ##              Prevalence : 0.4405          
-    ##          Detection Rate : 0.1706          
-    ##    Detection Prevalence : 0.4087          
-    ##       Balanced Accuracy : 0.4809          
-    ##                                           
-    ##        'Positive' Class : Down            
-    ##
 :::
 
 ## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-028 .scrollable}
@@ -858,30 +806,26 @@ print(classification_report(y_te, knn_predict))
 
 Here we will perform a **point estimate** prediction. You can use your own features to see what the model will predict\...
 
-``` python
-import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+```{python}
+#| echo: true
 
-Smarket = pd.read_csv("https://www.statlearning.com/s/Smarket.csv")
-train = Smarket[Smarket["Year"] < 2005]
-test  = Smarket[Smarket["Year"] == 2005]
+# The whole workflow, in the order it is actually written: load, split, build a
+# pipeline, search k by cross-validation, then — and only then — touch the test
+# set. Everything above was this, one step at a time.
+smarket = qmib.load("smarket")
+train = smarket[smarket["year"] < 2005]
+test  = smarket[smarket["year"] == 2005]
 
-modelknn = GridSearchCV(
+workflow = GridSearchCV(
     make_pipeline(StandardScaler(), KNeighborsClassifier()),
     {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
-    cv=3).fit(train[["Lag1", "Lag2"]], train["Direction"])
+    cv=3).fit(train[["lag1", "lag2"]], train["direction"])
+
+print(f"chosen k = {workflow.best_params_['kneighborsclassifier__n_neighbors']}, "
+      f"test accuracy = {workflow.score(test[['lag1','lag2']], test['direction']):.4f}")
 ```
 
 ### Step 4: Output
-
-    ##     Lag1  Lag2
-    ## 1 -0.134 0.008
-
-    ##   knnPredict2
-    ## 1        Down
 
 ### Step 4: Visual
 
@@ -937,7 +881,9 @@ OK, let\'s step back first\...
 ::: panel-tabset
 ### Neural Network - Not exam material
 
-``` python
+```{python}
+#| echo: true
+
 # Classification example: the iris data, which ships with scikit-learn
 from sklearn.datasets import load_iris
 
@@ -953,41 +899,63 @@ print(f"best k = {knn_iris.best_params_}, accuracy = {knn_iris.best_score_:.3f}"
 
 ### ML Regression
 
-``` python
-# Regression example: California housing replaces the retired Boston data,
-# which was withdrawn over an ethically problematic variable.
-from sklearn.datasets import fetch_california_housing
+```{python}
+#| echo: true
+
+# Regression example. scikit-learn's California housing would download at
+# runtime, so this uses the course's own house-price data instead — the same
+# frame session 6 fitted OLS to, which makes the two directly comparable.
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LinearRegression
 
-housing = fetch_california_housing(as_frame=True)
-X, y = housing.data, housing.target
+houses = qmib.load("realestate").dropna()
+Xh = houses[["living_area", "bedrooms", "bathrooms", "year", "garage"]]
+yh = houses["price"]
 
-knn_reg = make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=5))
-rmse = -cross_val_score(knn_reg, X[:2000], y[:2000], cv=5,
-                        scoring="neg_root_mean_squared_error").mean()
-print(f"KNN regression RMSE = {rmse:.3f}")
+for name, mdl in [("KNN, k=5", make_pipeline(StandardScaler(), KNeighborsRegressor(5))),
+                  ("KNN, k=25", make_pipeline(StandardScaler(), KNeighborsRegressor(25))),
+                  ("linear regression", LinearRegression())]:
+    rmse = -cross_val_score(mdl, Xh, yh, cv=5,
+                            scoring="neg_root_mean_squared_error").mean()
+    print(f"{name:20} RMSE {rmse:10,.0f}")
+
+print(f"\nprice sd = {yh.std():,.0f} — the number any model has to beat")
 ```
 
 ### glmboost
 
-``` python
-# scikit-learn parallelises with n_jobs — no cluster setup required.
+```{python}
+#| echo: true
+
+# scikit-learn parallelises with n_jobs — no cluster setup required. The same
+# search as before, across every core rather than one.
 knn_par = GridSearchCV(
     make_pipeline(StandardScaler(), KNeighborsClassifier()),
     {"kneighborsclassifier__n_neighbors": range(1, 26)},
     cv=5, n_jobs=-1).fit(X_tr, y_tr)
 
-print(f"best k = {knn_par.best_params_}")
+print(f"best k = {knn_par.best_params_['kneighborsclassifier__n_neighbors']}, "
+      f"CV accuracy = {knn_par.best_score_:.4f}")
 ```
 
 ### RF
 
-``` python
-# A random forest, also parallelised, for comparison with KNN
+```{python}
+#| echo: true
+
+# A random forest, also parallelised, for comparison with KNN.
 from sklearn.ensemble import RandomForestClassifier
 
 rf = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0)
-print(f"forest CV accuracy = {cross_val_score(rf, X_tr, y_tr, cv=5).mean():.3f}")
+forest = cross_val_score(rf, X_tr, y_tr, cv=5).mean()
+
+print(f"forest CV accuracy = {forest:.4f}")
+print(f"KNN    CV accuracy = {knn_par.best_score_:.4f}")
+print(f"majority class     = {y_tr.value_counts(normalize=True).max():.4f}")
+print("\nFive hundred trees, every core busy, and nothing has beaten the")
+print("constant rule. The lesson is not about the method — it is that this")
+print("problem may carry no signal at these two lags, and no amount of")
+print("compute manufactures one.")
 ```
 :::
