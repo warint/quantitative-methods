@@ -43,7 +43,7 @@ format:
 15. Step 5c — What to put in it
 16. Which model size
 17. Step 6 — Check the context window
-18. Step 6b — aider needs its own environment
+18. Step 6b — Step out of the environment first
 19. Step 6b — Install pipx
 20. Step 6b — Install aider with it
 21. Step 6c — Pointing it at your model
@@ -492,19 +492,27 @@ outgrow on any real file.
 - [`ollama ps` shows 2048 or 4096](#fix-context)
 :::
 
-## Step 6b — aider needs its own environment
+## Step 6b — Step out of the environment first
 
-::: {.warn}
-**Do not `pip install aider-chat` into `.venv`.** aider pins its own versions of
-packages the course also uses, and pip must satisfy both at once — which is where
-the resolver errors come from. When it appears to succeed it can quietly
-downgrade something the course needs.
+**One thing to do:** look at your prompt.
+
+::: {.tight}
+| It shows | Do this |
+|---|---|
+| `(.venv) PS C:\...>` | type `deactivate` |
+| `PS C:\...>` | nothing — you are already out |
 :::
 
 ::: {.check}
-Do this in a terminal where **`(.venv)` is not showing**. `--user` is refused
-inside a virtual environment, and that refusal is what leaves you with *no module
-named pipx* a moment later.
+That is the whole of it. The next three slides install aider, and they install
+it **beside** the course rather than inside it.
+:::
+
+::: {.muted}
+Why: aider pins its own versions of packages the course also uses. Installed
+into `.venv` it forces pip to satisfy both at once, which is where the resolver
+errors come from — and where a silent downgrade of something the course needs
+comes from. Kept separate, neither can disturb the other.
 :::
 
 ## Step 6b — Install pipx {#step-6b}
