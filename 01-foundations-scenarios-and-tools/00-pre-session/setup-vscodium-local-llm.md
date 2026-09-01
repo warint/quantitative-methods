@@ -93,7 +93,8 @@ press `Ctrl/Cmd+L`.
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check `(.venv)` is in your prompt |
 | Windows: *l'exécution de scripts est désactivée sur ce système* | PowerShell's execution policy blocks `Activate.ps1` | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` — user-scoped, no admin rights, asked once |
-| Windows: *le répertoire n'est pas vide* when deleting `.venv` | The environment is still active, or VS Codium holds its interpreter | `deactivate` first; quit VS Codium if needed; `cmd /c "rmdir /s /q .venv"` as a last resort |
+| Windows: *le répertoire n'est pas vide* when deleting `.venv` | VS Codium holds the interpreter it has selected | Quit VS Codium; delete from a plain PowerShell; `cmd /c "rmdir /s /q .venv"` as a last resort |
+| `deactivate` is not recognised | Activation defines it, so it exists only inside an active environment | You are not in one. Skip it — the prompt shows `(.venv)` when you are |
 | LaTeX shows as raw `$...$` | Preview extension missing | Install *Markdown Preview Enhanced*; open with `Ctrl/Cmd+K V` |
 | Apple Silicon: slow inference | Rosetta Python | Install the arm64 build |
 

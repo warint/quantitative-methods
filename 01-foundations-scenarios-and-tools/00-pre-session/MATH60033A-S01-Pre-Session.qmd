@@ -41,29 +41,30 @@ format:
 13. Windows: "l'exécution de scripts est désactivée"
 14. Step 4d — Install the packages
 15. Built it on the wrong version? Start over
-16. Windows: still cannot activate?
-17. Windows: "Python introuvable"
-18. Windows: checking it took
-19. Step 5 — Ollama and Qwen
-20. Step 5b — Open Continue's config file
-21. Step 5c — What to put in it
-22. Which model size
-23. Step 6 — Give the model a real context window
-24. Step 6 — macOS
-25. Step 6 — Windows
-26. Step 6 — Linux
-27. If you see a socket error
-28. Step 6b — Install pipx first
-29. Step 6b — Then install aider
-30. Step 6c — Pointing it at your model
-31. `aider n'est pas reconnu`?
-32. Step 6d — Ask it something real
-33. Two terminals is the working pattern
-34. The last check
-35. When it goes wrong
-36. Using the model well
-37. Also before class
-38. Ready?
+16. `deactivate` is not a command
+17. Windows: still cannot activate?
+18. Windows: "Python introuvable"
+19. Windows: checking it took
+20. Step 5 — Ollama and Qwen
+21. Step 5b — Open Continue's config file
+22. Step 5c — What to put in it
+23. Which model size
+24. Step 6 — Give the model a real context window
+25. Step 6 — macOS
+26. Step 6 — Windows
+27. Step 6 — Linux
+28. If you see a socket error
+29. Step 6b — Install pipx first
+30. Step 6b — Then install aider
+31. Step 6c — Pointing it at your model
+32. `aider n'est pas reconnu`?
+33. Step 6d — Ask it something real
+34. Two terminals is the working pattern
+35. The last check
+36. When it goes wrong
+37. Using the model well
+38. Also before class
+39. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -376,30 +377,45 @@ afterwards changes nothing, and neither does PATH — the folder has to go and b
 rebuilt.
 :::
 
-**Windows**, in order. The first line only if you have not done it already:
+**Windows.** Quit VS Codium first — it holds the interpreter it has selected,
+and that alone can stop the folder being deleted. Then open **PowerShell** from
+the Start menu, not a terminal inside the editor:
+
+```powershell
+cd ~\Desktop\quantitative-methods
+Remove-Item -Recurse -Force .venv
+py -3.12 -m venv .venv
+```
+
+Now reopen VS Codium, and in its terminal:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-
-deactivate                            # only if your prompt shows (.venv)
-Remove-Item -Recurse -Force .venv
-py -3.12 -m venv .venv
 .venv\Scripts\activate
 python --version                      # must say 3.12.x
 pip install -r requirements.txt
 ```
 
-::: {.warn}
-**`Le répertoire n'est pas vide` / `The directory is not empty`** means something
-still has a file open inside `.venv` — almost always the environment being
-active, or VS Codium holding its interpreter. `deactivate` first. If it still
-refuses, quit VS Codium entirely, reopen it, and delete before activating
-anything.
+::: {.muted}
+Still `le répertoire n'est pas vide`? `cmd /c "rmdir /s /q .venv"` deletes it
+where `Remove-Item` will not.
+:::
+
+## `deactivate` is not a command
+
+It is a function that **activation creates**, so it exists only while an
+environment is active.
+
+::: {.check}
+*«Le terme `deactivate` n'est pas reconnu»* is not a problem to solve — it is
+the answer to "am I in a virtual environment?", and the answer is no. Skip the
+step and carry on.
 :::
 
 ::: {.muted}
-Windows sometimes reports that even when nothing is holding the folder. `cmd /c
-"rmdir /s /q .venv"` deletes it where `Remove-Item` will not.
+The reliable indicator is the prompt: `(.venv)` at the start means active,
+nothing means not. On Windows the folder is then held by VS Codium rather than
+by your shell, which is why quitting the editor is the step that works.
 :::
 
 **macOS and Linux**
@@ -841,7 +857,8 @@ test of whether your setup works.
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
 | *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
-| *le répertoire n'est pas vide* deleting `.venv` | Something has a file open in it — usually the environment is still active | `deactivate`, then delete. Still refusing: quit VS Codium, or `cmd /c "rmdir /s /q .venv"` |
+| *le répertoire n'est pas vide* deleting `.venv` | Something holds a file inside it — usually VS Codium's selected interpreter | Quit VS Codium, delete from a plain PowerShell. Last resort `cmd /c "rmdir /s /q .venv"` |
+| `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
 | Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
 | aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
