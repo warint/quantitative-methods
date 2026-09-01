@@ -237,6 +237,7 @@ Everything runs in the **VS Codium terminal**, with the project environment acti
 
 ```bash
 source .venv/bin/activate        # macOS / Linux
+.venv\\Scripts\\activate         # Windows
 python
 ```
 
@@ -388,22 +389,34 @@ Listen for traceable evidence, not confidence of delivery.
 """
 
 
+# A deck carrying this marker has been written by hand and is no longer a
+# template instance. Regenerating it would silently discard that work — which is
+# exactly what happened to session 02's pre-session deck, whose git walkthrough
+# and data steps were overwritten by a single unrelated run of this script.
+AUTHORED = "<!-- authored: do not regenerate -->"
+
+
 def main():
-    written = 0
+    written = skipped = 0
     for num in sorted(SESSIONS):
         if num in ("01", "12"):
             continue
         s = SESSIONS[num]
         d = ROOT / s["dir"]
-        (d / "00-pre-session").mkdir(exist_ok=True)
-        (d / "00-pre-session" / f"MATH60033A-S{num}-Pre-Session.qmd").write_text(
-            pre_session_deck(num, s), encoding="utf-8")
-        (d / "02-practice").mkdir(exist_ok=True)
-        (d / "02-practice" / f"MATH60033A-S{num}-Practice.qmd").write_text(
-            practice_deck(num, s), encoding="utf-8")
-        written += 2
-        print(f"  session {num}: pre-session + practice deck")
-    print(f"\n{written} decks written")
+        for sub, name, build in (
+            ("00-pre-session", f"MATH60033A-S{num}-Pre-Session.qmd", pre_session_deck),
+            ("02-practice", f"MATH60033A-S{num}-Practice.qmd", practice_deck),
+        ):
+            (d / sub).mkdir(exist_ok=True)
+            out = d / sub / name
+            if out.exists() and AUTHORED in out.read_text(encoding="utf-8"):
+                print(f"  session {num}: {sub} is authored — left alone")
+                skipped += 1
+                continue
+            out.write_text(build(num, s), encoding="utf-8")
+            written += 1
+    note = f", {skipped} authored decks left alone" if skipped else ""
+    print(f"\n{written} decks written{note}")
 
 
 if __name__ == "__main__":

@@ -1081,10 +1081,16 @@ Thierry Warin, PhD
 <li>Step 2 — Extensions</li>
 <li>Step 3 — The course materials</li>
 <li>Step 4 — Python and the environment</li>
+<li>Windows: “Python introuvable”</li>
+<li>Windows: checking it took</li>
 <li>Step 5 — Ollama and Qwen</li>
+<li>Step 5b — Point Continue at your local model</li>
+<li>Which model size</li>
 <li>Step 6 — The agent in your terminal</li>
 <li>Two terminals is the working pattern</li>
 <li>The last check</li>
+<li>When it goes wrong</li>
+<li>Using the model well</li>
 <li>Also before class</li>
 <li>Ready?</li>
 </ol>
@@ -1210,6 +1216,11 @@ Thierry Warin, PhD
 <li><strong>Quarto</strong> — to preview the lecture decks</li>
 </ul>
 </div>
+<div class="tight">
+<ul>
+<li><strong>Continue</strong> — the assistant panel inside the editor, which Step 5b points at your local model</li>
+</ul>
+</div>
 <div class="muted">
 <p>Extensions view: <strong>View → Extensions</strong>, or <code>Cmd/Ctrl + Shift + X</code>.</p>
 </div>
@@ -1281,14 +1292,46 @@ Thierry Warin, PhD
 <p><strong>Turn your wifi off and run that again.</strong> It should still answer. That is the point of running it locally.</p>
 </div>
 </section>
+<section id="step-5b-point-continue-at-your-local-model" class="slide level2">
+<h2>Step 5b — Point Continue at your local model</h2>
+<p>Installed, Continue still talks to nothing. Give it a config at <code>~/.continue/config.yaml</code> — on Windows, <code>%USERPROFILE%\\.continue\\config.yaml</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href></a><span class="fu">name</span><span class="kw">:</span><span class="at"> qmib</span></span>
+<span id="cb8-2"><a href></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.0.1</span></span>
+<span id="cb8-3"><a href></a><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local coder</span></span>
+<span id="cb8-5"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
+<span id="cb8-6"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> qwen2.5-coder:7b</span><span class="co">     # the size you actually pulled</span></span>
+<span id="cb8-7"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">chat</span><span class="kw">,</span><span class="at"> edit</span><span class="kw">,</span><span class="at"> apply</span><span class="kw">]</span></span>
+<span id="cb8-8"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local embedder</span></span>
+<span id="cb8-9"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
+<span id="cb8-10"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> nomic-embed-text</span></span>
+<span id="cb8-11"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">embed</span><span class="kw">]</span></span>
+<span id="cb8-12"><a href></a><span class="fu">context</span><span class="kw">:</span></span>
+<span id="cb8-13"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> file</span></span>
+<span id="cb8-14"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> code</span></span>
+<span id="cb8-15"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> diff</span></span>
+<span id="cb8-16"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> terminal</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Open a <code>.py</code> file, select a few lines, press <code>Cmd/Ctrl + L</code>. If the panel answers, you are done. If it answers nothing, <code>ollama serve</code> is not running.</p>
+</div>
+</section>
+<section id="which-model-size" class="slide level2">
+<h2>Which model size</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:3b     <span class="co"># 8 GB RAM</span></span>
+<span id="cb9-2"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:7b     <span class="co"># 16 GB  ← most laptops</span></span>
+<span id="cb9-3"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:14b    <span class="co"># 32 GB+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p>Pull the one that matches your <strong>RAM</strong>, not the biggest one. A model that does not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change the name in <code>config.yaml</code> to whichever you pulled.</p>
+</div>
+</section>
 <section id="step-6-the-agent-in-your-terminal" class="slide level2">
 <h2>Step 6 — The agent in your terminal</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Point it at Ollama, and give the model a real context window:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434</span>
-<span id="cb9-2"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192</span>
-<span id="cb9-3"><a href></a></span>
-<span id="cb9-4"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama/qwen2.5-coder</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434</span>
+<span id="cb11-2"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192</span>
+<span id="cb11-3"><a href></a></span>
+<span id="cb11-4"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama/qwen2.5-coder</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="step">
 <p>Ask it for something real — <em>“open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached”</em> — and read what it proposes <strong>before</strong> you accept it.</p>
 </div>
@@ -1307,11 +1350,96 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
 <p>If one fails, the script prints what to do. If you are still stuck, ask Qwen — which is itself a test of whether your setup works.</p>
+</section>
+<section id="when-it-goes-wrong" class="slide level2">
+<h2>When it goes wrong</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>What you see</th>
+<th>Why</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Python introuvable</code> (Windows)</td>
+<td>Store alias shadowing Python</td>
+<td>Turn off the app execution aliases — two slides back</td>
+</tr>
+<tr class="even">
+<td><code>ollama: command not found</code></td>
+<td>Not on PATH yet</td>
+<td>New terminal; on Windows restart VS Codium</td>
+</tr>
+<tr class="odd">
+<td><code>ModuleNotFoundError</code> in VS Codium</td>
+<td>Wrong interpreter selected</td>
+<td><code>Cmd/Ctrl + Shift + P</code> → <em>Python: Select Interpreter</em> → <code>.venv</code></td>
+</tr>
+<tr class="even">
+<td><code>pip</code> fails</td>
+<td>Environment not active</td>
+<td>Check your prompt starts with <code>(.venv)</code></td>
+</tr>
+<tr class="odd">
+<td>Continue answers nothing</td>
+<td><code>ollama serve</code> not running</td>
+<td>Start it in its own terminal, leave it open</td>
+</tr>
+<tr class="even">
+<td>The model is very slow</td>
+<td>Too large for your RAM</td>
+<td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
+</tr>
+<tr class="odd">
+<td>aider forgets your file</td>
+<td>Ollama’s 2k default context</td>
+<td><code>OLLAMA_CONTEXT_LENGTH=8192 ollama serve</code></td>
+</tr>
+<tr class="even">
+<td><code>connection refused</code> from aider</td>
+<td>Same — no server</td>
+<td>Start <code>ollama serve</code> first</td>
+</tr>
+<tr class="odd">
+<td>Maths shows as raw <code>$...$</code></td>
+<td>No preview extension</td>
+<td>Install <em>Markdown Preview Enhanced</em>, open with <code>Cmd/Ctrl + K V</code></td>
+</tr>
+<tr class="even">
+<td>Slow on Apple Silicon</td>
+<td>Rosetta build of Python</td>
+<td>Install the arm64 build</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="using-the-model-well" class="slide level2">
+<h2>Using the model well</h2>
+<p>The local model is a <strong>sparring partner</strong>, not an oracle.</p>
+<div class="step">
+<p><strong>Ask it to argue against you.</strong> Its most useful output is the objection you had not considered — not the answer you were hoping for.</p>
+</div>
+<div class="step">
+<p><strong>Verify every factual claim.</strong> It states plausible falsehoods with complete confidence, and does so most often about library APIs, statistical results and citations — which is exactly the material of this course.</p>
+</div>
+<div class="step">
+<p><strong>Record what you checked.</strong> Every practice deliverable requires one documented instance where you caught the model being wrong or unable to support a claim. That is graded.</p>
+</div>
+<div class="warn">
+<p>You are never penalised for using the model. You are penalised for using it uncritically.</p>
+</div>
 </section>
 <section id="also-before-class" class="slide level2">
 <h2>Also before class</h2>

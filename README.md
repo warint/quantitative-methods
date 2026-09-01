@@ -92,7 +92,7 @@ is never a prerequisite for the next lecture.
 **Session 12** is different: the pre-session prepares the final presentation and the class meeting is
 a presentation workshop and defence. There is no separate practice deck.
 
-**Complete PowerPoint and Python demo index: [`slides/COURSE-POWERPOINTS.md`](slides/COURSE-POWERPOINTS.md).**
+**Complete deck and demo index: [`slides/COURSE-POWERPOINTS.md`](slides/COURSE-POWERPOINTS.md)**
 
 ### The second half is real research, from Africa
 
@@ -214,8 +214,8 @@ Set-Location "$HOME\Desktop"
 git clone https://github.com/warint/quantitative-methods.git quantitative-methods
 Set-Location quantitative-methods
 
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+py -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py

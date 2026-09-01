@@ -22,59 +22,6 @@ format:
     footer: "MATH60033A · Session 02 practice · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
-
-## Outline · The workshop {.center .scrollable}
-
-1. Ninety minutes
-2. Before you start
-3. Did not get the data? Two minutes, now
-4. Reproduce — 20 min
-5. Apply to your own angle — 35 min
-6. Break one assumption — 15 min
-7. Write it down — 20 min
-8. Submitting
-9. What loses marks
-10. Two-minute report
-
-## What session 2 is for {.scrollable}
-::::: columns
-
-:::: {.column width="33%"}
-
-### The mathematics
-
-- Distinguish **mean, median and trimmed mean**, and say which question each answers
-- Explain why the sample variance divides by $n-1$
-- Test **skewness** and **excess kurtosis** against $2\sqrt{6/n}$ and $4\sqrt{6/n}$
-- Derive the least-squares slope, and read "controlling for" as a residual regression
-
-::::
-
-:::: {.column width="33%"}
-
-### The Python
-
-- Compute the moments directly, and check them against a library
-- Fit a simple and a multiple regression with `smf.ols`, and read `.params`
-- Draw a scatter and a fitted line, and label both axes in units
-
-::::
-
-:::: {.column width="33%"}
-
-### The international business
-
-- Quote a slope **in units** a manager can act on
-- Read a mean–median gap as evidence about a distribution's shape
-- Say why a slope is an association, and what more is needed to call it a cause
-
-::::
-
-:::::
-
-<!-- END deck-frontmatter -->
-
 # Practice {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -107,52 +54,16 @@ mkdir -p groups/A2026/group-XX/session-02
 The git log is the participation record. It is not a formality.
 :::
 
-## Did not get the data? Two minutes, now
-
-The pre-session asked you to download it. If you did not, do it before the room
-starts — everything after this slide needs it.
-
-```bash
-mkdir -p 02-exploratory-data-analysis/data/replication
-cd 02-exploratory-data-analysis/data/replication
-
-curl -L -o replication.zip \
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF"
-
-unzip -q replication.zip && rm replication.zip
-cd -
-```
-
-```bash
-ls 02-exploratory-data-analysis/data/replication/public   # code  data  results
-```
-
-::: {.muted}
-33 MB. Windows PowerShell: `curl.exe`, and `Expand-Archive replication.zip .`
-:::
-
 ## 1 · Reproduce — 20 min
 
-Take the result the paper rests on, and reproduce it.
+Take the result the paper rests on, and reproduce it. The package you downloaded is at
+`02-exploratory-data-analysis/data/replication/`.
 
 ```python
-import pandas as pd, qmib
+import qmib
 
-REP = "02-exploratory-data-analysis/data/replication/public"
-
-# The authors ship their outputs as CSV beside the figures they became, which
-# is what makes a reproduction checkable: your number against their number.
-fig2a = pd.read_csv(f"{REP}/results/figure_2a.csv")
-print(fig2a.shape)
-print(fig2a.head())
-
-core = qmib.load("core")     # the session's own data, for comparison
+data = qmib.load("core")     # the session's own data, for comparison
 ```
-
-::: {.check}
-Their `code/` is Stata. You are not running it — you are reproducing **one
-number** in Python and saying whether you got it.
-:::
 
 ::: {.muted}
 Paper: Fraiberger et al. (2021), *Media sentiment and international asset prices* · [10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF)

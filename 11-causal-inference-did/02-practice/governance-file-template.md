@@ -80,7 +80,8 @@ Every transformation, in order, with the function that performs it.
 
 ```bash
 git clone <repo> && cd <repo>
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate    # macOS / Linux
+py -m venv .venv && .venv\Scripts\activate           # Windows
 pip install -r requirements.txt
 python <entry point>
 ```

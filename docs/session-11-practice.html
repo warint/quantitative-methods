@@ -1067,156 +1067,6 @@ Thierry Warin, PhD
 </div>
 
 </section>
-<section class="slide level2">
-
-<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
-</section>
-<section id="outline-the-workshop" class="slide level2 center scrollable">
-<h2>Outline · The workshop</h2>
-<ol type="1">
-<li>Ninety minutes</li>
-<li>Before you start</li>
-<li>Reproduce — 20 min</li>
-<li>Apply to your own angle — 35 min</li>
-<li>Break one assumption — 15 min</li>
-<li>Write it down — 20 min</li>
-<li>Submitting</li>
-<li>What loses marks</li>
-<li>Two-minute report</li>
-</ol>
-</section>
-<section id="what-session-11-is-for" class="slide level2 scrollable">
-<h2>What session 11 is for</h2>
-<div class="columns">
-<div class="column" style="width:33%;">
-<h3 id="the-mathematics">The mathematics</h3>
-<ul>
-<li>Set up a <strong>difference-in-differences</strong> design and identify the four cells</li>
-<li>Read the <strong>interaction coefficient</strong> as the estimate</li>
-<li>State the <strong>parallel-trends</strong> assumption and how you would probe it</li>
-<li>Say what an <strong>instrument</strong> must satisfy, and why good ones are rare</li>
-</ul>
-</div><div class="column" style="width:33%;">
-<h3 id="the-python">The Python</h3>
-<ul>
-<li>Build the four cells, then get the same number from an interaction in <code>smf.ols</code></li>
-<li>Plot an event study and let the pre-period speak for the design</li>
-<li>Handle staggered adoption without letting the cohorts blur</li>
-</ul>
-</div><div class="column" style="width:33%;">
-<h3 id="the-international-business">The international business</h3>
-<ul>
-<li>Evaluate a policy that arrived in different countries at different times</li>
-<li>Defend parallel trends as an argument, not as a test that passed</li>
-<li>Say plainly what the design cannot rescue</li>
-</ul>
-</div></div>
-</section>
-<section id="your-python-so-far" class="slide level2 scrollable">
-<h2>Your Python so far</h2>
-<p>The 79 names below came out of sessions 2–10. Today’s slides assume them, and add to them. The ones marked are the newest, from session 10.</p>
-<h3 id="load-and-shape">Load and shape</h3>
-<ul>
-<li><code>.dropna</code> — drop rows with missing values</li>
-<li><code>.merge</code> — join two frames on a key</li>
-<li><code>.shape</code> — rows and columns</li>
-<li><code>pd.read_parquet</code> — a parquet file, directly</li>
-<li><code>qmib.load</code> — a course dataset, by name</li>
-<li><code>pd.get_dummies</code> — categories to indicator columns</li>
-<li><code>StandardScaler</code> — standardise before you penalise</li>
-<li><code>make_pipeline</code> — so the scaler is fitted on train only</li>
-<li><code>pd.concat</code> — stack the matched sample back together · <em>new in session 10</em></li>
-</ul>
-<h3 id="describe">Describe</h3>
-<ul>
-<li><code>.mean / .median</code> — the two centres, and their gap</li>
-<li><code>.quantile</code> — any quantile, including the median</li>
-<li><code>.std / .var</code> — spread, dividing by <span class="math inline">\(n-1\)</span></li>
-<li><code>stats.trim_mean</code> — the mean after cutting both tails</li>
-<li><code>.value_counts</code> — how unbalanced is the outcome</li>
-<li><code>pd.crosstab</code> — a contingency table in one call</li>
-<li><code>np.linalg.eigvalsh</code> — eigenvalues of a symmetric matrix</li>
-<li><code>np.cov</code> — the matrix the model is trying to reproduce</li>
-</ul>
-<h3 id="fit">Fit</h3>
-<ul>
-<li><code>.fit()</code> — estimate the model you specified</li>
-<li><code>smf.ols</code> — least squares, from a formula</li>
-<li><code>OrderedModel</code> — ordered categories, proportional odds</li>
-<li><code>sm.MNLogit</code> — unordered categories, one baseline</li>
-<li><code>sm.add_constant</code> — the intercept, when there is no formula</li>
-<li><code>smf.logit</code> — binary outcome, from a formula</li>
-<li><code>Ridge / Lasso / ElasticNet</code> — the three penalties</li>
-<li><code>I(x**2)</code> — a quadratic term, inside a formula</li>
-<li><code>PanelOLS</code> — fixed effects, entity intercepts absorbed</li>
-<li><code>RandomEffects</code> — the other panel estimator, and its assumption</li>
-<li><code>a * b</code> — interaction — expands to <code>a + b + a:b</code></li>
-<li><code>Factor</code> — statsmodels’ factor analysis, by maximum likelihood</li>
-<li><code>PCA</code> — components, on standardised columns</li>
-<li><code>prince.FAMD</code> — when the columns are mixed numeric and categorical</li>
-<li><code>KNeighborsClassifier</code> — predict a class from the k closest rows</li>
-<li><code>KNeighborsRegressor</code> — the same idea, averaging a number</li>
-<li><code>RandomForestClassifier</code> — the comparison that complexity has to beat</li>
-<li><code>semopy.Model</code> — from a model description string</li>
-<li><code>expit</code> — the inverse logit, when you need it directly · <em>new in session 10</em></li>
-</ul>
-<h3 id="read-the-fit">Read the fit</h3>
-<ul>
-<li><code>.params</code> — the coefficients, in units of <span class="math inline">\(y\)</span></li>
-<li><code>.rsquared</code> — share of variance explained</li>
-<li><code>.mse_resid</code> — its square root is the RSE, in units</li>
-<li><code>.resid / .fittedvalues</code> — what is left, and what was predicted</li>
-<li><code>.rsquared_adj</code> — penalised for the extra predictor</li>
-<li><code>.get_prediction</code> — with an interval, via <code>.summary_frame()</code></li>
-<li><code>.predict</code> — fitted probabilities, not classes</li>
-<li><code>np.exp</code> — a log-odds becomes an odds ratio</li>
-<li><code>.coef_ / .alpha_</code> — scikit-learn’s spelling of <code>.params</code></li>
-<li><code>.components_</code> — the loadings — variables on components</li>
-<li><code>.explained_variance_ratio_</code> — what the scree plot is drawn from</li>
-<li><code>.rotate(&#39;varimax&#39;)</code> — same fit, readable loadings — and no new evidence</li>
-<li><code>.inspect()</code> — loadings and paths, estimated</li>
-</ul>
-<h3 id="diagnose">Diagnose</h3>
-<ul>
-<li><code>.cooks_distance</code> — influence: leverage <span class="math inline">\(\times\)</span> residual</li>
-<li><code>.get_influence()</code> — the whole diagnostic bundle</li>
-<li><code>.hat_matrix_diag</code> — leverage; sums to <span class="math inline">\(p\)</span>, always</li>
-<li><code>.resid_studentized_internal</code> — residuals on a common scale</li>
-<li><code>classification_report</code> — precision and recall, per class</li>
-<li><code>confusion_matrix</code> — the four cells accuracy hides</li>
-<li><code>permutation_importance</code> — importance without coefficients: scramble a column</li>
-</ul>
-<h3 id="choose-and-validate">Choose and validate</h3>
-<ul>
-<li><code>.aic / .bic</code> — compare non-nested models</li>
-<li><code>.llf</code> — log-likelihood, for the LR test</li>
-<li><code>stats.chi2.sf</code> — the <span class="math inline">\(p\)</span>-value of that test</li>
-<li><code>KFold</code> — and do it <span class="math inline">\(k\)</span> times</li>
-<li><code>RidgeCV / LassoCV / ElasticNetCV</code> — <span class="math inline">\(\lambda\)</span> by cross-validation</li>
-<li><code>lasso_path</code> — the whole coefficient path</li>
-<li><code>mean_squared_error</code> — score it on the held-out part</li>
-<li><code>np.logspace</code> — a grid that is even in <span class="math inline">\(\log\lambda\)</span></li>
-<li><code>train_test_split</code> — hold something back</li>
-<li><code>.compare_f_test</code> — an F-test, for nested models only</li>
-<li><code>np.linalg.pinv</code> — pseudo-inverse, for the Hausman statistic</li>
-<li><code>.best_params_ / .best_score_</code> — what the search chose, and how it scored</li>
-<li><code>GridSearchCV</code> — search a hyperparameter by cross-validation</li>
-<li><code>cross_val_score</code> — one number, k folds, any scorer</li>
-<li><code>semopy.calc_stats</code> — CFI, TLI, RMSEA — report all three</li>
-<li><code>.kneighbors</code> — who got matched to whom · <em>new in session 10</em></li>
-<li><code>NearestNeighbors</code> — match treated to control · <em>new in session 10</em></li>
-</ul>
-<h3 id="plot">Plot</h3>
-<ul>
-<li><code>plt.scatter</code> — the data, before anything else</li>
-<li><code>plt.xlabel / plt.ylabel</code> — say the units, every time</li>
-<li><code>plt.axhline / plt.axvline</code> — draw the threshold you are judging against</li>
-<li><code>plt.stem</code> — one spike per observation</li>
-<li><code>plt.subplots</code> — several panels, one figure</li>
-<li><code>.boxplot</code> — balance, before and after matching · <em>new in session 10</em></li>
-</ul>
-<!-- END deck-frontmatter -->
-</section>
 <section>
 <section id="practice" class="title-slide slide level1 center" data-background-color="#E3120B" style="color:#F7F4ED">
 <h1>Practice</h1>
@@ -1264,7 +1114,7 @@ Thierry Warin, PhD
 <h2>Before you start</h2>
 <p>Everyone pushes at least once. Replace <code>XX</code> with your group number — group 07 uses <code>group-07</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="fu">git</span> checkout <span class="at">-b</span> group-XX</span>
-<span id="cb1-2"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> 11-causal-inference-did/02-practice/submissions/group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> groups/A2026/group-XX/session-11</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p>The git log is the participation record. It is not a formality.</p>
 </div>
@@ -1321,7 +1171,7 @@ Thierry Warin, PhD
 </section>
 <section id="submitting" class="slide level2">
 <h2>Submitting</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="fu">git</span> add 11-causal-inference-did/02-practice/submissions/group-XX</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="fu">git</span> add groups/A2026/group-XX/session-11</span>
 <span id="cb4-2"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Session 11 practice — group XX&quot;</span></span>
 <span id="cb4-3"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="get">

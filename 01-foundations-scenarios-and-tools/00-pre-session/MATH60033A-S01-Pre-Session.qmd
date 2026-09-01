@@ -33,12 +33,18 @@ format:
 5. Step 2 — Extensions
 6. Step 3 — The course materials
 7. Step 4 — Python and the environment
-8. Step 5 — Ollama and Qwen
-9. Step 6 — The agent in your terminal
-10. Two terminals is the working pattern
-11. The last check
-12. Also before class
-13. Ready?
+8. Windows: "Python introuvable"
+9. Windows: checking it took
+10. Step 5 — Ollama and Qwen
+11. Step 5b — Point Continue at your local model
+12. Which model size
+13. Step 6 — The agent in your terminal
+14. Two terminals is the working pattern
+15. The last check
+16. When it goes wrong
+17. Using the model well
+18. Also before class
+19. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -146,6 +152,11 @@ VS Codium uses the **Open VSX** registry, not Microsoft's Marketplace.
 - **Python** (ms-python) — syntax, linting, the interpreter picker
 - **Jupyter** — for running cells inside a file
 - **Quarto** — to preview the lecture decks
+:::
+
+::: {.tight}
+- **Continue** — the assistant panel inside the editor, which Step 5b points at
+  your local model
 :::
 
 ::: {.muted}
@@ -271,6 +282,49 @@ ollama run qwen2.5-coder "In one sentence, what is a residual?"
 locally.
 :::
 
+## Step 5b — Point Continue at your local model
+
+Installed, Continue still talks to nothing. Give it a config at
+`~/.continue/config.yaml` — on Windows, `%USERPROFILE%\\.continue\\config.yaml`:
+
+```yaml
+name: qmib
+version: 0.0.1
+models:
+  - name: Local coder
+    provider: ollama
+    model: qwen2.5-coder:7b     # the size you actually pulled
+    roles: [chat, edit, apply]
+  - name: Local embedder
+    provider: ollama
+    model: nomic-embed-text
+    roles: [embed]
+context:
+  - provider: file
+  - provider: code
+  - provider: diff
+  - provider: terminal
+```
+
+::: {.check}
+Open a `.py` file, select a few lines, press `Cmd/Ctrl + L`. If the panel
+answers, you are done. If it answers nothing, `ollama serve` is not running.
+:::
+
+## Which model size
+
+```bash
+ollama pull qwen2.5-coder:3b     # 8 GB RAM
+ollama pull qwen2.5-coder:7b     # 16 GB  ← most laptops
+ollama pull qwen2.5-coder:14b    # 32 GB+
+```
+
+::: {.warn}
+Pull the one that matches your **RAM**, not the biggest one. A model that does
+not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change
+the name in `config.yaml` to whichever you pulled.
+:::
+
 ## Step 6 — The agent in your terminal
 
 ```bash
@@ -315,6 +369,47 @@ Five checks should pass. **Bring the output to class.**
 
 If one fails, the script prints what to do. If you are still stuck, ask Qwen — which is itself a
 test of whether your setup works.
+
+## When it goes wrong
+
+| What you see | Why | Fix |
+|---|---|---|
+| `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — two slides back |
+| `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
+| `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
+| `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
+| Continue answers nothing | `ollama serve` not running | Start it in its own terminal, leave it open |
+| The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
+| aider forgets your file | Ollama's 2k default context | `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
+| `connection refused` from aider | Same — no server | Start `ollama serve` first |
+| Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
+| Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
+
+## Using the model well
+
+The local model is a **sparring partner**, not an oracle.
+
+::: {.step}
+**Ask it to argue against you.** Its most useful output is the objection you had
+not considered — not the answer you were hoping for.
+:::
+
+::: {.step}
+**Verify every factual claim.** It states plausible falsehoods with complete
+confidence, and does so most often about library APIs, statistical results and
+citations — which is exactly the material of this course.
+:::
+
+::: {.step}
+**Record what you checked.** Every practice deliverable requires one documented
+instance where you caught the model being wrong or unable to support a claim.
+That is graded.
+:::
+
+::: {.warn}
+You are never penalised for using the model. You are penalised for using it
+uncritically.
+:::
 
 ## Also before class
 

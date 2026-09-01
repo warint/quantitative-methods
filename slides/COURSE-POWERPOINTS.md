@@ -1,8 +1,10 @@
-# MATH60033A course PowerPoints
+# MATH60033A deck and demo index
 
-The course contains **35 PowerPoint decks and 351 slides**. The files have stable, descriptive names
-and use the same visual system throughout. Source credits and reading links are stored in the speaker
-notes under `[Sources]`.
+Every deck in the course is **Quarto**, rendered to revealjs and published to the course site. The
+one exception is session 12, whose pre-session and presentation brief are still PowerPoint.
+
+`slides/reference.pptx` is not a deck — it is the reference document Quarto uses when a `.qmd` is
+rendered to `pptx`, which a few are as a fallback.
 
 ## The session rhythm
 
@@ -30,9 +32,9 @@ Desktop/quantitative-methods
 Open that folder in VS Codium. Each runnable Python demo is self-contained, uses a fixed seed, works
 offline, and saves its figure locally.
 
-> **Lectures are Quarto, not PowerPoint.** The lecture decks were replaced by the imported
-> Quarto sources listed in [`COURSE-QUARTO-SESSIONS.md`](COURSE-QUARTO-SESSIONS.md); render them
-> with `scripts/render_session_lectures.sh`. Pre-session and practice remain PowerPoint.
+> **Everything here is Quarto.** Lecture provenance — which imported source each deck came from —
+> is in [`COURSE-QUARTO-SESSIONS.md`](COURSE-QUARTO-SESSIONS.md). Render a single deck with
+> `quarto render <file>.qmd --to revealjs`, or the whole site with `scripts/build_docs.py`.
 
 ## Deck and demo index
 
