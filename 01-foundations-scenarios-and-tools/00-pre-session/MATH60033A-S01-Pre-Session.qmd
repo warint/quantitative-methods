@@ -49,25 +49,26 @@ format:
 21. Step 6c — Pointing it at your model
 22. "Add .aider* to .gitignore?"
 23. Step 6d — Ask it something real
-24. Two terminals is the working pattern
-25. The last check
-26. Using the model well
-27. Also before class
-28. Ready?
-29. Nothing here is your fault
-30. Windows: the star is not a tick
-31. Windows: "l'exécution de scripts est désactivée"
-32. Windows: still cannot activate?
-33. Built it on the wrong version? Start over
-34. `deactivate` is not a command
-35. Windows: "Python introuvable"
-36. Windows: checking it took
-37. Only if CONTEXT is small
-38. Check it took
-39. Linux, or no desktop app
-40. If pipx will not cooperate
-41. `aider n'est pas reconnu`?
-42. When it goes wrong
+24. It is thinking, not stuck
+25. Two terminals is the working pattern
+26. The last check
+27. Using the model well
+28. Also before class
+29. Ready?
+30. Nothing here is your fault
+31. Windows: the star is not a tick
+32. Windows: "l'exécution de scripts est désactivée"
+33. Windows: still cannot activate?
+34. Built it on the wrong version? Start over
+35. `deactivate` is not a command
+36. Windows: "Python introuvable"
+37. Windows: checking it took
+38. Only if CONTEXT is small
+39. Check it took
+40. Linux, or no desktop app
+41. If pipx will not cooperate
+42. `aider n'est pas reconnu`?
+43. When it goes wrong
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -615,20 +616,53 @@ asked — yours to keep, not to push.
 
 ## Step 6d — Ask it something real
 
-::: {.step}
-*"Open `qmib.py` and explain what `load` does when the file is already cached."*
-:::
-
-Read what it proposes **before** you accept it. aider commits automatically
-after each change it applies, and those commits are attributed to you.
+Start it on **one file**, not the whole repository:
 
 ```bash
-aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+aider --model ollama_chat/qwen2.5-coder:7b --map-tokens 0 --no-auto-commits qmib.py
 ```
 
+::: {.step}
+*"What does `load` do when the file is already cached?"*
+:::
+
+Read what it proposes **before** you accept it. aider commits after each change
+it applies, and those commits are attributed to you.
+
 ::: {.muted}
-`--no-auto-commits` if you would rather stage the changes yourself. Either way,
-you are answerable for every line on your branch.
+`--map-tokens 0` skips the repository map. Without it aider parses all 210 code
+files here before answering anything, which on a first run looks like a hang.
+Drop the flag once you are working on real code and want it to see the project.
+:::
+
+## It is thinking, not stuck {#slow}
+
+A local model is slower than the hosted ones you are used to. **How much slower
+depends on one thing**, and `ollama ps` reports it:
+
+```text
+NAME                SIZE      PROCESSOR    CONTEXT
+qwen2.5-coder:7b    6.4 GB    100% GPU     8192
+```
+
+::: {.tight}
+| PROCESSOR | What to expect |
+|---|---|
+| **100% GPU** | a few seconds for a sentence |
+| **CPU/GPU split** | tens of seconds |
+| **100% CPU** | minutes — use `qwen2.5-coder:3b` instead |
+:::
+
+::: {.check}
+If it says 100% CPU, the model does not fit in your graphics memory. Pull the
+3b, change the name in `config.yaml` and in the aider command, and it becomes
+usable. A smaller model that answers is worth more than a larger one you will
+not wait for.
+:::
+
+::: {.warn}
+Genuinely hung, rather than slow, looks different: no spinner, no partial text,
+and nothing in `ollama ps` at all. That means the server is not running.
 :::
 
 ## Two terminals is the working pattern
@@ -1088,7 +1122,8 @@ PATH.
 | *le répertoire n'est pas vide* deleting `.venv` | Something holds a file inside it — usually VS Codium's selected interpreter | Quit VS Codium, delete from a plain PowerShell. Last resort `cmd /c "rmdir /s /q .venv"` |
 | `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
 | Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
-| The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
+| The model is very slow | `ollama ps` says 100% CPU — it does not fit in graphics memory | Pull `qwen2.5-coder:3b`, change it in `config.yaml` and the aider command |
+| aider sits there after your first question | It is parsing 210 files to build a repo map | Start it with `--map-tokens 0` and name one file |
 | aider forgets your file | The context window is too small | `ollama ps` to read it; raise it in the **Ollama app's settings**, not with an environment variable |
 | `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
 | `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |

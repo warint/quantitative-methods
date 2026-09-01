@@ -1097,6 +1097,7 @@ Thierry Warin, PhD
 <li>Step 6c — Pointing it at your model</li>
 <li>“Add .aider* to .gitignore?”</li>
 <li>Step 6d — Ask it something real</li>
+<li>It is thinking, not stuck</li>
 <li>Two terminals is the working pattern</li>
 <li>The last check</li>
 <li>Using the model well</li>
@@ -1560,13 +1561,50 @@ Thierry Warin, PhD
 </section>
 <section id="step-6d-ask-it-something-real" class="slide level2">
 <h2>Step 6d — Ask it something real</h2>
+<p>Start it on <strong>one file</strong>, not the whole repository:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--map-tokens</span> 0 <span class="at">--no-auto-commits</span> qmib.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="step">
-<p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
+<p><em>“What does <code>load</code> do when the file is already cached?”</em></p>
 </div>
-<p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Read what it proposes <strong>before</strong> you accept it. aider commits after each change it applies, and those commits are attributed to you.</p>
 <div class="muted">
-<p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
+<p><code>--map-tokens 0</code> skips the repository map. Without it aider parses all 210 code files here before answering anything, which on a first run looks like a hang. Drop the flag once you are working on real code and want it to see the project.</p>
+</div>
+</section>
+<section id="slow" class="slide level2">
+<h2>It is thinking, not stuck</h2>
+<p>A local model is slower than the hosted ones you are used to. <strong>How much slower depends on one thing</strong>, and <code>ollama ps</code> reports it:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb27-1"><a href></a>NAME                SIZE      PROCESSOR    CONTEXT</span>
+<span id="cb27-2"><a href></a>qwen2.5-coder:7b    6.4 GB    100% GPU     8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="tight">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>PROCESSOR</th>
+<th>What to expect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>100% GPU</strong></td>
+<td>a few seconds for a sentence</td>
+</tr>
+<tr class="even">
+<td><strong>CPU/GPU split</strong></td>
+<td>tens of seconds</td>
+</tr>
+<tr class="odd">
+<td><strong>100% CPU</strong></td>
+<td>minutes — use <code>qwen2.5-coder:3b</code> instead</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="check">
+<p>If it says 100% CPU, the model does not fit in your graphics memory. Pull the 3b, change the name in <code>config.yaml</code> and in the aider command, and it becomes usable. A smaller model that answers is worth more than a larger one you will not wait for.</p>
+</div>
+<div class="warn">
+<p>Genuinely hung, rather than slow, looks different: no spinner, no partial text, and nothing in <code>ollama ps</code> at all. That means the server is not running.</p>
 </div>
 </section>
 <section id="two-terminals-is-the-working-pattern" class="slide level2">
@@ -1586,7 +1624,7 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
@@ -1688,8 +1726,8 @@ Thierry Warin, PhD
 <section id="fix-star" class="slide level2">
 <h2>Windows: the star is not a tick</h2>
 <p><code>py --list</code> marks the <strong>default</strong> — what a bare <code>py</code> uses. After installing 3.12 the star normally stays where it was:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb28-1"><a href></a> -V:3.14 *        Python 3.14 (64-bit)</span>
-<span id="cb28-2"><a href></a> -V:3.12          Python 3.12 (64-bit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb29-1"><a href></a> -V:3.14 *        Python 3.14 (64-bit)</span>
+<span id="cb29-2"><a href></a> -V:3.12          Python 3.12 (64-bit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>That is expected, and it is why every command writes <code>-3.12</code>. Leave the star alone.</p>
 </div>
@@ -1700,11 +1738,11 @@ Thierry Warin, PhD
 <section id="fix-execution-policy" class="slide level2">
 <h2>Windows: “l’exécution de scripts est désactivée”</h2>
 <p>Activation is a PowerShell script, and Windows refuses to run scripts by default:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb29-1"><a href></a>… ne peut pas être chargé car l&#39;exécution de scripts est désactivée</span>
-<span id="cb29-2"><a href></a>    sur ce système</span>
-<span id="cb29-3"><a href></a>… cannot be loaded because running scripts is disabled on this system</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb30-1"><a href></a>… ne peut pas être chargé car l&#39;exécution de scripts est désactivée</span>
+<span id="cb30-2"><a href></a>    sur ce système</span>
+<span id="cb30-3"><a href></a>… cannot be loaded because running scripts is disabled on this system</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Nothing is broken. Allow scripts <strong>for your own account</strong> — no administrator rights needed, and it is asked once, ever:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb30-1"><a href></a><span class="fu">Set-ExecutionPolicy</span> <span class="op">-</span>Scope CurrentUser <span class="op">-</span>ExecutionPolicy RemoteSigned</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb31-1"><a href></a><span class="fu">Set-ExecutionPolicy</span> <span class="op">-</span>Scope CurrentUser <span class="op">-</span>ExecutionPolicy RemoteSigned</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Answer <code>O</code> (or <code>Y</code>), then activate again.</p>
 <div class="muted">
 <p><code>RemoteSigned</code> runs scripts you wrote or created locally, and still refuses unsigned scripts downloaded from the internet. It is the setting Microsoft recommends for development machines — not <code>Unrestricted</code>, and not <code>Bypass</code>.</p>
@@ -1741,14 +1779,14 @@ Thierry Warin, PhD
 <p>A <code>.venv</code> <strong>remembers the interpreter that created it</strong>. Installing 3.12 afterwards changes nothing, and neither does PATH — the folder has to go and be rebuilt.</p>
 </div>
 <p><strong>Windows.</strong> Quit VS Codium first — it holds the interpreter it has selected, and that alone can stop the folder being deleted. Then open <strong>PowerShell</strong> from the Start menu, not a terminal inside the editor:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb31-1"><a href></a><span class="fu">cd</span> <span class="op">~</span>\Desktop\quantitative-methods</span>
-<span id="cb31-2"><a href></a><span class="fu">Remove-Item</span> <span class="op">-</span>Recurse <span class="op">-</span>Force <span class="op">.</span><span class="fu">venv</span></span>
-<span id="cb31-3"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb32-1"><a href></a><span class="fu">cd</span> <span class="op">~</span>\Desktop\quantitative-methods</span>
+<span id="cb32-2"><a href></a><span class="fu">Remove-Item</span> <span class="op">-</span>Recurse <span class="op">-</span>Force <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb32-3"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Now reopen VS Codium, and in its terminal:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb32-1"><a href></a><span class="fu">Set-ExecutionPolicy</span> <span class="op">-</span>Scope CurrentUser <span class="op">-</span>ExecutionPolicy RemoteSigned</span>
-<span id="cb32-2"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span>
-<span id="cb32-3"><a href></a>python <span class="op">--</span>version                      <span class="co"># must say 3.12.x</span></span>
-<span id="cb32-4"><a href></a>pip install <span class="op">-</span>r requirements<span class="op">.</span><span class="fu">txt</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb33-1"><a href></a><span class="fu">Set-ExecutionPolicy</span> <span class="op">-</span>Scope CurrentUser <span class="op">-</span>ExecutionPolicy RemoteSigned</span>
+<span id="cb33-2"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span>
+<span id="cb33-3"><a href></a>python <span class="op">--</span>version                      <span class="co"># must say 3.12.x</span></span>
+<span id="cb33-4"><a href></a>pip install <span class="op">-</span>r requirements<span class="op">.</span><span class="fu">txt</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p>Still <code>le répertoire n&#39;est pas vide</code>? <code>cmd /c &quot;rmdir /s /q .venv&quot;</code> deletes it where <code>Remove-Item</code> will not.</p>
 </div>
@@ -1766,11 +1804,11 @@ Thierry Warin, PhD
 <p>The reliable indicator is the prompt: <code>(.venv)</code> at the start means active, nothing means not. On Windows the folder is then held by VS Codium rather than by your shell, which is why quitting the editor is the step that works.</p>
 </div>
 <p><strong>macOS and Linux</strong></p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href></a><span class="fu">rm</span> <span class="at">-rf</span> .venv</span>
-<span id="cb33-2"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv .venv</span>
-<span id="cb33-3"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
-<span id="cb33-4"><a href></a><span class="ex">python</span> <span class="at">--version</span>                      <span class="co"># must say 3.12.x</span></span>
-<span id="cb33-5"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href></a><span class="fu">rm</span> <span class="at">-rf</span> .venv</span>
+<span id="cb34-2"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv .venv</span>
+<span id="cb34-3"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
+<span id="cb34-4"><a href></a><span class="ex">python</span> <span class="at">--version</span>                      <span class="co"># must say 3.12.x</span></span>
+<span id="cb34-5"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>If <code>python --version</code> says anything but 3.12, the <code>venv</code> line used the wrong interpreter — check you wrote <code>-3.12</code> — and you need to delete and rebuild again.</p>
 </div>
@@ -1795,8 +1833,8 @@ Thierry Warin, PhD
 <section id="fix-python-path" class="slide level2">
 <h2>Windows: checking it took</h2>
 <p>Open a <strong>new</strong> terminal — PATH changes do not reach a terminal that is already running.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb34-1"><a href></a>py <span class="op">--</span>version</span>
-<span id="cb34-2"><a href></a><span class="fu">where</span> py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb35-1"><a href></a>py <span class="op">--</span>version</span>
+<span id="cb35-2"><a href></a><span class="fu">where</span> py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>A version number and a path under <code>Program Files</code> or <code>AppData</code> means you are fine. A path ending in <code>WindowsApps</code> means the Store alias is still in the way: go back and turn it off.</p>
 </div>
@@ -1823,8 +1861,8 @@ Thierry Warin, PhD
 <section id="fix-context-verify" class="slide level2">
 <h2>Check it took</h2>
 <p>The setting is read when the server starts and the window is sized when the model loads, so both have to happen again:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;hi&quot;</span></span>
-<span id="cb35-2"><a href></a><span class="ex">ollama</span> ps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;hi&quot;</span></span>
+<span id="cb36-2"><a href></a><span class="ex">ollama</span> ps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>CONTEXT should now read <strong>8192</strong>. If it still says 4096, Ollama did not fully restart.</p>
 </div>
@@ -1832,10 +1870,10 @@ Thierry Warin, PhD
 <section id="fix-context-linux" class="slide level2">
 <h2>Linux, or no desktop app</h2>
 <p>There the server is a systemd service and the environment variable is the only control:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource ini number-lines code-with-copy"><code class="sourceCode ini"><span id="cb37-1"><a href></a><span class="kw">[Service]</span></span>
-<span id="cb37-2"><a href></a><span class="dt">Environment</span><span class="ot">=</span><span class="st">&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="fu">sudo</span> systemctl daemon-reload <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl restart ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource ini number-lines code-with-copy"><code class="sourceCode ini"><span id="cb38-1"><a href></a><span class="kw">[Service]</span></span>
+<span id="cb38-2"><a href></a><span class="dt">Environment</span><span class="ot">=</span><span class="st">&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href></a><span class="fu">sudo</span> systemctl daemon-reload <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl restart ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p>Bigger is not free: the context is held in memory beside the model, so a very large window on a small machine costs speed. 8192 is enough for aider to hold a file and its own instructions.</p>
 </div>
@@ -1846,12 +1884,12 @@ Thierry Warin, PhD
 <section id="fix-pipx" class="slide level2">
 <h2>If pipx will not cooperate</h2>
 <p>pipx is a convenience. A plain environment does the same job with nothing on PATH to go wrong:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb39-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="va">$HOME</span>\aider-env</span>
-<span id="cb39-2"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\pip&quot;</span> install aider-chat</span>
-<span id="cb39-3"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\aider&quot;</span> <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv ~/aider-env</span>
-<span id="cb40-2"><a href></a><span class="ex">~/aider-env/bin/pip</span> install aider-chat</span>
-<span id="cb40-3"><a href></a><span class="ex">~/aider-env/bin/aider</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb40-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="va">$HOME</span>\aider-env</span>
+<span id="cb40-2"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\pip&quot;</span> install aider-chat</span>
+<span id="cb40-3"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\aider&quot;</span> <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv ~/aider-env</span>
+<span id="cb41-2"><a href></a><span class="ex">~/aider-env/bin/pip</span> install aider-chat</span>
+<span id="cb41-3"><a href></a><span class="ex">~/aider-env/bin/aider</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>That is all pipx does. Run aider by its full path from then on, and it stays completely separate from the course environment — which was the only point.</p>
 </div>
@@ -1862,10 +1900,10 @@ Thierry Warin, PhD
 <section id="fix-aider-path" class="slide level2">
 <h2><code>aider n&#39;est pas reconnu</code>?</h2>
 <p>pipx installed it; your shell just cannot see it yet. Confirm it is there, and where:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>pipx puts the command in <code>~/.local/bin</code> — <code>%USERPROFILE%\.local\bin</code> on Windows. Call it by its full path and it runs whatever PATH says:</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb42-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb43-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>To fix it properly rather than working around it: <code>py -m pipx ensurepath</code> (<code>python3</code> elsewhere), then <strong>quit VS Codium entirely and reopen it</strong>. A new terminal tab is not enough on Windows — the editor itself is holding the old PATH.</p>
 </div>
@@ -1956,30 +1994,35 @@ Thierry Warin, PhD
 </tr>
 <tr class="even">
 <td>The model is very slow</td>
-<td>Too large for your RAM</td>
-<td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
+<td><code>ollama ps</code> says 100% CPU — it does not fit in graphics memory</td>
+<td>Pull <code>qwen2.5-coder:3b</code>, change it in <code>config.yaml</code> and the aider command</td>
 </tr>
 <tr class="odd">
+<td>aider sits there after your first question</td>
+<td>It is parsing 210 files to build a repo map</td>
+<td>Start it with <code>--map-tokens 0</code> and name one file</td>
+</tr>
+<tr class="even">
 <td>aider forgets your file</td>
 <td>The context window is too small</td>
 <td><code>ollama ps</code> to read it; raise it in the <strong>Ollama app’s settings</strong>, not with an environment variable</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>address already in use</code> / <em>une seule utilisation … socket</em></td>
 <td>Ollama is already running — it always is</td>
 <td>You do not need <code>ollama serve</code>. Set the variable, restart Ollama</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>connection refused</code> from aider</td>
 <td>Nothing on 11434</td>
 <td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Maths shows as raw <code>$...$</code></td>
 <td>No preview extension</td>
 <td>Install <em>Markdown Preview Enhanced</em>, open with <code>Cmd/Ctrl + K V</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Slow on Apple Silicon</td>
 <td>Rosetta build of Python</td>
 <td>Install the arm64 build</td>
