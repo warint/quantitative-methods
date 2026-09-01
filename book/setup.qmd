@@ -164,7 +164,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] A model pulled: `qwen2.5-coder:3b` (8 GB RAM), `:7b` (16 GB), or `:14b` (32 GB+)
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
 - [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:7b "hello"`. It still answers.
-- [ ] **aider** installed **outside** the course environment — `pip install --user aider-install` then `aider-install`, never `pip install aider-chat` into `.venv`, which collides with the course's own pinned packages — and `aider --version` answers in a new terminal
+- [ ] **aider** installed **outside** the course environment, via pipx — `python3 -m pip install --user pipx`, `python3 -m pipx ensurepath`, new terminal, `pipx install aider-chat` (`py` for `python3` on Windows) — never `pip install aider-chat` into `.venv`. `aider --version` answers in a new terminal
 - [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
@@ -205,14 +205,16 @@ press `Ctrl/Cmd+L`.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `ollama: command not found` | Not on PATH yet | Open a new terminal; on Windows restart VS Codium |
-| Dependency resolver errors while installing aider | aider was installed into `.venv`, where it competes with the course's packages | Install it standalone: `pip install --user aider-install`, then `aider-install` |
+| Dependency resolver errors while installing aider | It was installed into `.venv`, where it competes with the course's packages | Install it with pipx instead — see the checklist above |
+| `pipx` or `aider` *n'est pas reconnu* / *not recognized* | `pip install --user` writes scripts to a folder Windows does not have on PATH | `py -m pipx …` works regardless; `py -m pipx ensurepath` plus a new terminal fixes PATH itself |
 | A newly installed extension or command does nothing | The window or terminal predates the install | *Developer: Reload Window*; for PATH changes, quit VS Codium and reopen |
 | `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
 | `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
 | Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
-| aider "forgets" the file you gave it | Ollama's 2k default context | Raise it on the server. macOS: `launchctl setenv OLLAMA_CONTEXT_LENGTH 8192` and restart the app — `ollama serve` will fail with *address already in use* |
-| `connection refused` from aider | Nothing serving on 11434 | macOS: open the Ollama app. Windows/Linux: `ollama serve`, and leave that terminal open |
+| aider "forgets" the file you gave it | Ollama's 2k default context | Set `OLLAMA_CONTEXT_LENGTH=8192` for the **system** and restart Ollama — `launchctl setenv` on macOS, `setx` on Windows, `systemctl edit ollama.service` on Linux |
+| `address already in use`, or *une seule utilisation de chaque adresse de socket* | Ollama is already running; the installer starts it on every platform | Do not run `ollama serve`. Set the variable, then restart Ollama itself |
+| `connection refused` from aider | Nothing listening on 11434 | Start Ollama — the app on macOS and Windows, `sudo systemctl start ollama` on Linux |
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check `(.venv)` is in your prompt |
 | LaTeX shows as raw `$...$` | Preview extension missing | Install *Markdown Preview Enhanced*; open with `Ctrl/Cmd+K V` |

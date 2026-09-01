@@ -41,15 +41,21 @@ format:
 13. Step 5c — What to put in it
 14. Which model size
 15. Step 6 — Give the model a real context window
-16. Step 6b — Install aider, outside the course environment
-17. Step 6c — Pointing it at your model
-18. Step 6d — Ask it something real
-19. Two terminals is the working pattern
-20. The last check
-21. When it goes wrong
-22. Using the model well
-23. Also before class
-24. Ready?
+16. Step 6 — macOS
+17. Step 6 — Windows
+18. Step 6 — Linux
+19. If you see a socket error
+20. Step 6b — Install pipx first
+21. Step 6b — Then install aider
+22. Step 6c — Pointing it at your model
+23. `aider n'est pas reconnu`?
+24. Step 6d — Ask it something real
+25. Two terminals is the working pattern
+26. The last check
+27. When it goes wrong
+28. Using the model well
+29. Also before class
+30. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -156,8 +162,14 @@ not see it — the command stays "not found" and it looks like the install faile
 
 ::: {.warn}
 On **Windows** this bites hardest, because the installers change PATH and
-nothing already running picks it up. When in doubt there, quit VS Codium and
-reopen it — it costs five seconds and removes an entire category of problem.
+nothing already running picks it up — not even a new terminal tab, because the
+tab inherits PATH from VS Codium itself. Quit the editor and reopen it.
+:::
+
+::: {.muted}
+The symptom is always the same sentence: *«… n'est pas reconnu comme nom
+d'applet de commande»*, or *"is not recognized as a cmdlet"*. It means the file
+exists and your shell cannot see it — never that the install failed.
 :::
 
 ## Step 1 — VS Codium
@@ -382,8 +394,8 @@ answers, you are done.
 :::
 
 ::: {.muted}
-Nothing at all means no model server is listening — on macOS open the Ollama
-app; on Windows and Linux run `ollama serve` and leave that terminal open.
+Nothing at all means no model server is listening. Start Ollama — the app on
+macOS and Windows, `sudo systemctl start ollama` on Linux.
 :::
 
 ## Which model size
@@ -403,59 +415,136 @@ the name in `config.yaml` to whichever you pulled.
 ## Step 6 — Give the model a real context window
 
 Ollama defaults to a **2,048-token** context. aider fills that with your file and
-the model then "forgets" what you sent. Raise it on the **server**, which is the
-only place the setting is read.
+the model then "forgets" what you sent. Raise it to 8192.
 
-**macOS** — the Ollama app is already serving, so setting the variable in a
-terminal does nothing. Set it for the app, then restart it from the menu bar:
+::: {.warn}
+The setting is read by the **server**, once, when it starts. Setting it in the
+terminal where you run `aider` does nothing at all — and you cannot simply start
+a second server, because one is already running on every platform.
+:::
+
+::: {.tight}
+So on all three the shape is the same: **set the variable for the system, then
+restart Ollama.**
+:::
+
+## Step 6 — macOS
 
 ```bash
 launchctl setenv OLLAMA_CONTEXT_LENGTH 8192
 ```
 
-**Windows and Linux** — run the server yourself, in its own terminal:
+Then quit Ollama from the **menu bar** and reopen it.
+
+## Step 6 — Windows
 
 ```powershell
-$env:OLLAMA_CONTEXT_LENGTH = "8192"; ollama serve
+setx OLLAMA_CONTEXT_LENGTH 8192
+```
+
+Then quit Ollama from the **system tray** — right-click its icon → *Quit* — and
+start it again from the Start menu.
+
+::: {.warn}
+`setx` writes the variable permanently but does **not** apply it to the terminal
+you typed it in. Ollama picks it up when it next starts, which is why the restart
+is not optional.
+:::
+
+## Step 6 — Linux
+
+Installed by the official script, Ollama runs under systemd:
+
+```bash
+sudo systemctl edit ollama.service
+```
+
+Add these two lines, save, then reload and restart:
+
+```ini
+[Service]
+Environment="OLLAMA_CONTEXT_LENGTH=8192"
 ```
 
 ```bash
-OLLAMA_CONTEXT_LENGTH=8192 ollama serve       # Linux
+sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
-::: {.warn}
-`address already in use` means a server is **already running** — on macOS that
-is the app, and you want `launchctl`, not this command.
+::: {.muted}
+Running it by hand instead of as a service? Then
+`OLLAMA_CONTEXT_LENGTH=8192 ollama serve` is all you need.
 :::
 
-## Step 6b — Install aider, outside the course environment
+## If you see a socket error
+
+```text
+Only one usage of each socket address … is normally permitted
+Une seule utilisation de chaque adresse de socket est normalement autorisée
+Error: listen tcp 127.0.0.1:11434: bind: address already in use
+```
+
+::: {.check}
+All three say the same thing: **Ollama is already running.** That is the normal
+state — the installer starts it for you on every platform. You do not need
+`ollama serve` at all; you need the variable set and the running server
+restarted, which is what the three slides above do.
+:::
+
+::: {.muted}
+Check what is answering: `curl http://127.0.0.1:11434/api/version` — on Windows,
+`curl.exe`.
+:::
+
+## Step 6b — Install pipx first
 
 ::: {.warn}
 **Do not `pip install aider-chat` into `.venv`.** aider pins its own versions of
-several packages the course also uses, and pip has to satisfy both at once. On
-Windows that usually ends in a wall of resolver errors; when it appears to
-succeed it can quietly downgrade something the course needs.
+packages the course also uses, and pip must satisfy both at once — which is where
+the resolver errors come from. When it appears to succeed it can quietly
+downgrade something the course needs.
 :::
 
-Install it as a standalone tool instead. aider ships an installer that puts it in
-its own isolated environment:
+`pipx` installs a command-line tool into an environment of its own and puts the
+command on your PATH. Install it **with the course environment deactivated**, or
+from a terminal where you never activated it.
 
 **macOS and Linux**
 
 ```bash
-python3 -m pip install --user aider-install && aider-install
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
 ```
 
 **Windows PowerShell**
 
 ```powershell
-py -m pip install --user aider-install; aider-install
+py -m pip install --user pipx
+py -m pipx ensurepath
 ```
 
+::: {.warn}
+`ensurepath` edits your PATH, and nothing already running sees the change.
+**Close the terminal and open a new one before the next slide** — on Windows,
+quit VS Codium and reopen it.
+:::
+
+## Step 6b — Then install aider
+
+In the **new** terminal:
+
+```bash
+pipx install aider-chat
+```
+
+::: {.muted}
+`pipx : le terme «pipx» n'est pas reconnu` — or *not recognized as a cmdlet* —
+means PATH still has not caught up. You do not need to fix that to continue:
+`py -m pipx install aider-chat` on Windows, `python3 -m pipx install aider-chat`
+elsewhere, works whether or not the shortcut is on PATH.
+:::
+
 ::: {.check}
-Open a **new terminal** and run `aider --version`. If the command is not found,
-the installer's directory is not on PATH yet — that is what the new terminal is
-for, and on Windows you may need to restart VS Codium.
+Then, in another new terminal, `aider --version` should answer.
 :::
 
 ## Step 6c — Pointing it at your model
@@ -480,6 +569,33 @@ aider --model ollama_chat/qwen2.5-coder:7b
 `ollama_chat/`, not `ollama/` — the second uses the completion endpoint and
 gives markedly worse answers. And use the tag you actually pulled: `:3b`, `:7b`
 or `:14b`.
+:::
+
+## `aider n'est pas reconnu`?
+
+pipx installed it; your shell just cannot see it yet. Confirm it is there, and
+where:
+
+```bash
+pipx list          # or: py -m pipx list
+```
+
+pipx puts the command in `~/.local/bin` — `%USERPROFILE%\.local\bin` on Windows.
+Call it by its full path and it runs whatever PATH says:
+
+```powershell
+& "$HOME\.local\bin\aider.exe" --model ollama_chat/qwen2.5-coder:7b
+```
+
+```bash
+~/.local/bin/aider --model ollama_chat/qwen2.5-coder:7b
+```
+
+::: {.check}
+To fix it properly rather than working around it: `py -m pipx ensurepath`
+(`python3` elsewhere), then **quit VS Codium entirely and reopen it**. A new
+terminal tab is not enough on Windows — the editor itself is holding the old
+PATH.
 :::
 
 ## Step 6d — Ask it something real
@@ -537,15 +653,17 @@ test of whether your setup works.
 |---|---|---|
 | `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — two slides back |
 | `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
-| `aider: command not found` | Same — the installer's folder is new on PATH | New terminal; on Windows restart VS Codium |
-| Resolver errors installing aider | It was installed into `.venv` | Use `aider-install`, which keeps it separate — step 6b |
+| `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
+| Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — step 6b |
+| `aider-install` / `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module instead: `py -m pipx …`. `py -m pipx ensurepath` then a new terminal fixes it properly |
 | An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
-| Continue answers nothing | `ollama serve` not running | Start it in its own terminal, leave it open |
+| Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
-| aider forgets your file | Ollama's 2k default context | Raise it on the **server** — step 6. macOS: `launchctl setenv`, not `ollama serve` |
-| `connection refused` from aider | No server on 11434 | macOS: open the Ollama app. Windows/Linux: `ollama serve` |
+| aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
+| `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
+| `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
 | Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
 

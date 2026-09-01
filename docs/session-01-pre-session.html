@@ -1089,8 +1089,14 @@ Thierry Warin, PhD
 <li>Step 5c — What to put in it</li>
 <li>Which model size</li>
 <li>Step 6 — Give the model a real context window</li>
-<li>Step 6b — Install aider, outside the course environment</li>
+<li>Step 6 — macOS</li>
+<li>Step 6 — Windows</li>
+<li>Step 6 — Linux</li>
+<li>If you see a socket error</li>
+<li>Step 6b — Install pipx first</li>
+<li>Step 6b — Then install aider</li>
 <li>Step 6c — Pointing it at your model</li>
+<li><code>aider n&#39;est pas reconnu</code>?</li>
 <li>Step 6d — Ask it something real</li>
 <li>Two terminals is the working pattern</li>
 <li>The last check</li>
@@ -1236,7 +1242,10 @@ Thierry Warin, PhD
 </table>
 </div>
 <div class="warn">
-<p>On <strong>Windows</strong> this bites hardest, because the installers change PATH and nothing already running picks it up. When in doubt there, quit VS Codium and reopen it — it costs five seconds and removes an entire category of problem.</p>
+<p>On <strong>Windows</strong> this bites hardest, because the installers change PATH and nothing already running picks it up — not even a new terminal tab, because the tab inherits PATH from VS Codium itself. Quit the editor and reopen it.</p>
+</div>
+<div class="muted">
+<p>The symptom is always the same sentence: <em>«… n’est pas reconnu comme nom d’applet de commande»</em>, or <em>“is not recognized as a cmdlet”</em>. It means the file exists and your shell cannot see it — never that the install failed.</p>
 </div>
 </section>
 <section id="step-1-vs-codium" class="slide level2">
@@ -1378,7 +1387,7 @@ Thierry Warin, PhD
 <p>Open a <code>.py</code> file, select a few lines, press <code>Cmd/Ctrl + L</code>. If the panel answers, you are done.</p>
 </div>
 <div class="muted">
-<p>Nothing at all means no model server is listening — on macOS open the Ollama app; on Windows and Linux run <code>ollama serve</code> and leave that terminal open.</p>
+<p>Nothing at all means no model server is listening. Start Ollama — the app on macOS and Windows, <code>sudo systemctl start ollama</code> on Linux.</p>
 </div>
 </section>
 <section id="which-model-size" class="slide level2">
@@ -1392,39 +1401,98 @@ Thierry Warin, PhD
 </section>
 <section id="step-6-give-the-model-a-real-context-window" class="slide level2">
 <h2>Step 6 — Give the model a real context window</h2>
-<p>Ollama defaults to a <strong>2,048-token</strong> context. aider fills that with your file and the model then “forgets” what you sent. Raise it on the <strong>server</strong>, which is the only place the setting is read.</p>
-<p><strong>macOS</strong> — the Ollama app is already serving, so setting the variable in a terminal does nothing. Set it for the app, then restart it from the menu bar:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Windows and Linux</strong> — run the server yourself, in its own terminal:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb14-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_CONTEXT_LENGTH</span> <span class="op">=</span> <span class="st">&quot;8192&quot;</span><span class="op">;</span> ollama serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve       <span class="co"># Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Ollama defaults to a <strong>2,048-token</strong> context. aider fills that with your file and the model then “forgets” what you sent. Raise it to 8192.</p>
 <div class="warn">
-<p><code>address already in use</code> means a server is <strong>already running</strong> — on macOS that is the app, and you want <code>launchctl</code>, not this command.</p>
+<p>The setting is read by the <strong>server</strong>, once, when it starts. Setting it in the terminal where you run <code>aider</code> does nothing at all — and you cannot simply start a second server, because one is already running on every platform.</p>
+</div>
+<div class="tight">
+<p>So on all three the shape is the same: <strong>set the variable for the system, then restart Ollama.</strong></p>
 </div>
 </section>
-<section id="step-6b-install-aider-outside-the-course-environment" class="slide level2">
-<h2>Step 6b — Install aider, outside the course environment</h2>
+<section id="step-6-macos" class="slide level2">
+<h2>Step 6 — macOS</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then quit Ollama from the <strong>menu bar</strong> and reopen it.</p>
+</section>
+<section id="step-6-windows" class="slide level2">
+<h2>Step 6 — Windows</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb14-1"><a href></a>setx OLLAMA_CONTEXT_LENGTH <span class="dv">8192</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then quit Ollama from the <strong>system tray</strong> — right-click its icon → <em>Quit</em> — and start it again from the Start menu.</p>
 <div class="warn">
-<p><strong>Do not <code>pip install aider-chat</code> into <code>.venv</code>.</strong> aider pins its own versions of several packages the course also uses, and pip has to satisfy both at once. On Windows that usually ends in a wall of resolver errors; when it appears to succeed it can quietly downgrade something the course needs.</p>
+<p><code>setx</code> writes the variable permanently but does <strong>not</strong> apply it to the terminal you typed it in. Ollama picks it up when it next starts, which is why the restart is not optional.</p>
 </div>
-<p>Install it as a standalone tool instead. aider ships an installer that puts it in its own isolated environment:</p>
-<p><strong>macOS and Linux</strong></p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">--user</span> aider-install <span class="kw">&amp;&amp;</span> <span class="ex">aider-install</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Windows PowerShell</strong></p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb17-1"><a href></a>py <span class="op">-</span>m pip install <span class="op">--</span>user aider-install<span class="op">;</span> aider-install</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-6-linux" class="slide level2">
+<h2>Step 6 — Linux</h2>
+<p>Installed by the official script, Ollama runs under systemd:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Add these two lines, save, then reload and restart:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource ini number-lines code-with-copy"><code class="sourceCode ini"><span id="cb16-1"><a href></a><span class="kw">[Service]</span></span>
+<span id="cb16-2"><a href></a><span class="dt">Environment</span><span class="ot">=</span><span class="st">&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="fu">sudo</span> systemctl daemon-reload <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl restart ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p>Running it by hand instead of as a service? Then <code>OLLAMA_CONTEXT_LENGTH=8192 ollama serve</code> is all you need.</p>
+</div>
+</section>
+<section id="if-you-see-a-socket-error" class="slide level2">
+<h2>If you see a socket error</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb18-1"><a href></a>Only one usage of each socket address … is normally permitted</span>
+<span id="cb18-2"><a href></a>Une seule utilisation de chaque adresse de socket est normalement autorisée</span>
+<span id="cb18-3"><a href></a>Error: listen tcp 127.0.0.1:11434: bind: address already in use</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>Open a <strong>new terminal</strong> and run <code>aider --version</code>. If the command is not found, the installer’s directory is not on PATH yet — that is what the new terminal is for, and on Windows you may need to restart VS Codium.</p>
+<p>All three say the same thing: <strong>Ollama is already running.</strong> That is the normal state — the installer starts it for you on every platform. You do not need <code>ollama serve</code> at all; you need the variable set and the running server restarted, which is what the three slides above do.</p>
+</div>
+<div class="muted">
+<p>Check what is answering: <code>curl http://127.0.0.1:11434/api/version</code> — on Windows, <code>curl.exe</code>.</p>
+</div>
+</section>
+<section id="step-6b-install-pipx-first" class="slide level2">
+<h2>Step 6b — Install pipx first</h2>
+<div class="warn">
+<p><strong>Do not <code>pip install aider-chat</code> into <code>.venv</code>.</strong> aider pins its own versions of packages the course also uses, and pip must satisfy both at once — which is where the resolver errors come from. When it appears to succeed it can quietly downgrade something the course needs.</p>
+</div>
+<p><code>pipx</code> installs a command-line tool into an environment of its own and puts the command on your PATH. Install it <strong>with the course environment deactivated</strong>, or from a terminal where you never activated it.</p>
+<p><strong>macOS and Linux</strong></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">--user</span> pipx</span>
+<span id="cb19-2"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb20-1"><a href></a>py <span class="op">-</span>m pip install <span class="op">--</span>user pipx</span>
+<span id="cb20-2"><a href></a>py <span class="op">-</span>m pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><code>ensurepath</code> edits your PATH, and nothing already running sees the change. <strong>Close the terminal and open a new one before the next slide</strong> — on Windows, quit VS Codium and reopen it.</p>
+</div>
+</section>
+<section id="step-6b-then-install-aider" class="slide level2">
+<h2>Step 6b — Then install aider</h2>
+<p>In the <strong>new</strong> terminal:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">pipx</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p><code>pipx : le terme «pipx» n&#39;est pas reconnu</code> — or <em>not recognized as a cmdlet</em> — means PATH still has not caught up. You do not need to fix that to continue: <code>py -m pipx install aider-chat</code> on Windows, <code>python3 -m pipx install aider-chat</code> elsewhere, works whether or not the shortcut is on PATH.</p>
+</div>
+<div class="check">
+<p>Then, in another new terminal, <code>aider --version</code> should answer.</p>
 </div>
 </section>
 <section id="step-6c-pointing-it-at-your-model" class="slide level2">
 <h2>Step 6c — Pointing it at your model</h2>
 <p>Point it at the server. The variable goes in <em>aider’s</em> terminal:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb19-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb23-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then, on both:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>ollama_chat/</code>, not <code>ollama/</code> — the second uses the completion endpoint and gives markedly worse answers. And use the tag you actually pulled: <code>:3b</code>, <code>:7b</code> or <code>:14b</code>.</p>
+</div>
+</section>
+<section id="aider-nest-pas-reconnu" class="slide level2">
+<h2><code>aider n&#39;est pas reconnu</code>?</h2>
+<p>pipx installed it; your shell just cannot see it yet. Confirm it is there, and where:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>pipx puts the command in <code>~/.local/bin</code> — <code>%USERPROFILE%\.local\bin</code> on Windows. Call it by its full path and it runs whatever PATH says:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb26-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>To fix it properly rather than working around it: <code>py -m pipx ensurepath</code> (<code>python3</code> elsewhere), then <strong>quit VS Codium entirely and reopen it</strong>. A new terminal tab is not enough on Windows — the editor itself is holding the old PATH.</p>
 </div>
 </section>
 <section id="step-6d-ask-it-something-real" class="slide level2">
@@ -1433,7 +1501,7 @@ Thierry Warin, PhD
 <p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
 </div>
 <p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
 </div>
@@ -1455,7 +1523,7 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
@@ -1489,48 +1557,58 @@ Thierry Warin, PhD
 </tr>
 <tr class="odd">
 <td><code>aider: command not found</code></td>
-<td>Same — the installer’s folder is new on PATH</td>
-<td>New terminal; on Windows restart VS Codium</td>
+<td>pipx’s folder is new on PATH</td>
+<td>New terminal; on Windows restart VS Codium. Or <code>py -m pipx run aider-chat</code></td>
 </tr>
 <tr class="even">
 <td>Resolver errors installing aider</td>
 <td>It was installed into <code>.venv</code></td>
-<td>Use <code>aider-install</code>, which keeps it separate — step 6b</td>
+<td>Use <code>pipx</code>, which keeps it separate — step 6b</td>
 </tr>
 <tr class="odd">
+<td><code>aider-install</code> / <code>pipx</code> <em>n’est pas reconnu</em></td>
+<td><code>pip install --user</code> put the script in a folder Windows does not have on PATH</td>
+<td>Run it as a module instead: <code>py -m pipx …</code>. <code>py -m pipx ensurepath</code> then a new terminal fixes it properly</td>
+</tr>
+<tr class="even">
 <td>An extension does nothing</td>
 <td>Installed but not loaded</td>
 <td><em>Developer: Reload Window</em></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>ModuleNotFoundError</code> in VS Codium</td>
 <td>Wrong interpreter selected</td>
 <td><code>Cmd/Ctrl + Shift + P</code> → <em>Python: Select Interpreter</em> → <code>.venv</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>pip</code> fails</td>
 <td>Environment not active</td>
 <td>Check your prompt starts with <code>(.venv)</code></td>
 </tr>
-<tr class="even">
-<td>Continue answers nothing</td>
-<td><code>ollama serve</code> not running</td>
-<td>Start it in its own terminal, leave it open</td>
-</tr>
 <tr class="odd">
+<td>Continue answers nothing</td>
+<td>No server on 11434</td>
+<td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
+</tr>
+<tr class="even">
 <td>The model is very slow</td>
 <td>Too large for your RAM</td>
 <td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>aider forgets your file</td>
 <td>Ollama’s 2k default context</td>
-<td>Raise it on the <strong>server</strong> — step 6. macOS: <code>launchctl setenv</code>, not <code>ollama serve</code></td>
+<td>Raise it on the server and restart Ollama — step 6</td>
+</tr>
+<tr class="even">
+<td><code>address already in use</code> / <em>une seule utilisation … socket</em></td>
+<td>Ollama is already running — it always is</td>
+<td>You do not need <code>ollama serve</code>. Set the variable, restart Ollama</td>
 </tr>
 <tr class="odd">
 <td><code>connection refused</code> from aider</td>
-<td>No server on 11434</td>
-<td>macOS: open the Ollama app. Windows/Linux: <code>ollama serve</code></td>
+<td>Nothing on 11434</td>
+<td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
 <tr class="even">
 <td>Maths shows as raw <code>$...$</code></td>
