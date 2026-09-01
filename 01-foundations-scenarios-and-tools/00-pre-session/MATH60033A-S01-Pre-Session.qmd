@@ -474,9 +474,14 @@ qwen2.5-coder:7b    6.4 GB    100% GPU     32768      4 minutes from now
 ```
 
 ::: {.check}
-**8192 or more is fine — do nothing.** Recent Ollama versions ask for a very
-large context and the model caps it at its own maximum, so this is usually
-already settled.
+**8192 or more — do nothing.** **2048 or 4096 — raise it**, next slide.
+:::
+
+::: {.warn}
+This differs by platform, so check rather than assume. The macOS app asks for a
+very large window and the model caps it at its own maximum — 32768 for
+`qwen2.5-coder:7b`. **On Windows the default is 4096**, which aider will
+outgrow on any real file.
 :::
 
 ::: {.muted}
@@ -937,8 +942,8 @@ installed version and picks the newest. Inside an activated `.venv`, plain
 
 ## Only if CONTEXT is small {#fix-context}
 
-If `ollama ps` shows 2048 or 4096, raise it **on the server** — that is the only
-place the setting is read — and restart Ollama.
+`ollama ps` showed 2048 or 4096 — the usual case on Windows. Raise it **on the
+server**, which is the only place the setting is read, then restart Ollama.
 
 ```bash
 launchctl setenv OLLAMA_CONTEXT_LENGTH 8192      # macOS, then quit from the menu bar
@@ -958,9 +963,22 @@ Do not set this if `ollama ps` already showed a larger number — you would be
 making the window **smaller**. Check first, change second.
 :::
 
+::: {.check}
+**Then check it took.** The variable is read when the server starts, so nothing
+changes until Ollama is restarted and the model reloaded:
+
+```bash
+ollama run qwen2.5-coder:7b "hi"
+ollama ps
+```
+
+CONTEXT should now read 8192.
+:::
+
 ::: {.muted}
 Bigger is not free: the context is held in memory alongside the model, so a very
-large window on a small machine costs speed.
+large window on a small machine costs speed. 8192 is enough for aider to hold a
+file and its own instructions; raise it further only if you have the RAM.
 :::
 
 ::: {.muted}

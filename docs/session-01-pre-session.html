@@ -1457,7 +1457,10 @@ Thierry Warin, PhD
 <div class="sourceCode" id="cb17"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb17-1"><a href></a>NAME                SIZE      PROCESSOR    CONTEXT    UNTIL</span>
 <span id="cb17-2"><a href></a>qwen2.5-coder:7b    6.4 GB    100% GPU     32768      4 minutes from now</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p><strong>8192 or more is fine — do nothing.</strong> Recent Ollama versions ask for a very large context and the model caps it at its own maximum, so this is usually already settled.</p>
+<p><strong>8192 or more — do nothing.</strong> <strong>2048 or 4096 — raise it</strong>, next slide.</p>
+</div>
+<div class="warn">
+<p>This differs by platform, so check rather than assume. The macOS app asks for a very large window and the model caps it at its own maximum — 32768 for <code>qwen2.5-coder:7b</code>. <strong>On Windows the default is 4096</strong>, which aider will outgrow on any real file.</p>
 </div>
 <div class="muted">
 <p><strong>If it does not work:</strong></p>
@@ -1783,7 +1786,7 @@ Thierry Warin, PhD
 </section>
 <section id="fix-context" class="slide level2">
 <h2>Only if CONTEXT is small</h2>
-<p>If <code>ollama ps</code> shows 2048 or 4096, raise it <strong>on the server</strong> — that is the only place the setting is read — and restart Ollama.</p>
+<p><code>ollama ps</code> showed 2048 or 4096 — the usual case on Windows. Raise it <strong>on the server</strong>, which is the only place the setting is read, then restart Ollama.</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192      <span class="co"># macOS, then quit from the menu bar</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="sourceCode" id="cb36"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb36-1"><a href></a>setx OLLAMA_CONTEXT_LENGTH <span class="dv">8192</span>                  <span class="co"># Windows, then quit from the system tray</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service               <span class="co"># Linux: Environment=&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span>
@@ -1791,8 +1794,14 @@ Thierry Warin, PhD
 <div class="warn">
 <p>Do not set this if <code>ollama ps</code> already showed a larger number — you would be making the window <strong>smaller</strong>. Check first, change second.</p>
 </div>
+<div class="check">
+<p><strong>Then check it took.</strong> The variable is read when the server starts, so nothing changes until Ollama is restarted and the model reloaded:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;hi&quot;</span></span>
+<span id="cb38-2"><a href></a><span class="ex">ollama</span> ps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>CONTEXT should now read 8192.</p>
+</div>
 <div class="muted">
-<p>Bigger is not free: the context is held in memory alongside the model, so a very large window on a small machine costs speed.</p>
+<p>Bigger is not free: the context is held in memory alongside the model, so a very large window on a small machine costs speed. 8192 is enough for aider to hold a file and its own instructions; raise it further only if you have the RAM.</p>
 </div>
 <div class="muted">
 <p><a href="#/step-6">← back to Step 6 — Check the context window</a></p>
@@ -1801,12 +1810,12 @@ Thierry Warin, PhD
 <section id="fix-pipx" class="slide level2">
 <h2>If pipx will not cooperate</h2>
 <p>pipx is a convenience. A plain environment does the same job with nothing on PATH to go wrong:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb38-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="va">$HOME</span>\aider-env</span>
-<span id="cb38-2"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\pip&quot;</span> install aider-chat</span>
-<span id="cb38-3"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\aider&quot;</span> <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv ~/aider-env</span>
-<span id="cb39-2"><a href></a><span class="ex">~/aider-env/bin/pip</span> install aider-chat</span>
-<span id="cb39-3"><a href></a><span class="ex">~/aider-env/bin/aider</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb39-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="va">$HOME</span>\aider-env</span>
+<span id="cb39-2"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\pip&quot;</span> install aider-chat</span>
+<span id="cb39-3"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\aider&quot;</span> <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv ~/aider-env</span>
+<span id="cb40-2"><a href></a><span class="ex">~/aider-env/bin/pip</span> install aider-chat</span>
+<span id="cb40-3"><a href></a><span class="ex">~/aider-env/bin/aider</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>That is all pipx does. Run aider by its full path from then on, and it stays completely separate from the course environment — which was the only point.</p>
 </div>
@@ -1817,10 +1826,10 @@ Thierry Warin, PhD
 <section id="fix-aider-path" class="slide level2">
 <h2><code>aider n&#39;est pas reconnu</code>?</h2>
 <p>pipx installed it; your shell just cannot see it yet. Confirm it is there, and where:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>pipx puts the command in <code>~/.local/bin</code> — <code>%USERPROFILE%\.local\bin</code> on Windows. Call it by its full path and it runs whatever PATH says:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb41-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb42-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>To fix it properly rather than working around it: <code>py -m pipx ensurepath</code> (<code>python3</code> elsewhere), then <strong>quit VS Codium entirely and reopen it</strong>. A new terminal tab is not enough on Windows — the editor itself is holding the old PATH.</p>
 </div>
