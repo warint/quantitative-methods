@@ -33,33 +33,37 @@ format:
 5. Step 1 — VS Codium
 6. Step 2 — Extensions
 7. Step 3 — The course materials
-8. Step 4 — Python 3.12, and only 3.12
-9. Step 4 — Build the environment with it
-10. Windows: "l'exécution de scripts est désactivée"
-11. Built it on the wrong version? Start over
-12. Windows: still cannot activate?
-13. Windows: "Python introuvable"
-14. Windows: checking it took
-15. Step 5 — Ollama and Qwen
-16. Step 5b — Open Continue's config file
-17. Step 5c — What to put in it
-18. Which model size
-19. Step 6 — Give the model a real context window
-20. Step 6 — macOS
-21. Step 6 — Windows
-22. Step 6 — Linux
-23. If you see a socket error
-24. Step 6b — Install pipx first
-25. Step 6b — Then install aider
-26. Step 6c — Pointing it at your model
-27. `aider n'est pas reconnu`?
-28. Step 6d — Ask it something real
-29. Two terminals is the working pattern
-30. The last check
-31. When it goes wrong
-32. Using the model well
-33. Also before class
-34. Ready?
+8. Step 4 — Install Python 3.12
+9. Why 3.12 and not the newest
+10. Step 4b — Create the environment
+11. Windows: the star is not a tick
+12. Step 4c — Activate it
+13. Windows: "l'exécution de scripts est désactivée"
+14. Step 4d — Install the packages
+15. Built it on the wrong version? Start over
+16. Windows: still cannot activate?
+17. Windows: "Python introuvable"
+18. Windows: checking it took
+19. Step 5 — Ollama and Qwen
+20. Step 5b — Open Continue's config file
+21. Step 5c — What to put in it
+22. Which model size
+23. Step 6 — Give the model a real context window
+24. Step 6 — macOS
+25. Step 6 — Windows
+26. Step 6 — Linux
+27. If you see a socket error
+28. Step 6b — Install pipx first
+29. Step 6b — Then install aider
+30. Step 6c — Pointing it at your model
+31. `aider n'est pas reconnu`?
+32. Step 6d — Ask it something real
+33. Two terminals is the working pattern
+34. The last check
+35. When it goes wrong
+36. Using the model well
+37. Also before class
+38. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -228,93 +232,91 @@ these slides will work.
 In Session 02 you will do this properly, with git and your own group branch.
 :::
 
-## Step 4 — Python 3.12, and only 3.12
+## Step 4 — Install Python 3.12
 
 ::: {.warn}
-**Install Python 3.12 specifically.** Not "the latest", not whatever the
-download page offers first — **3.12**.
+**3.12 specifically.** Not "the latest", not whatever the download page offers
+first.
 [python.org/downloads/release/python-31214](https://www.python.org/downloads/release/python-31214/)
 :::
 
 ::: {.tight}
-- **Windows** — scroll to *Files*, take **Windows installer (64-bit)**, and tick
-  **Add python.exe to PATH** on the first screen
+- **Windows** — *Windows installer (64-bit)*, and tick **Add python.exe to PATH**
+  on the first screen
 - **macOS** — *macOS 64-bit universal2 installer*
-- **Linux** — `sudo apt install python3.12 python3.12-venv`, or your
-  distribution's equivalent
+- **Linux** — `sudo apt install python3.12 python3.12-venv`
 :::
 
-::: {.muted}
-Why not the newest: `aider-chat` declares `requires-python <3.13`, so on 3.13 or
-3.14 it cannot be installed at all. Everything else in the course is fine on
-3.14 — but one interpreter is simpler than two, and 3.12 is supported until
-October 2028, well past this course.
+::: {.check}
+**Then quit VS Codium and reopen it**, before the next slide. The installer
+changes PATH and a window already open will not see it.
 :::
 
-## Step 4 — Build the environment with it
+## Why 3.12 and not the newest
 
-The command is **not the same on the three platforms**. Use the one for yours.
+`aider-chat` declares `requires-python <3.13`. On 3.13 or 3.14 it cannot be
+installed at all.
 
-**macOS**
+::: {.tight}
+- Everything else in the course runs fine on 3.14
+- One interpreter is simpler than two
+- 3.12 is supported until **October 2028**, well past this course
+:::
+
+## Step 4b — Create the environment
+
+From the repository root. **Name the version** — a bare `python3` or `py` picks
+the newest you have installed.
 
 ```bash
-python3.12 --version       # name the version — plain `python3` may be newer
-python3.12 -m venv .venv
-source .venv/bin/activate
+python3.12 -m venv .venv          # macOS
 ```
-
-**Linux**
 
 ```bash
-python3.12 --version
-python3.12 -m venv .venv
-source .venv/bin/activate
+python3.12 -m venv .venv          # Linux
 ```
-
-**Windows** — `py`, the launcher that ships with Python. There is no `python3`
-on Windows.
 
 ```powershell
-py --list                  # every Python you have
-py -3.12 --version         # the one this course wants
-py -3.12 -m venv .venv     # name the version — see below
-.venv\Scripts\activate
+py -3.12 -m venv .venv            # Windows
 ```
 
-::: {.warn}
-**The star is not a tick.** `py --list` marks the *default* — the one a bare
-`py` uses — and after installing 3.12 the star normally stays on 3.14:
+::: {.muted}
+Check first if you like: `python3.12 --version`, or `py -3.12 --version` on
+Windows.
+:::
+
+## Windows: the star is not a tick
+
+`py --list` marks the **default** — what a bare `py` uses. After installing 3.12
+the star normally stays where it was:
 
 ```text
  -V:3.14 *        Python 3.14 (64-bit)
  -V:3.12          Python 3.12 (64-bit)
 ```
 
-That is why every command here writes `-3.12`. Leave the star alone; naming the
-version works regardless of where it sits.
+::: {.check}
+That is expected, and it is why every command writes `-3.12`. Leave the star
+alone.
 :::
 
-Then, on both:
+## Step 4c — Activate it
 
 ```bash
-pip install -r requirements.txt
+source .venv/bin/activate         # macOS
+```
+
+```bash
+source .venv/bin/activate         # Linux
+```
+
+```powershell
+.venv\Scripts\activate            # Windows
 ```
 
 ::: {.check}
-**Windows: quit VS Codium and reopen it after installing Python**, before
-creating the environment. The installer adds Python to PATH, and a window that
-was already open will not see it.
-:::
-
-::: {.check}
-Your prompt should now begin with `(.venv)`. If it does not, the activation did
-not take — and nothing installed afterwards will be visible to the course.
-:::
-
-::: {.check}
-Confirm it: `python --version` inside the activated environment must say
-**3.12.x**. Anything else and the environment was built by the wrong
-interpreter.
+Your prompt should now begin with **`(.venv)`**. If it does not, the activation
+did not take, and nothing you install afterwards will be visible to the course.
 :::
 
 ## Windows: "l'exécution de scripts est désactivée"
@@ -347,6 +349,23 @@ recommends for development machines — not `Unrestricted`, and not `Bypass`.
 Would rather change nothing? `.venv\Scripts\activate.bat` does the same job and
 is not a PowerShell script — but you must run it from **cmd**, not PowerShell,
 and you will need it in every new terminal.
+:::
+
+## Step 4d — Install the packages
+
+```bash
+python --version                  # must say 3.12.x
+pip install -r requirements.txt
+```
+
+::: {.warn}
+Check the version **before** installing. If it is not 3.12, the environment was
+built by the wrong interpreter — see *Built it on the wrong version?*
+:::
+
+::: {.muted}
+Inside an activated environment, plain `python` and `pip` are the right commands
+on all three platforms. The version-naming was only needed to create it.
 :::
 
 ## Built it on the wrong version? Start over
