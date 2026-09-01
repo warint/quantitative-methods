@@ -28,13 +28,14 @@ format:
 
 1. Ninety minutes
 2. Before you start
-3. Reproduce — 20 min
-4. Apply to your own angle — 35 min
-5. Break one assumption — 15 min
-6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
+3. Did not get the data? Two minutes, now
+4. Reproduce — 20 min
+5. Apply to your own angle — 35 min
+6. Break one assumption — 15 min
+7. Write it down — 20 min
+8. Submitting
+9. What loses marks
+10. Two-minute report
 
 ## What session 2 is for {.scrollable}
 ::::: columns
@@ -99,23 +100,59 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-02
 ```
 
 ::: {.muted}
 The git log is the participation record. It is not a formality.
 :::
 
+## Did not get the data? Two minutes, now
+
+The pre-session asked you to download it. If you did not, do it before the room
+starts — everything after this slide needs it.
+
+```bash
+mkdir -p 02-exploratory-data-analysis/data/replication
+cd 02-exploratory-data-analysis/data/replication
+
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF"
+
+unzip -q replication.zip && rm replication.zip
+cd -
+```
+
+```bash
+ls 02-exploratory-data-analysis/data/replication/public   # code  data  results
+```
+
+::: {.muted}
+33 MB. Windows PowerShell: `curl.exe`, and `Expand-Archive replication.zip .`
+:::
+
 ## 1 · Reproduce — 20 min
 
-Take the result the paper rests on, and reproduce it. The package you downloaded is at
-`02-exploratory-data-analysis/data/replication/`.
+Take the result the paper rests on, and reproduce it.
 
 ```python
-import qmib
+import pandas as pd, qmib
 
-data = qmib.load("core")     # the session's own data, for comparison
+REP = "02-exploratory-data-analysis/data/replication/public"
+
+# The authors ship their outputs as CSV beside the figures they became, which
+# is what makes a reproduction checkable: your number against their number.
+fig2a = pd.read_csv(f"{REP}/results/figure_2a.csv")
+print(fig2a.shape)
+print(fig2a.head())
+
+core = qmib.load("core")     # the session's own data, for comparison
 ```
+
+::: {.check}
+Their `code/` is Stata. You are not running it — you are reproducing **one
+number** in Python and saying whether you got it.
+:::
 
 ::: {.muted}
 Paper: Fraiberger et al. (2021), *Media sentiment and international asset prices* · [10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF)
@@ -175,7 +212,7 @@ And the standing rule: one LLM output you identified as wrong, and how you estab
 ## Submitting
 
 ```bash
-git add 02-exploratory-data-analysis/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-02
 git commit -m "Session 02 practice — group XX"
 git push -u origin group-XX
 ```

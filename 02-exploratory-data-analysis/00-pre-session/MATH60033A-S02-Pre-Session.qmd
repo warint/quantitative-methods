@@ -29,21 +29,23 @@ format:
 1. What to do, and how long it takes
 2. Read the paper
 3. Get BOTH datasets
-4. 2b · The course data
-5. Self-check
-6. What the session will ask of you
-7. Running the code
-8. How submission works — read this first
-9. Step 1 · Install git
-10. Step 2 · Tell git who you are
-11. Step 3 · A GitHub account
-12. Step 4 · Move the Session 01 folder aside first
-13. Step 4b · Clone
-14. Step 4c · Rebuild the environment inside the clone
-15. Step 5 · Authenticating your first push
-16. Step 6 · Your group branch
-17. Step 7 · The round trip
-18. When it goes wrong
+4. 2a · The replication package, in three commands
+5. 2a · Check it arrived
+6. 2b · The course data, in one command
+7. Self-check
+8. What the session will ask of you
+9. Running the code
+10. How submission works — read this first
+11. Step 1 · Install git
+12. Step 2 · Tell git who you are
+13. Step 3 · A GitHub account
+14. Step 4 · Move the Session 01 folder aside first
+15. Step 4b · Clone it onto your Desktop
+16. Step 4c · Rebuild the environment inside the clone
+17. Step 5 · Authenticating your first push
+18. Step 6 · Your group branch
+19. Step 7 · The round trip
+20. When it goes wrong
 
 ## What session 2 is for {.scrollable}
 ::::: columns
@@ -122,38 +124,78 @@ Read for the **argument**, not for coverage. Annotate four things:
 ## 2 · Get BOTH datasets
 
 ::: {.warn}
-The practice uses two: the **paper's data**, to reproduce one of its results, and **your own
-angle**, to apply the method. Have both before you arrive.
+The practice uses two: the **paper's data**, to reproduce one of its results,
+and **your own angle**, to apply the method. Have both before you arrive — the
+first is 33 MB and takes a couple of minutes on room wifi.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
-
-::: {.step}
-[10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF)
+::: {.tight}
+- **a)** Fraiberger et al.'s replication package, from Harvard Dataverse
+- **b)** the course data, through `qmib`
 :::
 
-Unzip it into `02-exploratory-data-analysis/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+## 2a · The replication package, in three commands
 
-## 2b · The course data
+From the repository root, in the VS Codium terminal:
+
+```bash
+mkdir -p 02-exploratory-data-analysis/data/replication
+cd 02-exploratory-data-analysis/data/replication
+
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF"
+
+unzip -q replication.zip && rm replication.zip
+cd -                              # back to the repository root
+```
+
+::: {.muted}
+No Dataverse account and no browser needed — that URL is their public download
+API. Windows PowerShell: `curl.exe` rather than `curl`, and `Expand-Archive
+replication.zip .` rather than `unzip`.
+:::
+
+## 2a · Check it arrived
+
+```bash
+ls 02-exploratory-data-analysis/data/replication/public
+```
+
+::: {.check}
+You should see `code/`, `data/` and `results/`. The `code/` folder is Stata
+`.do` files — you are not running them; you are reproducing **one result** in
+Python, and the practice tells you which.
+:::
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is ever committed. If
+`git status` shows the zip, you are in the wrong folder.
+:::
+
+## 2b · The course data, in one command
 
 ```python
 import qmib
 
-data = qmib.load("core")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine — every group uses this
+mine = qmib.load("angle_c_country")     # YOUR angle — see your data dictionary
 
-print(data.shape, core.shape, mine.shape)
+print(core.shape, mine.shape)
 ```
 
 ::: {.check}
-Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
-whatever the room's wifi is doing.
+`(450, 11)` for the spine. Anything else, or a traceback, bring it to class.
+:::
+
+::: {.warn}
+**Replace `angle_c_country` with your own angle.** Your group's is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md). `qmib.catalog()` lists
+every dataset in the course.
 :::
 
 ::: {.muted}
-The course spine — thirty european countries, 2010–2024 · everything available: `qmib.catalog()`
+`qmib.load` downloads once and caches as parquet, so the practice works whatever
+the room's wifi is doing — which is the reason for doing it the night before.
 :::
 
 ## 3 · Self-check
@@ -222,7 +264,7 @@ github.com/warint/quantitative-methods
 Your group has **one branch**, `group-XX`, and your work goes in
 
 ```
-NN-session-name/02-practice/submissions/group-XX/
+NN-session-name/groups/A2026/group-XX/session-NN/
 ```
 
 ::: {.warn}
@@ -296,13 +338,16 @@ cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
 mv quantitative-methods quantitative-methods-session01
 ```
 
-## Step 4b · Clone
+## Step 4b · Clone it onto your Desktop
 
-A ZIP cannot push. From here you work in a clone, at the same place as before.
+A ZIP cannot push. From here you work in a clone — in the same place the ZIP
+was, so every path in the course still matches.
 
 ```bash
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
 git clone https://github.com/warint/quantitative-methods.git
 cd quantitative-methods
+pwd                              # expect /Users/you/Desktop/quantitative-methods
 ```
 
 Then `File → Open Folder…` in VS Codium and choose the **new** folder.
@@ -377,11 +422,11 @@ than doing damage — but check where you are before you commit:
 ```bash
 git pull                         # always pull before you start
 
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-07
+mkdir -p groups/A2026/group-07/session-02
 echo "# Group 07 — session 02" > \
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/
+git add groups/A2026/group-07/session-02/
 git commit -m "Add group 07 notes for session 02"
 git push
 ```

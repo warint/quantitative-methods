@@ -78,7 +78,7 @@ an individual paper plus a 15-minute individual oral — is a distinct deliverab
 brief:
 [`assessments/final-paper/`](../assessments/final-paper/README.md).
 
-Submit everything to `submissions/group-XX/`. Preparation checklist:
+Submit everything to `groups/A2026/group-XX/session-12/` — the deck, the governance file, the analysis, and the revised memo. Preparation checklist:
 [`00-pre-session/README.md`](00-pre-session/README.md).
 
 The governance file, backtest and shift diagnostic were drafted in the

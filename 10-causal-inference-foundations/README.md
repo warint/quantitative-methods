@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a matched comparison on your own data: the naive difference, the overlap check, the balance table, the matched estimate, and the paragraph defending conditional ignorability — that paragraph carries the marks.
+In `groups/A2026/group-XX/session-10/`: a matched comparison on your own data: the naive difference, the overlap check, the balance table, the matched estimate, and the paragraph defending conditional ignorability — that paragraph carries the marks.
 
 ---
 

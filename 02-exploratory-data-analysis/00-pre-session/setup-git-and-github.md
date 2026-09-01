@@ -25,7 +25,7 @@ git checkout group-07
 ```
 
 not `git checkout group-XX`. Same for folder paths:
-`02-practice/submissions/group-07/`.
+`groups/A2026/group-XX/group-07/`.
 
 If you do not know your group number yet, you get it in Session 01. Do not guess.
 
@@ -49,7 +49,7 @@ github.com/warint/quantitative-methods        ← the course repository
 that branch and pushed to it. Your practice deliverables go in the session folder:
 
 ```
-NN-session-name/02-practice/submissions/group-XX/
+NN-session-name/groups/A2026/group-XX/session-NN/
 ```
 
 **Why one repository and not one per group.** Your commit history is one of the four records used
@@ -192,10 +192,10 @@ git checkout group-07
 
 ```bash
 # group 7 shown throughout — substitute your own number everywhere
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-07
-echo "# Group 07 — session 02" > 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+mkdir -p groups/A2026/group-07/session-02
+echo "# Group 07 — session 02" > groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/
+git add groups/A2026/group-07/session-02/
 git commit -m "Add group 07 notes for session 02"
 git push
 ```
@@ -232,9 +232,9 @@ git checkout group-07
 ```bash
 git pull                              # always pull before you start
 echo "- Ana tested the push, 2 September" >> \
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+git add groups/A2026/group-07/session-02/NOTES.md
 git commit -m "Ana: trial push"
 git push
 ```

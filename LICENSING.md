@@ -51,7 +51,7 @@ that request may come.
   permits reuse with attribution, UN Comtrade restricts redistribution outright. Data fetched this
   way are **not** covered by this repository's licences and are excluded by `.gitignore` on purpose.
   Do not commit them.
-- **Student work.** Anything under `**/02-practice/submissions/` belongs to its authors.
+- **Student work.** Anything under `**/groups/A2026/group-XX/` belongs to its authors.
 
 ## How to cite
 

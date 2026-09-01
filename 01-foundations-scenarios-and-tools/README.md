@@ -59,7 +59,7 @@ Download instructions: [`data/README.md`](data/README.md)
 
 ## Deliverable
 
-A one-page memo (`02-practice/submissions/group-XX.md`) containing: the assumption,
+A one-page memo (`groups/A2026/group-XX/session-NN.md`) containing: the assumption,
 its negation, two indicators with sources and frequencies, two trigger points with horizons, one
 falsifier, the LLM's strongest objection with your reply, and one flagged unverifiable claim.
 Attach your indicator plot. **Five minutes of oral presentation** in the last 20 minutes of class.

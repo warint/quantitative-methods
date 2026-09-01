@@ -59,7 +59,7 @@ Download instructions: [`data/README.md`](data/README.md)
 
 ## Deliverable
 
-`02-practice/submissions/group-XX/` with the coordinate-descent implementation,
+`groups/A2026/group-XX/session-NN/` with the coordinate-descent implementation,
 the CV surface, the stability plot, and a 300-word note answering: *a policymaker asks which
 indicators drive industrial production. Given your stability results, what can you honestly tell
 them, and what must you refuse to claim?*

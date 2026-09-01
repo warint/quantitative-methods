@@ -33,7 +33,7 @@ everywhere below — group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-02
 ```
 
 ---
@@ -162,7 +162,7 @@ random when you start, so everyone prepares.
 ## Submitting
 
 ```bash
-git add 02-exploratory-data-analysis/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-02
 git commit -m "Session 02 practice — group XX"
 git push -u origin group-XX
 ```

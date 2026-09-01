@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a KNN classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
+In `groups/A2026/group-XX/session-08/`: a KNN classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
 
 ---
 

@@ -243,7 +243,7 @@ In-class practice work and the one-slide group result go in the session folder, 
 branch. They must be finished before the group presents:
 
 ```
-NN-session-name/02-practice/submissions/group-XX/
+NN-session-name/groups/A2026/group-XX/session-NN/
 ```
 
 **Why one repository.** `python scripts/assess.py contributions` reads the git history *of this

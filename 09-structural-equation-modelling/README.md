@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a measurement model for one construct in your project, with the loadings reported, the fit indices stated, and a note on the indicators you would drop and why.
+In `groups/A2026/group-XX/session-09/`: a measurement model for one construct in your project, with the loadings reported, the fit indices stated, and a note on the indicators you would drop and why.
 
 ---
 

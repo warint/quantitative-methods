@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a difference-in-differences estimate on your angle, with the parallel-trends evidence shown rather than asserted, and a note on the threat you consider most serious.
+In `groups/A2026/group-XX/session-11/`: a difference-in-differences estimate on your angle, with the parallel-trends evidence shown rather than asserted, and a note on the threat you consider most serious.
 
 ---
 

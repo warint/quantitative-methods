@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import SESSIONS  # noqa: E402
+from course_spec import COHORT, SESSIONS  # noqa: E402
 
 RED, PAPER = "#E3120B", "#F7F4ED"
 
@@ -114,9 +114,9 @@ git checkout group-07
 git pull                          # always pull before you start
 
 echo "- Ana tested the push" >> \\
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+git add groups/A2026/group-07/session-02/NOTES.md
 git commit -m "Ana: trial push"
 git push
 ```
@@ -279,7 +279,7 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p {s['dir']}/02-practice/submissions/group-XX
+mkdir -p groups/{COHORT}/group-XX/session-{num}
 ```
 
 ::: {{.muted}}
@@ -355,7 +355,7 @@ And the standing rule: one LLM output you identified as wrong, and how you estab
 ## Submitting
 
 ```bash
-git add {s['dir']}/02-practice/submissions/group-XX
+git add groups/{COHORT}/group-XX/session-{num}
 git commit -m "Session {num} practice — group XX"
 git push -u origin group-XX
 ```

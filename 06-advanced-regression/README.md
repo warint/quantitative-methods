@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a panel specification of your project's core relationship, fitted with both fixed and random effects, plus a 250-word note on which you would report and why.
+In `groups/A2026/group-XX/session-06/`: a panel specification of your project's core relationship, fitted with both fixed and random effects, plus a 250-word note on which you would report and why.
 
 ---
 

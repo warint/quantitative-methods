@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a diagnostic report on your group's own regression: four plots, the observations you investigated, and a 250-word note on which conclusions survived the diagnostics and which did not.
+In `groups/A2026/group-XX/session-03/`: a diagnostic report on your group's own regression: four plots, the observations you investigated, and a 250-word note on which conclusions survived the diagnostics and which did not.
 
 ---
 

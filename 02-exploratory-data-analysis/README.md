@@ -68,7 +68,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-A commented script in `02-practice/submissions/group-XX/` that profiles your project's three most
+A commented script in `groups/A2026/group-XX/session-NN/` that profiles your project's three most
 important variables — centre, spread and shape, with the thresholds tested — plus a 250-word note
 answering: *for the variable at the centre of your research question, which summary would you put
 in a paper, and what does its shape tell you about the methods available to you later?*

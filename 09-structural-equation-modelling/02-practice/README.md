@@ -33,7 +33,7 @@ group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p 09-structural-equation-modelling/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-09
 ```
 
 ---
@@ -94,7 +94,7 @@ A 250-word note in your submissions folder:
 ## Submitting
 
 ```bash
-git add 09-structural-equation-modelling/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-09
 git commit -m "Session 09 practice — group XX"
 git push -u origin group-XX
 ```

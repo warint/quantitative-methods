@@ -11,6 +11,11 @@ cannot drift apart again.
     python scripts/build_course_pages.py
 """
 
+# The cohort folder under groups/. Autumn 2026; a winter term would be H2026.
+# Every submission path in the generated pages is built from this, so changing
+# it here moves the whole course's group work to a new directory.
+COHORT = "A2026"
+
 SESSIONS = {
     "01": dict(
         dir="01-foundations-scenarios-and-tools",

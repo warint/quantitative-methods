@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a dimension-reduction of your project's indicators: the scree plot, the number retained with its justification, the loadings interpreted, and a note on what you are *not* entitled to call the components.
+In `groups/A2026/group-XX/session-07/`: a dimension-reduction of your project's indicators: the scree plot, the number retained with its justification, the loadings interpreted, and a note on what you are *not* entitled to call the components.
 
 ---
 

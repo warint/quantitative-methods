@@ -61,7 +61,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a logistic model of a binary outcome in your own project data, with the odds ratios interpreted in words, one nested comparison tested, and a note on what the model does not license you to say.
+In `groups/A2026/group-XX/session-04/`: a logistic model of a binary outcome in your own project data, with the odds ratios interpreted in words, one nested comparison tested, and a note on what the model does not license you to say.
 
 ---
 

@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import (SESSIONS, ordered, generated, MIDTERM_AFTER,  # noqa: E402
+from course_spec import (COHORT, SESSIONS, ordered, generated, MIDTERM_AFTER,  # noqa: E402
                          DATES, ASYNCHRONOUS, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
@@ -94,7 +94,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: {s['deliverable']}.
+In `groups/{COHORT}/group-XX/session-{num}/`: {s['deliverable']}.
 
 ---
 
@@ -241,7 +241,7 @@ group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p {s['dir']}/02-practice/submissions/group-XX
+mkdir -p groups/{COHORT}/group-XX/session-{num}
 ```
 
 ---
@@ -302,7 +302,7 @@ A 250-word note in your submissions folder:
 ## Submitting
 
 ```bash
-git add {s['dir']}/02-practice/submissions/group-XX
+git add groups/{COHORT}/group-XX/session-{num}
 git commit -m "Session {num} practice — group XX"
 git push -u origin group-XX
 ```
