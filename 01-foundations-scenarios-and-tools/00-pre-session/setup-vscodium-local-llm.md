@@ -29,7 +29,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] **VS Codium** installed from <https://vscodium.com> and it opens
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
 - [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
-- [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked — **not 3.13 or 3.14**: several course packages have no wheel for those yet, so pip tries to compile them and fails on a missing C compiler
+- [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked. **Not 3.13 or 3.14:** the course's own packages are fine on those, but `aider-chat` requires Python `<3.13` and will not resolve
 - [ ] `python3.12 --version` prints 3.12.x — **on Windows, `py -3.12 --version`; `py --list` shows what you have.** Build the environment with the version named (`py -3.12 -m venv .venv`), because `py` alone picks the newest installed Python
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
 - [ ] `pip install -r requirements.txt` completed without red text
@@ -80,7 +80,7 @@ press `Ctrl/Cmd+L`.
 |---|---|---|
 | `ollama: command not found` | Not on PATH yet | Open a new terminal; on Windows restart VS Codium |
 | Dependency resolver errors while installing aider | It was installed into `.venv`, where it competes with the course's packages | Install it with pipx instead — see the checklist above |
-| A long build error mentioning a compiler, `gcc`, `cl.exe` or *Microsoft Visual C++ 14.0 is required* | Your Python is newer than the packages have wheels for | Install Python 3.12 and rebuild `.venv`. Do not install a compiler |
+| Dependency conflicts installing aider, or a build error naming a compiler | Your Python is 3.13 or newer; aider requires `<3.13` | Give aider a 3.12 of its own: `pipx install --python python3.12 aider-chat` |
 | `pipx` or `aider` *n'est pas reconnu* / *not recognized* | `pip install --user` writes scripts to a folder Windows does not have on PATH | `py -m pipx …` works regardless; `py -m pipx ensurepath` plus a new terminal fixes PATH itself |
 | A newly installed extension or command does nothing | The window or terminal predates the install | *Developer: Reload Window*; for PATH changes, quit VS Codium and reopen |
 | `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
