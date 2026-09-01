@@ -5,12 +5,22 @@ Everything a group produces lives here, under its cohort and its own number:
 ```
 groups/
 └── A2026/                  ← the cohort: autumn 2026
-    ├── group-01/
+    ├── group-03/
     │   ├── session-02/     ← one folder per session's practice
-    │   ├── session-03/
-    │   └── ...
-    └── group-10/
+    │   └── session-03/
+    └── group-07/
 ```
+
+**The group folders are not pre-created.** `groups/A2026/` ships empty, and each
+group makes its own the first time it has something to submit:
+
+```bash
+mkdir -p groups/A2026/group-07/session-02      # your number, not 07
+```
+
+Group numbers are only fixed in Session 04, so there is nothing sensible to
+create in advance — and ten empty directories for groups that may not all form
+is worse than none.
 
 **Why here and not inside each session folder.** A group's work used to be scattered across twelve
 session directories, so seeing what one group had done meant opening twelve places, and running the
