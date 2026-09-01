@@ -30,7 +30,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
 - [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
 - [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked — **not 3.13 or 3.14**: several course packages have no wheel for those yet, so pip tries to compile them and fails on a missing C compiler
-- [ ] `python3 --version` prints 3.11.x or 3.12.x — **on Windows the command is `py --version`**
+- [ ] `python3.12 --version` prints 3.12.x — **on Windows, `py -3.12 --version`; `py --list` shows what you have.** Build the environment with the version named (`py -3.12 -m venv .venv`), because `py` alone picks the newest installed Python
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
 - [ ] `pip install -r requirements.txt` completed without red text
 - [ ] `python -c "import numpy, pandas, sklearn; print('ok')"` prints `ok`

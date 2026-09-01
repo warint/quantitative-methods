@@ -34,28 +34,29 @@ format:
 6. Step 2 — Extensions
 7. Step 3 — The course materials
 8. Step 4 — Python and the environment
-9. Windows: "Python introuvable"
-10. Windows: checking it took
-11. Step 5 — Ollama and Qwen
-12. Step 5b — Open Continue's config file
-13. Step 5c — What to put in it
-14. Which model size
-15. Step 6 — Give the model a real context window
-16. Step 6 — macOS
-17. Step 6 — Windows
-18. Step 6 — Linux
-19. If you see a socket error
-20. Step 6b — Install pipx first
-21. Step 6b — Then install aider
-22. Step 6c — Pointing it at your model
-23. `aider n'est pas reconnu`?
-24. Step 6d — Ask it something real
-25. Two terminals is the working pattern
-26. The last check
-27. When it goes wrong
-28. Using the model well
-29. Also before class
-30. Ready?
+9. Already installed the wrong version?
+10. Windows: "Python introuvable"
+11. Windows: checking it took
+12. Step 5 — Ollama and Qwen
+13. Step 5b — Open Continue's config file
+14. Step 5c — What to put in it
+15. Which model size
+16. Step 6 — Give the model a real context window
+17. Step 6 — macOS
+18. Step 6 — Windows
+19. Step 6 — Linux
+20. If you see a socket error
+21. Step 6b — Install pipx first
+22. Step 6b — Then install aider
+23. Step 6c — Pointing it at your model
+24. `aider n'est pas reconnu`?
+25. Step 6d — Ask it something real
+26. Two terminals is the working pattern
+27. The last check
+28. When it goes wrong
+29. Using the model well
+30. Also before class
+31. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -231,8 +232,8 @@ The command is **not the same on the two platforms**. Use the one for yours.
 **macOS and Linux**
 
 ```bash
-python3 --version          # must be 3.11.x or 3.12.x
-python3 -m venv .venv
+python3.12 --version       # name the version explicitly
+python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
@@ -240,8 +241,9 @@ source .venv/bin/activate
 on Windows.
 
 ```powershell
-py --version               # must be 3.11.x or 3.12.x
-py -m venv .venv
+py --list                  # every Python you have
+py -3.12 --version         # the one this course wants
+py -3.12 -m venv .venv     # name the version — `py` alone picks the newest
 .venv\Scripts\activate
 ```
 
@@ -266,8 +268,32 @@ not take — and nothing installed afterwards will be visible to the course.
 **Not 3.13 or 3.14.** Several of the course's packages have no prebuilt wheel for
 the newest Python yet, so `pip` falls back to compiling them from source — which
 needs a C compiler you almost certainly do not have, and produces a long build
-error that has nothing to do with anything you did wrong. Install 3.12 and this
-never arises.
+error that has nothing to do with anything you did wrong.
+:::
+
+## Already installed the wrong version?
+
+You do not have to uninstall it. Install 3.12 alongside it, then rebuild the
+environment naming the version:
+
+```powershell
+Remove-Item -Recurse -Force .venv     # Windows
+py -3.12 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+```bash
+rm -rf .venv                          # macOS and Linux
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+::: {.check}
+`python --version` inside the activated environment should now say 3.12. The
+`.venv` remembers which interpreter built it, so this is the only way to change
+it — editing PATH afterwards does nothing.
 :::
 
 ## Windows: "Python introuvable"
