@@ -22,6 +22,58 @@ format:
     footer: "MATH60033A · Session 06 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · Before class {.center .scrollable}
+
+1. What to do, and how long it takes
+2. Read the paper
+3. Get BOTH datasets
+4. 2b · The course data
+5. Self-check
+6. What the session will ask of you
+7. Running the code
+
+## What session 6 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- State what a **panel** is, and why pooling understates uncertainty
+- Distinguish **fixed** from **random** effects, and say what each assumes
+- Read an **interaction** as a slope that differs between groups
+- Compare non-nested models on information criteria rather than an $F$-test
+- Use the **Hausman test** to choose between fixed and random effects, and say what it assumes
+- Name the two pitfalls this session is really about — **multicollinearity** and **overfitting**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Fit pooled, fixed-effects and two-way models, and cluster the errors
+- Write a quadratic and an interaction in a formula, and interpret them in units
+- Put three specifications in one table and let the reader see the spread
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Separate within-country change from between-country difference
+- Say which specification your identifying variation can actually support
+- Report the estimate *and* the specification, because neither means much alone
+
+::::
+
+:::::
+
+<!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -71,8 +123,30 @@ angle**, to apply the method. Have both before you arrive.
 [10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD)
 :::
 
-Unzip it into `06-advanced-regression/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 06-advanced-regression/data/replication && cd 06-advanced-regression/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/8WEXYD"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 06-advanced-regression/data/replication; cd 06-advanced-regression/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/8WEXYD"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
@@ -80,8 +154,8 @@ committed. Keep the authors' own structure.
 import qmib
 
 data = qmib.load("panel")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
 print(data.shape, core.shape, mine.shape)
 ```
@@ -89,6 +163,11 @@ print(data.shape, core.shape, mine.shape)
 ::: {.check}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {.warn}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {.muted}

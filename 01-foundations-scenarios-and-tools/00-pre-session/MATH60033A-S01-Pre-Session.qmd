@@ -36,17 +36,18 @@ format:
 8. Windows: "Python introuvable"
 9. Windows: checking it took
 10. Step 5 — Ollama and Qwen
-11. Step 5b — Point Continue at your local model
-12. Which model size
-13. Step 6 — Give the model a real context window
-14. Step 6b — The agent in your terminal
-15. Step 6c — Ask it something real
-16. Two terminals is the working pattern
-17. The last check
-18. When it goes wrong
-19. Using the model well
-20. Also before class
-21. Ready?
+11. Step 5b — Open Continue's config file
+12. Step 5c — What to put in it
+13. Which model size
+14. Step 6 — Give the model a real context window
+15. Step 6b — The agent in your terminal
+16. Step 6c — Ask it something real
+17. Two terminals is the working pattern
+18. The last check
+19. When it goes wrong
+20. Using the model well
+21. Also before class
+22. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -284,10 +285,39 @@ ollama run qwen2.5-coder "In one sentence, what is a residual?"
 locally.
 :::
 
-## Step 5b — Point Continue at your local model
+## Step 5b — Open Continue's config file
 
-Installed, Continue still talks to nothing. Give it a config at
-`~/.continue/config.yaml` — on Windows, `%USERPROFILE%\\.continue\\config.yaml`:
+Installed, Continue still talks to nothing. It needs a config file, and the
+easiest way to open it is from inside Continue itself:
+
+::: {.step}
+Open the Continue panel → the **gear icon** at its top right → *Configure*. It
+opens `config.yaml` in the editor, creating it if it does not exist.
+:::
+
+If you would rather do it from the terminal — the file lives in your home
+directory, and the path differs:
+
+```bash
+mkdir -p ~/.continue && open -e ~/.continue/config.yaml        # macOS
+```
+
+```bash
+mkdir -p ~/.continue && ${EDITOR:-nano} ~/.continue/config.yaml   # Linux
+```
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.continue" | Out-Null
+notepad "$HOME\.continue\config.yaml"                          # Windows
+```
+
+::: {.muted}
+`$HOME\.continue` on Windows is normally `C:\Users\you\.continue`. The folder
+starts with a dot, so File Explorer hides it unless *Hidden items* is ticked in
+the View ribbon.
+:::
+
+## Step 5c — What to put in it
 
 ```yaml
 name: qmib
@@ -310,7 +340,12 @@ context:
 
 ::: {.check}
 Open a `.py` file, select a few lines, press `Cmd/Ctrl + L`. If the panel
-answers, you are done. If it answers nothing, `ollama serve` is not running.
+answers, you are done.
+:::
+
+::: {.muted}
+Nothing at all means no model server is listening — on macOS open the Ollama
+app; on Windows and Linux run `ollama serve` and leave that terminal open.
 :::
 
 ## Which model size

@@ -22,6 +22,121 @@ format:
     footer: "MATH60033A · Session 05 practice · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The workshop {.center .scrollable}
+
+1. Ninety minutes
+2. Before you start
+3. Reproduce — 20 min
+4. Apply to your own angle — 35 min
+5. Break one assumption — 15 min
+6. Write it down — 20 min
+7. Submitting
+8. What loses marks
+9. Two-minute report
+
+## What session 5 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Derive the ridge estimator and show how it shrinks the **SVD spectrum**
+- Explain geometrically why the lasso produces exact zeros and ridge does not
+- State the **elastic net** objective and what $\ell_2$ adds under correlation
+- Derive the coordinate-descent update, including **soft-thresholding**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Standardise before penalising, with `StandardScaler` inside a pipeline
+- Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
+- Read a coefficient path and a cross-validation curve
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Work with more candidate predictors than countries
+- Say why a variable the lasso dropped is not thereby irrelevant
+- Report a penalised model honestly, including what selection did
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 38 names below came out of sessions 2–4. Today's slides assume them, and add to them. The ones marked are the newest, from session 4.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns · *new in session 4*
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome · *new in session 4*
+- `pd.crosstab` — a contingency table in one call · *new in session 4*
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds · *new in session 4*
+- `sm.MNLogit` — unordered categories, one baseline · *new in session 4*
+- `sm.add_constant` — the intercept, when there is no formula · *new in session 4*
+- `smf.logit` — binary outcome, from a formula · *new in session 4*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()` · *new in session 4*
+- `.predict` — fitted probabilities, not classes · *new in session 4*
+- `np.exp` — a log-odds becomes an odds ratio · *new in session 4*
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test · *new in session 4*
+- `stats.chi2.sf` — the $p$-value of that test · *new in session 4*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure · *new in session 4*
+
+<!-- END deck-frontmatter -->
+
 # Practice {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -47,10 +162,16 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-05
+mkdir -p groups/A2026/group-XX/session-05      # macOS and Linux
+```
+
+```powershell
+git checkout -b group-XX
+mkdir groups/A2026/group-XX/session-05         # Windows — no -p
 ```
 
 ::: {.muted}
+PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
 The git log is the participation record. It is not a formality.
 :::
 

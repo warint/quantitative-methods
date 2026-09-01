@@ -22,6 +22,154 @@ format:
     footer: "MATH60033A · Session 09 practice · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The workshop {.center .scrollable}
+
+1. Ninety minutes
+2. Before you start
+3. Reproduce — 20 min
+4. Apply to your own angle — 35 min
+5. Break one assumption — 15 min
+6. Write it down — 20 min
+7. Submitting
+8. What loses marks
+9. Two-minute report
+
+## What session 9 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Distinguish the **measurement** model from the **structural** model
+- Read `=~` as "is measured by", and write a model description
+- Interpret a **standardised loading**, and say when an indicator is weak
+- Report **CFI, TLI and RMSEA**, and say what each would have to be
+- Decompose a **mediation** into direct and indirect paths
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Specify and fit a model with `semopy.Model`, and read `.inspect()`
+- Pull fit indices with `semopy.calc_stats` and report them all
+- Fit two models with opposite arrows and watch the fit not decide between them
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Measure a construct — trust, capability, institutional quality — you cannot observe
+- State why good fit is not evidence that the model is correct
+- Name the alternative model you rejected, and on what grounds
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+The 70 names below came out of sessions 2–8. Today's slides assume them, and add to them. The ones marked are the newest, from session 8.
+
+### Load and shape
+
+- `.dropna` — drop rows with missing values
+- `.merge` — join two frames on a key
+- `.shape` — rows and columns
+- `pd.read_parquet` — a parquet file, directly
+- `qmib.load` — a course dataset, by name
+- `pd.get_dummies` — categories to indicator columns
+- `StandardScaler` — standardise before you penalise
+- `make_pipeline` — so the scaler is fitted on train only
+
+### Describe
+
+- `.mean / .median` — the two centres, and their gap
+- `.quantile` — any quantile, including the median
+- `.std / .var` — spread, dividing by $n-1$
+- `stats.trim_mean` — the mean after cutting both tails
+- `.value_counts` — how unbalanced is the outcome
+- `pd.crosstab` — a contingency table in one call
+- `np.linalg.eigvalsh` — eigenvalues of a symmetric matrix
+
+### Fit
+
+- `.fit()` — estimate the model you specified
+- `smf.ols` — least squares, from a formula
+- `OrderedModel` — ordered categories, proportional odds
+- `sm.MNLogit` — unordered categories, one baseline
+- `sm.add_constant` — the intercept, when there is no formula
+- `smf.logit` — binary outcome, from a formula
+- `Ridge / Lasso / ElasticNet` — the three penalties
+- `I(x**2)` — a quadratic term, inside a formula
+- `PanelOLS` — fixed effects, entity intercepts absorbed
+- `RandomEffects` — the other panel estimator, and its assumption
+- `a * b` — interaction — expands to `a + b + a:b`
+- `Factor` — statsmodels' factor analysis, by maximum likelihood
+- `PCA` — components, on standardised columns
+- `prince.FAMD` — when the columns are mixed numeric and categorical
+- `KNeighborsClassifier` — predict a class from the k closest rows · *new in session 8*
+- `KNeighborsRegressor` — the same idea, averaging a number · *new in session 8*
+- `RandomForestClassifier` — the comparison that complexity has to beat · *new in session 8*
+
+### Read the fit
+
+- `.params` — the coefficients, in units of $y$
+- `.rsquared` — share of variance explained
+- `.mse_resid` — its square root is the RSE, in units
+- `.resid / .fittedvalues` — what is left, and what was predicted
+- `.rsquared_adj` — penalised for the extra predictor
+- `.get_prediction` — with an interval, via `.summary_frame()`
+- `.predict` — fitted probabilities, not classes
+- `np.exp` — a log-odds becomes an odds ratio
+- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
+- `.components_` — the loadings — variables on components
+- `.explained_variance_ratio_` — what the scree plot is drawn from
+- `.rotate('varimax')` — same fit, readable loadings — and no new evidence
+
+### Diagnose
+
+- `.cooks_distance` — influence: leverage $\times$ residual
+- `.get_influence()` — the whole diagnostic bundle
+- `.hat_matrix_diag` — leverage; sums to $p$, always
+- `.resid_studentized_internal` — residuals on a common scale
+- `classification_report` — precision and recall, per class · *new in session 8*
+- `confusion_matrix` — the four cells accuracy hides · *new in session 8*
+- `permutation_importance` — importance without coefficients: scramble a column · *new in session 8*
+
+### Choose and validate
+
+- `.aic / .bic` — compare non-nested models
+- `.llf` — log-likelihood, for the LR test
+- `stats.chi2.sf` — the $p$-value of that test
+- `KFold` — and do it $k$ times
+- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
+- `lasso_path` — the whole coefficient path
+- `mean_squared_error` — score it on the held-out part
+- `np.logspace` — a grid that is even in $\log\lambda$
+- `train_test_split` — hold something back
+- `.compare_f_test` — an F-test, for nested models only
+- `np.linalg.pinv` — pseudo-inverse, for the Hausman statistic
+- `.best_params_ / .best_score_` — what the search chose, and how it scored · *new in session 8*
+- `GridSearchCV` — search a hyperparameter by cross-validation · *new in session 8*
+- `cross_val_score` — one number, k folds, any scorer · *new in session 8*
+
+### Plot
+
+- `plt.scatter` — the data, before anything else
+- `plt.xlabel / plt.ylabel` — say the units, every time
+- `plt.axhline / plt.axvline` — draw the threshold you are judging against
+- `plt.stem` — one spike per observation
+- `plt.subplots` — several panels, one figure
+
+<!-- END deck-frontmatter -->
+
 # Practice {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -47,10 +195,16 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-09
+mkdir -p groups/A2026/group-XX/session-09      # macOS and Linux
+```
+
+```powershell
+git checkout -b group-XX
+mkdir groups/A2026/group-XX/session-09         # Windows — no -p
 ```
 
 ::: {.muted}
+PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
 The git log is the participation record. It is not a formality.
 :::
 

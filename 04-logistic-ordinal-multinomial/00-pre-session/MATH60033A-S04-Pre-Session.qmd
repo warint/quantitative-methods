@@ -22,6 +22,57 @@ format:
     footer: "MATH60033A · Session 04 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · Before class {.center .scrollable}
+
+1. What to do, and how long it takes
+2. Read the paper
+3. Get BOTH datasets
+4. 2b · The course data
+5. Self-check
+6. What the session will ask of you
+7. Running the code
+
+## What session 4 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Say why the **linear probability model** fails, and where it fails worst
+- Read a coefficient as a **log-odds** and its exponential as an odds ratio
+- Compute a fitted probability by hand from $x^\top\hat\beta$
+- Compare nested models with a **likelihood-ratio test**
+- Separate a **Wald** test from a **likelihood-ratio** test, and report McFadden's pseudo-$R^2$ for what it is
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Fit binary, **ordinal** and **multinomial** logits with `smf.logit`, `OrderedModel`, `sm.MNLogit`
+- Turn coefficients into odds ratios and predicted probabilities
+- Build the likelihood-ratio test from two models' `.llf`
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Model a categorical business outcome — enter or not, which mode, which grade
+- Report an odds ratio to someone who will not read the appendix
+- State what the proportional-odds assumption costs when it fails
+
+::::
+
+:::::
+
+<!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -71,8 +122,30 @@ angle**, to apply the method. Have both before you arrive.
 [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)
 :::
 
-Unzip it into `04-logistic-ordinal-multinomial/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 04-logistic-ordinal-multinomial/data/replication && cd 04-logistic-ordinal-multinomial/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/ONOFS7"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 04-logistic-ordinal-multinomial/data/replication; cd 04-logistic-ordinal-multinomial/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/ONOFS7"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
@@ -80,8 +153,8 @@ committed. Keep the authors' own structure.
 import qmib
 
 data = qmib.load("loans")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
 print(data.shape, core.shape, mine.shape)
 ```
@@ -89,6 +162,11 @@ print(data.shape, core.shape, mine.shape)
 ::: {.check}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {.warn}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {.muted}

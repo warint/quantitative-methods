@@ -22,6 +22,56 @@ format:
     footer: "MATH60033A · Session 05 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · Before class {.center .scrollable}
+
+1. What to do, and how long it takes
+2. Read the paper
+3. Get BOTH datasets
+4. 2b · The course data
+5. Self-check
+6. What the session will ask of you
+7. Running the code
+
+## What session 5 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Derive the ridge estimator and show how it shrinks the **SVD spectrum**
+- Explain geometrically why the lasso produces exact zeros and ridge does not
+- State the **elastic net** objective and what $\ell_2$ adds under correlation
+- Derive the coordinate-descent update, including **soft-thresholding**
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Standardise before penalising, with `StandardScaler` inside a pipeline
+- Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
+- Read a coefficient path and a cross-validation curve
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Work with more candidate predictors than countries
+- Say why a variable the lasso dropped is not thereby irrelevant
+- Report a penalised model honestly, including what selection did
+
+::::
+
+:::::
+
+<!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -71,24 +121,50 @@ angle**, to apply the method. Have both before you arrive.
 [10.7910/DVN/QJEUKR](https://doi.org/10.7910/DVN/QJEUKR)
 :::
 
-Unzip it into `05-ridge-lasso-elastic-net/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 05-ridge-lasso-elastic-net/data/replication && cd 05-ridge-lasso-elastic-net/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 05-ridge-lasso-elastic-net/data/replication; cd 05-ridge-lasso-elastic-net/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("core")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
-print(data.shape, core.shape, mine.shape)
+print(core.shape, mine.shape)
 ```
 
 ::: {.check}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {.warn}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {.muted}

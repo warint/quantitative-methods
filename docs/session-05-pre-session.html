@@ -1067,6 +1067,50 @@ Thierry Warin, PhD
 </div>
 
 </section>
+<section class="slide level2">
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+</section>
+<section id="outline-before-class" class="slide level2 center scrollable">
+<h2>Outline · Before class</h2>
+<ol type="1">
+<li>What to do, and how long it takes</li>
+<li>Read the paper</li>
+<li>Get BOTH datasets</li>
+<li>2b · The course data</li>
+<li>Self-check</li>
+<li>What the session will ask of you</li>
+<li>Running the code</li>
+</ol>
+</section>
+<section id="what-session-5-is-for" class="slide level2 scrollable">
+<h2>What session 5 is for</h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<h3 id="the-mathematics">The mathematics</h3>
+<ul>
+<li>Derive the ridge estimator and show how it shrinks the <strong>SVD spectrum</strong></li>
+<li>Explain geometrically why the lasso produces exact zeros and ridge does not</li>
+<li>State the <strong>elastic net</strong> objective and what <span class="math inline">\(\ell_2\)</span> adds under correlation</li>
+<li>Derive the coordinate-descent update, including <strong>soft-thresholding</strong></li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-python">The Python</h3>
+<ul>
+<li>Standardise before penalising, with <code>StandardScaler</code> inside a pipeline</li>
+<li>Choose <span class="math inline">\((\alpha,\lambda)\)</span> with <code>RidgeCV</code>, <code>LassoCV</code>, <code>ElasticNetCV</code></li>
+<li>Read a coefficient path and a cross-validation curve</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<h3 id="the-international-business">The international business</h3>
+<ul>
+<li>Work with more candidate predictors than countries</li>
+<li>Say why a variable the lasso dropped is not thereby irrelevant</li>
+<li>Report a penalised model honestly, including what selection did</li>
+</ul>
+</div></div>
+<!-- END deck-frontmatter -->
+</section>
 <section>
 <section id="before-the-session" class="title-slide slide level1 center" data-background-color="#E3120B" style="color:#F7F4ED">
 <h1>Before the session</h1>
@@ -1142,19 +1186,34 @@ Thierry Warin, PhD
 <div class="step">
 <p><a href="https://doi.org/10.7910/DVN/QJEUKR">10.7910/DVN/QJEUKR</a></p>
 </div>
-<p>Unzip it into <code>05-ridge-lasso-elastic-net/data/replication/</code> — that folder is git-ignored, so nothing large is committed. Keep the authors’ own structure.</p>
+<p>Download it from the terminal — no Dataverse account, no browser. From the repository root:</p>
+<p><strong>macOS and Linux</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> 05-ridge-lasso-elastic-net/data/replication <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> 05-ridge-lasso-elastic-net/data/replication</span>
+<span id="cb1-2"><a href></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> replication.zip <span class="dt">\</span></span>
+<span id="cb1-3"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR&quot;</span></span>
+<span id="cb1-4"><a href></a><span class="fu">unzip</span> <span class="at">-q</span> replication.zip <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> replication.zip <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> <span class="at">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href></a>mkdir <span class="dv">05</span><span class="op">-</span>ridge-lasso-elastic-net<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication<span class="op">;</span> <span class="fu">cd</span> <span class="dv">05</span><span class="op">-</span>ridge-lasso-elastic-net<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication</span>
+<span id="cb2-2"><a href></a><span class="fu">curl</span><span class="op">.</span><span class="fu">exe</span> <span class="op">-</span>L <span class="op">-</span>o replication<span class="op">.</span><span class="fu">zip</span> `</span>
+<span id="cb2-3"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR&quot;</span></span>
+<span id="cb2-4"><a href></a>Expand-Archive replication<span class="op">.</span><span class="fu">zip</span> <span class="op">.;</span> <span class="fu">Remove-Item</span> replication<span class="op">.</span><span class="fu">zip</span><span class="op">;</span> <span class="fu">cd</span> <span class="op">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><code>data/replication/</code> is git-ignored, so nothing large is committed. Keep the authors’ own structure — do not tidy it.</p>
+</div>
 </section>
 <section id="b-the-course-data" class="slide level2">
 <h2>2b · The course data</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb1-2"><a href></a></span>
-<span id="cb1-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)     <span class="co"># what the lecture uses</span></span>
-<span id="cb1-4"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># shared by every group</span></span>
-<span id="cb1-5"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># YOUR angle — see your dictionary</span></span>
-<span id="cb1-6"><a href></a></span>
-<span id="cb1-7"><a href></a><span class="bu">print</span>(data.shape, core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb3-2"><a href></a></span>
+<span id="cb3-3"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># the spine, shared by every group</span></span>
+<span id="cb3-4"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># REPLACE with your own angle</span></span>
+<span id="cb3-5"><a href></a></span>
+<span id="cb3-6"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Run this <strong>before</strong> you arrive. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing.</p>
+</div>
+<div class="warn">
+<p><code>angle_c_country</code> is an example, not your angle. Yours is named in <a href="https://github.com/warint/quantitative-methods/blob/main/RESEARCH-MANDATES.md"><code>RESEARCH-MANDATES.md</code></a>.</p>
 </div>
 <div class="muted">
 <p>A wide slice of the spine — more candidate indicators than usable rows · everything available: <code>qmib.catalog()</code></p>
@@ -1190,9 +1249,9 @@ Thierry Warin, PhD
 <section id="running-the-code" class="slide level2">
 <h2>Running the code</h2>
 <p>Everything runs in the <strong>VS Codium terminal</strong>, with the project environment active:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS / Linux</span></span>
-<span id="cb2-2"><a href></a><span class="ex">.venv\Scripts\activate</span>         <span class="co"># Windows</span></span>
-<span id="cb2-3"><a href></a><span class="ex">python</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS / Linux</span></span>
+<span id="cb4-2"><a href></a><span class="ex">.venv\Scripts\activate</span>         <span class="co"># Windows</span></span>
+<span id="cb4-3"><a href></a><span class="ex">python</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p>Missing a package? <code>pip install -r requirements.txt</code> from the repository root.</p>
 </div>

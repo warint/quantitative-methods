@@ -22,6 +22,57 @@ format:
     footer: "MATH60033A · Session 09 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · Before class {.center .scrollable}
+
+1. What to do, and how long it takes
+2. Read the paper
+3. Get BOTH datasets
+4. 2b · The course data
+5. Self-check
+6. What the session will ask of you
+7. Running the code
+
+## What session 9 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Distinguish the **measurement** model from the **structural** model
+- Read `=~` as "is measured by", and write a model description
+- Interpret a **standardised loading**, and say when an indicator is weak
+- Report **CFI, TLI and RMSEA**, and say what each would have to be
+- Decompose a **mediation** into direct and indirect paths
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Specify and fit a model with `semopy.Model`, and read `.inspect()`
+- Pull fit indices with `semopy.calc_stats` and report them all
+- Fit two models with opposite arrows and watch the fit not decide between them
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Measure a construct — trust, capability, institutional quality — you cannot observe
+- State why good fit is not evidence that the model is correct
+- Name the alternative model you rejected, and on what grounds
+
+::::
+
+:::::
+
+<!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -71,8 +122,30 @@ angle**, to apply the method. Have both before you arrive.
 [10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)
 :::
 
-Unzip it into `09-structural-equation-modelling/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 09-structural-equation-modelling/data/replication && cd 09-structural-equation-modelling/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/TZEN38"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 09-structural-equation-modelling/data/replication; cd 09-structural-equation-modelling/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/TZEN38"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
@@ -80,8 +153,8 @@ committed. Keep the authors' own structure.
 import qmib
 
 data = qmib.load("efa")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
 print(data.shape, core.shape, mine.shape)
 ```
@@ -89,6 +162,11 @@ print(data.shape, core.shape, mine.shape)
 ::: {.check}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {.warn}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {.muted}

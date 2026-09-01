@@ -22,6 +22,56 @@ format:
     footer: "MATH60033A · Session 03 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · Before class {.center .scrollable}
+
+1. What to do, and how long it takes
+2. Read the paper
+3. Get BOTH datasets
+4. 2b · The course data
+5. Self-check
+6. What the session will ask of you
+7. Running the code
+
+## What session 3 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Read **residuals versus fitted** and say what structure it reveals
+- Compute **leverage** from the hat matrix, and show it sums to $p$
+- Separate an outlier from an influential point with **Cook's distance**
+- Compare models on **AIC**, and say why that is not model selection
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Pull diagnostics from a fitted model with `get_influence()`
+- Build the four diagnostic plots yourself rather than calling one function
+- Compare candidate specifications side by side on AIC and BIC
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Say whether a published coefficient survives its own diagnostics
+- Decide what to do about the one country that moves the whole result
+- Refuse a model whose residuals show it has missed the structure
+
+::::
+
+:::::
+
+<!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -71,24 +121,50 @@ angle**, to apply the method. Have both before you arrive.
 [10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)
 :::
 
-Unzip it into `03-regression-adequacy-and-validity/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 03-regression-adequacy-and-validity/data/replication && cd 03-regression-adequacy-and-validity/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/U5DAEP"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 03-regression-adequacy-and-validity/data/replication; cd 03-regression-adequacy-and-validity/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/U5DAEP"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("core")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
-print(data.shape, core.shape, mine.shape)
+print(core.shape, mine.shape)
 ```
 
 ::: {.check}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {.warn}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {.muted}

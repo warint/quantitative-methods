@@ -134,6 +134,12 @@ Full guide: [`setup-git-and-github.md`](setup-git-and-github.md)
 
 def pre_session_deck(num, s):
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
+    # Six sessions teach on the spine itself. Loading it twice under two names,
+    # as the template used to, reads as two datasets and is one.
+    on_spine = s["dataset"] == "core"
+    lecture_load = ("" if on_spine
+                    else f'data = qmib.load("{s["dataset"]}")     # what the lecture uses\n')
+    shapes = "core.shape, mine.shape" if on_spine else "data.shape, core.shape, mine.shape"
     return header(num, "pre-session", "Before the session", s["question"]) + f"""
 # Before the session {{background-color="{RED}" style="color:{PAPER}"}}
 
@@ -184,24 +190,50 @@ angle**, to apply the method. Have both before you arrive.
 [{s['dataverse']}](https://doi.org/{s['dataverse']})
 :::
 
-Unzip it into `{s['dir']}/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p {s['dir']}/data/replication && cd {s['dir']}/data/replication
+curl -L -o replication.zip \\
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir {s['dir']}/data/replication; cd {s['dir']}/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {{.warn}}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
 
 ## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+{lecture_load}core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
-print(data.shape, core.shape, mine.shape)
+print({shapes})
 ```
 
 ::: {{.check}}
 Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
 whatever the room's wifi is doing.
+:::
+
+::: {{.warn}}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
 ::: {{.muted}}
@@ -280,10 +312,16 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p groups/{COHORT}/group-XX/session-{num}
+mkdir -p groups/{COHORT}/group-XX/session-{num}      # macOS and Linux
+```
+
+```powershell
+git checkout -b group-XX
+mkdir groups/{COHORT}/group-XX/session-{num}         # Windows — no -p
 ```
 
 ::: {{.muted}}
+PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
 The git log is the participation record. It is not a formality.
 :::
 

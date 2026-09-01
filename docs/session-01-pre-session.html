@@ -1084,7 +1084,8 @@ Thierry Warin, PhD
 <li>Windows: “Python introuvable”</li>
 <li>Windows: checking it took</li>
 <li>Step 5 — Ollama and Qwen</li>
-<li>Step 5b — Point Continue at your local model</li>
+<li>Step 5b — Open Continue’s config file</li>
+<li>Step 5c — What to put in it</li>
 <li>Which model size</li>
 <li>Step 6 — Give the model a real context window</li>
 <li>Step 6b — The agent in your terminal</li>
@@ -1294,34 +1295,51 @@ Thierry Warin, PhD
 <p><strong>Turn your wifi off and run that again.</strong> It should still answer. That is the point of running it locally.</p>
 </div>
 </section>
-<section id="step-5b-point-continue-at-your-local-model" class="slide level2">
-<h2>Step 5b — Point Continue at your local model</h2>
-<p>Installed, Continue still talks to nothing. Give it a config at <code>~/.continue/config.yaml</code> — on Windows, <code>%USERPROFILE%\\.continue\\config.yaml</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href></a><span class="fu">name</span><span class="kw">:</span><span class="at"> qmib</span></span>
-<span id="cb8-2"><a href></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.0.1</span></span>
-<span id="cb8-3"><a href></a><span class="fu">models</span><span class="kw">:</span></span>
-<span id="cb8-4"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local coder</span></span>
-<span id="cb8-5"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
-<span id="cb8-6"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> qwen2.5-coder:7b</span><span class="co">     # the size you actually pulled</span></span>
-<span id="cb8-7"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">chat</span><span class="kw">,</span><span class="at"> edit</span><span class="kw">,</span><span class="at"> apply</span><span class="kw">]</span></span>
-<span id="cb8-8"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local embedder</span></span>
-<span id="cb8-9"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
-<span id="cb8-10"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> nomic-embed-text</span></span>
-<span id="cb8-11"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">embed</span><span class="kw">]</span></span>
-<span id="cb8-12"><a href></a><span class="fu">context</span><span class="kw">:</span></span>
-<span id="cb8-13"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> file</span></span>
-<span id="cb8-14"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> code</span></span>
-<span id="cb8-15"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> diff</span></span>
-<span id="cb8-16"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> terminal</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-5b-open-continues-config-file" class="slide level2">
+<h2>Step 5b — Open Continue’s config file</h2>
+<p>Installed, Continue still talks to nothing. It needs a config file, and the easiest way to open it is from inside Continue itself:</p>
+<div class="step">
+<p>Open the Continue panel → the <strong>gear icon</strong> at its top right → <em>Configure</em>. It opens <code>config.yaml</code> in the editor, creating it if it does not exist.</p>
+</div>
+<p>If you would rather do it from the terminal — the file lives in your home directory, and the path differs:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.continue <span class="kw">&amp;&amp;</span> <span class="ex">open</span> <span class="at">-e</span> ~/.continue/config.yaml        <span class="co"># macOS</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.continue <span class="kw">&amp;&amp;</span> <span class="va">${EDITOR</span><span class="op">:-</span>nano<span class="va">}</span> ~/.continue/config.yaml   <span class="co"># Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb10-1"><a href></a><span class="fu">New-Item</span> <span class="op">-</span>ItemType Directory <span class="op">-</span>Force <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.continue&quot;</span> <span class="op">|</span> <span class="fu">Out-Null</span></span>
+<span id="cb10-2"><a href></a>notepad <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.continue\config.yaml&quot;</span>                          <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p><code>$HOME\.continue</code> on Windows is normally <code>C:\Users\you\.continue</code>. The folder starts with a dot, so File Explorer hides it unless <em>Hidden items</em> is ticked in the View ribbon.</p>
+</div>
+</section>
+<section id="step-5c-what-to-put-in-it" class="slide level2">
+<h2>Step 5c — What to put in it</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href></a><span class="fu">name</span><span class="kw">:</span><span class="at"> qmib</span></span>
+<span id="cb11-2"><a href></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.0.1</span></span>
+<span id="cb11-3"><a href></a><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb11-4"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local coder</span></span>
+<span id="cb11-5"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
+<span id="cb11-6"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> qwen2.5-coder:7b</span><span class="co">     # the size you actually pulled</span></span>
+<span id="cb11-7"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">chat</span><span class="kw">,</span><span class="at"> edit</span><span class="kw">,</span><span class="at"> apply</span><span class="kw">]</span></span>
+<span id="cb11-8"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Local embedder</span></span>
+<span id="cb11-9"><a href></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> ollama</span></span>
+<span id="cb11-10"><a href></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> nomic-embed-text</span></span>
+<span id="cb11-11"><a href></a><span class="at">    </span><span class="fu">roles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">embed</span><span class="kw">]</span></span>
+<span id="cb11-12"><a href></a><span class="fu">context</span><span class="kw">:</span></span>
+<span id="cb11-13"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> file</span></span>
+<span id="cb11-14"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> code</span></span>
+<span id="cb11-15"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> diff</span></span>
+<span id="cb11-16"><a href></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> terminal</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>Open a <code>.py</code> file, select a few lines, press <code>Cmd/Ctrl + L</code>. If the panel answers, you are done. If it answers nothing, <code>ollama serve</code> is not running.</p>
+<p>Open a <code>.py</code> file, select a few lines, press <code>Cmd/Ctrl + L</code>. If the panel answers, you are done.</p>
+</div>
+<div class="muted">
+<p>Nothing at all means no model server is listening — on macOS open the Ollama app; on Windows and Linux run <code>ollama serve</code> and leave that terminal open.</p>
 </div>
 </section>
 <section id="which-model-size" class="slide level2">
 <h2>Which model size</h2>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:3b     <span class="co"># 8 GB RAM</span></span>
-<span id="cb9-2"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:7b     <span class="co"># 16 GB  ← most laptops</span></span>
-<span id="cb9-3"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:14b    <span class="co"># 32 GB+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:3b     <span class="co"># 8 GB RAM</span></span>
+<span id="cb12-2"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:7b     <span class="co"># 16 GB  ← most laptops</span></span>
+<span id="cb12-3"><a href></a><span class="ex">ollama</span> pull qwen2.5-coder:14b    <span class="co"># 32 GB+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p>Pull the one that matches your <strong>RAM</strong>, not the biggest one. A model that does not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change the name in <code>config.yaml</code> to whichever you pulled.</p>
 </div>
@@ -1330,22 +1348,22 @@ Thierry Warin, PhD
 <h2>Step 6 — Give the model a real context window</h2>
 <p>Ollama defaults to a <strong>2,048-token</strong> context. aider fills that with your file and the model then “forgets” what you sent. Raise it on the <strong>server</strong>, which is the only place the setting is read.</p>
 <p><strong>macOS</strong> — the Ollama app is already serving, so setting the variable in a terminal does nothing. Set it for the app, then restart it from the menu bar:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Windows and Linux</strong> — run the server yourself, in its own terminal:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb11-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_CONTEXT_LENGTH</span> <span class="op">=</span> <span class="st">&quot;8192&quot;</span><span class="op">;</span> ollama serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve       <span class="co"># Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb14-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_CONTEXT_LENGTH</span> <span class="op">=</span> <span class="st">&quot;8192&quot;</span><span class="op">;</span> ollama serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve       <span class="co"># Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>address already in use</code> means a server is <strong>already running</strong> — on macOS that is the app, and you want <code>launchctl</code>, not this command.</p>
 </div>
 </section>
 <section id="step-6b-the-agent-in-your-terminal" class="slide level2">
 <h2>Step 6b — The agent in your terminal</h2>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Point it at the server. The variable goes in <em>aider’s</em> terminal:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb15-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb18-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then, on both:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>ollama_chat/</code>, not <code>ollama/</code> — the second uses the completion endpoint and gives markedly worse answers. And use the tag you actually pulled: <code>:3b</code>, <code>:7b</code> or <code>:14b</code>.</p>
 </div>
@@ -1356,7 +1374,7 @@ Thierry Warin, PhD
 <p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
 </div>
 <p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
 </div>
@@ -1378,7 +1396,7 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
