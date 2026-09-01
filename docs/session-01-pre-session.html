@@ -1077,6 +1077,7 @@ Thierry Warin, PhD
 <li>What you are building</li>
 <li>Where do I type this?</li>
 <li>Why local, and why these tools</li>
+<li>One rule before you start: restart after installing</li>
 <li>Step 1 — VS Codium</li>
 <li>Step 2 — Extensions</li>
 <li>Step 3 — The course materials</li>
@@ -1088,8 +1089,9 @@ Thierry Warin, PhD
 <li>Step 5c — What to put in it</li>
 <li>Which model size</li>
 <li>Step 6 — Give the model a real context window</li>
-<li>Step 6b — The agent in your terminal</li>
-<li>Step 6c — Ask it something real</li>
+<li>Step 6b — Install aider, outside the course environment</li>
+<li>Step 6c — Pointing it at your model</li>
+<li>Step 6d — Ask it something real</li>
 <li>Two terminals is the working pattern</li>
 <li>The last check</li>
 <li>When it goes wrong</li>
@@ -1202,6 +1204,41 @@ Thierry Warin, PhD
 <p>Data sovereignty is a real constraint in the work you will do. A workflow that only functions when you can send the data to somebody else’s server is not a workflow you can take to a client.</p>
 </div>
 </section>
+<section id="one-rule-before-you-start-restart-after-installing" class="slide level2">
+<h2>One rule before you start: restart after installing</h2>
+<p>A terminal reads your PATH <strong>once, when it opens</strong>. VS Codium reads it once, when it launches. Install something and the window you already have open will not see it — the command stays “not found” and it looks like the install failed.</p>
+<div class="tight">
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>After installing</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A <strong>VS Codium extension</strong></td>
+<td><em>Developer: Reload Window</em> — <code>Cmd/Ctrl + Shift + P</code></td>
+</tr>
+<tr class="even">
+<td><strong>Python</strong> or <strong>git</strong></td>
+<td>Quit VS Codium entirely and reopen it</td>
+</tr>
+<tr class="odd">
+<td><strong>Ollama</strong> or <strong>aider</strong></td>
+<td>A new terminal is enough — <code>+</code> in the terminal panel</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="warn">
+<p>On <strong>Windows</strong> this bites hardest, because the installers change PATH and nothing already running picks it up. When in doubt there, quit VS Codium and reopen it — it costs five seconds and removes an entire category of problem.</p>
+</div>
+</section>
 <section id="step-1-vs-codium" class="slide level2">
 <h2>Step 1 — VS Codium</h2>
 <p>Download from <strong><a href="https://vscodium.com">vscodium.com</a></strong> and install it as you would any application.</p>
@@ -1226,6 +1263,9 @@ Thierry Warin, PhD
 </div>
 <div class="muted">
 <p>Extensions view: <strong>View → Extensions</strong>, or <code>Cmd/Ctrl + Shift + X</code>.</p>
+</div>
+<div class="check">
+<p><strong>Reload the window afterwards</strong> — <code>Cmd/Ctrl + Shift + P</code> → <em>Developer: Reload Window</em>. An extension that has just been installed is not active until you do.</p>
 </div>
 </section>
 <section id="step-3-the-course-materials" class="slide level2">
@@ -1253,6 +1293,9 @@ Thierry Warin, PhD
 <span id="cb3-3"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then, on both:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p><strong>Windows: quit VS Codium and reopen it after installing Python</strong>, before creating the environment. The installer adds Python to PATH, and a window that was already open will not see it.</p>
+</div>
 <div class="check">
 <p>Your prompt should now begin with <code>(.venv)</code>. If it does not, the activation did not take — and nothing installed afterwards will be visible to the course.</p>
 </div>
@@ -1291,6 +1334,9 @@ Thierry Warin, PhD
 </div>
 <p>Check it answers:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder <span class="st">&quot;In one sentence, what is a residual?&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p><code>ollama: command not found</code> right after installing? Open a <strong>new terminal</strong>. On Windows, quit VS Codium and reopen it.</p>
+</div>
 <div class="check">
 <p><strong>Turn your wifi off and run that again.</strong> It should still answer. That is the point of running it locally.</p>
 </div>
@@ -1356,25 +1402,38 @@ Thierry Warin, PhD
 <p><code>address already in use</code> means a server is <strong>already running</strong> — on macOS that is the app, and you want <code>launchctl</code>, not this command.</p>
 </div>
 </section>
-<section id="step-6b-the-agent-in-your-terminal" class="slide level2">
-<h2>Step 6b — The agent in your terminal</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-6b-install-aider-outside-the-course-environment" class="slide level2">
+<h2>Step 6b — Install aider, outside the course environment</h2>
+<div class="warn">
+<p><strong>Do not <code>pip install aider-chat</code> into <code>.venv</code>.</strong> aider pins its own versions of several packages the course also uses, and pip has to satisfy both at once. On Windows that usually ends in a wall of resolver errors; when it appears to succeed it can quietly downgrade something the course needs.</p>
+</div>
+<p>Install it as a standalone tool instead. aider ships an installer that puts it in its own isolated environment:</p>
+<p><strong>macOS and Linux</strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">--user</span> aider-install <span class="kw">&amp;&amp;</span> <span class="ex">aider-install</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb17-1"><a href></a>py <span class="op">-</span>m pip install <span class="op">--</span>user aider-install<span class="op">;</span> aider-install</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Open a <strong>new terminal</strong> and run <code>aider --version</code>. If the command is not found, the installer’s directory is not on PATH yet — that is what the new terminal is for, and on Windows you may need to restart VS Codium.</p>
+</div>
+</section>
+<section id="step-6c-pointing-it-at-your-model" class="slide level2">
+<h2>Step 6c — Pointing it at your model</h2>
 <p>Point it at the server. The variable goes in <em>aider’s</em> terminal:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb18-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb19-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then, on both:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>ollama_chat/</code>, not <code>ollama/</code> — the second uses the completion endpoint and gives markedly worse answers. And use the tag you actually pulled: <code>:3b</code>, <code>:7b</code> or <code>:14b</code>.</p>
 </div>
 </section>
-<section id="step-6c-ask-it-something-real" class="slide level2">
-<h2>Step 6c — Ask it something real</h2>
+<section id="step-6d-ask-it-something-real" class="slide level2">
+<h2>Step 6d — Ask it something real</h2>
 <div class="step">
 <p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
 </div>
 <p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
 </div>
@@ -1396,7 +1455,7 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
@@ -1429,41 +1488,56 @@ Thierry Warin, PhD
 <td>New terminal; on Windows restart VS Codium</td>
 </tr>
 <tr class="odd">
+<td><code>aider: command not found</code></td>
+<td>Same — the installer’s folder is new on PATH</td>
+<td>New terminal; on Windows restart VS Codium</td>
+</tr>
+<tr class="even">
+<td>Resolver errors installing aider</td>
+<td>It was installed into <code>.venv</code></td>
+<td>Use <code>aider-install</code>, which keeps it separate — step 6b</td>
+</tr>
+<tr class="odd">
+<td>An extension does nothing</td>
+<td>Installed but not loaded</td>
+<td><em>Developer: Reload Window</em></td>
+</tr>
+<tr class="even">
 <td><code>ModuleNotFoundError</code> in VS Codium</td>
 <td>Wrong interpreter selected</td>
 <td><code>Cmd/Ctrl + Shift + P</code> → <em>Python: Select Interpreter</em> → <code>.venv</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>pip</code> fails</td>
 <td>Environment not active</td>
 <td>Check your prompt starts with <code>(.venv)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Continue answers nothing</td>
 <td><code>ollama serve</code> not running</td>
 <td>Start it in its own terminal, leave it open</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>The model is very slow</td>
 <td>Too large for your RAM</td>
 <td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>aider forgets your file</td>
 <td>Ollama’s 2k default context</td>
 <td>Raise it on the <strong>server</strong> — step 6. macOS: <code>launchctl setenv</code>, not <code>ollama serve</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>connection refused</code> from aider</td>
 <td>No server on 11434</td>
 <td>macOS: open the Ollama app. Windows/Linux: <code>ollama serve</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Maths shows as raw <code>$...$</code></td>
 <td>No preview extension</td>
 <td>Install <em>Markdown Preview Enhanced</em>, open with <code>Cmd/Ctrl + K V</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Slow on Apple Silicon</td>
 <td>Rosetta build of Python</td>
 <td>Install the arm64 build</td>

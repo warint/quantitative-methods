@@ -29,25 +29,27 @@ format:
 1. What you are building
 2. Where do I type this?
 3. Why local, and why these tools
-4. Step 1 — VS Codium
-5. Step 2 — Extensions
-6. Step 3 — The course materials
-7. Step 4 — Python and the environment
-8. Windows: "Python introuvable"
-9. Windows: checking it took
-10. Step 5 — Ollama and Qwen
-11. Step 5b — Open Continue's config file
-12. Step 5c — What to put in it
-13. Which model size
-14. Step 6 — Give the model a real context window
-15. Step 6b — The agent in your terminal
-16. Step 6c — Ask it something real
-17. Two terminals is the working pattern
-18. The last check
-19. When it goes wrong
-20. Using the model well
-21. Also before class
-22. Ready?
+4. One rule before you start: restart after installing
+5. Step 1 — VS Codium
+6. Step 2 — Extensions
+7. Step 3 — The course materials
+8. Step 4 — Python and the environment
+9. Windows: "Python introuvable"
+10. Windows: checking it took
+11. Step 5 — Ollama and Qwen
+12. Step 5b — Open Continue's config file
+13. Step 5c — What to put in it
+14. Which model size
+15. Step 6 — Give the model a real context window
+16. Step 6b — Install aider, outside the course environment
+17. Step 6c — Pointing it at your model
+18. Step 6d — Ask it something real
+19. Two terminals is the working pattern
+20. The last check
+21. When it goes wrong
+22. Using the model well
+23. Also before class
+24. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -138,6 +140,26 @@ Data sovereignty is a real constraint in the work you will do. A workflow that o
 you can send the data to somebody else's server is not a workflow you can take to a client.
 :::
 
+## One rule before you start: restart after installing
+
+A terminal reads your PATH **once, when it opens**. VS Codium reads it once,
+when it launches. Install something and the window you already have open will
+not see it — the command stays "not found" and it looks like the install failed.
+
+::: {.tight}
+| After installing | Do this |
+|---|---|
+| A **VS Codium extension** | *Developer: Reload Window* — `Cmd/Ctrl + Shift + P` |
+| **Python** or **git** | Quit VS Codium entirely and reopen it |
+| **Ollama** or **aider** | A new terminal is enough — `+` in the terminal panel |
+:::
+
+::: {.warn}
+On **Windows** this bites hardest, because the installers change PATH and
+nothing already running picks it up. When in doubt there, quit VS Codium and
+reopen it — it costs five seconds and removes an entire category of problem.
+:::
+
 ## Step 1 — VS Codium
 
 Download from **[vscodium.com](https://vscodium.com)** and install it as you would any application.
@@ -164,6 +186,11 @@ VS Codium uses the **Open VSX** registry, not Microsoft's Marketplace.
 
 ::: {.muted}
 Extensions view: **View → Extensions**, or `Cmd/Ctrl + Shift + X`.
+:::
+
+::: {.check}
+**Reload the window afterwards** — `Cmd/Ctrl + Shift + P` → *Developer: Reload
+Window*. An extension that has just been installed is not active until you do.
 :::
 
 ## Step 3 — The course materials
@@ -211,6 +238,12 @@ Then, on both:
 ```bash
 pip install -r requirements.txt
 ```
+
+::: {.check}
+**Windows: quit VS Codium and reopen it after installing Python**, before
+creating the environment. The installer adds Python to PATH, and a window that
+was already open will not see it.
+:::
 
 ::: {.check}
 Your prompt should now begin with `(.venv)`. If it does not, the activation did
@@ -279,6 +312,11 @@ Check it answers:
 ```bash
 ollama run qwen2.5-coder "In one sentence, what is a residual?"
 ```
+
+::: {.muted}
+`ollama: command not found` right after installing? Open a **new terminal**. On
+Windows, quit VS Codium and reopen it.
+:::
 
 ::: {.check}
 **Turn your wifi off and run that again.** It should still answer. That is the point of running it
@@ -390,11 +428,37 @@ OLLAMA_CONTEXT_LENGTH=8192 ollama serve       # Linux
 is the app, and you want `launchctl`, not this command.
 :::
 
-## Step 6b — The agent in your terminal
+## Step 6b — Install aider, outside the course environment
+
+::: {.warn}
+**Do not `pip install aider-chat` into `.venv`.** aider pins its own versions of
+several packages the course also uses, and pip has to satisfy both at once. On
+Windows that usually ends in a wall of resolver errors; when it appears to
+succeed it can quietly downgrade something the course needs.
+:::
+
+Install it as a standalone tool instead. aider ships an installer that puts it in
+its own isolated environment:
+
+**macOS and Linux**
 
 ```bash
-pip install aider-chat
+python3 -m pip install --user aider-install && aider-install
 ```
+
+**Windows PowerShell**
+
+```powershell
+py -m pip install --user aider-install; aider-install
+```
+
+::: {.check}
+Open a **new terminal** and run `aider --version`. If the command is not found,
+the installer's directory is not on PATH yet — that is what the new terminal is
+for, and on Windows you may need to restart VS Codium.
+:::
+
+## Step 6c — Pointing it at your model
 
 Point it at the server. The variable goes in *aider's* terminal:
 
@@ -418,7 +482,7 @@ gives markedly worse answers. And use the tag you actually pulled: `:3b`, `:7b`
 or `:14b`.
 :::
 
-## Step 6c — Ask it something real
+## Step 6d — Ask it something real
 
 ::: {.step}
 *"Open `qmib.py` and explain what `load` does when the file is already cached."*
@@ -473,6 +537,9 @@ test of whether your setup works.
 |---|---|---|
 | `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — two slides back |
 | `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
+| `aider: command not found` | Same — the installer's folder is new on PATH | New terminal; on Windows restart VS Codium |
+| Resolver errors installing aider | It was installed into `.venv` | Use `aider-install`, which keeps it separate — step 6b |
+| An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
 | Continue answers nothing | `ollama serve` not running | Start it in its own terminal, leave it open |

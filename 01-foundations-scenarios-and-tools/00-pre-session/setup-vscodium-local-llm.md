@@ -38,7 +38,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] A model pulled: `qwen2.5-coder:3b` (8 GB RAM), `:7b` (16 GB), or `:14b` (32 GB+)
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
 - [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:7b "hello"`. It still answers.
-- [ ] **aider** installed and talking to Ollama — the server's context raised to 8192 (macOS: `launchctl setenv OLLAMA_CONTEXT_LENGTH 8192`, then restart the app; Windows/Linux: `OLLAMA_CONTEXT_LENGTH=8192 ollama serve`), and `aider --model ollama_chat/qwen2.5-coder:7b` answering in another terminal
+- [ ] **aider** installed **outside** the course environment — `pip install --user aider-install` then `aider-install`, never `pip install aider-chat` into `.venv`, which collides with the course's own pinned packages — and `aider --version` answers in a new terminal
 - [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
@@ -79,6 +79,8 @@ press `Ctrl/Cmd+L`.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `ollama: command not found` | Not on PATH yet | Open a new terminal; on Windows restart VS Codium |
+| Dependency resolver errors while installing aider | aider was installed into `.venv`, where it competes with the course's packages | Install it standalone: `pip install --user aider-install`, then `aider-install` |
+| A newly installed extension or command does nothing | The window or terminal predates the install | *Developer: Reload Window*; for PATH changes, quit VS Codium and reopen |
 | `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
 | `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
