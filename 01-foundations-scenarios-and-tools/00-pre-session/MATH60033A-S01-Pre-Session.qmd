@@ -36,29 +36,30 @@ format:
 8. Step 4 — Python 3.12, and only 3.12
 9. Step 4 — Build the environment with it
 10. Windows: "l'exécution de scripts est désactivée"
-11. Already installed the wrong version?
-12. Windows: "Python introuvable"
-13. Windows: checking it took
-14. Step 5 — Ollama and Qwen
-15. Step 5b — Open Continue's config file
-16. Step 5c — What to put in it
-17. Which model size
-18. Step 6 — Give the model a real context window
-19. Step 6 — macOS
-20. Step 6 — Windows
-21. Step 6 — Linux
-22. If you see a socket error
-23. Step 6b — Install pipx first
-24. Step 6b — Then install aider
-25. Step 6c — Pointing it at your model
-26. `aider n'est pas reconnu`?
-27. Step 6d — Ask it something real
-28. Two terminals is the working pattern
-29. The last check
-30. When it goes wrong
-31. Using the model well
-32. Also before class
-33. Ready?
+11. Built it on the wrong version? Start over
+12. Windows: still cannot activate?
+13. Windows: "Python introuvable"
+14. Windows: checking it took
+15. Step 5 — Ollama and Qwen
+16. Step 5b — Open Continue's config file
+17. Step 5c — What to put in it
+18. Which model size
+19. Step 6 — Give the model a real context window
+20. Step 6 — macOS
+21. Step 6 — Windows
+22. Step 6 — Linux
+23. If you see a socket error
+24. Step 6b — Install pipx first
+25. Step 6b — Then install aider
+26. Step 6c — Pointing it at your model
+27. `aider n'est pas reconnu`?
+28. Step 6d — Ask it something real
+29. Two terminals is the working pattern
+30. The last check
+31. When it goes wrong
+32. Using the model well
+33. Also before class
+34. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -276,9 +277,22 @@ on Windows.
 ```powershell
 py --list                  # every Python you have
 py -3.12 --version         # the one this course wants
-py -3.12 -m venv .venv     # name the version — `py` alone picks the newest
+py -3.12 -m venv .venv     # name the version — see below
 .venv\Scripts\activate
 ```
+
+::: {.warn}
+**The star is not a tick.** `py --list` marks the *default* — the one a bare
+`py` uses — and after installing 3.12 the star normally stays on 3.14:
+
+```text
+ -V:3.14 *        Python 3.14 (64-bit)
+ -V:3.12          Python 3.12 (64-bit)
+```
+
+That is why every command here writes `-3.12`. Leave the star alone; naming the
+version works regardless of where it sits.
+:::
 
 Then, on both:
 
@@ -335,29 +349,64 @@ is not a PowerShell script — but you must run it from **cmd**, not PowerShell,
 and you will need it in every new terminal.
 :::
 
-## Already installed the wrong version?
+## Built it on the wrong version? Start over
 
-You do not have to uninstall it. Install 3.12 alongside it, then rebuild the
-environment naming the version:
+::: {.warn}
+A `.venv` **remembers the interpreter that created it**. Installing 3.12
+afterwards changes nothing, and neither does PATH — the folder has to go and be
+rebuilt.
+:::
+
+**Windows**, in order. Step 1 only if you have not done it already:
 
 ```powershell
-Remove-Item -Recurse -Force .venv     # Windows
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+Remove-Item -Recurse -Force .venv
 py -3.12 -m venv .venv
 .venv\Scripts\activate
+python --version                      # must say 3.12.x
 pip install -r requirements.txt
 ```
 
+**macOS and Linux**
+
 ```bash
-rm -rf .venv                          # macOS and Linux
+rm -rf .venv
 python3.12 -m venv .venv
 source .venv/bin/activate
+python --version                      # must say 3.12.x
 pip install -r requirements.txt
 ```
 
 ::: {.check}
-`python --version` inside the activated environment should now say 3.12. The
-`.venv` remembers which interpreter built it, so this is the only way to change
-it — editing PATH afterwards does nothing.
+If `python --version` says anything but 3.12, the `venv` line used the wrong
+interpreter — check you wrote `-3.12` — and you need to delete and rebuild
+again.
+:::
+
+## Windows: still cannot activate?
+
+Work through it in this order:
+
+::: {.step}
+**Does `.venv` exist?** `ls .venv\Scripts` should list `activate`,
+`activate.bat` and `Activate.ps1`. If not, the `venv` command failed — read its
+output rather than moving on.
+:::
+
+::: {.step}
+**Is it the execution policy?** *«l'exécution de scripts est désactivée»* — see
+the slide above. This is the usual answer.
+:::
+
+::: {.step}
+**Spelling.** `activate`, not `activiate`. Tab-completion after
+`.venv\Scripts\a` will finish it for you and never misspells it.
+:::
+
+::: {.muted}
+Prefer the star on 3.12? `setx PY_PYTHON 3.12`, then a new terminal. Not needed
+for anything in this course, which always names the version.
 :::
 
 ## Windows: "Python introuvable"
