@@ -357,16 +357,31 @@ afterwards changes nothing, and neither does PATH — the folder has to go and b
 rebuilt.
 :::
 
-**Windows**, in order. Step 1 only if you have not done it already:
+**Windows**, in order. The first line only if you have not done it already:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+deactivate                            # only if your prompt shows (.venv)
 Remove-Item -Recurse -Force .venv
 py -3.12 -m venv .venv
 .venv\Scripts\activate
 python --version                      # must say 3.12.x
 pip install -r requirements.txt
 ```
+
+::: {.warn}
+**`Le répertoire n'est pas vide` / `The directory is not empty`** means something
+still has a file open inside `.venv` — almost always the environment being
+active, or VS Codium holding its interpreter. `deactivate` first. If it still
+refuses, quit VS Codium entirely, reopen it, and delete before activating
+anything.
+:::
+
+::: {.muted}
+Windows sometimes reports that even when nothing is holding the folder. `cmd /c
+"rmdir /s /q .venv"` deletes it where `Remove-Item` will not.
+:::
 
 **macOS and Linux**
 
@@ -807,6 +822,7 @@ test of whether your setup works.
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
 | *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
+| *le répertoire n'est pas vide* deleting `.venv` | Something has a file open in it — usually the environment is still active | `deactivate`, then delete. Still refusing: quit VS Codium, or `cmd /c "rmdir /s /q .venv"` |
 | Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
 | aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |

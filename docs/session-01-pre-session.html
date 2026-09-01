@@ -1364,13 +1364,21 @@ Thierry Warin, PhD
 <div class="warn">
 <p>A <code>.venv</code> <strong>remembers the interpreter that created it</strong>. Installing 3.12 afterwards changes nothing, and neither does PATH — the folder has to go and be rebuilt.</p>
 </div>
-<p><strong>Windows</strong>, in order. Step 1 only if you have not done it already:</p>
+<p><strong>Windows</strong>, in order. The first line only if you have not done it already:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb9-1"><a href></a><span class="fu">Set-ExecutionPolicy</span> <span class="op">-</span>Scope CurrentUser <span class="op">-</span>ExecutionPolicy RemoteSigned</span>
-<span id="cb9-2"><a href></a><span class="fu">Remove-Item</span> <span class="op">-</span>Recurse <span class="op">-</span>Force <span class="op">.</span><span class="fu">venv</span></span>
-<span id="cb9-3"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span>
-<span id="cb9-4"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span>
-<span id="cb9-5"><a href></a>python <span class="op">--</span>version                      <span class="co"># must say 3.12.x</span></span>
-<span id="cb9-6"><a href></a>pip install <span class="op">-</span>r requirements<span class="op">.</span><span class="fu">txt</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-2"><a href></a></span>
+<span id="cb9-3"><a href></a>deactivate                            <span class="co"># only if your prompt shows (.venv)</span></span>
+<span id="cb9-4"><a href></a><span class="fu">Remove-Item</span> <span class="op">-</span>Recurse <span class="op">-</span>Force <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb9-5"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb9-6"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span>
+<span id="cb9-7"><a href></a>python <span class="op">--</span>version                      <span class="co"># must say 3.12.x</span></span>
+<span id="cb9-8"><a href></a>pip install <span class="op">-</span>r requirements<span class="op">.</span><span class="fu">txt</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><strong><code>Le répertoire n&#39;est pas vide</code> / <code>The directory is not empty</code></strong> means something still has a file open inside <code>.venv</code> — almost always the environment being active, or VS Codium holding its interpreter. <code>deactivate</code> first. If it still refuses, quit VS Codium entirely, reopen it, and delete before activating anything.</p>
+</div>
+<div class="muted">
+<p>Windows sometimes reports that even when nothing is holding the folder. <code>cmd /c &quot;rmdir /s /q .venv&quot;</code> deletes it where <code>Remove-Item</code> will not.</p>
+</div>
 <p><strong>macOS and Linux</strong></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="fu">rm</span> <span class="at">-rf</span> .venv</span>
 <span id="cb10-2"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv .venv</span>
@@ -1679,36 +1687,41 @@ Thierry Warin, PhD
 <td><code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code>, then activate again</td>
 </tr>
 <tr class="even">
+<td><em>le répertoire n’est pas vide</em> deleting <code>.venv</code></td>
+<td>Something has a file open in it — usually the environment is still active</td>
+<td><code>deactivate</code>, then delete. Still refusing: quit VS Codium, or <code>cmd /c &quot;rmdir /s /q .venv&quot;</code></td>
+</tr>
+<tr class="odd">
 <td>Continue answers nothing</td>
 <td>No server on 11434</td>
 <td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>The model is very slow</td>
 <td>Too large for your RAM</td>
 <td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>aider forgets your file</td>
 <td>Ollama’s 2k default context</td>
 <td>Raise it on the server and restart Ollama — step 6</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>address already in use</code> / <em>une seule utilisation … socket</em></td>
 <td>Ollama is already running — it always is</td>
 <td>You do not need <code>ollama serve</code>. Set the variable, restart Ollama</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>connection refused</code> from aider</td>
 <td>Nothing on 11434</td>
 <td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Maths shows as raw <code>$...$</code></td>
 <td>No preview extension</td>
 <td>Install <em>Markdown Preview Enhanced</em>, open with <code>Cmd/Ctrl + K V</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Slow on Apple Silicon</td>
 <td>Rosetta build of Python</td>
 <td>Install the arm64 build</td>
