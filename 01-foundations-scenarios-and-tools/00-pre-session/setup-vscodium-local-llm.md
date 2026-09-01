@@ -92,6 +92,7 @@ press `Ctrl/Cmd+L`.
 | `connection refused` from aider | Nothing listening on 11434 | Start Ollama — the app on macOS and Windows, `sudo systemctl start ollama` on Linux |
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check `(.venv)` is in your prompt |
+| Windows: *l'exécution de scripts est désactivée sur ce système* | PowerShell's execution policy blocks `Activate.ps1` | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` — user-scoped, no admin rights, asked once |
 | LaTeX shows as raw `$...$` | Preview extension missing | Install *Markdown Preview Enhanced*; open with `Ctrl/Cmd+K V` |
 | Apple Silicon: slow inference | Rosetta Python | Install the arm64 build |
 

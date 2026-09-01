@@ -35,29 +35,30 @@ format:
 7. Step 3 — The course materials
 8. Step 4 — Python 3.12, and only 3.12
 9. Step 4 — Build the environment with it
-10. Already installed the wrong version?
-11. Windows: "Python introuvable"
-12. Windows: checking it took
-13. Step 5 — Ollama and Qwen
-14. Step 5b — Open Continue's config file
-15. Step 5c — What to put in it
-16. Which model size
-17. Step 6 — Give the model a real context window
-18. Step 6 — macOS
-19. Step 6 — Windows
-20. Step 6 — Linux
-21. If you see a socket error
-22. Step 6b — Install pipx first
-23. Step 6b — Then install aider
-24. Step 6c — Pointing it at your model
-25. `aider n'est pas reconnu`?
-26. Step 6d — Ask it something real
-27. Two terminals is the working pattern
-28. The last check
-29. When it goes wrong
-30. Using the model well
-31. Also before class
-32. Ready?
+10. Windows: "l'exécution de scripts est désactivée"
+11. Already installed the wrong version?
+12. Windows: "Python introuvable"
+13. Windows: checking it took
+14. Step 5 — Ollama and Qwen
+15. Step 5b — Open Continue's config file
+16. Step 5c — What to put in it
+17. Which model size
+18. Step 6 — Give the model a real context window
+19. Step 6 — macOS
+20. Step 6 — Windows
+21. Step 6 — Linux
+22. If you see a socket error
+23. Step 6b — Install pipx first
+24. Step 6b — Then install aider
+25. Step 6c — Pointing it at your model
+26. `aider n'est pas reconnu`?
+27. Step 6d — Ask it something real
+28. Two terminals is the working pattern
+29. The last check
+30. When it goes wrong
+31. Using the model well
+32. Also before class
+33. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -300,6 +301,38 @@ not take — and nothing installed afterwards will be visible to the course.
 Confirm it: `python --version` inside the activated environment must say
 **3.12.x**. Anything else and the environment was built by the wrong
 interpreter.
+:::
+
+## Windows: "l'exécution de scripts est désactivée"
+
+Activation is a PowerShell script, and Windows refuses to run scripts by
+default:
+
+```text
+… ne peut pas être chargé car l'exécution de scripts est désactivée
+    sur ce système
+… cannot be loaded because running scripts is disabled on this system
+```
+
+Nothing is broken. Allow scripts **for your own account** — no administrator
+rights needed, and it is asked once, ever:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Answer `O` (or `Y`), then activate again.
+
+::: {.muted}
+`RemoteSigned` runs scripts you wrote or created locally, and still refuses
+unsigned scripts downloaded from the internet. It is the setting Microsoft
+recommends for development machines — not `Unrestricted`, and not `Bypass`.
+:::
+
+::: {.check}
+Would rather change nothing? `.venv\Scripts\activate.bat` does the same job and
+is not a PowerShell script — but you must run it from **cmd**, not PowerShell,
+and you will need it in every new terminal.
 :::
 
 ## Already installed the wrong version?
@@ -724,6 +757,7 @@ test of whether your setup works.
 | An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
+| *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
 | Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
 | aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
