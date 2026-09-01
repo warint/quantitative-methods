@@ -1,11 +1,15 @@
 """
 environment verification.
 
-Run this BEFORE Session 1:
+Run this BEFORE Session 1, **with the environment activated** — the prompt
+should show (.venv) first:
 
     python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
 
-Five checks. All five must pass. Bring the output to class.
+If check 0 fails, nothing below it means anything: the packages are installed
+somewhere this interpreter cannot see. Activate and run it again.
+
+All checks must pass. Bring the output to class.
 """
 
 import importlib
@@ -36,9 +40,30 @@ def report(check, status, detail=""):
 WANT = (3, 12)
 
 
+def in_venv():
+    """True when this interpreter is a virtual environment's own."""
+    return sys.prefix != sys.base_prefix
+
+
 def check_python():
     major, minor = sys.version_info[:2]
     detail = f"{platform.python_implementation()} {platform.python_version()} on {platform.platform()}"
+
+    # The commonest reason every package check fails is that this script is
+    # being run by the system interpreter rather than the environment's — the
+    # packages are installed, just not where this Python is looking. Say so
+    # first, because otherwise the output blames the install.
+    if not in_venv():
+        report("0. Virtual environment", FAIL,
+               f"Running {sys.executable}\n"
+               "This is NOT the course environment, so the package checks below\n"
+               "will fail even if everything installed correctly.\n"
+               "Activate it first, then run this again:\n"
+               "    .venv\\Scripts\\activate     (Windows)\n"
+               "    source .venv/bin/activate  (macOS and Linux)\n"
+               "Your prompt should show (.venv) before you re-run.")
+    else:
+        report("0. Virtual environment", PASS, sys.executable)
     if (major, minor) == WANT:
         report("1. Python 3.12", PASS, detail)
     elif (major, minor) > WANT:
