@@ -1086,7 +1086,9 @@ Thierry Warin, PhD
 <li>Step 5 — Ollama and Qwen</li>
 <li>Step 5b — Point Continue at your local model</li>
 <li>Which model size</li>
-<li>Step 6 — The agent in your terminal</li>
+<li>Step 6 — Give the model a real context window</li>
+<li>Step 6b — The agent in your terminal</li>
+<li>Step 6c — Ask it something real</li>
 <li>Two terminals is the working pattern</li>
 <li>The last check</li>
 <li>When it goes wrong</li>
@@ -1324,16 +1326,39 @@ Thierry Warin, PhD
 <p>Pull the one that matches your <strong>RAM</strong>, not the biggest one. A model that does not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change the name in <code>config.yaml</code> to whichever you pulled.</p>
 </div>
 </section>
-<section id="step-6-the-agent-in-your-terminal" class="slide level2">
-<h2>Step 6 — The agent in your terminal</h2>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Point it at Ollama, and give the model a real context window:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434</span>
-<span id="cb11-2"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192</span>
-<span id="cb11-3"><a href></a></span>
-<span id="cb11-4"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama/qwen2.5-coder</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-6-give-the-model-a-real-context-window" class="slide level2">
+<h2>Step 6 — Give the model a real context window</h2>
+<p>Ollama defaults to a <strong>2,048-token</strong> context. aider fills that with your file and the model then “forgets” what you sent. Raise it on the <strong>server</strong>, which is the only place the setting is read.</p>
+<p><strong>macOS</strong> — the Ollama app is already serving, so setting the variable in a terminal does nothing. Set it for the app, then restart it from the menu bar:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows and Linux</strong> — run the server yourself, in its own terminal:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb11-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_CONTEXT_LENGTH</span> <span class="op">=</span> <span class="st">&quot;8192&quot;</span><span class="op">;</span> ollama serve</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="va">OLLAMA_CONTEXT_LENGTH</span><span class="op">=</span>8192 <span class="ex">ollama</span> serve       <span class="co"># Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><code>address already in use</code> means a server is <strong>already running</strong> — on macOS that is the app, and you want <code>launchctl</code>, not this command.</p>
+</div>
+</section>
+<section id="step-6b-the-agent-in-your-terminal" class="slide level2">
+<h2>Step 6b — The agent in your terminal</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="ex">pip</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Point it at the server. The variable goes in <em>aider’s</em> terminal:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb15-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, on both:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><code>ollama_chat/</code>, not <code>ollama/</code> — the second uses the completion endpoint and gives markedly worse answers. And use the tag you actually pulled: <code>:3b</code>, <code>:7b</code> or <code>:14b</code>.</p>
+</div>
+</section>
+<section id="step-6c-ask-it-something-real" class="slide level2">
+<h2>Step 6c — Ask it something real</h2>
 <div class="step">
-<p>Ask it for something real — <em>“open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached”</em> — and read what it proposes <strong>before</strong> you accept it.</p>
+<p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
+</div>
+<p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
 </div>
 </section>
 <section id="two-terminals-is-the-working-pattern" class="slide level2">
@@ -1344,13 +1369,16 @@ Thierry Warin, PhD
 <li><strong>One</strong> running <code>python</code>, where you check what it told you</li>
 </ul>
 </div>
+<div class="muted">
+<p>Plus the server — but on macOS that is the app in your menu bar, and on Windows and Linux it is a terminal you start once and leave alone.</p>
+</div>
 <div class="warn">
-<p>That second terminal is not optional. The rule for every deliverable in this course is that you document one thing the model got wrong — and you cannot do that without checking.</p>
+<p>The checking terminal is not optional. Every deliverable in this course requires you to document one thing the model got wrong — and you cannot do that without checking.</p>
 </div>
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
@@ -1405,12 +1433,12 @@ Thierry Warin, PhD
 <tr class="odd">
 <td>aider forgets your file</td>
 <td>Ollama’s 2k default context</td>
-<td><code>OLLAMA_CONTEXT_LENGTH=8192 ollama serve</code></td>
+<td>Raise it on the <strong>server</strong> — step 6. macOS: <code>launchctl setenv</code>, not <code>ollama serve</code></td>
 </tr>
 <tr class="even">
 <td><code>connection refused</code> from aider</td>
-<td>Same — no server</td>
-<td>Start <code>ollama serve</code> first</td>
+<td>No server on 11434</td>
+<td>macOS: open the Ollama app. Windows/Linux: <code>ollama serve</code></td>
 </tr>
 <tr class="odd">
 <td>Maths shows as raw <code>$...$</code></td>

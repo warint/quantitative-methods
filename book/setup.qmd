@@ -164,7 +164,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] A model pulled: `qwen2.5-coder:3b` (8 GB RAM), `:7b` (16 GB), or `:14b` (32 GB+)
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
 - [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:7b "hello"`. It still answers.
-- [ ] **aider** installed and talking to Ollama — `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` in one terminal, `aider --model ollama_chat/qwen2.5-coder:7b` in another
+- [ ] **aider** installed and talking to Ollama — the server's context raised to 8192 (macOS: `launchctl setenv OLLAMA_CONTEXT_LENGTH 8192`, then restart the app; Windows/Linux: `OLLAMA_CONTEXT_LENGTH=8192 ollama serve`), and `aider --model ollama_chat/qwen2.5-coder:7b` answering in another terminal
 - [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
@@ -209,8 +209,8 @@ press `Ctrl/Cmd+L`.
 | `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
 | Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
-| aider "forgets" the file you gave it | Ollama's 2k default context | Start it as `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
-| `connection refused` from aider | `ollama serve` not running | Start it, leave that terminal open |
+| aider "forgets" the file you gave it | Ollama's 2k default context | Raise it on the server. macOS: `launchctl setenv OLLAMA_CONTEXT_LENGTH 8192` and restart the app — `ollama serve` will fail with *address already in use* |
+| `connection refused` from aider | Nothing serving on 11434 | macOS: open the Ollama app. Windows/Linux: `ollama serve`, and leave that terminal open |
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check `(.venv)` is in your prompt |
 | LaTeX shows as raw `$...$` | Preview extension missing | Install *Markdown Preview Enhanced*; open with `Ctrl/Cmd+K V` |

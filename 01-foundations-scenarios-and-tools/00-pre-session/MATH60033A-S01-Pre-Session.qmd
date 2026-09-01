@@ -38,13 +38,15 @@ format:
 10. Step 5 — Ollama and Qwen
 11. Step 5b — Point Continue at your local model
 12. Which model size
-13. Step 6 — The agent in your terminal
-14. Two terminals is the working pattern
-15. The last check
-16. When it goes wrong
-17. Using the model well
-18. Also before class
-19. Ready?
+13. Step 6 — Give the model a real context window
+14. Step 6b — The agent in your terminal
+15. Step 6c — Ask it something real
+16. Two terminals is the working pattern
+17. The last check
+18. When it goes wrong
+19. Using the model well
+20. Also before class
+21. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -325,24 +327,78 @@ not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change
 the name in `config.yaml` to whichever you pulled.
 :::
 
-## Step 6 — The agent in your terminal
+## Step 6 — Give the model a real context window
+
+Ollama defaults to a **2,048-token** context. aider fills that with your file and
+the model then "forgets" what you sent. Raise it on the **server**, which is the
+only place the setting is read.
+
+**macOS** — the Ollama app is already serving, so setting the variable in a
+terminal does nothing. Set it for the app, then restart it from the menu bar:
+
+```bash
+launchctl setenv OLLAMA_CONTEXT_LENGTH 8192
+```
+
+**Windows and Linux** — run the server yourself, in its own terminal:
+
+```powershell
+$env:OLLAMA_CONTEXT_LENGTH = "8192"; ollama serve
+```
+
+```bash
+OLLAMA_CONTEXT_LENGTH=8192 ollama serve       # Linux
+```
+
+::: {.warn}
+`address already in use` means a server is **already running** — on macOS that
+is the app, and you want `launchctl`, not this command.
+:::
+
+## Step 6b — The agent in your terminal
 
 ```bash
 pip install aider-chat
 ```
 
-Point it at Ollama, and give the model a real context window:
+Point it at the server. The variable goes in *aider's* terminal:
 
 ```bash
-export OLLAMA_API_BASE=http://127.0.0.1:11434
-export OLLAMA_CONTEXT_LENGTH=8192
-
-aider --model ollama/qwen2.5-coder
+export OLLAMA_API_BASE=http://127.0.0.1:11434          # macOS / Linux
 ```
 
+```powershell
+$env:OLLAMA_API_BASE = "http://127.0.0.1:11434"        # Windows
+```
+
+Then, on both:
+
+```bash
+aider --model ollama_chat/qwen2.5-coder:7b
+```
+
+::: {.warn}
+`ollama_chat/`, not `ollama/` — the second uses the completion endpoint and
+gives markedly worse answers. And use the tag you actually pulled: `:3b`, `:7b`
+or `:14b`.
+:::
+
+## Step 6c — Ask it something real
+
 ::: {.step}
-Ask it for something real — *"open `qmib.py` and explain what `load` does when the file is already
-cached"* — and read what it proposes **before** you accept it.
+*"Open `qmib.py` and explain what `load` does when the file is already cached."*
+:::
+
+Read what it proposes **before** you accept it. aider commits automatically
+after each change it applies, and those commits are attributed to you.
+
+```bash
+aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+```
+
+::: {.muted}
+`--no-auto-commits` if you would rather stage the changes yourself. Either way,
+you are answerable for every line on your branch.
 :::
 
 ## Two terminals is the working pattern
@@ -352,9 +408,15 @@ cached"* — and read what it proposes **before** you accept it.
 - **One** running `python`, where you check what it told you
 :::
 
+::: {.muted}
+Plus the server — but on macOS that is the app in your menu bar, and on Windows
+and Linux it is a terminal you start once and leave alone.
+:::
+
 ::: {.warn}
-That second terminal is not optional. The rule for every deliverable in this course is that you
-document one thing the model got wrong — and you cannot do that without checking.
+The checking terminal is not optional. Every deliverable in this course requires
+you to document one thing the model got wrong — and you cannot do that without
+checking.
 :::
 
 ## The last check
@@ -380,8 +442,8 @@ test of whether your setup works.
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
 | Continue answers nothing | `ollama serve` not running | Start it in its own terminal, leave it open |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
-| aider forgets your file | Ollama's 2k default context | `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
-| `connection refused` from aider | Same — no server | Start `ollama serve` first |
+| aider forgets your file | Ollama's 2k default context | Raise it on the **server** — step 6. macOS: `launchctl setenv`, not `ollama serve` |
+| `connection refused` from aider | No server on 11434 | macOS: open the Ollama app. Windows/Linux: `ollama serve` |
 | Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
 | Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
 
