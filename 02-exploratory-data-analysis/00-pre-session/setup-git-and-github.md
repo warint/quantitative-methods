@@ -331,7 +331,7 @@ evidence of who did the work.
 
 ```bash
 git log --oneline
-aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+aider --model ollama_chat/qwen2.5-coder:3b --no-auto-commits
 ```
 
 What the agent writes is attributed to **you**. Read the diff before accepting: you are answerable

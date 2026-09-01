@@ -357,7 +357,7 @@ Install **[ollama.com](https://ollama.com)**, then in the VS Codium terminal:
 
 ```bash
 ollama --version
-ollama pull qwen2.5-coder
+ollama pull qwen2.5-coder:3b
 ollama pull nomic-embed-text
 ```
 
@@ -368,7 +368,7 @@ The second model is used in Session 09 for text embeddings. Pull it now while yo
 Check it answers:
 
 ```bash
-ollama run qwen2.5-coder "In one sentence, what is a residual?"
+ollama run qwen2.5-coder:3b "In one sentence, what is a residual?"
 ```
 
 ::: {.muted}
@@ -421,7 +421,7 @@ version: 0.0.1
 models:
   - name: Local coder
     provider: ollama
-    model: qwen2.5-coder:7b     # the size you actually pulled
+    model: qwen2.5-coder:3b     # the size you actually pulled
     roles: [chat, edit, apply]
   - name: Local embedder
     provider: ollama
@@ -446,16 +446,27 @@ macOS and Windows, `sudo systemctl start ollama` on Linux.
 
 ## Which model size
 
+**Start with the 3b.** It is the one that works on a laptop without a dedicated
+graphics card, which is most laptops.
+
 ```bash
-ollama pull qwen2.5-coder:3b     # 8 GB RAM
-ollama pull qwen2.5-coder:7b     # 16 GB  ← most laptops
-ollama pull qwen2.5-coder:14b    # 32 GB+
+ollama pull qwen2.5-coder:3b
+```
+
+::: {.check}
+Only try a bigger one once you have seen `ollama ps` report **100% GPU** on the
+3b. If it already says 100% CPU, a 7b will be three times slower at the same
+task, not three times better.
+:::
+
+```bash
+ollama pull qwen2.5-coder:7b     # only if the 3b runs on the GPU
 ```
 
 ::: {.warn}
-Pull the one that matches your **RAM**, not the biggest one. A model that does
-not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change
-the name in `config.yaml` to whichever you pulled.
+Whichever you pull, put that exact name in `config.yaml` and in your `aider`
+command. A name that is not there produces a confusing error rather than a
+missing-model one.
 :::
 
 ## Step 6 — Check the context window {#step-6}
@@ -467,13 +478,13 @@ like stupidity rather than truncation.
 **Load the model, then ask the server what it gave it:**
 
 ```bash
-ollama run qwen2.5-coder:7b "hi"
+ollama run qwen2.5-coder:3b "hi"
 ollama ps
 ```
 
 ```text
 NAME                SIZE      PROCESSOR    CONTEXT    UNTIL
-qwen2.5-coder:7b    6.4 GB    100% GPU     32768      4 minutes from now
+qwen2.5-coder:3b    3.1 GB    100% GPU     32768      4 minutes from now
 ```
 
 ::: {.check}
@@ -583,7 +594,7 @@ $env:OLLAMA_API_BASE = "http://127.0.0.1:11434"        # Windows
 Then, on both:
 
 ```bash
-aider --model ollama_chat/qwen2.5-coder:7b
+aider --model ollama_chat/qwen2.5-coder:3b
 ```
 
 ::: {.warn}
@@ -619,7 +630,7 @@ asked — yours to keep, not to push.
 Start it on **one file**, not the whole repository:
 
 ```bash
-aider --model ollama_chat/qwen2.5-coder:7b --map-tokens 0 --no-auto-commits qmib.py
+aider --model ollama_chat/qwen2.5-coder:3b --map-tokens 0 --no-auto-commits qmib.py
 ```
 
 ::: {.step}
@@ -642,7 +653,7 @@ depends on one thing**, and `ollama ps` reports it:
 
 ```text
 NAME                SIZE      PROCESSOR    CONTEXT
-qwen2.5-coder:7b    6.4 GB    100% GPU     8192
+qwen2.5-coder:3b    3.1 GB    100% GPU     8192
 ```
 
 ::: {.tight}
@@ -650,14 +661,13 @@ qwen2.5-coder:7b    6.4 GB    100% GPU     8192
 |---|---|
 | **100% GPU** | a few seconds for a sentence |
 | **CPU/GPU split** | tens of seconds |
-| **100% CPU** | minutes — use `qwen2.5-coder:3b` instead |
+| **100% CPU** | minutes — you are on the smallest model already; expect to wait |
 :::
 
 ::: {.check}
-If it says 100% CPU, the model does not fit in your graphics memory. Pull the
-3b, change the name in `config.yaml` and in the aider command, and it becomes
-usable. A smaller model that answers is worth more than a larger one you will
-not wait for.
+100% CPU is normal on a laptop without a dedicated graphics card, and the 3b is
+still usable there — a sentence in tens of seconds rather than seconds. What it
+is not is a reason to try a bigger model.
 :::
 
 ::: {.warn}
@@ -685,16 +695,35 @@ checking.
 
 ## The last check
 
+::: {.warn}
+**Activate the environment first.** Your prompt must show `(.venv)` — this
+script checks what *its own interpreter* can see, so run outside the environment
+it reports every package as missing.
+:::
+
+```bash
+source .venv/bin/activate     # macOS and Linux
+```
+
+```powershell
+.venv\Scripts\activate         # Windows
+```
+
 ```bash
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
 ```
 
 ::: {.check}
-Five checks should pass. **Bring the output to class.**
+**Check 0 is the environment itself.** If it fails, nothing below it means
+anything — activate and run it again. **Bring the output to class.**
 :::
 
-If one fails, the script prints what to do. If you are still stuck, ask Qwen — which is itself a
-test of whether your setup works.
+::: {.muted}
+One check is allowed to warn rather than pass: the optional packages. Everything
+else must be `[ok]`. If something fails, the script prints what to do — and if
+you are still stuck, ask Qwen, which is itself a test of whether the setup
+works.
+:::
 
 ## Using the model well
 
@@ -744,10 +773,10 @@ gives you the vocabulary Session 02 uses. Not required, not examinable.
 | | |
 |---|---|
 | Repository on the Desktop | ☐ |
-| `.venv` created and selected | ☐ |
+| `.venv` built by **3.12** and activating | ☐ |
 | `requirements.txt` installed | ☐ |
 | Qwen answers with the wifi off | ☐ |
-| `verify_environment.py` passes | ☐ |
+| `verify_environment.py` passes **with `(.venv)` showing** | ☐ |
 | *Europe 2031* read and annotated | ☐ |
 | The Gates Notes piece read | ☐ |
 | One question ready | ☐ |
@@ -1011,7 +1040,7 @@ The setting is read when the server starts and the window is sized when the
 model loads, so both have to happen again:
 
 ```bash
-ollama run qwen2.5-coder:7b "hi"
+ollama run qwen2.5-coder:3b "hi"
 ollama ps
 ```
 
@@ -1087,11 +1116,11 @@ pipx puts the command in `~/.local/bin` — `%USERPROFILE%\.local\bin` on Window
 Call it by its full path and it runs whatever PATH says:
 
 ```powershell
-& "$HOME\.local\bin\aider.exe" --model ollama_chat/qwen2.5-coder:7b
+& "$HOME\.local\bin\aider.exe" --model ollama_chat/qwen2.5-coder:3b
 ```
 
 ```bash
-~/.local/bin/aider --model ollama_chat/qwen2.5-coder:7b
+~/.local/bin/aider --model ollama_chat/qwen2.5-coder:3b
 ```
 
 ::: {.check}

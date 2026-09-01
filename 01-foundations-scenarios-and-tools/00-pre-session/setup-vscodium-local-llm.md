@@ -35,11 +35,11 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] `pip install -r requirements.txt` completed without red text
 - [ ] `python -c "import numpy, pandas, sklearn; print('ok')"` prints `ok`
 - [ ] **Ollama** installed from <https://ollama.com/download>; `ollama --version` works
-- [ ] A model pulled: `qwen2.5-coder:3b` (8 GB RAM), `:7b` (16 GB), or `:14b` (32 GB+)
+- [ ] A model pulled: **`qwen2.5-coder:3b`** — the default, and the one that works without a dedicated graphics card. Try `:7b` only after `ollama ps` shows **100% GPU** on the 3b
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
-- [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:7b "hello"`. It still answers.
+- [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:3b "hello"`. It still answers
 - [ ] **aider** installed **outside** the course environment, via pipx — `python3 -m pip install --user pipx`, `python3 -m pipx ensurepath`, new terminal, `pipx install aider-chat` (`py` for `python3` on Windows) — never `pip install aider-chat` into `.venv`. `aider --version` answers in a new terminal
-- [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
+- [ ] `verify_environment.py` passes **with the environment activated** — the prompt shows `(.venv)`. Check 0 reports which interpreter is running; if it fails, every package check below it fails too and means nothing. Bring the output
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
 [`setup-git-and-github.md`](../../02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md).
@@ -56,7 +56,7 @@ version: 0.0.1
 models:
   - name: Local coder
     provider: ollama
-    model: qwen2.5-coder:7b
+    model: qwen2.5-coder:3b
     roles: [chat, edit, apply]
   - name: Local embedder
     provider: ollama
@@ -86,7 +86,7 @@ press `Ctrl/Cmd+L`.
 | `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
 | `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
-| Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
+| Model extremely slow | `ollama ps` shows 100% CPU — no dedicated graphics card | Normal on most laptops with the 3b. A larger model will be slower, not faster |
 | aider "forgets" the file you gave it | The context window is too small — `ollama ps` shows it | Raise it in the **Ollama app's own settings** (Settings → Context length), then quit Ollama from the tray or menu bar and restart. The app overrides `setx` and `launchctl`, so those appear to do nothing. Linux: `systemctl edit ollama.service` |
 | `address already in use`, or *une seule utilisation de chaque adresse de socket* | Ollama is already running; the installer starts it on every platform | Do not run `ollama serve`. Set the variable, then restart Ollama itself |
 | `connection refused` from aider | Nothing listening on 11434 | Start Ollama — the app on macOS and Windows, `sudo systemctl start ollama` on Linux |
