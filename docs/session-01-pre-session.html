@@ -1111,6 +1111,8 @@ Thierry Warin, PhD
 <li>Windows: “Python introuvable”</li>
 <li>Windows: checking it took</li>
 <li>Only if CONTEXT is small</li>
+<li>Check it took</li>
+<li>Linux, or no desktop app</li>
 <li>If pipx will not cooperate</li>
 <li><code>aider n&#39;est pas reconnu</code>?</li>
 <li>When it goes wrong</li>
@@ -1786,22 +1788,35 @@ Thierry Warin, PhD
 </section>
 <section id="fix-context" class="slide level2">
 <h2>Only if CONTEXT is small</h2>
-<p><code>ollama ps</code> showed 2048 or 4096 — the usual case on Windows. Raise it <strong>on the server</strong>, which is the only place the setting is read, then restart Ollama.</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">launchctl</span> setenv OLLAMA_CONTEXT_LENGTH 8192      <span class="co"># macOS, then quit from the menu bar</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb36-1"><a href></a>setx OLLAMA_CONTEXT_LENGTH <span class="dv">8192</span>                  <span class="co"># Windows, then quit from the system tray</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service               <span class="co"># Linux: Environment=&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span>
-<span id="cb37-2"><a href></a><span class="fu">sudo</span> systemctl daemon-reload <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl restart ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>ollama ps</code> showed 2048 or 4096 — the usual case on Windows.</p>
 <div class="warn">
-<p>Do not set this if <code>ollama ps</code> already showed a larger number — you would be making the window <strong>smaller</strong>. Check first, change second.</p>
+<p><strong>Change it in the Ollama app, not with an environment variable.</strong> The desktop app stores its own context length and passes it to the server every time it starts, so it overrides <code>setx</code> and <code>launchctl</code> — which is why setting those appears to do nothing at all.</p>
 </div>
-<div class="check">
-<p><strong>Then check it took.</strong> The variable is read when the server starts, so nothing changes until Ollama is restarted and the model reloaded:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;hi&quot;</span></span>
-<span id="cb38-2"><a href></a><span class="ex">ollama</span> ps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>CONTEXT should now read 8192.</p>
+<div class="step">
+<p>Open <strong>Ollama</strong> → its <strong>Settings</strong> → <strong>Context length</strong>. Set 8192 or more, then quit Ollama completely and start it again.</p>
 </div>
 <div class="muted">
-<p>Bigger is not free: the context is held in memory alongside the model, so a very large window on a small machine costs speed. 8192 is enough for aider to hold a file and its own instructions; raise it further only if you have the RAM.</p>
+<p>On Windows, quit from the <strong>system tray</strong> — closing the window leaves the server running, and a server that never stopped never re-reads the setting.</p>
+</div>
+</section>
+<section id="fix-context-verify" class="slide level2">
+<h2>Check it took</h2>
+<p>The setting is read when the server starts and the window is sized when the model loads, so both have to happen again:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">ollama</span> run qwen2.5-coder:7b <span class="st">&quot;hi&quot;</span></span>
+<span id="cb35-2"><a href></a><span class="ex">ollama</span> ps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>CONTEXT should now read <strong>8192</strong>. If it still says 4096, Ollama did not fully restart.</p>
+</div>
+</section>
+<section id="fix-context-linux" class="slide level2">
+<h2>Linux, or no desktop app</h2>
+<p>There the server is a systemd service and the environment variable is the only control:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href></a><span class="fu">sudo</span> systemctl edit ollama.service</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource ini number-lines code-with-copy"><code class="sourceCode ini"><span id="cb37-1"><a href></a><span class="kw">[Service]</span></span>
+<span id="cb37-2"><a href></a><span class="dt">Environment</span><span class="ot">=</span><span class="st">&quot;OLLAMA_CONTEXT_LENGTH=8192&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="fu">sudo</span> systemctl daemon-reload <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl restart ollama</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p>Bigger is not free: the context is held in memory beside the model, so a very large window on a small machine costs speed. 8192 is enough for aider to hold a file and its own instructions.</p>
 </div>
 <div class="muted">
 <p><a href="#/step-6">← back to Step 6 — Check the context window</a></p>
@@ -1925,8 +1940,8 @@ Thierry Warin, PhD
 </tr>
 <tr class="odd">
 <td>aider forgets your file</td>
-<td>Ollama’s 2k default context</td>
-<td>Raise it on the server and restart Ollama — step 6</td>
+<td>The context window is too small</td>
+<td><code>ollama ps</code> to read it; raise it in the <strong>Ollama app’s settings</strong>, not with an environment variable</td>
 </tr>
 <tr class="even">
 <td><code>address already in use</code> / <em>une seule utilisation … socket</em></td>

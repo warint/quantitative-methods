@@ -63,9 +63,11 @@ format:
 35. Windows: "Python introuvable"
 36. Windows: checking it took
 37. Only if CONTEXT is small
-38. If pipx will not cooperate
-39. `aider n'est pas reconnu`?
-40. When it goes wrong
+38. Check it took
+39. Linux, or no desktop app
+40. If pipx will not cooperate
+41. `aider n'est pas reconnu`?
+42. When it goes wrong
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -942,43 +944,62 @@ installed version and picks the newest. Inside an activated `.venv`, plain
 
 ## Only if CONTEXT is small {#fix-context}
 
-`ollama ps` showed 2048 or 4096 — the usual case on Windows. Raise it **on the
-server**, which is the only place the setting is read, then restart Ollama.
-
-```bash
-launchctl setenv OLLAMA_CONTEXT_LENGTH 8192      # macOS, then quit from the menu bar
-```
-
-```powershell
-setx OLLAMA_CONTEXT_LENGTH 8192                  # Windows, then quit from the system tray
-```
-
-```bash
-sudo systemctl edit ollama.service               # Linux: Environment="OLLAMA_CONTEXT_LENGTH=8192"
-sudo systemctl daemon-reload && sudo systemctl restart ollama
-```
+`ollama ps` showed 2048 or 4096 — the usual case on Windows.
 
 ::: {.warn}
-Do not set this if `ollama ps` already showed a larger number — you would be
-making the window **smaller**. Check first, change second.
+**Change it in the Ollama app, not with an environment variable.** The desktop
+app stores its own context length and passes it to the server every time it
+starts, so it overrides `setx` and `launchctl` — which is why setting those
+appears to do nothing at all.
 :::
 
-::: {.check}
-**Then check it took.** The variable is read when the server starts, so nothing
-changes until Ollama is restarted and the model reloaded:
+::: {.step}
+Open **Ollama** → its **Settings** → **Context length**. Set 8192 or more, then
+quit Ollama completely and start it again.
+:::
+
+::: {.muted}
+On Windows, quit from the **system tray** — closing the window leaves the server
+running, and a server that never stopped never re-reads the setting.
+:::
+
+## Check it took {#fix-context-verify}
+
+The setting is read when the server starts and the window is sized when the
+model loads, so both have to happen again:
 
 ```bash
 ollama run qwen2.5-coder:7b "hi"
 ollama ps
 ```
 
-CONTEXT should now read 8192.
+::: {.check}
+CONTEXT should now read **8192**. If it still says 4096, Ollama did not fully
+restart.
 :::
 
+## Linux, or no desktop app {#fix-context-linux}
+
+There the server is a systemd service and the environment variable is the only
+control:
+
+```bash
+sudo systemctl edit ollama.service
+```
+
+```ini
+[Service]
+Environment="OLLAMA_CONTEXT_LENGTH=8192"
+```
+
+```bash
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
 ::: {.muted}
-Bigger is not free: the context is held in memory alongside the model, so a very
+Bigger is not free: the context is held in memory beside the model, so a very
 large window on a small machine costs speed. 8192 is enough for aider to hold a
-file and its own instructions; raise it further only if you have the RAM.
+file and its own instructions.
 :::
 
 ::: {.muted}
@@ -1060,7 +1081,7 @@ PATH.
 | `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
 | Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
-| aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
+| aider forgets your file | The context window is too small | `ollama ps` to read it; raise it in the **Ollama app's settings**, not with an environment variable |
 | `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
 | `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
 | Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |

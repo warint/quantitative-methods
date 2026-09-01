@@ -87,7 +87,7 @@ press `Ctrl/Cmd+L`.
 | `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
 | Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
-| aider "forgets" the file you gave it | Ollama's 2k default context | Set `OLLAMA_CONTEXT_LENGTH=8192` for the **system** and restart Ollama — `launchctl setenv` on macOS, `setx` on Windows, `systemctl edit ollama.service` on Linux |
+| aider "forgets" the file you gave it | The context window is too small — `ollama ps` shows it | Raise it in the **Ollama app's own settings** (Settings → Context length), then quit Ollama from the tray or menu bar and restart. The app overrides `setx` and `launchctl`, so those appear to do nothing. Linux: `systemctl edit ollama.service` |
 | `address already in use`, or *une seule utilisation de chaque adresse de socket* | Ollama is already running; the installer starts it on every platform | Do not run `ollama serve`. Set the variable, then restart Ollama itself |
 | `connection refused` from aider | Nothing listening on 11434 | Start Ollama — the app on macOS and Windows, `sudo systemctl start ollama` on Linux |
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
