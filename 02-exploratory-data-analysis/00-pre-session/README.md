@@ -3,7 +3,7 @@
 > **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-02-pre-session.html)** ·
 > source: [`MATH60033A-S02-Pre-Session.qmd`](MATH60033A-S02-Pre-Session.qmd)
 
-> Complete **all four steps** before class. Expect 90–120 minutes, plus 45 for the git setup below.
+> Complete **all three steps** before class. Expect 90–120 minutes, plus 45 for the git setup below.
 
 | | Before class | Used in the practice for |
 |---|---|---|
@@ -13,19 +13,39 @@
 
 ---
 
-## ⚠️ Session 2 only — set up git and your group repository
+## ⚠️ Session 2 only — set up git and clone the course repository
 
-Before the four steps, work through
+Before the three steps below, work through
 **[`setup-git-and-github.md`](setup-git-and-github.md)**. Budget 45 minutes.
 
 From this session onward you are assessed as a group, and your commit history is one of the four
 records used to check that all three members did the work. That record only exists if git knows
 who you are.
 
-You must arrive with a private group repository that your teammates **and the instructor** can
-see, and with at least one commit pushed from your own machine.
+**Session 01 gave you a ZIP. A ZIP cannot push, so from here you work in a clone:**
 
-Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
+```bash
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+git clone https://github.com/warint/quantitative-methods.git
+cd quantitative-methods
+
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+python -c "import qmib; print(qmib.load('core').shape)"   # expect (450, 11)
+```
+
+Then delete the unzipped Session 01 folder, so there is only one copy of the course on your
+machine.
+
+There is **no separate group repository**. Everyone works in this one, and each group has a
+branch, `group-XX`. You must arrive having cloned it and pushed at least one commit to your
+group's branch from your own machine — which needs you to be added as a **collaborator** first,
+so send your GitHub username to the instructor if you have not.
+
+Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd) — the same material,
+walked through.
 
 ---
 

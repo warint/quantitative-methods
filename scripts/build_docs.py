@@ -95,6 +95,35 @@ STYLE = """
 """
 
 
+# Every deck links to its neighbours the way a reader browsing the repository
+# would want — `../01-lecture/README.md`, `setup-git-and-github.md`. Those are
+# correct on GitHub and wrong the moment the page is copied into docs/, which is
+# one directory with no session folders under it. Rewriting them on the way out
+# means the source keeps the relative links that work where it lives, and the
+# published page gets absolute ones that work where it lands.
+MD_LINK = re.compile(r'href="((?!https?:|#|mailto:|data:)[^"]{1,200}\.md)"')
+
+
+def publish_deck(src, dest):
+    """Copy a rendered deck into docs/, repointing its relative .md links."""
+    src = Path(src)
+    here = src.parent.relative_to(ROOT)
+    text = src.read_text(encoding="utf-8")
+
+    def fix(m):
+        target = os.path.normpath(os.path.join(here, m.group(1)))
+        if target.startswith(".."):        # escapes the repository: leave it
+            return m.group(0)
+        if not (ROOT / target).exists():
+            print(f"    {dest.name}: link to a file that does not exist — {m.group(1)}")
+        return f'href="{REPO_URL}/blob/main/{target}"'
+
+    fixed, n = MD_LINK.subn(fix, text)
+    dest.write_text(fixed, encoding="utf-8")
+    shutil.copystat(src, dest)
+    return n
+
+
 def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / ".nojekyll").touch()   # skip Jekyll: nothing here needs processing
@@ -126,7 +155,7 @@ def main():
         if kind is None:
             continue
         dest = DOCS / f"session-{num}-{kind}.html"
-        shutil.copy2(src, dest)
+        publish_deck(src, dest)
         if kind == "lecture":
             title, blurb = SESSIONS[num]
             rows.append((num, title, blurb, dest.name, dest.stat().st_size))

@@ -33,10 +33,16 @@ format:
 5. Self-check
 6. What the session will ask of you
 7. Running the code
-8. Install git — you may already have it
-9. Tell git who you are
-10. Already have your three? Do a trial run
-11. Then each of you pushes, one at a time
+8. How submission works — read this first
+9. Step 1 · Install git
+10. Step 2 · Tell git who you are
+11. Step 3 · A GitHub account
+12. Step 4 · Clone the repository
+13. Step 4b · Rebuild the environment inside the clone
+14. Step 5 · Authenticating your first push
+15. Step 6 · Your group branch
+16. Step 7 · The round trip
+17. When it goes wrong
 
 ## What session 2 is for {.scrollable}
 ::::: columns
@@ -194,31 +200,55 @@ Session 02: [`README.md`](../README.md) ·
 the lecture: [`01-lecture/`](../01-lecture/README.md)
 :::
 
-# Session 02 only: your group repository {background-color="#E3120B" style="color:#F7F4ED"}
+# Session 02 only: git, step by step {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
-### From this session on, your commit history is part of the record
+### Seven steps, about 45 minutes. Everything you need is on these slides.
 :::
 
-## Install git — you may already have it
+## How submission works — read this first
+
+There is **one repository for the whole course**. You do not create one.
+
+```
+github.com/warint/quantitative-methods
+│
+├── main          ← the instructor's branch. You never push to it.
+├── group-01      ← group 01 works here
+└── group-XX      ← your group works here
+```
+
+Your group has **one branch**, `group-XX`, and your work goes in
+
+```
+NN-session-name/02-practice/submissions/group-XX/
+```
+
+::: {.warn}
+**Why one repository and not one per group.** `scripts/assess.py contributions`
+reads your commit history from *this* repository. Work pushed anywhere else is
+invisible to it — and invisible work counts as work you did not do.
+:::
+
+## Step 1 · Install git
 
 ```bash
 git --version
 ```
 
 ::: {.check}
-**macOS.** Git ships with Apple's Command Line Tools, so most Macs already have it. If the command
-is not found, macOS offers to install them — accept — or run `xcode-select --install`.
-**You do not need Homebrew.**
+**macOS.** Git ships with Apple's Command Line Tools, so most Macs already have
+it. If the command is not found, macOS offers to install them — accept — or run
+`xcode-select --install`. **You do not need Homebrew.**
 :::
 
 ::: {.tight}
-- **Windows** — [git-scm.com/downloads](https://git-scm.com/downloads), accept the defaults, then
-  restart VS Codium
+- **Windows** — [git-scm.com/downloads](https://git-scm.com/downloads), accept
+  the defaults, then restart VS Codium
 - **Linux** — `sudo apt install git`
 :::
 
-## Tell git who you are
+## Step 2 · Tell git who you are
 
 ```bash
 git config --global user.name  "Your Full Name"
@@ -226,48 +256,138 @@ git config --global user.email "you@example.com"
 ```
 
 ::: {.warn}
-Use your **real** name and the email on your GitHub account. The commit log is one of the records
-used to check that all three of you did the work — and it only identifies you if you set this.
+Use your **real** name and the email on your GitHub account. The commit log is
+one of the four records used to check that all three of you did the work — and
+it only identifies you if you set this. Do it before your first commit; it does
+not apply retroactively.
 :::
 
-## Already have your three? Do a trial run
+## Step 3 · A GitHub account
 
-Groups are confirmed in Session 04 — but if you have already agreed to work together, rehearse the
-whole cycle now. Ten minutes, and it removes the one thing that reliably eats practice time.
+::: {.tight}
+1. [github.com/signup](https://github.com/signup) — free
+2. Choose a username you would put on a CV
+3. Verify the email GitHub sends you
+4. Enable **two-factor authentication** when prompted; GitHub requires it
+:::
 
-**One person, once:**
+::: {.warn}
+**Then send your GitHub username to the instructor.** You cannot push until you
+have been added as a collaborator, and that is done by hand. Cloning works
+without it — pushing does not.
+:::
+
+## Step 4 · Clone the repository
+
+Session 01 gave you a ZIP. A ZIP cannot push, so from here you work in a clone.
 
 ```bash
-git checkout -b group-07          # your number, not 07
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+git clone https://github.com/warint/quantitative-methods.git
+cd quantitative-methods
+```
+
+Then `File → Open Folder…` in VS Codium and choose the cloned folder.
+
+::: {.warn}
+**Delete the unzipped Session 01 folder afterwards.** Two copies of the course on
+one Desktop is the most reliable way to spend an hour editing the file you are
+not running.
+:::
+
+## Step 4b · Rebuild the environment inside the clone
+
+`.venv` is not in the repository — it is built per machine, and the one in your
+old ZIP folder belongs to that folder.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+The whole setup, checked in one line:
+
+```bash
+python -c "import qmib; print(qmib.load('core').shape)"
+```
+
+::: {.check}
+`(450, 11)` means you are ready. Anything else — bring the error to class.
+:::
+
+## Step 5 · Authenticating your first push
+
+GitHub rejects your account password and asks for a token instead.
+
+::: {.tight}
+1. github.com → avatar → **Settings**
+2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+3. **Generate new token**, tick the **`repo`** scope, set an expiry
+4. Copy it — **it is shown once** — and paste it when git asks for your *password*
+:::
+
+::: {.muted}
+Paste it once and the system keychain remembers it. If you lose it, generate
+another; tokens are disposable.
+:::
+
+## Step 6 · Your group branch
+
+**One person per group** creates it. The others check it out.
+
+```bash
+# the first person, once — group 07 shown; use your own number
+git checkout -b group-07
 git push -u origin group-07
 ```
 
-**The other two:**
-
 ```bash
+# everyone else, afterwards
 git fetch origin
 git checkout group-07
 ```
 
-## Then each of you pushes, one at a time
+::: {.warn}
+**Never push while on `main`.** It is protected, so the push is refused rather
+than doing damage — but check where you are before you commit:
+`git branch --show-current`
+:::
+
+## Step 7 · The round trip
 
 ```bash
-git pull                          # always pull before you start
+git pull                         # always pull before you start
 
-echo "- Ana tested the push" >> \
+mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-07
+echo "# Group 07 — session 02" > \
   02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
-git commit -m "Ana: trial push"
+git add 02-exploratory-data-analysis/02-practice/submissions/group-07/
+git commit -m "Add group 07 notes for session 02"
 git push
 ```
 
+Refresh the repository page, switch to your branch, and the file is there.
+
 ::: {.check}
-When all three are done, `git log --oneline -5` should show **three commits with three different
-author names**. That is exactly what the participation record looks like.
+**Each of the three of you does this at least once, from your own machine.** Not
+one per group. `git log --oneline -5` should show three commits with three
+different author names — that is exactly what the participation record is.
 :::
 
+## When it goes wrong
+
+| What you see | What it means | What to do |
+|---|---|---|
+| `rejected — non-fast-forward` | someone pushed in between | `git pull`, then push again |
+| `Authentication failed` | the password is not the token | Step 5 again, generate a fresh one |
+| `Permission denied` | not yet a collaborator | send your username to the instructor |
+| `detached HEAD` | you checked out a commit, not a branch | `git checkout group-07` |
+| a conflict marker `<<<<<<<` | two people edited the same lines | keep both sides, delete the markers, commit |
+
 ::: {.muted}
-A rejected push almost always means someone pushed in between — `git pull` first. That is normal.
-Full guide: [`setup-git-and-github.md`](setup-git-and-github.md)
+A rejected push is normal and means the system is working. The full written
+guide, with more on conflicts and working together, is
+[`setup-git-and-github.md`](setup-git-and-github.md).
 :::
