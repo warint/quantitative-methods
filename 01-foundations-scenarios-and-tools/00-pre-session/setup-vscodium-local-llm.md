@@ -30,7 +30,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
 - [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
 - [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked
-- [ ] `python3 --version` prints 3.11.x or 3.12.x
+- [ ] `python3 --version` prints 3.11.x or 3.12.x — **on Windows the command is `py --version`**
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
 - [ ] `pip install -r requirements.txt` completed without red text
 - [ ] `python -c "import numpy, pandas, sklearn; print('ok')"` prints `ok`
@@ -79,7 +79,8 @@ press `Ctrl/Cmd+L`.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `ollama: command not found` | Not on PATH yet | Open a new terminal; on Windows restart VS Codium |
-| `python3: command not found` (Windows) | PATH box not ticked | Try `python`; if still missing, re-run the installer |
+| `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
+| `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
 | Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
 | aider "forgets" the file you gave it | Ollama's 2k default context | Start it as `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |

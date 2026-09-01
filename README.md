@@ -200,7 +200,7 @@ cd ~/Desktop
 git clone https://github.com/warint/quantitative-methods.git quantitative-methods
 cd quantitative-methods
 
-python3 -m venv .venv
+python3 -m venv .venv          # Windows: py -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -243,7 +243,7 @@ In-class practice work and the one-slide group result go in the session folder, 
 branch. They must be finished before the group presents:
 
 ```
-NN-session-name/groups/A2026/group-XX/session-NN/
+groups/A2026/group-XX/session-NN/
 ```
 
 **Why one repository.** `python scripts/assess.py contributions` reads the git history *of this

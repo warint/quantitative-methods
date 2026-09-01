@@ -25,7 +25,7 @@ git checkout group-07
 ```
 
 not `git checkout group-XX`. Same for folder paths:
-`groups/A2026/group-XX/group-07/`.
+`groups/A2026/group-07/`.
 
 If you do not know your group number yet, you get it in Session 01. Do not guess.
 
@@ -46,11 +46,21 @@ github.com/warint/quantitative-methods        ← the course repository
 ```
 
 **Your group has one branch, named `group-XX`.** Everything your group produces is committed on
-that branch and pushed to it. Your practice deliverables go in the session folder:
+that branch and pushed to it, into your group's own directory:
 
 ```
-NN-session-name/groups/A2026/group-XX/session-NN/
+groups/
+└── A2026/                    ← the cohort: autumn 2026
+    ├── group-01/
+    └── group-XX/             ← yours
+        ├── session-02/       ← one folder per practice
+        ├── session-03/
+        └── ...
 ```
+
+Your whole term is one directory, which is how you find in week ten what you wrote in week two.
+The cohort folder above it is what lets next year's students start clean rather than on top of
+you — and it is why the path is `A2026` and not just `groups/`.
 
 **Why one repository and not one per group.** Your commit history is one of the four records used
 to check that all three of you did the work, and `scripts/assess.py contributions` reads it from
@@ -141,8 +151,8 @@ On Windows PowerShell, use `Set-Location "$HOME\Desktop"` for the first line. Th
 Rebuild your environment inside the clone:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+python3 -m venv .venv              # Windows: py -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 

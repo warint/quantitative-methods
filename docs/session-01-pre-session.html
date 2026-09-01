@@ -1228,16 +1228,42 @@ Thierry Warin, PhD
 </section>
 <section id="step-4-python-and-the-environment" class="slide level2">
 <h2>Step 4 — Python and the environment</h2>
+<p>The command is <strong>not the same on the two platforms</strong>. Use the one for yours.</p>
+<p><strong>macOS and Linux</strong></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href></a><span class="ex">python3</span> <span class="at">--version</span>          <span class="co"># 3.11 or newer</span></span>
-<span id="cb2-2"><a href></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Activate it — macOS and Linux:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="bu">source</span> .venv/bin/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Windows:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="ex">.venv\Scripts\activate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Then install everything the course needs:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span>
+<span id="cb2-3"><a href></a><span class="bu">source</span> .venv/bin/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows</strong> — <code>py</code>, the launcher that ships with Python. There is no <code>python3</code> on Windows.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb3-1"><a href></a>py <span class="op">--</span>version               <span class="co"># 3.11 or newer</span></span>
+<span id="cb3-2"><a href></a>py <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb3-3"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, on both:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>Your prompt should now begin with <code>(.venv)</code>. If it does not, the activation did not take.</p>
+<p>Your prompt should now begin with <code>(.venv)</code>. If it does not, the activation did not take — and nothing installed afterwards will be visible to the course.</p>
+</div>
+</section>
+<section id="windows-python-introuvable" class="slide level2">
+<h2>Windows: “Python introuvable”</h2>
+<p>If <code>py</code> or <code>python</code> prints <strong>Python introuvable / Python was not found</strong> and offers you the Microsoft Store, do <strong>not</strong> accept. There are two causes and the first is the common one.</p>
+<div class="step">
+<p><strong>1 · The Store alias is shadowing Python.</strong> Windows ships a stub named <code>python.exe</code> that does nothing but open the Store.</p>
+<p>Start → search <strong>Manage app execution aliases</strong> → turn <strong>off</strong> both <strong>python.exe</strong> and <strong>python3.exe</strong>. Close the terminal and open a new one.</p>
+</div>
+<div class="step">
+<p><strong>2 · Python is not installed, or not on PATH.</strong> Install from <a href="https://www.python.org/downloads/">python.org/downloads</a> — not the Store — and on the first screen tick <strong>Add python.exe to PATH</strong> before clicking Install. That checkbox is off by default and is the single most common setup failure.</p>
+</div>
+</section>
+<section id="windows-checking-it-took" class="slide level2">
+<h2>Windows: checking it took</h2>
+<p>Open a <strong>new</strong> terminal — PATH changes do not reach a terminal that is already running.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb5-1"><a href></a>py <span class="op">--</span>version</span>
+<span id="cb5-2"><a href></a><span class="fu">where</span> py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>A version number and a path under <code>Program Files</code> or <code>AppData</code> means you are fine. A path ending in <code>WindowsApps</code> means the Store alias is still in the way: go back and turn it off.</p>
+</div>
+<div class="muted">
+<p><code>py</code> is the right command on Windows even once PATH is set — it finds every installed version and picks the newest. Inside an activated <code>.venv</code>, plain <code>python</code> works and refers to the environment’s own interpreter.</p>
 </div>
 </section>
 <section id="step-5-ollama-and-qwen" class="slide level2">

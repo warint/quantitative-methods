@@ -34,8 +34,8 @@ mv quantitative-methods quantitative-methods-session01
 git clone https://github.com/warint/quantitative-methods.git
 cd quantitative-methods
 
-python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+python3 -m venv .venv            # Windows: py -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 python -c "import qmib; print(qmib.load('core').shape)"   # expect (450, 11)

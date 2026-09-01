@@ -173,31 +173,77 @@ In Session 02 you will do this properly, with git and your own group branch.
 
 ## Step 4 — Python and the environment
 
+The command is **not the same on the two platforms**. Use the one for yours.
+
+**macOS and Linux**
+
 ```bash
 python3 --version          # 3.11 or newer
 python3 -m venv .venv
-```
-
-Activate it — macOS and Linux:
-
-```bash
 source .venv/bin/activate
 ```
 
-Windows:
+**Windows** — `py`, the launcher that ships with Python. There is no `python3`
+on Windows.
 
-```bash
+```powershell
+py --version               # 3.11 or newer
+py -m venv .venv
 .venv\Scripts\activate
 ```
 
-Then install everything the course needs:
+Then, on both:
 
 ```bash
 pip install -r requirements.txt
 ```
 
 ::: {.check}
-Your prompt should now begin with `(.venv)`. If it does not, the activation did not take.
+Your prompt should now begin with `(.venv)`. If it does not, the activation did
+not take — and nothing installed afterwards will be visible to the course.
+:::
+
+## Windows: "Python introuvable"
+
+If `py` or `python` prints **Python introuvable / Python was not found** and
+offers you the Microsoft Store, do **not** accept. There are two causes and the
+first is the common one.
+
+::: {.step}
+**1 · The Store alias is shadowing Python.** Windows ships a stub named
+`python.exe` that does nothing but open the Store.
+
+Start → search **Manage app execution aliases** → turn **off** both
+**python.exe** and **python3.exe**. Close the terminal and open a new one.
+:::
+
+::: {.step}
+**2 · Python is not installed, or not on PATH.** Install from
+[python.org/downloads](https://www.python.org/downloads/) — not the Store — and
+on the first screen tick **Add python.exe to PATH** before clicking Install.
+That checkbox is off by default and is the single most common setup failure.
+:::
+
+## Windows: checking it took
+
+Open a **new** terminal — PATH changes do not reach a terminal that is already
+running.
+
+```powershell
+py --version
+where py
+```
+
+::: {.check}
+A version number and a path under `Program Files` or `AppData` means you are
+fine. A path ending in `WindowsApps` means the Store alias is still in the way:
+go back and turn it off.
+:::
+
+::: {.muted}
+`py` is the right command on Windows even once PATH is set — it finds every
+installed version and picks the newest. Inside an activated `.venv`, plain
+`python` works and refers to the environment's own interpreter.
 :::
 
 ## Step 5 — Ollama and Qwen
