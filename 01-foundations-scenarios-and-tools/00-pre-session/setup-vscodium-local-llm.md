@@ -29,8 +29,8 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] **VS Codium** installed from <https://vscodium.com> and it opens
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
 - [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
-- [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked. **Not 3.13 or 3.14:** the course's own packages are fine on those, but `aider-chat` requires Python `<3.13` and will not resolve
-- [ ] `python3.12 --version` prints 3.12.x — **on Windows, `py -3.12 --version`; `py --list` shows what you have.** Build the environment with the version named (`py -3.12 -m venv .venv`), because `py` alone picks the newest installed Python
+- [ ] **Python 3.12 specifically** — not "the latest" — from <https://www.python.org/downloads/release/python-31214/>; on Windows tick *"Add python.exe to PATH"*. `aider-chat` requires Python `<3.13`, so 3.13 and 3.14 cannot run this course's toolchain
+- [ ] `python3.12 --version` prints 3.12.x — on Windows `py -3.12 --version`, and `py --list` shows every Python you have. Build the environment with the version named (`py -3.12 -m venv .venv`, `python3.12 -m venv .venv`), because a bare `py` or `python3` picks the newest one installed
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
 - [ ] `pip install -r requirements.txt` completed without red text
 - [ ] `python -c "import numpy, pandas, sklearn; print('ok')"` prints `ok`

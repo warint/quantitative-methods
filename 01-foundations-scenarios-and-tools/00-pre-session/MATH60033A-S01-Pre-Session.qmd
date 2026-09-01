@@ -33,30 +33,31 @@ format:
 5. Step 1 — VS Codium
 6. Step 2 — Extensions
 7. Step 3 — The course materials
-8. Step 4 — Python and the environment
-9. Already installed the wrong version?
-10. Windows: "Python introuvable"
-11. Windows: checking it took
-12. Step 5 — Ollama and Qwen
-13. Step 5b — Open Continue's config file
-14. Step 5c — What to put in it
-15. Which model size
-16. Step 6 — Give the model a real context window
-17. Step 6 — macOS
-18. Step 6 — Windows
-19. Step 6 — Linux
-20. If you see a socket error
-21. Step 6b — Install pipx first
-22. Step 6b — Then install aider
-23. Step 6c — Pointing it at your model
-24. `aider n'est pas reconnu`?
-25. Step 6d — Ask it something real
-26. Two terminals is the working pattern
-27. The last check
-28. When it goes wrong
-29. Using the model well
-30. Also before class
-31. Ready?
+8. Step 4 — Python 3.12, and only 3.12
+9. Step 4 — Build the environment with it
+10. Already installed the wrong version?
+11. Windows: "Python introuvable"
+12. Windows: checking it took
+13. Step 5 — Ollama and Qwen
+14. Step 5b — Open Continue's config file
+15. Step 5c — What to put in it
+16. Which model size
+17. Step 6 — Give the model a real context window
+18. Step 6 — macOS
+19. Step 6 — Windows
+20. Step 6 — Linux
+21. If you see a socket error
+22. Step 6b — Install pipx first
+23. Step 6b — Then install aider
+24. Step 6c — Pointing it at your model
+25. `aider n'est pas reconnu`?
+26. Step 6d — Ask it something real
+27. Two terminals is the working pattern
+28. The last check
+29. When it goes wrong
+30. Using the model well
+31. Also before class
+32. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -225,14 +226,45 @@ these slides will work.
 In Session 02 you will do this properly, with git and your own group branch.
 :::
 
-## Step 4 — Python and the environment
+## Step 4 — Python 3.12, and only 3.12
 
-The command is **not the same on the two platforms**. Use the one for yours.
+::: {.warn}
+**Install Python 3.12 specifically.** Not "the latest", not whatever the
+download page offers first — **3.12**.
+[python.org/downloads/release/python-31214](https://www.python.org/downloads/release/python-31214/)
+:::
 
-**macOS and Linux**
+::: {.tight}
+- **Windows** — scroll to *Files*, take **Windows installer (64-bit)**, and tick
+  **Add python.exe to PATH** on the first screen
+- **macOS** — *macOS 64-bit universal2 installer*
+- **Linux** — `sudo apt install python3.12 python3.12-venv`, or your
+  distribution's equivalent
+:::
+
+::: {.muted}
+Why not the newest: `aider-chat` declares `requires-python <3.13`, so on 3.13 or
+3.14 it cannot be installed at all. Everything else in the course is fine on
+3.14 — but one interpreter is simpler than two, and 3.12 is supported until
+October 2028, well past this course.
+:::
+
+## Step 4 — Build the environment with it
+
+The command is **not the same on the three platforms**. Use the one for yours.
+
+**macOS**
 
 ```bash
-python3.12 --version       # name the version explicitly
+python3.12 --version       # name the version — plain `python3` may be newer
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+**Linux**
+
+```bash
+python3.12 --version
 python3.12 -m venv .venv
 source .venv/bin/activate
 ```
@@ -264,18 +296,10 @@ Your prompt should now begin with `(.venv)`. If it does not, the activation did
 not take — and nothing installed afterwards will be visible to the course.
 :::
 
-::: {.warn}
-**3.12, not 3.13 or 3.14 — and the reason is aider, not the course.** Everything
-in `requirements.txt` installs happily on 3.14. But `aider-chat` declares
-`requires-python <3.13`, so on anything newer pip cannot resolve it and reports a
-wall of conflicts. One interpreter for everything is simpler than two, so the
-course pins the one aider can use.
-:::
-
-::: {.muted}
-Already on 3.14 and happy there? Keep it for the course and give aider its own:
-`pipx install --python python3.12 aider-chat`. You still need 3.12 installed —
-you just do not have to build `.venv` with it.
+::: {.check}
+Confirm it: `python --version` inside the activated environment must say
+**3.12.x**. Anything else and the environment was built by the wrong
+interpreter.
 :::
 
 ## Already installed the wrong version?

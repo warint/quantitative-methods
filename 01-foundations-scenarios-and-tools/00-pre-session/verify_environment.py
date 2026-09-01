@@ -29,14 +29,27 @@ def report(check, status, detail=""):
 
 
 # ---------------------------------------------------------------- 1. Python
+# The course runs on 3.12 and only 3.12. Everything in requirements.txt is happy
+# on 3.14 — but aider-chat declares requires-python <3.13, so on anything newer
+# it cannot be installed at all. Rather than run two interpreters, the course
+# uses the newest one aider accepts. 3.12 is supported until October 2028.
+WANT = (3, 12)
+
+
 def check_python():
     major, minor = sys.version_info[:2]
     detail = f"{platform.python_implementation()} {platform.python_version()} on {platform.platform()}"
-    if (major, minor) >= (3, 10):
-        report("1. Python 3.10+", PASS, detail)
+    if (major, minor) == WANT:
+        report("1. Python 3.12", PASS, detail)
+    elif (major, minor) > WANT:
+        report("1. Python 3.12", FAIL, detail +
+               f"\nThis is newer than the course uses. aider requires Python < 3.13 and"
+               f"\nwill not install here. Install 3.12, then rebuild the environment"
+               f"\nnaming it:  py -3.12 -m venv .venv   (Windows)"
+               f"\n             python3.12 -m venv .venv  (macOS and Linux)")
     else:
-        report("1. Python 3.10+", FAIL,
-               detail + "\nInstall Python 3.11 or 3.12 and recreate your virtual environment.")
+        report("1. Python 3.12", FAIL, detail +
+               "\nThis is older than the course uses. Install 3.12 and rebuild .venv.")
 
 
 # ---------------------------------------------------------------- 2. Packages
