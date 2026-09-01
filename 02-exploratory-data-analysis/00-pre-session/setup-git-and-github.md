@@ -5,8 +5,6 @@
 > Follows on from the [Session 01 setup guide](../../01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
 > You should already have VS Codium, a Python environment, and Ollama serving a local model.
 
-Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
-
 ---
 
 ## ⚠️ `XX` is a placeholder — replace it

@@ -24,8 +24,13 @@ who you are.
 
 **Session 01 gave you a ZIP. A ZIP cannot push, so from here you work in a clone:**
 
+Session 01 unzipped to `Desktop/quantitative-methods`, and the clone wants that same path — so
+move the old folder aside first, or git refuses to start.
+
 ```bash
 cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+mv quantitative-methods quantitative-methods-session01
+
 git clone https://github.com/warint/quantitative-methods.git
 cd quantitative-methods
 
@@ -36,16 +41,13 @@ pip install -r requirements.txt
 python -c "import qmib; print(qmib.load('core').shape)"   # expect (450, 11)
 ```
 
-Then delete the unzipped Session 01 folder, so there is only one copy of the course on your
-machine.
+Copy anything you wrote during Session 01 out of `quantitative-methods-session01`, then delete it,
+so there is only one copy of the course on your machine.
 
 There is **no separate group repository**. Everyone works in this one, and each group has a
 branch, `group-XX`. You must arrive having cloned it and pushed at least one commit to your
 group's branch from your own machine — which needs you to be added as a **collaborator** first,
 so send your GitHub username to the instructor if you have not.
-
-Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd) — the same material,
-walked through.
 
 ---
 
