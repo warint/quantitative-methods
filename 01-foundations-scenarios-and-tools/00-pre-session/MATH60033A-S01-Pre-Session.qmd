@@ -54,17 +54,19 @@ format:
 26. Step 6 — Windows
 27. Step 6 — Linux
 28. If you see a socket error
-29. Step 6b — Install pipx first
-30. Step 6b — Then install aider
-31. Step 6c — Pointing it at your model
-32. `aider n'est pas reconnu`?
-33. Step 6d — Ask it something real
-34. Two terminals is the working pattern
-35. The last check
-36. When it goes wrong
-37. Using the model well
-38. Also before class
-39. Ready?
+29. Step 6b — aider needs its own environment
+30. Step 6b — Install pipx
+31. Step 6b — Install aider with it
+32. If pipx will not cooperate
+33. Step 6c — Pointing it at your model
+34. `aider n'est pas reconnu`?
+35. Step 6d — Ask it something real
+36. Two terminals is the working pattern
+37. The last check
+38. When it goes wrong
+39. Using the model well
+40. Also before class
+41. Ready?
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -692,7 +694,7 @@ Check what is answering: `curl http://127.0.0.1:11434/api/version` — on Window
 `curl.exe`.
 :::
 
-## Step 6b — Install pipx first
+## Step 6b — aider needs its own environment
 
 ::: {.warn}
 **Do not `pip install aider-chat` into `.venv`.** aider pins its own versions of
@@ -701,47 +703,78 @@ the resolver errors come from. When it appears to succeed it can quietly
 downgrade something the course needs.
 :::
 
-`pipx` installs a command-line tool into an environment of its own and puts the
-command on your PATH. Install it **with the course environment deactivated**, or
-from a terminal where you never activated it.
+::: {.check}
+Do this in a terminal where **`(.venv)` is not showing**. `--user` is refused
+inside a virtual environment, and that refusal is what leaves you with *no module
+named pipx* a moment later.
+:::
 
-**macOS and Linux**
+## Step 6b — Install pipx
+
+**Name the version on both lines.** Installing with one interpreter and calling
+with another is the whole of the *no module named pipx* problem.
 
 ```bash
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
+python3.12 -m pip install --user pipx      # macOS
+python3.12 -m pipx ensurepath
 ```
 
-**Windows PowerShell**
+```bash
+python3.12 -m pip install --user pipx      # Linux
+python3.12 -m pipx ensurepath
+```
 
 ```powershell
-py -m pip install --user pipx
-py -m pipx ensurepath
+py -3.12 -m pip install --user pipx        # Windows
+py -3.12 -m pipx ensurepath
 ```
 
 ::: {.warn}
-`ensurepath` edits your PATH, and nothing already running sees the change.
-**Close the terminal and open a new one before the next slide** — on Windows,
-quit VS Codium and reopen it.
+`ensurepath` edits PATH, and nothing already running sees it. **Quit VS Codium
+and reopen it** before the next slide.
 :::
 
-## Step 6b — Then install aider
+## Step 6b — Install aider with it
 
-In the **new** terminal:
+```powershell
+py -3.12 -m pipx install aider-chat        # Windows
+```
 
 ```bash
-pipx install aider-chat
+python3.12 -m pipx install aider-chat      # macOS and Linux
 ```
 
 ::: {.muted}
-`pipx : le terme «pipx» n'est pas reconnu` — or *not recognized as a cmdlet* —
-means PATH still has not caught up. You do not need to fix that to continue:
-`py -m pipx install aider-chat` on Windows, `python3 -m pipx install aider-chat`
-elsewhere, works whether or not the shortcut is on PATH.
+Written as a module deliberately: `pipx install aider-chat` is the same thing and
+works too, but only once PATH has caught up. The module form does not care.
 :::
 
 ::: {.check}
-Then, in another new terminal, `aider --version` should answer.
+In a new terminal, `aider --version` should answer. If it does not, the command
+is still at `~/.local/bin/aider` — `%USERPROFILE%\.local\bin\aider.exe` on
+Windows — and calling it there works regardless.
+:::
+
+## If pipx will not cooperate
+
+pipx is a convenience. A plain environment does the same job with nothing on
+PATH to go wrong:
+
+```powershell
+py -3.12 -m venv $HOME\aider-env
+& "$HOME\aider-env\Scripts\pip" install aider-chat
+& "$HOME\aider-env\Scripts\aider" --version
+```
+
+```bash
+python3.12 -m venv ~/aider-env
+~/aider-env/bin/pip install aider-chat
+~/aider-env/bin/aider --version
+```
+
+::: {.check}
+That is all pipx does. Run aider by its full path from then on, and it stays
+completely separate from the course environment — which was the only point.
 :::
 
 ## Step 6c — Pointing it at your model
@@ -852,7 +885,8 @@ test of whether your setup works.
 | `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
 | `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
 | Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — step 6b |
-| `aider-install` / `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module instead: `py -m pipx …`. `py -m pipx ensurepath` then a new terminal fixes it properly |
+| `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module: `py -3.12 -m pipx …` |
+| `No module named pipx` | It was installed for one interpreter and called from another — or `--user` was refused because `.venv` was active | Deactivate, then `py -3.12` on **both** lines |
 | An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |

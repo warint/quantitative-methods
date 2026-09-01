@@ -1102,8 +1102,10 @@ Thierry Warin, PhD
 <li>Step 6 — Windows</li>
 <li>Step 6 — Linux</li>
 <li>If you see a socket error</li>
-<li>Step 6b — Install pipx first</li>
-<li>Step 6b — Then install aider</li>
+<li>Step 6b — aider needs its own environment</li>
+<li>Step 6b — Install pipx</li>
+<li>Step 6b — Install aider with it</li>
+<li>If pipx will not cooperate</li>
 <li>Step 6c — Pointing it at your model</li>
 <li><code>aider n&#39;est pas reconnu</code>?</li>
 <li>Step 6d — Ask it something real</li>
@@ -1570,40 +1572,59 @@ Thierry Warin, PhD
 <p>Check what is answering: <code>curl http://127.0.0.1:11434/api/version</code> — on Windows, <code>curl.exe</code>.</p>
 </div>
 </section>
-<section id="step-6b-install-pipx-first" class="slide level2">
-<h2>Step 6b — Install pipx first</h2>
+<section id="step-6b-aider-needs-its-own-environment" class="slide level2">
+<h2>Step 6b — aider needs its own environment</h2>
 <div class="warn">
 <p><strong>Do not <code>pip install aider-chat</code> into <code>.venv</code>.</strong> aider pins its own versions of packages the course also uses, and pip must satisfy both at once — which is where the resolver errors come from. When it appears to succeed it can quietly downgrade something the course needs.</p>
 </div>
-<p><code>pipx</code> installs a command-line tool into an environment of its own and puts the command on your PATH. Install it <strong>with the course environment deactivated</strong>, or from a terminal where you never activated it.</p>
-<p><strong>macOS and Linux</strong></p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">--user</span> pipx</span>
-<span id="cb29-2"><a href></a><span class="ex">python3</span> <span class="at">-m</span> pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Windows PowerShell</strong></p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb30-1"><a href></a>py <span class="op">-</span>m pip install <span class="op">--</span>user pipx</span>
-<span id="cb30-2"><a href></a>py <span class="op">-</span>m pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p><code>ensurepath</code> edits your PATH, and nothing already running sees the change. <strong>Close the terminal and open a new one before the next slide</strong> — on Windows, quit VS Codium and reopen it.</p>
+<div class="check">
+<p>Do this in a terminal where <strong><code>(.venv)</code> is not showing</strong>. <code>--user</code> is refused inside a virtual environment, and that refusal is what leaves you with <em>no module named pipx</em> a moment later.</p>
 </div>
 </section>
-<section id="step-6b-then-install-aider" class="slide level2">
-<h2>Step 6b — Then install aider</h2>
-<p>In the <strong>new</strong> terminal:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href></a><span class="ex">pipx</span> install aider-chat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-6b-install-pipx" class="slide level2">
+<h2>Step 6b — Install pipx</h2>
+<p><strong>Name the version on both lines.</strong> Installing with one interpreter and calling with another is the whole of the <em>no module named pipx</em> problem.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> pip install <span class="at">--user</span> pipx      <span class="co"># macOS</span></span>
+<span id="cb29-2"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> pip install <span class="at">--user</span> pipx      <span class="co"># Linux</span></span>
+<span id="cb30-2"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb31-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m pip install <span class="op">--</span>user pipx        <span class="co"># Windows</span></span>
+<span id="cb31-2"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m pipx ensurepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><code>ensurepath</code> edits PATH, and nothing already running sees it. <strong>Quit VS Codium and reopen it</strong> before the next slide.</p>
+</div>
+</section>
+<section id="step-6b-install-aider-with-it" class="slide level2">
+<h2>Step 6b — Install aider with it</h2>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb32-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m pipx install aider-chat        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> pipx install aider-chat      <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
-<p><code>pipx : le terme «pipx» n&#39;est pas reconnu</code> — or <em>not recognized as a cmdlet</em> — means PATH still has not caught up. You do not need to fix that to continue: <code>py -m pipx install aider-chat</code> on Windows, <code>python3 -m pipx install aider-chat</code> elsewhere, works whether or not the shortcut is on PATH.</p>
+<p>Written as a module deliberately: <code>pipx install aider-chat</code> is the same thing and works too, but only once PATH has caught up. The module form does not care.</p>
 </div>
 <div class="check">
-<p>Then, in another new terminal, <code>aider --version</code> should answer.</p>
+<p>In a new terminal, <code>aider --version</code> should answer. If it does not, the command is still at <code>~/.local/bin/aider</code> — <code>%USERPROFILE%\.local\bin\aider.exe</code> on Windows — and calling it there works regardless.</p>
+</div>
+</section>
+<section id="if-pipx-will-not-cooperate" class="slide level2">
+<h2>If pipx will not cooperate</h2>
+<p>pipx is a convenience. A plain environment does the same job with nothing on PATH to go wrong:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb34-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="va">$HOME</span>\aider-env</span>
+<span id="cb34-2"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\pip&quot;</span> install aider-chat</span>
+<span id="cb34-3"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\aider-env\Scripts\aider&quot;</span> <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv ~/aider-env</span>
+<span id="cb35-2"><a href></a><span class="ex">~/aider-env/bin/pip</span> install aider-chat</span>
+<span id="cb35-3"><a href></a><span class="ex">~/aider-env/bin/aider</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>That is all pipx does. Run aider by its full path from then on, and it stays completely separate from the course environment — which was the only point.</p>
 </div>
 </section>
 <section id="step-6c-pointing-it-at-your-model" class="slide level2">
 <h2>Step 6c — Pointing it at your model</h2>
 <p>Point it at the server. The variable goes in <em>aider’s</em> terminal:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb33-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href></a><span class="bu">export</span> <span class="va">OLLAMA_API_BASE</span><span class="op">=</span>http://127.0.0.1:11434          <span class="co"># macOS / Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb37-1"><a href></a><span class="va">$env</span><span class="op">:</span><span class="va">OLLAMA_API_BASE</span> <span class="op">=</span> <span class="st">&quot;http://127.0.0.1:11434&quot;</span>        <span class="co"># Windows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then, on both:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>ollama_chat/</code>, not <code>ollama/</code> — the second uses the completion endpoint and gives markedly worse answers. And use the tag you actually pulled: <code>:3b</code>, <code>:7b</code> or <code>:14b</code>.</p>
 </div>
@@ -1611,10 +1632,10 @@ Thierry Warin, PhD
 <section id="aider-nest-pas-reconnu" class="slide level2">
 <h2><code>aider n&#39;est pas reconnu</code>?</h2>
 <p>pipx installed it; your shell just cannot see it yet. Confirm it is there, and where:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href></a><span class="ex">pipx</span> list          <span class="co"># or: py -m pipx list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>pipx puts the command in <code>~/.local/bin</code> — <code>%USERPROFILE%\.local\bin</code> on Windows. Call it by its full path and it runs whatever PATH says:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb36-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb40-1"><a href></a><span class="op">&amp;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">\.local\bin\aider.exe&quot;</span> <span class="op">--</span>model ollama_chat<span class="op">/</span>qwen2<span class="op">.</span><span class="dv">5</span><span class="op">-</span>coder<span class="op">:</span>7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href></a><span class="ex">~/.local/bin/aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>To fix it properly rather than working around it: <code>py -m pipx ensurepath</code> (<code>python3</code> elsewhere), then <strong>quit VS Codium entirely and reopen it</strong>. A new terminal tab is not enough on Windows — the editor itself is holding the old PATH.</p>
 </div>
@@ -1625,7 +1646,7 @@ Thierry Warin, PhD
 <p><em>“Open <code>qmib.py</code> and explain what <code>load</code> does when the file is already cached.”</em></p>
 </div>
 <p>Read what it proposes <strong>before</strong> you accept it. aider commits automatically after each change it applies, and those commits are attributed to you.</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href></a><span class="ex">aider</span> <span class="at">--model</span> ollama_chat/qwen2.5-coder:7b <span class="at">--no-auto-commits</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p><code>--no-auto-commits</code> if you would rather stage the changes yourself. Either way, you are answerable for every line on your branch.</p>
 </div>
@@ -1647,7 +1668,7 @@ Thierry Warin, PhD
 </section>
 <section id="the-last-check" class="slide level2">
 <h2>The last check</h2>
-<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href></a><span class="ex">python</span> 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p>Five checks should pass. <strong>Bring the output to class.</strong></p>
 </div>
@@ -1690,71 +1711,76 @@ Thierry Warin, PhD
 <td>Use <code>pipx</code>, which keeps it separate — step 6b</td>
 </tr>
 <tr class="odd">
-<td><code>aider-install</code> / <code>pipx</code> <em>n’est pas reconnu</em></td>
+<td><code>pipx</code> <em>n’est pas reconnu</em></td>
 <td><code>pip install --user</code> put the script in a folder Windows does not have on PATH</td>
-<td>Run it as a module instead: <code>py -m pipx …</code>. <code>py -m pipx ensurepath</code> then a new terminal fixes it properly</td>
+<td>Run it as a module: <code>py -3.12 -m pipx …</code></td>
 </tr>
 <tr class="even">
+<td><code>No module named pipx</code></td>
+<td>It was installed for one interpreter and called from another — or <code>--user</code> was refused because <code>.venv</code> was active</td>
+<td>Deactivate, then <code>py -3.12</code> on <strong>both</strong> lines</td>
+</tr>
+<tr class="odd">
 <td>An extension does nothing</td>
 <td>Installed but not loaded</td>
 <td><em>Developer: Reload Window</em></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>ModuleNotFoundError</code> in VS Codium</td>
 <td>Wrong interpreter selected</td>
 <td><code>Cmd/Ctrl + Shift + P</code> → <em>Python: Select Interpreter</em> → <code>.venv</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>pip</code> fails</td>
 <td>Environment not active</td>
 <td>Check your prompt starts with <code>(.venv)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>l’exécution de scripts est désactivée</em> (Windows)</td>
 <td>PowerShell blocks scripts by default, and activation is one</td>
 <td><code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code>, then activate again</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>le répertoire n’est pas vide</em> deleting <code>.venv</code></td>
 <td>Something holds a file inside it — usually VS Codium’s selected interpreter</td>
 <td>Quit VS Codium, delete from a plain PowerShell. Last resort <code>cmd /c &quot;rmdir /s /q .venv&quot;</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>deactivate</code> <em>n’est pas reconnu</em></td>
 <td>It only exists while an environment is active</td>
 <td>Nothing to fix — you are not in one. Skip the step</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Continue answers nothing</td>
 <td>No server on 11434</td>
 <td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>The model is very slow</td>
 <td>Too large for your RAM</td>
 <td>Pull <code>:3b</code> and change <code>config.yaml</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>aider forgets your file</td>
 <td>Ollama’s 2k default context</td>
 <td>Raise it on the server and restart Ollama — step 6</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>address already in use</code> / <em>une seule utilisation … socket</em></td>
 <td>Ollama is already running — it always is</td>
 <td>You do not need <code>ollama serve</code>. Set the variable, restart Ollama</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>connection refused</code> from aider</td>
 <td>Nothing on 11434</td>
 <td>Start Ollama: the app on macOS and Windows, <code>systemctl start ollama</code> on Linux</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Maths shows as raw <code>$...$</code></td>
 <td>No preview extension</td>
 <td>Install <em>Markdown Preview Enhanced</em>, open with <code>Cmd/Ctrl + K V</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Slow on Apple Silicon</td>
 <td>Rosetta build of Python</td>
 <td>Install the arm64 build</td>
