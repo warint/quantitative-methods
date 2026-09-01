@@ -36,38 +36,36 @@ format:
 8. Step 4 — Install Python 3.12
 9. Why 3.12 and not the newest
 10. Step 4b — Create the environment
-11. Windows: the star is not a tick
-12. Step 4c — Activate it
-13. Windows: "l'exécution de scripts est désactivée"
-14. Step 4d — Install the packages
-15. Built it on the wrong version? Start over
-16. `deactivate` is not a command
-17. Windows: still cannot activate?
-18. Windows: "Python introuvable"
-19. Windows: checking it took
-20. Step 5 — Ollama and Qwen
-21. Step 5b — Open Continue's config file
-22. Step 5c — What to put in it
-23. Which model size
-24. Step 6 — Give the model a real context window
-25. Step 6 — macOS
-26. Step 6 — Windows
-27. Step 6 — Linux
-28. If you see a socket error
-29. Step 6b — aider needs its own environment
-30. Step 6b — Install pipx
-31. Step 6b — Install aider with it
-32. If pipx will not cooperate
-33. Step 6c — Pointing it at your model
-34. `aider n'est pas reconnu`?
-35. "Add .aider* to .gitignore?"
-36. Step 6d — Ask it something real
-37. Two terminals is the working pattern
-38. The last check
-39. When it goes wrong
-40. Using the model well
-41. Also before class
-42. Ready?
+11. Step 4c — Activate it
+12. Step 4d — Install the packages
+13. Step 5 — Ollama and Qwen
+14. Step 5b — Open Continue's config file
+15. Step 5c — What to put in it
+16. Which model size
+17. Step 6 — Check the context window
+18. Step 6b — aider needs its own environment
+19. Step 6b — Install pipx
+20. Step 6b — Install aider with it
+21. Step 6c — Pointing it at your model
+22. "Add .aider* to .gitignore?"
+23. Step 6d — Ask it something real
+24. Two terminals is the working pattern
+25. The last check
+26. Using the model well
+27. Also before class
+28. Ready?
+29. Nothing here is your fault
+30. Windows: the star is not a tick
+31. Windows: "l'exécution de scripts est désactivée"
+32. Windows: still cannot activate?
+33. Built it on the wrong version? Start over
+34. `deactivate` is not a command
+35. Windows: "Python introuvable"
+36. Windows: checking it took
+37. Only if CONTEXT is small
+38. If pipx will not cooperate
+39. `aider n'est pas reconnu`?
+40. When it goes wrong
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -236,7 +234,7 @@ these slides will work.
 In Session 02 you will do this properly, with git and your own group branch.
 :::
 
-## Step 4 — Install Python 3.12
+## Step 4 — Install Python 3.12 {#step-4}
 
 ::: {.warn}
 **3.12 specifically.** Not "the latest", not whatever the download page offers
@@ -256,6 +254,12 @@ first.
 changes PATH and a window already open will not see it.
 :::
 
+::: {.muted}
+**If it does not work:**
+
+- [Windows: *«Python introuvable»*](#fix-python-introuvable)
+:::
+
 ## Why 3.12 and not the newest
 
 `aider-chat` declares `requires-python <3.13`. On 3.13 or 3.14 it cannot be
@@ -267,7 +271,7 @@ installed at all.
 - 3.12 is supported until **October 2028**, well past this course
 :::
 
-## Step 4b — Create the environment
+## Step 4b — Create the environment {#step-4b}
 
 From the repository root. **Name the version** — a bare `python3` or `py` picks
 the newest you have installed.
@@ -289,22 +293,13 @@ Check first if you like: `python3.12 --version`, or `py -3.12 --version` on
 Windows.
 :::
 
-## Windows: the star is not a tick
+::: {.muted}
+**If it does not work:**
 
-`py --list` marks the **default** — what a bare `py` uses. After installing 3.12
-the star normally stays where it was:
-
-```text
- -V:3.14 *        Python 3.14 (64-bit)
- -V:3.12          Python 3.12 (64-bit)
-```
-
-::: {.check}
-That is expected, and it is why every command writes `-3.12`. Leave the star
-alone.
+- [Windows: `py --list` shows a star on the wrong version](#fix-star)
 :::
 
-## Step 4c — Activate it
+## Step 4c — Activate it {#step-4c}
 
 ```bash
 source .venv/bin/activate         # macOS
@@ -323,39 +318,14 @@ Your prompt should now begin with **`(.venv)`**. If it does not, the activation
 did not take, and nothing you install afterwards will be visible to the course.
 :::
 
-## Windows: "l'exécution de scripts est désactivée"
-
-Activation is a PowerShell script, and Windows refuses to run scripts by
-default:
-
-```text
-… ne peut pas être chargé car l'exécution de scripts est désactivée
-    sur ce système
-… cannot be loaded because running scripts is disabled on this system
-```
-
-Nothing is broken. Allow scripts **for your own account** — no administrator
-rights needed, and it is asked once, ever:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
-
-Answer `O` (or `Y`), then activate again.
-
 ::: {.muted}
-`RemoteSigned` runs scripts you wrote or created locally, and still refuses
-unsigned scripts downloaded from the internet. It is the setting Microsoft
-recommends for development machines — not `Unrestricted`, and not `Bypass`.
+**If it does not work:**
+
+- [Windows: *«l'exécution de scripts est désactivée»*](#fix-execution-policy)
+- [Activation fails for some other reason](#fix-activate)
 :::
 
-::: {.check}
-Would rather change nothing? `.venv\Scripts\activate.bat` does the same job and
-is not a PowerShell script — but you must run it from **cmd**, not PowerShell,
-and you will need it in every new terminal.
-:::
-
-## Step 4d — Install the packages
+## Step 4d — Install the packages {#step-4d}
 
 ```bash
 python --version                  # must say 3.12.x
@@ -372,137 +342,10 @@ Inside an activated environment, plain `python` and `pip` are the right commands
 on all three platforms. The version-naming was only needed to create it.
 :::
 
-## Built it on the wrong version? Start over
-
-::: {.warn}
-A `.venv` **remembers the interpreter that created it**. Installing 3.12
-afterwards changes nothing, and neither does PATH — the folder has to go and be
-rebuilt.
-:::
-
-**Windows.** Quit VS Codium first — it holds the interpreter it has selected,
-and that alone can stop the folder being deleted. Then open **PowerShell** from
-the Start menu, not a terminal inside the editor:
-
-```powershell
-cd ~\Desktop\quantitative-methods
-Remove-Item -Recurse -Force .venv
-py -3.12 -m venv .venv
-```
-
-Now reopen VS Codium, and in its terminal:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-.venv\Scripts\activate
-python --version                      # must say 3.12.x
-pip install -r requirements.txt
-```
-
 ::: {.muted}
-Still `le répertoire n'est pas vide`? `cmd /c "rmdir /s /q .venv"` deletes it
-where `Remove-Item` will not.
-:::
+**If it does not work:**
 
-## `deactivate` is not a command
-
-It is a function that **activation creates**, so it exists only while an
-environment is active.
-
-::: {.check}
-*«Le terme `deactivate` n'est pas reconnu»* is not a problem to solve — it is
-the answer to "am I in a virtual environment?", and the answer is no. Skip the
-step and carry on.
-:::
-
-::: {.muted}
-The reliable indicator is the prompt: `(.venv)` at the start means active,
-nothing means not. On Windows the folder is then held by VS Codium rather than
-by your shell, which is why quitting the editor is the step that works.
-:::
-
-**macOS and Linux**
-
-```bash
-rm -rf .venv
-python3.12 -m venv .venv
-source .venv/bin/activate
-python --version                      # must say 3.12.x
-pip install -r requirements.txt
-```
-
-::: {.check}
-If `python --version` says anything but 3.12, the `venv` line used the wrong
-interpreter — check you wrote `-3.12` — and you need to delete and rebuild
-again.
-:::
-
-## Windows: still cannot activate?
-
-Work through it in this order:
-
-::: {.step}
-**Does `.venv` exist?** `ls .venv\Scripts` should list `activate`,
-`activate.bat` and `Activate.ps1`. If not, the `venv` command failed — read its
-output rather than moving on.
-:::
-
-::: {.step}
-**Is it the execution policy?** *«l'exécution de scripts est désactivée»* — see
-the slide above. This is the usual answer.
-:::
-
-::: {.step}
-**Spelling.** `activate`, not `activiate`. Tab-completion after
-`.venv\Scripts\a` will finish it for you and never misspells it.
-:::
-
-::: {.muted}
-Prefer the star on 3.12? `setx PY_PYTHON 3.12`, then a new terminal. Not needed
-for anything in this course, which always names the version.
-:::
-
-## Windows: "Python introuvable"
-
-If `py` or `python` prints **Python introuvable / Python was not found** and
-offers you the Microsoft Store, do **not** accept. There are two causes and the
-first is the common one.
-
-::: {.step}
-**1 · The Store alias is shadowing Python.** Windows ships a stub named
-`python.exe` that does nothing but open the Store.
-
-Start → search **Manage app execution aliases** → turn **off** both
-**python.exe** and **python3.exe**. Close the terminal and open a new one.
-:::
-
-::: {.step}
-**2 · Python is not installed, or not on PATH.** Install from
-[python.org/downloads](https://www.python.org/downloads/) — not the Store — and
-on the first screen tick **Add python.exe to PATH** before clicking Install.
-That checkbox is off by default and is the single most common setup failure.
-:::
-
-## Windows: checking it took
-
-Open a **new** terminal — PATH changes do not reach a terminal that is already
-running.
-
-```powershell
-py --version
-where py
-```
-
-::: {.check}
-A version number and a path under `Program Files` or `AppData` means you are
-fine. A path ending in `WindowsApps` means the Store alias is still in the way:
-go back and turn it off.
-:::
-
-::: {.muted}
-`py` is the right command on Windows even once PATH is set — it finds every
-installed version and picks the newest. Inside an activated `.venv`, plain
-`python` works and refers to the environment's own interpreter.
+- [`python --version` is not 3.12](#fix-wrong-version)
 :::
 
 ## Step 5 — Ollama and Qwen
@@ -612,87 +455,34 @@ not fit swaps to disk, and a 30-second answer becomes a five-minute one. Change
 the name in `config.yaml` to whichever you pulled.
 :::
 
-## Step 6 — Give the model a real context window
+## Step 6 — Check the context window {#step-6}
 
-Ollama defaults to a **2,048-token** context. aider fills that with your file and
-the model then "forgets" what you sent. Raise it to 8192.
+aider sends your file to the model. If the context is small the model silently
+drops the beginning of it and answers about the part it still has — which looks
+like stupidity rather than truncation.
 
-::: {.warn}
-The setting is read by the **server**, once, when it starts. Setting it in the
-terminal where you run `aider` does nothing at all — and you cannot simply start
-a second server, because one is already running on every platform.
-:::
-
-::: {.tight}
-So on all three the shape is the same: **set the variable for the system, then
-restart Ollama.**
-:::
-
-## Step 6 — macOS
+**Load the model, then ask the server what it gave it:**
 
 ```bash
-launchctl setenv OLLAMA_CONTEXT_LENGTH 8192
+ollama run qwen2.5-coder:7b "hi"
+ollama ps
 ```
-
-Then quit Ollama from the **menu bar** and reopen it.
-
-## Step 6 — Windows
-
-```powershell
-setx OLLAMA_CONTEXT_LENGTH 8192
-```
-
-Then quit Ollama from the **system tray** — right-click its icon → *Quit* — and
-start it again from the Start menu.
-
-::: {.warn}
-`setx` writes the variable permanently but does **not** apply it to the terminal
-you typed it in. Ollama picks it up when it next starts, which is why the restart
-is not optional.
-:::
-
-## Step 6 — Linux
-
-Installed by the official script, Ollama runs under systemd:
-
-```bash
-sudo systemctl edit ollama.service
-```
-
-Add these two lines, save, then reload and restart:
-
-```ini
-[Service]
-Environment="OLLAMA_CONTEXT_LENGTH=8192"
-```
-
-```bash
-sudo systemctl daemon-reload && sudo systemctl restart ollama
-```
-
-::: {.muted}
-Running it by hand instead of as a service? Then
-`OLLAMA_CONTEXT_LENGTH=8192 ollama serve` is all you need.
-:::
-
-## If you see a socket error
 
 ```text
-Only one usage of each socket address … is normally permitted
-Une seule utilisation de chaque adresse de socket est normalement autorisée
-Error: listen tcp 127.0.0.1:11434: bind: address already in use
+NAME                SIZE      PROCESSOR    CONTEXT    UNTIL
+qwen2.5-coder:7b    6.4 GB    100% GPU     32768      4 minutes from now
 ```
 
 ::: {.check}
-All three say the same thing: **Ollama is already running.** That is the normal
-state — the installer starts it for you on every platform. You do not need
-`ollama serve` at all; you need the variable set and the running server
-restarted, which is what the three slides above do.
+**8192 or more is fine — do nothing.** Recent Ollama versions ask for a very
+large context and the model caps it at its own maximum, so this is usually
+already settled.
 :::
 
 ::: {.muted}
-Check what is answering: `curl http://127.0.0.1:11434/api/version` — on Windows,
-`curl.exe`.
+**If it does not work:**
+
+- [`ollama ps` shows 2048 or 4096](#fix-context)
 :::
 
 ## Step 6b — aider needs its own environment
@@ -710,7 +500,7 @@ inside a virtual environment, and that refusal is what leaves you with *no modul
 named pipx* a moment later.
 :::
 
-## Step 6b — Install pipx
+## Step 6b — Install pipx {#step-6b}
 
 **Name the version on both lines.** Installing with one interpreter and calling
 with another is the whole of the *no module named pipx* problem.
@@ -735,6 +525,12 @@ py -3.12 -m pipx ensurepath
 and reopen it** before the next slide.
 :::
 
+::: {.muted}
+**If it does not work:**
+
+- [pipx will not install, or is not found](#fix-pipx)
+:::
+
 ## Step 6b — Install aider with it
 
 ```powershell
@@ -756,29 +552,7 @@ is still at `~/.local/bin/aider` — `%USERPROFILE%\.local\bin\aider.exe` on
 Windows — and calling it there works regardless.
 :::
 
-## If pipx will not cooperate
-
-pipx is a convenience. A plain environment does the same job with nothing on
-PATH to go wrong:
-
-```powershell
-py -3.12 -m venv $HOME\aider-env
-& "$HOME\aider-env\Scripts\pip" install aider-chat
-& "$HOME\aider-env\Scripts\aider" --version
-```
-
-```bash
-python3.12 -m venv ~/aider-env
-~/aider-env/bin/pip install aider-chat
-~/aider-env/bin/aider --version
-```
-
-::: {.check}
-That is all pipx does. Run aider by its full path from then on, and it stays
-completely separate from the course environment — which was the only point.
-:::
-
-## Step 6c — Pointing it at your model
+## Step 6c — Pointing it at your model {#step-6c}
 
 Point it at the server. The variable goes in *aider's* terminal:
 
@@ -802,31 +576,10 @@ gives markedly worse answers. And use the tag you actually pulled: `:3b`, `:7b`
 or `:14b`.
 :::
 
-## `aider n'est pas reconnu`?
+::: {.muted}
+**If it does not work:**
 
-pipx installed it; your shell just cannot see it yet. Confirm it is there, and
-where:
-
-```bash
-pipx list          # or: py -m pipx list
-```
-
-pipx puts the command in `~/.local/bin` — `%USERPROFILE%\.local\bin` on Windows.
-Call it by its full path and it runs whatever PATH says:
-
-```powershell
-& "$HOME\.local\bin\aider.exe" --model ollama_chat/qwen2.5-coder:7b
-```
-
-```bash
-~/.local/bin/aider --model ollama_chat/qwen2.5-coder:7b
-```
-
-::: {.check}
-To fix it properly rather than working around it: `py -m pipx ensurepath`
-(`python3` elsewhere), then **quit VS Codium entirely and reopen it**. A new
-terminal tab is not enough on Windows — the editor itself is holding the old
-PATH.
+- [`aider` is not recognised](#fix-aider-path)
 :::
 
 ## "Add .aider* to .gitignore?"
@@ -894,30 +647,6 @@ Five checks should pass. **Bring the output to class.**
 If one fails, the script prints what to do. If you are still stuck, ask Qwen — which is itself a
 test of whether your setup works.
 
-## When it goes wrong
-
-| What you see | Why | Fix |
-|---|---|---|
-| `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — two slides back |
-| `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
-| `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
-| Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — step 6b |
-| `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module: `py -3.12 -m pipx …` |
-| `No module named pipx` | It was installed for one interpreter and called from another — or `--user` was refused because `.venv` was active | Deactivate, then `py -3.12` on **both** lines |
-| An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
-| `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
-| `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
-| *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
-| *le répertoire n'est pas vide* deleting `.venv` | Something holds a file inside it — usually VS Codium's selected interpreter | Quit VS Codium, delete from a plain PowerShell. Last resort `cmd /c "rmdir /s /q .venv"` |
-| `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
-| Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
-| The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
-| aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
-| `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
-| `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
-| Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
-| Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
-
 ## Using the model well
 
 The local model is a **sparring partner**, not an oracle.
@@ -977,3 +706,349 @@ gives you the vocabulary Session 02 uses. Not required, not examinable.
 ::: {.muted}
 Full checklist and troubleshooting: [`setup-vscodium-local-llm.md`](setup-vscodium-local-llm.md)
 :::
+
+# Appendix — when it goes wrong {background-color="#E3120B" style="color:#F7F4ED"}
+
+::: {style="margin-top: 1.0em; color:#F7F4ED"}
+### Every failure anyone has hit on this setup, and what it means
+:::
+
+## Nothing here is your fault {#appendix-intro}
+
+Each of these is a real message someone saw, in the words they saw it.
+They are collected here rather than beside the steps so that a setup
+that goes smoothly reads as eight slides, not twenty.
+
+::: {.tight}
+- Windows: [the star on the wrong version](#fix-star) · [«Python introuvable»](#fix-python-introuvable) · [«l'exécution de scripts est désactivée»](#fix-execution-policy)
+- [Activation fails some other way](#fix-activate) · [`deactivate` is not recognised](#fix-deactivate)
+- [The environment is on the wrong Python](#fix-wrong-version)
+- [The context window is small](#fix-context) · [pipx will not cooperate](#fix-pipx) · [`aider` is not recognised](#fix-aider-path)
+- [Everything else, in one table](#fix-table)
+:::
+
+## Windows: the star is not a tick {#fix-star}
+
+`py --list` marks the **default** — what a bare `py` uses. After installing 3.12
+the star normally stays where it was:
+
+```text
+ -V:3.14 *        Python 3.14 (64-bit)
+ -V:3.12          Python 3.12 (64-bit)
+```
+
+::: {.check}
+That is expected, and it is why every command writes `-3.12`. Leave the star
+alone.
+:::
+
+::: {.muted}
+[← back to Step 4b — Create the environment](#step-4b)
+:::
+
+## Windows: "l'exécution de scripts est désactivée" {#fix-execution-policy}
+
+Activation is a PowerShell script, and Windows refuses to run scripts by
+default:
+
+```text
+… ne peut pas être chargé car l'exécution de scripts est désactivée
+    sur ce système
+… cannot be loaded because running scripts is disabled on this system
+```
+
+Nothing is broken. Allow scripts **for your own account** — no administrator
+rights needed, and it is asked once, ever:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Answer `O` (or `Y`), then activate again.
+
+::: {.muted}
+`RemoteSigned` runs scripts you wrote or created locally, and still refuses
+unsigned scripts downloaded from the internet. It is the setting Microsoft
+recommends for development machines — not `Unrestricted`, and not `Bypass`.
+:::
+
+::: {.check}
+Would rather change nothing? `.venv\Scripts\activate.bat` does the same job and
+is not a PowerShell script — but you must run it from **cmd**, not PowerShell,
+and you will need it in every new terminal.
+:::
+
+::: {.muted}
+[← back to Step 4c — Activate it](#step-4c)
+:::
+
+## Windows: still cannot activate? {#fix-activate}
+
+Work through it in this order:
+
+::: {.step}
+**Does `.venv` exist?** `ls .venv\Scripts` should list `activate`,
+`activate.bat` and `Activate.ps1`. If not, the `venv` command failed — read its
+output rather than moving on.
+:::
+
+::: {.step}
+**Is it the execution policy?** *«l'exécution de scripts est désactivée»* — see
+the slide above. This is the usual answer.
+:::
+
+::: {.step}
+**Spelling.** `activate`, not `activiate`. Tab-completion after
+`.venv\Scripts\a` will finish it for you and never misspells it.
+:::
+
+::: {.muted}
+Prefer the star on 3.12? `setx PY_PYTHON 3.12`, then a new terminal. Not needed
+for anything in this course, which always names the version.
+:::
+
+::: {.muted}
+[← back to Step 4c — Activate it](#step-4c)
+:::
+
+## Built it on the wrong version? Start over {#fix-wrong-version}
+
+::: {.warn}
+A `.venv` **remembers the interpreter that created it**. Installing 3.12
+afterwards changes nothing, and neither does PATH — the folder has to go and be
+rebuilt.
+:::
+
+**Windows.** Quit VS Codium first — it holds the interpreter it has selected,
+and that alone can stop the folder being deleted. Then open **PowerShell** from
+the Start menu, not a terminal inside the editor:
+
+```powershell
+cd ~\Desktop\quantitative-methods
+Remove-Item -Recurse -Force .venv
+py -3.12 -m venv .venv
+```
+
+Now reopen VS Codium, and in its terminal:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+.venv\Scripts\activate
+python --version                      # must say 3.12.x
+pip install -r requirements.txt
+```
+
+::: {.muted}
+Still `le répertoire n'est pas vide`? `cmd /c "rmdir /s /q .venv"` deletes it
+where `Remove-Item` will not.
+:::
+
+::: {.muted}
+[← back to Step 4d — Install the packages](#step-4d)
+:::
+
+## `deactivate` is not a command {#fix-deactivate}
+
+It is a function that **activation creates**, so it exists only while an
+environment is active.
+
+::: {.check}
+*«Le terme `deactivate` n'est pas reconnu»* is not a problem to solve — it is
+the answer to "am I in a virtual environment?", and the answer is no. Skip the
+step and carry on.
+:::
+
+::: {.muted}
+The reliable indicator is the prompt: `(.venv)` at the start means active,
+nothing means not. On Windows the folder is then held by VS Codium rather than
+by your shell, which is why quitting the editor is the step that works.
+:::
+
+**macOS and Linux**
+
+```bash
+rm -rf .venv
+python3.12 -m venv .venv
+source .venv/bin/activate
+python --version                      # must say 3.12.x
+pip install -r requirements.txt
+```
+
+::: {.check}
+If `python --version` says anything but 3.12, the `venv` line used the wrong
+interpreter — check you wrote `-3.12` — and you need to delete and rebuild
+again.
+:::
+
+::: {.muted}
+[← back to Built it on the wrong version?](#fix-wrong-version)
+:::
+
+## Windows: "Python introuvable" {#fix-python-introuvable}
+
+If `py` or `python` prints **Python introuvable / Python was not found** and
+offers you the Microsoft Store, do **not** accept. There are two causes and the
+first is the common one.
+
+::: {.step}
+**1 · The Store alias is shadowing Python.** Windows ships a stub named
+`python.exe` that does nothing but open the Store.
+
+Start → search **Manage app execution aliases** → turn **off** both
+**python.exe** and **python3.exe**. Close the terminal and open a new one.
+:::
+
+::: {.step}
+**2 · Python is not installed, or not on PATH.** Install from
+[python.org/downloads](https://www.python.org/downloads/) — not the Store — and
+on the first screen tick **Add python.exe to PATH** before clicking Install.
+That checkbox is off by default and is the single most common setup failure.
+:::
+
+::: {.muted}
+[← back to Step 4 — Install Python 3.12](#step-4)
+:::
+
+## Windows: checking it took {#fix-python-path}
+
+Open a **new** terminal — PATH changes do not reach a terminal that is already
+running.
+
+```powershell
+py --version
+where py
+```
+
+::: {.check}
+A version number and a path under `Program Files` or `AppData` means you are
+fine. A path ending in `WindowsApps` means the Store alias is still in the way:
+go back and turn it off.
+:::
+
+::: {.muted}
+`py` is the right command on Windows even once PATH is set — it finds every
+installed version and picks the newest. Inside an activated `.venv`, plain
+`python` works and refers to the environment's own interpreter.
+:::
+
+::: {.muted}
+[← back to Step 4 — Install Python 3.12](#step-4)
+:::
+
+## Only if CONTEXT is small {#fix-context}
+
+If `ollama ps` shows 2048 or 4096, raise it **on the server** — that is the only
+place the setting is read — and restart Ollama.
+
+```bash
+launchctl setenv OLLAMA_CONTEXT_LENGTH 8192      # macOS, then quit from the menu bar
+```
+
+```powershell
+setx OLLAMA_CONTEXT_LENGTH 8192                  # Windows, then quit from the system tray
+```
+
+```bash
+sudo systemctl edit ollama.service               # Linux: Environment="OLLAMA_CONTEXT_LENGTH=8192"
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
+::: {.warn}
+Do not set this if `ollama ps` already showed a larger number — you would be
+making the window **smaller**. Check first, change second.
+:::
+
+::: {.muted}
+Bigger is not free: the context is held in memory alongside the model, so a very
+large window on a small machine costs speed.
+:::
+
+::: {.muted}
+[← back to Step 6 — Check the context window](#step-6)
+:::
+
+## If pipx will not cooperate {#fix-pipx}
+
+pipx is a convenience. A plain environment does the same job with nothing on
+PATH to go wrong:
+
+```powershell
+py -3.12 -m venv $HOME\aider-env
+& "$HOME\aider-env\Scripts\pip" install aider-chat
+& "$HOME\aider-env\Scripts\aider" --version
+```
+
+```bash
+python3.12 -m venv ~/aider-env
+~/aider-env/bin/pip install aider-chat
+~/aider-env/bin/aider --version
+```
+
+::: {.check}
+That is all pipx does. Run aider by its full path from then on, and it stays
+completely separate from the course environment — which was the only point.
+:::
+
+::: {.muted}
+[← back to Step 6b — Install pipx](#step-6b)
+:::
+
+## `aider n'est pas reconnu`? {#fix-aider-path}
+
+pipx installed it; your shell just cannot see it yet. Confirm it is there, and
+where:
+
+```bash
+pipx list          # or: py -m pipx list
+```
+
+pipx puts the command in `~/.local/bin` — `%USERPROFILE%\.local\bin` on Windows.
+Call it by its full path and it runs whatever PATH says:
+
+```powershell
+& "$HOME\.local\bin\aider.exe" --model ollama_chat/qwen2.5-coder:7b
+```
+
+```bash
+~/.local/bin/aider --model ollama_chat/qwen2.5-coder:7b
+```
+
+::: {.check}
+To fix it properly rather than working around it: `py -m pipx ensurepath`
+(`python3` elsewhere), then **quit VS Codium entirely and reopen it**. A new
+terminal tab is not enough on Windows — the editor itself is holding the old
+PATH.
+:::
+
+::: {.muted}
+[← back to Step 6c — Pointing it at your model](#step-6c)
+:::
+
+## When it goes wrong {#fix-table}
+
+| What you see | Why | Fix |
+|---|---|---|
+| `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — two slides back |
+| `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
+| `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
+| Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — step 6b |
+| `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module: `py -3.12 -m pipx …` |
+| `No module named pipx` | It was installed for one interpreter and called from another — or `--user` was refused because `.venv` was active | Deactivate, then `py -3.12` on **both** lines |
+| An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
+| `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
+| `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
+| *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
+| *le répertoire n'est pas vide* deleting `.venv` | Something holds a file inside it — usually VS Codium's selected interpreter | Quit VS Codium, delete from a plain PowerShell. Last resort `cmd /c "rmdir /s /q .venv"` |
+| `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
+| Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
+| The model is very slow | Too large for your RAM | Pull `:3b` and change `config.yaml` |
+| aider forgets your file | Ollama's 2k default context | Raise it on the server and restart Ollama — step 6 |
+| `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
+| `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
+| Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
+| Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
+
+::: {.muted}
+[← back to the appendix index](#appendix-intro)
+:::
+
