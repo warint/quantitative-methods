@@ -156,7 +156,7 @@ On Windows PowerShell, use `Set-Location "$HOME\Desktop"` for the first line. Th
 Rebuild your environment inside the clone:
 
 ```bash
-python3 -m venv .venv              # Windows: py -m venv .venv
+python3.12 -m venv .venv           # Windows: py -3.12 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```

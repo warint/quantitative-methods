@@ -363,7 +363,7 @@
 \makeatother
 \subtitle{MATH60033A · HEC Montréal}
 \author{Thierry Warin, PhD}
-\date{1 September 2026}
+\date{2 September 2026}
 \begin{document}
 \frontmatter
 \maketitle
@@ -593,7 +593,7 @@ decision-maker act on this --- and say what would change your mind? \\
 
 Source:
 \href{https://github.com/warint/quantitative-methods}{github.com/warint/quantitative-methods}
-· 1 September 2026
+· 2 September 2026
 
 \end{qmibmuted}
 
@@ -8372,7 +8372,7 @@ disconnect from the network and watch the model keep working.
 This is also your first encounter with a distinction the course returns
 to. Qwen 2.5 Coder is a \emph{vertical} model: specialised for code, and
 consequently far better at code, for its size, than a general assistant
-many times larger. A 7-billion-parameter model on a laptop is not
+many times larger. A three-billion-parameter model on a laptop is not
 competitive with a frontier system at open-ended reasoning. At
 completing a pandas idiom it is entirely adequate. Choosing a small
 specialised model over a large general one --- and knowing which tasks
@@ -8380,11 +8380,50 @@ admit that trade --- is the applied judgement that separates a sensible
 AI deployment from an expensive one, and it is the same judgement that
 chapter 5 will make about a deliberately biased estimator.
 
+The course installs the 3-billion variant rather than the 7, and the
+reason is worth stating because it is the same reasoning in miniature.
+Most student laptops have no dedicated graphics card, so the model runs
+on the processor. On a processor the 7B is not a better model: it
+produces a comparable answer to the same question at roughly a quarter
+of the speed, and a tool slow enough to interrupt your thinking is a
+tool you stop using. The binding constraint is not quality, it is
+whether you will actually reach for it.
+
 The standing rule of the course applies to it from the first day: every
 deliverable must document at least one instance where you identified a
 model output as wrong, unverifiable or misleading, and explain how you
 established that. You are never penalised for using the model. You are
 penalised for using it uncritically.
+
+\section{Two ways of using it,
+deliberately}\label{two-ways-of-using-it-deliberately}
+
+The same model is reached through two different tools, and the split is
+not redundancy.
+
+\textbf{Continue} puts the model in the editor. You select code and ask
+about it, and the answer arrives beside the file. This is the mode that
+matters most in a course where you will read far more code than you
+write --- the session decks, the authors' replication packages, your
+group's scripts. The friction of copying code into a browser is small,
+and it is enough to stop most people asking.
+
+\textbf{aider} puts the model in the terminal, inside your repository,
+where it can change files and commit what it changed. That is a
+different kind of act, and the course treats it as one. You see every
+command it proposes before it runs, and whatever it writes is committed
+under your name --- which is the point, since the commit history is one
+of the records used to check that all three members of a group did the
+work. Delegating the typing does not delegate the answerability.
+
+The honest limitation, stated once: on a machine without a graphics
+card, a small model is a capable reader and an unreliable editor. It
+will explain a function correctly and then fail to produce a well-formed
+multi-file edit, because emitting a precise diff is a harder task than
+describing code. That is a fact about small models rather than about
+you, and the practical response is to use aider for understanding and do
+the editing yourself --- which is, in any case, the position the course
+would prefer you were in.
 
 \section{git}\label{git}
 
@@ -8485,6 +8524,88 @@ yours. That is the first substantive lesson of the course.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
+\subsection{What your machine needs}\label{what-your-machine-needs}
+
+No graphics card is required. Everything runs on the processor, more
+slowly.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Enough
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Comfortable
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+RAM & 8 GB & 16 GB \\
+Free disk & 12 GB & 20 GB \\
+CPU & anything from the last five years & Apple Silicon, or Intel i7
+10th gen and later \\
+Graphics & none & 8 GB VRAM, which makes the model 5--10× faster \\
+\end{longtable}
+
+Speed, in tokens per second --- roughly a short word each:
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+& tokens/s & a short answer \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Dedicated GPU, or Apple Silicon & 15--40 & a second or two \\
+\textbf{CPU only, \texttt{qwen2.5-coder:3b}} & 8--20 & a few seconds \\
+CPU only, \texttt{qwen2.5-coder:7b} & 3--8 & half a minute or more \\
+\end{longtable}
+
+\textbf{Use the 3b unless \texttt{ollama\ ps} reports
+\texttt{100\%\ GPU}.} On a processor the 7b is not a better model --- it
+is the same answer, four times slower.
+
+\subsubsection{Per tool}\label{per-tool}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RAM
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Disk
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Notes
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Ollama} & 8 GB for a 3b, 16 GB for a 7b & \textasciitilde2 GB
+per model & A model needs its file size plus about a fifth, in memory \\
+\textbf{Continue} & the model's, plus nothing much & \textasciitilde50
+MB & Does \textbf{not} manage the context window --- set it yourself \\
+\textbf{aider} & as Ollama & its own environment via pipx & Sets the
+context window per request itself \\
+\end{longtable}
+
+\textbf{aider on a CPU-only machine:} fine for reading and asking,
+unreliable for editing. Small models often fail to produce its edit
+format and report \emph{``the LLM did not conform to the edit format''}
+instead of making a change. If you want it to edit anyway,
+\texttt{-\/-edit-format\ whole} asks it to rewrite files rather than
+produce diffs, which a 3b manages far more often.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
 \subsection{The checklist}\label{the-checklist}
 
 Everything typed goes in the \textbf{VS Codium integrated terminal}
@@ -8506,11 +8627,19 @@ never the macOS Terminal app.
   \textbf{directly on your Desktop} as \texttt{quantitative-methods},
   and opened with \texttt{File\ →\ Open\ Folder…}
 \item[$\square$]
-  \textbf{Python 3.11 or 3.12} from
-  \url{https://www.python.org/downloads/} --- on Windows, \emph{``Add
-  python.exe to PATH''} ticked
+  \textbf{Python 3.12.10 specifically} --- not ``the latest'' --- from
+  \url{https://www.python.org/downloads/release/python-31210/}; on
+  Windows tick \emph{``Add python.exe to PATH''}. Later 3.12 releases
+  are security-only and ship as source code with no installer, and
+  \texttt{aider-chat} requires Python \texttt{\textless{}3.13}, so 3.13
+  and 3.14 cannot run this course's toolchain
 \item[$\square$]
-  \texttt{python3\ -\/-version} prints 3.11.x or 3.12.x
+  \texttt{python3.12\ -\/-version} prints 3.12.x --- on Windows
+  \texttt{py\ -3.12\ -\/-version}, and \texttt{py\ -\/-list} shows every
+  Python you have. Build the environment with the version named
+  (\texttt{py\ -3.12\ -m\ venv\ .venv},
+  \texttt{python3.12\ -m\ venv\ .venv}), because a bare \texttt{py} or
+  \texttt{python3} picks the newest one installed
 \item[$\square$]
   \texttt{.venv} created and activated --- your prompt shows
   \texttt{(.venv)}
@@ -8523,20 +8652,27 @@ never the macOS Terminal app.
   \textbf{Ollama} installed from \url{https://ollama.com/download};
   \texttt{ollama\ -\/-version} works
 \item[$\square$]
-  A model pulled: \texttt{qwen2.5-coder:3b} (8 GB RAM), \texttt{:7b} (16
-  GB), or \texttt{:14b} (32 GB+)
+  A model pulled: \textbf{\texttt{qwen2.5-coder:3b}} --- the default,
+  and the one that works without a dedicated graphics card. Try
+  \texttt{:7b} only after \texttt{ollama\ ps} shows \textbf{100\% GPU}
+  on the 3b
 \item[$\square$]
   \texttt{ollama\ pull\ nomic-embed-text} --- needed in Session 09
 \item[$\square$]
   \textbf{The wifi test:} turn wifi off, run
-  \texttt{ollama\ run\ qwen2.5-coder:7b\ "hello"}. It still answers.
+  \texttt{ollama\ run\ qwen2.5-coder:3b\ "hello"}. It still answers
 \item[$\square$]
-  \textbf{aider} installed and talking to Ollama ---
-  \texttt{OLLAMA\_CONTEXT\_LENGTH=8192\ ollama\ serve} in one terminal,
-  \texttt{aider\ -\/-model\ ollama\_chat/qwen2.5-coder:7b} in another
+  \textbf{aider} installed \textbf{outside} the course environment, via
+  pipx --- \texttt{python3.12\ -m\ pip\ install\ -\/-user\ pipx},
+  \texttt{python3.12\ -m\ pipx\ ensurepath}, new terminal,
+  \texttt{pipx\ install\ aider-chat} (\texttt{py} for \texttt{python3}
+  on Windows) --- never \texttt{pip\ install\ aider-chat} into
+  \texttt{.venv}. \texttt{aider\ -\/-version} answers in a new terminal
 \item[$\square$]
-  \texttt{verify\_environment.py} shows five passing checks, and you
-  have the output to bring
+  \texttt{verify\_environment.py} passes \textbf{with the environment
+  activated} --- the prompt shows \texttt{(.venv)}. Check 0 reports
+  which interpreter is running; if it fails, every package check below
+  it fails too and means nothing. Bring the output
 \end{itemize}
 
 Git and GitHub are \textbf{not} part of Session 01. They are set up
@@ -8558,7 +8694,7 @@ Continue's config lives at
 \FunctionTok{models}\KeywordTok{:}
 \AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Local coder}
 \AttributeTok{    }\FunctionTok{provider}\KeywordTok{:}\AttributeTok{ ollama}
-\AttributeTok{    }\FunctionTok{model}\KeywordTok{:}\AttributeTok{ qwen2.5{-}coder:7b}
+\AttributeTok{    }\FunctionTok{model}\KeywordTok{:}\AttributeTok{ qwen2.5{-}coder:3b}
 \AttributeTok{    }\FunctionTok{roles}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{chat}\KeywordTok{,}\AttributeTok{ edit}\KeywordTok{,}\AttributeTok{ apply}\KeywordTok{]}
 \AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Local embedder}
 \AttributeTok{    }\FunctionTok{provider}\KeywordTok{:}\AttributeTok{ ollama}
@@ -8597,21 +8733,64 @@ Fix
 \endlastfoot
 \texttt{ollama:\ command\ not\ found} & Not on PATH yet & Open a new
 terminal; on Windows restart VS Codium \\
-\texttt{python3:\ command\ not\ found} (Windows) & PATH box not ticked &
-Try \texttt{python}; if still missing, re-run the installer \\
+Dependency resolver errors while installing aider & It was installed
+into \texttt{.venv}, where it competes with the course's packages &
+Install it with pipx instead --- see the checklist above \\
+Dependency conflicts installing aider, or a build error naming a
+compiler & Your Python is 3.13 or newer; aider requires
+\texttt{\textless{}3.13} & Give aider a 3.12 of its own:
+\texttt{pipx\ install\ -\/-python\ python3.12\ aider-chat} \\
+\texttt{pipx} or \texttt{aider} \emph{n'est pas reconnu} / \emph{not
+recognized} & \texttt{pip\ install\ -\/-user} writes scripts to a folder
+Windows does not have on PATH & \texttt{py\ -m\ pipx\ …} works
+regardless; \texttt{py\ -m\ pipx\ ensurepath} plus a new terminal fixes
+PATH itself \\
+A newly installed extension or command does nothing & The window or
+terminal predates the install & \emph{Developer: Reload Window}; for
+PATH changes, quit VS Codium and reopen \\
+\texttt{Python\ introuvable} / \texttt{Python\ was\ not\ found}
+(Windows) & The Microsoft Store alias is shadowing Python & Start →
+\textbf{Manage app execution aliases} → turn \textbf{off}
+\texttt{python.exe} and \texttt{python3.exe}, then open a new terminal.
+Do not install from the Store. \\
+\texttt{python3:\ command\ not\ found} (Windows) & There is no
+\texttt{python3} on Windows & Use \texttt{py}. If that is missing too,
+re-run the python.org installer with \textbf{Add python.exe to PATH}
+ticked \\
 Continue answers nothing & Server not running & \texttt{ollama\ serve}
 in a separate terminal \\
-Model extremely slow & Too large for your RAM & Pull a smaller variant
-(\texttt{:3b}) \\
-aider ``forgets'' the file you gave it & Ollama's 2k default context &
-Start it as \texttt{OLLAMA\_CONTEXT\_LENGTH=8192\ ollama\ serve} \\
-\texttt{connection\ refused} from aider & \texttt{ollama\ serve} not
-running & Start it, leave that terminal open \\
+Model extremely slow & \texttt{ollama\ ps} shows 100\% CPU --- no
+dedicated graphics card & Normal on most laptops with the 3b. A larger
+model will be slower, not faster \\
+aider ``forgets'' the file you gave it & The context window is too small
+--- \texttt{ollama\ ps} shows it & Raise it in the \textbf{Ollama app's
+own settings} (Settings → Context length), then quit Ollama from the
+tray or menu bar and restart. The app overrides \texttt{setx} and
+\texttt{launchctl}, so those appear to do nothing. Linux:
+\texttt{systemctl\ edit\ ollama.service} \\
+\texttt{address\ already\ in\ use}, or \emph{une seule utilisation de
+chaque adresse de socket} & Ollama is already running; the installer
+starts it on every platform & Do not run \texttt{ollama\ serve}. Set the
+variable, then restart Ollama itself \\
+\texttt{connection\ refused} from aider & Nothing listening on 11434 &
+Start Ollama --- the app on macOS and Windows,
+\texttt{sudo\ systemctl\ start\ ollama} on Linux \\
 \texttt{ModuleNotFoundError} inside VS Codium & Wrong interpreter &
 \texttt{Ctrl/Cmd+Shift+P} → \emph{Python: Select Interpreter} →
 \texttt{.venv} \\
 \texttt{pip} fails & Environment not active & Check \texttt{(.venv)} is
 in your prompt \\
+Windows: \emph{l'exécution de scripts est désactivée sur ce système} &
+PowerShell's execution policy blocks \texttt{Activate.ps1} &
+\texttt{Set-ExecutionPolicy\ -Scope\ CurrentUser\ -ExecutionPolicy\ RemoteSigned}
+--- user-scoped, no admin rights, asked once \\
+Windows: \emph{le répertoire n'est pas vide} when deleting
+\texttt{.venv} & VS Codium holds the interpreter it has selected & Quit
+VS Codium; delete from a plain PowerShell;
+\texttt{cmd\ /c\ "rmdir\ /s\ /q\ .venv"} as a last resort \\
+\texttt{deactivate} is not recognised & Activation defines it, so it
+exists only inside an active environment & You are not in one. Skip it
+--- the prompt shows \texttt{(.venv)} when you are \\
 LaTeX shows as raw \texttt{\$...\$} & Preview extension missing &
 Install \emph{Markdown Preview Enhanced}; open with
 \texttt{Ctrl/Cmd+K\ V} \\
@@ -8701,7 +8880,7 @@ So a student in \textbf{group 7} running the branch command types:
 \end{Shaded}
 
 not \texttt{git\ checkout\ group-XX}. Same for folder paths:
-\texttt{02-practice/submissions/group-07/}.
+\texttt{groups/A2026/group-07/}.
 
 If you do not know your group number yet, you get it in Session 01. Do
 not guess.
@@ -8725,12 +8904,29 @@ github.com/warint/quantitative-methods        ← the course repository
 \end{verbatim}
 
 \textbf{Your group has one branch, named \texttt{group-XX}.} Everything
-your group produces is committed on that branch and pushed to it. Your
-practice deliverables go in the session folder:
+your group produces is committed on that branch and pushed to it, into
+your group's own directory:
 
 \begin{verbatim}
-NN-session-name/02-practice/submissions/group-XX/
+groups/
+└── A2026/                    ← the cohort: autumn 2026
+    ├── group-03/
+    └── group-XX/             ← yours
+        ├── session-02/       ← one folder per practice
+        ├── session-03/
+        └── ...
 \end{verbatim}
+
+\texttt{groups/A2026/} ships \textbf{empty}. Your group creates its own
+folder the first time it submits ---
+\texttt{mkdir\ -p\ groups/A2026/group-XX/session-02} --- and committing
+a file inside it is what puts your group in the repository. There is no
+registration step, and git does not track an empty directory.
+
+Your whole term is one directory, which is how you find in week ten what
+you wrote in week two. The cohort folder above it is what lets next
+year's students start clean rather than on top of you --- and it is why
+the path is \texttt{A2026} and not just \texttt{groups/}.
 
 \textbf{Why one repository and not one per group.} Your commit history
 is one of the four records used to check that all three of you did the
@@ -8858,8 +9054,8 @@ Rebuild your environment inside the clone:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv .venv}
-\BuiltInTok{source}\NormalTok{ .venv/bin/activate          }\CommentTok{\# Windows: .venv\textbackslash{}Scripts\textbackslash{}Activate.ps1}
+\ExtensionTok{python3.12} \AttributeTok{{-}m}\NormalTok{ venv .venv           }\CommentTok{\# Windows: py {-}3.12 {-}m venv .venv}
+\BuiltInTok{source}\NormalTok{ .venv/bin/activate          }\CommentTok{\# Windows: .venv\textbackslash{}Scripts\textbackslash{}activate}
 \ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
 \end{Highlighting}
 \end{Shaded}
@@ -8935,10 +9131,10 @@ cause damage --- but check where you are before you commit:
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# group 7 shown throughout — substitute your own number everywhere}
-\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ 02{-}exploratory{-}data{-}analysis/02{-}practice/submissions/group{-}07}
-\BuiltInTok{echo} \StringTok{"\# Group 07 — session 02"} \OperatorTok{\textgreater{}}\NormalTok{ 02{-}exploratory{-}data{-}analysis/02{-}practice/submissions/group{-}07/NOTES.md}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ groups/A2026/group{-}07/session{-}02}
+\BuiltInTok{echo} \StringTok{"\# Group 07 — session 02"} \OperatorTok{\textgreater{}}\NormalTok{ groups/A2026/group{-}07/session{-}02/NOTES.md}
 
-\FunctionTok{git}\NormalTok{ add 02{-}exploratory{-}data{-}analysis/02{-}practice/submissions/group{-}07/}
+\FunctionTok{git}\NormalTok{ add groups/A2026/group{-}07/session{-}02/}
 \FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Add group 07 notes for session 02"}
 \FunctionTok{git}\NormalTok{ push}
 \end{Highlighting}
@@ -8985,9 +9181,9 @@ and pushes:
 \begin{Highlighting}[]
 \FunctionTok{git}\NormalTok{ pull                              }\CommentTok{\# always pull before you start}
 \BuiltInTok{echo} \StringTok{"{-} Ana tested the push, 2 September"} \OperatorTok{\textgreater{}\textgreater{}} \DataTypeTok{\textbackslash{}}
-\NormalTok{  02{-}exploratory{-}data{-}analysis/02{-}practice/submissions/group{-}07/NOTES.md}
+\NormalTok{  groups/A2026/group{-}07/session{-}02/NOTES.md}
 
-\FunctionTok{git}\NormalTok{ add 02{-}exploratory{-}data{-}analysis/02{-}practice/submissions/group{-}07/NOTES.md}
+\FunctionTok{git}\NormalTok{ add groups/A2026/group{-}07/session{-}02/NOTES.md}
 \FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Ana: trial push"}
 \FunctionTok{git}\NormalTok{ push}
 \end{Highlighting}
@@ -9087,7 +9283,7 @@ course counts commits as evidence of who did the work.
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline}
-\ExtensionTok{aider} \AttributeTok{{-}{-}model}\NormalTok{ ollama\_chat/qwen2.5{-}coder:7b }\AttributeTok{{-}{-}no{-}auto{-}commits}
+\ExtensionTok{aider} \AttributeTok{{-}{-}model}\NormalTok{ ollama\_chat/qwen2.5{-}coder:3b }\AttributeTok{{-}{-}no{-}auto{-}commits}
 \end{Highlighting}
 \end{Shaded}
 

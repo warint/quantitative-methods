@@ -76,7 +76,7 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] A model pulled: **`qwen2.5-coder:3b`** — the default, and the one that works without a dedicated graphics card. Try `:7b` only after `ollama ps` shows **100% GPU** on the 3b
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
 - [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:3b "hello"`. It still answers
-- [ ] **aider** installed **outside** the course environment, via pipx — `python3 -m pip install --user pipx`, `python3 -m pipx ensurepath`, new terminal, `pipx install aider-chat` (`py` for `python3` on Windows) — never `pip install aider-chat` into `.venv`. `aider --version` answers in a new terminal
+- [ ] **aider** installed **outside** the course environment, via pipx — `python3.12 -m pip install --user pipx`, `python3.12 -m pipx ensurepath`, new terminal, `pipx install aider-chat` (`py` for `python3` on Windows) — never `pip install aider-chat` into `.venv`. `aider --version` answers in a new terminal
 - [ ] `verify_environment.py` passes **with the environment activated** — the prompt shows `(.venv)`. Check 0 reports which interpreter is running; if it fails, every package check below it fails too and means nothing. Bring the output
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:

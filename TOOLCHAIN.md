@@ -58,18 +58,52 @@ working.
 This is also your first encounter with a distinction the course returns to.
 Qwen 2.5 Coder is a *vertical* model: specialised for code, and consequently
 far better at code, for its size, than a general assistant many times larger.
-A 7-billion-parameter model on a laptop is not competitive with a frontier
+A three-billion-parameter model on a laptop is not competitive with a frontier
 system at open-ended reasoning. At completing a pandas idiom it is entirely
 adequate. Choosing a small specialised model over a large general one — and
 knowing which tasks admit that trade — is the applied judgement that separates
 a sensible AI deployment from an expensive one, and it is the same judgement
 that chapter 5 will make about a deliberately biased estimator.
 
+The course installs the 3-billion variant rather than the 7, and the reason is
+worth stating because it is the same reasoning in miniature. Most student
+laptops have no dedicated graphics card, so the model runs on the processor. On
+a processor the 7B is not a better model: it produces a comparable answer to the
+same question at roughly a quarter of the speed, and a tool slow enough to
+interrupt your thinking is a tool you stop using. The binding constraint is not
+quality, it is whether you will actually reach for it.
+
 The standing rule of the course applies to it from the first day: every
 deliverable must document at least one instance where you identified a model
 output as wrong, unverifiable or misleading, and explain how you established
 that. You are never penalised for using the model. You are penalised for using
 it uncritically.
+
+## Two ways of using it, deliberately
+
+The same model is reached through two different tools, and the split is not
+redundancy.
+
+**Continue** puts the model in the editor. You select code and ask about it, and
+the answer arrives beside the file. This is the mode that matters most in a
+course where you will read far more code than you write — the session decks, the
+authors' replication packages, your group's scripts. The friction of copying
+code into a browser is small, and it is enough to stop most people asking.
+
+**aider** puts the model in the terminal, inside your repository, where it can
+change files and commit what it changed. That is a different kind of act, and
+the course treats it as one. You see every command it proposes before it runs,
+and whatever it writes is committed under your name — which is the point, since
+the commit history is one of the records used to check that all three members of
+a group did the work. Delegating the typing does not delegate the answerability.
+
+The honest limitation, stated once: on a machine without a graphics card, a
+small model is a capable reader and an unreliable editor. It will explain a
+function correctly and then fail to produce a well-formed multi-file edit,
+because emitting a precise diff is a harder task than describing code. That is
+a fact about small models rather than about you, and the practical response is
+to use aider for understanding and do the editing yourself — which is, in any
+case, the position the course would prefer you were in.
 
 ## git
 
