@@ -28,49 +28,54 @@ format:
 
 1. Why this, and not a notebook in the cloud
 2. What you are building
-3. Where do I type this?
-4. One rule before you start: restart after installing
-5. VS Codium
-6. Extensions
-7. The course materials
-8. Install Python 3.12
-9. Why 3.12 and not the newest
-10. Create the environment
-11. Activate it
-12. Install the packages
-13. Why a model in the editor
-14. Install Ollama, pull the model
-15. Which model size
-16. Open Continue's config
-17. What to put in it
-18. Check the context window
-19. Why a second one in the terminal
-20. Step out of the environment
-21. Install pipx
-22. Install aider
-23. Point it at your model
-24. "Add .aider* to .gitignore?"
-25. Ask it something real
-26. It is thinking, not stuck
-27. Two terminals is the working pattern
-28. The final check
-29. Using the model well
-30. Also before class
-31. Ready?
-32. Nothing here is your fault
-33. Windows: the star is not a tick
-34. Windows: "l'exécution de scripts est désactivée"
-35. Windows: still cannot activate?
-36. Built it on the wrong version? Start over
-37. `deactivate` is not a command
-38. Windows: "Python introuvable"
-39. Windows: checking it took
-40. Only if CONTEXT is small
-41. Check it took
-42. Linux, or no desktop app
-43. If pipx will not cooperate
-44. `aider n'est pas reconnu`?
-45. When it goes wrong
+3. What your machine needs
+4. What "slower" actually means
+5. Where do I type this?
+6. One rule before you start: restart after installing
+7. VS Codium
+8. Extensions
+9. The course materials
+10. Install Python 3.12
+11. Why 3.12 and not the newest
+12. Create the environment
+13. Activate it
+14. Install the packages
+15. Why a model in the editor
+16. What Continue and Ollama need
+17. Install Ollama, pull the model
+18. Which model size
+19. Open Continue's config
+20. What to put in it
+21. Check the context window
+22. Why a second one in the terminal
+23. What aider needs, and what it can do without a GPU
+24. One thing aider does for you
+25. Step out of the environment
+26. Install pipx
+27. Install aider
+28. Point it at your model
+29. "Add .aider* to .gitignore?"
+30. Ask it something real
+31. It is thinking, not stuck
+32. Two terminals is the working pattern
+33. The final check
+34. Using the model well
+35. Also before class
+36. Ready?
+37. Nothing here is your fault
+38. Windows: the star is not a tick
+39. Windows: "l'exécution de scripts est désactivée"
+40. Windows: still cannot activate?
+41. Built it on the wrong version? Start over
+42. `deactivate` is not a command
+43. Windows: "Python introuvable"
+44. Windows: checking it took
+45. Only if CONTEXT is small
+46. Check it took
+47. Linux, or no desktop app
+48. If pipx will not cooperate
+49. `aider n'est pas reconnu`?
+50. When it goes wrong
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -146,6 +151,43 @@ Six pieces, in this order. Each one checks before you move on.
 ::: {.warn}
 **Session 1 does not include installation time.** Arriving without a working environment means you
 cannot take part in either half.
+:::
+
+## What your machine needs
+
+Nothing exotic. **No graphics card is required** — everything here runs on the
+processor, more slowly.
+
+::: {.tight}
+| | Enough | Comfortable |
+|---|---|---|
+| **RAM** | 8 GB | 16 GB |
+| **Free disk** | 12 GB | 20 GB |
+| **CPU** | anything from the last five years | Apple Silicon, or Intel i7 10th gen and later |
+| **Graphics** | none needed | 8 GB VRAM makes the model 5–10× faster |
+:::
+
+::: {.check}
+On 8 GB, use the **3b** model. On 16 GB with no graphics card, still use the 3b
+— system memory is not what makes it fast.
+:::
+
+## What "slower" actually means
+
+Speed is measured in tokens per second, and roughly a token is a short word.
+
+::: {.tight}
+| Your machine | Tokens/second | A short answer takes |
+|---|---|---|
+| Dedicated GPU | 15–40+ | a second or two |
+| Apple Silicon | 15–30 | a second or two |
+| **CPU only, 3b model** | 8–20 | a few seconds |
+| CPU only, 7b model | 3–8 | half a minute or more |
+:::
+
+::: {.warn}
+This is the whole reason the course uses the 3b. On a CPU the 7b is not a better
+model — it is the same answer, four times slower, and you will stop asking.
 :::
 
 ## Where do I type this?
@@ -385,6 +427,28 @@ It is a **sparring partner, not an oracle** — the slides at the end of this de
 say what that means in practice, and it is graded.
 :::
 
+## What Continue and Ollama need
+
+::: {.tight}
+| | Continue | Ollama |
+|---|---|---|
+| **RAM** | negligible itself — the model is the cost | 8 GB for a 3b, 16 GB for a 7b |
+| **Disk** | ~50 MB | 2 GB per model, plus 274 MB for the embedder |
+| **Graphics** | none | none, but 8 GB VRAM is 5–10× faster |
+| **Network** | none after setup | none after the models are pulled |
+:::
+
+::: {.check}
+Rule of thumb for any model: it needs its **file size plus about a fifth** in
+memory. The 3b is 1.9 GB on disk and around 3.4 GB loaded.
+:::
+
+::: {.warn}
+Continue does **not** manage the context window for you — which is why 2.5 asks
+you to check it. Set it too small and the model answers about the part of your
+file it can still see, without saying so.
+:::
+
 ## 2.1 — Install Ollama, pull the model
 
 Install **[ollama.com](https://ollama.com)**, then in the VS Codium terminal:
@@ -560,6 +624,50 @@ repository, and commits what it did.
 ::: {.check}
 Two tools, two jobs: **Continue to understand, aider to change.** They talk to
 the same model.
+:::
+
+## What aider needs, and what it can do without a GPU
+
+::: {.tight}
+| | |
+|---|---|
+| **RAM** | 8 GB with the 3b; 16 GB is where the 7b becomes reasonable |
+| **Graphics** | not required |
+| **Python** | its own, via pipx — never the course environment |
+| **A git repository** | it edits files and commits; it expects to be inside one |
+:::
+
+::: {.warn}
+**On a CPU-only laptop, treat aider as a reader and an adviser rather than an
+editor.** It will answer questions about your code perfectly well. Asking a 3b
+to *apply* a multi-file edit is where it struggles — small models frequently
+fail to produce aider's edit format, and you get "the LLM did not conform to the
+edit format" rather than a change.
+:::
+
+::: {.check}
+If you want it to edit on a small model, make the job easier — have it rewrite
+whole files rather than produce diffs:
+
+```bash
+aider --model ollama_chat/qwen2.5-coder:3b --edit-format whole
+```
+:::
+
+## One thing aider does for you
+
+Ollama's default context is small, and it **silently discards** anything beyond
+it — aider's own documentation calls this "especially dangerous because many
+users don't even realize that most of their data is being discarded".
+
+::: {.check}
+aider handles it: it sets the context window per request, large enough for what
+it is sending plus 8k for the reply. So the `ollama ps` value you checked in
+part 2 matters for **Continue**, which does not do this — not for aider.
+:::
+
+::: {.muted}
+Which is why part 2 asked you to check it and part 3 does not.
 :::
 
 ## 3.1 — Step out of the environment

@@ -21,6 +21,44 @@ substantive lesson of the course.
 
 ---
 
+## What your machine needs
+
+No graphics card is required. Everything runs on the processor, more slowly.
+
+| | Enough | Comfortable |
+|---|---|---|
+| RAM | 8 GB | 16 GB |
+| Free disk | 12 GB | 20 GB |
+| CPU | anything from the last five years | Apple Silicon, or Intel i7 10th gen and later |
+| Graphics | none | 8 GB VRAM, which makes the model 5–10× faster |
+
+Speed, in tokens per second — roughly a short word each:
+
+| | tokens/s | a short answer |
+|---|---|---|
+| Dedicated GPU, or Apple Silicon | 15–40 | a second or two |
+| **CPU only, `qwen2.5-coder:3b`** | 8–20 | a few seconds |
+| CPU only, `qwen2.5-coder:7b` | 3–8 | half a minute or more |
+
+**Use the 3b unless `ollama ps` reports `100% GPU`.** On a processor the 7b is
+not a better model — it is the same answer, four times slower.
+
+### Per tool
+
+| | RAM | Disk | Notes |
+|---|---|---|---|
+| **Ollama** | 8 GB for a 3b, 16 GB for a 7b | ~2 GB per model | A model needs its file size plus about a fifth, in memory |
+| **Continue** | the model's, plus nothing much | ~50 MB | Does **not** manage the context window — set it yourself |
+| **aider** | as Ollama | its own environment via pipx | Sets the context window per request itself |
+
+**aider on a CPU-only machine:** fine for reading and asking, unreliable for
+editing. Small models often fail to produce its edit format and report *"the LLM
+did not conform to the edit format"* instead of making a change. If you want it
+to edit anyway, `--edit-format whole` asks it to rewrite files rather than
+produce diffs, which a 3b manages far more often.
+
+---
+
 ## The checklist
 
 Everything typed goes in the **VS Codium integrated terminal** (``View → Terminal``, or
