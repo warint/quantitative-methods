@@ -14,15 +14,22 @@ PALE_RED <- "#F7C9C6"
 PALE_BLUE <- "#C9DCE8"
 PALE_TEAL <- "#C6E2DE"
 
+# The session codes below are the ones this script has always used; the
+# directories are the current ones. Seven of these eight paths still named
+# folders from an earlier syllabus — 03-inference-diagnostics-interpretation,
+# 07-trees-forests-boosting and so on — so re-running the script created
+# orphans and left the assets the decks actually load untouched. Each path here
+# is the directory that references the files that code generates; verified by
+# grepping the decks for every filename.
 paths <- c(
   S02 = "02-exploratory-data-analysis/01-lecture/economist-assets",
-  S03 = "03-inference-diagnostics-interpretation/01-lecture/economist-assets",
-  S04 = "04-bias-variance-and-cross-validation/01-lecture/economist-assets",
-  S07 = "07-trees-forests-boosting/01-lecture/economist-assets",
-  S08 = "08-pca-and-factor-models/01-lecture/economist-assets",
-  S09 = "09-clustering-and-text-as-data/01-lecture/economist-assets",
-  S10 = "10-causal-machine-learning/01-lecture/economist-assets",
-  S11 = "11-forecasting-drift-and-governance/01-lecture/economist-assets"
+  S03 = "03-regression-adequacy-and-validity/01-lecture/economist-assets",
+  S04 = "04-logistic-ordinal-multinomial/01-lecture/economist-assets",
+  S07 = "07-pca-and-factor-analysis/01-lecture/economist-assets",
+  S08 = "08-knn-and-bias-variance/01-lecture/economist-assets",
+  S09 = "09-structural-equation-modelling/01-lecture/economist-assets",
+  S10 = "10-causal-inference-foundations/01-lecture/economist-assets",
+  S11 = "11-causal-inference-did/01-lecture/economist-assets"
 )
 invisible(lapply(paths, dir.create, recursive = TRUE, showWarnings = FALSE))
 
@@ -86,12 +93,16 @@ open_svg(asset("S02", "percentile.svg"))
 x <- seq(-3.6, 3.6, length.out = 500); y <- dnorm(x)
 plot(x, y, type = "n", axes = FALSE, xlab = "Observed value", ylab = "Density",
      ylim = c(0, max(y) * 1.08)); abline(h = 0, col = INK)
-cut <- qnorm(.73); xs <- x[x <= cut]
+# The cut sits at one standard deviation above the mean, so the figure shows
+# the same number the slide's code computes -- pnorm(1) = 0.8413 -- and the same
+# number the 68-95-99.7 rule implies two slides later: 68% within 1 SD leaves
+# 16% in the upper tail, so 84% below. An arbitrary cut taught none of that.
+cut <- 1; xs <- x[x <= cut]
 polygon(c(xs, rev(xs)), c(dnorm(xs), rep(0, length(xs))), col = PALE_RED, border = NA)
 lines(x, y, col = INK, lwd = 2.4); abline(v = cut, col = RED, lwd = 2)
-axis(1, at = c(-2, 0, cut, 2), labels = c("low", "centre", "x", "high"), col = NA)
-text(cut, dnorm(cut) + .035, "73rd percentile", col = RED, pos = 4, font = 2)
-text(-1.3, .12, "73% of observations", col = INK, font = 2)
+axis(1, at = c(-2, 0, cut, 2.4), labels = c("low", "mean", "mean + 1 SD", "high"), col = NA)
+text(cut, dnorm(cut) + .035, "84th percentile", col = RED, pos = 4, font = 2)
+text(-1.4, .12, "84% of observations", col = INK, font = 2)
 headline("A percentile turns a value into a position")
 dev.off()
 
@@ -119,14 +130,28 @@ lines(x, dnorm(x), col = INK, lwd = 2)
 right <- dlnorm(x + 4.1, 1, .48); right <- right / max(right) * .43
 left <- rev(right)
 lines(x, right, col = RED, lwd = 2.2); lines(x, left, col = BLUE, lwd = 2.2)
-direct_label(2.2, .32, "right-skewed", RED, 4); direct_label(-2.2, .32, "left-skewed", BLUE, 2)
+# Each label beside its own curve. They sat on the opposite side of the panel
+# from the curve they name — colour-matched, but reading as swapped.
+direct_label(-2.15, .30, "right-skewed", RED, 2)
+direct_label(2.15, .30, "left-skewed", BLUE, 4)
 title("Skewness: which tail is longer?", adj = 0, line = 1.3, font.main = 2)
 plot(x, dnorm(x), type = "n", axes = FALSE, xlab = "", ylab = "Density",
      ylim = c(0, .65)); abline(h = 0, col = INK)
-normal <- dnorm(x); heavy <- dt(x * 1.15, df = 3) * 1.15; light <- dnorm(x, sd = 1.35)
+# All three curves have variance 1, so the only thing differing is shape. This
+# matters: "lighter tails" used to be dnorm(sd = 1.35), which has *identical*
+# kurtosis to the standard normal — kurtosis is scale-invariant — and visibly
+# more mass in the tails, so the picture claimed the opposite of what it showed.
+#   heavy: t(5) scaled to unit variance, excess kurtosis +5.3
+#   light: Beta(2,2) mapped to unit variance, excess kurtosis -0.86, and
+#          compactly supported, so its tails visibly stop rather than thin out.
+s_t <- sqrt(3 / 5); a_b <- sqrt(5)
+normal <- dnorm(x)
+heavy  <- dt(x / s_t, df = 5) / s_t
+light  <- ifelse(abs(x) < a_b, dbeta((x + a_b) / (2 * a_b), 2, 2) / (2 * a_b), NA)
 lines(x, normal, col = INK, lwd = 2); lines(x, heavy, col = RED, lwd = 2.2)
 lines(x, light, col = BLUE, lwd = 2.2)
-direct_label(.15, .57, "heavier tails", RED, 4); direct_label(1.7, .17, "lighter tails", BLUE, 4)
+direct_label(.35, .53, "heavier tails", RED, 4)
+direct_label(-2.05, .105, "lighter tails", BLUE, 2)
 title("Kurtosis: how much mass reaches the tails?", adj = 0, line = 1.3, font.main = 2)
 dev.off()
 
