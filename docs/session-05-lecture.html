@@ -442,7 +442,7 @@
   <meta name="generator" content="quarto-1.7.31">
 
   <meta name="author" content="Thierry Warin">
-  <meta name="dcterms.date" content="2026-09-01">
+  <meta name="dcterms.date" content="2026-09-03">
   <title>Regularisation: Ridge, Lasso, and the Elastic Net</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1067,7 +1067,7 @@ Thierry Warin
     </div>
 </div>
 
-  <p class="date">1 September 2026</p>
+  <p class="date">3 September 2026</p>
 </section>
 <section class="slide level2">
 
@@ -1268,7 +1268,7 @@ Thierry Warin
 </section>
 <section id="what-complete-case-analysis-leaves-you" class="slide level2">
 <h2>What complete-case analysis leaves you</h2>
-<div id="6ad142a6" class="cell" data-execution_count="2">
+<div id="38fc7e93" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>raw <span class="op">=</span> pd.read_parquet(<span class="st">&quot;../../data/spine/angle_c_country.parquet&quot;</span>)</span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a>YCOL  <span class="op">=</span> <span class="st">&quot;rd_pct_gdp&quot;</span>                           <span class="co"># what we are trying to explain</span></span>
@@ -1291,7 +1291,7 @@ Thierry Warin
 </section>
 <section id="why-ols-cannot-cope-here" class="slide level2">
 <h2>Why OLS cannot cope here</h2>
-<div id="4399af03" class="cell" data-execution_count="3">
+<div id="f34c2a76" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># The condition number is the ratio of the largest singular value to the</span></span>
 <span id="cb3-2"><a href></a><span class="co"># smallest: how much a small wobble in the data can be amplified in the</span></span>
 <span id="cb3-3"><a href></a><span class="co"># coefficients. Under about 30 is comfortable; 1e3 and above means the design</span></span>
@@ -1314,7 +1314,7 @@ Thierry Warin
 </section>
 <section id="four-estimators-one-held-out-test-set" class="slide level2">
 <h2>Four estimators, one held-out test set</h2>
-<div id="6f6d1ba8" class="cell" data-execution_count="4">
+<div id="a5627a45" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
 <span id="cb5-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
 <span id="cb5-3"><a href></a>    model.fit(Xtr, ytr)                        <span class="co"># the model never sees Xte here</span></span>
@@ -1409,7 +1409,7 @@ Thierry Warin
 </section>
 <section id="ridge-in-three-lines-explained" class="slide level2">
 <h2>Ridge in three lines, explained</h2>
-<div id="49fb7338" class="cell" data-execution_count="7">
+<div id="b6ac5361" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># A pipeline, not three separate steps, because the scaler must be fitted on</span></span>
 <span id="cb6-2"><a href></a><span class="co"># the training rows only. Fit it on everything and the test set has leaked into</span></span>
 <span id="cb6-3"><a href></a><span class="co"># the training procedure, and the honest 30% you held out is no longer honest.</span></span>
@@ -1554,7 +1554,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </section>
 <section id="what-survived-on-our-data" class="slide level2">
 <h2>What survived, on our data</h2>
-<div id="4a00f2ac" class="cell" data-execution_count="11">
+<div id="32710edb" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># LassoCV does two things at once: it fits the whole path of lambdas, and it</span></span>
 <span id="cb8-2"><a href></a><span class="co"># uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the</span></span>
 <span id="cb8-3"><a href></a><span class="co"># penalty is on coefficient size, so the columns must be on a common scale.</span></span>
@@ -1604,7 +1604,7 @@ auxiliary series kept: 0 of 15</code></pre>
 <section id="limitation-2-is-not-academic" class="slide level2">
 <h2>Limitation 2 is not academic</h2>
 <p>Our five AI-adoption columns are all measuring roughly the same thing:</p>
-<div id="4532d383" class="cell" data-execution_count="12">
+<div id="82ed956a" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Five columns that are all, in substance, &quot;how much AI does this country use&quot;.</span></span>
 <span id="cb10-2"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
 <span id="cb10-3"><a href></a></span>
@@ -1667,6 +1667,48 @@ auxiliary series kept: 0 of 15</code></pre>
 <p><span class="math display">\[\hat\beta_j = \frac{S_{\lambda\alpha}(\rho_j)}{1 + \lambda(1-\alpha)}\]</span></p>
 <div class="check">
 <p>Same worked example, <span class="math inline">\(\lambda = 0.2\)</span>, <span class="math inline">\(\alpha = 0.5\)</span>: threshold at <span class="math inline">\(0.10\)</span>, divide by <span class="math inline">\(1.10\)</span> → <span class="math inline">\((0.291,\, -0.073,\, 0,\, 0.191)\)</span>. <strong>Three survive instead of two.</strong></p>
+</div>
+</section>
+<section id="playground" class="slide level2">
+<h2>Watch the two penalties, side by side</h2>
+<p>Everything in this section can be watched happening. <strong><a href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;noise=0&amp;networkShape=&amp;seed=0.69510&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=true&amp;xSquared=true&amp;ySquared=true&amp;cosX=false&amp;sinX=true&amp;cosY=false&amp;sinY=true&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;regularization=None&amp;regularizationRate=0">The TensorFlow Playground</a></strong> with the hidden layers removed is not a neural network at all — it is a <strong>penalised linear classifier</strong>, which is exactly our object.</p>
+<div class="tight">
+<ul>
+<li>Two concentric rings to separate</li>
+<li><strong>Seven</strong> candidate features: <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(X_1X_2\)</span>, <span class="math inline">\(X_1^2\)</span>, <span class="math inline">\(X_2^2\)</span>, <span class="math inline">\(\sin X_1\)</span>, <span class="math inline">\(\sin X_2\)</span></li>
+<li>Only two are needed — <span class="math inline">\(X_1^2 + X_2^2\)</span> is the radius</li>
+</ul>
+</div>
+<div class="check">
+<p>So the question is the one this whole session asks: <strong>which does the penalty keep?</strong></p>
+</div>
+</section>
+<section id="run-it-three-times" class="slide level2">
+<h2>Run it three times</h2>
+<div class="step">
+<p><strong><a href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;noise=0&amp;networkShape=&amp;seed=0.69510&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=true&amp;xSquared=true&amp;ySquared=true&amp;cosX=false&amp;sinX=true&amp;cosY=false&amp;sinY=true&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;regularization=None&amp;regularizationRate=0">No penalty</a></strong> — all seven connections stay, at some weight. Nothing is discarded because nothing was asked to be.</p>
+</div>
+<div class="step">
+<p><strong><a href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;noise=0&amp;networkShape=&amp;seed=0.69510&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=true&amp;xSquared=true&amp;ySquared=true&amp;cosX=false&amp;sinX=true&amp;cosY=false&amp;sinY=true&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;regularization=L2&amp;regularizationRate=0.03">L2, rate 0.03</a></strong> — the lines thin. All seven survive, the useless ones merely small. This is ridge: <strong>shrinkage without selection</strong>.</p>
+</div>
+<div class="step">
+<p><strong><a href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;noise=0&amp;networkShape=&amp;seed=0.69510&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=true&amp;xSquared=true&amp;ySquared=true&amp;cosX=false&amp;sinX=true&amp;cosY=false&amp;sinY=true&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;regularization=L1&amp;regularizationRate=0.03">L1, rate 0.03</a></strong> — connections <strong>disappear from the diagram</strong>. What remains is <span class="math inline">\(X_1^2\)</span> and <span class="math inline">\(X_2^2\)</span>. This is the lasso, performing variable selection in front of you.</p>
+</div>
+<div class="muted">
+<p>Fitted here as a penalised logistic regression on those same seven features, so the picture is checkable rather than decorative: <strong>L1 keeps 2 of 7</strong> — the two squares, everything else exactly zero — while <strong>L2 keeps 7 of 7</strong>, its largest weights on the same two.</p>
+</div>
+</section>
+<section id="the-elastic-net-is-the-dial-between-them" class="slide level2">
+<h2>The elastic net is the dial between them</h2>
+<p>The playground offers L1 or L2. It does not offer the mixture — which is the gap this section exists to fill.</p>
+<p><span class="math display">\[\alpha = 1 \Rightarrow \text{lasso} \qquad
+\alpha = 0 \Rightarrow \text{ridge} \qquad
+0 &lt; \alpha &lt; 1 \Rightarrow \text{elastic net}\]</span></p>
+<div class="warn">
+<p>Now imagine that demonstration with <span class="math inline">\(X_1^2\)</span> <strong>duplicated</strong> — two columns measuring one thing, as our five AI-adoption columns do. L1 would keep one twin and zero the other, arbitrarily, and the diagram would show it happening. That arbitrariness is the grouping problem, and <span class="math inline">\(\alpha &lt; 1\)</span> is the answer to it.</p>
+</div>
+<div class="check">
+<p>Four minutes here makes the coefficient path concrete: you have now <em>seen</em> the thing that path is a plot of.</p>
 </div>
 </section></section>
 <section>

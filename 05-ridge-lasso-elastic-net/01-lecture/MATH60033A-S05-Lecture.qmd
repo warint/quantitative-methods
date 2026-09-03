@@ -782,6 +782,70 @@ Same worked example, $\lambda = 0.2$, $\alpha = 0.5$: threshold at $0.10$, divid
 $(0.291,\, -0.073,\, 0,\, 0.191)$. **Three survive instead of two.**
 :::
 
+## Watch the two penalties, side by side {#playground}
+
+Everything in this section can be watched happening. **[The TensorFlow
+Playground](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=None&regularizationRate=0)** with the hidden layers removed is not a neural network at
+all — it is a **penalised linear classifier**, which is exactly our object.
+
+::: {.tight}
+- Two concentric rings to separate
+- **Seven** candidate features: $X_1$, $X_2$, $X_1X_2$, $X_1^2$, $X_2^2$,
+  $\sin X_1$, $\sin X_2$
+- Only two are needed — $X_1^2 + X_2^2$ is the radius
+:::
+
+::: {.check}
+So the question is the one this whole session asks: **which does the penalty
+keep?**
+:::
+
+## Run it three times
+
+::: {.step}
+**[No penalty](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=None&regularizationRate=0)** — all seven connections stay, at some weight. Nothing
+is discarded because nothing was asked to be.
+:::
+
+::: {.step}
+**[L2, rate 0.03](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=L2&regularizationRate=0.03)** — the lines thin. All seven survive, the useless ones
+merely small. This is ridge: **shrinkage without selection**.
+:::
+
+::: {.step}
+**[L1, rate 0.03](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=L1&regularizationRate=0.03)** — connections **disappear from the diagram**. What
+remains is $X_1^2$ and $X_2^2$. This is the lasso, performing variable selection
+in front of you.
+:::
+
+::: {.muted}
+Fitted here as a penalised logistic regression on those same seven features, so
+the picture is checkable rather than decorative: **L1 keeps 2 of 7** — the two
+squares, everything else exactly zero — while **L2 keeps 7 of 7**, its largest
+weights on the same two.
+:::
+
+## The elastic net is the dial between them
+
+The playground offers L1 or L2. It does not offer the mixture — which is the gap
+this section exists to fill.
+
+$$\alpha = 1 \Rightarrow \text{lasso} \qquad
+\alpha = 0 \Rightarrow \text{ridge} \qquad
+0 < \alpha < 1 \Rightarrow \text{elastic net}$$
+
+::: {.warn}
+Now imagine that demonstration with $X_1^2$ **duplicated** — two columns
+measuring one thing, as our five AI-adoption columns do. L1 would keep one twin
+and zero the other, arbitrarily, and the diagram would show it happening. That
+arbitrariness is the grouping problem, and $\alpha < 1$ is the answer to it.
+:::
+
+::: {.check}
+Four minutes here makes the coefficient path concrete: you have now *seen* the
+thing that path is a plot of.
+:::
+
 # 6 · Choosing $\lambda$ {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The path, and where it starts
