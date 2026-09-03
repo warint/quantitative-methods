@@ -53,20 +53,23 @@ pd.set_option("display.max_columns", 10)
 4. Classification (cont.)
 5. The Bayes Classifier
 6. The Bayes Classifier (cont.)
-7. K-Nearest Neighbors
-8. K-Nearest Neighbors (cont.)
-9. KNN by hand (you are the algorithm)
-10. KNN by hand (you are the algorithm) (cont.)
-11. KNN by hand
-12. KNN in code (you are no longer the algorithm)
-13. Machine Learning: using KNN as an example
-14. Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.)
-15. Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)
-16. KNN has no coefficients — importance is measured by scrambling a column (cont.)
-17. The confusion matrix, and the accuracy that goes with it (cont.)
-18. Big lessons from ML
-19. Big lessons
-20. Big lessons (cont.)
+7. Watch a decision boundary being built
+8. Four things to try, and what each one shows
+9. What step 4 was really about
+10. K-Nearest Neighbors
+11. K-Nearest Neighbors (cont.)
+12. KNN by hand (you are the algorithm)
+13. KNN by hand (you are the algorithm) (cont.)
+14. KNN by hand
+15. KNN in code (you are no longer the algorithm)
+16. Machine Learning: using KNN as an example
+17. Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.)
+18. Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)
+19. KNN has no coefficients — importance is measured by scrambling a column (cont.)
+20. The confusion matrix, and the accuracy that goes with it (cont.)
+21. Big lessons from ML
+22. Big lessons
+23. Big lessons (cont.)
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -296,6 +299,74 @@ This figure provides an example using a simulated data set in a two-dimensional 
 ## The Bayes Classifier (cont.) {#imported-s08-011 .scrollable}
 
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
+
+## Watch a decision boundary being built {#playground}
+
+Everything on the last four slides — a boundary, a class region, the cost of
+flexibility — can be watched happening, in a browser, in about four minutes.
+
+::: {.step}
+**[playground.tensorflow.org](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape=4,2&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false)** — the link is pre-set to the exercise
+below. Press the play button.
+:::
+
+The problem is two concentric rings, and the inputs are only $X_1$ and $X_2$ —
+the raw coordinates, nothing engineered.
+
+::: {.muted}
+It is a neural network rather than anything this course fits, and that does not
+matter here. What is on screen is a decision boundary and a test error, which
+are the two objects of this session.
+:::
+
+## Four things to try, and what each one shows
+
+::: {.step}
+**1 · Remove both hidden layers**, leaving the inputs wired straight to the
+output. Run it. The boundary is a **straight line**, and it cannot separate a
+ring from its centre — the error stalls near 0.5. This is the limit that made
+session 4's logistic regression a line, and it is why we need something else.
+:::
+
+::: {.step}
+**2 · Put the layers back and run it again.** A closed curve forms. Nothing told
+it to draw a circle; the hidden units composed one out of straight pieces. That
+is what "flexible" buys you.
+:::
+
+::: {.step}
+**3 · Now add capacity** — eight neurons in each of four layers. Watch the two
+loss numbers separate: **training loss keeps falling while test loss turns
+upward**, and the boundary starts bulging toward individual points. You are
+watching variance, live. It is the same curve as $k$ getting too small in the
+next section.
+:::
+
+::: {.step}
+**4 · Reset, and instead tick the $X_1^2$ and $X_2^2$ input features.** Now even
+*no* hidden layer separates the rings almost perfectly — because $X_1^2 + X_2^2$
+is the radius, and in that coordinate the problem was always linear.
+:::
+
+## What step 4 was really about
+
+::: {.tight}
+You can buy the non-linearity with **model flexibility**, or with **a feature you
+thought of yourself**. They are substitutes.
+:::
+
+::: {.check}
+The second is cheaper, more stable and easier to defend — when you can think of
+the feature. Knowing that $X_1^2 + X_2^2$ is a radius is subject knowledge, not
+statistics, and it is the part a model cannot supply for you.
+:::
+
+::: {.warn}
+Which is the session's argument in one sentence: **complexity is what you spend
+when understanding runs out.** Session 5 penalised that spending; session 6 wrote
+the non-linearity in by hand as a quadratic; this session measures what it costs
+when you cannot.
+:::
 
 ## K-Nearest Neighbors {#imported-s08-012 .scrollable}
 
