@@ -268,6 +268,106 @@ estimable at all because that country is absent from the final year. Both are
 reported rather than quietly dropped, because a cohort of one is a fact about the
 design and hiding it would make the evidence look stronger than it is.
 
+## The estimator has a name
+
+The loop in that cell is not an improvisation. Estimating each cohort against a
+clean comparison group and aggregating with weights you chose is precisely the
+procedure of @callaway2021, and there is a Python implementation of it,
+`diff-diff`. It is a young package and the reference implementation is still
+R's `did`, so the first thing to do with it is what this section does: run it
+beside a calculation you already understand, and find out where the two
+disagree.
+
+That is worth doing here for three reasons. It states out loud which cells it
+refuses to estimate. It attaches standard errors to the cohort estimates, which
+the hand-rolled loop had no way to produce. And it does disagree — in a way that
+turns out to be the hand-rolled version's fault.
+
+```{python}
+#| label: check-cs
+#| code-summary: "Run it: Callaway–Sant'Anna on the same panel"
+
+import diff_diff as dd
+
+# The estimator wants one column holding the adoption year, and 0 — not a
+# sentinel it would read as a year — for the never-treated.
+panel["g"] = panel["cohort"].replace(9999, 0)
+
+cs = dd.CallawaySantAnna(cluster="geo").fit(
+    panel, outcome=Y, unit="geo", time="time", first_treat="g")
+gt = cs.to_dataframe()
+
+print(f"{'cohort':>7}{'year':>6}{'ATT(g,t)':>10}{'SE':>7}")
+for _, r in gt.iterrows():
+    g, t = int(r.group), int(r.time)
+    if pd.isna(r.effect):
+        print(f"{g:>7}{t:>6}{'—':>10}{'—':>7}   dropped: {r.skip_reason}")
+    else:
+        tag = "  ← pre-treatment, not an effect" if t < g else ""
+        print(f"{g:>7}{t:>6}{r.effect:>10.3f}{r.se:>7.3f}{tag}")
+
+print(f"\n{'overall ATT':>18}{cs.overall_att:>10.3f}{cs.overall_se:>7.3f}"
+      f"   bias {cs.overall_att - TRUE_EFFECT:+.3f}, {cs.n_clusters} clusters")
+for _, r in cs.aggregate("group").to_dataframe().iterrows():
+    n = panel.loc[panel["cohort"] == int(r.label), "geo"].nunique()
+    print(f"{'cohort ' + str(r.label):>18}{r.att:>10.3f}{r.se:>7.3f}"
+          f"   {n} countr{'y' if n == 1 else 'ies'}")
+
+# The hand-rolled estimates and these ones differ. Recomputing each 2x2 over
+# only the countries observed in *both* of its two years isolates why.
+print("\nthe hand-rolled numbers, and what was wrong with them:")
+print(f"{'g,t':>9}{'as written':>12}{'same units':>12}{'ATT(g,t)':>10}")
+for g, t in ((2022, 2022), (2022, 2023), (2022, 2024), (2023, 2023)):
+    sub = panel[panel["cohort"].isin([g, 9999]) & panel["time"].isin([g - 1, t])]
+    seen = sub.groupby("geo")["time"].nunique()
+    bal = sub[sub["geo"].isin(seen[seen == 2].index)]
+    tr = bal[bal["cohort"] == g].groupby("time")[Y].mean()
+    co = bal[bal["cohort"] == 9999].groupby("time")[Y].mean()
+    fixed = (tr[t] - tr[g - 1]) - (co[t] - co[g - 1])
+    att = gt.loc[(gt.group == g) & (gt.time == t), "effect"].iloc[0]
+    print(f"{f'{g},{t}':>9}{twoby(g, g - 1, t):>12.3f}{fixed:>12.3f}{att:>10.3f}")
+```
+
+The first table is this chapter's own reasoning, produced by the estimator
+rather than argued for in advance. The 2021 cohort is dropped as
+`missing_period` — no pre-treatment observation exists, which is the conclusion
+reached two sections ago by reading the adoption structure. ATT(2023, 2024) is
+dropped as `zero_treated_control`, the same absent country the hand-rolled
+version returned `NaN` for. Neither refusal is buried inside a coefficient.
+
+The standard errors are new. They come from the influence function of each
+group-time effect, clustered by country, and they carry through to the
+aggregate: an overall ATT of +2.20 with a standard error of 0.78, against a
+truth of 2.40. The interval covers it, which is the honest summary of what
+thirty countries over four years can establish about an effect of this size.
+
+::: {.warn}
+**Read the cohort lines again.** The nine-country cohort reports a standard
+error of 0.81. The one-country cohort reports 0.55. One country's trajectory is
+not measured more precisely than nine countries' — the smaller number is what
+comes out when there is no between-country variation left to estimate, and the
+software has no way to know that a cohort of one should not be reported at all.
+The estimator computes whatever you ask it for. Deciding what is worth asking
+for is still yours.
+:::
+
+The last table is the uncomfortable one. The hand-rolled estimates and
+Callaway–Sant'Anna's differ — +1.70 against +1.74, +2.29 against +2.14 — and
+the middle column says why. `twoby` averaged whichever countries happened to be
+present in each year, and this panel is not balanced: Malta and Estonia have no
+2022 observation, Luxembourg no 2021, Spain no 2023, Croatia neither. The "before"
+mean and the "after" mean were therefore computed over different sets of
+countries, and part of what looked like an effect was the change in who was
+being averaged. Hold the units fixed and the estimator is reproduced to three
+decimals.
+
+That failure is on this chapter's own list — it is the **composition change**
+warning further down, committed in code written to demonstrate the method,
+on a dataset small enough to audit by hand. Which is the argument for using the
+package rather than the argument against it: not that it is cleverer, but that
+the choices the hand-rolled version made silently are ones it is forced to make
+out loud.
+
 ## Pre-trends: what this data cannot tell you
 
 ```{python}
@@ -320,6 +420,61 @@ It is worth noticing how much weaker that is than what chapter 10 could do. Ther
 the assumption was also untestable, but the covariates could at least be shown to
 be balanced. Here, there is nothing to show.
 
+## How large a violation would it take?
+
+"The assumption cannot be checked" is where this dataset leaves you. It is not
+where the literature leaves you. @rambachan2023 changes the question: rather
+than testing parallel trends, ask how large a violation of it would have to be
+before the finding stops holding, and report *that* number. The output is a
+family of intervals indexed by how much post-treatment departure from parallel
+trends you are prepared to allow — measured, in the relative-magnitudes version,
+as a multiple $M$ of the largest departure actually visible before treatment.
+
+```{python}
+#| label: check-honest
+#| code-summary: "Run it: how much violation does the result survive?"
+
+es = cs.aggregate("event_study")
+
+print("the whole of the pre-treatment evidence in this dataset:")
+for _, r in es.to_dataframe().query("event_time < 0").iterrows():
+    print(f"   event time {int(r.event_time):>3}: {r.att:+.3f}  "
+          f"(SE {r.se:.3f}, p {r.p_value:.3f}), from {int(r.n)} cohort")
+
+print(f"\n{'M':>5}{'identified set':>22}{'95% robust CI':>22}   rules out zero")
+for M in (0.0, 0.25, 0.5, 1.0, 2.0):
+    h = dd.HonestDiD(method="relative_magnitude", M=M).fit(es)
+    print(f"{M:>5.2f}   [{h.lb:>7.3f},{h.ub:>7.3f}]     "
+          f"[{h.ci_lb:>7.3f},{h.ci_ub:>7.3f}]   "
+          f"{'yes' if h.is_significant else 'no'}")
+```
+
+Two things to read off that, and the second matters more.
+
+The pre-treatment evidence is a single number, from a single cohort, and that
+cohort is a single country. Germany adopted in 2023, so it is the only unit
+whose pre-period is something other than its own reference year, and its
+2021→2022 change ran 1.13 points below the never-treated countries'. Everything
+in the table below rests on that one comparison. The 2022 cohort, nine countries
+strong, contributes nothing here at all — its only pre-period *is* the reference.
+
+The sensitivity table then says: the result survives at $M = 0.25$ and not at
+$M = 0.5$. In words, if post-treatment departures from parallel trends could be
+as much as half the size of the one pre-treatment departure visible in the data,
+the interval already contains zero. That is a low breakdown point, and it ought
+to be — it is what an estimate resting on one country's single pre-period is
+worth.
+
+::: {.warn}
+**This is not a test, and nothing here has been tested.** The honest sentence is
+"the finding requires post-treatment violations of parallel trends no larger
+than about a quarter of the single pre-treatment deviation we can observe, and
+we have one country from which to judge that." A sensitivity analysis converts
+an untestable assumption into a statement about how much of it the result needs.
+That is real progress over asserting the assumption, and it is not the same
+thing as evidence for it.
+:::
+
 ## What difference-in-differences cannot fix
 
 **Anything that changes at the same time as treatment.** Fixed effects remove
@@ -362,6 +517,12 @@ group-time average treatment effects and the aggregation schemes; @sun2021
 does the equivalent for event-study specifications, where the same negative
 weighting contaminates the coefficients on individual leads and lags.
 
+Where the pre-trend evidence is thin — and outside a handful of long panels it
+usually is — @rambachan2023 replaces the ritual pre-trend test with a
+sensitivity analysis. Report the range of estimates consistent with violations
+of parallel trends up to a stated size, and the reader can see how much of the
+assumption the finding actually needs rather than being told it holds.
+
 On inference, the reference remains Bertrand, Duflo and Mullainathan, discussed
 in chapter 3: DiD data are serially correlated panels, and standard errors that
 ignore it reject true nulls at many times the nominal rate.
@@ -379,7 +540,8 @@ ignore it reject true nulls at many times the nominal rate.
    line is evidence.
 4. **A staggered-robust estimator alongside TWFE.** If they agree, the weights
    were benign and you have shown it. If they disagree, the decomposition is the
-   finding.
+   finding. `diff-diff`'s `CallawaySantAnna` is the Python route; the `did`
+   package is the R one.
 5. **Standard errors clustered by unit**, with the number of clusters. Below
    about forty, say what you did about it.
 6. **The scale.** Levels or logs is part of the assumption, because parallel
@@ -388,3 +550,7 @@ ignore it reject true nulls at many times the nominal rate.
    the confounding events they considered and explain why each is implausible —
    which is the modern version of Snow pointing out that nobody chose their water
    company.
+8. **How much violation the result survives.** A breakdown value — the size of
+   departure from parallel trends at which the finding stops holding — is worth
+   more than a pre-trend $p$-value, and unlike the $p$-value it can be reported
+   even when there is nothing to test.

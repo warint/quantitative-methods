@@ -363,7 +363,7 @@
 \makeatother
 \subtitle{MATH60033A · HEC Montréal}
 \author{Thierry Warin, PhD}
-\date{2 September 2026}
+\date{4 September 2026}
 \begin{document}
 \frontmatter
 \maketitle
@@ -593,7 +593,7 @@ decision-maker act on this --- and say what would change your mind? \\
 
 Source:
 \href{https://github.com/warint/quantitative-methods}{github.com/warint/quantitative-methods}
-· 2 September 2026
+· 4 September 2026
 
 \end{qmibmuted}
 
@@ -7864,6 +7864,141 @@ that country is absent from the final year. Both are reported rather
 than quietly dropped, because a cohort of one is a fact about the design
 and hiding it would make the evidence look stronger than it is.
 
+\section{The estimator has a name}\label{the-estimator-has-a-name}
+
+The loop in that cell is not an improvisation. Estimating each cohort
+against a clean comparison group and aggregating with weights you chose
+is precisely the procedure of Callaway and Sant'Anna
+(\citeproc{ref-callaway2021}{2021}), and there is a Python
+implementation of it, \texttt{diff-diff}. It is a young package and the
+reference implementation is still R's \texttt{did}, so the first thing
+to do with it is what this section does: run it beside a calculation you
+already understand, and find out where the two disagree.
+
+That is worth doing here for three reasons. It states out loud which
+cells it refuses to estimate. It attaches standard errors to the cohort
+estimates, which the hand-rolled loop had no way to produce. And it does
+disagree --- in a way that turns out to be the hand-rolled version's
+fault.
+
+\phantomsection\label{check-cs}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ diff\_diff }\ImportTok{as}\NormalTok{ dd}
+
+\CommentTok{\# The estimator wants one column holding the adoption year, and 0 — not a}
+\CommentTok{\# sentinel it would read as a year — for the never{-}treated.}
+\NormalTok{panel[}\StringTok{"g"}\NormalTok{] }\OperatorTok{=}\NormalTok{ panel[}\StringTok{"cohort"}\NormalTok{].replace(}\DecValTok{9999}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+
+\NormalTok{cs }\OperatorTok{=}\NormalTok{ dd.CallawaySantAnna(cluster}\OperatorTok{=}\StringTok{"geo"}\NormalTok{).fit(}
+\NormalTok{    panel, outcome}\OperatorTok{=}\NormalTok{Y, unit}\OperatorTok{=}\StringTok{"geo"}\NormalTok{, time}\OperatorTok{=}\StringTok{"time"}\NormalTok{, first\_treat}\OperatorTok{=}\StringTok{"g"}\NormalTok{)}
+\NormalTok{gt }\OperatorTok{=}\NormalTok{ cs.to\_dataframe()}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}cohort\textquotesingle{}}\SpecialCharTok{:\textgreater{}7\}\{}\StringTok{\textquotesingle{}year\textquotesingle{}}\SpecialCharTok{:\textgreater{}6\}\{}\StringTok{\textquotesingle{}ATT(g,t)\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}\{}\StringTok{\textquotesingle{}SE\textquotesingle{}}\SpecialCharTok{:\textgreater{}7\}}\SpecialStringTok{"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ gt.iterrows():}
+\NormalTok{    g, t }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(r.group), }\BuiltInTok{int}\NormalTok{(r.time)}
+    \ControlFlowTok{if}\NormalTok{ pd.isna(r.effect):}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{g}\SpecialCharTok{:\textgreater{}7\}\{}\NormalTok{t}\SpecialCharTok{:\textgreater{}6\}\{}\StringTok{\textquotesingle{}—\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}\{}\StringTok{\textquotesingle{}—\textquotesingle{}}\SpecialCharTok{:\textgreater{}7\}}\SpecialStringTok{   dropped: }\SpecialCharTok{\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{skip\_reason}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        tag }\OperatorTok{=} \StringTok{"  ← pre{-}treatment, not an effect"} \ControlFlowTok{if}\NormalTok{ t }\OperatorTok{\textless{}}\NormalTok{ g }\ControlFlowTok{else} \StringTok{""}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{g}\SpecialCharTok{:\textgreater{}7\}\{}\NormalTok{t}\SpecialCharTok{:\textgreater{}6\}\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{effect}\SpecialCharTok{:\textgreater{}10.3f\}\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{se}\SpecialCharTok{:\textgreater{}7.3f\}\{}\NormalTok{tag}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialCharTok{\{}\StringTok{\textquotesingle{}overall ATT\textquotesingle{}}\SpecialCharTok{:\textgreater{}18\}\{}\NormalTok{cs}\SpecialCharTok{.}\NormalTok{overall\_att}\SpecialCharTok{:\textgreater{}10.3f\}\{}\NormalTok{cs}\SpecialCharTok{.}\NormalTok{overall\_se}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{"}
+      \SpecialStringTok{f"   bias }\SpecialCharTok{\{}\NormalTok{cs}\SpecialCharTok{.}\NormalTok{overall\_att }\OperatorTok{{-}}\NormalTok{ TRUE\_EFFECT}\SpecialCharTok{:+.3f\}}\SpecialStringTok{, }\SpecialCharTok{\{}\NormalTok{cs}\SpecialCharTok{.}\NormalTok{n\_clusters}\SpecialCharTok{\}}\SpecialStringTok{ clusters"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ cs.aggregate(}\StringTok{"group"}\NormalTok{).to\_dataframe().iterrows():}
+\NormalTok{    n }\OperatorTok{=}\NormalTok{ panel.loc[panel[}\StringTok{"cohort"}\NormalTok{] }\OperatorTok{==} \BuiltInTok{int}\NormalTok{(r.label), }\StringTok{"geo"}\NormalTok{].nunique()}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}cohort \textquotesingle{}} \OperatorTok{+} \BuiltInTok{str}\NormalTok{(r.label)}\SpecialCharTok{:\textgreater{}18\}\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{att}\SpecialCharTok{:\textgreater{}10.3f\}\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{se}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"   }\SpecialCharTok{\{}\NormalTok{n}\SpecialCharTok{\}}\SpecialStringTok{ countr}\SpecialCharTok{\{}\StringTok{\textquotesingle{}y\textquotesingle{}} \ControlFlowTok{if}\NormalTok{ n }\OperatorTok{==} \DecValTok{1} \ControlFlowTok{else} \StringTok{\textquotesingle{}ies\textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\CommentTok{\# The hand{-}rolled estimates and these ones differ. Recomputing each 2x2 over}
+\CommentTok{\# only the countries observed in *both* of its two years isolates why.}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{the hand{-}rolled numbers, and what was wrong with them:"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}g,t\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}\{}\StringTok{\textquotesingle{}as written\textquotesingle{}}\SpecialCharTok{:\textgreater{}12\}\{}\StringTok{\textquotesingle{}same units\textquotesingle{}}\SpecialCharTok{:\textgreater{}12\}\{}\StringTok{\textquotesingle{}ATT(g,t)\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}}\SpecialStringTok{"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ g, t }\KeywordTok{in}\NormalTok{ ((}\DecValTok{2022}\NormalTok{, }\DecValTok{2022}\NormalTok{), (}\DecValTok{2022}\NormalTok{, }\DecValTok{2023}\NormalTok{), (}\DecValTok{2022}\NormalTok{, }\DecValTok{2024}\NormalTok{), (}\DecValTok{2023}\NormalTok{, }\DecValTok{2023}\NormalTok{)):}
+\NormalTok{    sub }\OperatorTok{=}\NormalTok{ panel[panel[}\StringTok{"cohort"}\NormalTok{].isin([g, }\DecValTok{9999}\NormalTok{]) }\OperatorTok{\&}\NormalTok{ panel[}\StringTok{"time"}\NormalTok{].isin([g }\OperatorTok{{-}} \DecValTok{1}\NormalTok{, t])]}
+\NormalTok{    seen }\OperatorTok{=}\NormalTok{ sub.groupby(}\StringTok{"geo"}\NormalTok{)[}\StringTok{"time"}\NormalTok{].nunique()}
+\NormalTok{    bal }\OperatorTok{=}\NormalTok{ sub[sub[}\StringTok{"geo"}\NormalTok{].isin(seen[seen }\OperatorTok{==} \DecValTok{2}\NormalTok{].index)]}
+\NormalTok{    tr }\OperatorTok{=}\NormalTok{ bal[bal[}\StringTok{"cohort"}\NormalTok{] }\OperatorTok{==}\NormalTok{ g].groupby(}\StringTok{"time"}\NormalTok{)[Y].mean()}
+\NormalTok{    co }\OperatorTok{=}\NormalTok{ bal[bal[}\StringTok{"cohort"}\NormalTok{] }\OperatorTok{==} \DecValTok{9999}\NormalTok{].groupby(}\StringTok{"time"}\NormalTok{)[Y].mean()}
+\NormalTok{    fixed }\OperatorTok{=}\NormalTok{ (tr[t] }\OperatorTok{{-}}\NormalTok{ tr[g }\OperatorTok{{-}} \DecValTok{1}\NormalTok{]) }\OperatorTok{{-}}\NormalTok{ (co[t] }\OperatorTok{{-}}\NormalTok{ co[g }\OperatorTok{{-}} \DecValTok{1}\NormalTok{])}
+\NormalTok{    att }\OperatorTok{=}\NormalTok{ gt.loc[(gt.group }\OperatorTok{==}\NormalTok{ g) }\OperatorTok{\&}\NormalTok{ (gt.time }\OperatorTok{==}\NormalTok{ t), }\StringTok{"effect"}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{]}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\SpecialStringTok{f\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{g}\SpecialCharTok{\}}\SpecialStringTok{,}\SpecialCharTok{\{}\NormalTok{t}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}\{}\NormalTok{twoby(g, g }\OperatorTok{{-}} \DecValTok{1}\NormalTok{, t)}\SpecialCharTok{:\textgreater{}12.3f\}\{}\NormalTok{fixed}\SpecialCharTok{:\textgreater{}12.3f\}\{}\NormalTok{att}\SpecialCharTok{:\textgreater{}10.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ cohort  year  ATT(g,t)     SE
+   2021  2021         —      —   dropped: missing_period
+   2021  2022         —      —   dropped: missing_period
+   2021  2023         —      —   dropped: missing_period
+   2021  2024         —      —   dropped: missing_period
+   2022  2022     1.739  1.135
+   2022  2023     2.751  0.843
+   2022  2024     2.138  0.977
+   2023  2022    -1.126  0.440  ← pre-treatment, not an effect
+   2023  2023     1.842  0.553
+   2023  2024         —      —   dropped: zero_treated_control
+
+       overall ATT     2.196  0.782   bias -0.204, 30 clusters
+       cohort 2022     2.209  0.809   9 countries
+       cohort 2023     1.842  0.553   1 country
+
+the hand-rolled numbers, and what was wrong with them:
+      g,t  as written  same units  ATT(g,t)
+2022,2022       1.701       1.739     1.739
+2022,2023       2.702       2.751     2.751
+2022,2024       2.292       2.138     2.138
+2023,2023       1.666       1.842     1.842
+\end{verbatim}
+
+The first table is this chapter's own reasoning, produced by the
+estimator rather than argued for in advance. The 2021 cohort is dropped
+as \texttt{missing\_period} --- no pre-treatment observation exists,
+which is the conclusion reached two sections ago by reading the adoption
+structure. ATT(2023, 2024) is dropped as
+\texttt{zero\_treated\_control}, the same absent country the hand-rolled
+version returned \texttt{NaN} for. Neither refusal is buried inside a
+coefficient.
+
+The standard errors are new. They come from the influence function of
+each group-time effect, clustered by country, and they carry through to
+the aggregate: an overall ATT of +2.20 with a standard error of 0.78,
+against a truth of 2.40. The interval covers it, which is the honest
+summary of what thirty countries over four years can establish about an
+effect of this size.
+
+\begin{qmibwarn}
+
+\textbf{Read the cohort lines again.} The nine-country cohort reports a
+standard error of 0.81. The one-country cohort reports 0.55. One
+country's trajectory is not measured more precisely than nine countries'
+--- the smaller number is what comes out when there is no
+between-country variation left to estimate, and the software has no way
+to know that a cohort of one should not be reported at all. The
+estimator computes whatever you ask it for. Deciding what is worth
+asking for is still yours.
+
+\end{qmibwarn}
+
+The last table is the uncomfortable one. The hand-rolled estimates and
+Callaway--Sant'Anna's differ --- +1.70 against +1.74, +2.29 against
++2.14 --- and the middle column says why. \texttt{twoby} averaged
+whichever countries happened to be present in each year, and this panel
+is not balanced: Malta and Estonia have no 2022 observation, Luxembourg
+no 2021, Spain no 2023, Croatia neither. The ``before'' mean and the
+``after'' mean were therefore computed over different sets of countries,
+and part of what looked like an effect was the change in who was being
+averaged. Hold the units fixed and the estimator is reproduced to three
+decimals.
+
+That failure is on this chapter's own list --- it is the
+\textbf{composition change} warning further down, committed in code
+written to demonstrate the method, on a dataset small enough to audit by
+hand. Which is the argument for using the package rather than the
+argument against it: not that it is cleverer, but that the choices the
+hand-rolled version made silently are ones it is forced to make out
+loud.
+
 \section{Pre-trends: what this data cannot tell
 you}\label{pre-trends-what-this-data-cannot-tell-you}
 
@@ -7942,6 +8077,80 @@ It is worth noticing how much weaker that is than what chapter 10 could
 do. There the assumption was also untestable, but the covariates could
 at least be shown to be balanced. Here, there is nothing to show.
 
+\section{How large a violation would it
+take?}\label{how-large-a-violation-would-it-take}
+
+``The assumption cannot be checked'' is where this dataset leaves you.
+It is not where the literature leaves you. Rambachan and Roth
+(\citeproc{ref-rambachan2023}{2023}) changes the question: rather than
+testing parallel trends, ask how large a violation of it would have to
+be before the finding stops holding, and report \emph{that} number. The
+output is a family of intervals indexed by how much post-treatment
+departure from parallel trends you are prepared to allow --- measured,
+in the relative-magnitudes version, as a multiple \(M\) of the largest
+departure actually visible before treatment.
+
+\phantomsection\label{check-honest}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{es }\OperatorTok{=}\NormalTok{ cs.aggregate(}\StringTok{"event\_study"}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(}\StringTok{"the whole of the pre{-}treatment evidence in this dataset:"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ es.to\_dataframe().query(}\StringTok{"event\_time \textless{} 0"}\NormalTok{).iterrows():}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"   event time }\SpecialCharTok{\{}\BuiltInTok{int}\NormalTok{(r.event\_time)}\SpecialCharTok{:\textgreater{}3\}}\SpecialStringTok{: }\SpecialCharTok{\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{att}\SpecialCharTok{:+.3f\}}\SpecialStringTok{  "}
+          \SpecialStringTok{f"(SE }\SpecialCharTok{\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{se}\SpecialCharTok{:.3f\}}\SpecialStringTok{, p }\SpecialCharTok{\{}\NormalTok{r}\SpecialCharTok{.}\NormalTok{p\_value}\SpecialCharTok{:.3f\}}\SpecialStringTok{), from }\SpecialCharTok{\{}\BuiltInTok{int}\NormalTok{(r.n)}\SpecialCharTok{\}}\SpecialStringTok{ cohort"}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialCharTok{\{}\StringTok{\textquotesingle{}M\textquotesingle{}}\SpecialCharTok{:\textgreater{}5\}\{}\StringTok{\textquotesingle{}identified set\textquotesingle{}}\SpecialCharTok{:\textgreater{}22\}\{}\StringTok{\textquotesingle{}95}\SpecialCharTok{\% r}\StringTok{obust CI\textquotesingle{}}\SpecialCharTok{:\textgreater{}22\}}\SpecialStringTok{   rules out zero"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ M }\KeywordTok{in}\NormalTok{ (}\FloatTok{0.0}\NormalTok{, }\FloatTok{0.25}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{1.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{):}
+\NormalTok{    h }\OperatorTok{=}\NormalTok{ dd.HonestDiD(method}\OperatorTok{=}\StringTok{"relative\_magnitude"}\NormalTok{, M}\OperatorTok{=}\NormalTok{M).fit(es)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{M}\SpecialCharTok{:\textgreater{}5.2f\}}\SpecialStringTok{   [}\SpecialCharTok{\{}\NormalTok{h}\SpecialCharTok{.}\NormalTok{lb}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{,}\SpecialCharTok{\{}\NormalTok{h}\SpecialCharTok{.}\NormalTok{ub}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{]     "}
+          \SpecialStringTok{f"[}\SpecialCharTok{\{}\NormalTok{h}\SpecialCharTok{.}\NormalTok{ci\_lb}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{,}\SpecialCharTok{\{}\NormalTok{h}\SpecialCharTok{.}\NormalTok{ci\_ub}\SpecialCharTok{:\textgreater{}7.3f\}}\SpecialStringTok{]   "}
+          \SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}yes\textquotesingle{}} \ControlFlowTok{if}\NormalTok{ h}\SpecialCharTok{.}\NormalTok{is\_significant }\ControlFlowTok{else} \StringTok{\textquotesingle{}no\textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+the whole of the pre-treatment evidence in this dataset:
+   event time  -1: -1.126  (SE 0.440, p 0.016), from 1 cohort
+
+    M        identified set         95% robust CI   rules out zero
+ 0.00   [  2.212,  2.212]     [  0.613,  3.812]   yes
+ 0.25   [  1.649,  2.776]     [  0.050,  4.375]   yes
+ 0.50   [  1.086,  3.339]     [ -0.513,  4.938]   no
+ 1.00   [ -0.040,  4.465]     [ -1.640,  6.064]   no
+ 2.00   [ -2.293,  6.718]     [ -3.892,  8.317]   no
+\end{verbatim}
+
+Two things to read off that, and the second matters more.
+
+The pre-treatment evidence is a single number, from a single cohort, and
+that cohort is a single country. Germany adopted in 2023, so it is the
+only unit whose pre-period is something other than its own reference
+year, and its 2021→2022 change ran 1.13 points below the never-treated
+countries'. Everything in the table below rests on that one comparison.
+The 2022 cohort, nine countries strong, contributes nothing here at all
+--- its only pre-period \emph{is} the reference.
+
+The sensitivity table then says: the result survives at \(M = 0.25\) and
+not at \(M = 0.5\). In words, if post-treatment departures from parallel
+trends could be as much as half the size of the one pre-treatment
+departure visible in the data, the interval already contains zero. That
+is a low breakdown point, and it ought to be --- it is what an estimate
+resting on one country's single pre-period is worth.
+
+\begin{qmibwarn}
+
+\textbf{This is not a test, and nothing here has been tested.} The
+honest sentence is ``the finding requires post-treatment violations of
+parallel trends no larger than about a quarter of the single
+pre-treatment deviation we can observe, and we have one country from
+which to judge that.'' A sensitivity analysis converts an untestable
+assumption into a statement about how much of it the result needs. That
+is real progress over asserting the assumption, and it is not the same
+thing as evidence for it.
+
+\end{qmibwarn}
+
 \section{What difference-in-differences cannot
 fix}\label{what-difference-in-differences-cannot-fix}
 
@@ -7994,6 +8203,14 @@ average treatment effects and the aggregation schemes; Sun and Abraham
 specifications, where the same negative weighting contaminates the
 coefficients on individual leads and lags.
 
+Where the pre-trend evidence is thin --- and outside a handful of long
+panels it usually is --- Rambachan and Roth
+(\citeproc{ref-rambachan2023}{2023}) replaces the ritual pre-trend test
+with a sensitivity analysis. Report the range of estimates consistent
+with violations of parallel trends up to a stated size, and the reader
+can see how much of the assumption the finding actually needs rather
+than being told it holds.
+
 On inference, the reference remains Bertrand, Duflo and Mullainathan,
 discussed in chapter 3: DiD data are serially correlated panels, and
 standard errors that ignore it reject true nulls at many times the
@@ -8021,7 +8238,9 @@ nominal rate.
 \item
   \textbf{A staggered-robust estimator alongside TWFE.} If they agree,
   the weights were benign and you have shown it. If they disagree, the
-  decomposition is the finding.
+  decomposition is the finding. \texttt{diff-diff}'s
+  \texttt{CallawaySantAnna} is the Python route; the \texttt{did}
+  package is the R one.
 \item
   \textbf{Standard errors clustered by unit}, with the number of
   clusters. Below about forty, say what you did about it.
@@ -8033,6 +8252,11 @@ nominal rate.
   papers name the confounding events they considered and explain why
   each is implausible --- which is the modern version of Snow pointing
   out that nobody chose their water company.
+\item
+  \textbf{How much violation the result survives.} A breakdown value ---
+  the size of departure from parallel trends at which the finding stops
+  holding --- is worth more than a pre-trend \(p\)-value, and unlike the
+  \(p\)-value it can be reported even when there is nothing to test.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
@@ -10201,6 +10425,12 @@ Planes of Closest Fit to Systems of Points in
 Space\textless/i\textgreater{}.''} \emph{{The} {London}, {Edinburgh},
 and {Dublin} {Philosophical} {Magazine} and {Journal} of {Science}} 2
 (11): 559--72. \url{https://doi.org/10.1080/14786440109462720}.
+
+\bibitem[\citeproctext]{ref-rambachan2023}
+Rambachan, Ashesh, and Jonathan Roth. 2023. {``A {More} {Credible}
+{Approach} to {Parallel} {Trends}.''} \emph{{Review} of {Economic}
+{Studies}} 90 (5): 2555--91.
+\url{https://doi.org/10.1093/restud/rdad018}.
 
 \bibitem[\citeproctext]{ref-ramsey1969}
 Ramsey, J. B. 1969. {``{Tests} for {Specification} {Errors} in

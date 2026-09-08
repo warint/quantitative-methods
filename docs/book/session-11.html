@@ -324,10 +324,12 @@ window.Quarto = {
   <li><a href="#when-treatment-arrives-at-different-times" id="toc-when-treatment-arrives-at-different-times" class="nav-link" data-scroll-target="#when-treatment-arrives-at-different-times"><span class="header-section-number">11.4</span> When treatment arrives at different times</a></li>
   <li><a href="#the-data-and-what-it-will-and-will-not-support" id="toc-the-data-and-what-it-will-and-will-not-support" class="nav-link" data-scroll-target="#the-data-and-what-it-will-and-will-not-support"><span class="header-section-number">11.5</span> The data, and what it will and will not support</a></li>
   <li><a href="#the-estimates" id="toc-the-estimates" class="nav-link" data-scroll-target="#the-estimates"><span class="header-section-number">11.6</span> The estimates</a></li>
-  <li><a href="#pre-trends-what-this-data-cannot-tell-you" id="toc-pre-trends-what-this-data-cannot-tell-you" class="nav-link" data-scroll-target="#pre-trends-what-this-data-cannot-tell-you"><span class="header-section-number">11.7</span> Pre-trends: what this data cannot tell you</a></li>
-  <li><a href="#what-difference-in-differences-cannot-fix" id="toc-what-difference-in-differences-cannot-fix" class="nav-link" data-scroll-target="#what-difference-in-differences-cannot-fix"><span class="header-section-number">11.8</span> What difference-in-differences cannot fix</a></li>
-  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">11.9</span> A short review of the literature</a></li>
-  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">11.10</span> What to report</a></li>
+  <li><a href="#the-estimator-has-a-name" id="toc-the-estimator-has-a-name" class="nav-link" data-scroll-target="#the-estimator-has-a-name"><span class="header-section-number">11.7</span> The estimator has a name</a></li>
+  <li><a href="#pre-trends-what-this-data-cannot-tell-you" id="toc-pre-trends-what-this-data-cannot-tell-you" class="nav-link" data-scroll-target="#pre-trends-what-this-data-cannot-tell-you"><span class="header-section-number">11.8</span> Pre-trends: what this data cannot tell you</a></li>
+  <li><a href="#how-large-a-violation-would-it-take" id="toc-how-large-a-violation-would-it-take" class="nav-link" data-scroll-target="#how-large-a-violation-would-it-take"><span class="header-section-number">11.9</span> How large a violation would it take?</a></li>
+  <li><a href="#what-difference-in-differences-cannot-fix" id="toc-what-difference-in-differences-cannot-fix" class="nav-link" data-scroll-target="#what-difference-in-differences-cannot-fix"><span class="header-section-number">11.10</span> What difference-in-differences cannot fix</a></li>
+  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">11.11</span> A short review of the literature</a></li>
+  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">11.12</span> What to report</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-11.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -533,39 +535,119 @@ averaging only the cohort with more than one country: +2.232   bias -0.168</code
 <p>The two-way fixed effects estimate is close to the truth here, and it would be dishonest to stage a dramatic failure that the data do not produce. With four periods and effects that are roughly constant once treatment begins, the negative-weighting problem is mild. The point stands anyway: <strong>the estimate is close for reasons you can only check by decomposing it</strong>, and a paper reporting the TWFE coefficient alone offers no way to know whether its weights were benign.</p>
 <p>The cohort estimates show what the decomposition looks like. The 2022 cohort — nine countries with one clean pre-period — gives +1.70, +2.70 and +2.29 in successive years, averaging +2.23 against a truth of +2.40, with the sampling noise you would expect from that many units. The 2023 cohort is a single country; its one estimable comparison happens to land at +1.67, and the second is not estimable at all because that country is absent from the final year. Both are reported rather than quietly dropped, because a cohort of one is a fact about the design and hiding it would make the evidence look stronger than it is.</p>
 </section>
-<section id="pre-trends-what-this-data-cannot-tell-you" class="level2" data-number="11.7">
-<h2 data-number="11.7" class="anchored" data-anchor-id="pre-trends-what-this-data-cannot-tell-you"><span class="header-section-number">11.7</span> Pre-trends: what this data cannot tell you</h2>
-<div id="cell-fig-event-study" class="cell" data-execution_count="3">
+<section id="the-estimator-has-a-name" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="the-estimator-has-a-name"><span class="header-section-number">11.7</span> The estimator has a name</h2>
+<p>The loop in that cell is not an improvisation. Estimating each cohort against a clean comparison group and aggregating with weights you chose is precisely the procedure of <span class="citation" data-cites="callaway2021">Callaway and Sant’Anna (<a href="#ref-callaway2021" role="doc-biblioref">2021</a>)</span>, and there is a Python implementation of it, <code>diff-diff</code>. It is a young package and the reference implementation is still R’s <code>did</code>, so the first thing to do with it is what this section does: run it beside a calculation you already understand, and find out where the two disagree.</p>
+<p>That is worth doing here for three reasons. It states out loud which cells it refuses to estimate. It attaches standard errors to the cohort estimates, which the hand-rolled loop had no way to produce. And it does disagree — in a way that turns out to be the hand-rolled version’s fault.</p>
+<div id="check-cs" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Run it: Callaway–Sant’Anna on the same panel</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The estimator wants one column holding the adoption year, and 0 — not a</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sentinel it would read as a year — for the never-treated.</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>panel[<span class="st">"g"</span>] <span class="op">=</span> panel[<span class="st">"cohort"</span>].replace(<span class="dv">9999</span>, <span class="dv">0</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>cs <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">"geo"</span>).fit(</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    panel, outcome<span class="op">=</span>Y, unit<span class="op">=</span><span class="st">"geo"</span>, time<span class="op">=</span><span class="st">"time"</span>, first_treat<span class="op">=</span><span class="st">"g"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>gt <span class="op">=</span> cs.to_dataframe()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'cohort'</span><span class="sc">:&gt;7}{</span><span class="st">'year'</span><span class="sc">:&gt;6}{</span><span class="st">'ATT(g,t)'</span><span class="sc">:&gt;10}{</span><span class="st">'SE'</span><span class="sc">:&gt;7}</span><span class="ss">"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, r <span class="kw">in</span> gt.iterrows():</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    g, t <span class="op">=</span> <span class="bu">int</span>(r.group), <span class="bu">int</span>(r.time)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pd.isna(r.effect):</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>g<span class="sc">:&gt;7}{</span>t<span class="sc">:&gt;6}{</span><span class="st">'—'</span><span class="sc">:&gt;10}{</span><span class="st">'—'</span><span class="sc">:&gt;7}</span><span class="ss">   dropped: </span><span class="sc">{</span>r<span class="sc">.</span>skip_reason<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        tag <span class="op">=</span> <span class="st">"  ← pre-treatment, not an effect"</span> <span class="cf">if</span> t <span class="op">&lt;</span> g <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>g<span class="sc">:&gt;7}{</span>t<span class="sc">:&gt;6}{</span>r<span class="sc">.</span>effect<span class="sc">:&gt;10.3f}{</span>r<span class="sc">.</span>se<span class="sc">:&gt;7.3f}{</span>tag<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'overall ATT'</span><span class="sc">:&gt;18}{</span>cs<span class="sc">.</span>overall_att<span class="sc">:&gt;10.3f}{</span>cs<span class="sc">.</span>overall_se<span class="sc">:&gt;7.3f}</span><span class="ss">"</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"   bias </span><span class="sc">{</span>cs<span class="sc">.</span>overall_att <span class="op">-</span> TRUE_EFFECT<span class="sc">:+.3f}</span><span class="ss">, </span><span class="sc">{</span>cs<span class="sc">.</span>n_clusters<span class="sc">}</span><span class="ss"> clusters"</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, r <span class="kw">in</span> cs.aggregate(<span class="st">"group"</span>).to_dataframe().iterrows():</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> panel.loc[panel[<span class="st">"cohort"</span>] <span class="op">==</span> <span class="bu">int</span>(r.label), <span class="st">"geo"</span>].nunique()</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'cohort '</span> <span class="op">+</span> <span class="bu">str</span>(r.label)<span class="sc">:&gt;18}{</span>r<span class="sc">.</span>att<span class="sc">:&gt;10.3f}{</span>r<span class="sc">.</span>se<span class="sc">:&gt;7.3f}</span><span class="ss">"</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"   </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> countr</span><span class="sc">{</span><span class="st">'y'</span> <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> <span class="st">'ies'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co"># The hand-rolled estimates and these ones differ. Recomputing each 2x2 over</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co"># only the countries observed in *both* of its two years isolates why.</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">the hand-rolled numbers, and what was wrong with them:"</span>)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'g,t'</span><span class="sc">:&gt;9}{</span><span class="st">'as written'</span><span class="sc">:&gt;12}{</span><span class="st">'same units'</span><span class="sc">:&gt;12}{</span><span class="st">'ATT(g,t)'</span><span class="sc">:&gt;10}</span><span class="ss">"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> g, t <span class="kw">in</span> ((<span class="dv">2022</span>, <span class="dv">2022</span>), (<span class="dv">2022</span>, <span class="dv">2023</span>), (<span class="dv">2022</span>, <span class="dv">2024</span>), (<span class="dv">2023</span>, <span class="dv">2023</span>)):</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">=</span> panel[panel[<span class="st">"cohort"</span>].isin([g, <span class="dv">9999</span>]) <span class="op">&amp;</span> panel[<span class="st">"time"</span>].isin([g <span class="op">-</span> <span class="dv">1</span>, t])]</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> sub.groupby(<span class="st">"geo"</span>)[<span class="st">"time"</span>].nunique()</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    bal <span class="op">=</span> sub[sub[<span class="st">"geo"</span>].isin(seen[seen <span class="op">==</span> <span class="dv">2</span>].index)]</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> bal[bal[<span class="st">"cohort"</span>] <span class="op">==</span> g].groupby(<span class="st">"time"</span>)[Y].mean()</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    co <span class="op">=</span> bal[bal[<span class="st">"cohort"</span>] <span class="op">==</span> <span class="dv">9999</span>].groupby(<span class="st">"time"</span>)[Y].mean()</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    fixed <span class="op">=</span> (tr[t] <span class="op">-</span> tr[g <span class="op">-</span> <span class="dv">1</span>]) <span class="op">-</span> (co[t] <span class="op">-</span> co[g <span class="op">-</span> <span class="dv">1</span>])</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    att <span class="op">=</span> gt.loc[(gt.group <span class="op">==</span> g) <span class="op">&amp;</span> (gt.time <span class="op">==</span> t), <span class="st">"effect"</span>].iloc[<span class="dv">0</span>]</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="ss">f'</span><span class="sc">{</span>g<span class="sc">}</span><span class="ss">,</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span><span class="sc">:&gt;9}{</span>twoby(g, g <span class="op">-</span> <span class="dv">1</span>, t)<span class="sc">:&gt;12.3f}{</span>fixed<span class="sc">:&gt;12.3f}{</span>att<span class="sc">:&gt;10.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> cohort  year  ATT(g,t)     SE
+   2021  2021         —      —   dropped: missing_period
+   2021  2022         —      —   dropped: missing_period
+   2021  2023         —      —   dropped: missing_period
+   2021  2024         —      —   dropped: missing_period
+   2022  2022     1.739  1.135
+   2022  2023     2.751  0.843
+   2022  2024     2.138  0.977
+   2023  2022    -1.126  0.440  ← pre-treatment, not an effect
+   2023  2023     1.842  0.553
+   2023  2024         —      —   dropped: zero_treated_control
+
+       overall ATT     2.196  0.782   bias -0.204, 30 clusters
+       cohort 2022     2.209  0.809   9 countries
+       cohort 2023     1.842  0.553   1 country
+
+the hand-rolled numbers, and what was wrong with them:
+      g,t  as written  same units  ATT(g,t)
+2022,2022       1.701       1.739     1.739
+2022,2023       2.702       2.751     2.751
+2022,2024       2.292       2.138     2.138
+2023,2023       1.666       1.842     1.842</code></pre>
+</div>
+</div>
+<p>The first table is this chapter’s own reasoning, produced by the estimator rather than argued for in advance. The 2021 cohort is dropped as <code>missing_period</code> — no pre-treatment observation exists, which is the conclusion reached two sections ago by reading the adoption structure. ATT(2023, 2024) is dropped as <code>zero_treated_control</code>, the same absent country the hand-rolled version returned <code>NaN</code> for. Neither refusal is buried inside a coefficient.</p>
+<p>The standard errors are new. They come from the influence function of each group-time effect, clustered by country, and they carry through to the aggregate: an overall ATT of +2.20 with a standard error of 0.78, against a truth of 2.40. The interval covers it, which is the honest summary of what thirty countries over four years can establish about an effect of this size.</p>
+<div class="warn">
+<p><strong>Read the cohort lines again.</strong> The nine-country cohort reports a standard error of 0.81. The one-country cohort reports 0.55. One country’s trajectory is not measured more precisely than nine countries’ — the smaller number is what comes out when there is no between-country variation left to estimate, and the software has no way to know that a cohort of one should not be reported at all. The estimator computes whatever you ask it for. Deciding what is worth asking for is still yours.</p>
+</div>
+<p>The last table is the uncomfortable one. The hand-rolled estimates and Callaway–Sant’Anna’s differ — +1.70 against +1.74, +2.29 against +2.14 — and the middle column says why. <code>twoby</code> averaged whichever countries happened to be present in each year, and this panel is not balanced: Malta and Estonia have no 2022 observation, Luxembourg no 2021, Spain no 2023, Croatia neither. The “before” mean and the “after” mean were therefore computed over different sets of countries, and part of what looked like an effect was the change in who was being averaged. Hold the units fixed and the estimator is reproduced to three decimals.</p>
+<p>That failure is on this chapter’s own list — it is the <strong>composition change</strong> warning further down, committed in code written to demonstrate the method, on a dataset small enough to audit by hand. Which is the argument for using the package rather than the argument against it: not that it is cleverer, but that the choices the hand-rolled version made silently are ones it is forced to make out loud.</p>
+</section>
+<section id="pre-trends-what-this-data-cannot-tell-you" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="pre-trends-what-this-data-cannot-tell-you"><span class="header-section-number">11.8</span> Pre-trends: what this data cannot tell you</h2>
+<div id="cell-fig-event-study" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="op">=</span> <span class="dv">2022</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> panel[panel[<span class="st">"cohort"</span>].isin([cohort, <span class="dv">9999</span>])].copy()</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sub[<span class="st">"treated"</span>] <span class="op">=</span> (sub[<span class="st">"cohort"</span>] <span class="op">==</span> cohort).astype(<span class="bu">int</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>tr <span class="op">=</span> sub[sub[<span class="st">"treated"</span>] <span class="op">==</span> <span class="dv">1</span>].groupby(<span class="st">"time"</span>)[Y].mean()</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>co <span class="op">=</span> sub[sub[<span class="st">"treated"</span>] <span class="op">==</span> <span class="dv">0</span>].groupby(<span class="st">"time"</span>)[Y].mean()</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>years <span class="op">=</span> <span class="bu">sorted</span>(sub[<span class="st">"time"</span>].unique())</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>eff <span class="op">=</span> [(t <span class="op">-</span> cohort, (tr[t] <span class="op">-</span> tr[<span class="dv">2021</span>]) <span class="op">-</span> (co[t] <span class="op">-</span> co[<span class="dv">2021</span>])) <span class="cf">for</span> t <span class="kw">in</span> years]</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">6.8</span>, <span class="fl">4.0</span>))</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> [e <span class="cf">for</span> e, _ <span class="kw">in</span> eff]<span class="op">;</span> ys <span class="op">=</span> [v <span class="cf">for</span> _, v <span class="kw">in</span> eff]</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span>CL.line, lw<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ax.axhline(TRUE_EFFECT, color<span class="op">=</span>CL.good, lw<span class="op">=</span><span class="fl">1.4</span>, ls<span class="op">=</span><span class="st">":"</span>, label<span class="op">=</span><span class="st">"true effect"</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="op">-</span><span class="fl">0.5</span>, color<span class="op">=</span>CL.muted, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, ys, marker<span class="op">=</span><span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">7</span>, lw<span class="op">=</span><span class="fl">1.8</span>, color<span class="op">=</span>CL.accent, zorder<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"reference period</span><span class="ch">\n</span><span class="st">(zero by construction)"</span>, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            textcoords<span class="op">=</span><span class="st">"offset points"</span>, xytext<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">26</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span>CL.muted)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"years since adoption"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"estimated effect (pp)"</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(xs)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'event time'</span><span class="sc">:&gt;12}{</span><span class="st">'estimate'</span><span class="sc">:&gt;11}</span><span class="ss">"</span>)</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> e, v <span class="kw">in</span> eff:</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    note <span class="op">=</span> <span class="st">"  reference — not evidence"</span> <span class="cf">if</span> e <span class="op">==</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">else</span> <span class="st">""</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>e<span class="sc">:&gt;12}{</span>v<span class="sc">:&gt;11.3f}{</span>note<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">pre-periods available for this cohort: "</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span><span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> e, _ <span class="kw">in</span> eff <span class="cf">if</span> e <span class="op">&lt;</span> <span class="dv">0</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="op">=</span> <span class="dv">2022</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> panel[panel[<span class="st">"cohort"</span>].isin([cohort, <span class="dv">9999</span>])].copy()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>sub[<span class="st">"treated"</span>] <span class="op">=</span> (sub[<span class="st">"cohort"</span>] <span class="op">==</span> cohort).astype(<span class="bu">int</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>tr <span class="op">=</span> sub[sub[<span class="st">"treated"</span>] <span class="op">==</span> <span class="dv">1</span>].groupby(<span class="st">"time"</span>)[Y].mean()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>co <span class="op">=</span> sub[sub[<span class="st">"treated"</span>] <span class="op">==</span> <span class="dv">0</span>].groupby(<span class="st">"time"</span>)[Y].mean()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>years <span class="op">=</span> <span class="bu">sorted</span>(sub[<span class="st">"time"</span>].unique())</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>eff <span class="op">=</span> [(t <span class="op">-</span> cohort, (tr[t] <span class="op">-</span> tr[<span class="dv">2021</span>]) <span class="op">-</span> (co[t] <span class="op">-</span> co[<span class="dv">2021</span>])) <span class="cf">for</span> t <span class="kw">in</span> years]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">6.8</span>, <span class="fl">4.0</span>))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> [e <span class="cf">for</span> e, _ <span class="kw">in</span> eff]<span class="op">;</span> ys <span class="op">=</span> [v <span class="cf">for</span> _, v <span class="kw">in</span> eff]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span>CL.line, lw<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ax.axhline(TRUE_EFFECT, color<span class="op">=</span>CL.good, lw<span class="op">=</span><span class="fl">1.4</span>, ls<span class="op">=</span><span class="st">":"</span>, label<span class="op">=</span><span class="st">"true effect"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="op">-</span><span class="fl">0.5</span>, color<span class="op">=</span>CL.muted, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, ys, marker<span class="op">=</span><span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">7</span>, lw<span class="op">=</span><span class="fl">1.8</span>, color<span class="op">=</span>CL.accent, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"reference period</span><span class="ch">\n</span><span class="st">(zero by construction)"</span>, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            textcoords<span class="op">=</span><span class="st">"offset points"</span>, xytext<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">26</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span>CL.muted)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"years since adoption"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"estimated effect (pp)"</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(xs)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'event time'</span><span class="sc">:&gt;12}{</span><span class="st">'estimate'</span><span class="sc">:&gt;11}</span><span class="ss">"</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> e, v <span class="kw">in</span> eff:</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    note <span class="op">=</span> <span class="st">"  reference — not evidence"</span> <span class="cf">if</span> e <span class="op">==</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>e<span class="sc">:&gt;12}{</span>v<span class="sc">:&gt;11.3f}{</span>note<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">pre-periods available for this cohort: "</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span><span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> e, _ <span class="kw">in</span> eff <span class="cf">if</span> e <span class="op">&lt;</span> <span class="dv">0</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  event time   estimate
@@ -593,32 +675,73 @@ Figure&nbsp;11.1: Event study for the 2022 cohort against the never-treated. Eve
 <p><strong>A flat pre-trend that contains one mechanically-zero point is not evidence of anything.</strong> This is not a defect of the analysis; it is a property of the data, and it means the identifying assumption of this chapter cannot be examined at all in this dataset. The honest report says so, states the estimate as conditional on an assumption that could not be checked, and treats the finding accordingly.</p>
 <p>It is worth noticing how much weaker that is than what chapter 10 could do. There the assumption was also untestable, but the covariates could at least be shown to be balanced. Here, there is nothing to show.</p>
 </section>
-<section id="what-difference-in-differences-cannot-fix" class="level2" data-number="11.8">
-<h2 data-number="11.8" class="anchored" data-anchor-id="what-difference-in-differences-cannot-fix"><span class="header-section-number">11.8</span> What difference-in-differences cannot fix</h2>
+<section id="how-large-a-violation-would-it-take" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="how-large-a-violation-would-it-take"><span class="header-section-number">11.9</span> How large a violation would it take?</h2>
+<p>“The assumption cannot be checked” is where this dataset leaves you. It is not where the literature leaves you. <span class="citation" data-cites="rambachan2023">Rambachan and Roth (<a href="#ref-rambachan2023" role="doc-biblioref">2023</a>)</span> changes the question: rather than testing parallel trends, ask how large a violation of it would have to be before the finding stops holding, and report <em>that</em> number. The output is a family of intervals indexed by how much post-treatment departure from parallel trends you are prepared to allow — measured, in the relative-magnitudes version, as a multiple <span class="math inline">\(M\)</span> of the largest departure actually visible before treatment.</p>
+<div id="check-honest" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Run it: how much violation does the result survive?</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>es <span class="op">=</span> cs.aggregate(<span class="st">"event_study"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"the whole of the pre-treatment evidence in this dataset:"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, r <span class="kw">in</span> es.to_dataframe().query(<span class="st">"event_time &lt; 0"</span>).iterrows():</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   event time </span><span class="sc">{</span><span class="bu">int</span>(r.event_time)<span class="sc">:&gt;3}</span><span class="ss">: </span><span class="sc">{</span>r<span class="sc">.</span>att<span class="sc">:+.3f}</span><span class="ss">  "</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"(SE </span><span class="sc">{</span>r<span class="sc">.</span>se<span class="sc">:.3f}</span><span class="ss">, p </span><span class="sc">{</span>r<span class="sc">.</span>p_value<span class="sc">:.3f}</span><span class="ss">), from </span><span class="sc">{</span><span class="bu">int</span>(r.n)<span class="sc">}</span><span class="ss"> cohort"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'M'</span><span class="sc">:&gt;5}{</span><span class="st">'identified set'</span><span class="sc">:&gt;22}{</span><span class="st">'95</span><span class="sc">% r</span><span class="st">obust CI'</span><span class="sc">:&gt;22}</span><span class="ss">   rules out zero"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> M <span class="kw">in</span> (<span class="fl">0.0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>):</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> dd.HonestDiD(method<span class="op">=</span><span class="st">"relative_magnitude"</span>, M<span class="op">=</span>M).fit(es)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>M<span class="sc">:&gt;5.2f}</span><span class="ss">   [</span><span class="sc">{</span>h<span class="sc">.</span>lb<span class="sc">:&gt;7.3f}</span><span class="ss">,</span><span class="sc">{</span>h<span class="sc">.</span>ub<span class="sc">:&gt;7.3f}</span><span class="ss">]     "</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"[</span><span class="sc">{</span>h<span class="sc">.</span>ci_lb<span class="sc">:&gt;7.3f}</span><span class="ss">,</span><span class="sc">{</span>h<span class="sc">.</span>ci_ub<span class="sc">:&gt;7.3f}</span><span class="ss">]   "</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"</span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> h<span class="sc">.</span>is_significant <span class="cf">else</span> <span class="st">'no'</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>the whole of the pre-treatment evidence in this dataset:
+   event time  -1: -1.126  (SE 0.440, p 0.016), from 1 cohort
+
+    M        identified set         95% robust CI   rules out zero
+ 0.00   [  2.212,  2.212]     [  0.613,  3.812]   yes
+ 0.25   [  1.649,  2.776]     [  0.050,  4.375]   yes
+ 0.50   [  1.086,  3.339]     [ -0.513,  4.938]   no
+ 1.00   [ -0.040,  4.465]     [ -1.640,  6.064]   no
+ 2.00   [ -2.293,  6.718]     [ -3.892,  8.317]   no</code></pre>
+</div>
+</div>
+<p>Two things to read off that, and the second matters more.</p>
+<p>The pre-treatment evidence is a single number, from a single cohort, and that cohort is a single country. Germany adopted in 2023, so it is the only unit whose pre-period is something other than its own reference year, and its 2021→2022 change ran 1.13 points below the never-treated countries’. Everything in the table below rests on that one comparison. The 2022 cohort, nine countries strong, contributes nothing here at all — its only pre-period <em>is</em> the reference.</p>
+<p>The sensitivity table then says: the result survives at <span class="math inline">\(M = 0.25\)</span> and not at <span class="math inline">\(M = 0.5\)</span>. In words, if post-treatment departures from parallel trends could be as much as half the size of the one pre-treatment departure visible in the data, the interval already contains zero. That is a low breakdown point, and it ought to be — it is what an estimate resting on one country’s single pre-period is worth.</p>
+<div class="warn">
+<p><strong>This is not a test, and nothing here has been tested.</strong> The honest sentence is “the finding requires post-treatment violations of parallel trends no larger than about a quarter of the single pre-treatment deviation we can observe, and we have one country from which to judge that.” A sensitivity analysis converts an untestable assumption into a statement about how much of it the result needs. That is real progress over asserting the assumption, and it is not the same thing as evidence for it.</p>
+</div>
+</section>
+<section id="what-difference-in-differences-cannot-fix" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="what-difference-in-differences-cannot-fix"><span class="header-section-number">11.10</span> What difference-in-differences cannot fix</h2>
 <p><strong>Anything that changes at the same time as treatment.</strong> Fixed effects remove what is constant; the second difference removes what is common. A shock hitting only the treated group in the treatment year is indistinguishable from the treatment, and no amount of data separates them. Countries that adopt an AI strategy in a given year may be doing several other things that year.</p>
 <p><strong>Anticipation.</strong> If units change behaviour before adoption because they know it is coming, the pre-period is already contaminated and the “before” is not a clean baseline. This shows as a non-zero pre-trend, when there are enough pre-periods to see one.</p>
 <p><strong>Composition change.</strong> If the units in the panel change — countries entering or leaving the sample, or a survey changing who it asks — the first difference is comparing different populations rather than the same one over time.</p>
 <p><strong>Spillovers.</strong> The control group must be unaffected. If a national strategy in one country shifts behaviour in its neighbours, the controls are partially treated and the estimate is attenuated toward zero.</p>
 </section>
-<section id="a-short-review-of-the-literature" class="level2" data-number="11.9">
-<h2 data-number="11.9" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">11.9</span> A short review of the literature</h2>
+<section id="a-short-review-of-the-literature" class="level2" data-number="11.11">
+<h2 data-number="11.11" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">11.11</span> A short review of the literature</h2>
 <div class="lit">
 <p>The design is older than its name: <span class="citation" data-cites="wing2018">Wing, Simon, and Bello-Gomez (<a href="#ref-wing2018" role="doc-biblioref">2018</a>)</span> traces it to Snow’s 1855 water study and sets out the modern practice, including the pre-trend examination and the sensitivity checks a credible paper is expected to show.</p>
 <p>The last decade has been dominated by a single discovery about staggered adoption. <span class="citation" data-cites="goodmanbacon2021">Goodman-Bacon (<a href="#ref-goodmanbacon2021" role="doc-biblioref">2021</a>)</span> decomposed the two-way fixed effects estimator into the underlying two-by-two comparisons and showed that some of them use already-treated units as controls; <span class="citation" data-cites="dechaisemartin2020">Chaisemartin and D’Haultfœuille (<a href="#ref-dechaisemartin2020" role="doc-biblioref">2020</a>)</span> showed that the implied weights can be negative, so the estimand may lie outside the range of every underlying effect. Neither paper is a curiosity — between them they called into question a large body of published work.</p>
 <p>The constructive replacements estimate cohort-specific effects against clean comparison groups and aggregate them explicitly. <span class="citation" data-cites="callaway2021">Callaway and Sant’Anna (<a href="#ref-callaway2021" role="doc-biblioref">2021</a>)</span> gives the group-time average treatment effects and the aggregation schemes; <span class="citation" data-cites="sun2021">Sun and Abraham (<a href="#ref-sun2021" role="doc-biblioref">2021</a>)</span> does the equivalent for event-study specifications, where the same negative weighting contaminates the coefficients on individual leads and lags.</p>
+<p>Where the pre-trend evidence is thin — and outside a handful of long panels it usually is — <span class="citation" data-cites="rambachan2023">Rambachan and Roth (<a href="#ref-rambachan2023" role="doc-biblioref">2023</a>)</span> replaces the ritual pre-trend test with a sensitivity analysis. Report the range of estimates consistent with violations of parallel trends up to a stated size, and the reader can see how much of the assumption the finding actually needs rather than being told it holds.</p>
 <p>On inference, the reference remains Bertrand, Duflo and Mullainathan, discussed in chapter 3: DiD data are serially correlated panels, and standard errors that ignore it reject true nulls at many times the nominal rate.</p>
 </div>
 </section>
-<section id="what-to-report" class="level2" data-number="11.10">
-<h2 data-number="11.10" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">11.10</span> What to report</h2>
+<section id="what-to-report" class="level2" data-number="11.12">
+<h2 data-number="11.12" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">11.12</span> What to report</h2>
 <ol type="1">
 <li><strong>The adoption structure.</strong> How many units in each cohort, how many periods before and after, and which cohorts are unusable. A table of this is worth more than a paragraph asserting the design is sound.</li>
 <li><strong>The parallel-trends argument</strong>, as an argument. Why should the gap have stayed constant? Institutional reasoning, not a citation to the assumption.</li>
 <li><strong>An event study</strong>, with the reference period marked as such — and if there are too few pre-periods to see a trend, say that instead of implying the flat line is evidence.</li>
-<li><strong>A staggered-robust estimator alongside TWFE.</strong> If they agree, the weights were benign and you have shown it. If they disagree, the decomposition is the finding.</li>
+<li><strong>A staggered-robust estimator alongside TWFE.</strong> If they agree, the weights were benign and you have shown it. If they disagree, the decomposition is the finding. <code>diff-diff</code>’s <code>CallawaySantAnna</code> is the Python route; the <code>did</code> package is the R one.</li>
 <li><strong>Standard errors clustered by unit</strong>, with the number of clusters. Below about forty, say what you did about it.</li>
 <li><strong>The scale.</strong> Levels or logs is part of the assumption, because parallel trends in one is not parallel trends in the other.</li>
 <li><strong>What could have moved at the same time.</strong> The most credible DiD papers name the confounding events they considered and explain why each is implausible — which is the modern version of Snow pointing out that nobody chose their water company.</li>
+<li><strong>How much violation the result survives.</strong> A breakdown value — the size of departure from parallel trends at which the finding stops holding — is worth more than a pre-trend <span class="math inline">\(p\)</span>-value, and unlike the <span class="math inline">\(p\)</span>-value it can be reported even when there is nothing to test.</li>
 </ol>
 
 
@@ -631,6 +754,9 @@ Chaisemartin, Clément de, and Xavier D’Haultfœuille. 2020. <span>“<span>Tw
 </div>
 <div id="ref-goodmanbacon2021" class="csl-entry" role="listitem">
 Goodman-Bacon, Andrew. 2021. <span>“<span>Difference</span>-in-Differences with Variation in Treatment Timing.”</span> <em><span>Journal</span> of <span>Econometrics</span></em> 225 (2): 254–77. <a href="https://doi.org/10.1016/j.jeconom.2021.03.014">https://doi.org/10.1016/j.jeconom.2021.03.014</a>.
+</div>
+<div id="ref-rambachan2023" class="csl-entry" role="listitem">
+Rambachan, Ashesh, and Jonathan Roth. 2023. <span>“A <span>More</span> <span>Credible</span> <span>Approach</span> to <span>Parallel</span> <span>Trends</span>.”</span> <em><span>Review</span> of <span>Economic</span> <span>Studies</span></em> 90 (5): 2555–91. <a href="https://doi.org/10.1093/restud/rdad018">https://doi.org/10.1093/restud/rdad018</a>.
 </div>
 <div id="ref-sun2021" class="csl-entry" role="listitem">
 Sun, Liyang, and Sarah Abraham. 2021. <span>“<span>Estimating</span> Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects.”</span> <em><span>Journal</span> of <span>Econometrics</span></em> 225 (2): 175–99. <a href="https://doi.org/10.1016/j.jeconom.2020.09.006">https://doi.org/10.1016/j.jeconom.2020.09.006</a>.
