@@ -84,14 +84,16 @@ TOOLKIT = {
     ".std / .var": ("02", "Describe", "spread, dividing by $n-1$"),
     ".quantile": ("02", "Describe", "any quantile, including the median"),
     "stats.trim_mean": ("02", "Describe", "the mean after cutting both tails"),
-    "smf.ols": ("02", "Fit", "least squares, from a formula"),
-    ".fit()": ("02", "Fit", "estimate the model you specified"),
-    ".params": ("02", "Read the fit", "the coefficients, in units of $y$"),
-    ".rsquared": ("02", "Read the fit", "share of variance explained"),
-    "plt.scatter": ("02", "Plot", "the data, before anything else"),
-    "plt.xlabel / plt.ylabel": ("02", "Plot", "say the units, every time"),
 
-    # ---- Session 03 · adequacy and validity ------------------------------
+    # ---- Session 03 · fitting a line, then adequacy and validity ---------
+    # The fitting names sat under session 02 while the regression section
+    # closed that deck. That section now opens this one, so they move with it.
+    "smf.ols": ("03", "Fit", "least squares, from a formula"),
+    ".fit()": ("03", "Fit", "estimate the model you specified"),
+    ".params": ("03", "Read the fit", "the coefficients, in units of $y$"),
+    ".rsquared": ("03", "Read the fit", "share of variance explained"),
+    "plt.scatter": ("03", "Plot", "the data, before anything else"),
+    "plt.xlabel / plt.ylabel": ("03", "Plot", "say the units, every time"),
     ".get_influence()": ("03", "Diagnose", "the whole diagnostic bundle"),
     ".hat_matrix_diag": ("03", "Diagnose", "leverage; sums to $p$, always"),
     ".cooks_distance": ("03", "Diagnose", "influence: leverage $\\times$ residual"),

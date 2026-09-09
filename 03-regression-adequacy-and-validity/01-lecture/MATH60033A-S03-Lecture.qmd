@@ -44,19 +44,35 @@ import qmib
 
 pd.set_option("display.width", 96)
 pd.set_option("display.max_columns", 10)
+
+# Matplotlib's default figure is 6.4 x 4.8 inches — a notebook shape, and on a
+# 1280x760 slide that already carries a title, a paragraph and a code block it
+# runs off the bottom edge. Every live figure in this deck is a wide, short one,
+# sized to the space a slide actually has left.
+plt.rcParams.update({
+    "figure.figsize": (7.4, 2.9),
+    "figure.dpi": 110,
+    "savefig.bbox": "tight",
+    "font.size": 9,
+    "axes.titlesize": 10,
+    "axes.labelsize": 9,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+})
 ```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Why Evaluate Models?
-2. Introduction: Key Aspects of Model Evaluation
-3. Models: Assessing the adequacy
-4. Models: assessing the validity
-5. Model Robustness/Parsimony and Selection
-6. Best Practices and Conclusion
-7. Conclusion
+1. From data to models
+2. Why Evaluate Models?
+3. Introduction: Key Aspects of Model Evaluation
+4. Models: Assessing the adequacy
+5. Models: assessing the validity
+6. Model Robustness/Parsimony and Selection
+7. Best Practices and Conclusion
+8. Conclusion
 
 ## What session 3 is for {.scrollable}
 ::::: columns
@@ -65,6 +81,7 @@ pd.set_option("display.max_columns", 10)
 
 ### The mathematics
 
+- Derive the least-squares slope, and read "controlling for" as a residual regression
 - Read **residuals versus fitted** and say what structure it reveals
 - Compute **leverage** from the hat matrix, and show it sums to $p$
 - Separate an outlier from an influential point with **Cook's distance**
@@ -76,6 +93,7 @@ pd.set_option("display.max_columns", 10)
 
 ### The Python
 
+- Fit a simple and a multiple regression with `smf.ols`, and read `.params`
 - Pull diagnostics from a fitted model with `get_influence()`
 - Build the four diagnostic plots yourself rather than calling one function
 - Compare candidate specifications side by side on AIC and BIC
@@ -86,6 +104,8 @@ pd.set_option("display.max_columns", 10)
 
 ### The international business
 
+- Quote a slope **in units** a manager can act on
+- Say why a slope is an association, and what more is needed to call it a cause
 - Say whether a published coefficient survives its own diagnostics
 - Decide what to do about the one country that moves the whole result
 - Refuse a model whose residuals show it has missed the structure
@@ -96,7 +116,7 @@ pd.set_option("display.max_columns", 10)
 
 ## Your Python so far {.scrollable}
 
-The 15 names below came out of session 2. Today's slides assume them, and add to them.
+The 9 names below came out of session 2. Today's slides assume them, and add to them.
 
 ### Load and shape
 
@@ -113,22 +133,184 @@ The 15 names below came out of session 2. Today's slides assume them, and add to
 - `.std / .var` — spread, dividing by $n-1$
 - `stats.trim_mean` — the mean after cutting both tails
 
-### Fit
-
-- `.fit()` — estimate the model you specified
-- `smf.ols` — least squares, from a formula
-
-### Read the fit
-
-- `.params` — the coefficients, in units of $y$
-- `.rsquared` — share of variance explained
-
-### Plot
-
-- `plt.scatter` — the data, before anything else
-- `plt.xlabel / plt.ylabel` — say the units, every time
-
 <!-- END deck-frontmatter -->
+
+## From data to models {.center background-color="#E3120B" style="color:#F7F4ED"}
+
+## The question
+
+> **Do more productive European countries have higher income per head?**
+
+Thirty countries, fifteen years, both numbers already in the repository.
+
+::: {.muted}
+No download, no API key: `data/spine/core.parquet`.
+:::
+
+## Always look first
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+core = pd.read_parquet("data/spine/core.parquet")
+
+# Drop rows missing either variable. subset= matters: without it, a row missing
+# any column at all would go, and you would silently lose a third of the panel.
+d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
+
+# Look before you model. s= is the marker size and alpha= the transparency —
+# with 428 points, overlapping markers hide density unless you can see through
+# them.
+plt.scatter(d["productivity_idx"], d["gdp_pc_eur"], s=12, alpha=0.6)
+plt.xlabel("Labour productivity index (EU average = 100)")
+plt.ylabel("GDP per capita (EUR)")
+plt.show()
+```
+
+::: {.warn}
+Draw the picture before you fit anything. A straight line through a curved cloud is still a
+straight line, and the software will not warn you.
+:::
+
+## The model, and what each piece is
+
+$$y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$$
+
+| Symbol | Name | Here |
+|---|---|---|
+| $y_i$ | outcome | GDP per capita |
+| $x_i$ | predictor | productivity index |
+| $\beta_0$ | intercept | predicted $y$ when $x = 0$ |
+| $\beta_1$ | slope | change in $y$ per unit of $x$ |
+| $\varepsilon_i$ | error | what $x_i$ does not explain |
+
+## Choosing the line
+
+$$\min_{\beta_0,\,\beta_1} \sum_{i=1}^{n}\big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
+
+::: {.step}
+Squaring makes every miss positive, so misses above and below cannot cancel — and it punishes one
+large miss more than several small ones.
+:::
+
+::: {.check}
+This is the mean, done conditionally. The mean minimises $\sum(x_i - c)^2$; the regression line
+minimises the same quantity over *lines*.
+:::
+
+## Three lines of Python
+
+```python
+import statsmodels.formula.api as smf
+
+# The formula reads "gdp_pc_eur explained by productivity_idx". statsmodels
+# adds the intercept for you; write ~ 0 + x if you ever want it suppressed,
+# and know that R-squared stops being interpretable when you do.
+model = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+
+# .params holds the two coefficients. The slope is in euros of GDP per capita
+# per one index point — always say the units.
+print(model.params)
+```
+
+```
+Intercept          -86118.1
+productivity_idx     1111.3
+```
+
+::: {.muted}
+Read the `~` as "explained by". `.fit()` does the arithmetic; `model.params` holds the estimates.
+:::
+
+## The slope is the sentence you will write
+
+::: {.check}
+Comparing two country-years that differ by **one point** of productivity, the more productive one
+has on average **€1,111 more** GDP per capita.
+:::
+
+Always say the units aloud — euros per index point. **A slope without units is not a finding.**
+
+::: {.warn}
+The intercept says a country at productivity 0 would have **−€86,118**. The index runs from 72 to
+129 in our data. Do not interpret an intercept you have no data near.
+:::
+
+## Fitted values and residuals
+
+Germany, 2022 — productivity 121.2, actual GDP per capita €54,239:
+
+$$\hat y = -86{,}118 + 1{,}111.3 \times 121.2 = 48{,}606$$
+
+$$e = 54{,}239 - 48{,}606 = \mathbf{+5{,}633}$$
+
+::: {.check}
+Germany sits **€5,633 above** the line. That residual is everything about German income that
+productivity alone does not account for — and reading residuals is the rest of this hour.
+:::
+
+## How much did the line explain?
+
+```python
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape. The rest of this hour is that difference.
+print(f"R-squared = {model.rsquared:.3f}")
+```
+
+```
+R-squared = 0.627
+```
+
+::: {.step}
+$R^2$ is the share of the variation in $y$ the model accounts for: **62.7%**, on a scale from 0 to 1.
+:::
+
+::: {.warn}
+It does **not** say the model is correct, that the relationship is causal, or that the line will
+predict a new country well.
+:::
+
+## Two predictors: what "controlling for" means
+
+```python
+# The third column has its own holes, so the sample is rebuilt: d2 is not d.
+d2 = core.dropna(subset=["gdp_pc_eur", "productivity_idx", "gfcf_meur"])
+
+# Adding a second predictor changes what the first coefficient means: it is now
+# the association holding investment fixed, not the raw association. The two
+# answer different questions, and the number will move.
+model2 = smf.ols("gdp_pc_eur ~ productivity_idx + gfcf_meur", data=d2).fit()
+```
+
+```
+Intercept          -71211.8
+productivity_idx      928.3
+gfcf_meur              68.7
+R-squared = 0.692
+```
+
+::: {.check}
+The productivity slope falls **1,111 → 928**, about 16%. It now answers a different question:
+comparing country-years **with the same investment**, one point more productivity goes with €928
+more income.
+:::
+
+## Correlation is not causation
+
+The slope says the two **move together**. It does not say raising productivity by a point *would*
+raise income by €928.
+
+::: {.tight}
+1. Productivity raises income
+2. Higher income buys the capital and training that raise productivity — the arrow points the other way
+3. Something else — institutions, education, market size — drives both
+:::
+
+::: {.warn}
+Nothing in the output distinguishes these. Until Sessions 10–11, write **"is associated with"** —
+and mean it.
+:::
 
 ## Course Objectives {#imported-s03-001 .center .scrollable}
 
@@ -354,7 +536,7 @@ import statsmodels.formula.api as smf
 core = qmib.load("core")
 d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
 
-# the model Session 02 fitted — now we ask whether it can be trusted
+# the model we fitted at the top of the hour — now: can it be trusted?
 fit = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
 
 # Adjusted R^2 penalises each extra predictor, so it can fall when you add one.
@@ -371,7 +553,7 @@ Interpretation:
 -   Adjusted [\\(R\^2\\)]{.math .inline} can *decrease* if irrelevant variables are added.
 -   RSE gives an absolute measure, in units of Y.
 
-## what makes it the more useful of the two to quote to a non-specialist. (cont.) {#imported-s03-011 .scrollable}
+## Quiz: reading an [\\(R\^2\\)]{.math .inline} {#imported-s03-011 .scrollable}
 
 ::::::::::::: panel-tabset
 ### Quiz
@@ -533,9 +715,10 @@ Remedies: add polynomial terms, interactions, or reconsider functional form.
 -   Errors should be normally distributed.
 -   Important for valid t-tests and confidence intervals.
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png){.r-stretch width="960"}
+Points on the line are what normality looks like; points peeling away at both
+ends are heavy tails.
 
-Visual: Q-Q plot --- left = good (points on line), right = heavy tails.
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png){.r-stretch}
 
 ## Normality of Residuals (cont.) {#imported-s03-017 .scrollable}
 
@@ -544,6 +727,7 @@ Visual: Q-Q plot --- left = good (points on line), right = heavy tails.
 
 -   Residuals should have **constant variance** across fitted values.
 -   Violation = *heteroscedasticity* (funnel shape).
+-   Remedies: transform Y, add missing predictors, or use robust errors.
 
 ```{python}
 #| echo: true
@@ -556,8 +740,6 @@ plt.scatter(fit.fittedvalues, np.sqrt(np.abs(fit.get_influence().resid_studentiz
 plt.xlabel("Fitted values"); plt.ylabel("sqrt(|standardised residual|)")
 plt.show()
 ```
-
-Remedies: transform Y, add missing predictors, or use robust errors.
 
 ### Validity: Constant Variability
 
@@ -603,11 +785,14 @@ plt.xlabel("Fitted values"); plt.ylabel("Residuals")
 plt.show()
 ```
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-14-1.png){.r-stretch width="960"}
+## What you are looking for {.scrollable}
 
-Visual: Residuals scattered randomly vs. curved pattern.
+Scattered at random around zero is the model behaving. A curve, a funnel or a
+drift is the model telling you what it missed.
 
-## Residuals vs Fitted: is there structure the straight line missed? (cont.) {#imported-s03-019 .scrollable}
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-14-1.png){.r-stretch}
+
+## Quiz: reading a residual plot {#imported-s03-019 .scrollable}
 
 :::::::::::::::::: panel-tabset
 ### Quiz 1
@@ -626,7 +811,7 @@ What condition is this linear model obviously violating?
 :::
 
 ::: {.column style="width:50%;"}
-![](economist-assets/nonlinearity.png){.r-stretch}
+![](economist-assets/nonlinearity.png){.quarto-figure .quarto-figure-center style="width:100.0%"}
 :::
 :::::
 
@@ -648,7 +833,7 @@ What condition is this linear model obviously violating?
 :::: {.column style="width:50%;"}
 ::: {.cell layout-align="center"}
 <figure>
-<p><img src="economist-assets/nonlinearity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
+<p><img src="economist-assets/nonlinearity.png" class="quarto-figure quarto-figure-center" style="width:100.0%" /></p>
 </figure>
 :::
 ::::
@@ -672,7 +857,7 @@ What condition is this linear model obviously violating?
 :::: {.column style="width:50%;"}
 ::: {.cell layout-align="center"}
 <figure>
-<p><img src="economist-assets/heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
+<p><img src="economist-assets/heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:100.0%" /></p>
 </figure>
 :::
 ::::
@@ -696,7 +881,7 @@ What condition is this linear model obviously violating?
 :::: {.column style="width:50%;"}
 ::: {.cell layout-align="center"}
 <figure>
-<p><img src="economist-assets/heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:82.0%" /></p>
+<p><img src="economist-assets/heteroskedasticity.png" class="quarto-figure quarto-figure-center" style="width:100.0%" /></p>
 </figure>
 :::
 ::::
@@ -733,19 +918,24 @@ leverage = influence.hat_matrix_diag
 print(f"mean leverage {leverage.mean():.4f}, max {leverage.max():.4f}")
 print(f"rule of thumb 2p/n = {2 * 2 / len(d):.4f}")
 
-# Residuals vs Leverage — the points with the power to move the line.
-# Far right = unusual X. High up or low down = badly predicted. The damage is
-# done by points that are both, which is why the two are plotted together.
-import matplotlib.pyplot as plt
-
-plt.figure(figsize=(7, 4))
-plt.scatter(leverage, influence.resid_studentized_internal, s=12, alpha=0.6)
-plt.axvline(2 * 2 / len(d), color="red", ls="--")   # the 2p/n rule of thumb
-plt.xlabel("Leverage"); plt.ylabel("Standardised residual")
-plt.tight_layout(); plt.show()
 ```
 
 > Leverage matters because a data point with unusual predictor values can pull the regression line toward itself, changing the story the model tells.
+
+## Residuals versus leverage {.scrollable}
+
+The points with the power to move the line.
+
+```{python}
+#| echo: true
+
+# Far right = unusual X. High up or low down = badly predicted. The damage is
+# done by points that are both, which is why the two are plotted together.
+plt.scatter(leverage, influence.resid_studentized_internal, s=12, alpha=0.6)
+plt.axvline(2 * 2 / len(d), color="red", ls="--")   # the 2p/n rule of thumb
+plt.xlabel("Leverage"); plt.ylabel("Standardised residual")
+plt.show()
+```
 
 ## Cook's Distance {#imported-s03-024 .scrollable}
 
@@ -760,17 +950,24 @@ cooks_d = influence.cooks_distance[0]
 print(f"largest Cook's D {cooks_d.max():.4f}")
 print(f"above 4/n ({4/len(d):.4f}): {(cooks_d > 4/len(d)).sum()} observations")
 
-# One spike per observation: how much every coefficient would move if that
-# single row were deleted. The dashed line is the conventional 4/n screen —
-# a prompt to go and look at the row, not a rule for dropping it.
-plt.figure(figsize=(7, 4))
-plt.stem(cooks_d)
-plt.axhline(4 / len(d), color="red", ls="--")
-plt.xlabel("Observation"); plt.ylabel("Cook's distance")
-plt.tight_layout(); plt.show()
 ```
 
 > Cook's distance matters because it shows which data points, if removed, would noticeably change the model's results.
+
+## One spike per observation {.scrollable}
+
+How much every coefficient would move if that single row were deleted.
+
+```{python}
+#| echo: true
+
+# The dashed line is the conventional 4/n screen — a prompt to go and look at
+# the row, not a rule for dropping it.
+plt.stem(cooks_d)
+plt.axhline(4 / len(d), color="red", ls="--")
+plt.xlabel("Observation"); plt.ylabel("Cook's distance")
+plt.show()
+```
 
 ## Information Criteria --- AIC {#imported-s03-025 .scrollable}
 
@@ -848,11 +1045,9 @@ Final message: **Balance predictive adequacy, interpretability, and parsimony.**
 
 ## One more thing... {#imported-s03-033 .scrollable}
 
-::: cell
-![](economist-assets/small-samples.png){.r-stretch}
-:::
+After [Wainer's "most dangerous equation"](https://blog.ephorie.de/the-most-dangerous-equation-or-why-small-is-not-beautiful) — the standard error of the mean, and what forgetting it costs.
 
-https://blog.ephorie.de/the-most-dangerous-equation-or-why-small-is-not-beautiful?utm_source=rss&utm_medium=rss&utm_campaign=the-most-dangerous-equation-or-why-small-is-not-beautiful
+![](economist-assets/small-samples.png){.r-stretch}
 
 ## References {#imported-s03-034 .center .scrollable}
 
