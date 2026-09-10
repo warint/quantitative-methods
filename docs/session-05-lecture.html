@@ -1078,6 +1078,7 @@ Thierry Warin
 <ol type="1">
 <li>Where we are, and the opening claim that turns out to be wrong</li>
 <li>A situation you will meet — more candidate predictors than countries</li>
+<li>Stepwise selection, and why its choices do not survive a resample</li>
 <li>Ridge, and what it does to the SVD spectrum</li>
 <li>Lasso, and why corners produce exact zeros</li>
 <li>Soft-thresholding, and the coefficient path</li>
@@ -1093,6 +1094,7 @@ Thierry Warin
 <div class="column" style="width:33%;">
 <h3 id="the-mathematics">The mathematics</h3>
 <ul>
+<li>Say why a greedy <strong>stepwise</strong> search is unstable, and what that argues for</li>
 <li>Derive the ridge estimator and show how it shrinks the <strong>SVD spectrum</strong></li>
 <li>Explain geometrically why the lasso produces exact zeros and ridge does not</li>
 <li>State the <strong>elastic net</strong> objective and what <span class="math inline">\(\ell_2\)</span> adds under correlation</li>
@@ -1268,7 +1270,7 @@ Thierry Warin
 </section>
 <section id="what-complete-case-analysis-leaves-you" class="slide level2">
 <h2>What complete-case analysis leaves you</h2>
-<div id="b91c1554" class="cell" data-execution_count="2">
+<div id="71598a68" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>raw <span class="op">=</span> pd.read_parquet(<span class="st">&quot;../../data/spine/angle_c_country.parquet&quot;</span>)</span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a>YCOL  <span class="op">=</span> <span class="st">&quot;rd_pct_gdp&quot;</span>                           <span class="co"># what we are trying to explain</span></span>
@@ -1289,14 +1291,84 @@ Thierry Warin
 <p><span class="math inline">\(n = 37\)</span>, <span class="math inline">\(p = 29\)</span>. Eight degrees of freedom. This is not an exotic case — it is what happens every time a new survey wave meets an old panel.</p>
 </div>
 </section>
+<section id="the-obvious-thing-to-try-first" class="slide level2">
+<h2>The obvious thing to try first</h2>
+<p>Twenty-nine candidates, thirty-seven rows. The mechanical response is to let the data choose: start from nothing, add whichever variable improves the fit most, stop when none does.</p>
+<p>That is <strong>forward stepwise selection</strong>, the standard answer for decades and still the default in a great deal of applied software. It is worth watching it fail carefully, because everything after this slide is a response to the way it fails.</p>
+<div id="80d78a68" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb3-2"><a href></a></span>
+<span id="cb3-3"><a href></a><span class="kw">def</span> forward_aic(X, y):</span>
+<span id="cb3-4"><a href></a>    <span class="co">&quot;&quot;&quot;Add whichever variable lowers AIC most; stop when none does.&quot;&quot;&quot;</span></span>
+<span id="cb3-5"><a href></a>    chosen, rest <span class="op">=</span> [], <span class="bu">list</span>(X.columns)</span>
+<span id="cb3-6"><a href></a>    best <span class="op">=</span> sm.OLS(y, np.ones((<span class="bu">len</span>(y), <span class="dv">1</span>))).fit().aic</span>
+<span id="cb3-7"><a href></a>    <span class="cf">while</span> rest:</span>
+<span id="cb3-8"><a href></a>        s <span class="op">=</span> <span class="bu">sorted</span>((sm.OLS(y, sm.add_constant(X[chosen <span class="op">+</span> [c]])).fit().aic, c) <span class="cf">for</span> c <span class="kw">in</span> rest)</span>
+<span id="cb3-9"><a href></a>        <span class="cf">if</span> s[<span class="dv">0</span>][<span class="dv">0</span>] <span class="op">&gt;=</span> best <span class="op">-</span> <span class="fl">1e-9</span>:</span>
+<span id="cb3-10"><a href></a>            <span class="cf">break</span></span>
+<span id="cb3-11"><a href></a>        best, pick <span class="op">=</span> s[<span class="dv">0</span>]<span class="op">;</span> chosen.append(pick)<span class="op">;</span> rest.remove(pick)</span>
+<span id="cb3-12"><a href></a>    <span class="cf">return</span> chosen</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="it-keeps-fifteen-and-three-of-them-are-noise" class="slide level2">
+<h2>It keeps fifteen, and three of them are noise</h2>
+<div id="14a293d3" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># Ground truth, from scripts/build_spine/make_fixtures.py: of the fifteen aux_</span></span>
+<span id="cb4-2"><a href></a><span class="co"># columns, every third carries a weak signal and the other ten are pure noise.</span></span>
+<span id="cb4-3"><a href></a><span class="co"># No real dataset tells you this; the fixture was built so that it can.</span></span>
+<span id="cb4-4"><a href></a>noise <span class="op">=</span> {<span class="ss">f&quot;aux_</span><span class="sc">{</span>k<span class="sc">:02d}</span><span class="ss">&quot;</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">15</span>) <span class="cf">if</span> k <span class="op">%</span> <span class="dv">3</span>}</span>
+<span id="cb4-5"><a href></a></span>
+<span id="cb4-6"><a href></a>Xc, yc <span class="op">=</span> d[XCOLS].astype(<span class="bu">float</span>), d[YCOL].astype(<span class="bu">float</span>)</span>
+<span id="cb4-7"><a href></a>selected <span class="op">=</span> forward_aic(Xc, yc)</span>
+<span id="cb4-8"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;stepwise kept </span><span class="sc">{</span><span class="bu">len</span>(selected)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss"> candidates&quot;</span>)</span>
+<span id="cb4-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;   pure noise among them: </span><span class="sc">{</span><span class="bu">sorted</span>(c <span class="cf">for</span> c <span class="kw">in</span> selected <span class="cf">if</span> c <span class="kw">in</span> noise)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>stepwise kept 15 of 29 candidates
+   pure noise among them: [&#39;aux_04&#39;, &#39;aux_07&#39;, &#39;aux_10&#39;]</code></pre>
+</div>
+</div>
+<div class="muted">
+<p>Three false positives out of fifteen might be dismissed as bad luck. The next slide is the part that cannot be.</p>
+</div>
+</section>
+<section id="now-run-it-again-on-a-resample" class="slide level2">
+<h2>Now run it again on a resample</h2>
+<div id="24eabddc" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb6-2"><a href></a></span>
+<span id="cb6-3"><a href></a>rng, B, counts <span class="op">=</span> np.random.default_rng(<span class="dv">60033</span>), <span class="dv">100</span>, Counter()</span>
+<span id="cb6-4"><a href></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(B):                      <span class="co"># bootstrap: same data, resampled rows</span></span>
+<span id="cb6-5"><a href></a>    idx <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="bu">len</span>(d), <span class="bu">len</span>(d))</span>
+<span id="cb6-6"><a href></a>    counts.update(forward_aic(Xc.iloc[idx], yc.iloc[idx]))</span>
+<span id="cb6-7"><a href></a></span>
+<span id="cb6-8"><a href></a><span class="cf">for</span> name, k <span class="kw">in</span> counts.most_common(<span class="dv">5</span>):</span>
+<span id="cb6-9"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:20}</span><span class="ss">selected in </span><span class="sc">{</span>k<span class="op">/</span>B<span class="sc">:&gt;4.0%}</span><span class="ss"> of resamples&quot;</span>)</span>
+<span id="cb6-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">selected at least once: </span><span class="sc">{</span><span class="bu">len</span>(counts)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ai_use_any          selected in  98% of resamples
+has_ai_strategy     selected in  93% of resamples
+barrier_legal       selected in  92% of resamples
+digital_intensity   selected in  90% of resamples
+aux_06              selected in  87% of resamples
+
+selected at least once: 29 of 29</code></pre>
+</div>
+</div>
+<div class="warn">
+<p><strong>Every one</strong> of the twenty-nine is chosen in some resample. “The data selected these variables” is not a finding: perturb the data slightly and the data select different ones.</p>
+</div>
+<div class="check">
+<p>The diagnosis is that stepwise makes a sequence of <strong>discrete</strong> decisions, each conditional on the last. A hair’s difference at step three changes the whole path. So stop making in-or-out decisions, and shrink coefficients <strong>continuously</strong> instead. That is the rest of this session.</p>
+</div>
+</section>
 <section id="why-ols-cannot-cope-here" class="slide level2">
 <h2>Why OLS cannot cope here</h2>
-<div id="8a459f1a" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># The condition number is the ratio of the largest singular value to the</span></span>
-<span id="cb3-2"><a href></a><span class="co"># smallest: how much a small wobble in the data can be amplified in the</span></span>
-<span id="cb3-3"><a href></a><span class="co"># coefficients. Under about 30 is comfortable; 1e3 and above means the design</span></span>
-<span id="cb3-4"><a href></a><span class="co"># is nearly collinear and OLS coefficients are being solved out of noise.</span></span>
-<span id="cb3-5"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;condition number of the standardised design: </span><span class="sc">{</span>np<span class="sc">.</span>linalg<span class="sc">.</span>cond(Ztr)<span class="sc">:.1e}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="6be967ff" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># The condition number is the ratio of the largest singular value to the</span></span>
+<span id="cb8-2"><a href></a><span class="co"># smallest: how much a small wobble in the data can be amplified in the</span></span>
+<span id="cb8-3"><a href></a><span class="co"># coefficients. Under about 30 is comfortable; 1e3 and above means the design</span></span>
+<span id="cb8-4"><a href></a><span class="co"># is nearly collinear and OLS coefficients are being solved out of noise.</span></span>
+<span id="cb8-5"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;condition number of the standardised design: </span><span class="sc">{</span>np<span class="sc">.</span>linalg<span class="sc">.</span>cond(Ztr)<span class="sc">:.1e}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>condition number of the standardised design: 5.0e+15</code></pre>
 </div>
@@ -1314,31 +1386,31 @@ Thierry Warin
 </section>
 <section id="four-estimators-one-held-out-test-set" class="slide level2">
 <h2>Four estimators, one held-out test set</h2>
-<div id="636157d0" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
-<span id="cb5-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
-<span id="cb5-3"><a href></a>    model.fit(Xtr, ytr)                        <span class="co"># the model never sees Xte here</span></span>
-<span id="cb5-4"><a href></a>    <span class="cf">return</span> np.sqrt(mean_squared_error(yte, model.predict(Xte)))</span>
-<span id="cb5-5"><a href></a></span>
-<span id="cb5-6"><a href></a><span class="co"># A log grid, because what matters is the order of magnitude of the penalty,</span></span>
-<span id="cb5-7"><a href></a><span class="co"># not its arithmetic spacing: 0.001 to 0.01 is the same size of step as 100 to</span></span>
-<span id="cb5-8"><a href></a><span class="co"># 1000. Sixty points is plenty for a curve this smooth.</span></span>
-<span id="cb5-9"><a href></a>ALPHAS <span class="op">=</span> np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>)</span>
-<span id="cb5-10"><a href></a></span>
-<span id="cb5-11"><a href></a><span class="co"># The mixing weight for the elastic net. 1.0 is pure lasso; the lower values</span></span>
-<span id="cb5-12"><a href></a><span class="co"># let the ridge penalty share the work when predictors are correlated.</span></span>
-<span id="cb5-13"><a href></a>L1S    <span class="op">=</span> [<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span>, <span class="fl">1.0</span>]</span>
-<span id="cb5-14"><a href></a></span>
-<span id="cb5-15"><a href></a>scores <span class="op">=</span> {</span>
-<span id="cb5-16"><a href></a>    <span class="st">&quot;predict the mean&quot;</span>: np.sqrt(mean_squared_error(yte, np.full_like(yte, ytr.mean()))),</span>
-<span id="cb5-17"><a href></a>    <span class="st">&quot;OLS&quot;</span>:         test_rmse(make_pipeline(StandardScaler(), LinearRegression())),</span>
-<span id="cb5-18"><a href></a>    <span class="st">&quot;ridge (CV)&quot;</span>:  test_rmse(make_pipeline(StandardScaler(), RidgeCV(alphas<span class="op">=</span>ALPHAS))),</span>
-<span id="cb5-19"><a href></a>    <span class="st">&quot;lasso (CV)&quot;</span>:  test_rmse(make_pipeline(</span>
-<span id="cb5-20"><a href></a>        StandardScaler(), LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>))),</span>
-<span id="cb5-21"><a href></a>    <span class="st">&quot;elastic net&quot;</span>: test_rmse(make_pipeline(</span>
-<span id="cb5-22"><a href></a>        StandardScaler(), ElasticNetCV(l1_ratio<span class="op">=</span>L1S, cv<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb5-23"><a href></a>                                       random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>))),</span>
-<span id="cb5-24"><a href></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7c1893e7" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
+<span id="cb10-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
+<span id="cb10-3"><a href></a>    model.fit(Xtr, ytr)                        <span class="co"># the model never sees Xte here</span></span>
+<span id="cb10-4"><a href></a>    <span class="cf">return</span> np.sqrt(mean_squared_error(yte, model.predict(Xte)))</span>
+<span id="cb10-5"><a href></a></span>
+<span id="cb10-6"><a href></a><span class="co"># A log grid, because what matters is the order of magnitude of the penalty,</span></span>
+<span id="cb10-7"><a href></a><span class="co"># not its arithmetic spacing: 0.001 to 0.01 is the same size of step as 100 to</span></span>
+<span id="cb10-8"><a href></a><span class="co"># 1000. Sixty points is plenty for a curve this smooth.</span></span>
+<span id="cb10-9"><a href></a>ALPHAS <span class="op">=</span> np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>)</span>
+<span id="cb10-10"><a href></a></span>
+<span id="cb10-11"><a href></a><span class="co"># The mixing weight for the elastic net. 1.0 is pure lasso; the lower values</span></span>
+<span id="cb10-12"><a href></a><span class="co"># let the ridge penalty share the work when predictors are correlated.</span></span>
+<span id="cb10-13"><a href></a>L1S    <span class="op">=</span> [<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span>, <span class="fl">1.0</span>]</span>
+<span id="cb10-14"><a href></a></span>
+<span id="cb10-15"><a href></a>scores <span class="op">=</span> {</span>
+<span id="cb10-16"><a href></a>    <span class="st">&quot;predict the mean&quot;</span>: np.sqrt(mean_squared_error(yte, np.full_like(yte, ytr.mean()))),</span>
+<span id="cb10-17"><a href></a>    <span class="st">&quot;OLS&quot;</span>:         test_rmse(make_pipeline(StandardScaler(), LinearRegression())),</span>
+<span id="cb10-18"><a href></a>    <span class="st">&quot;ridge (CV)&quot;</span>:  test_rmse(make_pipeline(StandardScaler(), RidgeCV(alphas<span class="op">=</span>ALPHAS))),</span>
+<span id="cb10-19"><a href></a>    <span class="st">&quot;lasso (CV)&quot;</span>:  test_rmse(make_pipeline(</span>
+<span id="cb10-20"><a href></a>        StandardScaler(), LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>))),</span>
+<span id="cb10-21"><a href></a>    <span class="st">&quot;elastic net&quot;</span>: test_rmse(make_pipeline(</span>
+<span id="cb10-22"><a href></a>        StandardScaler(), ElasticNetCV(l1_ratio<span class="op">=</span>L1S, cv<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb10-23"><a href></a>                                       random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>))),</span>
+<span id="cb10-24"><a href></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="muted">
 <p><code>make_pipeline(StandardScaler(), …)</code> matters: the scaler is refitted <strong>inside</strong> each CV fold, so no test-fold information leaks into the standardisation. Session 04, leakage #1.</p>
@@ -1409,18 +1481,18 @@ Thierry Warin
 </section>
 <section id="ridge-in-three-lines-explained" class="slide level2">
 <h2>Ridge in three lines, explained</h2>
-<div id="28eed89d" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># A pipeline, not three separate steps, because the scaler must be fitted on</span></span>
-<span id="cb6-2"><a href></a><span class="co"># the training rows only. Fit it on everything and the test set has leaked into</span></span>
-<span id="cb6-3"><a href></a><span class="co"># the training procedure, and the honest 30% you held out is no longer honest.</span></span>
-<span id="cb6-4"><a href></a>mod <span class="op">=</span> make_pipeline(</span>
-<span id="cb6-5"><a href></a>    StandardScaler(),                       <span class="co"># 1. penalty is scale-dependent: standardise first</span></span>
-<span id="cb6-6"><a href></a>    RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))  <span class="co"># 2. pick lambda by leave-one-out CV over a log grid</span></span>
-<span id="cb6-7"><a href></a>).fit(Xtr, ytr)                             <span class="co"># 3. refit on all training rows at the chosen lambda</span></span>
-<span id="cb6-8"><a href></a></span>
-<span id="cb6-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;chosen lambda = </span><span class="sc">{</span>mod[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb6-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;largest |coef|:  OLS </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(LinearRegression().fit(Ztr, ytr).coef_)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
-<span id="cb6-11"><a href></a>      <span class="ss">f&quot;   ridge </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(mod[<span class="op">-</span><span class="dv">1</span>].coef_)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="76197f43" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># A pipeline, not three separate steps, because the scaler must be fitted on</span></span>
+<span id="cb11-2"><a href></a><span class="co"># the training rows only. Fit it on everything and the test set has leaked into</span></span>
+<span id="cb11-3"><a href></a><span class="co"># the training procedure, and the honest 30% you held out is no longer honest.</span></span>
+<span id="cb11-4"><a href></a>mod <span class="op">=</span> make_pipeline(</span>
+<span id="cb11-5"><a href></a>    StandardScaler(),                       <span class="co"># 1. penalty is scale-dependent: standardise first</span></span>
+<span id="cb11-6"><a href></a>    RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))  <span class="co"># 2. pick lambda by leave-one-out CV over a log grid</span></span>
+<span id="cb11-7"><a href></a>).fit(Xtr, ytr)                             <span class="co"># 3. refit on all training rows at the chosen lambda</span></span>
+<span id="cb11-8"><a href></a></span>
+<span id="cb11-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;chosen lambda = </span><span class="sc">{</span>mod[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb11-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;largest |coef|:  OLS </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(LinearRegression().fit(Ztr, ytr).coef_)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
+<span id="cb11-11"><a href></a>      <span class="ss">f&quot;   ridge </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(mod[<span class="op">-</span><span class="dv">1</span>].coef_)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>chosen lambda = 23.598
 largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
@@ -1554,20 +1626,20 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </section>
 <section id="what-survived-on-our-data" class="slide level2">
 <h2>What survived, on our data</h2>
-<div id="e6d4e2fa" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># LassoCV does two things at once: it fits the whole path of lambdas, and it</span></span>
-<span id="cb8-2"><a href></a><span class="co"># uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the</span></span>
-<span id="cb8-3"><a href></a><span class="co"># penalty is on coefficient size, so the columns must be on a common scale.</span></span>
-<span id="cb8-4"><a href></a>lcv <span class="op">=</span> LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>).fit(Ztr, ytr)</span>
-<span id="cb8-5"><a href></a></span>
-<span id="cb8-6"><a href></a><span class="co"># &quot;Kept&quot; means a coefficient the optimiser did not drive to zero. The 1e-8</span></span>
-<span id="cb8-7"><a href></a><span class="co"># threshold is guarding against floating-point dust, not making a judgement.</span></span>
-<span id="cb8-8"><a href></a>kept <span class="op">=</span> [(c, b) <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, lcv.coef_) <span class="cf">if</span> <span class="bu">abs</span>(b) <span class="op">&gt;</span> <span class="fl">1e-8</span>]</span>
-<span id="cb8-9"><a href></a></span>
-<span id="cb8-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;lambda = </span><span class="sc">{</span>lcv<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">   kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span>P<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb8-11"><a href></a><span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">sorted</span>(kept, key<span class="op">=</span><span class="kw">lambda</span> t: <span class="op">-</span><span class="bu">abs</span>(t[<span class="dv">1</span>])):</span>
-<span id="cb8-12"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;   </span><span class="sc">{</span>c<span class="sc">:&lt;20s}</span><span class="ss"> </span><span class="sc">{</span>b<span class="sc">:+.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb8-13"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;auxiliary series kept: </span><span class="sc">{</span><span class="bu">sum</span>(c.startswith(<span class="st">&#39;aux&#39;</span>) <span class="cf">for</span> c, _ <span class="kw">in</span> kept)<span class="sc">}</span><span class="ss"> of 15&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="5cb29dcb" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># LassoCV does two things at once: it fits the whole path of lambdas, and it</span></span>
+<span id="cb13-2"><a href></a><span class="co"># uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the</span></span>
+<span id="cb13-3"><a href></a><span class="co"># penalty is on coefficient size, so the columns must be on a common scale.</span></span>
+<span id="cb13-4"><a href></a>lcv <span class="op">=</span> LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>).fit(Ztr, ytr)</span>
+<span id="cb13-5"><a href></a></span>
+<span id="cb13-6"><a href></a><span class="co"># &quot;Kept&quot; means a coefficient the optimiser did not drive to zero. The 1e-8</span></span>
+<span id="cb13-7"><a href></a><span class="co"># threshold is guarding against floating-point dust, not making a judgement.</span></span>
+<span id="cb13-8"><a href></a>kept <span class="op">=</span> [(c, b) <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, lcv.coef_) <span class="cf">if</span> <span class="bu">abs</span>(b) <span class="op">&gt;</span> <span class="fl">1e-8</span>]</span>
+<span id="cb13-9"><a href></a></span>
+<span id="cb13-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;lambda = </span><span class="sc">{</span>lcv<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">   kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span>P<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb13-11"><a href></a><span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">sorted</span>(kept, key<span class="op">=</span><span class="kw">lambda</span> t: <span class="op">-</span><span class="bu">abs</span>(t[<span class="dv">1</span>])):</span>
+<span id="cb13-12"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;   </span><span class="sc">{</span>c<span class="sc">:&lt;20s}</span><span class="ss"> </span><span class="sc">{</span>b<span class="sc">:+.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb13-13"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;auxiliary series kept: </span><span class="sc">{</span><span class="bu">sum</span>(c.startswith(<span class="st">&#39;aux&#39;</span>) <span class="cf">for</span> c, _ <span class="kw">in</span> kept)<span class="sc">}</span><span class="ss"> of 15&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>lambda = 0.0520   kept 6 of 29
    ai_use_any           +0.182
@@ -1604,15 +1676,15 @@ auxiliary series kept: 0 of 15</code></pre>
 <section id="limitation-2-is-not-academic" class="slide level2">
 <h2>Limitation 2 is not academic</h2>
 <p>Our five AI-adoption columns are all measuring roughly the same thing:</p>
-<div id="fd1199aa" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Five columns that are all, in substance, &quot;how much AI does this country use&quot;.</span></span>
-<span id="cb10-2"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
-<span id="cb10-3"><a href></a></span>
-<span id="cb10-4"><a href></a>C <span class="op">=</span> d[GRP].corr().to_numpy()</span>
-<span id="cb10-5"><a href></a><span class="co"># triu_indices(5, 1) takes the strict upper triangle: the ten distinct pairs,</span></span>
-<span id="cb10-6"><a href></a><span class="co"># without the diagonal of ones and without counting each pair twice.</span></span>
-<span id="cb10-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pairwise correlations within the group: </span><span class="sc">{</span>C[np.triu_indices(<span class="dv">5</span>, <span class="dv">1</span>)]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.2f}</span><span class="ss">&quot;</span></span>
-<span id="cb10-8"><a href></a>      <span class="ss">f&quot; to </span><span class="sc">{</span>C[np.triu_indices(<span class="dv">5</span>, <span class="dv">1</span>)]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a392a840" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Five columns that are all, in substance, &quot;how much AI does this country use&quot;.</span></span>
+<span id="cb15-2"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
+<span id="cb15-3"><a href></a></span>
+<span id="cb15-4"><a href></a>C <span class="op">=</span> d[GRP].corr().to_numpy()</span>
+<span id="cb15-5"><a href></a><span class="co"># triu_indices(5, 1) takes the strict upper triangle: the ten distinct pairs,</span></span>
+<span id="cb15-6"><a href></a><span class="co"># without the diagonal of ones and without counting each pair twice.</span></span>
+<span id="cb15-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pairwise correlations within the group: </span><span class="sc">{</span>C[np.triu_indices(<span class="dv">5</span>, <span class="dv">1</span>)]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.2f}</span><span class="ss">&quot;</span></span>
+<span id="cb15-8"><a href></a>      <span class="ss">f&quot; to </span><span class="sc">{</span>C[np.triu_indices(<span class="dv">5</span>, <span class="dv">1</span>)]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>pairwise correlations within the group: 0.93 to 0.96</code></pre>
 </div>

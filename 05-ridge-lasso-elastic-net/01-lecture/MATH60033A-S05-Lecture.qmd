@@ -64,13 +64,14 @@ Z = StandardScaler().fit_transform(X)
 
 1. Where we are, and the opening claim that turns out to be wrong
 2. A situation you will meet — more candidate predictors than countries
-3. Ridge, and what it does to the SVD spectrum
-4. Lasso, and why corners produce exact zeros
-5. Soft-thresholding, and the coefficient path
-6. The elastic net, and the grouping effect
-7. Choosing $(\alpha, \lambda)$ by cross-validation
-8. Three limitations to state out loud
-9. Key takeaways, and on to the practice
+3. Stepwise selection, and why its choices do not survive a resample
+4. Ridge, and what it does to the SVD spectrum
+5. Lasso, and why corners produce exact zeros
+6. Soft-thresholding, and the coefficient path
+7. The elastic net, and the grouping effect
+8. Choosing $(\alpha, \lambda)$ by cross-validation
+9. Three limitations to state out loud
+10. Key takeaways, and on to the practice
 
 ## What session 5 is for {.scrollable}
 ::::: columns
@@ -79,6 +80,7 @@ Z = StandardScaler().fit_transform(X)
 
 ### The mathematics
 
+- Say why a greedy **stepwise** search is unstable, and what that argues for
 - Derive the ridge estimator and show how it shrinks the **SVD spectrum**
 - Explain geometrically why the lasso produces exact zeros and ridge does not
 - State the **elastic net** objective and what $\ell_2$ adds under correlation
@@ -262,6 +264,78 @@ print(f"usable rows n = {len(d)},  candidate predictors p = {len(XCOLS)}")
 ::: {.warn}
 $n = 37$, $p = 29$. Eight degrees of freedom. This is not an exotic case — it is what happens every
 time a new survey wave meets an old panel.
+:::
+
+## The obvious thing to try first
+
+Twenty-nine candidates, thirty-seven rows. The mechanical response is to let the data choose: start
+from nothing, add whichever variable improves the fit most, stop when none does.
+
+That is **forward stepwise selection**, the standard answer for decades and still the default in a
+great deal of applied software. It is worth watching it fail carefully, because everything after
+this slide is a response to the way it fails.
+
+```{python}
+#| echo: true
+import statsmodels.api as sm
+
+def forward_aic(X, y):
+    """Add whichever variable lowers AIC most; stop when none does."""
+    chosen, rest = [], list(X.columns)
+    best = sm.OLS(y, np.ones((len(y), 1))).fit().aic
+    while rest:
+        s = sorted((sm.OLS(y, sm.add_constant(X[chosen + [c]])).fit().aic, c) for c in rest)
+        if s[0][0] >= best - 1e-9:
+            break
+        best, pick = s[0]; chosen.append(pick); rest.remove(pick)
+    return chosen
+```
+
+## It keeps fifteen, and three of them are noise
+
+```{python}
+#| echo: true
+# Ground truth, from scripts/build_spine/make_fixtures.py: of the fifteen aux_
+# columns, every third carries a weak signal and the other ten are pure noise.
+# No real dataset tells you this; the fixture was built so that it can.
+noise = {f"aux_{k:02d}" for k in range(15) if k % 3}
+
+Xc, yc = d[XCOLS].astype(float), d[YCOL].astype(float)
+selected = forward_aic(Xc, yc)
+print(f"stepwise kept {len(selected)} of {len(XCOLS)} candidates")
+print(f"   pure noise among them: {sorted(c for c in selected if c in noise)}")
+```
+
+::: {.muted}
+Three false positives out of fifteen might be dismissed as bad luck. The next slide is the part
+that cannot be.
+:::
+
+## Now run it again on a resample
+
+```{python}
+#| echo: true
+from collections import Counter
+
+rng, B, counts = np.random.default_rng(60033), 100, Counter()
+for _ in range(B):                      # bootstrap: same data, resampled rows
+    idx = rng.integers(0, len(d), len(d))
+    counts.update(forward_aic(Xc.iloc[idx], yc.iloc[idx]))
+
+for name, k in counts.most_common(5):
+    print(f"{name:20}selected in {k/B:>4.0%} of resamples")
+print(f"\nselected at least once: {len(counts)} of {len(XCOLS)}")
+```
+
+::: {.warn}
+**Every one** of the twenty-nine is chosen in some resample. "The data selected these variables" is
+not a finding: perturb the data slightly and the data select different ones.
+:::
+
+::: {.check}
+The diagnosis is that stepwise makes a sequence of **discrete** decisions, each conditional on the
+last. A hair's difference at step three changes the whole path. So stop making in-or-out decisions,
+and shrink coefficients **continuously** instead. That is the rest of this session.
 :::
 
 ## Why OLS cannot cope here

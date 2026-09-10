@@ -66,13 +66,12 @@ plt.rcParams.update({
 ## Outline · The hour ahead {.center .scrollable}
 
 1. From data to models
-2. Why Evaluate Models?
-3. Introduction: Key Aspects of Model Evaluation
-4. Models: Assessing the adequacy
-5. Models: assessing the validity
-6. Model Robustness/Parsimony and Selection
-7. Best Practices and Conclusion
-8. Conclusion
+2. Why evaluate a model at all?
+3. Adequacy · how much does the line explain?
+4. Validity · do the assumptions hold?
+5. Robustness · which observations move the answer?
+6. Parsimony · comparing candidate models
+7. Best practice, and what to take away
 
 ## What session 3 is for {.scrollable}
 ::::: columns
@@ -312,13 +311,18 @@ Nothing in the output distinguishes these. Until Sessions 10–11, write **"is a
 and mean it.
 :::
 
-## Course Objectives {#imported-s03-001 .center .scrollable}
+## Why evaluate a model at all? {.center background-color="#E3120B" style="color:#F7F4ED"}
+
+## What a regression table asks you to believe {#imported-s03-001 .scrollable}
+
+Every number in it is an estimate, and every star is a claim about a population you never
+saw. Today is about which of those claims survive.
 
 ![](economist-assets/regression-table.png){.quarto-figure .quarto-figure-center .r-stretch style="width:88.0%"}
 
-## Why Evaluate Models? {#imported-s03-003 .center .scrollable}
+## "All models are wrong, but some are useful" {#imported-s03-003 .scrollable}
 
-> "All models are wrong, but some are useful." --- George Box
+> --- George Box
 
 -   Regression results must be tested for adequacy, not just reported.\
 -   Ignoring diagnostics can lead to:
@@ -326,21 +330,19 @@ and mean it.
     -   Overconfidence in predictions\
     -   Poor generalization
 
-## Introduction: Key Aspects of Model Evaluation {#imported-s03-004 .center .scrollable}
-
-## Key Aspects of Model Evaluation {#imported-s03-005 .scrollable}
+## The four questions of the hour {#imported-s03-005 .scrollable}
 
 -   Model Accuracy (Adequacy): [\\(R\^2\\)]{.math .inline}, Adjusted [\\(R\^2\\)]{.math .inline}, RSE.
 -   Model Validity (Assumptions): Linearity, homoscedasticity, normality of residuals.
 -   Model Robustness: Outliers, leverage, Cook's distance (sensitivity to unusual points).
--   Model Parsimony/Selection: AIC, BIC, stepwise methods.
+-   Model Parsimony/Selection: AIC, BIC --- and, in session 05, what to do instead of stepwise.
 
-## Models: Assessing the adequacy {#imported-s03-006 .center .scrollable}
+## Adequacy · how much does the line explain? {.center background-color="#E3120B" style="color:#F7F4ED"}
 
-## Models: Assessing the adequacy {#imported-s03-007 .scrollable}
+## Adequacy: two things to assess {#imported-s03-007 .scrollable}
 
 ::::::::::::: panel-tabset
-### Adequacy 1
+### Two questions
 
 We can assess the adequacy of
 
@@ -348,7 +350,7 @@ We can assess the adequacy of
 
 -   the model \[the whole\]
 
-### A 2
+### The coefficients
 
 First, assessing the adequacy of the **coefficient estimates**:
 
@@ -360,7 +362,7 @@ A natural question is as follows:
 
 > We have established that the average of [\\(\\hat{\\mu}\\)]{.math .inline}'s over many data sets will be very close to [\\(\\mu\\)]{.math .inline}, but that a single estimate [\\(\\hat{\\mu}\\)]{.math .inline} may be a substantial **underestimate** or **overestimate** of [\\(\\mu\\)]{.math .inline}.
 
-### A 3
+### Residuals
 
 ::::::: columns
 ::: {.column style="width:50%;"}
@@ -382,7 +384,7 @@ Residuals are the leftovers from the model fit: Data = Fit + Residual
 :::::
 :::::::
 
-### A 4
+### One residual, read
 
 ::::::: columns
 ::: {.column style="width:50%;"}
@@ -408,7 +410,7 @@ A residual is the difference between the observed [\\(y_i\\)]{.math .inline} and
 :::::
 :::::::
 
-### A 5
+### Standard error
 
 How far off will that single estimate of [\\(\\hat{\\mu}\\)]{.math .inline} be?
 
@@ -422,7 +424,7 @@ Roughly speaking, the **standard error** tells us the average amount that this e
 
 The previous equation also tells us how this deviation shrinks with [\\(n\\)]{.math .inline} --- **the more observations** we have, **the smaller the standard error** of [\\(\\hat{\\mu}\\)]{.math .inline}.
 
-### A 6
+### SE of the slope
 
 In a similar vein, we can wonder how close [\\(\\hat{\\beta}\_0\\)]{.math .inline} and [\\(\\hat{\\beta}\_1\\)]{.math .inline} are to the true values [\\(\\beta_0\\)]{.math .inline} and [\\(\\beta_1\\)]{.math .inline}?
 
@@ -430,7 +432,7 @@ In a similar vein, we can wonder how close [\\(\\hat{\\beta}\_0\\)]{.math .inlin
 
 [\\\[ SE(\\hat{\\beta_1}) \\\]]{.math .display}
 
-### A 7
+### Interval, and test
 
 **Models: Assessing the adequacy of the coefficient estimates**
 
@@ -449,10 +451,10 @@ As already seen, we compute the the t-statistic, which measures the number of st
 [\\\[ t=\\frac{\\hat{\\beta}\_1-0}{SE(\\hat{\\beta}\_1)} \\\]]{.math .display}
 :::::::::::::
 
-## Models: Assessing the adequacy (cont.) {#imported-s03-008 .scrollable}
+## From residuals to [\\(R\^2\\)]{.math .inline} {#imported-s03-008 .scrollable}
 
 :::::::: panel-tabset
-### adequacy M 1
+### The whole model
 
 Assessing the **adequacy of the model** now:
 
@@ -464,7 +466,7 @@ For that, we use:
 
 -   the [\\(R\^2\\)]{.math .inline} statistic.
 
-### AM 2
+### RSE
 
 The RSE is an estimate of the standard deviation of [\\(\\epsilon\\)]{.math .inline}.
 
@@ -476,7 +478,7 @@ recall:
 
 [\\\[ RSS= \\sum\_{i=1}\^{n}(y_i-\\hat{y}\_i)\^2 \\\]]{.math .display}
 
-### AM 3
+### TSS, and R-squared
 
 ::::::: columns
 ::: {.column style="width:50%;"}
@@ -511,18 +513,10 @@ To calculate [\\(R\^2\\)]{.math .inline}, we use the formula:
 :::::::
 ::::::::
 
-## Goodness-of-Fit --- [\\(R\^2\\)]{.math .inline} {#imported-s03-009 .scrollable}
+## Adjusted [\\(R\^2\\)]{.math .inline} and RSE, in Python {#imported-s03-010 .scrollable}
 
-[\\\[ R\^2 = 1 - \\frac{RSS}{TSS} \\\]]{.math .display}
-
--   Proportion of variance in Y explained by the model.
--   Example: [\\(R\^2\\)]{.math .inline} = 0.62 means 62% of variance explained.
-
-Limitation: [\\(R\^2\\)]{.math .inline} always increases with more predictors.
-
-Visual: bar chart comparing variance explained ([\\(R\^2\\)]{.math .inline}) across models.
-
-## Adjusted [\\(R\^2\\)]{.math .inline} and RSE {#imported-s03-010 .scrollable}
+[\\(R\^2\\)]{.math .inline} can never fall when a predictor is added, so on its own it
+cannot say whether that predictor earned its place. Two answers:
 
 -   **Adjusted [\\(R\^2\\)]{.math .inline}:** corrects for number of predictors.
 -   **RSE (Residual Standard Error):** average deviation from regression line.
@@ -613,18 +607,42 @@ Which of the below is the correct interpretation of [\\(R\^2 = 0.38\\)]{.math .i
 :::::::
 :::::::::::::
 
-## Models: assessing the validity {#imported-s03-012 .center .scrollable}
+## Validity · do the assumptions hold? {.center background-color="#E3120B" style="color:#F7F4ED"}
 
-## Models: assessing the validity {#imported-s03-013 .scrollable}
+## The residual plot is the instrument {#imported-s03-018 .scrollable}
+
+Residual = observed [\\(y_i\\)]{.math .inline} -- predicted [\\(\\hat{y}\_i\\)]{.math .inline}.
+
+-   Residuals contain all the information the model *did not explain*.\
+-   Checking them reveals whether assumptions of linear regression hold.
+
+```{python}
+#| echo: true
+
+# Residuals vs Fitted: is there structure the straight line missed?
+plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
+plt.axhline(0, color="black", lw=1)
+plt.xlabel("Fitted values"); plt.ylabel("Residuals")
+plt.show()
+```
+
+## What you are looking for {.scrollable}
+
+Scattered at random around zero is the model behaving. A curve, a funnel or a
+drift is the model telling you what it missed.
+
+![](imported-assets/index_files/figure-revealjs/unnamed-chunk-14-1.png){.r-stretch}
+
+## Three conditions to check {#imported-s03-013 .scrollable}
 
 -   1.  Linearity
 -   2.  Nearly normal residuals
 -   3.  Constant variability
 
-## Models: assessing the validity (cont.) {#imported-s03-014 .scrollable}
+## Validity: linearity {#imported-s03-014 .scrollable}
 
 :::::::::: panel-tabset
-### Validity: Linearity 1
+### The condition
 
 -   The relationship between the explanatory and the dependent variable should be linear.
 
@@ -640,7 +658,7 @@ Which of the below is the correct interpretation of [\\(R\^2 = 0.38\\)]{.math .i
 </div>
 ::::
 
-### V: L 2
+### Anatomy of a residual
 
 **Anatomy of a residuals plot**
 
@@ -676,7 +694,7 @@ Which of the below is the correct interpretation of [\\(R\^2 = 0.38\\)]{.math .i
 :::::
 :::::::
 
-### V: L 3
+### What a violation looks like
 
 -   The relationship between predictors and outcome should be linear.
 -   Violations show up as **curved patterns** in residuals.
@@ -684,9 +702,7 @@ Which of the below is the correct interpretation of [\\(R\^2 = 0.38\\)]{.math .i
 Remedies: add polynomial terms, interactions, or reconsider functional form.
 ::::::::::
 
-## Models: assessing the validity (cont.) {#imported-s03-015 .scrollable}
-
-**Validity: Nearly Normal Residuals**
+## Validity: nearly normal residuals {#imported-s03-015 .scrollable}
 
 ::::::: columns
 ::: {.column style="width:50%;"}
@@ -710,7 +726,7 @@ Remedies: add polynomial terms, interactions, or reconsider functional form.
 :::::
 :::::::
 
-## Normality of Residuals {#imported-s03-016 .scrollable}
+## Normality, on a Q-Q plot {#imported-s03-016 .scrollable}
 
 -   Errors should be normally distributed.
 -   Important for valid t-tests and confidence intervals.
@@ -720,10 +736,10 @@ ends are heavy tails.
 
 ![](imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png){.r-stretch}
 
-## Normality of Residuals (cont.) {#imported-s03-017 .scrollable}
+## Validity: constant variance {#imported-s03-017 .scrollable}
 
 ::::::::::: panel-tabset
-### Homoscedasticity (Equal Variance)
+### The condition, and the test
 
 -   Residuals should have **constant variance** across fitted values.
 -   Violation = *heteroscedasticity* (funnel shape).
@@ -741,7 +757,7 @@ plt.xlabel("Fitted values"); plt.ylabel("sqrt(|standardised residual|)")
 plt.show()
 ```
 
-### Validity: Constant Variability
+### Said the other way round
 
 ::::::: columns
 ::: {.column style="width:50%;"}
@@ -767,30 +783,6 @@ plt.show()
 :::::
 :::::::
 :::::::::::
-
-## The Window Into Model Adequacy {#imported-s03-018 .scrollable}
-
-Residual = observed [\\(y_i\\)]{.math .inline} -- predicted [\\(\\hat{y}\_i\\)]{.math .inline}.
-
--   Residuals contain all the information the model *did not explain*.\
--   Checking them reveals whether assumptions of linear regression hold.
-
-```{python}
-#| echo: true
-
-# Residuals vs Fitted: is there structure the straight line missed?
-plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
-plt.axhline(0, color="black", lw=1)
-plt.xlabel("Fitted values"); plt.ylabel("Residuals")
-plt.show()
-```
-
-## What you are looking for {.scrollable}
-
-Scattered at random around zero is the model behaving. A curve, a funnel or a
-drift is the model telling you what it missed.
-
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-14-1.png){.r-stretch}
 
 ## Quiz: reading a residual plot {#imported-s03-019 .scrollable}
 
@@ -839,7 +831,7 @@ What condition is this linear model obviously violating?
 ::::
 ::::::
 
-### Quiz 3
+### Quiz 2
 
 :::::: columns
 ::: {.column style="width:50%;"}
@@ -888,15 +880,17 @@ What condition is this linear model obviously violating?
 ::::::
 ::::::::::::::::::
 
-## Models: assessing the validity {#imported-s03-020 .scrollable}
+## Practise the eye {#imported-s03-020 .scrollable}
+
+Guess the correlation, then check. Ten minutes here is worth a chapter.
 
 ::: {style="text-align:center"}
 [Correlation and Regression Game](http://shiny.calpoly.sh/Corr_Reg_Game/)
 :::
 
-## Model Robustness/Parsimony and Selection {#imported-s03-021 .center .scrollable}
+## Robustness · which observations move the answer? {.center background-color="#E3120B" style="color:#F7F4ED"}
 
-## Outliers vs. Influential Observations {#imported-s03-022 .scrollable}
+## Outlier, leverage point, influential point {#imported-s03-022 .scrollable}
 
 -   **Outlier:** unusual Y given X.
 -   **Leverage point:** unusual X values.
@@ -969,6 +963,8 @@ plt.xlabel("Observation"); plt.ylabel("Cook's distance")
 plt.show()
 ```
 
+## Parsimony · comparing candidate models {.center background-color="#E3120B" style="color:#F7F4ED"}
+
 ## Information Criteria --- AIC {#imported-s03-025 .scrollable}
 
 [\\\[ AIC = -2\\log(L) + 2k \\\]]{.math .display}
@@ -993,39 +989,23 @@ fit.aic
 
 > BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.
 
-## Stepwise Regression {#imported-s03-027 .scrollable}
+## Choosing a model is not a diagnostic {.scrollable}
 
--   Automated selection: forward, backward, or both.
--   Based on AIC (or BIC with k = log(n)).
+AIC and BIC compare models you have already written down. They do not write them down for you.
 
-```{python}
-#| echo: true
+::: {.warn}
+The automated alternative --- **stepwise selection**, which adds and drops predictors by criterion
+until nothing improves --- is a *selection procedure*, not a check on a fit. Teaching it beside
+Cook's distance would imply it belongs to model checking.
+:::
 
-# Python has no step(); compare candidate models directly, which is
-# clearer about what you are doing and why.
-candidates = [
-    "gdp_pc_eur ~ productivity_idx",
-    "gdp_pc_eur ~ productivity_idx + gfcf_meur",
-    "gdp_pc_eur ~ productivity_idx + gfcf_meur + employment_ths",
-]
-cols = ["gdp_pc_eur", "productivity_idx", "gfcf_meur", "employment_ths"]
-dd = core.dropna(subset=cols)
+::: {.check}
+It opens **session 05** instead, where it does real work: watch its choices fail to survive a
+resample, and you have the argument for shrinking coefficients continuously rather than including
+or excluding them. That argument is ridge and lasso.
+:::
 
-for formula in candidates:
-    m = smf.ols(formula, data=dd).fit()
-    print(f"AIC {m.aic:9.1f}   adj R2 {m.rsquared_adj:.3f}   {formula}")
-```
-
-Magic exists... Your first entry into Machine Learning...
-
-## Best Practices and Conclusion {#imported-s03-028 .center .scrollable}
-
-## Key Aspects of Model Evaluation {#imported-s03-029 .scrollable}
-
--   Model Adequacy: [\\(R\^2\\)]{.math .inline}, Adjusted [\\(R\^2\\)]{.math .inline}, RSE.
--   Model Validity (Assumptions): Linearity, homoscedasticity, normality of residuals.
--   Model Robustness: Outliers, leverage, Cook's distance (sensitivity to unusual points).
--   Model Parsimony/Selection: AIC, BIC, stepwise methods.
+## Best practice, and what to take away {.center background-color="#E3120B" style="color:#F7F4ED"}
 
 ## Best Practices {#imported-s03-030 .scrollable}
 
@@ -1033,15 +1013,19 @@ Magic exists... Your first entry into Machine Learning...
 -   Use multiple fit criteria, not just [\\(R\^2\\)]{.math .inline}.
 -   Always investigate influential points.
 -   Use AIC/BIC to compare, but remember they are relative.
--   Stepwise is exploratory --- combine with theory.
+-   If you selected on a criterion, say so, and treat the inference as exploratory.
 
 Final message: **Balance predictive adequacy, interpretability, and parsimony.**
 
-## Conclusion {#imported-s03-031 .center .scrollable}
-
 ## Conclusion {#imported-s03-032 .scrollable}
 
-![](economist-assets/regression-table.png){.quarto-figure .quarto-figure-center .r-stretch style="width:90.0%"}
+-   We fitted the smallest possible model, and read its slope in units
+-   **Adequacy** asked how much it explains; **validity**, whether its assumptions hold;
+    **robustness**, which observations are doing the work; **parsimony**, whether a simpler
+    model would do as well
+-   Not one of the four is answered by the coefficient table alone
+-   Session 04 keeps the machinery and changes the outcome: the thing you are predicting
+    becomes a **category**
 
 ## One more thing... {#imported-s03-033 .scrollable}
 
