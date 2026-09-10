@@ -6,6 +6,12 @@
 
 ---
 
+> **Python cheatsheet — [session 09](https://warint.github.io/quantitative-methods/python-cheatsheet-09.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and the code from the session before this one. Print it.
+
 ## How to use this page
 
 The lecture is delivered from the slides:

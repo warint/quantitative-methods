@@ -138,6 +138,15 @@ def main():
         n_data += 1
     print(f"published {n_data} spine files to docs/data/")
 
+    # The per-session Python cheatsheets, which every deck links to by URL.
+    # Built by scripts/build_cheatsheets.py; copied here so the link resolves.
+    n_sheets = 0
+    for src in sorted(ROOT.glob("[0-9][0-9]-*/PYTHON-CHEATSHEET.pdf")):
+        num = src.parent.name[:2]
+        shutil.copy2(src, DOCS / f"python-cheatsheet-{num}.pdf")
+        n_sheets += 1
+    print(f"published {n_sheets} python cheatsheets to docs/")
+
     decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:
         raise SystemExit("No rendered decks found — run scripts/render_session_lectures.sh first.")
@@ -161,6 +170,9 @@ def main():
             rows.append((num, title, blurb, dest.name, dest.stat().st_size))
         else:
             extra.setdefault(num, {})[kind] = dest.name
+        sheet = DOCS / f"python-cheatsheet-{num}.pdf"
+        if sheet.exists():
+            extra.setdefault(num, {})["cheatsheet"] = sheet.name
 
     def companions(num):
         got = extra.get(num, {})

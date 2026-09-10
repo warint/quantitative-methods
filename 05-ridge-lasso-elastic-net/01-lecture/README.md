@@ -6,6 +6,12 @@
 
 ---
 
+> **Python cheatsheet — [session 05](https://warint.github.io/quantitative-methods/python-cheatsheet-05.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and the code from the session before this one. Print it.
+
 ### 5.1 Ridge regression
 
 $$\hat\beta^{\text{ridge}} = \arg\min_\beta \Big\{ \|y - X\beta\|_2^2 + \lambda\|\beta\|_2^2 \Big\}

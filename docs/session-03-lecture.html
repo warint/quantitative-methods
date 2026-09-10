@@ -1119,22 +1119,13 @@ Thierry Warin, PhD
 </section>
 <section id="your-python-so-far" class="slide level2 scrollable">
 <h2>Your Python so far</h2>
-<p>The 9 names below came out of session 2. Today’s slides assume them, and add to them.</p>
-<h3 id="load-and-shape">Load and shape</h3>
-<ul>
-<li><code>.dropna</code> — drop rows with missing values</li>
-<li><code>.merge</code> — join two frames on a key</li>
-<li><code>.shape</code> — rows and columns</li>
-<li><code>pd.read_parquet</code> — a parquet file, directly</li>
-<li><code>qmib.load</code> — a course dataset, by name</li>
-</ul>
-<h3 id="describe">Describe</h3>
-<ul>
-<li><code>.mean / .median</code> — the two centres, and their gap</li>
-<li><code>.quantile</code> — any quantile, including the median</li>
-<li><code>.std / .var</code> — spread, dividing by <span class="math inline">\(n-1\)</span></li>
-<li><code>stats.trim_mean</code> — the mean after cutting both tails</li>
-</ul>
+<p>Everything you need to type is on one sheet — how to start Python in VS Codium on your platform, how to make a file and run it, the DataFrame basics, and every name from session 2 with a line showing it in use.</p>
+<blockquote>
+<p><strong><a href="https://warint.github.io/quantitative-methods/python-cheatsheet-03.pdf">Python Cheatsheet · Session 03</a></strong> (PDF) · in the repository at <code>03-…/PYTHON-CHEATSHEET.pdf</code></p>
+</blockquote>
+<div class="muted">
+<p>Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is assumed.</p>
+</div>
 <!-- END deck-frontmatter -->
 </section>
 <section id="from-data-to-models" class="slide level2 center" data-background-color="#E3120B" style="color:#F7F4ED">
@@ -1494,7 +1485,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="981c43a5" class="cell" data-execution_count="2">
+<div id="c98b54d5" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1585,7 +1576,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="7829e287" class="cell" data-execution_count="3">
+<div id="7a3bc27c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1712,7 +1703,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="695bb9ac" class="cell" data-execution_count="4">
+<div id="b550e350" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1866,7 +1857,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Leverage measures how far X is from its mean.</li>
 <li>Average leverage = (p+1)/n.</li>
 </ul>
-<div id="ca757a34" class="cell" data-execution_count="5">
+<div id="cd2dc252" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>leverage <span class="op">=</span> influence.hat_matrix_diag</span>
 <span id="cb12-3"><a href></a></span>
@@ -1884,7 +1875,7 @@ rule of thumb 2p/n = 0.0093</code></pre>
 <section id="residuals-versus-leverage" class="slide level2 scrollable">
 <h2>Residuals versus leverage</h2>
 <p>The points with the power to move the line.</p>
-<div id="adbd7291" class="cell" data-execution_count="6">
+<div id="5ebd94ec" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># Far right = unusual X. High up or low down = badly predicted. The damage is</span></span>
 <span id="cb14-2"><a href></a><span class="co"># done by points that are both, which is why the two are plotted together.</span></span>
 <span id="cb14-3"><a href></a>plt.scatter(leverage, influence.resid_studentized_internal, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
@@ -1900,7 +1891,7 @@ rule of thumb 2p/n = 0.0093</code></pre>
 <li>Combines leverage + residual size.</li>
 <li>High Cook’s D = observation heavily influences coefficients.</li>
 </ul>
-<div id="dc11cfdd" class="cell" data-execution_count="7">
+<div id="642a4bec" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb15-2"><a href></a></span>
 <span id="cb15-3"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;largest Cook&#39;s D </span><span class="sc">{</span>cooks_d<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
@@ -1917,7 +1908,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="one-spike-per-observation" class="slide level2 scrollable">
 <h2>One spike per observation</h2>
 <p>How much every coefficient would move if that single row were deleted.</p>
-<div id="c0aa4958" class="cell" data-execution_count="8">
+<div id="b567c3e9" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb17-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb17-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1937,7 +1928,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <li>Balances fit with penalty for number of parameters.</li>
 <li>Lower AIC = better model (relative).</li>
 </ul>
-<div id="219a2bf5" class="cell" data-execution_count="9">
+<div id="e690bb3a" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a>fit.aic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>np.float64(9045.504564959898)</code></pre>

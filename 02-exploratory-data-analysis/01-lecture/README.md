@@ -11,6 +11,12 @@
 
 ---
 
+> **Python cheatsheet — [session 02](https://warint.github.io/quantitative-methods/python-cheatsheet-02.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and the code from the session before this one. Print it.
+
 ## Why this session comes first
 
 Every method in the eleven sessions that follow reduces a column of numbers to a few summaries and

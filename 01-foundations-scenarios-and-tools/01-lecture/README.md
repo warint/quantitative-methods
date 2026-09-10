@@ -6,6 +6,12 @@
 
 ---
 
+> **Python cheatsheet — [session 01](https://warint.github.io/quantitative-methods/python-cheatsheet-01.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and the code from the session before this one. Print it.
+
 This session is not a lecture. There is no mathematics in it. The first half walks through
 [`SYLLABUS.md`](../../SYLLABUS.md) in full, and you should arrive having read it — the ninety minutes
 are for the questions it raises, not for reading it aloud.
