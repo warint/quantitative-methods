@@ -112,4 +112,12 @@ Everyone pushes at least once. The log is the record of participation.
 
 ---
 
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-07.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
+
+---
+
 [<- The lecture](../01-lecture/README.md) · [Session 07 overview](../README.md)

@@ -45,6 +45,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | Git and GitHub setup, reading, self-check | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: centre, spread, shape | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
+| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-02.html) |
 
 The pre-session work is **not optional**. This is the session where your group repository is set
 up, so arrive with git working and a GitHub account.

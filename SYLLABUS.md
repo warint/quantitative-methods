@@ -241,16 +241,16 @@ engagement**, and it is earned in three ways — any of which counts:
 |---|---|---|
 | **In the room** | a question that changed how another group saw their result, a connection between two angles, a correction that landed | every session |
 | **In the practice** | working the ninety minutes with your group: pushing your own commits, taking the two-minute report when drawn, engaging with what other groups found | Sessions 02–11 |
-| **In the optional lab** | a completed **QMIB Lab App** knowledge check, submitted after a session | any session, at home |
+| **In the optional lab** | a completed **[QMIB Lab](https://warin.ca/qmib-labs/)** knowledge check, submitted after a session | Sessions 02–11, at home |
 
 > **Why it is graded at all.** The second half of this course is a joint enterprise. Ten groups
 > produce five perspectives on one question, and the value of the session comes from the collision
 > between them. A room where nobody challenges anybody produces ten monologues and learns a
 > fraction of what it could. Participation is graded because the collision is the point.
 
-**The optional labs.** The QMIB Lab App is an at-home knowledge check that follows each session.
-**It opens during the term, and the link is announced in class when it does** — nothing is expected
-of you before then. It is **never a prerequisite** for the next lecture and never assessed for correctness — a completed
+**The optional labs.** The QMIB Lab App is an at-home knowledge check that follows each session,
+one per session for sessions 02 to 11, at **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/)**. It is **never a
+prerequisite** for the next lecture and never assessed for correctness — a completed
 report counts because attempting it is the engagement being measured. It exists for two reasons: it
 gives you a private way to find out whether you actually followed the session, and it gives a route
 to full participation marks that does not depend on speaking in a room of thirty.

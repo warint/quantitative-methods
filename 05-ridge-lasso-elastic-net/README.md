@@ -40,6 +40,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
+| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-05.html) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
 a working environment; the practice session assumes you arrive with the data already downloaded.

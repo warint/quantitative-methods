@@ -77,7 +77,7 @@ Full detail, including your group's allocation: [`RESEARCH-MANDATES.md`](../../R
 | **Final exam** | 40% | **individual** research paper (25) + individual oral, 15 min (15) |
 
 Participation is **active engagement**, and three routes count equally: contributing in the room,
-engaging in the 90-minute practice, and completing an optional QMIB Lab App knowledge check after a
+engaging in the 90-minute practice, and completing an optional [QMIB Lab](https://warin.ca/qmib-labs/) knowledge check after a
 session. What is marked is sustained engagement across the term, not a count of interventions.
 
 The final mark out of 100 is converted to a **letter grade on a curve, with the class median at

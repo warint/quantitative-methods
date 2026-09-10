@@ -16,6 +16,19 @@ cannot drift apart again.
 # it here moves the whole course's group work to a new directory.
 COHORT = "A2026"
 
+# The QMIB Lab App: the optional at-home knowledge check that is the third
+# route to participation marks. Live since September 2026; the course pages
+# said "the link is announced in class" until then.
+LAB_URL = "https://warin.ca/qmib-labs/"
+# One lab per session, sessions 02 to 11. Session 01 installs the workstation
+# and session 12 is the presentations, so neither has one.
+LAB_SESSIONS = tuple(f"{n:02d}" for n in range(2, 12))
+
+
+def lab_url(num):
+    """The lab for one session, or None where there is no lab."""
+    return f"{LAB_URL}qmib-lab-{num}.html" if num in LAB_SESSIONS else None
+
 SESSIONS = {
     "01": dict(
         dir="01-foundations-scenarios-and-tools",

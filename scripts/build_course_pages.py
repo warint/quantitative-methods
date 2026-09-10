@@ -18,8 +18,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import (COHORT, SESSIONS, ordered, generated, MIDTERM_AFTER,  # noqa: E402
-                         DATES, ASYNCHRONOUS, WHEN, ROOM)
+from course_spec import (COHORT, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E402
+                         generated, MIDTERM_AFTER, DATES, ASYNCHRONOUS, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
 
@@ -49,6 +49,10 @@ def link(num):
 def session_readme(num, s):
     prev, nxt = PREV_NEXT[num]
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
+    # Sessions 01 and 12 have no lab, so they get no row rather than a dead one.
+    lab = lab_url(num)
+    lab_row = (f"| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on "
+               f"this session | [warin.ca/qmib-labs]({lab}) |\n") if lab else ""
     return f"""# Session {num} — {s['title']}
 
 > **{s['question']}**
@@ -86,7 +90,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: {s['methods']} | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
-
+{lab_row}
 The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
 practice assumes you arrive with the data loaded.
 
@@ -220,6 +224,16 @@ Answer on paper. If you cannot, that is what the lecture is for.
 
 def practice(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
+    lab = lab_url(num)
+    after = f"""---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session]({lab})** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
+
+""" if lab else ""
     return f"""# Session {num} — Group practice (second half, ~90 min)
 
 # {s['title']}
@@ -329,7 +343,7 @@ Everyone pushes at least once. The log is the record of participation.
 
 {loses}
 
----
+{after}---
 
 [<- The lecture](../01-lecture/README.md) · [Session {num} overview](../README.md)
 """

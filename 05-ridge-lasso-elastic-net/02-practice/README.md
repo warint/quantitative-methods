@@ -122,4 +122,10 @@ eleven.
 
 ---
 
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-05.html)** has a knowledge check on what you have just done. It is optional, never a prerequisite for the next lecture, and never marked for correctness — a completed report counts because attempting it is the engagement being measured.
+
+---
+
 [Back to session 05](../README.md) · [<- Lecture notes](../01-lecture/README.md)

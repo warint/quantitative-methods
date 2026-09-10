@@ -16,7 +16,7 @@ rendered to `pptx`, which a few are as a fallback.
    session method or a benchmark, and break one assumption.
 4. **Present:** finish one slide and give a two-minute presentation. The presenter is selected at
    random. Class ends after the presentations.
-5. **Optional lab:** use the QMIB Lab App for an at-home knowledge check. A completed app report
+5. **Optional lab:** use the [QMIB Lab](https://warin.ca/qmib-labs/) for an at-home knowledge check. A completed report
    counts toward participation and is not required preparation for the next lecture.
 
 Session 01 is the exception: its pre-session installs VS Codium, Python, Ollama, Qwen 2.5 Coder,
@@ -71,5 +71,6 @@ python session05_regularisation_demo.py
 
 ## QMIB Lab App
 
-Each practice deck closes by distinguishing the optional at-home knowledge check from the next
-session's required article and Dataverse preparation.
+The labs live at **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/)** — one per session, sessions
+02 to 11. Each practice deck closes by distinguishing the optional at-home knowledge check from the
+next session's required article and Dataverse preparation.

@@ -85,9 +85,9 @@ presentations; no practice task carries over as required homework.**
 Aider), introduces the syllabus and semester, and uses *Europe 2031* for a 90-minute conversation
 about evidence, scenario, prediction, and AI.
 
-Students who want to check their knowledge may complete the corresponding activity in the **QMIB
-Lab App** after class. A completed app report counts toward participation. The lab is optional and
-is never a prerequisite for the next lecture.
+Students who want to check their knowledge may complete the corresponding activity in the
+**[QMIB Lab](https://warin.ca/qmib-labs/)** after class — one lab per session, sessions 02 to 11. A completed report counts
+toward participation. The lab is optional and is never a prerequisite for the next lecture.
 
 **Session 12** is different: the pre-session prepares the final presentation and the class meeting is
 a presentation workshop and defence. There is no separate practice deck.
@@ -281,7 +281,7 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional QMIB Lab App reports |
+| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional [QMIB Lab](https://warin.ca/qmib-labs/) reports |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet · **Wed 28 October** |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
@@ -290,8 +290,8 @@ Team work (20) breaks down as governance file 7 · reproducible analysis 7 · re
 memo 3 · presentation and defence 3.
 
 **Participation (10) is active engagement, earned by any of three routes:** contributing in the
-room, engaging in the 90-minute practice, or submitting an optional QMIB Lab App report after a
-session (the Lab App opens during the term; the link is announced in class). What is marked is
+room, engaging in the 90-minute practice, or submitting an optional
+[QMIB Lab](https://warin.ca/qmib-labs/) report after a session. What is marked is
 **sustained engagement across the term**, not a count of interventions,
 and never a ranking against other students. Note that the practices themselves are **formative**:
 the analysis is commented on, not marked. What is recorded is that you engaged with it.
