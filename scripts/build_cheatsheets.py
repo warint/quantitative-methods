@@ -23,12 +23,15 @@ What goes on it
 2. **The four things you always do** — build a DataFrame, look at what is in
    it, read a file in, write a CSV out. The same on every sheet, because they
    are the four things a student actually forgets.
-3. **What you have learned so far** — every name taught up to *and including*
+3. **Installing a package you do not have** — because the sheet says `read_excel`
+   needs openpyxl, and saying that without saying how to get it is half an
+   instruction. Recurrent, since the question recurs.
+4. **What you have learned so far** — every name taught up to *and including*
    this session, one session at a time, each with a runnable line. Session 03's
    sheet covers sessions 1, 2 and 3: a student holding it is holding everything
    the course has asked them to type, not only last week's half.
 
-Part 3 is driven by TOOLKIT in `build_deck_frontmatter.py`, which is the
+Part 4 is driven by TOOLKIT in `build_deck_frontmatter.py`, which is the
 registry the deck slide used, so the two can never disagree about *what* was
 taught. SNIPPETS below adds the missing half: what it looks like when you type
 it. A registry entry with no snippet is a build error rather than a silent gap.
@@ -265,7 +268,7 @@ df.describe()      # count, mean, sd and quartiles, per numeric column
 
 # 3 - read a file in
 df = pd.read_csv("data.csv")
-df = pd.read_excel("data.xlsx")                    # needs openpyxl
+df = pd.read_excel("data.xlsx")                    # needs openpyxl - see below
 df = pd.read_parquet("data/spine/core.parquet")
 
 import qmib
@@ -273,6 +276,31 @@ df = qmib.load("core")                             # a course dataset, by name
 
 # 4 - write a CSV out
 df.to_csv("out.csv", index=False)   # index=False, or you get a stray column
+```
+
+## Installing a package you do not have
+
+Everything this course needs is already in `requirements.txt`. When you meet a
+`ModuleNotFoundError` anyway, or a line above says a reader needs something extra, install it
+**into the environment** — never outside it:
+
+```bash
+pip install openpyxl                # one package, by name
+pip install -r requirements.txt     # or the whole course list again
+```
+
+Two rules, and both are about where it lands:
+
+- Your prompt must show `(.venv)` **first**. `pip -V` prints the path it is about to install into;
+  that path has to contain `.venv`.
+- Type `pip`, not `pip3`, and never `sudo`. Inside an activated environment `pip` is already the
+  environment's own.
+
+Then check it arrived:
+
+```bash
+pip show openpyxl                   # name, version and location - or nothing at all
+python -c "import openpyxl; print(openpyxl.__version__)"
 ```
 """
 
@@ -344,7 +372,7 @@ def recap(num):
 
 def sheet(num, s):
     n = int(num)
-    lead = (f"Everything you need to type, in one place. The first three sections are the same "
+    lead = (f"Everything you need to type, in one place. The first four sections are the same "
             f"every week; the last one is every name from sessions 1 to {n}."
             if n > 1 else "Everything you need to type, in one place.")
     return f"""---
