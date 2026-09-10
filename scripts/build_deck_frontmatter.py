@@ -348,19 +348,17 @@ def render_toolkit(sess):
     `PYTHON-CHEATSHEET.pdf`, built by `scripts/build_cheatsheets.py`, and the
     slide says where it is.
     """
-    prev = f"{int(sess) - 1:02d}"
-    if int(sess) < 2:
-        return None
-
     url = f"{PAGES}/python-cheatsheet-{sess}.pdf"
-    # Session 01 is the workstation and introduces no names, so the sheet that
-    # follows it has nothing to recap; saying otherwise sends students looking.
-    recap = (f"and every name from session {int(prev)} with a line showing it in use"
-             if any(v[0] == prev for v in TOOLKIT.values())
-             else f"and what session {int(prev)} set up")
+    # The sheet is cumulative and includes today: session 03's covers sessions
+    # 1, 2 and 3. Saying "last week's" would send students hunting for the rest.
+    # Session 01 has nothing behind it, and the sheet is its own subject anyway.
+    tail = ("and the four DataFrame moves you will use every week from now on"
+            if int(sess) == 1 else
+            f"the DataFrame basics, and every name from sessions 1 to {int(sess)}, each with a "
+            f"line showing it in use")
     return (f"## Your Python so far {{.scrollable}}\n\n"
             f"Everything you need to type is on one sheet — how to start Python in VS Codium on\n"
-            f"your platform, how to make a file and run it, the DataFrame basics, {recap}.\n\n"
+            f"your platform, how to make a file and run it, {tail}.\n\n"
             f"> **[Python Cheatsheet · Session {sess}]({url})** (PDF) ·\n"
             f"> in the repository at `{sess}-…/{CHEATSHEET}.pdf`\n\n"
             "::: {.muted}\n"

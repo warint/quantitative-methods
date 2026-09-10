@@ -10,7 +10,8 @@
 > source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
 >
 > How to start Python in VS Codium on your platform, how to make a file and run it,
-> the DataFrame basics, and the code from the session before this one. Print it.
+> the DataFrame basics, and every name taught in sessions 1 to 8 with a
+> line showing it in use. Print it.
 
 ## How to use this page
 

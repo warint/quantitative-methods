@@ -23,8 +23,10 @@ What goes on it
 2. **The four things you always do** — build a DataFrame, look at what is in
    it, read a file in, write a CSV out. The same on every sheet, because they
    are the four things a student actually forgets.
-3. **From session N-1** — the code introduced in the previous session, with a
-   runnable line for each name, grouped by what it is for.
+3. **What you have learned so far** — every name taught up to *and including*
+   this session, one session at a time, each with a runnable line. Session 03's
+   sheet covers sessions 1, 2 and 3: a student holding it is holding everything
+   the course has asked them to type, not only last week's half.
 
 Part 3 is driven by TOOLKIT in `build_deck_frontmatter.py`, which is the
 registry the deck slide used, so the two can never disagree about *what* was
@@ -198,7 +200,7 @@ PREAMBLE = r"""\usepackage{titling}
 \titleformat{\subsection}{\small\bfseries\color{accent}}{}{0pt}{}
 """
 
-GETTING_STARTED = r"""## Starting Python in VS Codium
+GETTING_STARTED = """## Starting Python in VS Codium
 
 Open the course folder once — **File > Open Folder**, then pick the repository. Everything below
 assumes you are inside it.
@@ -217,7 +219,7 @@ Then activate it — **every time you open a new terminal**:
 ```bash
 source .venv/bin/activate  # macOS
 source .venv/bin/activate  # Linux
-.venv\Scripts\activate     # Windows (PowerShell)
+.venv\\Scripts\\activate     # Windows (PowerShell)
 ```
 
 You will see `(.venv)` at the start of the prompt. If you do not, nothing below will find pandas.
@@ -232,11 +234,11 @@ Finally tell the editor which Python to use: `Ctrl`/`Cmd` + `Shift` + `P`, type
 
 ## A new file, and running it
 
-**File > New File**, then save it with a `.py` ending — `session03.py`, say. Write your code, save
-it, and in the terminal:
+**File > New File**, then save it with a `.py` ending — `sessionSESSIONNUM.py`, say. Write your code,
+save it, and in the terminal:
 
 ```bash
-python session03.py        # macOS, Linux and Windows alike, inside .venv
+python sessionSESSIONNUM.py     # macOS, Linux and Windows alike, inside .venv
 ```
 
 Inside the environment the command is `python` on all three platforms. Outside it, macOS and Linux
@@ -275,65 +277,76 @@ df.to_csv("out.csv", index=False)   # index=False, or you get a stray column
 """
 
 
-def previous(num):
-    """The session before this one, as a two-digit string, or None."""
-    keys = [k for k, _ in ordered()]
-    i = keys.index(num)
-    return keys[i - 1] if i else None
+def snippet_for(name, sess):
+    code = SNIPPETS.get(name)
+    if code is None:
+        raise SystemExit(f"No snippet for registry entry {name!r} (session {sess}). "
+                         f"Add one to SNIPPETS in {Path(__file__).name}.")
+    return code
+
+
+def session_block(sess):
+    """One fenced block for a session, subdivided by what the names are for.
+
+    Registry order, not alphabetical: the registry is written in teaching order,
+    so `smf.ols` comes before `.fit()` and `.get_influence()` before the four
+    things you pull off it. Sorting by name reverses both.
+    """
+    names = [k for k, v in TOOLKIT.items() if v[0] == sess]
+    if not names:
+        return None
+    by_group = OrderedDict((g, []) for g in GROUPS)
+    for name in names:
+        by_group[TOOLKIT[name][1]].append(name)
+
+    lines = []
+    for group, group_names in by_group.items():
+        if not group_names:
+            continue
+        rule = "-" * max(3, 62 - len(group))
+        lines.append(f"# -- {group} {rule}")
+        lines.extend(snippet_for(n, sess) for n in group_names)
+        lines.append("")
+    return "```python\n" + "\n".join(lines).rstrip() + "\n```\n"
 
 
 def recap(num):
-    """The code introduced in the session before this one."""
-    prev = previous(num)
-    if prev is None:
-        return ("## Nothing to recap yet\n\nThis is the first session. Everything above is all you "
-                "need for it.\n")
+    """Everything taught up to and including this session, session by session.
 
-    # Registry order, not alphabetical: the registry is written in teaching
-    # order, so `smf.ols` comes before `.fit()` and `.get_influence()` before the
-    # four things you pull off it. Sorting by name reverses both.
-    entries = [(g, k) for k, (s, g, _) in TOOLKIT.items() if s == prev]
-    if not entries:
-        # A session can be taught without introducing a new name. Session 01 is
-        # the workstation and has no registry entries at all; session 11 reuses
-        # session 10's machinery. Neither should read as an empty section.
-        earlier = [s for s in (v[0] for v in TOOLKIT.values()) if s < num]
-        if not earlier:
-            return (f"## From session {int(prev)}\n\nSession {int(prev)} was the workstation "
-                    "itself — the editor, the environment, and loading a course dataset with one "
-                    "line. All of it is in the three sections above.\n")
-        last = max(earlier)
-        return (f"## From session {int(prev)}\n\nSession {int(prev)} introduced no new Python: it "
-                f"reuses what you already have. The most recent new names were session "
-                f"{int(last)}'s, on that session's sheet — `{SESSIONS[last]['dir']}/"
-                f"{FILENAME}.pdf`.\n")
+    Cumulative rather than last-week-only: a student sitting in session 08 has
+    to remember `dropna` from session 02 as much as `GridSearchCV` from today,
+    and a sheet that carried only session 07 would send them hunting through
+    six other PDFs.
+    """
+    n = int(num)
+    if n == 1:
+        return ("## What you have learned so far\n\nThis is the first session — the three "
+                "sections above are all of it.\n")
 
-    by_group = OrderedDict((g, []) for g in GROUPS)
-    for group, name in entries:
-        by_group[group].append(name)
-
-    out = [f"## From session {int(prev)}\n"]
-    for group, names in by_group.items():
-        if not names:
-            continue
-        out.append(f"### {group}\n")
-        lines = []
-        for name in names:
-            snippet = SNIPPETS.get(name)
-            if snippet is None:
-                raise SystemExit(
-                    f"No snippet for registry entry {name!r} (session {prev}). "
-                    f"Add one to SNIPPETS in {Path(__file__).name}.")
-            lines.append(snippet)
-        out.append("```python\n" + "\n\n".join(lines) + "\n```\n")
+    out = [f"## What you have learned so far\n",
+           f"Sessions 1 to {n}, in the order you met them. Every line below has run on the course "
+           f"data.\n"]
+    for sess, meta in ordered():
+        if int(sess) > n:
+            break
+        head = f"### Session {int(sess)} · {meta['short']}\n"
+        block = session_block(sess)
+        if block:
+            out.append(head + "\n" + block)
+        elif int(sess) == 1:
+            out.append(head + "\nThe workstation itself — the editor, the environment, and loading "
+                              "a course dataset with one line. That is section 1 above.\n")
+        else:
+            out.append(head + f"\nNo new Python: session {int(sess)} reuses what you already "
+                              f"have.\n")
     return "\n".join(out)
 
 
 def sheet(num, s):
-    prev = previous(num)
+    n = int(num)
     lead = (f"Everything you need to type, in one place. The first three sections are the same "
-            f"every week; the last one is the Python from session {int(prev)}."
-            if prev else "Everything you need to type, in one place.")
+            f"every week; the last one is every name from sessions 1 to {n}."
+            if n > 1 else "Everything you need to type, in one place.")
     return f"""---
 title: "Python Cheatsheet"
 subtitle: "MATH60033A · Session {num} · {s['short']}"
@@ -357,7 +370,7 @@ format:
 
 {lead}
 
-{GETTING_STARTED}
+{GETTING_STARTED.replace('SESSIONNUM', num)}
 {recap(num)}"""
 
 
