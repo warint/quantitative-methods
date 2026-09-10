@@ -244,7 +244,9 @@ def clean_title(raw):
                lambda m: "$" + m.group(1).replace("\\^", "^") + "$", raw)
     t = re.sub(r"\{[^}]*\}", "", t)                 # the attribute block
     t = re.sub(r"\*\*(.*?)\*\*", r"\1", t)          # bold inside a title
-    t = re.sub(r"^\d+(?:\\?\.\d+)*\\?\.?\s+", "", t)    # "2\. " and "2.2 "
+    # "2\. ", "2.2 " and "2b " — the last is the sub-step form the pre-session
+    # decks use, which used to survive into the outline as "2b · The course data".
+    t = re.sub(r"^\d+[a-z]?(?:\\?\.\d+)*\\?\.?\s+", "", t)
     t = t.replace(chr(92) + chr(39), chr(39))        # pandoc escapes apostrophes
     t = re.sub(r"\s*-{2,}\s*", " \u2014 ", t)          # "Model --- Maximise"
     t = re.sub(r"\s+", " ", t).strip(" -\u2014\u00b7:")

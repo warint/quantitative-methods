@@ -25,6 +25,15 @@ from course_spec import COHORT, SESSIONS  # noqa: E402
 RED, PAPER = "#E3120B", "#F7F4ED"
 
 
+def sentence(s):
+    """Capitalise the first letter and leave the rest alone.
+
+    `str.capitalize()` lowercases everything after it, which turned "GDP per
+    capita" into "Gdp per capita" on every deck that named one.
+    """
+    return s[:1].upper() + s[1:]
+
+
 def header(num, kind, title, subtitle):
     return f"""---
 title: "Session {int(num)}: {title}"
@@ -237,12 +246,12 @@ whatever the room's wifi is doing.
 :::
 
 ::: {{.muted}}
-{s['dataset_note'].capitalize()} · everything available: `qmib.catalog()`
+{sentence(s['dataset_note'])} · everything available: `qmib.catalog()`
 :::
 
-## 3 · Self-check
+## 3 · Self-check, and what the session will ask of you
 
-Answer on paper. If you cannot, that is what the lecture is for.
+Answer these on paper. If you cannot, that is what the lecture is for.
 
 ::: {{.tight}}
 1. In one sentence: what does this session's method let you claim that the previous one did not?
@@ -250,9 +259,7 @@ Answer on paper. If you cannot, that is what the lecture is for.
 3. Which claim in the paper rests on this method — and how hard does it lean on it?
 :::
 
-## What the session will ask of you
-
-By the end you should be able to:
+By the end of the session you should be able to:
 
 ::: {{.tight}}
 {objectives}
@@ -263,18 +270,28 @@ By the end you should be able to:
 `qmib.load()` run at least once · your self-check answers on paper.
 :::
 
-## Running the code
+## Before you run anything
 
-Everything runs in the **VS Codium terminal**, with the project environment active:
+Everything runs in the **VS Codium terminal**, from the repository root, with the project
+environment active. Activate it in **every new terminal**, not only the first:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-.venv\\Scripts\\activate         # Windows
-python
+source .venv/bin/activate        # macOS and Linux
 ```
 
+```powershell
+.venv\\Scripts\\activate           # Windows (PowerShell)
+```
+
+::: {{.check}}
+Your prompt must begin with **`(.venv)`**. Without it `python` and `pip` are your system's, and
+nothing the course installed is visible to them.
+:::
+
 ::: {{.muted}}
-Missing a package? `pip install -r requirements.txt` from the repository root.
+`ModuleNotFoundError` means the packages went somewhere else, or were never installed. Check the
+prompt first, then `pip install -r requirements.txt` — **from the repository root, with the
+environment active**. Building the environment from scratch is Session 01, step 1.4.
 :::
 
 ::: {{.muted}}
