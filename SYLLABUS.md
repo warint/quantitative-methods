@@ -161,10 +161,10 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | # | Session | Method | Theme of the second half |
 |---|---|---|---|
 | 01 | Foundations: Scenarios, Tools, and the Syllabus | the syllabus, the toolchain, and a conversation | *(no practice; discussion)* |
-| 02 | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression | Which summary of your key variable would you defend in print? |
-| 03 | Regression: Adequacy, Validity, and Robustness | residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
+| 02 | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, the empirical rule | Which summary of your key variable would you defend in print? |
+| 03 | Regression: Adequacy, Validity, and Robustness | least squares, residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
 | 04 | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
-| 05 | Regularisation: Ridge, Lasso, and the Elastic Net | soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
+| 05 | Regularisation: Ridge, Lasso, and the Elastic Net | stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
 | — | **MIDTERM** *(in class, covering Sessions 1–7)* | | |
 | 07 | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |

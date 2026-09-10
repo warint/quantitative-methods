@@ -1,6 +1,6 @@
 # Session 04 — Data
 
-**Lending club — 9,578 three-year loans, fico scores and default**
+**Lending Club — 9,578 three-year loans, FICO scores and default**
 
 ```python
 import qmib

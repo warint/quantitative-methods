@@ -4,8 +4,12 @@
 
 Sessions 01, 02, 05 and 12 are hand-written and are left alone; the spec marks
 them `generated=False`. Everything else — README, pre-session, practice brief,
-data page — is regenerated, and the session tables in README.md and SYLLABUS.md
-are rewritten between markers so the three can never disagree.
+data page — is regenerated from the spec.
+
+The session tables in README.md and SYLLABUS.md are **not** rewritten here.
+`session_table()` below produces the rows, but neither file carries markers to
+write them between, so the tables are maintained by hand and have to be kept in
+step with `methods` and `theme` when either changes.
 """
 
 import datetime
@@ -18,6 +22,16 @@ from course_spec import (COHORT, SESSIONS, ordered, generated, MIDTERM_AFTER,  #
                          DATES, ASYNCHRONOUS, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
+
+
+def sentence(s):
+    """Capitalise the first letter and leave the rest alone.
+
+    `str.capitalize()` lowercases everything after it, which turned "GDP per
+    capita" into "Gdp per capita" and "Lending Club" into "Lending club" on
+    every data page that named one.
+    """
+    return s[:1].upper() + s[1:]
 
 
 def _when(num):
@@ -80,7 +94,7 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**{s['dataset_note'].capitalize()}** — one line to load it:
+**{sentence(s['dataset_note'])}** — one line to load it:
 
 ```python
 import qmib
@@ -170,7 +184,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-{s['dataset_note'].capitalize()}.
+{sentence(s['dataset_note'])}.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
@@ -324,7 +338,7 @@ Everyone pushes at least once. The log is the record of participation.
 def data_page(num, s):
     return f"""# Session {num} — Data
 
-**{s['dataset_note'].capitalize()}**
+**{sentence(s['dataset_note'])}**
 
 ```python
 import qmib

@@ -31,7 +31,7 @@ SESSIONS = {
         title="Exploratory Data Analysis, and the First Model",
         short="Exploratory data analysis",
         question="Before you model anything, what does the data actually look like?",
-        methods="mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression",
+        methods="mean/median/trimmed, variance, IQR, skewness, kurtosis, the empirical rule",
         theme="Which summary of your key variable would you defend in print?",
         generated=False,          # pages written by hand; decks still generated
         objectives=[
@@ -39,7 +39,7 @@ SESSIONS = {
             "Explain why the sample variance divides by $n-1$",
             "Apply the **empirical rule**, and state the precondition that makes it valid",
             "Compute **skewness** and **excess kurtosis**, and test each against its threshold",
-            "Fit a simple regression and state the slope **in units**",
+            "Say which summary you would defend in print, and why the other two mislead",
         ],
         reading="Fraiberger et al. (2021), *Media sentiment and international asset prices*",
         reading_url="https://doi.org/10.1016/j.jinteco.2021.103526",
@@ -61,9 +61,10 @@ SESSIONS = {
         title="Regression: Adequacy, Validity, and Robustness",
         short="Regression diagnostics",
         question="You have fitted a regression. Can it be trusted?",
-        methods="residual diagnostics, leverage, Cook's distance, information criteria",
+        methods="least squares, residual diagnostics, leverage, Cook's distance, information criteria",
         theme="Which model would survive a referee?",
         objectives=[
+            "Fit a simple and a multiple regression, and state the slope **in units**",
             "Read a **residuals-versus-fitted** plot and say what structure it reveals",
             "Diagnose non-constant variance from a **scale–location** plot",
             "Compute **leverage** and say which observations have the power to move the line",
@@ -74,7 +75,7 @@ SESSIONS = {
         reading_url="https://doi.org/10.1080/00103624.2024.2336573",
         dataverse="10.7910/DVN/U5DAEP",
         dataset="core",
-        dataset_note="the same regression Session 02 fitted — GDP per capita on productivity",
+        dataset_note="the regression fitted at the top of the lecture — GDP per capita on productivity",
         deliverable=("a diagnostic report on your group's own regression: four plots, the "
                      "observations you investigated, and a 250-word note on which conclusions "
                      "survived the diagnostics and which did not"),
@@ -119,10 +120,11 @@ SESSIONS = {
         title="Regularisation: Ridge, Lasso, and the Elastic Net",
         short="Regularisation",
         question="When is a deliberately biased estimator the better one?",
-        methods="soft-thresholding, coordinate descent, the grouping effect",
+        methods="stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect",
         theme="Of many indicators, which few actually carry the signal?",
         generated=False,          # repository-native pages; decks still generated
         objectives=[
+            "Say why a greedy **stepwise** search is unstable, and what that instability argues for",
             "State the ridge and lasso objectives and say **what each penalty buys**",
             "Explain why ridge shrinkage is **targeted** rather than blunt",
             "Derive **soft-thresholding** and use it to explain the lasso's exact zeros",
@@ -141,6 +143,7 @@ SESSIONS = {
             "Standardising before the cross-validation split",
             "Reporting the selected set as \"the variables that matter\"",
             "Reporting post-selection p-values with no caveat",
+            "Presenting a stepwise selection as though the data had chosen it",
         ],
     ),
     "06": dict(

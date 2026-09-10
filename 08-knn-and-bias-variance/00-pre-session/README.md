@@ -65,7 +65,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-The course spine, plus the smarket returns used in the lecture.
+The course spine, plus the Smarket returns used in the lecture.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

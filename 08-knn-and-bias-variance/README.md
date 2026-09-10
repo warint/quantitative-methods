@@ -47,7 +47,7 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The course spine, plus the smarket returns used in the lecture** — one line to load it:
+**The course spine, plus the Smarket returns used in the lecture** — one line to load it:
 
 ```python
 import qmib

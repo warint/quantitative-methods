@@ -1,6 +1,6 @@
 # Session 08 — Data
 
-**The course spine, plus the smarket returns used in the lecture**
+**The course spine, plus the Smarket returns used in the lecture**
 
 ```python
 import qmib

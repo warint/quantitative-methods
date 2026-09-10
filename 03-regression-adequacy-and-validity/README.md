@@ -24,6 +24,7 @@ See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of 
 
 By the end of this session you should be able to:
 
+- Fit a simple and a multiple regression, and state the slope **in units**
 - Read a **residuals-versus-fitted** plot and say what structure it reveals
 - Diagnose non-constant variance from a **scale–location** plot
 - Compute **leverage** and say which observations have the power to move the line
@@ -37,7 +38,7 @@ By the end of this session you should be able to:
 | Phase | When | What | Where |
 |---|---|---|---|
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: residual diagnostics, leverage, Cook's distance, information criteria | [`01-lecture/`](01-lecture/README.md) |
+| **First half** (~90 min) | In class | Lecture: least squares, residual diagnostics, leverage, Cook's distance, information criteria | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
@@ -47,7 +48,7 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The same regression session 02 fitted — gdp per capita on productivity** — one line to load it:
+**The regression fitted at the top of the lecture — GDP per capita on productivity** — one line to load it:
 
 ```python
 import qmib

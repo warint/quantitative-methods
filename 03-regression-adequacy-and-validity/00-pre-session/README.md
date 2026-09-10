@@ -65,7 +65,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-The same regression session 02 fitted — gdp per capita on productivity.
+The regression fitted at the top of the lecture — GDP per capita on productivity.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

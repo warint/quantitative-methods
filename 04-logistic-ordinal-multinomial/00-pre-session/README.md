@@ -65,7 +65,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-Lending club — 9,578 three-year loans, fico scores and default.
+Lending Club — 9,578 three-year loans, FICO scores and default.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

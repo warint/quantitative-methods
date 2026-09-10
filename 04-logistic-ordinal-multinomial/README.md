@@ -47,7 +47,7 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**Lending club — 9,578 three-year loans, fico scores and default** — one line to load it:
+**Lending Club — 9,578 three-year loans, FICO scores and default** — one line to load it:
 
 ```python
 import qmib
