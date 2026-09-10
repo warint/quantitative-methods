@@ -225,6 +225,13 @@ Answer on paper. If you cannot, that is what the lecture is for.
 def practice(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
     lab = lab_url(num)
+    # Sessions that teach a reporting tool say so in the brief as well as on the
+    # deck, so a group working from this page alone does not miss it.
+    table = ("""
+\n> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row."""
+             if s.get("practice_extra") == "regtable" else "")
     after = f"""---
 
 ## After class, if you want it
@@ -323,7 +330,7 @@ A 250-word note in your submissions folder:
 
 - What you found, in units
 - Which assumption you broke, and what it did
-- What this result does **not** license you to claim
+- What this result does **not** license you to claim{table}
 
 ---
 

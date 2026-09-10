@@ -301,8 +301,39 @@ the lecture: [`01-lecture/`](../01-lecture/README.md)
 """ + (GIT_SLIDES.format(RED=RED, PAPER=PAPER) if s.get("pre_session_extra") == "git" else "")
 
 
+PRACTICE_EXTRA = {
+    # Session 03 teaches qmib.regtable in the lecture; the practice is where a
+    # group has two models to put side by side and a note to write from them.
+    "regtable": """## Report it as one table
+
+Step 3 left you with two fits: the model as specified, and the model after you
+broke something. Put them in one table rather than two blocks of output — the
+comparison is the finding.
+
+```python
+import qmib
+
+print(qmib.regtable([before, after],
+                    names=["as specified", "assumption broken"]))
+```
+
+::: {.check}
+Read **across** the row, not down the column: what happened to the coefficient
+you care about, in its own units, and what happened to its standard error.
+:::
+
+::: {.muted}
+`.as_latex()` if you would rather paste it into the write-up than screenshot it.
+Pass `stats=` to change the rows at the foot.
+:::
+
+""",
+}
+
+
 def practice_deck(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
+    extra = PRACTICE_EXTRA.get(s.get("practice_extra"), "")
     return header(num, "practice", "Practice", s["theme"]) + f"""
 # Practice {{background-color="{RED}" style="color:{PAPER}"}}
 
@@ -394,7 +425,7 @@ This is the part that carries the marks. A group that shows how its result falls
 it; a group that only shows it holding does not yet know.
 :::
 
-## 4 · Write it down — 20 min
+{extra}## 4 · Write it down — 20 min
 
 250 words in your submissions folder:
 

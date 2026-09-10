@@ -89,6 +89,7 @@ SESSIONS = {
         dataverse="10.7910/DVN/U5DAEP",
         dataset="core",
         dataset_note="the regression fitted at the top of the lecture — GDP per capita on productivity",
+        practice_extra="regtable",   # the practice ends with two models to compare
         deliverable=("a diagnostic report on your group's own regression: four plots, the "
                      "observations you investigated, and a 250-word note on which conclusions "
                      "survived the diagnostics and which did not"),

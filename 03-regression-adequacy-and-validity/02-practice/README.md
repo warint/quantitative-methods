@@ -89,6 +89,10 @@ A 250-word note in your submissions folder:
 - Which assumption you broke, and what it did
 - What this result does **not** license you to claim
 
+> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row.
+
 ---
 
 ## Submitting
