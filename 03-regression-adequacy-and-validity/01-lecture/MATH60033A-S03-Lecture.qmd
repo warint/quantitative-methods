@@ -96,6 +96,7 @@ plt.rcParams.update({
 - Pull diagnostics from a fitted model with `get_influence()`
 - Build the four diagnostic plots yourself rather than calling one function
 - Compare candidate specifications side by side on AIC and BIC
+- Report the comparison as a publication table with `qmib.regtable`
 
 ::::
 
@@ -982,6 +983,33 @@ fit.aic
 -   Favors simpler models for large samples.
 
 > BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.
+
+## The table you would actually publish {.scrollable}
+
+`qmib.regtable` is R's **stargazer**, here: one column per model, stars on the
+coefficients, standard errors beneath, fit statistics at the foot.
+
+```{python}
+#| echo: true
+
+import qmib
+
+d2 = core.dropna(subset=["gdp_pc_eur", "productivity_idx", "gfcf_meur"])
+
+# Both models on the SAME rows. dropna gives a different sample for each set of
+# columns, and two fits estimated on different samples are not a comparison —
+# their AIC, their R-squared and their coefficients are not on one scale.
+m1 = smf.ols("gdp_pc_eur ~ productivity_idx", data=d2).fit()
+m2 = smf.ols("gdp_pc_eur ~ productivity_idx + gfcf_meur", data=d2).fit()
+
+print(qmib.regtable([m1, m2], names=["simple", "+ investment"],
+                    order=["productivity_idx", "gfcf_meur", "Intercept"]))
+```
+
+::: {.muted}
+`.as_latex()` for a paper, `.as_html()` for a slide. Pass your own `stats=`
+dict to put different rows at the foot.
+:::
 
 ## Choosing a model is not a diagnostic {.scrollable}
 

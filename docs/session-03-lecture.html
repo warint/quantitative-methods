@@ -1105,6 +1105,7 @@ Thierry Warin, PhD
 <li>Pull diagnostics from a fitted model with <code>get_influence()</code></li>
 <li>Build the four diagnostic plots yourself rather than calling one function</li>
 <li>Compare candidate specifications side by side on AIC and BIC</li>
+<li>Report the comparison as a publication table with <code>qmib.regtable</code></li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
@@ -1485,7 +1486,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="4eac4aae" class="cell" data-execution_count="2">
+<div id="688e1ad9" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1576,7 +1577,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="c3d0941b" class="cell" data-execution_count="3">
+<div id="897a1827" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1703,7 +1704,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="57179b33" class="cell" data-execution_count="4">
+<div id="664c573e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1857,7 +1858,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Leverage measures how far X is from its mean.</li>
 <li>Average leverage = (p+1)/n.</li>
 </ul>
-<div id="f24f05e2" class="cell" data-execution_count="5">
+<div id="b16b7b10" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>leverage <span class="op">=</span> influence.hat_matrix_diag</span>
 <span id="cb12-3"><a href></a></span>
@@ -1875,7 +1876,7 @@ rule of thumb 2p/n = 0.0093</code></pre>
 <section id="residuals-versus-leverage" class="slide level2 scrollable">
 <h2>Residuals versus leverage</h2>
 <p>The points with the power to move the line.</p>
-<div id="0667bbb5" class="cell" data-execution_count="6">
+<div id="6c973088" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># Far right = unusual X. High up or low down = badly predicted. The damage is</span></span>
 <span id="cb14-2"><a href></a><span class="co"># done by points that are both, which is why the two are plotted together.</span></span>
 <span id="cb14-3"><a href></a>plt.scatter(leverage, influence.resid_studentized_internal, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
@@ -1891,7 +1892,7 @@ rule of thumb 2p/n = 0.0093</code></pre>
 <li>Combines leverage + residual size.</li>
 <li>High Cook’s D = observation heavily influences coefficients.</li>
 </ul>
-<div id="031a5ca4" class="cell" data-execution_count="7">
+<div id="90c39db7" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb15-2"><a href></a></span>
 <span id="cb15-3"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;largest Cook&#39;s D </span><span class="sc">{</span>cooks_d<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
@@ -1908,7 +1909,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="one-spike-per-observation" class="slide level2 scrollable">
 <h2>One spike per observation</h2>
 <p>How much every coefficient would move if that single row were deleted.</p>
-<div id="4a97a660" class="cell" data-execution_count="8">
+<div id="30f83697" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb17-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb17-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1928,7 +1929,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <li>Balances fit with penalty for number of parameters.</li>
 <li>Lower AIC = better model (relative).</li>
 </ul>
-<div id="b7900a8a" class="cell" data-execution_count="9">
+<div id="61803023" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a>fit.aic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>np.float64(9045.504564959898)</code></pre>
@@ -1948,6 +1949,46 @@ above 4/n (0.0093): 25 observations</code></pre>
 <blockquote>
 <p>BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.</p>
 </blockquote>
+</section>
+<section id="the-table-you-would-actually-publish" class="slide level2 scrollable">
+<h2>The table you would actually publish</h2>
+<p><code>qmib.regtable</code> is R’s <strong>stargazer</strong>, here: one column per model, stars on the coefficients, standard errors beneath, fit statistics at the foot.</p>
+<div id="71a92fcc" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb20-2"><a href></a></span>
+<span id="cb20-3"><a href></a>d2 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>])</span>
+<span id="cb20-4"><a href></a></span>
+<span id="cb20-5"><a href></a><span class="co"># Both models on the SAME rows. dropna gives a different sample for each set of</span></span>
+<span id="cb20-6"><a href></a><span class="co"># columns, and two fits estimated on different samples are not a comparison —</span></span>
+<span id="cb20-7"><a href></a><span class="co"># their AIC, their R-squared and their coefficients are not on one scale.</span></span>
+<span id="cb20-8"><a href></a>m1 <span class="op">=</span> smf.ols(<span class="st">&quot;gdp_pc_eur ~ productivity_idx&quot;</span>, data<span class="op">=</span>d2).fit()</span>
+<span id="cb20-9"><a href></a>m2 <span class="op">=</span> smf.ols(<span class="st">&quot;gdp_pc_eur ~ productivity_idx + gfcf_meur&quot;</span>, data<span class="op">=</span>d2).fit()</span>
+<span id="cb20-10"><a href></a></span>
+<span id="cb20-11"><a href></a><span class="bu">print</span>(qmib.regtable([m1, m2], names<span class="op">=</span>[<span class="st">&quot;simple&quot;</span>, <span class="st">&quot;+ investment&quot;</span>],</span>
+<span id="cb20-12"><a href></a>                    order<span class="op">=</span>[<span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;Intercept&quot;</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+===============================================
+                    (1) simple (2) + investment
+-----------------------------------------------
+productivity_idx   1119.8***   928.3***        
+                   (42.9)      (43.7)          
+gfcf_meur                      68.7***         
+                               (7.2)           
+Intercept          -86949.7*** -71211.8***     
+                   (4526.6)    (4421.4)        
+Adjusted R-squared 0.623       0.690           
+Observations       414         414             
+R-squared          0.624       0.692           
+Residual SE        9,434       8,548           
+===============================================
+Standard errors in parentheses.
+* p&lt;.1, ** p&lt;.05, ***p&lt;.01</code></pre>
+</div>
+</div>
+<div class="muted">
+<p><code>.as_latex()</code> for a paper, <code>.as_html()</code> for a slide. Pass your own <code>stats=</code> dict to put different rows at the foot.</p>
+</div>
 </section>
 <section id="choosing-a-model-is-not-a-diagnostic" class="slide level2 scrollable">
 <h2>Choosing a model is not a diagnostic</h2>

@@ -82,6 +82,10 @@ SNIPPETS = {
     ".rsquared_adj": "fit.rsquared_adj                  # penalised for each extra predictor",
     ".mse_resid": "np.sqrt(fit.mse_resid)            # the RSE, in the units of y",
     ".resid / .fittedvalues": "fit.resid, fit.fittedvalues       # what is left, and what was predicted",
+    "qmib.regtable": ('print(qmib.regtable([m1, m2], names=["simple", "+ investment"],\n'
+                      '                    order=["productivity_idx", "gfcf_meur", "Intercept"]))\n'
+                      '# one column per model, stars, SEs beneath, fit stats at the foot.\n'
+                      '# .as_latex() for a paper, .as_html() for a slide.'),
     ".get_influence()": "influence = fit.get_influence()    # the whole diagnostic bundle",
     ".hat_matrix_diag": "leverage = influence.hat_matrix_diag        # sums to p, always",
     ".cooks_distance": "cooks_d = influence.cooks_distance[0]       # screen at 4/n",

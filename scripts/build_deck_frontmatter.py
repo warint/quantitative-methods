@@ -106,6 +106,7 @@ TOOLKIT = {
     ".resid / .fittedvalues": ("03", "Read the fit", "what is left, and what was predicted"),
     ".rsquared_adj": ("03", "Read the fit", "penalised for the extra predictor"),
     ".mse_resid": ("03", "Read the fit", "its square root is the RSE, in units"),
+    "qmib.regtable": ("03", "Read the fit", "several models as one publication table"),
     ".aic / .bic": ("03", "Choose and validate", "compare non-nested models"),
     "plt.axhline / plt.axvline": ("03", "Plot", "draw the threshold you are judging against"),
     "plt.stem": ("03", "Plot", "one spike per observation"),
