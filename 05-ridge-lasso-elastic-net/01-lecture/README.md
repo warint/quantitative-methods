@@ -127,4 +127,4 @@ motivates the design-based methods of Sessions 10 and 11.
 
 ---
 
-[Back to session 05](../README.md) · [On to the practice ->](../02-practice/README.md)
+[Back to session 05](../README.md) · [On to the practice ->](../02-practice/README.md) · [The lab for this session ↗](https://warin.ca/qmib-labs/qmib-lab-05.html)

@@ -445,4 +445,4 @@ assumptions about shape, and this session is where you check them.
 
 ---
 
-[Back to session 02](../README.md) · [On to the practice ->](../02-practice/README.md)
+[Back to session 02](../README.md) · [On to the practice ->](../02-practice/README.md) · [The lab for this session ↗](https://warin.ca/qmib-labs/qmib-lab-02.html)

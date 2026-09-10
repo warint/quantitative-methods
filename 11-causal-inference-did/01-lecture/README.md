@@ -87,4 +87,4 @@ If a package is missing, `pip install -r requirements.txt` from the repository r
 
 ---
 
-[Back to session 11](../README.md) · [On to the practice ->](../02-practice/README.md)
+[Back to session 11](../README.md) · [On to the practice ->](../02-practice/README.md) · [The lab for this session ↗](https://warin.ca/qmib-labs/qmib-lab-11.html)

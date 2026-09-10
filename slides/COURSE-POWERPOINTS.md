@@ -72,5 +72,6 @@ python session05_regularisation_demo.py
 ## QMIB Lab App
 
 The labs live at **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/)** — one per session, sessions
-02 to 11. Each practice deck closes by distinguishing the optional at-home knowledge check from the
-next session's required article and Dataverse preparation.
+02 to 11, each deep-linked from the session it belongs to. Both the lecture deck and the practice
+deck close on it, and both distinguish the optional at-home knowledge check from the next session's
+required article and Dataverse preparation.

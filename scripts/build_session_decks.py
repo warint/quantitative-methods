@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import COHORT, SESSIONS  # noqa: E402
+from course_spec import COHORT, SESSIONS, lab_url  # noqa: E402
 
 RED, PAPER = "#E3120B", "#F7F4ED"
 
@@ -335,6 +335,30 @@ Pass `stats=` to change the rows at the foot.
 def practice_deck(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
     extra = PRACTICE_EXTRA.get(s.get("practice_extra"), "")
+    # The last slide of the ninety minutes is where a student decides what, if
+    # anything, they do about this session at home. The lab belongs there, and
+    # the deck is the only one of the three artefacts they are looking at.
+    lab = lab_url(num)
+    closing = f"""
+
+## After class, if you want it
+
+::: {{.step}}
+The **QMIB Lab** has a knowledge check on what you have just done:
+**[warin.ca/qmib-labs]({lab})**
+:::
+
+::: {{.check}}
+Optional, never a prerequisite for the next lecture, and never marked for
+correctness. A completed report counts because **attempting it is the engagement
+being measured** — it is one of the three routes to the participation mark.
+:::
+
+::: {{.warn}}
+What **is** required before the next session: the article, its Dataverse package,
+and the self-check. That is the pre-session deck, not this.
+:::
+""" if lab else ""
     return header(num, "practice", "Practice", s["theme"]) + f"""
 # Practice {{background-color="{RED}" style="color:{PAPER}"}}
 
@@ -473,7 +497,7 @@ And everywhere in this course: an association described in causal language.
 ::: {{.muted}}
 Listen for traceable evidence, not confidence of delivery.
 :::
-"""
+{closing}"""
 
 
 # A deck carrying this marker has been written by hand and is no longer a
