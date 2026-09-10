@@ -37,6 +37,7 @@ taught. SNIPPETS below adds the missing half: what it looks like when you type
 it. A registry entry with no snippet is a build error rather than a silent gap.
 """
 
+import os
 import subprocess
 import sys
 from collections import OrderedDict
@@ -406,9 +407,18 @@ format:
 {recap(num)}"""
 
 
+# LaTeX picks a random six-letter tag for every embedded font subset, seeded
+# from the clock, so two builds of an unchanged sheet differ in a dozen places
+# and rewrite twelve binaries into the history for nothing. These are TeX Live's
+# documented reproducible-build switches; with them set, an unchanged sheet
+# rebuilds byte-identical. The epoch is arbitrary and fixed — 1 January 2025.
+REPRODUCIBLE = {"SOURCE_DATE_EPOCH": "1735689600", "FORCE_SOURCE_DATE": "1"}
+
+
 def render(qmd):
     r = subprocess.run(["quarto", "render", qmd.name, "--to", "pdf"],
-                       cwd=qmd.parent, capture_output=True, text=True)
+                       cwd=qmd.parent, capture_output=True, text=True,
+                       env={**os.environ, **REPRODUCIBLE})
     if r.returncode:
         sys.stderr.write(r.stdout[-3000:] + r.stderr[-3000:])
     return r.returncode == 0
