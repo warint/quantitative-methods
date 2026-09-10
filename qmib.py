@@ -243,12 +243,33 @@ def view(df: pd.DataFrame, n: int = 12, name: str | None = None):
 # The default rows for the bottom of a regression table. Ordinary functions of
 # a fitted model, so a reader can see there is no magic — and so a caller can
 # pass their own dict and get different ones.
+#
+# Two sets, because a logit has no R-squared and no residual standard error. Ask
+# for them anyway and `summary_col` prints the label with an empty cell beside
+# it, which reads as "zero" rather than "not defined for this model".
 REG_STATS = {
     "Observations": lambda m: f"{int(m.nobs):,}",
     "R-squared": lambda m: f"{m.rsquared:.3f}",
     "Adjusted R-squared": lambda m: f"{m.rsquared_adj:.3f}",
     "Residual SE": lambda m: f"{m.mse_resid ** 0.5:,.0f}",
 }
+
+REG_STATS_DISCRETE = {
+    "Observations": lambda m: f"{int(m.nobs):,}",
+    "Pseudo R-squared": lambda m: f"{m.prsquared:.3f}",
+    "Log-likelihood": lambda m: f"{m.llf:,.1f}",
+    "AIC": lambda m: f"{m.aic:,.1f}",
+}
+
+
+def _default_stats(models):
+    """The fit statistics that exist for this kind of model."""
+    first = models[0]
+    if hasattr(first, "rsquared"):          # OLS, RLM, Gaussian GLM
+        return REG_STATS
+    if hasattr(first, "prsquared"):         # logit, probit, MNLogit
+        return REG_STATS_DISCRETE
+    return {"Observations": lambda m: f"{int(m.nobs):,}"}
 
 
 def regtable(models, names=None, stats=None, order=None, digits=1, title=None):
@@ -281,7 +302,7 @@ def regtable(models, names=None, stats=None, order=None, digits=1, title=None):
     from statsmodels.iolib.summary2 import summary_col
 
     models = list(models)
-    stats = REG_STATS if stats is None else stats
+    stats = _default_stats(models) if stats is None else stats
     if names is None:
         names = [f"({i})" for i in range(1, len(models) + 1)]
 
@@ -302,6 +323,13 @@ def regtable(models, names=None, stats=None, order=None, digits=1, title=None):
     body = table.tables[0]
     drop = [i for i, label in enumerate(body.index)
             if label in ("R-squared", "R-squared Adj.")][:2]
+
+    # And any row that came out empty across every column — a statistic asked
+    # for that this model does not define. A labelled blank row is worse than no
+    # row: it reads as a zero.
+    drop += [i for i in range(len(body))
+             if i not in drop and str(body.index[i]).strip()
+             and not any(str(v).strip() for v in body.iloc[i])]
     if drop:
         table.tables[0] = body.iloc[[i for i in range(len(body)) if i not in drop]]
 

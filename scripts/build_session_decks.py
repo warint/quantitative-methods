@@ -323,6 +323,7 @@ you care about, in its own units, and what happened to its standard error.
 :::
 
 ::: {.muted}
+Coefficients too small to read at one decimal — a logit's usually are? `digits=3`.
 `.as_latex()` if you would rather paste it into the write-up than screenshot it.
 Pass `stats=` to change the rows at the foot.
 :::

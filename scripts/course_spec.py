@@ -119,6 +119,7 @@ SESSIONS = {
         dataverse="10.7910/DVN/ONOFS7",
         dataset="loans",
         dataset_note="Lending Club — 9,578 three-year loans, FICO scores and default",
+        practice_extra="regtable",   # two logits to compare, full against reduced
         deliverable=("a logistic model of a binary outcome in your own project data, with the "
                      "odds ratios interpreted in words, one nested comparison tested, and a note "
                      "on what the model does not license you to say"),
@@ -295,6 +296,7 @@ SESSIONS = {
         dataverse="10.7910/DVN/FS0KBA",
         dataset="core",
         dataset_note="the spine's documented treatment, with a known effect to recover",
+        practice_extra="regtable",   # an outcome model before and after matching
         deliverable=("a matched comparison on your own data: the naive difference, the overlap "
                      "check, the balance table, the matched estimate, and the paragraph defending "
                      "conditional ignorability — that paragraph carries the marks"),
@@ -324,6 +326,7 @@ SESSIONS = {
         dataverse="10.7910/DVN/PIAZWN",
         dataset="core",
         dataset_note="the spine's post-2021 structural break, treated as a policy change",
+        practice_extra="regtable",   # two DiD specifications side by side
         deliverable=("a difference-in-differences estimate on your angle, with the parallel-trends "
                      "evidence shown rather than asserted, and a note on the threat you consider "
                      "most serious"),
