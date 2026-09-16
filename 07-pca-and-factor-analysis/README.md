@@ -48,11 +48,11 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**45,000 films — budget, popularity, revenue, runtime and votes** — one line to load it:
+**The KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions each split into de facto and de jure** — one line to load it:
 
 ```python
 import qmib
-data = qmib.load("movies")
+data = qmib.load("kof")
 ```
 
 See [`data/README.md`](data/README.md) and your group's

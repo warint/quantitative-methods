@@ -72,6 +72,13 @@ PUBLISHED = {
     # — now 404s, so the primary is the ISLP authors' own copy and the mirror is
     # the Rdatasets archive, which carries an extra `rownames` column that
     # _read() drops along with the other index columns.
+    # Session 07: the KOF Globalisation Index, ETH Zurich. The overall index and
+    # its eight sub-indices, each split into de facto and de jure.
+    "kof": ("https://ethz.ch/content/dam/ethz/special-interest/dual/kof-dam/"
+            "documents/Globalization/2025/KOFGI_2025_public.xlsx", None),
+    # Session 08: the Jorda-Schularick-Taylor Macrohistory Database, R6. Eighteen
+    # advanced economies, 1870-2020, with the crisis dates the literature uses.
+    "jst": ("https://www.macrohistory.net/app/download/9834512569/JSTdatasetR6.xlsx", None),
     "smarket":    ("https://raw.githubusercontent.com/intro-stat-learning/ISLP/"
                    "main/ISLP/data/Smarket.csv",
                    "https://vincentarelbundock.github.io/Rdatasets/csv/ISLR/Smarket.csv"),
@@ -107,6 +114,8 @@ DESCRIPTIONS = {
     "glassdoor": "Glassdoor pay data — salary, bonus, gender, education, age",
     "movies": "Movie metadata — budget, popularity, revenue, runtime, votes",
     "efa": "Questionnaire on car purchase decisions — 14 items (factor analysis)",
+    "kof": "KOF Globalisation Index — 200+ countries, 1970–2022, eight sub-indices",
+    "jst": "Macrohistory database — 18 economies, 1870–2020, 88 financial crises",
 }
 
 
@@ -136,8 +145,14 @@ def _download(url: str) -> pd.DataFrame:
     # the TLS-inspecting proxies common on university networks.
     import requests
 
-    r = requests.get(url, timeout=60)
+    # Some publishers (ETH's KOF among them) reject requests that arrive
+    # without a browser User-Agent, with a 404 rather than a 403.
+    r = requests.get(url, timeout=120, headers={"User-Agent": "Mozilla/5.0 (qmib course loader)"})
     r.raise_for_status()
+    if url.endswith((".xlsx", ".xls")):
+        # Bytes, not text: an Excel file is a zip archive and does not survive
+        # being decoded to a string.
+        return pd.read_excel(io.BytesIO(r.content))
     sep = ";" if "winequality" in url else ","
     return pd.read_csv(io.StringIO(r.text), sep=sep)
 
@@ -353,6 +368,27 @@ def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
     if name == "smarket":
         # The Rdatasets mirror carries R's row numbers as a first column.
         df = df.drop(columns=[c for c in ("rownames", "unnamed:_0") if c in df.columns])
+    if name == "jst":
+        # The predictors Bluwstein et al. (2023) build their early-warning
+        # models from, derived here so the practice starts from the question
+        # rather than from twenty lines of panel arithmetic. Two-year changes
+        # throughout, which is the horizon the paper uses.
+        df = df.sort_values(["country", "year"])
+        g = df.groupby("country")
+        df["credit_gdp"] = df["tloans"] / df["gdp"]
+        df["credit_growth"] = g["credit_gdp"].diff(2)
+        df["yield_slope"] = df["ltrate"] - df["stir"]
+        df["money_growth"] = g.apply(
+            lambda t: (t["money"] / t["gdp"]).diff(2), include_groups=False
+        ).reset_index(level=0, drop=True)
+        df["cpi_growth"] = g["cpi"].pct_change(2)
+        df["pubdebt_change"] = g["debtgdp"].diff(2)
+        df["ca_gdp"] = df["ca"] / df["gdp"]
+        df["investment_change"] = g["iy"].diff(2)
+        # The outcome: a crisis begins within the next two years.
+        nxt = g["crisisjst"].shift(-1).fillna(0) + g["crisisjst"].shift(-2).fillna(0)
+        df["crisis_next2"] = (nxt > 0).astype(int)
+        df = df.reset_index(drop=True)
     if name == "movies":
         # The raw file mixes numbers and strings in several columns, which
         # parquet will not store. Coerce the numeric ones and drop the rest.

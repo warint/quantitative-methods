@@ -1,6 +1,8 @@
 # Session replications — the article and data behind each practice
 
-Sessions 02–11 pair one **academic article** with its **Harvard Dataverse replication package**.
+Sessions 02–11 pair one **academic article** with the **data behind it** — a Harvard Dataverse
+replication package where the authors deposited one, and otherwise the public database the paper
+itself is built on, fetched by `qmib.load()`.
 Before class, read and annotate the article, download the package, and identify the table cell,
 coefficient, or figure named in the pre-session deck. ISLR is optional background throughout.
 
@@ -16,7 +18,7 @@ Session 01 is the exception: the pre-session installs the workstation and assign
 the practice is a conversation about evidence, scenario, prediction, and what a local language model
 actually does.
 
-## Article–Dataverse map
+## Article–data map
 
 | Session | Academic article | Harvard Dataverse package | Practice target |
 |---|---|---|---|
@@ -25,11 +27,11 @@ actually does.
 | 04 · Logistic regression | Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks* · [article](https://doi.org/10.1371/journal.pone.0224194) | [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7) | Reproduce one classification result as a logistic model; interpret the odds ratios in words and test one nested comparison. |
 | 05 · Regularisation | Blonigen & Piger (2014), *Determinants of foreign direct investment* · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704) | No package published — rebuilt by `scripts/build_fdi_determinants.py` from OECD, CEPII, World Bank and Freedom House; load with `qmib.load("fdi")` | The paper runs Bayesian model averaging over 56 candidate determinants of bilateral FDI and finds about sixteen survive. Refit the same 56 for 2019 with lasso, ridge and elastic net, and say which of its conclusions still hold. |
 | 06 · Panel data and interactions | Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity* · [article](https://doi.org/10.1162/REST_a_00095) | [10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD) | Reproduce one firm-productivity regression; refit it as a panel with fixed and then random effects, and say which you would report. |
-| 07 · PCA and factor analysis | Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models* · [article](https://doi.org/10.1162/REST_a_00614) | [10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM) | Reproduce one factor figure; rebuild the first components yourself, defend the number retained, and interpret the loadings. |
-| 08 · KNN and bias–variance | Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling* · [article](https://doi.org/10.1080/00103624.2025.2454015) | [10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW) | Reproduce the full-versus-reduced comparison, then fit KNN against the paper's random forest. Choose $k$ by cross-validation and say whether flexibility earned its keep. |
+| 07 · PCA and factor analysis | Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited* · [article](https://doi.org/10.1007/s11558-019-09344-2) | No deposit — the index itself is public; load with `qmib.load("kof")` | The index asserts that globalisation has three dimensions — economic, social, political — built from six sub-dimensions. Run PCA on the sub-indices and ask how many the data actually supports. Defend the number you retain, and interpret the loadings. |
+| 08 · KNN and bias–variance | Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction* · [article](https://doi.org/10.1016/j.jinteco.2023.103773) · [free working paper](https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp2614~6974517ac3.en.pdf) | Jordà–Schularick–Taylor Macrohistory Database, public; load with `qmib.load("jst")` | The paper reports that flexible machine learning beats logistic regression at predicting financial crises. Fit KNN against logistic regression on the same 18-country panel, choose $k$ by cross-validation, and say whether flexibility earned its keep on **your** feature set. |
 | 09 · Structural equation modelling | Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings* · [article](https://doi.org/10.1016/j.jimonfin.2024.103161) | [10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38) | The paper builds a measure of an unobservable — tone — from observed indicators. Reproduce one tone result, then specify it as a measurement model and report the fit indices. |
-| 10 · Causal inference I | Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning* · [article](https://doi.org/10.1093/ectj/utac018) | [10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA) | Reproduce one treatment-effect estimate; check overlap and balance, re-estimate by propensity-score matching, and compare with the naive difference. |
-| 11 · Causal inference II | Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity* · [article](https://doi.org/10.1162/rest_a_00759) | [10.7910/DVN/PIAZWN](https://doi.org/10.7910/DVN/PIAZWN) | Reproduce one inference result; set it up as a difference-in-differences design, show the parallel-trends evidence, and compare conventional with design-aware uncertainty. |
+| 10 · Causal inference I | Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a Randomized Experiment* · [article](https://doi.org/10.1093/qje/qjx002) | [10.7910/DVN/QOGMVI](https://doi.org/10.7910/DVN/QOGMVI) | Egyptian rug producers were randomly given export orders, so the counterfactual is known. Reproduce the experimental estimate; then throw the randomisation away, re-estimate by propensity-score matching on observables, and report how far matching lands from the truth. |
+| 11 · Causal inference II | Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store: Evidence from US Trade Policy* · [article](https://doi.org/10.1257/aeri.20190536) | [10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH) | The 2018–19 US tariffs hit some goods and not others — a difference-in-differences design with a real policy as the treatment. Reproduce one passthrough estimate, show the parallel-trends evidence, and compare conventional with design-aware uncertainty. |
 
 ## Downloading a package
 

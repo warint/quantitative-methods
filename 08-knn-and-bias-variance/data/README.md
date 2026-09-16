@@ -1,10 +1,10 @@
 # Session 08 — Data
 
-**The course spine, plus the Smarket returns used in the lecture**
+**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived**
 
 ```python
 import qmib
-data = qmib.load("core")
+data = qmib.load("jst")
 ```
 
 One call. It resolves a local cache first, then the committed spine, then the published URL —

@@ -44,7 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning***. Its replication package ([10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA)) should already be unzipped at `10-causal-inference-foundations/data/replication/`.
+The paper is **Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a Randomized Experiment*, Quarterly Journal of Economics 132(2)**. Its replication package ([10.7910/DVN/QOGMVI](https://doi.org/10.7910/DVN/QOGMVI)) should already be unzipped at `10-causal-inference-foundations/data/replication/`.
 
 The session's own dataset, for comparison:
 

@@ -17,8 +17,8 @@ Budget **60–90 minutes**.
 
 ## 1. The reading — 45–60 min
 
-**Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning***
-[Read the article](https://doi.org/10.1093/ectj/utac018)
+**Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a Randomized Experiment*, Quarterly Journal of Economics 132(2)**
+[Read the article](https://doi.org/10.1093/qje/qjx002)
 
 Read for the **argument**, not for coverage:
 
@@ -41,7 +41,7 @@ You need **two** datasets in the practice, and both should be on your machine be
 
 This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA)**
+**Harvard Dataverse: [10.7910/DVN/QOGMVI](https://doi.org/10.7910/DVN/QOGMVI)**
 
 Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
 
@@ -50,6 +50,8 @@ Download it once, and unzip it here — the folder is git-ignored, so nothing la
 ```
 
 Keep the authors' own folder structure and README.
+
+> **Note.** This deposit sits behind a Dataverse **guestbook**, so the `curl` recipe above returns an error for this session. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, accept the terms once, and unzip it to the same folder. Everything after that is identical.
 
 ### b) The course data, for your own angle
 

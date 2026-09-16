@@ -92,10 +92,10 @@ machine.
 
 ## 1 · Read the paper
 
-**Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling***
+**Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach*, Journal of International Economics 145**
 
 ::: {.muted}
-[Read the article](https://doi.org/10.1080/00103624.2025.2454015)
+[Read the article](https://doi.org/10.1016/j.jinteco.2023.103773)
 :::
 
 Read for the **argument**, not for coverage. Annotate four things:
@@ -114,36 +114,28 @@ The practice uses two: the **paper's data**, to reproduce one of its results, an
 angle**, to apply the method. Have both before you arrive.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
+**a) The paper's data** — published, and fetched for you
 
 ::: {.step}
-[10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW)
+`qmib.load("jst")`
 :::
 
-Download it from the terminal — no Dataverse account, no browser. From the repository root:
+The paper has no replication deposit, but it rests on a database its publisher puts online for
+anyone. The course loader downloads it once and caches it as parquet, so run this before you
+arrive and the practice works with the wifi off:
 
-**macOS and Linux**
+```python
+import qmib
 
-```bash
-mkdir -p 08-knn-and-bias-variance/data/replication && cd 08-knn-and-bias-variance/data/replication
-curl -L -o replication.zip \
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/HGBPCW"
-unzip -q replication.zip && rm replication.zip && cd -
-```
-
-**Windows PowerShell**
-
-```powershell
-mkdir 08-knn-and-bias-variance/data/replication; cd 08-knn-and-bias-variance/data/replication
-curl.exe -L -o replication.zip `
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/HGBPCW"
-Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+data = qmib.load("jst")
+print(data.shape)
 ```
 
 ::: {.warn}
-`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
-structure — do not tidy it.
+Run it **before** class. It is a single download, and a room of thirty people fetching it at
+once is not a download.
 :::
+
 
 ## 2b · The course data
 
@@ -167,7 +159,7 @@ whatever the room's wifi is doing.
 :::
 
 ::: {.muted}
-The course spine, plus the Smarket returns used in the lecture · everything available: `qmib.catalog()`
+The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived · everything available: `qmib.catalog()`
 :::
 
 ## 3 · Self-check, and what the session will ask of you

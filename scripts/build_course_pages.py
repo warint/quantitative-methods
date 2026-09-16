@@ -27,9 +27,9 @@ PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
 def _paper_data_block(s):
     """The 'where the paper's data comes from' block.
 
-    Most sessions point at a Harvard Dataverse deposit. Session 05's authors
-    published none, so the course rebuilt their design from the sources the
-    paper names and commits the result; there is nothing to download.
+    Most sessions point at a Harvard Dataverse deposit. Sessions 07 and 08 rest
+    on a public database instead — the KOF Globalisation Index, the Macrohistory
+    database — which the course loader fetches, so there is nothing to unzip.
     """
     if s.get("dataverse"):
         return (
@@ -38,12 +38,15 @@ def _paper_data_block(s):
             "large is committed:\n\n"
             f"```text\n{s['dir']}/data/replication/\n```\n\n"
             "Keep the authors' own folder structure and README."
+            + (f"\n\n> **Note.** {s['data_extra']}" if s.get("data_extra") else "")
         )
     return (
-        "The authors published **no replication package**. The course rebuilt their design "
-        "from the sources the paper names, so there is nothing to download:\n\n"
+        "The paper has **no replication deposit**, but it rests on a database its publisher "
+        "puts online for anyone. The course loader fetches it once and caches it, so there is "
+        "nothing to download by hand:\n\n"
         f"```python\nimport qmib\n\ndata = qmib.load(\"{s['dataset']}\")\n```\n\n"
-        "`scripts/build_fdi_determinants.py` documents every source and every substitution."
+        "Run it **before** class: it is a single download, and thirty people fetching it at "
+        "once in the room is not a download."
     )
 
 
@@ -54,10 +57,7 @@ def _paper_data_pointer(s):
             f"Its replication package ([{s['dataverse']}](https://doi.org/{s['dataverse']})) "
             f"should already be unzipped at `{s['dir']}/data/replication/`."
         )
-    return (
-        f"Its data was rebuilt for the course and needs no download: "
-        f"`qmib.load(\"{s['dataset']}\")`."
-    )
+    return f"Its data needs no download: `qmib.load(\"{s['dataset']}\")`."
 
 
 def sentence(s):

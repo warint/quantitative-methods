@@ -29,6 +29,15 @@ def lab_url(num):
     """The lab for one session, or None where there is no lab."""
     return f"{LAB_URL}qmib-lab-{num}.html" if num in LAB_SESSIONS else None
 
+# Harvard Dataverse puts a guestbook on some deposits, and a guestbook cannot
+# be answered from the terminal: the access API returns HTTP 400 whatever you
+# send it. Those sessions get this note instead of a broken curl recipe.
+GUESTBOOK_NOTE = (
+    "This deposit sits behind a Dataverse **guestbook**, so the `curl` recipe above returns an "
+    "error for this session. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, "
+    "accept the terms once, and unzip it to the same folder. Everything after that is identical."
+)
+
 SESSIONS = {
     "01": dict(
         dir="01-foundations-scenarios-and-tools",
@@ -206,11 +215,13 @@ SESSIONS = {
             "State the difference between **PCA** and **factor analysis**, and when each applies",
             "Say why a factor is identified only **up to rotation**",
         ],
-        reading="Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models*",
-        reading_url="https://doi.org/10.1162/REST_a_00614",
-        dataverse="10.7910/DVN/NKWMQM",
-        dataset="movies",
-        dataset_note="45,000 films — budget, popularity, revenue, runtime and votes",
+        reading=("Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, "
+                 "Review of International Organizations 14(3)"),
+        reading_url="https://doi.org/10.1007/s11558-019-09344-2",
+        dataverse=None,           # the index itself is the data, published by KOF ETH Zurich
+        dataset="kof",
+        dataset_note=("the KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions "
+                      "each split into de facto and de jure"),
         deliverable=("a dimension-reduction of your project's indicators: the scree plot, the "
                      "number retained with its justification, the loadings interpreted, and a "
                      "note on what you are *not* entitled to call the components"),
@@ -235,11 +246,14 @@ SESSIONS = {
             "Choose $k$ by cross-validation, and read the trade-off the curve shows",
             "Say what happens to KNN as the number of predictors grows",
         ],
-        reading="Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling*",
-        reading_url="https://doi.org/10.1080/00103624.2025.2454015",
-        dataverse="10.7910/DVN/HGBPCW",
-        dataset="core",
-        dataset_note="the course spine, plus the Smarket returns used in the lecture",
+        reading=("Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield "
+                 "curve and financial crisis prediction: evidence from a machine learning approach*, "
+                 "Journal of International Economics 145"),
+        reading_url="https://doi.org/10.1016/j.jinteco.2023.103773",
+        dataverse=None,           # built on the public Macrohistory database
+        dataset="jst",
+        dataset_note=("the Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, "
+                      "88 financial crises, with the paper's predictors already derived"),
         deliverable=("a KNN classifier on a binary outcome from your angle, with $k$ chosen by "
                      "cross-validation, compared against a sensible benchmark, and a note on "
                      "whether the flexibility earned its keep"),
@@ -293,9 +307,11 @@ SESSIONS = {
             "Check **overlap** and **balance**, and say what to do when they fail",
             "Report an **ATT**, and state the assumption it rests on",
         ],
-        reading="Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning*",
-        reading_url="https://doi.org/10.1093/ectj/utac018",
-        dataverse="10.7910/DVN/FS0KBA",
+        reading=("Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a "
+                 "Randomized Experiment*, Quarterly Journal of Economics 132(2)"),
+        reading_url="https://doi.org/10.1093/qje/qjx002",
+        dataverse="10.7910/DVN/QOGMVI",
+        data_extra=GUESTBOOK_NOTE,
         dataset="core",
         dataset_note="the spine's documented treatment, with a known effect to recover",
         practice_extra="regtable",   # an outcome model before and after matching
@@ -323,9 +339,11 @@ SESSIONS = {
             "Explain what an **instrument** must satisfy, and why good ones are rare",
             "Say what neither design can rescue",
         ],
-        reading="Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity*",
-        reading_url="https://doi.org/10.1162/rest_a_00759",
-        dataverse="10.7910/DVN/PIAZWN",
+        reading=("Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at "
+                 "the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)"),
+        reading_url="https://doi.org/10.1257/aeri.20190536",
+        dataverse="10.7910/DVN/JV7FCH",
+        data_extra=GUESTBOOK_NOTE,
         dataset="core",
         dataset_note="the spine's post-2021 structural break, treated as a policy change",
         practice_extra="regtable",   # two DiD specifications side by side

@@ -92,10 +92,10 @@ machine.
 
 ## 1 · Read the paper
 
-**Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models***
+**Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, Review of International Organizations 14(3)**
 
 ::: {.muted}
-[Read the article](https://doi.org/10.1162/REST_a_00614)
+[Read the article](https://doi.org/10.1007/s11558-019-09344-2)
 :::
 
 Read for the **argument**, not for coverage. Annotate four things:
@@ -114,47 +114,38 @@ The practice uses two: the **paper's data**, to reproduce one of its results, an
 angle**, to apply the method. Have both before you arrive.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
+**a) The paper's data** — published, and fetched for you
 
 ::: {.step}
-[10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM)
+`qmib.load("kof")`
 :::
 
-Download it from the terminal — no Dataverse account, no browser. From the repository root:
+The paper has no replication deposit, but it rests on a database its publisher puts online for
+anyone. The course loader downloads it once and caches it as parquet, so run this before you
+arrive and the practice works with the wifi off:
 
-**macOS and Linux**
+```python
+import qmib
 
-```bash
-mkdir -p 07-pca-and-factor-analysis/data/replication && cd 07-pca-and-factor-analysis/data/replication
-curl -L -o replication.zip \
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/NKWMQM"
-unzip -q replication.zip && rm replication.zip && cd -
-```
-
-**Windows PowerShell**
-
-```powershell
-mkdir 07-pca-and-factor-analysis/data/replication; cd 07-pca-and-factor-analysis/data/replication
-curl.exe -L -o replication.zip `
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/NKWMQM"
-Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+data = qmib.load("kof")
+print(data.shape)
 ```
 
 ::: {.warn}
-`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
-structure — do not tidy it.
+Run it **before** class. It is a single download, and a room of thirty people fetching it at
+once is not a download.
 :::
+
 
 ## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("movies")     # what the lecture uses
 core = qmib.load("core")                # the spine, shared by every group
 mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
-print(data.shape, core.shape, mine.shape)
+print(core.shape, mine.shape)
 ```
 
 ::: {.check}
@@ -168,7 +159,7 @@ whatever the room's wifi is doing.
 :::
 
 ::: {.muted}
-45,000 films — budget, popularity, revenue, runtime and votes · everything available: `qmib.catalog()`
+The KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions each split into de facto and de jure · everything available: `qmib.catalog()`
 :::
 
 ## 3 · Self-check, and what the session will ask of you

@@ -48,11 +48,11 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The course spine, plus the Smarket returns used in the lecture** — one line to load it:
+**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — one line to load it:
 
 ```python
 import qmib
-data = qmib.load("core")
+data = qmib.load("jst")
 ```
 
 See [`data/README.md`](data/README.md) and your group's

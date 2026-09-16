@@ -25,6 +25,91 @@ from course_spec import COHORT, SESSIONS, lab_url  # noqa: E402
 RED, PAPER = "#E3120B", "#F7F4ED"
 
 
+def paper_data(s):
+    """The 'get the paper's data' block of the pre-session deck.
+
+    Most sessions send the student to a Harvard Dataverse deposit. Some papers
+    have no deposit but rest on a public database anyone can download — the KOF
+    Globalisation Index, the Macrohistory database — and for those the course
+    loader fetches it, so there is nothing to unzip.
+    """
+    if not s.get("dataverse"):
+        return f"""**a) The paper's data** — published, and fetched for you
+
+::: {{.step}}
+`qmib.load("{s['dataset']}")`
+:::
+
+The paper has no replication deposit, but it rests on a database its publisher puts online for
+anyone. The course loader downloads it once and caches it as parquet, so run this before you
+arrive and the practice works with the wifi off:
+
+```python
+import qmib
+
+data = qmib.load("{s['dataset']}")
+print(data.shape)
+```
+
+::: {{.warn}}
+Run it **before** class. It is a single download, and a room of thirty people fetching it at
+once is not a download.
+:::
+"""
+    extra = f"\n::: {{.warn}}\n{s['data_extra']}\n:::\n" if s.get("data_extra") else ""
+    return f"""**a) The paper's replication package** — Harvard Dataverse
+
+::: {{.step}}
+[{s['dataverse']}](https://doi.org/{s['dataverse']})
+:::
+
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p {s['dir']}/data/replication && cd {s['dir']}/data/replication
+curl -L -o replication.zip \\
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir {s['dir']}/data/replication; cd {s['dir']}/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {{.warn}}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
+{extra}"""
+
+
+def paper_pointer(s):
+    """One-line pointer to where the paper's data lives, for the practice deck."""
+    if not s.get("dataverse"):
+        return f'data: `qmib.load("{s["dataset"]}")`'
+    return f"[{s['dataverse']}](https://doi.org/{s['dataverse']})"
+
+
+def reproduce_intro(s):
+    """Where the paper's result is to be found, for the practice deck."""
+    if not s.get("dataverse"):
+        return (
+            "Take the result the paper rests on, and put it to the test on the database the "
+            "paper itself uses. There is nothing to unzip — the loader has it."
+        )
+    return (
+        "Take the result the paper rests on, and reproduce it. The package you downloaded is at\n"
+        f"`{s['dir']}/data/replication/`."
+    )
+
+
 def sentence(s):
     """Capitalise the first letter and leave the rest alone.
 
@@ -145,7 +230,9 @@ def pre_session_deck(num, s):
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
     # Six sessions teach on the spine itself. Loading it twice under two names,
     # as the template used to, reads as two datasets and is one.
-    on_spine = s["dataset"] == "core"
+    # When the paper has no deposit, step 2 already loaded the session dataset;
+    # repeating it under "the course data" reads as two datasets and is one.
+    on_spine = s["dataset"] == "core" or not s.get("dataverse")
     lecture_load = ("" if on_spine
                     else f'data = qmib.load("{s["dataset"]}")     # what the lecture uses\n')
     shapes = "core.shape, mine.shape" if on_spine else "data.shape, core.shape, mine.shape"
@@ -193,36 +280,7 @@ The practice uses two: the **paper's data**, to reproduce one of its results, an
 angle**, to apply the method. Have both before you arrive.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
-
-::: {{.step}}
-[{s['dataverse']}](https://doi.org/{s['dataverse']})
-:::
-
-Download it from the terminal — no Dataverse account, no browser. From the repository root:
-
-**macOS and Linux**
-
-```bash
-mkdir -p {s['dir']}/data/replication && cd {s['dir']}/data/replication
-curl -L -o replication.zip \\
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
-unzip -q replication.zip && rm replication.zip && cd -
-```
-
-**Windows PowerShell**
-
-```powershell
-mkdir {s['dir']}/data/replication; cd {s['dir']}/data/replication
-curl.exe -L -o replication.zip `
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
-Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
-```
-
-::: {{.warn}}
-`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
-structure — do not tidy it.
-:::
+{paper_data(s)}
 
 ## 2b · The course data
 
@@ -400,17 +458,16 @@ The git log is the participation record. It is not a formality.
 
 ## 1 · Reproduce — 20 min
 
-Take the result the paper rests on, and reproduce it. The package you downloaded is at
-`{s['dir']}/data/replication/`.
+{reproduce_intro(s)}
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")     # the session's own data, for comparison
+data = qmib.load("{s['dataset']}")     # the session's own data
 ```
 
 ::: {{.muted}}
-Paper: {s['reading']} · [{s['dataverse']}](https://doi.org/{s['dataverse']})
+Paper: {s['reading']} · {paper_pointer(s)}
 :::
 
 ::: {{.check}}
