@@ -701,9 +701,15 @@ Remedies: add polynomial terms, interactions, or reconsider functional form.
 
 ::::::: columns
 ::: {.column style="width:50%;"}
--   The residuals should be nearly normal.
+The residuals should be **nearly** normal — and nearly is the operative word. Least squares does
+not need normal errors to give you unbiased coefficients; it needs them for the **t-tests and
+confidence intervals** to mean what they claim. In a large sample even that requirement softens,
+because the central limit theorem does the work for you.
 
--   This condition may not be satisfied when there are unusual observations that don't follow the trend of the rest of the data.
+So the question is not "are these residuals normal" — they never are — but **how badly does the
+departure distort the inference**. Heavy tails on both sides usually signal a handful of unusual
+observations rather than a broken model; a single long tail on one side usually means the
+dependent variable wanted a log.
 
 > Check using a histogram.
 :::
@@ -720,16 +726,6 @@ Remedies: add polynomial terms, interactions, or reconsider functional form.
 ::::
 :::::
 :::::::
-
-## Normality, on a Q-Q plot {#imported-s03-016 .scrollable}
-
--   Errors should be normally distributed.
--   Important for valid t-tests and confidence intervals.
-
-Points on the line are what normality looks like; points peeling away at both
-ends are heavy tails.
-
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-11-1.png){.r-stretch}
 
 ## Validity: constant variance {#imported-s03-017 .scrollable}
 
@@ -887,53 +883,48 @@ Guess the correlation, then check. Ten minutes here is worth a chapter.
 
 ## Outlier, leverage point, influential point {#imported-s03-022 .scrollable}
 
--   **Outlier:** unusual Y given X.
--   **Leverage point:** unusual X values.
--   **Influential:** changes regression coefficients significantly.
+Three words that get used interchangeably in conversation and mean quite different things here.
+Keeping them apart is most of the work.
 
-Visual schematic: regression line with one leverage point pulling the slope.
+| | | |
+|---|---|---|
+| **Outlier** | unusual **Y** given X | the model predicts it badly |
+| **Leverage point** | unusual **X** | it sits far from the other predictor values |
+| **Influential point** | removing it **moves the coefficients** | the answer depends on it |
 
-## Leverage {#imported-s03-023 .scrollable}
+A point can be any one of these without being the others. An outlier sitting in the middle of the
+X range is badly predicted but has little power to tilt the line: there are neighbours on both
+sides holding it in place. A leverage point that happens to fall exactly where the line already
+goes is unusual in X and perfectly consistent with everything else — it does no damage at all,
+and in fact it *stabilises* the slope.
 
--   Leverage measures how far X is from its mean.
--   Average leverage = (p+1)/n.
+::: {.warn}
+The damage is done by points that are **both**. Far out in X, so the line pivots around them, and
+badly predicted, so the pivot is large. That combination is what influence means, and it is why
+neither residual size nor leverage on its own is the diagnostic you want.
+:::
+
+::: {.muted}
+Which is the argument for a measure that multiplies the two together. That measure is Cook's
+distance, next.
+:::
+
+## Cook's Distance {#imported-s03-024 .scrollable}
+
+Cook's distance answers one question directly: **if I deleted this row, how far would all the
+fitted values move?** It does that by combining the two ingredients from the previous slide — how
+badly the point is predicted, and how much leverage it has — into a single number per observation.
+
+$$D_i = \\frac{e_i^2}{p\\,s^2} \\cdot \\frac{h_i}{(1-h_i)^2}$$
+
+The first factor is the squared residual: the outlier part. The second is built from $h_i$, the
+leverage: it is small when the point sits in the middle of the X range and blows up as $h_i$
+approaches one. Multiply them and you have exactly the "both at once" case that does the damage.
 
 ```{python}
 #| echo: true
 
 influence = fit.get_influence()
-leverage = influence.hat_matrix_diag
-
-print(f"mean leverage {leverage.mean():.4f}, max {leverage.max():.4f}")
-print(f"rule of thumb 2p/n = {2 * 2 / len(d):.4f}")
-
-```
-
-> Leverage matters because a data point with unusual predictor values can pull the regression line toward itself, changing the story the model tells.
-
-## Residuals versus leverage {.scrollable}
-
-The points with the power to move the line.
-
-```{python}
-#| echo: true
-
-# Far right = unusual X. High up or low down = badly predicted. The damage is
-# done by points that are both, which is why the two are plotted together.
-plt.scatter(leverage, influence.resid_studentized_internal, s=12, alpha=0.6)
-plt.axvline(2 * 2 / len(d), color="red", ls="--")   # the 2p/n rule of thumb
-plt.xlabel("Leverage"); plt.ylabel("Standardised residual")
-plt.show()
-```
-
-## Cook's Distance {#imported-s03-024 .scrollable}
-
--   Combines leverage + residual size.
--   High Cook's D = observation heavily influences coefficients.
-
-```{python}
-#| echo: true
-
 cooks_d = influence.cooks_distance[0]
 
 print(f"largest Cook's D {cooks_d.max():.4f}")
@@ -941,11 +932,23 @@ print(f"above 4/n ({4/len(d):.4f}): {(cooks_d > 4/len(d)).sum()} observations")
 
 ```
 
-> Cook's distance matters because it shows which data points, if removed, would noticeably change the model's results.
+::: {.muted}
+`get_influence()` computes leverage, studentised residuals and Cook's distance together, because
+they are all read off the same hat matrix.
+:::
+
+::: {.warn}
+$4/n$ is a **screen, not a test**. It has no distributional justification; it is a threshold that
+flags roughly the most extreme few per cent in a well-behaved sample. Crossing it is a reason to
+go and look at the row, never a reason to delete it.
+:::
 
 ## One spike per observation {.scrollable}
 
-How much every coefficient would move if that single row were deleted.
+One spike per row, its height the distance the fitted values would travel if that row were
+deleted. Read it for **shape**, not for threshold-crossing: a forest of similar spikes means no
+single country-year is carrying the result, while one tower above the rest means your finding is
+really a statement about one observation.
 
 ```{python}
 #| echo: true
@@ -957,6 +960,22 @@ plt.axhline(4 / len(d), color="red", ls="--")
 plt.xlabel("Observation"); plt.ylabel("Cook's distance")
 plt.show()
 ```
+
+::: {.step}
+When a spike stands out, the next move is always the same: **find out which row it is** and go and
+look at it.
+
+```python
+d.iloc[cooks_d.argmax()]      # the observation, not just its index
+```
+:::
+
+::: {.warn}
+Then ask what it is. A data-entry error you fix. A small economy that genuinely behaves
+differently is not an error — it is a finding, and dropping it to tidy the plot is how a result
+gets manufactured. If you do exclude a row, the exclusion and the reason for it belong in the
+write-up, alongside the fit with the row left in.
+:::
 
 ## Parsimony · comparing candidate models {.center background-color="#E3120B" style="color:#F7F4ED"}
 
@@ -1021,8 +1040,44 @@ until nothing improves --- is a *selection procedure*, not a check on a fit. Tea
 Cook's distance would imply it belongs to model checking.
 :::
 
+Here it is, so you know what it does. Forward selection: start from the intercept, add
+whichever candidate lowers AIC most, stop when none does.
+
+```{python}
+#| echo: true
+
+candidates = ["productivity_idx", "gfcf_meur", "population",
+              "employment_ths", "prod_growth"]
+d3 = core.dropna(subset=["gdp_pc_eur"] + candidates)
+
+def forward_aic(y, pool, data):
+    chosen = []
+    best = smf.ols(f"{y} ~ 1", data=data).fit().aic
+    print(f"intercept only      AIC {best:,.1f}")
+    while True:
+        trials = [(smf.ols(f"{y} ~ {' + '.join(chosen + [c])}", data=data).fit().aic, c)
+                  for c in pool if c not in chosen]
+        if not trials:
+            break
+        aic, winner = min(trials)
+        if aic >= best:                 # nothing left that improves the fit
+            break
+        chosen, best = chosen + [winner], aic
+        print(f"  + {winner:<17} AIC {aic:,.1f}")
+    return chosen
+
+selected = forward_aic("gdp_pc_eur", candidates, d3)
+print(f"\nselected: {' + '.join(selected)}   (n = {len(d3)})")
+```
+
+::: {.muted}
+Five candidates and 367 rows: it keeps all five. The procedure only *looks* decisive when
+there are many candidates and few rows --- which is the case it is actually used in, and the
+case where it is least trustworthy.
+:::
+
 ::: {.check}
-It opens **session 05** instead, where it does real work: watch its choices fail to survive a
+It opens **session 05** instead, where it does real work: watch those choices fail to survive a
 resample, and you have the argument for shrinking coefficients continuously rather than including
 or excluding them. That argument is ridge and lasso.
 :::
