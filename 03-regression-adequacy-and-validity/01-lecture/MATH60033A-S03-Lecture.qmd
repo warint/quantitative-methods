@@ -911,15 +911,16 @@ distance, next.
 
 ## Cook's Distance {#imported-s03-024 .scrollable}
 
-Cook's distance answers one question directly: **if I deleted this row, how far would all the
-fitted values move?** It does that by combining the two ingredients from the previous slide — how
-badly the point is predicted, and how much leverage it has — into a single number per observation.
+One question, asked of every row in turn: **delete this observation, refit, and how far do all
+the fitted values move?** Cook's distance is the answer, and it is a single number per row.
 
-$$D_i = \\frac{e_i^2}{p\\,s^2} \\cdot \\frac{h_i}{(1-h_i)^2}$$
+$$D_i \;=\; \underbrace{\frac{e_i^2}{p\,s^2}}_{\text{is it badly predicted?}} \;\times\;
+            \underbrace{\frac{h_i}{(1-h_i)^2}}_{\text{does it have leverage?}}$$
 
-The first factor is the squared residual: the outlier part. The second is built from $h_i$, the
-leverage: it is small when the point sits in the middle of the X range and blows up as $h_i$
-approaches one. Multiply them and you have exactly the "both at once" case that does the damage.
+Those are the two ingredients from the previous slide, multiplied rather than added — which is
+the point. A big residual in the middle of the X range gives a large first factor and a tiny
+second one, so the product stays small. It takes **both** to move the line, and only the product
+knows that.
 
 ```{python}
 #| echo: true
@@ -932,15 +933,10 @@ print(f"above 4/n ({4/len(d):.4f}): {(cooks_d > 4/len(d)).sum()} observations")
 
 ```
 
-::: {.muted}
-`get_influence()` computes leverage, studentised residuals and Cook's distance together, because
-they are all read off the same hat matrix.
-:::
-
 ::: {.warn}
-$4/n$ is a **screen, not a test**. It has no distributional justification; it is a threshold that
-flags roughly the most extreme few per cent in a well-behaved sample. Crossing it is a reason to
-go and look at the row, never a reason to delete it.
+$4/n$ is a **screen, not a test**. It has no distributional justification — it simply flags the
+most extreme few per cent of a well-behaved sample. Crossing it is a reason to go and look at the
+row. It is never, on its own, a reason to delete it.
 :::
 
 ## One spike per observation {.scrollable}
@@ -979,29 +975,84 @@ write-up, alongside the fit with the row left in.
 
 ## Parsimony · comparing candidate models {.center background-color="#E3120B" style="color:#F7F4ED"}
 
-## Information Criteria --- AIC {#imported-s03-025 .scrollable}
+## Information criteria --- AIC and BIC {#imported-s03-025 .scrollable}
 
-[\\\[ AIC = -2\\log(L) + 2k \\\]]{.math .display}
+Adding a variable can never make the fit worse, so "which model fits best" always answers
+"the biggest one". Information criteria fix that by **charging rent** for each parameter:
 
--   Balances fit with penalty for number of parameters.
--   Lower AIC = better model (relative).
+$$\text{AIC} = -2\log(L) + 2k \qquad\qquad \text{BIC} = -2\log(L) + k\ln(n)$$
+
+The first term is the same in both — it is the fit, and it falls as the model grows. The second
+term is the rent, and it is the only thing that differs:
+
+| | Rent per parameter | Which means |
+|---|---|---|
+| **AIC** | $2$ | a flat charge, whatever the sample size |
+| **BIC** | $\ln(n)$ | the charge rises with $n$ — at $n = 410$ it is $6.02$, three times AIC's |
+
+::: {.warn}
+So BIC always prefers a model at least as small as AIC's, and the gap widens with the sample.
+Neither is "correct": AIC is aiming at the model that predicts best, BIC at the model that is
+true. Those are different targets, and they are allowed to disagree.
+:::
+
+## Watching them disagree {.scrollable}
+
+Four nested models on the same 410 rows — because two fits estimated on different samples are not
+a comparison.
 
 ```{python}
 #| echo: true
 
-fit.aic
+import numpy as np
+
+cols = ["gdp_pc_eur", "productivity_idx", "gfcf_meur", "employment_ths", "falling_behind"]
+dic  = core.dropna(subset=cols)
+
+specs = {
+    "productivity":     "productivity_idx",
+    "+ investment":     "productivity_idx + gfcf_meur",
+    "+ employment":     "productivity_idx + gfcf_meur + employment_ths",
+    "+ falling_behind": "productivity_idx + gfcf_meur + employment_ths + falling_behind",
+}
+fits = {k: smf.ols(f"gdp_pc_eur ~ {v}", data=dic).fit() for k, v in specs.items()}
+
+ic = pd.DataFrame({"k":   [int(m.df_model) + 1 for m in fits.values()],
+                   "AIC": [m.aic for m in fits.values()],
+                   "BIC": [m.bic for m in fits.values()]}, index=list(fits))
+ic["dAIC"] = ic.AIC - ic.AIC.min()      # distance from the best, which is what you read
+ic["dBIC"] = ic.BIC - ic.BIC.min()
+
+print(f"n = {len(dic)},  AIC's rent = 2,  BIC's rent = ln(n) = {np.log(len(dic)):.2f}\n")
+print(ic.round(2).to_string())
+print(f"\nAIC prefers: {ic.AIC.idxmin()}\nBIC prefers: {ic.BIC.idxmin()}")
 ```
 
-> AIC matters because it helps us avoid models that are too complicated by rewarding good fit but punishing unnecessary extra variables.
+## Reading that table {.scrollable}
 
-## Information Criteria --- BIC {#imported-s03-026 .scrollable}
+The first two steps are unanimous: investment and employment are worth their rent several times
+over, and both criteria drop by more than a hundred points.
 
-[\\\[ BIC = -2\\log(L) + k\\ln(n) \\\]]{.math .display}
+The last step is where they part. Adding `falling_behind` improves AIC by 0.74 and *worsens* BIC
+by 3.28 — and the difference between those two movements is not a coincidence:
 
--   Similar to AIC but harsher penalty (depends on n).
--   Favors simpler models for large samples.
+$$3.28 - (-0.74) \;=\; 4.02 \;=\; \ln(410) - 2$$
 
-> BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.
+That is the extra rent BIC charges for one more parameter. **The entire disagreement is that one
+number.** The data has not changed; the price of complexity has.
+
+::: {.check}
+Read **differences, not levels.** An AIC of 8442 means nothing on its own — it depends on the
+units of $y$ and the size of the sample. A $\Delta$AIC of 0.74 between two models means they are
+indistinguishable; a $\Delta$ of 145 means one is out of the running. A rough convention: under 2
+is a tie, over 10 is decisive.
+:::
+
+::: {.warn}
+And the standing condition: **same rows, same $y$.** Two AICs computed on different samples, or
+one on $y$ and one on $\log y$, are not comparable at all — and `dropna()` silently changes the
+sample every time you change the column list.
+:::
 
 ## The table you would actually publish {.scrollable}
 

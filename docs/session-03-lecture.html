@@ -1486,7 +1486,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="06b782f2" class="cell" data-execution_count="2">
+<div id="55ad2bd5" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1577,7 +1577,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="3470e94e" class="cell" data-execution_count="3">
+<div id="90e1db1b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1693,7 +1693,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="0e2b0fce" class="cell" data-execution_count="4">
+<div id="f8118be9" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1869,10 +1869,11 @@ RSE 9,376 EUR per head</code></pre>
 </section>
 <section id="imported-s03-024" class="slide level2 scrollable">
 <h2>Cook’s Distance</h2>
-<p>Cook’s distance answers one question directly: <strong>if I deleted this row, how far would all the fitted values move?</strong> It does that by combining the two ingredients from the previous slide — how badly the point is predicted, and how much leverage it has — into a single number per observation.</p>
-<p><span class="math display">\[D_i = \\frac{e_i^2}{p\\,s^2} \\cdot \\frac{h_i}{(1-h_i)^2}\]</span></p>
-<p>The first factor is the squared residual: the outlier part. The second is built from <span class="math inline">\(h_i\)</span>, the leverage: it is small when the point sits in the middle of the X range and blows up as <span class="math inline">\(h_i\)</span> approaches one. Multiply them and you have exactly the “both at once” case that does the damage.</p>
-<div id="fee7154b" class="cell" data-execution_count="5">
+<p>One question, asked of every row in turn: <strong>delete this observation, refit, and how far do all the fitted values move?</strong> Cook’s distance is the answer, and it is a single number per row.</p>
+<p><span class="math display">\[D_i \;=\; \underbrace{\frac{e_i^2}{p\,s^2}}_{\text{is it badly predicted?}} \;\times\;
+            \underbrace{\frac{h_i}{(1-h_i)^2}}_{\text{does it have leverage?}}\]</span></p>
+<p>Those are the two ingredients from the previous slide, multiplied rather than added — which is the point. A big residual in the middle of the X range gives a large first factor and a tiny second one, so the product stays small. It takes <strong>both</strong> to move the line, and only the product knows that.</p>
+<div id="d79ebbf4" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb12-3"><a href></a></span>
@@ -1883,17 +1884,14 @@ RSE 9,376 EUR per head</code></pre>
 above 4/n (0.0093): 25 observations</code></pre>
 </div>
 </div>
-<div class="muted">
-<p><code>get_influence()</code> computes leverage, studentised residuals and Cook’s distance together, because they are all read off the same hat matrix.</p>
-</div>
 <div class="warn">
-<p><span class="math inline">\(4/n\)</span> is a <strong>screen, not a test</strong>. It has no distributional justification; it is a threshold that flags roughly the most extreme few per cent in a well-behaved sample. Crossing it is a reason to go and look at the row, never a reason to delete it.</p>
+<p><span class="math inline">\(4/n\)</span> is a <strong>screen, not a test</strong>. It has no distributional justification — it simply flags the most extreme few per cent of a well-behaved sample. Crossing it is a reason to go and look at the row. It is never, on its own, a reason to delete it.</p>
 </div>
 </section>
 <section id="one-spike-per-observation" class="slide level2 scrollable">
 <h2>One spike per observation</h2>
 <p>One spike per row, its height the distance the fitted values would travel if that row were deleted. Read it for <strong>shape</strong>, not for threshold-crossing: a forest of similar spikes means no single country-year is carrying the result, while one tower above the rest means your finding is really a statement about one observation.</p>
-<div id="1f3c12cd" class="cell" data-execution_count="6">
+<div id="ec1e1523" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb14-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb14-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1914,37 +1912,97 @@ above 4/n (0.0093): 25 observations</code></pre>
 <h2>Parsimony · comparing candidate models</h2>
 </section>
 <section id="imported-s03-025" class="slide level2 scrollable">
-<h2>Information Criteria — AIC</h2>
-<p><span class="math display">\[ AIC = -2\log(L) + 2k \]</span></p>
-<ul>
-<li>Balances fit with penalty for number of parameters.</li>
-<li>Lower AIC = better model (relative).</li>
-</ul>
-<div id="e1c2b434" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a>fit.aic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>np.float64(9045.504564959898)</code></pre>
+<h2>Information criteria — AIC and BIC</h2>
+<p>Adding a variable can never make the fit worse, so “which model fits best” always answers “the biggest one”. Information criteria fix that by <strong>charging rent</strong> for each parameter:</p>
+<p><span class="math display">\[\text{AIC} = -2\log(L) + 2k \qquad\qquad \text{BIC} = -2\log(L) + k\ln(n)\]</span></p>
+<p>The first term is the same in both — it is the fit, and it falls as the model grows. The second term is the rent, and it is the only thing that differs:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Rent per parameter</th>
+<th>Which means</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>AIC</strong></td>
+<td><span class="math inline">\(2\)</span></td>
+<td>a flat charge, whatever the sample size</td>
+</tr>
+<tr class="even">
+<td><strong>BIC</strong></td>
+<td><span class="math inline">\(\ln(n)\)</span></td>
+<td>the charge rises with <span class="math inline">\(n\)</span> — at <span class="math inline">\(n = 410\)</span> it is <span class="math inline">\(6.02\)</span>, three times AIC’s</td>
+</tr>
+</tbody>
+</table>
+<div class="warn">
+<p>So BIC always prefers a model at least as small as AIC’s, and the gap widens with the sample. Neither is “correct”: AIC is aiming at the model that predicts best, BIC at the model that is true. Those are different targets, and they are allowed to disagree.</p>
 </div>
-</div>
-<blockquote>
-<p>AIC matters because it helps us avoid models that are too complicated by rewarding good fit but punishing unnecessary extra variables.</p>
-</blockquote>
 </section>
-<section id="imported-s03-026" class="slide level2 scrollable">
-<h2>Information Criteria — BIC</h2>
-<p><span class="math display">\[ BIC = -2\log(L) + k\ln(n) \]</span></p>
-<ul>
-<li>Similar to AIC but harsher penalty (depends on n).</li>
-<li>Favors simpler models for large samples.</li>
-</ul>
-<blockquote>
-<p>BIC matters because it goes even further than AIC in preferring simpler models, especially when we have a lot of data.</p>
-</blockquote>
+<section id="watching-them-disagree" class="slide level2 scrollable">
+<h2>Watching them disagree</h2>
+<p>Four nested models on the same 410 rows — because two fits estimated on different samples are not a comparison.</p>
+<div id="e7255799" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-2"><a href></a></span>
+<span id="cb16-3"><a href></a>cols <span class="op">=</span> [<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;falling_behind&quot;</span>]</span>
+<span id="cb16-4"><a href></a>dic  <span class="op">=</span> core.dropna(subset<span class="op">=</span>cols)</span>
+<span id="cb16-5"><a href></a></span>
+<span id="cb16-6"><a href></a>specs <span class="op">=</span> {</span>
+<span id="cb16-7"><a href></a>    <span class="st">&quot;productivity&quot;</span>:     <span class="st">&quot;productivity_idx&quot;</span>,</span>
+<span id="cb16-8"><a href></a>    <span class="st">&quot;+ investment&quot;</span>:     <span class="st">&quot;productivity_idx + gfcf_meur&quot;</span>,</span>
+<span id="cb16-9"><a href></a>    <span class="st">&quot;+ employment&quot;</span>:     <span class="st">&quot;productivity_idx + gfcf_meur + employment_ths&quot;</span>,</span>
+<span id="cb16-10"><a href></a>    <span class="st">&quot;+ falling_behind&quot;</span>: <span class="st">&quot;productivity_idx + gfcf_meur + employment_ths + falling_behind&quot;</span>,</span>
+<span id="cb16-11"><a href></a>}</span>
+<span id="cb16-12"><a href></a>fits <span class="op">=</span> {k: smf.ols(<span class="ss">f&quot;gdp_pc_eur ~ </span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">&quot;</span>, data<span class="op">=</span>dic).fit() <span class="cf">for</span> k, v <span class="kw">in</span> specs.items()}</span>
+<span id="cb16-13"><a href></a></span>
+<span id="cb16-14"><a href></a>ic <span class="op">=</span> pd.DataFrame({<span class="st">&quot;k&quot;</span>:   [<span class="bu">int</span>(m.df_model) <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> m <span class="kw">in</span> fits.values()],</span>
+<span id="cb16-15"><a href></a>                   <span class="st">&quot;AIC&quot;</span>: [m.aic <span class="cf">for</span> m <span class="kw">in</span> fits.values()],</span>
+<span id="cb16-16"><a href></a>                   <span class="st">&quot;BIC&quot;</span>: [m.bic <span class="cf">for</span> m <span class="kw">in</span> fits.values()]}, index<span class="op">=</span><span class="bu">list</span>(fits))</span>
+<span id="cb16-17"><a href></a>ic[<span class="st">&quot;dAIC&quot;</span>] <span class="op">=</span> ic.AIC <span class="op">-</span> ic.AIC.<span class="bu">min</span>()      <span class="co"># distance from the best, which is what you read</span></span>
+<span id="cb16-18"><a href></a>ic[<span class="st">&quot;dBIC&quot;</span>] <span class="op">=</span> ic.BIC <span class="op">-</span> ic.BIC.<span class="bu">min</span>()</span>
+<span id="cb16-19"><a href></a></span>
+<span id="cb16-20"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;n = </span><span class="sc">{</span><span class="bu">len</span>(dic)<span class="sc">}</span><span class="ss">,  AIC&#39;s rent = 2,  BIC&#39;s rent = ln(n) = </span><span class="sc">{</span>np<span class="sc">.</span>log(<span class="bu">len</span>(dic))<span class="sc">:.2f}</span><span class="ch">\n</span><span class="ss">&quot;</span>)</span>
+<span id="cb16-21"><a href></a><span class="bu">print</span>(ic.<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb16-22"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">AIC prefers: </span><span class="sc">{</span>ic<span class="sc">.</span>AIC<span class="sc">.</span>idxmin()<span class="sc">}</span><span class="ch">\n</span><span class="ss">BIC prefers: </span><span class="sc">{</span>ic<span class="sc">.</span>BIC<span class="sc">.</span>idxmin()<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n = 410,  AIC&#39;s rent = 2,  BIC&#39;s rent = ln(n) = 6.02
+
+                  k      AIC      BIC    dAIC    dBIC
+productivity      2  8666.05  8674.08  223.18  214.41
++ investment      3  8588.88  8600.93  146.02  141.26
++ employment      4  8443.60  8459.67    0.74    0.00
++ falling_behind  5  8442.87  8462.95    0.00    3.28
+
+AIC prefers: + falling_behind
+BIC prefers: + employment</code></pre>
+</div>
+</div>
+</section>
+<section id="reading-that-table" class="slide level2 scrollable">
+<h2>Reading that table</h2>
+<p>The first two steps are unanimous: investment and employment are worth their rent several times over, and both criteria drop by more than a hundred points.</p>
+<p>The last step is where they part. Adding <code>falling_behind</code> improves AIC by 0.74 and <em>worsens</em> BIC by 3.28 — and the difference between those two movements is not a coincidence:</p>
+<p><span class="math display">\[3.28 - (-0.74) \;=\; 4.02 \;=\; \ln(410) - 2\]</span></p>
+<p>That is the extra rent BIC charges for one more parameter. <strong>The entire disagreement is that one number.</strong> The data has not changed; the price of complexity has.</p>
+<div class="check">
+<p>Read <strong>differences, not levels.</strong> An AIC of 8442 means nothing on its own — it depends on the units of <span class="math inline">\(y\)</span> and the size of the sample. A <span class="math inline">\(\Delta\)</span>AIC of 0.74 between two models means they are indistinguishable; a <span class="math inline">\(\Delta\)</span> of 145 means one is out of the running. A rough convention: under 2 is a tie, over 10 is decisive.</p>
+</div>
+<div class="warn">
+<p>And the standing condition: <strong>same rows, same <span class="math inline">\(y\)</span>.</strong> Two AICs computed on different samples, or one on <span class="math inline">\(y\)</span> and one on <span class="math inline">\(\log y\)</span>, are not comparable at all — and <code>dropna()</code> silently changes the sample every time you change the column list.</p>
+</div>
 </section>
 <section id="the-table-you-would-actually-publish" class="slide level2 scrollable">
 <h2>The table you would actually publish</h2>
 <p><code>qmib.regtable</code> is R’s <strong>stargazer</strong>, here: one column per model, stars on the coefficients, standard errors beneath, fit statistics at the foot.</p>
-<div id="0c3386ea" class="cell" data-execution_count="8">
+<div id="bdd869ec" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb18-2"><a href></a></span>
 <span id="cb18-3"><a href></a>d2 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>])</span>
@@ -1988,7 +2046,7 @@ Standard errors in parentheses.
 <p>The automated alternative — <strong>stepwise selection</strong>, which adds and drops predictors by criterion until nothing improves — is a <em>selection procedure</em>, not a check on a fit. Teaching it beside Cook’s distance would imply it belongs to model checking.</p>
 </div>
 <p>Here it is, so you know what it does. Forward selection: start from the intercept, add whichever candidate lowers AIC most, stop when none does.</p>
-<div id="770afbeb" class="cell" data-execution_count="9">
+<div id="9e6d006b" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a>candidates <span class="op">=</span> [<span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;population&quot;</span>,</span>
 <span id="cb20-2"><a href></a>              <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;prod_growth&quot;</span>]</span>
 <span id="cb20-3"><a href></a>d3 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>] <span class="op">+</span> candidates)</span>
