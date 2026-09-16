@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***, and its replication package
-([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at:
-
-```text
-09-structural-equation-modelling/data/replication/
-```
+The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***. Its replication package ([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at `09-structural-equation-modelling/data/replication/`.
 
 The session's own dataset, for comparison:
 

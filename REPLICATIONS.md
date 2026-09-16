@@ -23,7 +23,7 @@ actually does.
 | 02 · Exploratory data analysis | Fraiberger et al. (2021), *Media sentiment and international asset prices* · [article](https://doi.org/10.1016/j.jinteco.2021.103526) | [10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF) | Profile the sentiment index — centre, spread, shape, thresholds tested — then fit the paper's simplest return regression and state the slope in units. |
 | 03 · Regression diagnostics | Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity* · [article](https://doi.org/10.1080/00103624.2024.2336573) | [10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP) | Reproduce one predictive regression, then diagnose it: residuals versus fitted, scale–location, leverage and Cook's distance. Which conclusions survive? |
 | 04 · Logistic regression | Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks* · [article](https://doi.org/10.1371/journal.pone.0224194) | [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7) | Reproduce one classification result as a logistic model; interpret the odds ratios in words and test one nested comparison. |
-| 05 · Regularisation | Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee* · [article](https://doi.org/10.1007/s10994-016-5578-4) | [10.7910/DVN/QJEUKR](https://doi.org/10.7910/DVN/QJEUKR) | Reproduce one sparse-model comparison on the selected train/test files; compare lasso, ridge and elastic net, and report what survives at $\lambda_{1se}$. |
+| 05 · Regularisation | Blonigen & Piger (2014), *Determinants of foreign direct investment* · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704) | No package published — rebuilt by `scripts/build_fdi_determinants.py` from OECD, CEPII, World Bank and Freedom House; load with `qmib.load("fdi")` | The paper runs Bayesian model averaging over 56 candidate determinants of bilateral FDI and finds about sixteen survive. Refit the same 56 for 2019 with lasso, ridge and elastic net, and say which of its conclusions still hold. |
 | 06 · Panel data and interactions | Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity* · [article](https://doi.org/10.1162/REST_a_00095) | [10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD) | Reproduce one firm-productivity regression; refit it as a panel with fixed and then random effects, and say which you would report. |
 | 07 · PCA and factor analysis | Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models* · [article](https://doi.org/10.1162/REST_a_00614) | [10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM) | Reproduce one factor figure; rebuild the first components yourself, defend the number retained, and interpret the loadings. |
 | 08 · KNN and bias–variance | Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling* · [article](https://doi.org/10.1080/00103624.2025.2454015) | [10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW) | Reproduce the full-versus-reduced comparison, then fit KNN against the paper's random forest. Choose $k$ by cross-validation and say whether flexibility earned its keep. |
@@ -42,8 +42,9 @@ Desktop/quantitative-methods/NN-session-name/data/replication/
 Keep the authors' folder structure and README. Large downloads belong in the git-ignored `data/`
 folder, never inside a practice script. The analysis should run locally after the download.
 
-The Session 05 package is especially large. Download only the selected train/test files named in the
-pre-session instructions (about 48 MB), not the entire deposit.
+Session 05 is the exception: its authors published no replication package, so the course rebuilt their
+design from the sources the paper names. It needs no download — `qmib.load("fdi")` reads a file committed
+to the repository. `scripts/build_fdi_determinants.py` documents every source and every substitution.
 
 If command-line download is useful, Dataverse also exposes a dataset endpoint:
 

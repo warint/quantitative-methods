@@ -37,9 +37,9 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
 **Harvard Dataverse: [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)**
 

@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity***, and its replication package
-([10.7910/DVN/PIAZWN](https://doi.org/10.7910/DVN/PIAZWN)) should already be unzipped at:
-
-```text
-11-causal-inference-did/data/replication/
-```
+The paper is **Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity***. Its replication package ([10.7910/DVN/PIAZWN](https://doi.org/10.7910/DVN/PIAZWN)) should already be unzipped at `11-causal-inference-did/data/replication/`.
 
 The session's own dataset, for comparison:
 

@@ -28,10 +28,11 @@ format:
 
 1. What to do, and how long it takes
 2. Read the paper
-3. Get BOTH datasets
-4. The course data
-5. Self-check, and what the session will ask of you
-6. Before you run anything
+3. What the paper found
+4. Get both datasets
+5. Your own angle
+6. Self-check, and what the session will ask of you
+7. Before you run anything
 
 ## What session 5 is for {.scrollable}
 ::::: columns
@@ -62,7 +63,7 @@ format:
 
 ### The international business
 
-- Work with more candidate predictors than countries
+- Choose among 56 candidate determinants of bilateral FDI
 - Say why a variable the lasso dropped is not thereby irrelevant
 - Report a penalised model honestly, including what selection did
 
@@ -83,7 +84,7 @@ format:
 | | | |
 |---|---|---|
 | **1** | Read the paper | 45–60 min |
-| **2** | Get **both** datasets — the paper's, and your own angle | 10 min |
+| **2** | Load **both** datasets — the paper's, and your own angle | 10 min |
 | **3** | Attempt the self-check | 15 min |
 
 ::: {.warn}
@@ -93,11 +94,17 @@ machine.
 
 ## 1 · Read the paper
 
-**Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee***
+**Blonigen & Piger (2014), *Determinants of foreign direct investment*, Canadian Journal of
+Economics 47(3), 775–812**
 
 ::: {.muted}
-[Read the article](https://doi.org/10.1007/s10994-016-5578-4)
+[Read the article](https://doi.org/10.1111/caje.12091) ·
+free preprint: [NBER w16704](https://www.nber.org/papers/w16704)
 :::
+
+Empirical studies of FDI disagree about which variables belong in the regression. Blonigen and
+Piger collect **56 candidate determinants**, run every model, and ask which variables survive.
+About sixteen do.
 
 Read for the **argument**, not for coverage. Annotate four things:
 
@@ -108,49 +115,71 @@ Read for the **argument**, not for coverage. Annotate four things:
 | **3** | The strongest single piece of evidence |
 | **4** | One limitation you would raise as a referee |
 
-## 2 · Get BOTH datasets
+::: {.check}
+Two tables carry the paper. **Table 1** shows eight prior studies disagreeing about what to
+include — that is the problem. **Table 3** is the answer: 56 variables, an inclusion probability
+for each. Read those two before anything else.
+:::
+
+## What the paper found
+
+Of 56 candidates, the ones that survive (log-levels, inclusion probability ≥ 85%):
+
+::: {.tight}
+- **Gravity** — parent GDP, host GDP, distance
+- **Cultural distance** — common official language, colonial relationship
+- **Trade agreements** — regional trade agreement, customs union
+- **Income and endowments** — parent GDP per capita, host skill level
+:::
+
+And the ones that do not:
+
+::: {.tight}
+- host **business costs**, host **communications infrastructure**,
+  host **financial depth**, host **institutions** — the variables a great many
+  published FDI papers lean on
+:::
 
 ::: {.warn}
-The practice uses two: the **paper's data**, to reproduce one of its results, and **your own
-angle**, to apply the method. Have both before you arrive.
+"Many covariates found significant by previous studies are not robust." That sentence is the
+paper, and it is also the reason this session exists.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
-
-::: {.step}
-[10.7910/DVN/QJEUKR](https://doi.org/10.7910/DVN/QJEUKR)
-:::
-
-Download it from the terminal — no Dataverse account, no browser. From the repository root:
-
-**macOS and Linux**
-
-```bash
-mkdir -p 05-ridge-lasso-elastic-net/data/replication && cd 05-ridge-lasso-elastic-net/data/replication
-curl -L -o replication.zip \
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR"
-unzip -q replication.zip && rm replication.zip && cd -
-```
-
-**Windows PowerShell**
-
-```powershell
-mkdir 05-ridge-lasso-elastic-net/data/replication; cd 05-ridge-lasso-elastic-net/data/replication
-curl.exe -L -o replication.zip `
-  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR"
-Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
-```
+## 2 · Get both datasets
 
 ::: {.warn}
-`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
-structure — do not tidy it.
+The practice uses two: the **paper's data**, to test its result, and **your own angle**, to
+apply the method. Have both before you arrive.
 :::
 
-## 2b · The course data
+**a) The paper's data, rebuilt**
+
+The authors published no replication package — the paper says only that a list of sources is
+available on request. So the course rebuilt their design from the three sources they name
+(CEPII's gravity database, the World Development Indicators, the Penn World Tables) plus the
+OECD for the dependent variable, for **2019** instead of their 2000.
 
 ```python
 import qmib
 
+fdi = qmib.load("fdi")
+print(fdi.shape)          # 7,051 directed country pairs, 56 candidates
+```
+
+::: {.check}
+Everything in it is real. `scripts/build_fdi_determinants.py` is the script that built it, and
+the [data dictionary](../../data/spine/dictionaries/S05-fdi.md) names every source and every
+place the rebuild departs from the paper.
+:::
+
+::: {.muted}
+Because the year is different, the practice is a **question**, not an arithmetic check: do the
+determinants that held in 2000 still hold two decades on?
+:::
+
+## 2b · Your own angle
+
+```python
 core = qmib.load("core")                # the spine, shared by every group
 mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
@@ -158,8 +187,8 @@ print(core.shape, mine.shape)
 ```
 
 ::: {.check}
-Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
-whatever the room's wifi is doing.
+Run this **before** you arrive. It reads from the repository and caches as parquet, so the
+practice works whatever the room's wifi is doing.
 :::
 
 ::: {.warn}
@@ -168,7 +197,7 @@ whatever the room's wifi is doing.
 :::
 
 ::: {.muted}
-A wide slice of the spine — more candidate indicators than usable rows · everything available: `qmib.catalog()`
+Everything available: `qmib.catalog()`
 :::
 
 ## 3 · Self-check, and what the session will ask of you
@@ -176,9 +205,11 @@ A wide slice of the spine — more candidate indicators than usable rows · ever
 Answer these on paper. If you cannot, that is what the lecture is for.
 
 ::: {.tight}
-1. In one sentence: what does this session's method let you claim that the previous one did not?
-2. What must be true of your data for it to apply?
-3. Which claim in the paper rests on this method — and how hard does it lean on it?
+1. The paper runs every one of $2^{56}$ models. Why can you not simply run the regression with
+   all 56 variables in it and read the t-statistics?
+2. Two candidate determinants are correlated at 0.97 and both matter. What will the lasso do?
+3. The paper reports that host institutions have a low inclusion probability. Does that mean
+   institutions do not affect FDI?
 :::
 
 By the end of the session you should be able to:
@@ -193,8 +224,8 @@ By the end of the session you should be able to:
 :::
 
 ::: {.get}
-**Arrive with:** the paper read and annotated · the replication package unzipped ·
-`qmib.load()` run at least once · your self-check answers on paper.
+**Arrive with:** the paper read and annotated · `qmib.load("fdi")` run at least once ·
+your own angle loaded · your self-check answers on paper.
 :::
 
 ## Before you run anything

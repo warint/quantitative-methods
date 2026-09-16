@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling***, and its replication package
-([10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW)) should already be unzipped at:
-
-```text
-08-knn-and-bias-variance/data/replication/
-```
+The paper is **Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling***. Its replication package ([10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW)) should already be unzipped at `08-knn-and-bias-variance/data/replication/`.
 
 The session's own dataset, for comparison:
 

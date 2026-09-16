@@ -24,6 +24,42 @@ from course_spec import (COHORT, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
 
 
+def _paper_data_block(s):
+    """The 'where the paper's data comes from' block.
+
+    Most sessions point at a Harvard Dataverse deposit. Session 05's authors
+    published none, so the course rebuilt their design from the sources the
+    paper names and commits the result; there is nothing to download.
+    """
+    if s.get("dataverse"):
+        return (
+            f"**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**\n\n"
+            "Download it once, and unzip it here — the folder is git-ignored, so nothing "
+            "large is committed:\n\n"
+            f"```text\n{s['dir']}/data/replication/\n```\n\n"
+            "Keep the authors' own folder structure and README."
+        )
+    return (
+        "The authors published **no replication package**. The course rebuilt their design "
+        "from the sources the paper names, so there is nothing to download:\n\n"
+        f"```python\nimport qmib\n\ndata = qmib.load(\"{s['dataset']}\")\n```\n\n"
+        "`scripts/build_fdi_determinants.py` documents every source and every substitution."
+    )
+
+
+def _paper_data_pointer(s):
+    """One sentence saying where the paper's data is, for the practice page."""
+    if s.get("dataverse"):
+        return (
+            f"Its replication package ([{s['dataverse']}](https://doi.org/{s['dataverse']})) "
+            f"should already be unzipped at `{s['dir']}/data/replication/`."
+        )
+    return (
+        f"Its data was rebuilt for the course and needs no download: "
+        f"`qmib.load(\"{s['dataset']}\")`."
+    )
+
+
 def sentence(s):
     """Capitalise the first letter and leave the rest alone.
 
@@ -160,19 +196,11 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**
-
-Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
-
-```text
-{s['dir']}/data/replication/
-```
-
-Keep the authors' own folder structure and README.
+{_paper_data_block(s)}
 
 ### b) The course data, for your own angle
 
@@ -287,12 +315,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **{s['reading']}**, and its replication package
-([{s['dataverse']}](https://doi.org/{s['dataverse']})) should already be unzipped at:
-
-```text
-{s['dir']}/data/replication/
-```
+The paper is **{s['reading']}**. {_paper_data_pointer(s)}
 
 The session's own dataset, for comparison:
 

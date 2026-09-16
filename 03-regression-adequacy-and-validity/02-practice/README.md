@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity***, and its replication package
-([10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)) should already be unzipped at:
-
-```text
-03-regression-adequacy-and-validity/data/replication/
-```
+The paper is **Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity***. Its replication package ([10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)) should already be unzipped at `03-regression-adequacy-and-validity/data/replication/`.
 
 The session's own dataset, for comparison:
 

@@ -91,10 +91,13 @@ SPINE_FILES = {
     "angle_d_product": "angle_d_product.parquet",
     "angle_e_centralbank": "angle_e_centralbank.parquet",
     "angle_e_national": "angle_e_national.parquet",
+    "fdi": "fdi_determinants.parquet",
 }
 
 DESCRIPTIONS = {
     "core": "European panel: GDP, population, employment, productivity, investment",
+    "fdi": "Bilateral FDI positions, 2019, with 56 candidate determinants "
+           "(OECD, CEPII gravity, World Bank, Freedom House) — Session 05",
     "loans": "Lending Club — 9,578 three-year loans, FICO and default",
     "redwines": "Portuguese red wines — 1,599 bottles, physico-chemical measures",
     "hsbdemo": "High school programme choice — 200 students (multinomial)",

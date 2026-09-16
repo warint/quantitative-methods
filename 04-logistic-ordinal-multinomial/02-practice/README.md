@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks***, and its replication package
-([10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)) should already be unzipped at:
-
-```text
-04-logistic-ordinal-multinomial/data/replication/
-```
+The paper is **Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks***. Its replication package ([10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)) should already be unzipped at `04-logistic-ordinal-multinomial/data/replication/`.
 
 The session's own dataset, for comparison:
 

@@ -28,14 +28,15 @@ format:
 
 1. Ninety minutes
 2. Before you start
-3. Reproduce — 20 min
-4. Apply to your own angle — 35 min
-5. Break one assumption — 15 min
-6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
-10. After class, if you want it
+3. Test the paper — 25 min
+4. What to look for
+5. Apply to your own angle — 30 min
+6. Break one assumption — 15 min
+7. Write it down — 20 min
+8. Submitting
+9. What loses marks
+10. Two-minute report
+11. After class, if you want it
 
 ## What session 5 is for {.scrollable}
 ::::: columns
@@ -66,7 +67,7 @@ format:
 
 ### The international business
 
-- Work with more candidate predictors than countries
+- Choose among 56 candidate determinants of bilateral FDI
 - Say why a variable the lasso dropped is not thereby irrelevant
 - Report a penalised model honestly, including what selection did
 
@@ -99,8 +100,8 @@ assumed.
 
 | | | |
 |---|---|---|
-| **00–20** | Reproduce | one result from the paper you read |
-| **20–55** | Apply | the method, to **your own angle** |
+| **00–25** | Test the paper | on the same design, two decades later |
+| **25–55** | Apply | the method, to **your own angle** |
 | **55–70** | Break | one assumption, deliberately |
 | **70–90** | Write, and report | 250 words, then two minutes to the room |
 
@@ -127,30 +128,54 @@ PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
 The git log is the participation record. It is not a formality.
 :::
 
-## 1 · Reproduce — 20 min
+## 1 · Test the paper — 25 min
 
-Take the result the paper rests on, and reproduce it. The package you downloaded is at
-`05-ridge-lasso-elastic-net/data/replication/`.
+Blonigen and Piger ran Bayesian model averaging over 56 candidate determinants of bilateral FDI
+in **2000**, and found about sixteen that mattered. You have the same 56 candidates for **2019**.
 
 ```python
-import qmib
+import numpy as np, qmib
 
-data = qmib.load("core")     # the session's own data, for comparison
+fdi = qmib.load("fdi")
+cov = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
+
+d = fdi[fdi.fdi_stock_musd > 0].dropna(subset=cov)   # the log-levels sample
+y = np.log(d.fdi_stock_musd)
 ```
 
+::: {.step}
+Fit the lasso with $\lambda$ chosen by cross-validation. Compare **what it keeps** with the
+paper's table 3. Which of their survivors survive for you? Which of their rejects come back?
+:::
+
+::: {.warn}
+Standardise inside the pipeline, not before the split. A penalty on $\beta_j$ is otherwise a
+penalty on your choice of units.
+:::
+
 ::: {.muted}
-Paper: Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee* · [10.7910/DVN/QJEUKR](https://doi.org/10.7910/DVN/QJEUKR)
+Paper: Blonigen & Piger (2014), *Determinants of foreign direct investment*, CJE 47(3) ·
+[10.1111/caje.12091](https://doi.org/10.1111/caje.12091) ·
+data: [dictionary](../../data/spine/dictionaries/S05-fdi.md)
+:::
+
+## What to look for
+
+::: {.tight}
+- The paper's **gravity block** — parent GDP, host GDP, distance — should be immovable. If it is
+  not, something is wrong with your pipeline, not with the paper.
+- The paper found **host institutions** near zero. Check yours.
+- Watch **`host_is_tax_haven`**. The paper gave it an inclusion probability of 4%. Look at what
+  it does in 2019, and think about why.
 :::
 
 ::: {.check}
-A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.
+A result that **disagrees** with the paper and is diagnosed earns full marks. One you do not
+attempt earns none. "It did not work" is not a diagnosis: where did it stop, and what did you
+check?
 :::
 
-::: {.muted}
-"It did not work" is not a diagnosis. Where did it stop, and what did you check?
-:::
-
-## 2 · Apply to your own angle — 35 min
+## 2 · Apply to your own angle — 30 min
 
 ```python
 core = qmib.load("core")
@@ -172,6 +197,12 @@ Every method in this course rests on something.
 ::: {.step}
 Find the assumption this one leans on hardest. Break it **deliberately**. Record what happened to
 your answer.
+:::
+
+::: {.muted}
+Candidates, if you want one: drop the standardisation · refit on a bootstrap resample and see
+whether the selected set is the same · keep the zero-FDI pairs instead of logging them away ·
+swap the lasso for the elastic net and watch the correlated pairs come back together.
 :::
 
 ::: {.check}
@@ -202,7 +233,8 @@ git push -u origin group-XX
 ```
 
 ::: {.get}
-**Deliverable.** A penalised fit on your own angle: the path, the chosen $\lambda$, what survived, and what that does not license you to claim.
+**Deliverable.** A penalised fit on your own angle: the path, the chosen $\lambda$, what survived,
+and what that does not license you to claim.
 :::
 
 ## What loses marks
@@ -212,7 +244,8 @@ git push -u origin group-XX
 - Standardising before the cross-validation split
 - Reporting the selected set as "the variables that matter"
 - Reporting post-selection p-values with no caveat
-- Presenting a stepwise selection as though the data had chosen it
+- Reading a dropped variable as evidence of no effect
+- Comparing your 2019 result with the paper's 2000 result **as though the samples were the same**
 :::
 
 ::: {.warn}
@@ -246,6 +279,6 @@ being measured** — it is one of the three routes to the participation mark.
 :::
 
 ::: {.warn}
-What **is** required before the next session: the article, its Dataverse package,
+What **is** required before the next session: the article, the session dataset loaded once,
 and the self-check. That is the pre-session deck, not this.
 :::

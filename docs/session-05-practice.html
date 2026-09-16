@@ -1076,8 +1076,9 @@ Thierry Warin, PhD
 <ol type="1">
 <li>Ninety minutes</li>
 <li>Before you start</li>
-<li>Reproduce — 20 min</li>
-<li>Apply to your own angle — 35 min</li>
+<li>Test the paper — 25 min</li>
+<li>What to look for</li>
+<li>Apply to your own angle — 30 min</li>
 <li>Break one assumption — 15 min</li>
 <li>Write it down — 20 min</li>
 <li>Submitting</li>
@@ -1108,7 +1109,7 @@ Thierry Warin, PhD
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
 <ul>
-<li>Work with more candidate predictors than countries</li>
+<li>Choose among 56 candidate determinants of bilateral FDI</li>
 <li>Say why a variable the lasso dropped is not thereby irrelevant</li>
 <li>Report a penalised model honestly, including what selection did</li>
 </ul>
@@ -1143,12 +1144,12 @@ Thierry Warin, PhD
 </colgroup>
 <tbody>
 <tr class="odd">
-<td><strong>00–20</strong></td>
-<td>Reproduce</td>
-<td>one result from the paper you read</td>
+<td><strong>00–25</strong></td>
+<td>Test the paper</td>
+<td>on the same design, two decades later</td>
 </tr>
 <tr class="even">
-<td><strong>20–55</strong></td>
+<td><strong>25–55</strong></td>
 <td>Apply</td>
 <td>the method, to <strong>your own angle</strong></td>
 </tr>
@@ -1179,24 +1180,41 @@ Thierry Warin, PhD
 <p>PowerShell’s <code>mkdir</code> creates the intermediate folders already, and rejects <code>-p</code>. The git log is the participation record. It is not a formality.</p>
 </div>
 </section>
-<section id="reproduce-20-min" class="slide level2">
-<h2>1 · Reproduce — 20 min</h2>
-<p>Take the result the paper rests on, and reproduce it. The package you downloaded is at <code>05-ridge-lasso-elastic-net/data/replication/</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> qmib</span>
+<section id="test-the-paper-25-min" class="slide level2">
+<h2>1 · Test the paper — 25 min</h2>
+<p>Blonigen and Piger ran Bayesian model averaging over 56 candidate determinants of bilateral FDI in <strong>2000</strong>, and found about sixteen that mattered. You have the same 56 candidates for <strong>2019</strong>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np, qmib</span>
 <span id="cb3-2"><a href></a></span>
-<span id="cb3-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)     <span class="co"># the session&#39;s own data, for comparison</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="muted">
-<p>Paper: Frandi et al. (2016), <em>Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee</em> · <a href="https://doi.org/10.7910/DVN/QJEUKR">10.7910/DVN/QJEUKR</a></p>
+<span id="cb3-3"><a href></a>fdi <span class="op">=</span> qmib.load(<span class="st">&quot;fdi&quot;</span>)</span>
+<span id="cb3-4"><a href></a>cov <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> fdi.columns <span class="cf">if</span> c <span class="kw">not</span> <span class="kw">in</span> (<span class="st">&quot;parent&quot;</span>, <span class="st">&quot;host&quot;</span>, <span class="st">&quot;year&quot;</span>, <span class="st">&quot;fdi_stock_musd&quot;</span>)]</span>
+<span id="cb3-5"><a href></a></span>
+<span id="cb3-6"><a href></a>d <span class="op">=</span> fdi[fdi.fdi_stock_musd <span class="op">&gt;</span> <span class="dv">0</span>].dropna(subset<span class="op">=</span>cov)   <span class="co"># the log-levels sample</span></span>
+<span id="cb3-7"><a href></a>y <span class="op">=</span> np.log(d.fdi_stock_musd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="step">
+<p>Fit the lasso with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Compare <strong>what it keeps</strong> with the paper’s table 3. Which of their survivors survive for you? Which of their rejects come back?</p>
 </div>
-<div class="check">
-<p>A failed reproduction that you <strong>diagnose</strong> earns full marks. One you do not attempt earns none.</p>
+<div class="warn">
+<p>Standardise inside the pipeline, not before the split. A penalty on <span class="math inline">\(\beta_j\)</span> is otherwise a penalty on your choice of units.</p>
 </div>
 <div class="muted">
-<p>“It did not work” is not a diagnosis. Where did it stop, and what did you check?</p>
+<p>Paper: Blonigen &amp; Piger (2014), <em>Determinants of foreign direct investment</em>, CJE 47(3) · <a href="https://doi.org/10.1111/caje.12091">10.1111/caje.12091</a> · data: <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/S05-fdi.md">dictionary</a></p>
 </div>
 </section>
-<section id="apply-to-your-own-angle-35-min" class="slide level2">
-<h2>2 · Apply to your own angle — 35 min</h2>
+<section id="what-to-look-for" class="slide level2">
+<h2>What to look for</h2>
+<div class="tight">
+<ul>
+<li>The paper’s <strong>gravity block</strong> — parent GDP, host GDP, distance — should be immovable. If it is not, something is wrong with your pipeline, not with the paper.</li>
+<li>The paper found <strong>host institutions</strong> near zero. Check yours.</li>
+<li>Watch <strong><code>host_is_tax_haven</code></strong>. The paper gave it an inclusion probability of 4%. Look at what it does in 2019, and think about why.</li>
+</ul>
+</div>
+<div class="check">
+<p>A result that <strong>disagrees</strong> with the paper and is diagnosed earns full marks. One you do not attempt earns none. “It did not work” is not a diagnosis: where did it stop, and what did you check?</p>
+</div>
+</section>
+<section id="apply-to-your-own-angle-30-min" class="slide level2">
+<h2>2 · Apply to your own angle — 30 min</h2>
 <div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)</span>
 <span id="cb4-2"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># your angle — see your dictionary</span></span>
 <span id="cb4-3"><a href></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>], how<span class="op">=</span><span class="st">&quot;inner&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1210,6 +1228,9 @@ Thierry Warin, PhD
 <p>Every method in this course rests on something.</p>
 <div class="step">
 <p>Find the assumption this one leans on hardest. Break it <strong>deliberately</strong>. Record what happened to your answer.</p>
+</div>
+<div class="muted">
+<p>Candidates, if you want one: drop the standardisation · refit on a bootstrap resample and see whether the selected set is the same · keep the zero-FDI pairs instead of logging them away · swap the lasso for the elastic net and watch the correlated pairs come back together.</p>
 </div>
 <div class="check">
 <p>This is the part that carries the marks. A group that shows how its result falls apart understands it; a group that only shows it holding does not yet know.</p>
@@ -1246,7 +1267,8 @@ Thierry Warin, PhD
 <li>Standardising before the cross-validation split</li>
 <li>Reporting the selected set as “the variables that matter”</li>
 <li>Reporting post-selection p-values with no caveat</li>
-<li>Presenting a stepwise selection as though the data had chosen it</li>
+<li>Reading a dropped variable as evidence of no effect</li>
+<li>Comparing your 2019 result with the paper’s 2000 result <strong>as though the samples were the same</strong></li>
 </ul>
 </div>
 <div class="warn">
@@ -1284,7 +1306,7 @@ Thierry Warin, PhD
 <p>Optional, never a prerequisite for the next lecture, and never marked for correctness. A completed report counts because <strong>attempting it is the engagement being measured</strong> — it is one of the three routes to the participation mark.</p>
 </div>
 <div class="warn">
-<p>What <strong>is</strong> required before the next session: the article, its Dataverse package, and the self-check. That is the pre-session deck, not this.</p>
+<p>What <strong>is</strong> required before the next session: the article, the session dataset loaded once, and the self-check. That is the pre-session deck, not this.</p>
 </div>
 
 </section></section>

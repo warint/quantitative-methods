@@ -146,11 +146,12 @@ SESSIONS = {
             "Choose between lasso and elastic net from the **correlation structure**",
             "Report $\\lambda$ by cross-validation, and know why post-selection inference is invalid",
         ],
-        reading="Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee*",
-        reading_url="https://doi.org/10.1007/s10994-016-5578-4",
-        dataverse="10.7910/DVN/QJEUKR",
-        dataset="core",
-        dataset_note="a wide slice of the spine — more candidate indicators than usable rows",
+        reading="Blonigen & Piger (2014), *Determinants of foreign direct investment*, Canadian Journal of Economics 47(3)",
+        reading_url="https://doi.org/10.1111/caje.12091",
+        dataverse=None,           # no package published; rebuilt by scripts/build_fdi_determinants.py
+        dataset="fdi",
+        dataset_note=("56 candidate determinants of bilateral FDI, 2019 — the paper's design "
+                      "rebuilt from OECD, CEPII, World Bank and Freedom House"),
         deliverable=("a penalised fit on your own angle: the path, the chosen $\\lambda$, what "
                      "survived, and what that does not license you to claim"),
         loses_marks=[
@@ -159,6 +160,7 @@ SESSIONS = {
             "Reporting the selected set as \"the variables that matter\"",
             "Reporting post-selection p-values with no caveat",
             "Presenting a stepwise selection as though the data had chosen it",
+            "Reading a dropped variable as evidence of no effect",
         ],
     ),
     "06": dict(
