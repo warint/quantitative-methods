@@ -83,19 +83,23 @@ SESSIONS = {
         title="Regression: Adequacy, Validity, and Robustness",
         short="Regression diagnostics",
         question="You have fitted a regression. Can it be trusted?",
-        methods="least squares, residual diagnostics, leverage, Cook's distance, information criteria",
+        methods="least squares, residual diagnostics, influence and Cook's distance, information criteria",
         theme="Which model would survive a referee?",
         objectives=[
             "Fit a simple and a multiple regression, and state the slope **in units**",
             "Read a **residuals-versus-fitted** plot and say what structure it reveals",
             "Diagnose non-constant variance from a **scale–location** plot",
-            "Compute **leverage** and say which observations have the power to move the line",
-            "Use **Cook's distance** to separate an outlier from an influential point",
-            "Compare candidate models on **AIC**, and say why that is not model selection",
+            "Tell an outlier, a **leverage point** and an **influential point** apart",
+            "Use **Cook's distance** to find the observations that move the answer",
+            "Compare candidate models on **AIC and BIC**, and say why that is not model selection",
         ],
         reading="Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity*",
         reading_url="https://doi.org/10.1080/00103624.2024.2336573",
         dataverse="10.7910/DVN/U5DAEP",
+        data_extra=(
+            "This deposit is **about 220 MB** — much the largest in the course. Start the download "
+            "before you sit down to read, not while the room is waiting for you."
+        ),
         dataset="core",
         dataset_note="the regression fitted at the top of the lecture — GDP per capita on productivity",
         practice_extra="regtable",   # the practice ends with two models to compare

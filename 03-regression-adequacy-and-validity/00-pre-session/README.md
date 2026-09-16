@@ -51,6 +51,8 @@ Download it once, and unzip it here — the folder is git-ignored, so nothing la
 
 Keep the authors' own folder structure and README.
 
+> **Note.** This deposit is **about 220 MB** — much the largest in the course. Start the download before you sit down to read, not while the room is waiting for you.
+
 ### b) The course data, for your own angle
 
 This is what you apply the method to in the second half.

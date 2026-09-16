@@ -30,7 +30,7 @@ establishes that the reading is load-bearing rather than decorative.
 | **25–33** | **Why evaluate at all.** The regression table on screen: every number an estimate, every star a claim. Put the four questions on the board and leave them there for the rest of the hour. |
 | **33–48** | **Adequacy.** RSE and $R^2$ from RSS and TSS, then adjusted $R^2$. Quote the RSE in euros, not the $R^2$ — it is the number a non-specialist can act on. |
 | **48–68** | **Validity.** Residuals-versus-fitted **first**, as the instrument; then linearity, normality and constant variance read off it. Draw the funnel and the curve by hand before showing either. |
-| **68–80** | **Robustness.** Leverage, then Cook's distance. Find the country-year at the top of the spike plot and look it up in front of them — the point is to investigate a row, not to delete it. |
+| **68–80** | **Robustness.** Outlier, leverage point, influential point — three different claims, and the damage is done by a point that is two of them at once. That is the argument for Cook's distance. Find the country-year at the top of the spike plot and look it up in front of them — the point is to investigate a row, not to delete it. |
 | **80–90** | **Parsimony.** AIC and BIC as comparisons between models you already wrote down. Say why choosing the model is session 05's problem, and hand off to the practice. |
 
 ---

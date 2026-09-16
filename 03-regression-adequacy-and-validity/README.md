@@ -27,9 +27,9 @@ By the end of this session you should be able to:
 - Fit a simple and a multiple regression, and state the slope **in units**
 - Read a **residuals-versus-fitted** plot and say what structure it reveals
 - Diagnose non-constant variance from a **scale–location** plot
-- Compute **leverage** and say which observations have the power to move the line
-- Use **Cook's distance** to separate an outlier from an influential point
-- Compare candidate models on **AIC**, and say why that is not model selection
+- Tell an outlier, a **leverage point** and an **influential point** apart
+- Use **Cook's distance** to find the observations that move the answer
+- Compare candidate models on **AIC and BIC**, and say why that is not model selection
 
 ---
 
@@ -38,7 +38,7 @@ By the end of this session you should be able to:
 | Phase | When | What | Where |
 |---|---|---|---|
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: least squares, residual diagnostics, leverage, Cook's distance, information criteria | [`01-lecture/`](01-lecture/README.md) |
+| **First half** (~90 min) | In class | Lecture: least squares, residual diagnostics, influence and Cook's distance, information criteria | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 | **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-03.html) |
 
