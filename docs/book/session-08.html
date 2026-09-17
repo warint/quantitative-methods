@@ -358,7 +358,7 @@ window.Quarto = {
 <p>Every method so far has assumed a form. Least squares assumes a line, logistic regression assumes a curve, and the penalties in chapter 5 assume the line is worth shrinking toward. Each assumption is a claim that can be wrong, and chapter 3 was about detecting when it is.</p>
 <p>Nearest neighbours makes no such claim. To predict for a new observation, find the <span class="math inline">\(k\)</span> observations in the training data closest to it, and average their outcomes:</p>
 <p><span class="math display">\[
-\hat f(x_0) \;=\; \frac{1}{k} \sum_{i \in N_k(x_0)} y_i ,
+\hat f(x_0) \thickspace=\thickspace \frac{1}{k} \sum_{i \in N_k(x_0)} y_i ,
 \]</span></p>
 <p>where <span class="math inline">\(N_k(x_0)\)</span> is the set of the <span class="math inline">\(k\)</span> nearest training points. For a classification problem, take the majority vote instead. There is no fitting stage, no coefficient, no optimisation — the training data <em>is</em> the model.</p>
 <p>This looks like getting something for nothing, and the chapter is about what it actually costs. The method is not assumption-free; it has simply moved its assumption. Averaging the neighbours presumes that the function is smooth enough that points close in <span class="math inline">\(x\)</span> have similar <span class="math inline">\(y\)</span>, and it presumes you know what “close” means. Both presumptions can fail badly, and neither shows up as a diagnostic plot.</p>
@@ -381,11 +381,11 @@ window.Quarto = {
 <p>Take a target <span class="math inline">\(y = f(x) + \varepsilon\)</span> with <span class="math inline">\(\operatorname{E}[\varepsilon] = 0\)</span> and <span class="math inline">\(\operatorname{Var}(\varepsilon) = \sigma^2\)</span>. Let <span class="math inline">\(\hat f\)</span> be an estimate built from a random training sample. The expected squared error at a point <span class="math inline">\(x_0\)</span>, averaged over training samples and over the noise in a new observation, splits into three:</p>
 <p><span class="math display">\[
 \operatorname{E}\big[(y_0 - \hat f(x_0))^2\big]
-\;=\;
+\thickspace=\thickspace
 \underbrace{\sigma^2}_{\text{irreducible}}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\big(\operatorname{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\operatorname{Var}\big(\hat f(x_0)\big)}_{\text{variance}} .
 \]</span></p>
 <p>Chapter 5 used the last two terms to argue for a biased estimator. Here all three matter, and the first is the one that makes the others meaningful: because <span class="math inline">\(\sigma^2 &gt; 0\)</span>, the total error has a floor, and the <em>only</em> quantity a modeller controls is how the remaining budget is split between bias and variance.</p>
@@ -489,7 +489,7 @@ Figure&nbsp;8.1: The decomposition, measured. Four hundred training samples are 
 <h2 data-number="8.4" class="anchored" data-anchor-id="distance-is-not-given-it-is-chosen"><span class="header-section-number">8.4</span> Distance is not given, it is chosen</h2>
 <p>Nearest neighbours needs a definition of “near”. The default is Euclidean distance,</p>
 <p><span class="math display">\[
-d(x_0, x_i) \;=\; \sqrt{\textstyle\sum_{j=1}^{p} (x_{0j} - x_{ij})^2},
+d(x_0, x_i) \thickspace=\thickspace \sqrt{\textstyle\sum_{j=1}^{p} (x_{0j} - x_{ij})^2},
 \]</span></p>
 <p>and that formula adds squared differences measured in different units. A difference of one euro and a difference of one index point are treated as identical quantities. In practice the variable with the largest numerical range determines the neighbours entirely, and every other predictor is decoration.</p>
 <p>This is the third time this book has reached the same conclusion — PCA in chapter 7, the penalties in chapter 5, and now here — and the reason is always the same: any method that compares magnitudes across variables must first make them comparable. <strong>Standardise before computing a distance.</strong> The alternative is a method whose answer depends on whether you recorded revenue in dollars or millions of dollars.</p>

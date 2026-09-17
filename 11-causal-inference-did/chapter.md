@@ -49,7 +49,7 @@ before the germ theory of disease existed — he had no mechanism, only a design
 ## The two differences
 
 Let $\bar Y_{g,t}$ be the average outcome for group $g$ in period $t$, with
-$g \in \{\text{treated}, \text{control}\}$ and $t \in \{\text{pre}, \text{post}\}$.
+$g \in \lbrace\text{treated}, \text{control}\rbrace$ and $t \in \lbrace\text{pre}, \text{post}\rbrace$.
 The estimator is
 
 $$
@@ -99,7 +99,7 @@ The two-by-two table is easier to work with as a regression, and the regression
 form is one you have already met. With unit and period fixed effects,
 
 $$
-Y_{it} \;=\; \alpha_i + \gamma_t + \delta \, D_{it} + \varepsilon_{it},
+Y_{it} \thickspace=\thickspace \alpha_i + \gamma_t + \delta \thinspace D_{it} + \varepsilon_{it},
 $$
 
 where $D_{it}$ is 1 when unit $i$ is treated in period $t$, the coefficient

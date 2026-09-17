@@ -91,7 +91,7 @@ what is absent — that nothing else in the model measures it.
 The corresponding equation for indicator $j$ of construct $\xi$ is
 
 $$
-x_j \;=\; \lambda_j \xi + \delta_j ,
+x_j \thickspace=\thickspace \lambda_j \xi + \delta_j ,
 $$
 
 with $\lambda_j$ the loading and $\delta_j$ everything specific to that
@@ -117,7 +117,7 @@ possible to the observed $S$. The discrepancy is what all the fit statistics
 measure, and the $\chi^2$ test is a formal test of
 
 $$
-H_0: \; \Sigma = \Sigma(\theta) ,
+H_0: \thickspace \Sigma = \Sigma(\theta) ,
 $$
 
 that is, of *exact* fit. Its degrees of freedom are the number of distinct

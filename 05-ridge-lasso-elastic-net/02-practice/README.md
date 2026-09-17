@@ -43,7 +43,7 @@ before using the library, and you will confront the stability question head-on.
 1. Apply the FRED-MD transformation codes to obtain stationary series. Document what you did to each code. Handle the resulting missing values explicitly.
 2. Build the design: predict industrial production growth $h$ = 3 months ahead from all available series at $t$ (plus 3 lags). Report $n$ and $p$.
 3. Implement `soft_threshold(rho, lam)` and a coordinate-descent lasso in ~30 lines. Verify against `sklearn.linear_model.Lasso` on a small subset. Report the max coefficient difference.
-4. Fit ridge, lasso, and elastic net over a grid of $\alpha \in \{0, 0.25, 0.5, 0.75, 1\}$ and 100 values of $\lambda$, using **rolling-origin** CV (Session 4 rules apply). Plot the CV surface.
+4. Fit ridge, lasso, and elastic net over a grid of $\alpha \in \lbrace0, 0.25, 0.5, 0.75, 1\rbrace$ and 100 values of $\lambda$, using **rolling-origin** CV (Session 4 rules apply). Plot the CV surface.
 5. Report both $\lambda_{\min}$ and $\lambda_{1se}$ models. How many non-zero coefficients does each retain? Name them.
 6. **Stability check.** Bootstrap the sample 200 times. For each predictor, record the share of bootstrap replicates in which it is selected. Plot the selection frequencies for lasso vs. elastic net. Which is more stable?
 7. Plot effective degrees of freedom against $\lambda$ for ridge using the SVD formula. Confirm it decreases from $p$ toward 0.

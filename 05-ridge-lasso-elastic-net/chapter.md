@@ -118,9 +118,9 @@ $\theta$:
 
 $$
 \operatorname{E}\big[(\hat\theta - \theta)^2\big]
-\;=\;
+\thickspace=\thickspace
 \underbrace{\big(\operatorname{E}[\hat\theta] - \theta\big)^2}_{\text{bias}^2}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\operatorname{Var}(\hat\theta)}_{\text{variance}} .
 $$
 
@@ -152,15 +152,15 @@ coefficients [@hoerl1970]:
 
 $$
 \hat\beta^{\text{ridge}}
-\;=\;
-\arg\min_\beta \; \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_2^2,
+\thickspace=\thickspace
+\arg\min_\beta \thickspace \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_2^2,
 \qquad \lambda \ge 0 .
 $$
 
 Unlike the lasso below, this has a closed form, and the form is the argument:
 
 $$
-\hat\beta^{\text{ridge}} \;=\; (X^\top X + \lambda I)^{-1} X^\top y .
+\hat\beta^{\text{ridge}} \thickspace=\thickspace (X^\top X + \lambda I)^{-1} X^\top y .
 $$
 
 Compare it to $(X^\top X)^{-1}X^\top y$. The only change is $\lambda I$ added to
@@ -215,8 +215,8 @@ rather than of squares [@tibshirani1996].
 
 $$
 \hat\beta^{\text{lasso}}
-\;=\;
-\arg\min_\beta \; \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_1 .
+\thickspace=\thickspace
+\arg\min_\beta \thickspace \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_1 .
 $$
 
 There is no closed form in general, but there is in the case that explains
@@ -226,7 +226,7 @@ separates into one problem per coefficient, and each has the solution
 
 $$
 \hat\beta_j^{\text{lasso}}
-\;=\;
+\thickspace=\thickspace
 \operatorname{sign}(z_j)\big(|z_j| - \lambda/2\big)_+
 $$
 
@@ -347,7 +347,7 @@ instability returning in a new form.
 Zou and Hastie's elastic net penalises both norms at once [@zou2005]:
 
 $$
-\hat\beta^{\text{EN}} = \arg\min_\beta \;
+\hat\beta^{\text{EN}} = \arg\min_\beta \thickspace
 \lVert y - X\beta\rVert^2
 + \lambda\Big(\alpha \lVert\beta\rVert_1 + \tfrac{1-\alpha}{2}\lVert\beta\rVert_2^2\Big).
 $$

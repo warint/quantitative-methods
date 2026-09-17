@@ -70,7 +70,7 @@ it is the single most informative number on this page, and §2.3 explains what p
 **The sample mean.** For a random variable taking values $x_1,\dots,x_k$ with probabilities
 $p(x_i)$, the mean is
 
-$$\mu = \sum_{i=1}^{k} x_i\, p(x_i).$$
+$$\mu = \sum_{i=1}^{k} x_i\thinspace p(x_i).$$
 
 For a sample of $n$ observations,
 
@@ -107,7 +107,7 @@ Read the ladder. Trimming just 5% from each end pulls the average down by nearly
 and the median sits lower still. **The three summaries disagree, and the direction of the
 disagreement is the finding.**
 
-The **sample quantile** $\tilde q_p$ is the value below which approximately $100p\%$ of the data
+The **sample quantile** $\tilde q_p$ is the value below which approximately $100p$% of the data
 falls. The **percentile** is the same idea read in the other direction — given a value, what
 fraction lies below it.
 
@@ -171,7 +171,7 @@ alike. Shape is measured by two more numbers.
 
 **Sample skewness** — the degree of symmetry:
 
-$$g_1 = \frac{1}{n}\,\frac{\sum_{i=1}^{n}(x_i - \bar{x})^3}{s^3}$$
+$$g_1 = \frac{1}{n}\thinspace\frac{\sum_{i=1}^{n}(x_i - \bar{x})^3}{s^3}$$
 
 The cube preserves sign, so $-\infty < g_1 < \infty$ and the sign tells you the direction: positive
 means a long right tail, negative a long left tail. A distribution is **substantially skewed** when
@@ -180,7 +180,7 @@ $$|g_1| > 2\sqrt{6/n}.$$
 
 **Sample excess kurtosis** — the degree of tail thickness:
 
-$$g_2 = \frac{1}{n}\,\frac{\sum_{i=1}^{n}(x_i - \bar{x})^4}{s^4} - 3$$
+$$g_2 = \frac{1}{n}\thinspace\frac{\sum_{i=1}^{n}(x_i - \bar{x})^4}{s^4} - 3$$
 
 The $-3$ makes the normal distribution the zero point. $g_2 > 0$ is **leptokurtic** — a sharper
 peak and heavier tails; $g_2 < 0$ is **platykurtic** — flatter, with thinner tails. The bound is
@@ -368,11 +368,11 @@ the standard deviation *of an estimate*.
 
 #### The Central Limit Theorem
 
-$$\bar X \;\approx\; N\!\left(\mu,\; \frac{\sigma}{\sqrt n}\right)$$
+$$\bar X \thickspace\approx\thickspace N\negthinspace\left(\mu,\thickspace \frac{\sigma}{\sqrt n}\right)$$
 
 As $n$ grows, the standardised sample average
 
-$$z = \frac{\bar X - \mathbb{E}[X]}{\sigma/\sqrt n} = \frac{\sqrt n\,(\bar X - \mathbb{E}[X])}{\sigma}$$
+$$z = \frac{\bar X - \mathbb{E}[X]}{\sigma/\sqrt n} = \frac{\sqrt n\thinspace(\bar X - \mathbb{E}[X])}{\sigma}$$
 
 converges to the standard normal — **whatever the shape of the underlying variable**. That is why
 the normal distribution keeps appearing in a course about data that is mostly not normal: it is not

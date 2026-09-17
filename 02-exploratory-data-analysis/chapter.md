@@ -164,7 +164,7 @@ sample, because a few very rich country-years are pulling it up.
 ::: {.definition}
 [**Sample variance**]{.term} —
 $$
-s^2 \;=\; \frac{1}{n-1}\sum_i (x_i - \bar x)^2 .
+s^2 \thickspace=\thickspace \frac{1}{n-1}\sum_i (x_i - \bar x)^2 .
 $$
 The divisor is $n-1$, not $n$, because the deviations are taken from $\bar x$
 rather than from the true mean $\mu$. $\bar x$ is the value that *minimises*
@@ -379,16 +379,16 @@ matters depends on the question, and the only wrong move is not to check.
 Now fit something. The simplest model relates one variable to one other,
 
 $$
-y_i \;=\; \beta_0 + \beta_1 x_i + \varepsilon_i ,
+y_i \thickspace=\thickspace \beta_0 + \beta_1 x_i + \varepsilon_i ,
 $$
 
 and the least-squares solution in this case has a closed form worth
 memorising, because it says what a slope *is*:
 
 $$
-\hat\beta_1 \;=\; \frac{\operatorname{Cov}(x, y)}{\operatorname{Var}(x)},
+\hat\beta_1 \thickspace=\thickspace \frac{\operatorname{Cov}(x, y)}{\operatorname{Var}(x)},
 \qquad
-\hat\beta_0 \;=\; \bar y - \hat\beta_1 \bar x .
+\hat\beta_0 \thickspace=\thickspace \bar y - \hat\beta_1 \bar x .
 $$
 
 The slope is covariation divided by variation in the predictor: how much $x$ and
@@ -404,9 +404,9 @@ fitted vector. A right angle means Pythagoras:
 
 $$
 \underbrace{\lVert y - \bar y\rVert^2}_{\text{TSS}}
-\;=\;
+\thickspace=\thickspace
 \underbrace{\lVert \hat y - \bar y\rVert^2}_{\text{ESS}}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\lVert y - \hat y\rVert^2}_{\text{RSS}} .
 $$
 
@@ -488,7 +488,7 @@ is tempted to describe an angle as a percentage of anything.
 One predictor is rarely enough, and the extension is mechanical:
 
 $$
-y_i \;=\; \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \dots + \beta_{p-1} x_{p-1,i} + \varepsilon_i .
+y_i \thickspace=\thickspace \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \dots + \beta_{p-1} x_{p-1,i} + \varepsilon_i .
 $$
 
 The interpretation is where the trouble starts. Every textbook says $\beta_1$ is

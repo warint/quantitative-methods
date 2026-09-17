@@ -98,7 +98,7 @@ to trust them.
 Infinitely many straight lines pass through that cloud. We pick the one that makes the vertical
 misses as small as possible — specifically, the one minimising the **sum of squared residuals**:
 
-$$\min_{\beta_0,\, \beta_1} \sum_{i=1}^{n} \big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
+$$\min_{\beta_0,\thinspace \beta_1} \sum_{i=1}^{n} \big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
 
 Why squared, rather than the plain distance? Two reasons a beginner should hold on to. Squaring
 makes every miss positive, so misses above and below cannot cancel out. And it punishes one large

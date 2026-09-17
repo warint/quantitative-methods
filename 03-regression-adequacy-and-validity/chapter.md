@@ -23,7 +23,7 @@ that $X\beta$ is close to $y$. Least squares defines "close" as the sum of
 squared vertical distances, and chooses
 
 $$
-\hat\beta \;=\; \arg\min_{\beta} \; \lVert y - X\beta \rVert^2 .
+\hat\beta \thickspace=\thickspace \arg\min_{\beta} \thickspace \lVert y - X\beta \rVert^2 .
 $$
 
 Squared, rather than absolute, distance is worth pausing on, because the choice
@@ -41,7 +41,7 @@ $X^{\top}X\beta = X^{\top}y$, whose solution — whenever $X^{\top}X$ can be
 inverted — is
 
 $$
-\hat\beta \;=\; (X^{\top}X)^{-1} X^{\top} y .
+\hat\beta \thickspace=\thickspace (X^{\top}X)^{-1} X^{\top} y .
 $$
 
 Every equation in this chapter is something you can execute, and executing it
@@ -87,7 +87,7 @@ returns the same confident four decimal places either way.
 The statistical content arrives only when you attach a model,
 
 $$
-y \;=\; X\beta + \varepsilon ,
+y \thickspace=\thickspace X\beta + \varepsilon ,
 $$
 
 and make claims about $\varepsilon$. The Gauss–Markov theorem says that if the
@@ -283,7 +283,7 @@ a plot.
 Write $\hat y = X\hat\beta$. Substituting the estimator,
 
 $$
-\hat y \;=\; X(X^{\top}X)^{-1}X^{\top} y \;=\; Hy ,
+\hat y \thickspace=\thickspace X(X^{\top}X)^{-1}X^{\top} y \thickspace=\thickspace Hy ,
 $$
 
 where $H = X(X^{\top}X)^{-1}X^{\top}$ is the *hat matrix* — so named because it
@@ -297,7 +297,7 @@ rather than algebraic. $H$ is symmetric ($H = H^{\top}$) and idempotent
 The residual vector is what the projection could not reach,
 
 $$
-e \;=\; y - \hat y \;=\; (I - H)\, y ,
+e \thickspace=\thickspace y - \hat y \thickspace=\thickspace (I - H)\thinspace y ,
 $$
 
 and it is orthogonal to every column of $X$ by construction. That orthogonality
@@ -311,9 +311,9 @@ Now the consequence that governs every diagnostic below. If
 $\operatorname{Var}(\varepsilon) = \sigma^2 I$, then
 
 $$
-\operatorname{Var}(e) \;=\; \sigma^{2}(I - H),
+\operatorname{Var}(e) \thickspace=\thickspace \sigma^{2}(I - H),
 \qquad\text{so}\qquad
-\operatorname{Var}(e_i) \;=\; \sigma^{2}\,(1 - h_{ii}).
+\operatorname{Var}(e_i) \thickspace=\thickspace \sigma^{2}\thinspace(1 - h_{ii}).
 $$
 
 **The residuals do not have constant variance even when the errors do.** An
@@ -324,7 +324,7 @@ wrong thing to plot, and why everything below is built on the *standardised*
 residual
 
 $$
-r_i \;=\; \frac{e_i}{s\sqrt{1 - h_{ii}}},
+r_i \thickspace=\thickspace \frac{e_i}{s\sqrt{1 - h_{ii}}},
 \qquad s^2 = \frac{e^{\top}e}{n-p},
 $$
 
@@ -399,9 +399,9 @@ part it does not,
 
 $$
 \underbrace{\textstyle\sum_i (y_i - \bar y)^2}_{\text{TSS}}
-\;=\;
+\thickspace=\thickspace
 \underbrace{\textstyle\sum_i (\hat y_i - \bar y)^2}_{\text{ESS}}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\textstyle\sum_i e_i^2}_{\text{RSS}},
 \qquad
 R^2 = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}} .
@@ -418,7 +418,7 @@ coefficient of zero. Two corrections are standard.
 ::: {.definition}
 [**Adjusted $R^2$**]{.term} — $R^2$ with a penalty for the parameters spent:
 $$
-R^2_{\text{adj}} \;=\; 1 - \frac{\mathrm{RSS}/(n-p)}{\mathrm{TSS}/(n-1)} .
+R^2_{\text{adj}} \thickspace=\thickspace 1 - \frac{\mathrm{RSS}/(n-p)}{\mathrm{TSS}/(n-1)} .
 $$
 It can decrease when a useless variable is added, which is the point. It is
 still not a model-selection criterion — see AIC below.
@@ -428,7 +428,7 @@ still not a model-selection criterion — see AIC below.
 [**Residual standard error**]{.term} — the typical size of a residual, in the
 units of $y$:
 $$
-\mathrm{RSE} \;=\; s \;=\; \sqrt{\frac{\mathrm{RSS}}{n-p}} .
+\mathrm{RSE} \thickspace=\thickspace s \thickspace=\thickspace \sqrt{\frac{\mathrm{RSS}}{n-p}} .
 $$
 Unlike $R^2$ it is not unitless, which makes it the more honest number to
 report: "typically wrong by 6,000 euros" means something, where "$R^2 = 0.63$"
@@ -485,7 +485,7 @@ which is a rule of thumb and nothing more [@hoaglin1978]. In simple regression i
 has a transparent form,
 
 $$
-h_{ii} \;=\; \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j - \bar x)^2},
+h_{ii} \thickspace=\thickspace \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j - \bar x)^2},
 $$
 
 which says exactly what leverage means: a floor of $1/n$ that everyone gets, plus
@@ -540,8 +540,8 @@ requires combining leverage with the residual.
 when observation $i$ is deleted, scaled to be comparable across observations and
 models:
 $$
-D_i \;=\; \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y_{(i)})}{p\,s^2}
-\;=\; \frac{r_i^{2}}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} .
+D_i \thickspace=\thickspace \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y_{(i)})}{p\thinspace s^2}
+\thickspace=\thickspace \frac{r_i^{2}}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} .
 $$
 :::
 
@@ -707,7 +707,7 @@ misapplied middle of the sandwich with the squared residuals themselves
 $$
 \widehat{\operatorname{Var}}(\hat\beta)
 = (X^{\top}X)^{-1}
-\Big(\textstyle\sum_i e_i^2 \, x_i x_i^{\top}\Big)
+\Big(\textstyle\sum_i e_i^2 \thinspace x_i x_i^{\top}\Big)
 (X^{\top}X)^{-1}.
 $$
 
@@ -829,7 +829,7 @@ expected Kullback–Leibler divergence between the fitted model and the process
 that generated the data, and reduces to
 
 $$
-\mathrm{AIC} \;=\; -2 \log \hat{L} + 2k
+\mathrm{AIC} \thickspace=\thickspace -2 \log \hat{L} + 2k
 $$
 
 for a model with $k$ estimated parameters and maximised likelihood $\hat L$
