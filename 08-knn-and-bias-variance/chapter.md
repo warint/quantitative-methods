@@ -66,20 +66,20 @@ the decomposition below.
 
 ## Where prediction error comes from
 
-Take a target $y = f(x) + \varepsilon$ with $\operatorname{E}[\varepsilon] = 0$
-and $\operatorname{Var}(\varepsilon) = \sigma^2$. Let $\hat f$ be an estimate
+Take a target $y = f(x) + \varepsilon$ with $\mathrm{E}[\varepsilon] = 0$
+and $\mathrm{Var}(\varepsilon) = \sigma^2$. Let $\hat f$ be an estimate
 built from a random training sample. The expected squared error at a point $x_0$,
 averaged over training samples and over the noise in a new observation, splits
 into three:
 
 $$
-\operatorname{E}\big[(y_0 - \hat f(x_0))^2\big]
+\mathrm{E}\big[(y_0 - \hat f(x_0))^2\big]
 \thickspace=\thickspace
 \underbrace{\sigma^2}_{\text{irreducible}}
 \thickspace+\thickspace
-\underbrace{\big(\operatorname{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
+\underbrace{\big(\mathrm{E}[\hat f(x_0)] - f(x_0)\big)^2}_{\text{bias}^2}
 \thickspace+\thickspace
-\underbrace{\operatorname{Var}\big(\hat f(x_0)\big)}_{\text{variance}} .
+\underbrace{\mathrm{Var}\big(\hat f(x_0)\big)}_{\text{variance}} .
 $$
 
 Chapter 5 used the last two terms to argue for a biased estimator. Here all three

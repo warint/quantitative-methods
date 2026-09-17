@@ -289,7 +289,7 @@ independence assumption with independence *between* clusters, allowing arbitrary
 correlation within:
 
 $$
-\widehat{\operatorname{Var}}(\hat\beta)
+\widehat{\mathrm{Var}}(\hat\beta)
 = (X^\top X)^{-1}
 \Big( \sum_{g=1}^{G} X_g^\top e_g e_g^\top X_g \Big)
 (X^\top X)^{-1} .

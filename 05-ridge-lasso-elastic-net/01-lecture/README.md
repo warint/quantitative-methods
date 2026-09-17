@@ -22,7 +22,7 @@ The added $\lambda I$ makes the matrix positive definite for any $\lambda > 0$, 
 Regularisation is not only a bias-variance device; it is what makes the problem well-posed at all.
 
 **What ridge does, in the SVD basis.** With $X = UDV^\top$ and
-$r = \operatorname{rank}(X) \le \min(n,p)$ nonzero singular values:
+$r = \mathrm{rank}(X) \le \min(n,p)$ nonzero singular values:
 
 $$\hat y^{\text{ridge}} = \sum_{j=1}^{r} u_j \frac{d_j^2}{d_j^2 + \lambda} \thinspace u_j^\top y .$$
 
@@ -34,7 +34,7 @@ data are nearly collinear and the OLS coefficient is wildly unstable - are shrun
 Ridge is therefore not a blunt instrument. It is a *targeted* damping of exactly the directions in
 which your data carry little information. The effective degrees of freedom are
 $\mathrm{df}(\lambda) = \sum_{j=1}^{r} d_j^2/(d_j^2+\lambda)$, decreasing smoothly from
-$r = \operatorname{rank}(X)$ to $0$ — not from $p$: when $p > n$ the design has at most $n$
+$r = \mathrm{rank}(X)$ to $0$ — not from $p$: when $p > n$ the design has at most $n$
 independent directions, so effective df is capped however small you make $\lambda$.
 
 **Bias-variance, explicitly.** $\mathrm{Var}(\hat\beta^{\text{ridge}})$ is decreasing in

@@ -91,7 +91,7 @@ y \thickspace=\thickspace X\beta + \varepsilon ,
 $$
 
 and make claims about $\varepsilon$. The Gauss–Markov theorem says that if the
-model is correctly specified, if $\operatorname{E}[\varepsilon \mid X] = 0$, and
+model is correctly specified, if $\mathrm{E}[\varepsilon \mid X] = 0$, and
 if the errors have constant variance and are mutually uncorrelated, then
 $\hat\beta$ is the Best Linear Unbiased Estimator: no other estimator that is
 both linear in $y$ and unbiased has smaller variance. Note what is *not* on that
@@ -308,12 +308,12 @@ is *not* guaranteed is the absence of non-linear structure, which is exactly wha
 you are looking for.
 
 Now the consequence that governs every diagnostic below. If
-$\operatorname{Var}(\varepsilon) = \sigma^2 I$, then
+$\mathrm{Var}(\varepsilon) = \sigma^2 I$, then
 
 $$
-\operatorname{Var}(e) \thickspace=\thickspace \sigma^{2}(I - H),
+\mathrm{Var}(e) \thickspace=\thickspace \sigma^{2}(I - H),
 \qquad\text{so}\qquad
-\operatorname{Var}(e_i) \thickspace=\thickspace \sigma^{2}\thinspace(1 - h_{ii}).
+\mathrm{Var}(e_i) \thickspace=\thickspace \sigma^{2}\thinspace(1 - h_{ii}).
 $$
 
 **The residuals do not have constant variance even when the errors do.** An
@@ -478,7 +478,7 @@ follows it almost exactly, which is another way of saying the line is not being
 constrained by anything else in that region.
 
 Because $H$ projects onto a $p$-dimensional space,
-$\sum_i h_{ii} = \operatorname{tr}(H) = p$, so leverage is a fixed budget of $p$
+$\sum_i h_{ii} = \mathrm{tr}(H) = p$, so leverage is a fixed budget of $p$
 shared among $n$ observations. The average is exactly $p/n$, and each $h_{ii}$
 lies in $[0,1]$. The conventional flag is $h_{ii} > 2p/n$ — twice the average —
 which is a rule of thumb and nothing more [@hoaglin1978]. In simple regression it
@@ -688,7 +688,7 @@ fig.tight_layout()
 Heteroscedasticity is the failure most often misdiagnosed, so be precise about
 what it costs. Under heteroscedasticity $\hat\beta$ remains **unbiased** and
 **consistent**. The coefficients are not wrong. What breaks is
-$\operatorname{Var}(\hat\beta)$: the usual $s^2 (X^{\top}X)^{-1}$ is no longer the
+$\mathrm{Var}(\hat\beta)$: the usual $s^2 (X^{\top}X)^{-1}$ is no longer the
 right formula, so the standard errors, $t$ statistics, confidence intervals and
 $p$-values are all computed from an expression that does not apply. You have the
 right answer with the wrong uncertainty attached — which, if the question is
@@ -705,7 +705,7 @@ misapplied middle of the sandwich with the squared residuals themselves
 [@white1980]:
 
 $$
-\widehat{\operatorname{Var}}(\hat\beta)
+\widehat{\mathrm{Var}}(\hat\beta)
 = (X^{\top}X)^{-1}
 \Big(\textstyle\sum_i e_i^2 \thinspace x_i x_i^{\top}\Big)
 (X^{\top}X)^{-1}.

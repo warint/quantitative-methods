@@ -251,7 +251,7 @@ a combination of a few common factors plus something specific to itself:
 $$
 x \thickspace=\thickspace \Lambda f + u,
 \qquad
-\operatorname{Var}(x) \thickspace=\thickspace \underbrace{\Lambda \Lambda^\top}_{\text{common}} + \underbrace{\Psi}_{\text{unique}},
+\mathrm{Var}(x) \thickspace=\thickspace \underbrace{\Lambda \Lambda^\top}_{\text{common}} + \underbrace{\Psi}_{\text{unique}},
 $$
 
 with $\Psi$ diagonal. The model asserts that the *correlations between* variables

@@ -64,14 +64,14 @@ construction. This is the **fundamental problem of causal inference**
 identified. What we can hope for is an *average*.
 
 ::: {.definition}
-[**ATE**]{.term} — average treatment effect, $\operatorname{E}[Y(1) - Y(0)]$
+[**ATE**]{.term} — average treatment effect, $\mathrm{E}[Y(1) - Y(0)]$
 over the whole population. What would happen if everyone were treated versus no
 one.
 :::
 
 ::: {.definition}
 [**ATT**]{.term} — average treatment effect on the treated,
-$\operatorname{E}[Y(1) - Y(0) \mid T = 1]$. What the treatment did for those who
+$\mathrm{E}[Y(1) - Y(0) \mid T = 1]$. What the treatment did for those who
 actually received it. Usually the policy-relevant quantity, and usually not
 equal to the ATE.
 :::
@@ -80,11 +80,11 @@ Now the arithmetic that explains why naive comparisons fail. What you can comput
 from data is the difference in observed means. Add and subtract the same term:
 
 $$
-\underbrace{\operatorname{E}[Y \mid T{=}1] - \operatorname{E}[Y \mid T{=}0]}_{\text{what you can compute}}
+\underbrace{\mathrm{E}[Y \mid T{=}1] - \mathrm{E}[Y \mid T{=}0]}_{\text{what you can compute}}
 =
-\underbrace{\operatorname{E}[Y(1) - Y(0) \mid T{=}1]}_{\text{ATT}}
+\underbrace{\mathrm{E}[Y(1) - Y(0) \mid T{=}1]}_{\text{ATT}}
 +
-\underbrace{\operatorname{E}[Y(0) \mid T{=}1] - \operatorname{E}[Y(0) \mid T{=}0]}_{\text{selection bias}} .
+\underbrace{\mathrm{E}[Y(0) \mid T{=}1] - \mathrm{E}[Y(0) \mid T{=}0]}_{\text{selection bias}} .
 $$
 
 The second term is the difference between the treated and untreated groups *in
@@ -97,7 +97,7 @@ plus that gap, and nothing in the data separates them.
 Randomised assignment sets the selection term to zero, and it is worth being
 precise about why. If treatment is assigned by a coin flip, then $T$ is
 independent of everything about the unit — including $Y(0)$ and $Y(1)$ — so
-$\operatorname{E}[Y(0) \mid T{=}1] = \operatorname{E}[Y(0) \mid T{=}0]$ and the
+$\mathrm{E}[Y(0) \mid T{=}1] = \mathrm{E}[Y(0) \mid T{=}0]$ and the
 bias term vanishes.
 
 Note what randomisation does *not* do. It does not make the groups identical; in

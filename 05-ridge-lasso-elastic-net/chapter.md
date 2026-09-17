@@ -117,11 +117,11 @@ Decompose the expected squared error of an estimate $\hat\theta$ of a quantity
 $\theta$:
 
 $$
-\operatorname{E}\big[(\hat\theta - \theta)^2\big]
+\mathrm{E}\big[(\hat\theta - \theta)^2\big]
 \thickspace=\thickspace
-\underbrace{\big(\operatorname{E}[\hat\theta] - \theta\big)^2}_{\text{bias}^2}
+\underbrace{\big(\mathrm{E}[\hat\theta] - \theta\big)^2}_{\text{bias}^2}
 \thickspace+\thickspace
-\underbrace{\operatorname{Var}(\hat\theta)}_{\text{variance}} .
+\underbrace{\mathrm{Var}(\hat\theta)}_{\text{variance}} .
 $$
 
 Least squares sets the first term to zero exactly. If the second term is large —
@@ -227,7 +227,7 @@ separates into one problem per coefficient, and each has the solution
 $$
 \hat\beta_j^{\text{lasso}}
 \thickspace=\thickspace
-\operatorname{sign}(z_j)\big(|z_j| - \lambda/2\big)_+
+\mathrm{sign}(z_j)\big(|z_j| - \lambda/2\big)_+
 $$
 
 — the *soft-thresholding* operator. Read what it does. Every coefficient is
