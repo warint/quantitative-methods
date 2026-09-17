@@ -1081,7 +1081,7 @@ print(qmib.regtable([m1, m2], names=["simple", "+ investment"],
 dict to put different rows at the foot.
 :::
 
-## Choosing a model is not a diagnostic {.scrollable}
+## Choosing a model is not a diagnostic
 
 AIC and BIC compare models you have already written down. They do not write them down for you.
 
@@ -1091,46 +1091,17 @@ until nothing improves --- is a *selection procedure*, not a check on a fit. Tea
 Cook's distance would imply it belongs to model checking.
 :::
 
-Here it is, so you know what it does. Forward selection: start from the intercept, add
-whichever candidate lowers AIC most, stop when none does.
-
-```{python}
-#| echo: true
-
-candidates = ["productivity_idx", "gfcf_meur", "population",
-              "employment_ths", "prod_growth"]
-d3 = core.dropna(subset=["gdp_pc_eur"] + candidates)
-
-def forward_aic(y, pool, data):
-    chosen = []
-    best = smf.ols(f"{y} ~ 1", data=data).fit().aic
-    print(f"intercept only      AIC {best:,.1f}")
-    while True:
-        trials = [(smf.ols(f"{y} ~ {' + '.join(chosen + [c])}", data=data).fit().aic, c)
-                  for c in pool if c not in chosen]
-        if not trials:
-            break
-        aic, winner = min(trials)
-        if aic >= best:                 # nothing left that improves the fit
-            break
-        chosen, best = chosen + [winner], aic
-        print(f"  + {winner:<17} AIC {aic:,.1f}")
-    return chosen
-
-selected = forward_aic("gdp_pc_eur", candidates, d3)
-print(f"\nselected: {' + '.join(selected)}   (n = {len(d3)})")
-```
-
-::: {.muted}
-Five candidates and 367 rows: it keeps all five. The procedure only *looks* decisive when
-there are many candidates and few rows --- which is the case it is actually used in, and the
-case where it is least trustworthy.
+::: {.step}
+It also cannot be judged on a case like this one. With five candidates and 367 rows forward
+selection simply keeps all five, and nothing is learned. The procedure only *looks* decisive when
+there are many candidates and few rows --- which is the case it is actually used in, and the case
+where it is least trustworthy.
 :::
 
 ::: {.check}
-It opens **session 05** instead, where it does real work: watch those choices fail to survive a
-resample, and you have the argument for shrinking coefficients continuously rather than including
-or excluding them. That argument is ridge and lasso.
+So it opens **session 05** instead, on 29 candidates and 37 rows, where it does real work: watch
+its choices fail to survive a resample and you have the argument for shrinking coefficients
+continuously rather than including or excluding them. That argument is ridge and lasso.
 :::
 
 ## Best practice, and what to take away {.center background-color="#E3120B" style="color:#F7F4ED"}

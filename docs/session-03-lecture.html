@@ -1486,7 +1486,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="55ad2bd5" class="cell" data-execution_count="2">
+<div id="4251694b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1577,7 +1577,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="90e1db1b" class="cell" data-execution_count="3">
+<div id="20529a0a" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1693,7 +1693,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="f8118be9" class="cell" data-execution_count="4">
+<div id="ca17057e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1873,7 +1873,7 @@ RSE 9,376 EUR per head</code></pre>
 <p><span class="math display">\[D_i \;=\; \underbrace{\frac{e_i^2}{p\,s^2}}_{\text{is it badly predicted?}} \;\times\;
             \underbrace{\frac{h_i}{(1-h_i)^2}}_{\text{does it have leverage?}}\]</span></p>
 <p>Those are the two ingredients from the previous slide, multiplied rather than added — which is the point. A big residual in the middle of the X range gives a large first factor and a tiny second one, so the product stays small. It takes <strong>both</strong> to move the line, and only the product knows that.</p>
-<div id="d79ebbf4" class="cell" data-execution_count="5">
+<div id="06d01503" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb12-3"><a href></a></span>
@@ -1891,7 +1891,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="one-spike-per-observation" class="slide level2 scrollable">
 <h2>One spike per observation</h2>
 <p>One spike per row, its height the distance the fitted values would travel if that row were deleted. Read it for <strong>shape</strong>, not for threshold-crossing: a forest of similar spikes means no single country-year is carrying the result, while one tower above the rest means your finding is really a statement about one observation.</p>
-<div id="ec1e1523" class="cell" data-execution_count="6">
+<div id="8a491d3a" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb14-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb14-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1949,7 +1949,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="watching-them-disagree" class="slide level2 scrollable">
 <h2>Watching them disagree</h2>
 <p>Four nested models on the same 410 rows — because two fits estimated on different samples are not a comparison.</p>
-<div id="e7255799" class="cell" data-execution_count="7">
+<div id="68b4b8e1" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb16-2"><a href></a></span>
 <span id="cb16-3"><a href></a>cols <span class="op">=</span> [<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;falling_behind&quot;</span>]</span>
@@ -2002,7 +2002,7 @@ BIC prefers: + employment</code></pre>
 <section id="the-table-you-would-actually-publish" class="slide level2 scrollable">
 <h2>The table you would actually publish</h2>
 <p><code>qmib.regtable</code> is R’s <strong>stargazer</strong>, here: one column per model, stars on the coefficients, standard errors beneath, fit statistics at the foot.</p>
-<div id="bdd869ec" class="cell" data-execution_count="8">
+<div id="52842aac" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb18-2"><a href></a></span>
 <span id="cb18-3"><a href></a>d2 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>])</span>
@@ -2039,52 +2039,17 @@ Standard errors in parentheses.
 <p><code>.as_latex()</code> for a paper, <code>.as_html()</code> for a slide. Pass your own <code>stats=</code> dict to put different rows at the foot.</p>
 </div>
 </section>
-<section id="choosing-a-model-is-not-a-diagnostic" class="slide level2 scrollable">
+<section id="choosing-a-model-is-not-a-diagnostic" class="slide level2">
 <h2>Choosing a model is not a diagnostic</h2>
 <p>AIC and BIC compare models you have already written down. They do not write them down for you.</p>
 <div class="warn">
 <p>The automated alternative — <strong>stepwise selection</strong>, which adds and drops predictors by criterion until nothing improves — is a <em>selection procedure</em>, not a check on a fit. Teaching it beside Cook’s distance would imply it belongs to model checking.</p>
 </div>
-<p>Here it is, so you know what it does. Forward selection: start from the intercept, add whichever candidate lowers AIC most, stop when none does.</p>
-<div id="9e6d006b" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a>candidates <span class="op">=</span> [<span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;population&quot;</span>,</span>
-<span id="cb20-2"><a href></a>              <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;prod_growth&quot;</span>]</span>
-<span id="cb20-3"><a href></a>d3 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>] <span class="op">+</span> candidates)</span>
-<span id="cb20-4"><a href></a></span>
-<span id="cb20-5"><a href></a><span class="kw">def</span> forward_aic(y, pool, data):</span>
-<span id="cb20-6"><a href></a>    chosen <span class="op">=</span> []</span>
-<span id="cb20-7"><a href></a>    best <span class="op">=</span> smf.ols(<span class="ss">f&quot;</span><span class="sc">{</span>y<span class="sc">}</span><span class="ss"> ~ 1&quot;</span>, data<span class="op">=</span>data).fit().aic</span>
-<span id="cb20-8"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;intercept only      AIC </span><span class="sc">{</span>best<span class="sc">:,.1f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb20-9"><a href></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
-<span id="cb20-10"><a href></a>        trials <span class="op">=</span> [(smf.ols(<span class="ss">f&quot;</span><span class="sc">{</span>y<span class="sc">}</span><span class="ss"> ~ </span><span class="sc">{</span><span class="st">&#39; + &#39;</span><span class="sc">.</span>join(chosen <span class="op">+</span> [c])<span class="sc">}</span><span class="ss">&quot;</span>, data<span class="op">=</span>data).fit().aic, c)</span>
-<span id="cb20-11"><a href></a>                  <span class="cf">for</span> c <span class="kw">in</span> pool <span class="cf">if</span> c <span class="kw">not</span> <span class="kw">in</span> chosen]</span>
-<span id="cb20-12"><a href></a>        <span class="cf">if</span> <span class="kw">not</span> trials:</span>
-<span id="cb20-13"><a href></a>            <span class="cf">break</span></span>
-<span id="cb20-14"><a href></a>        aic, winner <span class="op">=</span> <span class="bu">min</span>(trials)</span>
-<span id="cb20-15"><a href></a>        <span class="cf">if</span> aic <span class="op">&gt;=</span> best:                 <span class="co"># nothing left that improves the fit</span></span>
-<span id="cb20-16"><a href></a>            <span class="cf">break</span></span>
-<span id="cb20-17"><a href></a>        chosen, best <span class="op">=</span> chosen <span class="op">+</span> [winner], aic</span>
-<span id="cb20-18"><a href></a>        <span class="bu">print</span>(<span class="ss">f&quot;  + </span><span class="sc">{</span>winner<span class="sc">:&lt;17}</span><span class="ss"> AIC </span><span class="sc">{</span>aic<span class="sc">:,.1f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb20-19"><a href></a>    <span class="cf">return</span> chosen</span>
-<span id="cb20-20"><a href></a></span>
-<span id="cb20-21"><a href></a>selected <span class="op">=</span> forward_aic(<span class="st">&quot;gdp_pc_eur&quot;</span>, candidates, d3)</span>
-<span id="cb20-22"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">selected: </span><span class="sc">{</span><span class="st">&#39; + &#39;</span><span class="sc">.</span>join(selected)<span class="sc">}</span><span class="ss">   (n = </span><span class="sc">{</span><span class="bu">len</span>(d3)<span class="sc">}</span><span class="ss">)&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>intercept only      AIC 8,085.3
-  + productivity_idx  AIC 7,704.8
-  + gfcf_meur         AIC 7,638.1
-  + employment_ths    AIC 7,510.2
-  + prod_growth       AIC 7,491.6
-  + population        AIC 7,487.6
-
-selected: productivity_idx + gfcf_meur + employment_ths + prod_growth + population   (n = 367)</code></pre>
-</div>
-</div>
-<div class="muted">
-<p>Five candidates and 367 rows: it keeps all five. The procedure only <em>looks</em> decisive when there are many candidates and few rows — which is the case it is actually used in, and the case where it is least trustworthy.</p>
+<div class="step">
+<p>It also cannot be judged on a case like this one. With five candidates and 367 rows forward selection simply keeps all five, and nothing is learned. The procedure only <em>looks</em> decisive when there are many candidates and few rows — which is the case it is actually used in, and the case where it is least trustworthy.</p>
 </div>
 <div class="check">
-<p>It opens <strong>session 05</strong> instead, where it does real work: watch those choices fail to survive a resample, and you have the argument for shrinking coefficients continuously rather than including or excluding them. That argument is ridge and lasso.</p>
+<p>So it opens <strong>session 05</strong> instead, on 29 candidates and 37 rows, where it does real work: watch its choices fail to survive a resample and you have the argument for shrinking coefficients continuously rather than including or excluding them. That argument is ridge and lasso.</p>
 </div>
 </section>
 <section id="best-practice-and-what-to-take-away" class="slide level2 center" data-background-color="#E3120B" style="color:#F7F4ED">

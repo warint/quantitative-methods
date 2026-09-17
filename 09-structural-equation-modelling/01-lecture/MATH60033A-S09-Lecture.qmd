@@ -1034,9 +1034,11 @@ Xc = X - X.mean(0)
 S_inv = np.linalg.inv(np.cov(X, rowvar=False))
 D = Xc @ S_inv @ Xc.T
 n_, k = X.shape
-b1 = (D ** 3).sum() / n_ ** 2
-b2 = np.trace(D @ D) / n_        # summary statistics; see the notes
-print(f"Mardia skewness {b1:.3f}   kurtosis {b2:.3f}")
+b1 = (D ** 3).sum() / n_ ** 2      # every pair i, j — joint skewness
+b2 = (np.diag(D) ** 2).sum() / n_  # the diagonal only: squared distances
+# Under multivariate normality b2 has mean k(k+2); trace(D @ D) would sum the
+# whole matrix and land orders of magnitude away from it.
+print(f"Mardia skewness {b1:.3f}   kurtosis {b2:.2f}  (expected {k*(k+2)})")
 ```
 :::
 

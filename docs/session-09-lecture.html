@@ -2364,9 +2364,11 @@ how.ref   0.9942 0.1293  Yes         </code></pre>
 <span id="cb22-4"><a href></a>S_inv <span class="op">=</span> np.linalg.inv(np.cov(X, rowvar<span class="op">=</span><span class="va">False</span>))</span>
 <span id="cb22-5"><a href></a>D <span class="op">=</span> Xc <span class="op">@</span> S_inv <span class="op">@</span> Xc.T</span>
 <span id="cb22-6"><a href></a>n_, k <span class="op">=</span> X.shape</span>
-<span id="cb22-7"><a href></a>b1 <span class="op">=</span> (D <span class="op">**</span> <span class="dv">3</span>).<span class="bu">sum</span>() <span class="op">/</span> n_ <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb22-8"><a href></a>b2 <span class="op">=</span> np.trace(D <span class="op">@</span> D) <span class="op">/</span> n_        <span class="co"># summary statistics; see the notes</span></span>
-<span id="cb22-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;Mardia skewness </span><span class="sc">{</span>b1<span class="sc">:.3f}</span><span class="ss">   kurtosis </span><span class="sc">{</span>b2<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-7"><a href></a>b1 <span class="op">=</span> (D <span class="op">**</span> <span class="dv">3</span>).<span class="bu">sum</span>() <span class="op">/</span> n_ <span class="op">**</span> <span class="dv">2</span>      <span class="co"># every pair i, j — joint skewness</span></span>
+<span id="cb22-8"><a href></a>b2 <span class="op">=</span> (np.diag(D) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>() <span class="op">/</span> n_  <span class="co"># the diagonal only: squared distances</span></span>
+<span id="cb22-9"><a href></a><span class="co"># Under multivariate normality b2 has mean k(k+2); trace(D @ D) would sum the</span></span>
+<span id="cb22-10"><a href></a><span class="co"># whole matrix and land orders of magnitude away from it.</span></span>
+<span id="cb22-11"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;Mardia skewness </span><span class="sc">{</span>b1<span class="sc">:.3f}</span><span class="ss">   kurtosis </span><span class="sc">{</span>b2<span class="sc">:.2f}</span><span class="ss">  (expected </span><span class="sc">{</span>k<span class="op">*</span>(k<span class="op">+</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">)&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          Test Statistic p-value Result
