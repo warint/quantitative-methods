@@ -1336,7 +1336,7 @@ R-squared = 0.692</code></pre>
 <section id="imported-s03-007" class="slide level2 scrollable">
 <h2>Adequacy: two things to assess</h2>
 <div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">Two questions</a></li><li><a href="#tabset-1-2">The coefficients</a></li><li><a href="#tabset-1-3">Residuals</a></li><li><a href="#tabset-1-4">One residual, read</a></li><li><a href="#tabset-1-5">Standard error</a></li><li><a href="#tabset-1-6">SE of the slope</a></li><li><a href="#tabset-1-7">Interval, and test</a></li></ul>
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">Two questions</a></li><li><a href="#tabset-1-2">The coefficients</a></li><li><a href="#tabset-1-3">Residuals</a></li><li><a href="#tabset-1-4">One residual, read</a></li><li><a href="#tabset-1-5">Standard error</a></li><li><a href="#tabset-1-6">Standard deviation, or standard error?</a></li><li><a href="#tabset-1-7">SE of the slope</a></li><li><a href="#tabset-1-8">Interval, and test</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
 <p>We can assess the adequacy of</p>
@@ -1405,13 +1405,48 @@ R-squared = 0.692</code></pre>
 <p>The previous equation also tells us how this deviation shrinks with <span class="math inline">\(n\)</span> — <strong>the more observations</strong> we have, <strong>the smaller the standard error</strong> of <span class="math inline">\(\hat{\mu}\)</span>.</p>
 </div>
 <div id="tabset-1-6">
+<p>Both appear in the formula above, and they are not the same quantity.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>measures the spread of</th>
+<th>with more data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>standard deviation</strong> <span class="math inline">\(\sigma\)</span></td>
+<td>the <strong>observations</strong>, around their mean</td>
+<td>does <strong>not</strong> shrink — you estimate a fixed <span class="math inline">\(\sigma\)</span> more precisely</td>
+</tr>
+<tr class="even">
+<td><strong>standard error</strong> <span class="math inline">\(\mathrm{SE}(\hat\mu) = \sigma/\sqrt{n}\)</span></td>
+<td>an <strong>estimate</strong>, around the truth, across repeated samples</td>
+<td>shrinks as <span class="math inline">\(1/\sqrt{n}\)</span></td>
+</tr>
+</tbody>
+</table>
+<div class="step">
+<p>They carry the same units, which is why they get swapped. But <span class="math inline">\(\sigma\)</span> is a fact about the population your sample came from, and <span class="math inline">\(\mathrm{SE}\)</span> is a fact about <em>your estimate of it</em>: the standard error <strong>is</strong> the standard deviation of <span class="math inline">\(\hat\mu\)</span> over the samples you might have drawn but did not.</p>
+</div>
+<div class="warn">
+<p>So: an error bar that stays the same width as <span class="math inline">\(n\)</span> grows is a <strong>standard deviation</strong>; one that narrows is a <strong>standard error</strong>. Collecting more data makes you more certain <em>where the mean is</em>; it does not make the observations less spread out.</p>
+</div>
+</div>
+<div id="tabset-1-7">
 <p>In a similar vein, we can wonder how close <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> are to the true values <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>?</p>
 <ul>
 <li>To compute the standard errors associated with <span class="math inline">\(\hat{\beta}_1\)</span>, it comes down to the following formula:</li>
 </ul>
 <p><span class="math display">\[ SE(\hat{\beta_1}) \]</span></p>
 </div>
-<div id="tabset-1-7">
+<div id="tabset-1-8">
 <p><strong>Models: Assessing the adequacy of the coefficient estimates</strong></p>
 <p>Standard errors can be used to compute our <em>confidence intervals</em>, i.e. that the true value of <span class="math inline">\(\beta_1\)</span>, will within this interval with a 95% chance:</p>
 <p><span class="math display">\[ \hat{\beta}_1 - 1.96 \times SE(\hat{\beta}_1),~\hat{\beta}_1 + 1.96 \times SE(\hat{\beta}_1) \]</span></p>
@@ -1486,7 +1521,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="4251694b" class="cell" data-execution_count="2">
+<div id="61ebea55" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1577,7 +1612,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="20529a0a" class="cell" data-execution_count="3">
+<div id="3f8e8a0b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1693,7 +1728,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="ca17057e" class="cell" data-execution_count="4">
+<div id="4cdc557c" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1873,7 +1908,7 @@ RSE 9,376 EUR per head</code></pre>
 <p><span class="math display">\[D_i \;=\; \underbrace{\frac{e_i^2}{p\,s^2}}_{\text{is it badly predicted?}} \;\times\;
             \underbrace{\frac{h_i}{(1-h_i)^2}}_{\text{does it have leverage?}}\]</span></p>
 <p>Those are the two ingredients from the previous slide, multiplied rather than added — which is the point. A big residual in the middle of the X range gives a large first factor and a tiny second one, so the product stays small. It takes <strong>both</strong> to move the line, and only the product knows that.</p>
-<div id="06d01503" class="cell" data-execution_count="5">
+<div id="fe349aae" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb12-3"><a href></a></span>
@@ -1891,7 +1926,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="one-spike-per-observation" class="slide level2 scrollable">
 <h2>One spike per observation</h2>
 <p>One spike per row, its height the distance the fitted values would travel if that row were deleted. Read it for <strong>shape</strong>, not for threshold-crossing: a forest of similar spikes means no single country-year is carrying the result, while one tower above the rest means your finding is really a statement about one observation.</p>
-<div id="8a491d3a" class="cell" data-execution_count="6">
+<div id="7ab7abec" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb14-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb14-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1949,7 +1984,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="watching-them-disagree" class="slide level2 scrollable">
 <h2>Watching them disagree</h2>
 <p>Four nested models on the same 410 rows — because two fits estimated on different samples are not a comparison.</p>
-<div id="68b4b8e1" class="cell" data-execution_count="7">
+<div id="4d52ce1c" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb16-2"><a href></a></span>
 <span id="cb16-3"><a href></a>cols <span class="op">=</span> [<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;falling_behind&quot;</span>]</span>
@@ -2002,7 +2037,7 @@ BIC prefers: + employment</code></pre>
 <section id="the-table-you-would-actually-publish" class="slide level2 scrollable">
 <h2>The table you would actually publish</h2>
 <p><code>qmib.regtable</code> is R’s <strong>stargazer</strong>, here: one column per model, stars on the coefficients, standard errors beneath, fit statistics at the foot.</p>
-<div id="52842aac" class="cell" data-execution_count="8">
+<div id="8a5b1703" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb18-2"><a href></a></span>
 <span id="cb18-3"><a href></a>d2 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>])</span>
