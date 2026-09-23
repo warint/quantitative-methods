@@ -6,6 +6,13 @@
 
 ---
 
+> **Python cheatsheet — [session 07](https://warint.github.io/quantitative-methods/python-cheatsheet-07.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and every name taught in sessions 1 to 7 with a
+> line showing it in use. Print it.
+
 ## How to use this page
 
 The lecture is delivered from the slides:
@@ -81,4 +88,4 @@ If a package is missing, `pip install -r requirements.txt` from the repository r
 
 ---
 
-[Back to session 07](../README.md) · [On to the practice ->](../02-practice/README.md)
+[Back to session 07](../README.md) · [On to the practice ->](../02-practice/README.md) · [The lab for this session ↗](https://warin.ca/qmib-labs/qmib-lab-07.html)

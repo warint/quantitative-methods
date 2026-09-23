@@ -39,6 +39,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: measurement and structural models, latent variables, fit indices | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
+| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-09.html) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
 practice assumes you arrive with the data loaded.
@@ -61,7 +62,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `02-practice/submissions/group-XX/`: a measurement model for one construct in your project, with the loadings reported, the fit indices stated, and a note on the indicators you would drop and why.
+In `groups/A2026/group-XX/session-09/`: a measurement model for one construct in your project, with the loadings reported, the fit indices stated, and a note on the indicators you would drop and why.
 
 ---
 

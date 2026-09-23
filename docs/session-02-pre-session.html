@@ -1069,22 +1069,19 @@ Thierry Warin, PhD
 </section>
 <section class="slide level2">
 
+<!-- authored: do not regenerate -->
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 </section>
 <section id="outline-before-class" class="slide level2 center scrollable">
 <h2>Outline · Before class</h2>
 <ol type="1">
-<li>What to do, and how long it takes</li>
+<li>What to do before class, and how long it takes</li>
 <li>Read the paper</li>
-<li>Get BOTH datasets</li>
-<li>2b · The course data</li>
-<li>Self-check</li>
-<li>What the session will ask of you</li>
-<li>Running the code</li>
-<li>Install git — you may already have it</li>
-<li>Tell git who you are</li>
-<li>Already have your three? Do a trial run</li>
-<li>Then each of you pushes, one at a time</li>
+<li>Get both datasets — the paper’s, and your own angle</li>
+<li>Self-check, and what the session will ask of you</li>
+<li>Before you run anything — the environment</li>
+<li>Session 02 only — git, GitHub, and your group branch</li>
+<li>When it goes wrong</li>
 </ol>
 </section>
 <section id="what-session-2-is-for" class="slide level2 scrollable">
@@ -1096,21 +1093,20 @@ Thierry Warin, PhD
 <li>Distinguish <strong>mean, median and trimmed mean</strong>, and say which question each answers</li>
 <li>Explain why the sample variance divides by <span class="math inline">\(n-1\)</span></li>
 <li>Test <strong>skewness</strong> and <strong>excess kurtosis</strong> against <span class="math inline">\(2\sqrt{6/n}\)</span> and <span class="math inline">\(4\sqrt{6/n}\)</span></li>
-<li>Derive the least-squares slope, and read “controlling for” as a residual regression</li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-python">The Python</h3>
 <ul>
 <li>Compute the moments directly, and check them against a library</li>
-<li>Fit a simple and a multiple regression with <code>smf.ols</code>, and read <code>.params</code></li>
-<li>Draw a scatter and a fitted line, and label both axes in units</li>
+<li>Load the course panel with <code>pd.read_parquet</code> and <code>.dropna</code>, and say how many rows went</li>
+<li>Take any quantile — median, quartile, percentile — with <code>.quantile</code></li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
 <ul>
-<li>Quote a slope <strong>in units</strong> a manager can act on</li>
 <li>Read a mean–median gap as evidence about a distribution’s shape</li>
-<li>Say why a slope is an association, and what more is needed to call it a cause</li>
+<li>Choose the summary a manager should see when one country dominates the total</li>
+<li>Say what heavy tails cost a plan built on an average</li>
 </ul>
 </div></div>
 <!-- END deck-frontmatter -->
@@ -1184,33 +1180,67 @@ Thierry Warin, PhD
 <section id="get-both-datasets" class="slide level2">
 <h2>2 · Get BOTH datasets</h2>
 <div class="warn">
-<p>The practice uses two: the <strong>paper’s data</strong>, to reproduce one of its results, and <strong>your own angle</strong>, to apply the method. Have both before you arrive.</p>
+<p>The practice uses two: the <strong>paper’s data</strong>, to reproduce one of its results, and <strong>your own angle</strong>, to apply the method. Have both before you arrive — the first is 33 MB and takes a couple of minutes on room wifi.</p>
 </div>
-<p><strong>a) The paper’s replication package</strong> — Harvard Dataverse</p>
-<div class="step">
-<p><a href="https://doi.org/10.7910/DVN/QNKFJF">10.7910/DVN/QNKFJF</a></p>
+<div class="tight">
+<ul>
+<li><strong>a)</strong> Fraiberger et al.’s replication package, from Harvard Dataverse</li>
+<li><strong>b)</strong> the course data, through <code>qmib</code></li>
+</ul>
 </div>
-<p>Unzip it into <code>02-exploratory-data-analysis/data/replication/</code> — that folder is git-ignored, so nothing large is committed. Keep the authors’ own structure.</p>
 </section>
-<section id="b-the-course-data" class="slide level2">
-<h2>2b · The course data</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb1-2"><a href></a></span>
-<span id="cb1-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)     <span class="co"># what the lecture uses</span></span>
-<span id="cb1-4"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># shared by every group</span></span>
-<span id="cb1-5"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># YOUR angle — see your dictionary</span></span>
-<span id="cb1-6"><a href></a></span>
-<span id="cb1-7"><a href></a><span class="bu">print</span>(data.shape, core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="a-the-replication-package-in-three-commands" class="slide level2">
+<h2>2a · The replication package, in three commands</h2>
+<p>From the repository root, in the VS Codium terminal:</p>
+<p><strong>macOS and Linux</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> 02-exploratory-data-analysis/data/replication</span>
+<span id="cb1-2"><a href></a><span class="bu">cd</span> 02-exploratory-data-analysis/data/replication</span>
+<span id="cb1-3"><a href></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> replication.zip <span class="dt">\</span></span>
+<span id="cb1-4"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF&quot;</span></span>
+<span id="cb1-5"><a href></a><span class="fu">unzip</span> <span class="at">-q</span> replication.zip <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> replication.zip</span>
+<span id="cb1-6"><a href></a><span class="bu">cd</span> <span class="at">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href></a>mkdir <span class="dv">02</span><span class="op">-</span>exploratory-data-analysis<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication</span>
+<span id="cb2-2"><a href></a><span class="fu">cd</span> <span class="dv">02</span><span class="op">-</span>exploratory-data-analysis<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication</span>
+<span id="cb2-3"><a href></a><span class="fu">curl</span><span class="op">.</span><span class="fu">exe</span> <span class="op">-</span>L <span class="op">-</span>o replication<span class="op">.</span><span class="fu">zip</span> `</span>
+<span id="cb2-4"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF&quot;</span></span>
+<span id="cb2-5"><a href></a>Expand-Archive replication<span class="op">.</span><span class="fu">zip</span> <span class="op">.;</span> <span class="fu">Remove-Item</span> replication<span class="op">.</span><span class="fu">zip</span></span>
+<span id="cb2-6"><a href></a><span class="fu">cd</span> <span class="op">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p>No Dataverse account and no browser needed — that URL is their public download API.</p>
+</div>
+</section>
+<section id="a-check-it-arrived" class="slide level2">
+<h2>2a · Check it arrived</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="fu">ls</span> 02-exploratory-data-analysis/data/replication/public</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>Run this <strong>before</strong> you arrive. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing.</p>
+<p>You should see <code>code/</code>, <code>data/</code> and <code>results/</code>. The <code>code/</code> folder is Stata <code>.do</code> files — you are not running them; you are reproducing <strong>one result</strong> in Python, and the practice tells you which.</p>
+</div>
+<div class="warn">
+<p><code>data/replication/</code> is git-ignored, so nothing large is ever committed. If <code>git status</code> shows the zip, you are in the wrong folder.</p>
+</div>
+</section>
+<section id="b-the-course-data-in-one-command" class="slide level2">
+<h2>2b · The course data, in one command</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb4-2"><a href></a></span>
+<span id="cb4-3"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># the spine — every group uses this</span></span>
+<span id="cb4-4"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># YOUR angle — see your data dictionary</span></span>
+<span id="cb4-5"><a href></a></span>
+<span id="cb4-6"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p><code>(450, 11)</code> for the spine. Anything else, or a traceback, bring it to class.</p>
+</div>
+<div class="warn">
+<p><strong>Replace <code>angle_c_country</code> with your own angle.</strong> Your group’s is named in <a href="https://github.com/warint/quantitative-methods/blob/main/RESEARCH-MANDATES.md"><code>RESEARCH-MANDATES.md</code></a>. <code>qmib.catalog()</code> lists every dataset in the course.</p>
 </div>
 <div class="muted">
-<p>The course spine — thirty european countries, 2010–2024 · everything available: <code>qmib.catalog()</code></p>
+<p><code>qmib.load</code> downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing — which is the reason for doing it the night before.</p>
 </div>
 </section>
-<section id="self-check" class="slide level2">
-<h2>3 · Self-check</h2>
-<p>Answer on paper. If you cannot, that is what the lecture is for.</p>
+<section id="self-check-and-what-the-session-will-ask-of-you" class="slide level2">
+<h2>3 · Self-check, and what the session will ask of you</h2>
+<p>Answer these on paper. If you cannot, that is what the lecture is for.</p>
 <div class="tight">
 <ol type="1">
 <li>In one sentence: what does this session’s method let you claim that the previous one did not?</li>
@@ -1218,46 +1248,94 @@ Thierry Warin, PhD
 <li>Which claim in the paper rests on this method — and how hard does it lean on it?</li>
 </ol>
 </div>
-</section>
-<section id="what-the-session-will-ask-of-you" class="slide level2">
-<h2>What the session will ask of you</h2>
-<p>By the end you should be able to:</p>
+<p>By the end of the session you should be able to:</p>
 <div class="tight">
 <ul>
 <li>Compute the <strong>mean, median and trimmed mean</strong>, and say which question each answers</li>
 <li>Explain why the sample variance divides by <span class="math inline">\(n-1\)</span></li>
 <li>Apply the <strong>empirical rule</strong>, and state the precondition that makes it valid</li>
 <li>Compute <strong>skewness</strong> and <strong>excess kurtosis</strong>, and test each against its threshold</li>
-<li>Fit a simple regression and state the slope <strong>in units</strong></li>
+<li>Say which summary you would defend in print, and why the other two mislead</li>
 </ul>
 </div>
 <div class="get">
 <p><strong>Arrive with:</strong> the paper read and annotated · the replication package unzipped · <code>qmib.load()</code> run at least once · your self-check answers on paper.</p>
 </div>
 </section>
-<section id="running-the-code" class="slide level2">
-<h2>Running the code</h2>
-<p>Everything runs in the <strong>VS Codium terminal</strong>, with the project environment active:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS / Linux</span></span>
-<span id="cb2-2"><a href></a><span class="ex">python</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="muted">
-<p>Missing a package? <code>pip install -r requirements.txt</code> from the repository root.</p>
+<section id="before-you-run-anything" class="slide level2">
+<h2>Before you run anything</h2>
+<p>Everything runs in the <strong>VS Codium terminal</strong>, from the repository root, with the project environment active. Activate it in <strong>every new terminal</strong>, not only the first:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb6-1"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate           <span class="co"># Windows (PowerShell)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Your prompt must begin with <strong><code>(.venv)</code></strong>. Without it <code>python</code> and <code>pip</code> are your system’s, and nothing the course installed is visible to them.</p>
 </div>
 <div class="muted">
-<p>Session 02: <a href="../README.md"><code>README.md</code></a> · the lecture: <a href="../01-lecture/README.md"><code>01-lecture/</code></a></p>
+<p><code>ModuleNotFoundError</code> means the packages went somewhere else, or were never installed. Check the prompt first, then <code>pip install -r requirements.txt</code> — <strong>from the repository root, with the environment active</strong>. Building the environment from scratch is Session 01, step 1.4.</p>
+</div>
+<div class="muted">
+<p>Session 02: <a href="https://github.com/warint/quantitative-methods/blob/main/02-exploratory-data-analysis/README.md"><code>README.md</code></a> · the lecture: <a href="https://github.com/warint/quantitative-methods/blob/main/02-exploratory-data-analysis/01-lecture/README.md"><code>01-lecture/</code></a></p>
 </div>
 </section></section>
 <section>
-<section id="session-02-only-your-group-repository" class="title-slide slide level1 center" data-background-color="#E3120B" style="color:#F7F4ED">
-<h1>Session 02 only: your group repository</h1>
+<section id="session-02-only-git-step-by-step" class="title-slide slide level1 center" data-background-color="#E3120B" style="color:#F7F4ED">
+<h1>Session 02 only: git, step by step</h1>
 
 </section>
-<section id="from-this-session-on-your-commit-history-is-part-of-the-record" style="margin-top: 1.0em; color:#F7F4ED">
-<h3>From this session on, your commit history is part of the record</h3>
+<section id="seven-steps-about-45-minutes.-everything-you-need-is-on-these-slides." style="margin-top: 1.0em; color:#F7F4ED">
+<h3>Seven steps, about 45 minutes. Everything you need is on these slides.</h3>
 </section>
-<section id="install-git-you-may-already-have-it" class="slide level2">
-<h2>Install git — you may already have it</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="fu">git</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="how-submission-works" class="slide level2">
+<h2>How submission works</h2>
+<p>Two things, and everything in the rest of this deck is one of them.</p>
+<div class="tight">
+<ol type="1">
+<li><strong>One repository, one branch per group.</strong> You do not create a repository — you check out <code>group-XX</code> in this one.</li>
+<li><strong>One folder per group</strong>, which your group creates: <code>groups/A2026/group-XX/</code>.</li>
+</ol>
+</div>
+<pre><code>github.com/warint/quantitative-methods
+│
+├── main          ← the instructor&#39;s. You never push to it.
+├── group-01      ← group 01&#39;s branch
+└── group-XX      ← yours</code></pre>
+<div class="warn">
+<p><strong>Why not one repository per group.</strong> <code>scripts/assess.py contributions</code> reads your commit history from <em>this</em> repository. Work pushed anywhere else is invisible to it — and invisible work counts as work you did not do.</p>
+</div>
+</section>
+<section id="where-your-work-goes" class="slide level2">
+<h2>Where your work goes</h2>
+<p>The repository ships with two levels and no more:</p>
+<pre><code>groups/
+└── A2026/          ← the cohort: autumn 2026. Empty.</code></pre>
+<p><strong>Your group creates the third.</strong> Nobody has made one for you, because group numbers are not fixed until Session 04.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> groups/A2026/group-07/session-02      <span class="co"># macOS and Linux — your number</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb10-1"><a href></a>mkdir groups<span class="op">/</span>A2026<span class="op">/</span>group-07<span class="op">/</span>session-02         <span class="co"># Windows — no -p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Committing that folder with a file in it <em>is</em> how your group comes into existence in this repository. There is no other registration step.</p>
+</div>
+</section>
+<section id="what-it-looks-like-once-the-term-is-running" class="slide level2">
+<h2>What it looks like once the term is running</h2>
+<pre><code>groups/
+└── A2026/
+    ├── group-03/
+    │   ├── session-02/
+    │   └── session-03/
+    └── group-07/             ← yours
+        ├── session-02/       ← one folder per practice
+        ├── session-03/
+        └── ...</code></pre>
+<div class="muted">
+<p>Your whole term is one directory, which is how you find in week ten what you wrote in week two. The cohort folder above it is what lets next year’s students start clean instead of on top of you.</p>
+</div>
+<div class="warn">
+<p>Git does not track empty folders. <code>mkdir</code> alone commits nothing — the folder appears in the repository only when it has a file inside it.</p>
+</div>
+</section>
+<section id="step-1-install-git" class="slide level2">
+<h2>Step 1 · Install git</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href></a><span class="fu">git</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
 <p><strong>macOS.</strong> Git ships with Apple’s Command Line Tools, so most Macs already have it. If the command is not found, macOS offers to install them — accept — or run <code>xcode-select --install</code>. <strong>You do not need Homebrew.</strong></p>
 </div>
@@ -1268,39 +1346,157 @@ Thierry Warin, PhD
 </ul>
 </div>
 </section>
-<section id="tell-git-who-you-are" class="slide level2">
-<h2>Tell git who you are</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.name  <span class="st">&quot;Your Full Name&quot;</span></span>
-<span id="cb4-2"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">&quot;you@example.com&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-2-tell-git-who-you-are" class="slide level2">
+<h2>Step 2 · Tell git who you are</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.name  <span class="st">&quot;Your Full Name&quot;</span></span>
+<span id="cb13-2"><a href></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">&quot;you@example.com&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
-<p>Use your <strong>real</strong> name and the email on your GitHub account. The commit log is one of the records used to check that all three of you did the work — and it only identifies you if you set this.</p>
+<p>Use your <strong>real</strong> name and the email on your GitHub account. The commit log is one of the four records used to check that all three of you did the work — and it only identifies you if you set this. Do it before your first commit; it does not apply retroactively.</p>
 </div>
 </section>
-<section id="already-have-your-three-do-a-trial-run" class="slide level2">
-<h2>Already have your three? Do a trial run</h2>
-<p>Groups are confirmed in Session 04 — but if you have already agreed to work together, rehearse the whole cycle now. Ten minutes, and it removes the one thing that reliably eats practice time.</p>
-<p><strong>One person, once:</strong></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="fu">git</span> checkout <span class="at">-b</span> group-07          <span class="co"># your number, not 07</span></span>
-<span id="cb5-2"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-07</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>The other two:</strong></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href></a><span class="fu">git</span> fetch origin</span>
-<span id="cb6-2"><a href></a><span class="fu">git</span> checkout group-07</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-3-a-github-account" class="slide level2">
+<h2>Step 3 · A GitHub account</h2>
+<div class="tight">
+<ol type="1">
+<li><a href="https://github.com/signup">github.com/signup</a> — free</li>
+<li>Choose a username you would put on a CV</li>
+<li>Verify the email GitHub sends you</li>
+<li>Enable <strong>two-factor authentication</strong> when prompted; GitHub requires it</li>
+</ol>
+</div>
+<div class="warn">
+<p><strong>Then send your GitHub username to the instructor.</strong> You cannot push until you have been added as a collaborator, and that is done by hand. Cloning works without it — pushing does not.</p>
+</div>
 </section>
-<section id="then-each-of-you-pushes-one-at-a-time" class="slide level2">
-<h2>Then each of you pushes, one at a time</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href></a><span class="fu">git</span> pull                          <span class="co"># always pull before you start</span></span>
-<span id="cb7-2"><a href></a></span>
-<span id="cb7-3"><a href></a><span class="bu">echo</span> <span class="st">&quot;- Ana tested the push&quot;</span> <span class="op">&gt;&gt;</span> <span class="dt">\</span></span>
-<span id="cb7-4"><a href></a>  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md</span>
-<span id="cb7-5"><a href></a></span>
-<span id="cb7-6"><a href></a><span class="fu">git</span> add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md</span>
-<span id="cb7-7"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Ana: trial push&quot;</span></span>
-<span id="cb7-8"><a href></a><span class="fu">git</span> push</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="step-4-move-the-session-01-folder-aside-first" class="slide level2">
+<h2>Step 4 · Move the Session 01 folder aside first</h2>
+<p>Session 01 had you unzip to <code>Desktop/quantitative-methods</code>. The clone wants <strong>that exact path</strong>, so it will refuse to start while the old folder is there:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb14-1"><a href></a>fatal: destination path &#39;quantitative-methods&#39; already exists</span>
+<span id="cb14-2"><a href></a>       and is not an empty directory.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Rename it rather than deleting it — anything you wrote during Session 01 is still in there.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href></a><span class="bu">cd</span> ~/Desktop                     <span class="co"># Windows: Set-Location &quot;$HOME\Desktop&quot;</span></span>
+<span id="cb15-2"><a href></a><span class="fu">mv</span> quantitative-methods quantitative-methods-session01</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-4b-clone-it-onto-your-desktop" class="slide level2">
+<h2>Step 4b · Clone it onto your Desktop</h2>
+<p>A ZIP cannot push. From here you work in a clone — in the same place the ZIP was, so every path in the course still matches.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href></a><span class="bu">cd</span> ~/Desktop                     <span class="co"># Windows: Set-Location &quot;$HOME\Desktop&quot;</span></span>
+<span id="cb16-2"><a href></a><span class="fu">git</span> clone https://github.com/warint/quantitative-methods.git</span>
+<span id="cb16-3"><a href></a><span class="bu">cd</span> quantitative-methods</span>
+<span id="cb16-4"><a href></a><span class="bu">pwd</span>                              <span class="co"># expect /Users/you/Desktop/quantitative-methods</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then <code>File → Open Folder…</code> in VS Codium and choose the <strong>new</strong> folder.</p>
+<div class="warn">
+<p>Copy anything you wrote in Session 01 out of <code>quantitative-methods-session01</code>, then delete it. Two copies of the course on one Desktop is the most reliable way to spend an hour editing the file you are not running.</p>
+</div>
+</section>
+<section id="step-4c-rebuild-the-environment-inside-the-clone" class="slide level2">
+<h2>Step 4c · Rebuild the environment inside the clone</h2>
+<p><code>.venv</code> is not in the repository — it is built per machine, and the one in your old ZIP folder belongs to that folder. <strong>Name the version</strong>, as in Session 01:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href></a><span class="ex">python3.12</span> <span class="at">-m</span> venv .venv         <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb18-1"><a href></a>py <span class="op">-</span><span class="dv">3.12</span> <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span>           <span class="co"># Windows (PowerShell)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then activate it, and check the prompt <strong>before</strong> installing anything:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb20-1"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate           <span class="co"># Windows (PowerShell)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href></a><span class="ex">pip</span> <span class="at">-V</span>                           <span class="co"># (.venv) in the prompt, .venv in this path</span></span>
+<span id="cb21-2"><a href></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p>There is no <code>python3</code> on Windows — use <code>py</code>. If it answers <em>Python introuvable</em>, the Microsoft Store alias is shadowing it: Session 01, “Windows: Python introuvable”.</p>
+</div>
+<p>The whole setup, checked in one line:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">&quot;import qmib; print(qmib.load(&#39;core&#39;).shape)&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>When all three are done, <code>git log --oneline -5</code> should show <strong>three commits with three different author names</strong>. That is exactly what the participation record looks like.</p>
+<p><code>(450, 11)</code> means you are ready. Anything else — bring the error to class.</p>
+</div>
+</section>
+<section id="step-5-authenticating-your-first-push" class="slide level2">
+<h2>Step 5 · Authenticating your first push</h2>
+<p>GitHub rejects your account password and asks for a token instead.</p>
+<div class="tight">
+<ol type="1">
+<li>github.com → avatar → <strong>Settings</strong></li>
+<li><strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong></li>
+<li><strong>Generate new token</strong>, tick the <strong><code>repo</code></strong> scope, set an expiry</li>
+<li>Copy it — <strong>it is shown once</strong> — and paste it when git asks for your <em>password</em></li>
+</ol>
 </div>
 <div class="muted">
-<p>A rejected push almost always means someone pushed in between — <code>git pull</code> first. That is normal. Full guide: <a href="setup-git-and-github.md"><code>setup-git-and-github.md</code></a></p>
+<p>Paste it once and the system keychain remembers it. If you lose it, generate another; tokens are disposable.</p>
+</div>
+</section>
+<section id="step-6-your-group-branch" class="slide level2">
+<h2>Step 6 · Your group branch</h2>
+<p><strong>One person per group</strong> creates it. The others check it out.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href></a><span class="co"># the first person, once — group 07 shown; use your own number</span></span>
+<span id="cb23-2"><a href></a><span class="fu">git</span> checkout <span class="at">-b</span> group-07</span>
+<span id="cb23-3"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-07</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href></a><span class="co"># everyone else, afterwards</span></span>
+<span id="cb24-2"><a href></a><span class="fu">git</span> fetch origin</span>
+<span id="cb24-3"><a href></a><span class="fu">git</span> checkout group-07</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="warn">
+<p><strong>Never push while on <code>main</code>.</strong> It is protected, so the push is refused rather than doing damage — but check where you are before you commit: <code>git branch --show-current</code></p>
+</div>
+</section>
+<section id="step-7-the-round-trip" class="slide level2">
+<h2>Step 7 · The round trip</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href></a><span class="fu">git</span> pull                         <span class="co"># always pull before you start</span></span>
+<span id="cb25-2"><a href></a></span>
+<span id="cb25-3"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> groups/A2026/group-07/session-02      <span class="co"># Windows: mkdir, without -p</span></span>
+<span id="cb25-4"><a href></a><span class="bu">echo</span> <span class="st">&quot;# Group 07 — session 02&quot;</span> <span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb25-5"><a href></a>  groups/A2026/group-07/session-02/NOTES.md</span>
+<span id="cb25-6"><a href></a></span>
+<span id="cb25-7"><a href></a><span class="fu">git</span> add groups/A2026/group-07/session-02/</span>
+<span id="cb25-8"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Add group 07 notes for session 02&quot;</span></span>
+<span id="cb25-9"><a href></a><span class="fu">git</span> push</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Refresh the repository page, switch to your branch, and the file is there.</p>
+<div class="check">
+<p><strong>Each of the three of you does this at least once, from your own machine.</strong> Not one per group. <code>git log --oneline -5</code> should show three commits with three different author names — that is exactly what the participation record is.</p>
+</div>
+</section>
+<section id="when-it-goes-wrong" class="slide level2">
+<h2>When it goes wrong</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>What you see</th>
+<th>What it means</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>rejected — non-fast-forward</code></td>
+<td>someone pushed in between</td>
+<td><code>git pull</code>, then push again</td>
+</tr>
+<tr class="even">
+<td><code>Authentication failed</code></td>
+<td>the password is not the token</td>
+<td>Step 5 again, generate a fresh one</td>
+</tr>
+<tr class="odd">
+<td><code>Permission denied</code></td>
+<td>not yet a collaborator</td>
+<td>send your username to the instructor</td>
+</tr>
+<tr class="even">
+<td><code>detached HEAD</code></td>
+<td>you checked out a commit, not a branch</td>
+<td><code>git checkout group-07</code></td>
+</tr>
+<tr class="odd">
+<td>a conflict marker <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></td>
+<td>two people edited the same lines</td>
+<td>keep both sides, delete the markers, commit</td>
+</tr>
+</tbody>
+</table>
+<div class="muted">
+<p>A rejected push is normal and means the system is working. The full written guide, with more on conflicts and working together, is <a href="https://github.com/warint/quantitative-methods/blob/main/02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md"><code>setup-git-and-github.md</code></a>.</p>
 </div>
 
 </section></section>

@@ -33,7 +33,7 @@ group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p 04-logistic-ordinal-multinomial/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-04
 ```
 
 ---
@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks***, and its replication package
-([10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)) should already be unzipped at:
-
-```text
-04-logistic-ordinal-multinomial/data/replication/
-```
+The paper is **Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks***. Its replication package ([10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)) should already be unzipped at `04-logistic-ordinal-multinomial/data/replication/`.
 
 The session's own dataset, for comparison:
 
@@ -89,12 +84,16 @@ A 250-word note in your submissions folder:
 - Which assumption you broke, and what it did
 - What this result does **not** license you to claim
 
+> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row.
+
 ---
 
 ## Submitting
 
 ```bash
-git add 04-logistic-ordinal-multinomial/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-04
 git commit -m "Session 04 practice — group XX"
 git push -u origin group-XX
 ```
@@ -109,6 +108,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Interpreting an odds ratio as a relative risk
 - Comparing non-nested models with a likelihood-ratio test
 - Reporting accuracy on an imbalanced outcome with no base rate
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-04.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

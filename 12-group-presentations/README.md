@@ -8,11 +8,20 @@ Quantitative Methods in International Business · duration 3h00
 
 ---
 
-**Presentations fill both halves of the session.** There is no lecture and no practice.
+**Presentations fill most of the session.** There is no practice.
 
-Twelve groups × **13 minutes** each: **8 minutes** of presentation, **5 minutes** of questions from
-the other groups and the instructor. Two short breaks. The schedule is tight and will be kept to;
-a group that overruns loses its question time, not the next group's.
+Ten groups × **13 minutes** each: **8 minutes** of presentation, **5 minutes** of questions from
+the other groups and the instructor. The schedule is tight and will be kept to; a group that
+overruns loses its question time, not the next group's.
+
+The **closing address** opens the second half — what the twelve weeks were for, why it matters in
+private and public organisations, and a return to *Europe 2031* with the tools you did not have in
+August. It sits there rather than at the end for two reasons: it is the last teaching of the
+course, and the argument it makes deserves a room that has just come back from a break rather than
+one that has been listening to presentations for three hours.
+
+> **[Open the closing address](https://warint.github.io/quantitative-methods/session-12-lecture.html)** — or read the source at
+> [`01-lecture/MATH60033A-S12-Lecture.qmd`](01-lecture/MATH60033A-S12-Lecture.qmd).
 
 ---
 
@@ -27,15 +36,18 @@ a group that overruns loses its question time, not the next group's.
 
 ## Schedule
 
-| Time | |
-|---|---|
-| 0:00–0:05 | Opening and running order |
-| 0:05–1:11 | Presentations 1–5 |
-| 1:11–1:21 | Break |
-| 1:21–2:14 | Presentations 6–9 |
-| 2:14–2:24 | Break |
-| 2:24–2:55 | Presentations 10–12 |
-| 2:55–3:00 | Close |
+| Time | | |
+|---|---|---|
+| 0:00–0:05 | Opening and running order | |
+| 0:05–1:10 | Presentations 1–5 | *first half* |
+| 1:10–1:25 | Break | |
+| 1:25–1:45 | **Closing address** — *What the twelve weeks were for* | *second half opens* |
+| 1:45–2:50 | Presentations 6–10 | |
+| 2:50–3:00 | Results, next steps, and the final paper | |
+
+Ten presentations at 13 minutes is 2h10; with the opening, the break, the address and the close
+that is exactly three hours, and there is no slack in it. A group that runs long is taking the time
+out of the address or out of another group.
 
 ---
 
@@ -66,7 +78,7 @@ an individual paper plus a 15-minute individual oral — is a distinct deliverab
 brief:
 [`assessments/final-paper/`](../assessments/final-paper/README.md).
 
-Submit everything to `submissions/group-XX/`. Preparation checklist:
+Submit everything to `groups/A2026/group-XX/session-12/` — the deck, the governance file, the analysis, and the revised memo. Preparation checklist:
 [`00-pre-session/README.md`](00-pre-session/README.md).
 
 The governance file, backtest and shift diagnostic were drafted in the

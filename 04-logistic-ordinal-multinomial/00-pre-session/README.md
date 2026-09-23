@@ -37,9 +37,9 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
 **Harvard Dataverse: [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7)**
 
@@ -65,7 +65,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-Lending club — 9,578 three-year loans, fico scores and default.
+Lending Club — 9,578 three-year loans, FICO scores and default.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

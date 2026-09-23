@@ -33,6 +33,8 @@ By the end of this session you should be able to:
 | **First half** (~90 min) | In class | The syllabus: how the course works and how you are judged | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | A conversation: *Europe 2031*, and what AI actually is | [`02-practice/`](02-practice/README.md) |
 
+From session 02 the week also ends with an optional **[QMIB Lab](https://warin.ca/qmib-labs/)** — an at-home knowledge check, one per session, that counts toward participation. There is none for this session.
+
 **Session 01 has no practice and no deliverable.** It is the one session with no mathematics *in
 class*: the first half walks through the syllabus, the second is a discussion. The methods begin in
 Session 02.
@@ -59,7 +61,7 @@ Download instructions: [`data/README.md`](data/README.md)
 
 ## Deliverable
 
-A one-page memo (`02-practice/submissions/group-XX.md`) containing: the assumption,
+A one-page memo (`groups/A2026/group-XX/session-01/memo.md`) containing: the assumption,
 its negation, two indicators with sources and frequencies, two trigger points with horizons, one
 falsifier, the LLM's strongest objection with your reply, and one flagged unverifiable claim.
 Attach your indicator plot. **Five minutes of oral presentation** in the last 20 minutes of class.

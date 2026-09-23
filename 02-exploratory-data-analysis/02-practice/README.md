@@ -33,7 +33,7 @@ everywhere below — group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-02
 ```
 
 ---
@@ -162,7 +162,7 @@ random when you start, so everyone prepares.
 ## Submitting
 
 ```bash
-git add 02-exploratory-data-analysis/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-02
 git commit -m "Session 02 practice — group XX"
 git push -u origin group-XX
 ```
@@ -178,6 +178,12 @@ Everyone pushes at least once. The log is the record of participation.
 - Calling a variable "normal" because it is symmetric
 - Applying the empirical rule to a variable you have just shown to be skewed
 - Dropping outliers before you have said what they are
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-02.html)** has a knowledge check on what you have just done. It is optional, never a prerequisite for the next lecture, and never marked for correctness — a completed report counts because attempting it is the engagement being measured.
 
 ---
 

@@ -17,8 +17,8 @@ Budget **60–90 minutes**.
 
 ## 1. The reading — 45–60 min
 
-**Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity***
-[Read the article](https://doi.org/10.1162/rest_a_00759)
+**Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)**
+[Read the article](https://doi.org/10.1257/aeri.20190536)
 
 Read for the **argument**, not for coverage:
 
@@ -37,11 +37,11 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [10.7910/DVN/PIAZWN](https://doi.org/10.7910/DVN/PIAZWN)**
+**Harvard Dataverse: [10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH)**
 
 Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
 
@@ -50,6 +50,8 @@ Download it once, and unzip it here — the folder is git-ignored, so nothing la
 ```
 
 Keep the authors' own folder structure and README.
+
+> **Note.** This deposit sits behind a Dataverse **guestbook**, so the `curl` recipe above returns an error for this session. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, accept the terms once, and unzip it to the same folder. Everything after that is identical.
 
 ### b) The course data, for your own angle
 

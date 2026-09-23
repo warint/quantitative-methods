@@ -52,6 +52,9 @@ SESSIONS = {
            "Counterfactuals, randomised trials, matching and propensity scores"),
     "11": ("Causal Inference (2/2)",
            "Difference-in-differences and instrumental variables"),
+    "12": ("What the Twelve Weeks Were For",
+           "The closing address: what the term established, why it matters in private "
+           "and public organisations, and Europe 2031 read with the tools you now have"),
 }
 
 STYLE = """
@@ -92,6 +95,35 @@ STYLE = """
 """
 
 
+# Every deck links to its neighbours the way a reader browsing the repository
+# would want — `../01-lecture/README.md`, `setup-git-and-github.md`. Those are
+# correct on GitHub and wrong the moment the page is copied into docs/, which is
+# one directory with no session folders under it. Rewriting them on the way out
+# means the source keeps the relative links that work where it lives, and the
+# published page gets absolute ones that work where it lands.
+MD_LINK = re.compile(r'href="((?!https?:|#|mailto:|data:)[^"]{1,200}\.md)"')
+
+
+def publish_deck(src, dest):
+    """Copy a rendered deck into docs/, repointing its relative .md links."""
+    src = Path(src)
+    here = src.parent.relative_to(ROOT)
+    text = src.read_text(encoding="utf-8")
+
+    def fix(m):
+        target = os.path.normpath(os.path.join(here, m.group(1)))
+        if target.startswith(".."):        # escapes the repository: leave it
+            return m.group(0)
+        if not (ROOT / target).exists():
+            print(f"    {dest.name}: link to a file that does not exist — {m.group(1)}")
+        return f'href="{REPO_URL}/blob/main/{target}"'
+
+    fixed, n = MD_LINK.subn(fix, text)
+    dest.write_text(fixed, encoding="utf-8")
+    shutil.copystat(src, dest)
+    return n
+
+
 def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / ".nojekyll").touch()   # skip Jekyll: nothing here needs processing
@@ -105,6 +137,15 @@ def main():
         shutil.copy2(f, data_out / f.name)
         n_data += 1
     print(f"published {n_data} spine files to docs/data/")
+
+    # The per-session Python cheatsheets, which every deck links to by URL.
+    # Built by scripts/build_cheatsheets.py; copied here so the link resolves.
+    n_sheets = 0
+    for src in sorted(ROOT.glob("[0-9][0-9]-*/PYTHON-CHEATSHEET.pdf")):
+        num = src.parent.name[:2]
+        shutil.copy2(src, DOCS / f"python-cheatsheet-{num}.pdf")
+        n_sheets += 1
+    print(f"published {n_sheets} python cheatsheets to docs/")
 
     decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:
@@ -123,12 +164,15 @@ def main():
         if kind is None:
             continue
         dest = DOCS / f"session-{num}-{kind}.html"
-        shutil.copy2(src, dest)
+        publish_deck(src, dest)
         if kind == "lecture":
             title, blurb = SESSIONS[num]
             rows.append((num, title, blurb, dest.name, dest.stat().st_size))
         else:
             extra.setdefault(num, {})[kind] = dest.name
+        sheet = DOCS / f"python-cheatsheet-{num}.pdf"
+        if sheet.exists():
+            extra.setdefault(num, {})["cheatsheet"] = sheet.name
 
     def companions(num):
         got = extra.get(num, {})

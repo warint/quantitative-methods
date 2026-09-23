@@ -6,6 +6,13 @@
 
 ---
 
+> **Python cheatsheet — [session 01](https://warint.github.io/quantitative-methods/python-cheatsheet-01.pdf)** (PDF) ·
+> source: [`PYTHON-CHEATSHEET.qmd`](../PYTHON-CHEATSHEET.qmd)
+>
+> How to start Python in VS Codium on your platform, how to make a file and run it,
+> the DataFrame basics, and every name taught in sessions 1 to 1 with a
+> line showing it in use. Print it.
+
 This session is not a lecture. There is no mathematics in it. The first half walks through
 [`SYLLABUS.md`](../../SYLLABUS.md) in full, and you should arrive having read it — the ninety minutes
 are for the questions it raises, not for reading it aloud.
@@ -70,7 +77,7 @@ Full detail, including your group's allocation: [`RESEARCH-MANDATES.md`](../../R
 | **Final exam** | 40% | **individual** research paper (25) + individual oral, 15 min (15) |
 
 Participation is **active engagement**, and three routes count equally: contributing in the room,
-engaging in the 90-minute practice, and completing an optional QMIB Lab App knowledge check after a
+engaging in the 90-minute practice, and completing an optional [QMIB Lab](https://warin.ca/qmib-labs/) knowledge check after a
 session. What is marked is sustained engagement across the term, not a count of interventions.
 
 The final mark out of 100 is converted to a **letter grade on a curve, with the class median at

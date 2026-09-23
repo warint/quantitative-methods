@@ -164,7 +164,7 @@ sample, because a few very rich country-years are pulling it up.
 ::: {.definition}
 [**Sample variance**]{.term} —
 $$
-s^2 \;=\; \frac{1}{n-1}\sum_i (x_i - \bar x)^2 .
+s^2 \thickspace=\thickspace \frac{1}{n-1}\sum_i (x_i - \bar x)^2 .
 $$
 The divisor is $n-1$, not $n$, because the deviations are taken from $\bar x$
 rather than from the true mean $\mu$. $\bar x$ is the value that *minimises*
@@ -208,6 +208,34 @@ middle half of the data. Like the median it is unaffected by the size of the
 extremes, and like the median it is the right choice when the distribution is
 skewed or heavy-tailed.
 :::
+
+One more distinction belongs here, because the same square root is used for two
+different jobs and the two are confused constantly — including in published
+tables.
+
+::: {.definition}
+[**Standard deviation**]{.term} — $s = \sqrt{s^2}$, the spread of the
+**observations** around their mean, in the units of the variable.
+:::
+
+::: {.definition}
+[**Standard error**]{.term} — $\mathrm{SE}(\bar x) = s/\sqrt{n}$, the spread of
+an **estimate** around the truth, across the samples you might have drawn but
+did not. It estimates $\sigma/\sqrt{n}$.
+:::
+
+They share units and differ by a factor most people do not carry in their head,
+which is why they get swapped. What separates them is what each is the spread
+*of*: $s$ describes the data, $\mathrm{SE}$ describes a number computed from the
+data.
+
+The consequence is a test you can apply by eye. As $n$ grows, $s$ settles on a
+fixed $\sigma$ — observations do not become less variable because you collected
+more of them — while $\mathrm{SE}$ shrinks as $1/\sqrt{n}$ without limit. So an
+error bar that stays the same width as the sample grows is a standard deviation,
+and one that narrows is a standard error. More data tells you more precisely
+where the mean is; it tells you nothing new about how spread out the
+observations are.
 
 ## Shape, and a rule that passes when it should not
 
@@ -379,16 +407,16 @@ matters depends on the question, and the only wrong move is not to check.
 Now fit something. The simplest model relates one variable to one other,
 
 $$
-y_i \;=\; \beta_0 + \beta_1 x_i + \varepsilon_i ,
+y_i \thickspace=\thickspace \beta_0 + \beta_1 x_i + \varepsilon_i ,
 $$
 
 and the least-squares solution in this case has a closed form worth
 memorising, because it says what a slope *is*:
 
 $$
-\hat\beta_1 \;=\; \frac{\operatorname{Cov}(x, y)}{\operatorname{Var}(x)},
+\hat\beta_1 \thickspace=\thickspace \frac{\mathrm{Cov}(x, y)}{\mathrm{Var}(x)},
 \qquad
-\hat\beta_0 \;=\; \bar y - \hat\beta_1 \bar x .
+\hat\beta_0 \thickspace=\thickspace \bar y - \hat\beta_1 \bar x .
 $$
 
 The slope is covariation divided by variation in the predictor: how much $x$ and
@@ -404,9 +432,9 @@ fitted vector. A right angle means Pythagoras:
 
 $$
 \underbrace{\lVert y - \bar y\rVert^2}_{\text{TSS}}
-\;=\;
+\thickspace=\thickspace
 \underbrace{\lVert \hat y - \bar y\rVert^2}_{\text{ESS}}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\lVert y - \hat y\rVert^2}_{\text{RSS}} .
 $$
 
@@ -488,7 +516,7 @@ is tempted to describe an angle as a percentage of anything.
 One predictor is rarely enough, and the extension is mechanical:
 
 $$
-y_i \;=\; \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \dots + \beta_{p-1} x_{p-1,i} + \varepsilon_i .
+y_i \thickspace=\thickspace \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \dots + \beta_{p-1} x_{p-1,i} + \varepsilon_i .
 $$
 
 The interpretation is where the trouble starts. Every textbook says $\beta_1$ is

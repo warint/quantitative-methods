@@ -1,10 +1,10 @@
 # Session 07 — Data
 
-**45,000 films — budget, popularity, revenue, runtime and votes**
+**The KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions each split into de facto and de jure**
 
 ```python
 import qmib
-data = qmib.load("movies")
+data = qmib.load("kof")
 ```
 
 One call. It resolves a local cache first, then the committed spine, then the published URL —

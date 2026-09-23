@@ -1,4 +1,9 @@
 # Quantitative Methods in International Business
+#
+# Python 3.12 (3.12.10 is the last with a binary installer). Not 3.13, not 3.14: everything below installs on those, but
+# aider-chat declares requires-python <3.13 and the course uses one interpreter
+# for everything. 3.12 is supported until October 2028.
+#
 # Install:  pip install -r requirements.txt
 # Verify:   python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
 
@@ -25,11 +30,20 @@ shap>=0.44
 # TF-IDF comes from scikit-learn. Embeddings are generated locally via Ollama
 # (`ollama pull nomic-embed-text`), called over HTTP — no extra package required.
 nltk>=3.8
-scikit-learn-extra>=0.3 ; python_version < "3.13"
+# scikit-learn-extra was here for k-medoids and was never imported. It is also
+# the one package that stops at cp312, so removing it is what lets the rest of
+# this file install on any modern Python.
 
 # ---- Causal machine learning (Session 10) ----------------------------------
 doubleml>=0.7
 econml>=0.15
+
+# ---- Difference-in-differences (Session 11) ---------------------------------
+# Callaway-Sant'Anna group-time effects and the Rambachan-Roth sensitivity
+# analysis, neither of which is in statsmodels. Upper-bounded on purpose: the
+# package is young and moves fast, and a major version arriving mid-term would
+# break a chapter that executes its own cells.
+diff-diff>=3.11,<4
 
 # ---- Structural equation modelling (Session 09) ------------------------------
 # The Python counterpart to lavaan. Reproduces lavaan's canonical results on

@@ -5,8 +5,6 @@
 > Follows on from the [Session 01 setup guide](../../01-foundations-scenarios-and-tools/00-pre-session/setup-vscodium-local-llm.md).
 > You should already have VS Codium, a Python environment, and Ollama serving a local model.
 
-Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
-
 ---
 
 ## ⚠️ `XX` is a placeholder — replace it
@@ -27,7 +25,7 @@ git checkout group-07
 ```
 
 not `git checkout group-XX`. Same for folder paths:
-`02-practice/submissions/group-07/`.
+`groups/A2026/group-07/`.
 
 If you do not know your group number yet, you get it in Session 01. Do not guess.
 
@@ -48,11 +46,26 @@ github.com/warint/quantitative-methods        ← the course repository
 ```
 
 **Your group has one branch, named `group-XX`.** Everything your group produces is committed on
-that branch and pushed to it. Your practice deliverables go in the session folder:
+that branch and pushed to it, into your group's own directory:
 
 ```
-NN-session-name/02-practice/submissions/group-XX/
+groups/
+└── A2026/                    ← the cohort: autumn 2026
+    ├── group-03/
+    └── group-XX/             ← yours
+        ├── session-02/       ← one folder per practice
+        ├── session-03/
+        └── ...
 ```
+
+`groups/A2026/` ships **empty**. Your group creates its own folder the first time
+it submits — `mkdir -p groups/A2026/group-XX/session-02` — and committing a file
+inside it is what puts your group in the repository. There is no registration
+step, and git does not track an empty directory.
+
+Your whole term is one directory, which is how you find in week ten what you wrote in week two.
+The cohort folder above it is what lets next year's students start clean rather than on top of
+you — and it is why the path is `A2026` and not just `groups/`.
 
 **Why one repository and not one per group.** Your commit history is one of the four records used
 to check that all three of you did the work, and `scripts/assess.py contributions` reads it from
@@ -143,8 +156,8 @@ On Windows PowerShell, use `Set-Location "$HOME\Desktop"` for the first line. Th
 Rebuild your environment inside the clone:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+python3.12 -m venv .venv           # Windows: py -3.12 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -194,10 +207,10 @@ git checkout group-07
 
 ```bash
 # group 7 shown throughout — substitute your own number everywhere
-mkdir -p 02-exploratory-data-analysis/02-practice/submissions/group-07
-echo "# Group 07 — session 02" > 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+mkdir -p groups/A2026/group-07/session-02
+echo "# Group 07 — session 02" > groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/
+git add groups/A2026/group-07/session-02/
 git commit -m "Add group 07 notes for session 02"
 git push
 ```
@@ -234,9 +247,9 @@ git checkout group-07
 ```bash
 git pull                              # always pull before you start
 echo "- Ana tested the push, 2 September" >> \
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+git add groups/A2026/group-07/session-02/NOTES.md
 git commit -m "Ana: trial push"
 git push
 ```
@@ -318,7 +331,7 @@ evidence of who did the work.
 
 ```bash
 git log --oneline
-aider --model ollama_chat/qwen2.5-coder:7b --no-auto-commits
+aider --model ollama_chat/qwen2.5-coder:3b --no-auto-commits
 ```
 
 What the agent writes is attributed to **you**. Read the diff before accepting: you are answerable

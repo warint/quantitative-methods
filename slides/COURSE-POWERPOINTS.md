@@ -1,8 +1,10 @@
-# MATH60033A course PowerPoints
+# MATH60033A deck and demo index
 
-The course contains **35 PowerPoint decks and 351 slides**. The files have stable, descriptive names
-and use the same visual system throughout. Source credits and reading links are stored in the speaker
-notes under `[Sources]`.
+Every deck in the course is **Quarto**, rendered to revealjs and published to the course site. The
+one exception is session 12, whose pre-session and presentation brief are still PowerPoint.
+
+`slides/reference.pptx` is not a deck — it is the reference document Quarto uses when a `.qmd` is
+rendered to `pptx`, which a few are as a fallback.
 
 ## The session rhythm
 
@@ -14,7 +16,7 @@ notes under `[Sources]`.
    session method or a benchmark, and break one assumption.
 4. **Present:** finish one slide and give a two-minute presentation. The presenter is selected at
    random. Class ends after the presentations.
-5. **Optional lab:** use the QMIB Lab App for an at-home knowledge check. A completed app report
+5. **Optional lab:** use the [QMIB Lab](https://warin.ca/qmib-labs/) for an at-home knowledge check. A completed report
    counts toward participation and is not required preparation for the next lecture.
 
 Session 01 is the exception: its pre-session installs VS Codium, Python, Ollama, Qwen 2.5 Coder,
@@ -30,9 +32,9 @@ Desktop/quantitative-methods
 Open that folder in VS Codium. Each runnable Python demo is self-contained, uses a fixed seed, works
 offline, and saves its figure locally.
 
-> **Lectures are Quarto, not PowerPoint.** The lecture decks were replaced by the imported
-> Quarto sources listed in [`COURSE-QUARTO-SESSIONS.md`](COURSE-QUARTO-SESSIONS.md); render them
-> with `scripts/render_session_lectures.sh`. Pre-session and practice remain PowerPoint.
+> **Everything here is Quarto.** Lecture provenance — which imported source each deck came from —
+> is in [`COURSE-QUARTO-SESSIONS.md`](COURSE-QUARTO-SESSIONS.md). Render a single deck with
+> `quarto render <file>.qmd --to revealjs`, or the whole site with `scripts/build_docs.py`.
 
 ## Deck and demo index
 
@@ -69,5 +71,7 @@ python session05_regularisation_demo.py
 
 ## QMIB Lab App
 
-Each practice deck closes by distinguishing the optional at-home knowledge check from the next
-session's required article and Dataverse preparation.
+The labs live at **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/)** — one per session, sessions
+02 to 11, each deep-linked from the session it belongs to. Both the lecture deck and the practice
+deck close on it, and both distinguish the optional at-home knowledge check from the next session's
+required article and Dataverse preparation.

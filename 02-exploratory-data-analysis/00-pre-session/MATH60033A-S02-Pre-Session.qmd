@@ -22,21 +22,19 @@ format:
     footer: "MATH60033A · Session 02 pre-session · Thierry Warin, PhD · HEC Montréal"
 ---
 
+<!-- authored: do not regenerate -->
+
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · Before class {.center .scrollable}
 
-1. What to do, and how long it takes
+1. What to do before class, and how long it takes
 2. Read the paper
-3. Get BOTH datasets
-4. 2b · The course data
-5. Self-check
-6. What the session will ask of you
-7. Running the code
-8. Install git — you may already have it
-9. Tell git who you are
-10. Already have your three? Do a trial run
-11. Then each of you pushes, one at a time
+3. Get both datasets — the paper's, and your own angle
+4. Self-check, and what the session will ask of you
+5. Before you run anything — the environment
+6. Session 02 only — git, GitHub, and your group branch
+7. When it goes wrong
 
 ## What session 2 is for {.scrollable}
 ::::: columns
@@ -48,7 +46,6 @@ format:
 - Distinguish **mean, median and trimmed mean**, and say which question each answers
 - Explain why the sample variance divides by $n-1$
 - Test **skewness** and **excess kurtosis** against $2\sqrt{6/n}$ and $4\sqrt{6/n}$
-- Derive the least-squares slope, and read "controlling for" as a residual regression
 
 ::::
 
@@ -57,8 +54,8 @@ format:
 ### The Python
 
 - Compute the moments directly, and check them against a library
-- Fit a simple and a multiple regression with `smf.ols`, and read `.params`
-- Draw a scatter and a fitted line, and label both axes in units
+- Load the course panel with `pd.read_parquet` and `.dropna`, and say how many rows went
+- Take any quantile — median, quartile, percentile — with `.quantile`
 
 ::::
 
@@ -66,15 +63,16 @@ format:
 
 ### The international business
 
-- Quote a slope **in units** a manager can act on
 - Read a mean–median gap as evidence about a distribution's shape
-- Say why a slope is an association, and what more is needed to call it a cause
+- Choose the summary a manager should see when one country dominates the total
+- Say what heavy tails cost a plan built on an average
 
 ::::
 
 :::::
 
 <!-- END deck-frontmatter -->
+
 # Before the session {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
@@ -114,43 +112,92 @@ Read for the **argument**, not for coverage. Annotate four things:
 ## 2 · Get BOTH datasets
 
 ::: {.warn}
-The practice uses two: the **paper's data**, to reproduce one of its results, and **your own
-angle**, to apply the method. Have both before you arrive.
+The practice uses two: the **paper's data**, to reproduce one of its results,
+and **your own angle**, to apply the method. Have both before you arrive — the
+first is 33 MB and takes a couple of minutes on room wifi.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
-
-::: {.step}
-[10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF)
+::: {.tight}
+- **a)** Fraiberger et al.'s replication package, from Harvard Dataverse
+- **b)** the course data, through `qmib`
 :::
 
-Unzip it into `02-exploratory-data-analysis/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+## 2a · The replication package, in three commands
 
-## 2b · The course data
+From the repository root, in the VS Codium terminal:
+
+**macOS and Linux**
+
+```bash
+mkdir -p 02-exploratory-data-analysis/data/replication
+cd 02-exploratory-data-analysis/data/replication
+curl -L -o replication.zip \
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF"
+unzip -q replication.zip && rm replication.zip
+cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir 02-exploratory-data-analysis/data/replication
+cd 02-exploratory-data-analysis/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QNKFJF"
+Expand-Archive replication.zip .; Remove-Item replication.zip
+cd -
+```
+
+::: {.muted}
+No Dataverse account and no browser needed — that URL is their public download API.
+:::
+
+## 2a · Check it arrived
+
+```bash
+ls 02-exploratory-data-analysis/data/replication/public
+```
+
+::: {.check}
+You should see `code/`, `data/` and `results/`. The `code/` folder is Stata
+`.do` files — you are not running them; you are reproducing **one result** in
+Python, and the practice tells you which.
+:::
+
+::: {.warn}
+`data/replication/` is git-ignored, so nothing large is ever committed. If
+`git status` shows the zip, you are in the wrong folder.
+:::
+
+## 2b · The course data, in one command
 
 ```python
 import qmib
 
-data = qmib.load("core")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+core = qmib.load("core")                # the spine — every group uses this
+mine = qmib.load("angle_c_country")     # YOUR angle — see your data dictionary
 
-print(data.shape, core.shape, mine.shape)
+print(core.shape, mine.shape)
 ```
 
 ::: {.check}
-Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
-whatever the room's wifi is doing.
+`(450, 11)` for the spine. Anything else, or a traceback, bring it to class.
+:::
+
+::: {.warn}
+**Replace `angle_c_country` with your own angle.** Your group's is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md). `qmib.catalog()` lists
+every dataset in the course.
 :::
 
 ::: {.muted}
-The course spine — thirty european countries, 2010–2024 · everything available: `qmib.catalog()`
+`qmib.load` downloads once and caches as parquet, so the practice works whatever
+the room's wifi is doing — which is the reason for doing it the night before.
 :::
 
-## 3 · Self-check
+## 3 · Self-check, and what the session will ask of you
 
-Answer on paper. If you cannot, that is what the lecture is for.
+Answer these on paper. If you cannot, that is what the lecture is for.
 
 ::: {.tight}
 1. In one sentence: what does this session's method let you claim that the previous one did not?
@@ -158,16 +205,14 @@ Answer on paper. If you cannot, that is what the lecture is for.
 3. Which claim in the paper rests on this method — and how hard does it lean on it?
 :::
 
-## What the session will ask of you
-
-By the end you should be able to:
+By the end of the session you should be able to:
 
 ::: {.tight}
 - Compute the **mean, median and trimmed mean**, and say which question each answers
 - Explain why the sample variance divides by $n-1$
 - Apply the **empirical rule**, and state the precondition that makes it valid
 - Compute **skewness** and **excess kurtosis**, and test each against its threshold
-- Fit a simple regression and state the slope **in units**
+- Say which summary you would defend in print, and why the other two mislead
 :::
 
 ::: {.get}
@@ -175,17 +220,28 @@ By the end you should be able to:
 `qmib.load()` run at least once · your self-check answers on paper.
 :::
 
-## Running the code
+## Before you run anything
 
-Everything runs in the **VS Codium terminal**, with the project environment active:
+Everything runs in the **VS Codium terminal**, from the repository root, with the project
+environment active. Activate it in **every new terminal**, not only the first:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-python
+source .venv/bin/activate        # macOS and Linux
 ```
 
+```powershell
+.venv\Scripts\activate           # Windows (PowerShell)
+```
+
+::: {.check}
+Your prompt must begin with **`(.venv)`**. Without it `python` and `pip` are your system's, and
+nothing the course installed is visible to them.
+:::
+
 ::: {.muted}
-Missing a package? `pip install -r requirements.txt` from the repository root.
+`ModuleNotFoundError` means the packages went somewhere else, or were never installed. Check the
+prompt first, then `pip install -r requirements.txt` — **from the repository root, with the
+environment active**. Building the environment from scratch is Session 01, step 1.4.
 :::
 
 ::: {.muted}
@@ -193,31 +249,105 @@ Session 02: [`README.md`](../README.md) ·
 the lecture: [`01-lecture/`](../01-lecture/README.md)
 :::
 
-# Session 02 only: your group repository {background-color="#E3120B" style="color:#F7F4ED"}
+# Session 02 only: git, step by step {background-color="#E3120B" style="color:#F7F4ED"}
 
 ::: {style="margin-top: 1.0em; color:#F7F4ED"}
-### From this session on, your commit history is part of the record
+### Seven steps, about 45 minutes. Everything you need is on these slides.
 :::
 
-## Install git — you may already have it
+## How submission works
+
+Two things, and everything in the rest of this deck is one of them.
+
+::: {.tight}
+1. **One repository, one branch per group.** You do not create a repository —
+   you check out `group-XX` in this one.
+2. **One folder per group**, which your group creates: `groups/A2026/group-XX/`.
+:::
+
+```
+github.com/warint/quantitative-methods
+│
+├── main          ← the instructor's. You never push to it.
+├── group-01      ← group 01's branch
+└── group-XX      ← yours
+```
+
+::: {.warn}
+**Why not one repository per group.** `scripts/assess.py contributions` reads
+your commit history from *this* repository. Work pushed anywhere else is
+invisible to it — and invisible work counts as work you did not do.
+:::
+
+## Where your work goes
+
+The repository ships with two levels and no more:
+
+```
+groups/
+└── A2026/          ← the cohort: autumn 2026. Empty.
+```
+
+**Your group creates the third.** Nobody has made one for you, because group
+numbers are not fixed until Session 04.
+
+```bash
+mkdir -p groups/A2026/group-07/session-02      # macOS and Linux — your number
+```
+
+```powershell
+mkdir groups/A2026/group-07/session-02         # Windows — no -p
+```
+
+::: {.check}
+Committing that folder with a file in it *is* how your group comes into
+existence in this repository. There is no other registration step.
+:::
+
+## What it looks like once the term is running
+
+```
+groups/
+└── A2026/
+    ├── group-03/
+    │   ├── session-02/
+    │   └── session-03/
+    └── group-07/             ← yours
+        ├── session-02/       ← one folder per practice
+        ├── session-03/
+        └── ...
+```
+
+::: {.muted}
+Your whole term is one directory, which is how you find in week ten what you
+wrote in week two. The cohort folder above it is what lets next year's students
+start clean instead of on top of you.
+:::
+
+::: {.warn}
+Git does not track empty folders. `mkdir` alone commits nothing — the folder
+appears in the repository only when it has a file inside it.
+:::
+
+## Step 1 · Install git
 
 ```bash
 git --version
 ```
 
 ::: {.check}
-**macOS.** Git ships with Apple's Command Line Tools, so most Macs already have it. If the command
-is not found, macOS offers to install them — accept — or run `xcode-select --install`.
-**You do not need Homebrew.**
+**macOS.** Git ships with Apple's Command Line Tools, so most Macs already have
+it. If the command is not found, macOS offers to install them — accept — or run
+`xcode-select --install`. **You do not need Homebrew.**
 :::
 
 ::: {.tight}
-- **Windows** — [git-scm.com/downloads](https://git-scm.com/downloads), accept the defaults, then
-  restart VS Codium
+- **Windows** — [git-scm.com/downloads](https://git-scm.com/downloads), accept
+  the defaults, then restart VS Codium
 - **Linux** — `sudo apt install git`
 :::
 
-## Tell git who you are
+## Step 2 · Tell git who you are
 
 ```bash
 git config --global user.name  "Your Full Name"
@@ -225,48 +355,181 @@ git config --global user.email "you@example.com"
 ```
 
 ::: {.warn}
-Use your **real** name and the email on your GitHub account. The commit log is one of the records
-used to check that all three of you did the work — and it only identifies you if you set this.
+Use your **real** name and the email on your GitHub account. The commit log is
+one of the four records used to check that all three of you did the work — and
+it only identifies you if you set this. Do it before your first commit; it does
+not apply retroactively.
 :::
 
-## Already have your three? Do a trial run
+## Step 3 · A GitHub account
 
-Groups are confirmed in Session 04 — but if you have already agreed to work together, rehearse the
-whole cycle now. Ten minutes, and it removes the one thing that reliably eats practice time.
+::: {.tight}
+1. [github.com/signup](https://github.com/signup) — free
+2. Choose a username you would put on a CV
+3. Verify the email GitHub sends you
+4. Enable **two-factor authentication** when prompted; GitHub requires it
+:::
 
-**One person, once:**
+::: {.warn}
+**Then send your GitHub username to the instructor.** You cannot push until you
+have been added as a collaborator, and that is done by hand. Cloning works
+without it — pushing does not.
+:::
+
+## Step 4 · Move the Session 01 folder aside first
+
+Session 01 had you unzip to `Desktop/quantitative-methods`. The clone wants
+**that exact path**, so it will refuse to start while the old folder is there:
+
+```text
+fatal: destination path 'quantitative-methods' already exists
+       and is not an empty directory.
+```
+
+Rename it rather than deleting it — anything you wrote during Session 01 is
+still in there.
 
 ```bash
-git checkout -b group-07          # your number, not 07
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+mv quantitative-methods quantitative-methods-session01
+```
+
+## Step 4b · Clone it onto your Desktop
+
+A ZIP cannot push. From here you work in a clone — in the same place the ZIP
+was, so every path in the course still matches.
+
+```bash
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+git clone https://github.com/warint/quantitative-methods.git
+cd quantitative-methods
+pwd                              # expect /Users/you/Desktop/quantitative-methods
+```
+
+Then `File → Open Folder…` in VS Codium and choose the **new** folder.
+
+::: {.warn}
+Copy anything you wrote in Session 01 out of `quantitative-methods-session01`,
+then delete it. Two copies of the course on one Desktop is the most reliable way
+to spend an hour editing the file you are not running.
+:::
+
+## Step 4c · Rebuild the environment inside the clone
+
+`.venv` is not in the repository — it is built per machine, and the one in your
+old ZIP folder belongs to that folder. **Name the version**, as in Session 01:
+
+```bash
+python3.12 -m venv .venv         # macOS and Linux
+```
+
+```powershell
+py -3.12 -m venv .venv           # Windows (PowerShell)
+```
+
+Then activate it, and check the prompt **before** installing anything:
+
+```bash
+source .venv/bin/activate        # macOS and Linux
+```
+
+```powershell
+.venv\Scripts\activate           # Windows (PowerShell)
+```
+
+```bash
+pip -V                           # (.venv) in the prompt, .venv in this path
+pip install -r requirements.txt
+```
+
+::: {.muted}
+There is no `python3` on Windows — use `py`. If it answers *Python introuvable*,
+the Microsoft Store alias is shadowing it: Session 01, "Windows: Python
+introuvable".
+:::
+
+The whole setup, checked in one line:
+
+```bash
+python -c "import qmib; print(qmib.load('core').shape)"
+```
+
+::: {.check}
+`(450, 11)` means you are ready. Anything else — bring the error to class.
+:::
+
+## Step 5 · Authenticating your first push
+
+GitHub rejects your account password and asks for a token instead.
+
+::: {.tight}
+1. github.com → avatar → **Settings**
+2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+3. **Generate new token**, tick the **`repo`** scope, set an expiry
+4. Copy it — **it is shown once** — and paste it when git asks for your *password*
+:::
+
+::: {.muted}
+Paste it once and the system keychain remembers it. If you lose it, generate
+another; tokens are disposable.
+:::
+
+## Step 6 · Your group branch
+
+**One person per group** creates it. The others check it out.
+
+```bash
+# the first person, once — group 07 shown; use your own number
+git checkout -b group-07
 git push -u origin group-07
 ```
 
-**The other two:**
-
 ```bash
+# everyone else, afterwards
 git fetch origin
 git checkout group-07
 ```
 
-## Then each of you pushes, one at a time
+::: {.warn}
+**Never push while on `main`.** It is protected, so the push is refused rather
+than doing damage — but check where you are before you commit:
+`git branch --show-current`
+:::
+
+## Step 7 · The round trip
 
 ```bash
-git pull                          # always pull before you start
+git pull                         # always pull before you start
 
-echo "- Ana tested the push" >> \
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+mkdir -p groups/A2026/group-07/session-02      # Windows: mkdir, without -p
+echo "# Group 07 — session 02" > \
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
-git commit -m "Ana: trial push"
+git add groups/A2026/group-07/session-02/
+git commit -m "Add group 07 notes for session 02"
 git push
 ```
 
+Refresh the repository page, switch to your branch, and the file is there.
+
 ::: {.check}
-When all three are done, `git log --oneline -5` should show **three commits with three different
-author names**. That is exactly what the participation record looks like.
+**Each of the three of you does this at least once, from your own machine.** Not
+one per group. `git log --oneline -5` should show three commits with three
+different author names — that is exactly what the participation record is.
 :::
 
+## When it goes wrong
+
+| What you see | What it means | What to do |
+|---|---|---|
+| `rejected — non-fast-forward` | someone pushed in between | `git pull`, then push again |
+| `Authentication failed` | the password is not the token | Step 5 again, generate a fresh one |
+| `Permission denied` | not yet a collaborator | send your username to the instructor |
+| `detached HEAD` | you checked out a commit, not a branch | `git checkout group-07` |
+| a conflict marker `<<<<<<<` | two people edited the same lines | keep both sides, delete the markers, commit |
+
 ::: {.muted}
-A rejected push almost always means someone pushed in between — `git pull` first. That is normal.
-Full guide: [`setup-git-and-github.md`](setup-git-and-github.md)
+A rejected push is normal and means the system is working. The full written
+guide, with more on conflicts and working together, is
+[`setup-git-and-github.md`](setup-git-and-github.md).
 :::

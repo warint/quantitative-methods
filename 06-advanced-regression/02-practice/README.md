@@ -33,7 +33,7 @@ group 07 uses `group-07`.
 
 ```bash
 git checkout -b group-XX
-mkdir -p 06-advanced-regression/02-practice/submissions/group-XX
+mkdir -p groups/A2026/group-XX/session-06
 ```
 
 ---
@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity***, and its replication package
-([10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD)) should already be unzipped at:
-
-```text
-06-advanced-regression/data/replication/
-```
+The paper is **Topalova & Khandelwal (2011), *Trade Liberalization and Firm Productivity***. Its replication package ([10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD)) should already be unzipped at `06-advanced-regression/data/replication/`.
 
 The session's own dataset, for comparison:
 
@@ -94,7 +89,7 @@ A 250-word note in your submissions folder:
 ## Submitting
 
 ```bash
-git add 06-advanced-regression/02-practice/submissions/group-XX
+git add groups/A2026/group-XX/session-06
 git commit -m "Session 06 practice — group XX"
 git push -u origin group-XX
 ```
@@ -109,6 +104,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Choosing fixed or random effects because one gave the significant answer
 - Reporting an interaction without stating the slope in each group
 - Adding a quadratic term and interpreting only its coefficient
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-06.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

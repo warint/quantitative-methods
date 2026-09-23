@@ -20,9 +20,103 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import SESSIONS  # noqa: E402
+from course_spec import COHORT, SESSIONS, lab_url  # noqa: E402
 
 RED, PAPER = "#E3120B", "#F7F4ED"
+
+
+def paper_data(s):
+    """The 'get the paper's data' block of the pre-session deck.
+
+    Most sessions send the student to a Harvard Dataverse deposit. Some papers
+    have no deposit but rest on a public database anyone can download — the KOF
+    Globalisation Index, the Macrohistory database — and for those the course
+    loader fetches it, so there is nothing to unzip.
+    """
+    if not s.get("dataverse"):
+        return f"""**a) The paper's data** — published, and fetched for you
+
+::: {{.step}}
+`qmib.load("{s['dataset']}")`
+:::
+
+The paper has no replication deposit, but it rests on a database its publisher puts online for
+anyone. The course loader downloads it once and caches it as parquet, so run this before you
+arrive and the practice works with the wifi off:
+
+```python
+import qmib
+
+data = qmib.load("{s['dataset']}")
+print(data.shape)
+```
+
+::: {{.warn}}
+Run it **before** class. It is a single download, and a room of thirty people fetching it at
+once is not a download.
+:::
+"""
+    extra = f"\n::: {{.warn}}\n{s['data_extra']}\n:::\n" if s.get("data_extra") else ""
+    return f"""**a) The paper's replication package** — Harvard Dataverse
+
+::: {{.step}}
+[{s['dataverse']}](https://doi.org/{s['dataverse']})
+:::
+
+Download it from the terminal — no Dataverse account, no browser. From the repository root:
+
+**macOS and Linux**
+
+```bash
+mkdir -p {s['dir']}/data/replication && cd {s['dir']}/data/replication
+curl -L -o replication.zip \\
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+unzip -q replication.zip && rm replication.zip && cd -
+```
+
+**Windows PowerShell**
+
+```powershell
+mkdir {s['dir']}/data/replication; cd {s['dir']}/data/replication
+curl.exe -L -o replication.zip `
+  "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:{s['dataverse']}"
+Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
+```
+
+::: {{.warn}}
+`data/replication/` is git-ignored, so nothing large is committed. Keep the authors' own
+structure — do not tidy it.
+:::
+{extra}"""
+
+
+def paper_pointer(s):
+    """One-line pointer to where the paper's data lives, for the practice deck."""
+    if not s.get("dataverse"):
+        return f'data: `qmib.load("{s["dataset"]}")`'
+    return f"[{s['dataverse']}](https://doi.org/{s['dataverse']})"
+
+
+def reproduce_intro(s):
+    """Where the paper's result is to be found, for the practice deck."""
+    if not s.get("dataverse"):
+        return (
+            "Take the result the paper rests on, and put it to the test on the database the "
+            "paper itself uses. There is nothing to unzip — the loader has it."
+        )
+    return (
+        "Take the result the paper rests on, and reproduce it. The package you downloaded is at\n"
+        f"`{s['dir']}/data/replication/`."
+    )
+
+
+def sentence(s):
+    """Capitalise the first letter and leave the rest alone.
+
+    `str.capitalize()` lowercases everything after it, which turned "GDP per
+    capita" into "Gdp per capita" on every deck that named one.
+    """
+    return s[:1].upper() + s[1:]
 
 
 def header(num, kind, title, subtitle):
@@ -114,9 +208,9 @@ git checkout group-07
 git pull                          # always pull before you start
 
 echo "- Ana tested the push" >> \\
-  02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+  groups/A2026/group-07/session-02/NOTES.md
 
-git add 02-exploratory-data-analysis/02-practice/submissions/group-07/NOTES.md
+git add groups/A2026/group-07/session-02/NOTES.md
 git commit -m "Ana: trial push"
 git push
 ```
@@ -134,6 +228,14 @@ Full guide: [`setup-git-and-github.md`](setup-git-and-github.md)
 
 def pre_session_deck(num, s):
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
+    # Six sessions teach on the spine itself. Loading it twice under two names,
+    # as the template used to, reads as two datasets and is one.
+    # When the paper has no deposit, step 2 already loaded the session dataset;
+    # repeating it under "the course data" reads as two datasets and is one.
+    on_spine = s["dataset"] == "core" or not s.get("dataverse")
+    lecture_load = ("" if on_spine
+                    else f'data = qmib.load("{s["dataset"]}")     # what the lecture uses\n')
+    shapes = "core.shape, mine.shape" if on_spine else "data.shape, core.shape, mine.shape"
     return header(num, "pre-session", "Before the session", s["question"]) + f"""
 # Before the session {{background-color="{RED}" style="color:{PAPER}"}}
 
@@ -178,25 +280,17 @@ The practice uses two: the **paper's data**, to reproduce one of its results, an
 angle**, to apply the method. Have both before you arrive.
 :::
 
-**a) The paper's replication package** — Harvard Dataverse
-
-::: {{.step}}
-[{s['dataverse']}](https://doi.org/{s['dataverse']})
-:::
-
-Unzip it into `{s['dir']}/data/replication/` — that folder is git-ignored, so nothing large is
-committed. Keep the authors' own structure.
+{paper_data(s)}
 
 ## 2b · The course data
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")     # what the lecture uses
-core = qmib.load("core")                # shared by every group
-mine = qmib.load("angle_c_country")     # YOUR angle — see your dictionary
+{lecture_load}core = qmib.load("core")                # the spine, shared by every group
+mine = qmib.load("angle_c_country")     # REPLACE with your own angle
 
-print(data.shape, core.shape, mine.shape)
+print({shapes})
 ```
 
 ::: {{.check}}
@@ -204,13 +298,18 @@ Run this **before** you arrive. It downloads once and caches as parquet, so the 
 whatever the room's wifi is doing.
 :::
 
-::: {{.muted}}
-{s['dataset_note'].capitalize()} · everything available: `qmib.catalog()`
+::: {{.warn}}
+`angle_c_country` is an example, not your angle. Yours is named in
+[`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
-## 3 · Self-check
+::: {{.muted}}
+{sentence(s['dataset_note'])} · everything available: `qmib.catalog()`
+:::
 
-Answer on paper. If you cannot, that is what the lecture is for.
+## 3 · Self-check, and what the session will ask of you
+
+Answer these on paper. If you cannot, that is what the lecture is for.
 
 ::: {{.tight}}
 1. In one sentence: what does this session's method let you claim that the previous one did not?
@@ -218,9 +317,7 @@ Answer on paper. If you cannot, that is what the lecture is for.
 3. Which claim in the paper rests on this method — and how hard does it lean on it?
 :::
 
-## What the session will ask of you
-
-By the end you should be able to:
+By the end of the session you should be able to:
 
 ::: {{.tight}}
 {objectives}
@@ -231,17 +328,28 @@ By the end you should be able to:
 `qmib.load()` run at least once · your self-check answers on paper.
 :::
 
-## Running the code
+## Before you run anything
 
-Everything runs in the **VS Codium terminal**, with the project environment active:
+Everything runs in the **VS Codium terminal**, from the repository root, with the project
+environment active. Activate it in **every new terminal**, not only the first:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-python
+source .venv/bin/activate        # macOS and Linux
 ```
 
+```powershell
+.venv\\Scripts\\activate           # Windows (PowerShell)
+```
+
+::: {{.check}}
+Your prompt must begin with **`(.venv)`**. Without it `python` and `pip` are your system's, and
+nothing the course installed is visible to them.
+:::
+
 ::: {{.muted}}
-Missing a package? `pip install -r requirements.txt` from the repository root.
+`ModuleNotFoundError` means the packages went somewhere else, or were never installed. Check the
+prompt first, then `pip install -r requirements.txt` — **from the repository root, with the
+environment active**. Building the environment from scratch is Session 01, step 1.4.
 :::
 
 ::: {{.muted}}
@@ -251,8 +359,64 @@ the lecture: [`01-lecture/`](../01-lecture/README.md)
 """ + (GIT_SLIDES.format(RED=RED, PAPER=PAPER) if s.get("pre_session_extra") == "git" else "")
 
 
+PRACTICE_EXTRA = {
+    # Session 03 teaches qmib.regtable in the lecture; the practice is where a
+    # group has two models to put side by side and a note to write from them.
+    "regtable": """## Report it as one table
+
+Step 3 left you with two fits: the model as specified, and the model after you
+broke something. Put them in one table rather than two blocks of output — the
+comparison is the finding.
+
+```python
+import qmib
+
+print(qmib.regtable([before, after],
+                    names=["as specified", "assumption broken"]))
+```
+
+::: {.check}
+Read **across** the row, not down the column: what happened to the coefficient
+you care about, in its own units, and what happened to its standard error.
+:::
+
+::: {.muted}
+Coefficients too small to read at one decimal — a logit's usually are? `digits=3`.
+`.as_latex()` if you would rather paste it into the write-up than screenshot it.
+Pass `stats=` to change the rows at the foot.
+:::
+
+""",
+}
+
+
 def practice_deck(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
+    extra = PRACTICE_EXTRA.get(s.get("practice_extra"), "")
+    # The last slide of the ninety minutes is where a student decides what, if
+    # anything, they do about this session at home. The lab belongs there, and
+    # the deck is the only one of the three artefacts they are looking at.
+    lab = lab_url(num)
+    closing = f"""
+
+## After class, if you want it
+
+::: {{.step}}
+The **QMIB Lab** has a knowledge check on what you have just done:
+**[warin.ca/qmib-labs]({lab})**
+:::
+
+::: {{.check}}
+Optional, never a prerequisite for the next lecture, and never marked for
+correctness. A completed report counts because **attempting it is the engagement
+being measured** — it is one of the three routes to the participation mark.
+:::
+
+::: {{.warn}}
+What **is** required before the next session: the article, its Dataverse package,
+and the self-check. That is the pre-session deck, not this.
+:::
+""" if lab else ""
     return header(num, "practice", "Practice", s["theme"]) + f"""
 # Practice {{background-color="{RED}" style="color:{PAPER}"}}
 
@@ -279,26 +443,31 @@ Everyone pushes at least once. Replace `XX` with your group number — group 07 
 
 ```bash
 git checkout -b group-XX
-mkdir -p {s['dir']}/02-practice/submissions/group-XX
+mkdir -p groups/{COHORT}/group-XX/session-{num}      # macOS and Linux
+```
+
+```powershell
+git checkout -b group-XX
+mkdir groups/{COHORT}/group-XX/session-{num}         # Windows — no -p
 ```
 
 ::: {{.muted}}
+PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
 The git log is the participation record. It is not a formality.
 :::
 
 ## 1 · Reproduce — 20 min
 
-Take the result the paper rests on, and reproduce it. The package you downloaded is at
-`{s['dir']}/data/replication/`.
+{reproduce_intro(s)}
 
 ```python
 import qmib
 
-data = qmib.load("{s['dataset']}")     # the session's own data, for comparison
+data = qmib.load("{s['dataset']}")     # the session's own data
 ```
 
 ::: {{.muted}}
-Paper: {s['reading']} · [{s['dataverse']}](https://doi.org/{s['dataverse']})
+Paper: {s['reading']} · {paper_pointer(s)}
 :::
 
 ::: {{.check}}
@@ -338,7 +507,7 @@ This is the part that carries the marks. A group that shows how its result falls
 it; a group that only shows it holding does not yet know.
 :::
 
-## 4 · Write it down — 20 min
+{extra}## 4 · Write it down — 20 min
 
 250 words in your submissions folder:
 
@@ -355,7 +524,7 @@ And the standing rule: one LLM output you identified as wrong, and how you estab
 ## Submitting
 
 ```bash
-git add {s['dir']}/02-practice/submissions/group-XX
+git add groups/{COHORT}/group-XX/session-{num}
 git commit -m "Session {num} practice — group XX"
 git push -u origin group-XX
 ```
@@ -385,25 +554,37 @@ And everywhere in this course: an association described in causal language.
 ::: {{.muted}}
 Listen for traceable evidence, not confidence of delivery.
 :::
-"""
+{closing}"""
+
+
+# A deck carrying this marker has been written by hand and is no longer a
+# template instance. Regenerating it would silently discard that work — which is
+# exactly what happened to session 02's pre-session deck, whose git walkthrough
+# and data steps were overwritten by a single unrelated run of this script.
+AUTHORED = "<!-- authored: do not regenerate -->"
 
 
 def main():
-    written = 0
+    written = skipped = 0
     for num in sorted(SESSIONS):
         if num in ("01", "12"):
             continue
         s = SESSIONS[num]
         d = ROOT / s["dir"]
-        (d / "00-pre-session").mkdir(exist_ok=True)
-        (d / "00-pre-session" / f"MATH60033A-S{num}-Pre-Session.qmd").write_text(
-            pre_session_deck(num, s), encoding="utf-8")
-        (d / "02-practice").mkdir(exist_ok=True)
-        (d / "02-practice" / f"MATH60033A-S{num}-Practice.qmd").write_text(
-            practice_deck(num, s), encoding="utf-8")
-        written += 2
-        print(f"  session {num}: pre-session + practice deck")
-    print(f"\n{written} decks written")
+        for sub, name, build in (
+            ("00-pre-session", f"MATH60033A-S{num}-Pre-Session.qmd", pre_session_deck),
+            ("02-practice", f"MATH60033A-S{num}-Practice.qmd", practice_deck),
+        ):
+            (d / sub).mkdir(exist_ok=True)
+            out = d / sub / name
+            if out.exists() and AUTHORED in out.read_text(encoding="utf-8"):
+                print(f"  session {num}: {sub} is authored — left alone")
+                skipped += 1
+                continue
+            out.write_text(build(num, s), encoding="utf-8")
+            written += 1
+    note = f", {skipped} authored decks left alone" if skipped else ""
+    print(f"\n{written} decks written{note}")
 
 
 if __name__ == "__main__":

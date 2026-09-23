@@ -1,6 +1,6 @@
 # Session 03 — Data
 
-**The same regression session 02 fitted — gdp per capita on productivity**
+**The regression fitted at the top of the lecture — GDP per capita on productivity**
 
 ```python
 import qmib

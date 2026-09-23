@@ -27,7 +27,7 @@ So this course does four unusual things:
 | **The model runs on your machine** | Ollama + Qwen 2.5 Coder. No API key, no per-token bill, no data leaving the room. You also learn what is achievable *without* a frontier system, which is the realistic institutional constraint. |
 | **You work in a real IDE, from the terminal** | VS Codium, git, and an agent (`aider`) that reads and edits your files while you steer it in prose. Not notebooks; the workflow you will actually be hired into. |
 | **Catching the model is graded** | Every practice session deliverable must document one instance where you caught the LLM being wrong, unverifiable, or misleading. You are never penalised for using it — only for using it uncritically. |
-| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY 4.0 / MIT). Published articles with their replication data, cited by DOI. The practice sessions are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
+| **Everything is open, and it is research** | Open-source tools end to end — Python, git, VS Codium, Ollama. Open licences (CC BY-NC 4.0 / MIT). Published articles with their replication data, cited by DOI. The practice sessions are not exercises with known answers; they are ten groups producing five perspectives on one question, assembled each week. |
 
 Underneath, the mathematics is uncompromising: projection and FWL, Gauss–Markov, the bias–variance
 decomposition, soft-thresholding, Neyman orthogonality. Nothing is cited that is not first derived.
@@ -39,8 +39,9 @@ ends in a research paper written for a real reader, and an
 oral defence of it. Nothing here is a toy problem with a number at the back of the book.
 
 **Open by construction.** No proprietary software, no API keys, no cloud accounts, no per-token
-bills — and no dependency that stops the course working in a room with no internet. The whole
-repository is licensed for reuse, including commercially: take it, translate it, teach it.
+bills — and no dependency that stops the course working in a room with no internet. The materials
+are licensed for reuse in teaching: take them, translate them, teach them. Commercial use needs a
+word first; the code is MIT and needs nothing.
 
 **Who it is for.** Graduate students in economics and international business who will be expected to
 produce a defensible number, on real European data, and say out loud what it does not license.
@@ -84,14 +85,14 @@ presentations; no practice task carries over as required homework.**
 Aider), introduces the syllabus and semester, and uses *Europe 2031* for a 90-minute conversation
 about evidence, scenario, prediction, and AI.
 
-Students who want to check their knowledge may complete the corresponding activity in the **QMIB
-Lab App** after class. A completed app report counts toward participation. The lab is optional and
-is never a prerequisite for the next lecture.
+Students who want to check their knowledge may complete the corresponding activity in the
+**[QMIB Lab](https://warin.ca/qmib-labs/)** after class — one lab per session, sessions 02 to 11. A completed report counts
+toward participation. The lab is optional and is never a prerequisite for the next lecture.
 
 **Session 12** is different: the pre-session prepares the final presentation and the class meeting is
 a presentation workshop and defence. There is no separate practice deck.
 
-**Complete PowerPoint and Python demo index: [`slides/COURSE-POWERPOINTS.md`](slides/COURSE-POWERPOINTS.md).**
+**Complete deck and demo index: [`slides/COURSE-POWERPOINTS.md`](slides/COURSE-POWERPOINTS.md)**
 
 ### The second half is real research, from Africa
 
@@ -143,7 +144,7 @@ answerable question, where to find data, and what each session asks of you.
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
-| **12** | Wed 2 Dec | Final group presentations |
+| **12** | Wed 2 Dec | Final group presentations, and the closing address |
 
 **No class** on 30 September, 21 October.
 
@@ -163,17 +164,17 @@ answerable question, where to find data, and what each session asks of you.
 | # | Session | The method | The question it answers |
 |---|---|---|---|
 | [01](01-foundations-scenarios-and-tools/README.md) | Foundations: Scenarios, Tools, and the Syllabus | the syllabus, the toolchain, and a conversation | Before we model the future, what are we claiming to know? |
-| [02](02-exploratory-data-analysis/README.md) | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression | Which summary of your key variable would you defend in print? |
-| [03](03-regression-adequacy-and-validity/README.md) | Regression: Adequacy, Validity, and Robustness | residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
+| [02](02-exploratory-data-analysis/README.md) | Exploratory Data Analysis, and the First Model | mean/median/trimmed, variance, IQR, skewness, kurtosis, the empirical rule | Which summary of your key variable would you defend in print? |
+| [03](03-regression-adequacy-and-validity/README.md) | Regression: Adequacy, Validity, and Robustness | least squares, residual diagnostics, leverage, Cook's distance, information criteria | Which model would survive a referee? |
 | [04](04-logistic-ordinal-multinomial/README.md) | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
-| [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, and the Elastic Net | soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
+| [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, and the Elastic Net | stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | [06](06-advanced-regression/README.md) | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
 | [07](07-pca-and-factor-analysis/README.md) | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
 | [08](08-knn-and-bias-variance/README.md) | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | [09](09-structural-equation-modelling/README.md) | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | [10](10-causal-inference-foundations/README.md) | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
 | [11](11-causal-inference-did/README.md) | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
-| [12](12-group-presentations/README.md) | Final Group Presentations | — | Can you make a decision-maker act on this — and say what would change your mind? |
+| [12](12-group-presentations/README.md) | Final Group Presentations | Closing address | Can you make a decision-maker act on this — and say what would change your mind? |
 
 **The arc.** Sessions 2–3 build the classical estimator and its inference. Session 4 is the hinge:
 in-sample fit stops being evidence. Sessions 5–7 buy flexibility and pay for it in interpretability.
@@ -199,7 +200,7 @@ cd ~/Desktop
 git clone https://github.com/warint/quantitative-methods.git quantitative-methods
 cd quantitative-methods
 
-python3 -m venv .venv
+python3 -m venv .venv          # Windows: py -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -213,8 +214,8 @@ Set-Location "$HOME\Desktop"
 git clone https://github.com/warint/quantitative-methods.git quantitative-methods
 Set-Location quantitative-methods
 
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+py -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 
 python 01-foundations-scenarios-and-tools/00-pre-session/verify_environment.py
@@ -242,7 +243,7 @@ In-class practice work and the one-slide group result go in the session folder, 
 branch. They must be finished before the group presents:
 
 ```
-NN-session-name/02-practice/submissions/group-XX/
+groups/A2026/group-XX/session-NN/
 ```
 
 **Why one repository.** `python scripts/assess.py contributions` reads the git history *of this
@@ -280,7 +281,7 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 
 | Component | Weight | Form |
 |---|---|---|
-| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional QMIB Lab App reports |
+| **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional [QMIB Lab](https://warin.ca/qmib-labs/) reports |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet · **Wed 28 October** |
 | **Team work** | **20%** | groups of three, presented Session 12 |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
@@ -289,8 +290,8 @@ Team work (20) breaks down as governance file 7 · reproducible analysis 7 · re
 memo 3 · presentation and defence 3.
 
 **Participation (10) is active engagement, earned by any of three routes:** contributing in the
-room, engaging in the 90-minute practice, or submitting an optional QMIB Lab App report after a
-session (the Lab App opens during the term; the link is announced in class). What is marked is
+room, engaging in the 90-minute practice, or submitting an optional
+[QMIB Lab](https://warin.ca/qmib-labs/) report after a session. What is marked is
 **sustained engagement across the term**, not a count of interventions,
 and never a ranking against other students. Note that the practices themselves are **formative**:
 the analysis is commented on, not marked. What is recorded is that you engaged with it.
@@ -436,11 +437,12 @@ exposing assumptions — because that is also what a statistical model is.
 
 | | |
 |---|---|
-| Teaching materials (`*.md`, rubrics, the synthetic data spine) | **CC BY 4.0** — [`LICENSE`](LICENSE) |
+| Teaching materials (`*.md`, rubrics, the synthetic data spine) | **CC BY-NC 4.0** — [`LICENSE`](LICENSE) |
 | Code (`scripts/`, `**/starter/`, `*.py`) | **MIT** — [`LICENSE-CODE`](LICENSE-CODE) |
 
-Use it, adapt it, translate it, teach it — including commercially — provided you credit the author,
-link the licence and indicate what you changed. Attribution is not endorsement. Scope, exceptions
+Use it, adapt it, translate it, teach it — including at an institution that charges tuition —
+provided you credit the author, link the licence and indicate what you changed. Selling it, or
+selling access to it, needs permission first. Attribution is not endorsement. Scope, exceptions
 (quoted readings, live source data, student submissions) and the citation formats are set out in
 [`LICENSING.md`](LICENSING.md); GitHub's *Cite this repository* button reads
 [`CITATION.cff`](CITATION.cff).

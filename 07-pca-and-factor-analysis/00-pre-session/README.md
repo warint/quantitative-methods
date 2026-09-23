@@ -17,8 +17,8 @@ Budget **60–90 minutes**.
 
 ## 1. The reading — 45–60 min
 
-**Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models***
-[Read the article](https://doi.org/10.1162/REST_a_00614)
+**Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, Review of International Organizations 14(3)**
+[Read the article](https://doi.org/10.1007/s11558-019-09344-2)
 
 Read for the **argument**, not for coverage:
 
@@ -37,19 +37,19 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM)**
+The paper has **no replication deposit**, but it rests on a database its publisher puts online for anyone. The course loader fetches it once and caches it, so there is nothing to download by hand:
 
-Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
+```python
+import qmib
 
-```text
-07-pca-and-factor-analysis/data/replication/
+data = qmib.load("kof")
 ```
 
-Keep the authors' own folder structure and README.
+Run it **before** class: it is a single download, and thirty people fetching it at once in the room is not a download.
 
 ### b) The course data, for your own angle
 
@@ -58,14 +58,14 @@ This is what you apply the method to in the second half.
 ```python
 import qmib
 
-data = qmib.load("movies")      # what the lecture uses
+data = qmib.load("kof")      # what the lecture uses
 core = qmib.load("core")                 # shared by every group
 mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 
 print(data.shape, core.shape, mine.shape)
 ```
 
-45,000 films — budget, popularity, revenue, runtime and votes.
+The KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions each split into de facto and de jure.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

@@ -21,6 +21,44 @@ substantive lesson of the course.
 
 ---
 
+## What your machine needs
+
+No graphics card is required. Everything runs on the processor, more slowly.
+
+| | Enough | Comfortable |
+|---|---|---|
+| RAM | 8 GB | 16 GB |
+| Free disk | 12 GB | 20 GB |
+| CPU | anything from the last five years | Apple Silicon, or Intel i7 10th gen and later |
+| Graphics | none | 8 GB VRAM, which makes the model 5–10× faster |
+
+Speed, in tokens per second — roughly a short word each:
+
+| | tokens/s | a short answer |
+|---|---|---|
+| Dedicated GPU, or Apple Silicon | 15–40 | a second or two |
+| **CPU only, `qwen2.5-coder:3b`** | 8–20 | a few seconds |
+| CPU only, `qwen2.5-coder:7b` | 3–8 | half a minute or more |
+
+**Use the 3b unless `ollama ps` reports `100% GPU`.** On a processor the 7b is
+not a better model — it is the same answer, four times slower.
+
+### Per tool
+
+| | RAM | Disk | Notes |
+|---|---|---|---|
+| **Ollama** | 8 GB for a 3b, 16 GB for a 7b | ~2 GB per model | A model needs its file size plus about a fifth, in memory |
+| **Continue** | the model's, plus nothing much | ~50 MB | Does **not** manage the context window — set it yourself |
+| **aider** | as Ollama | its own environment via pipx | Sets the context window per request itself |
+
+**aider on a CPU-only machine:** fine for reading and asking, unreliable for
+editing. Small models often fail to produce its edit format and report *"the LLM
+did not conform to the edit format"* instead of making a change. If you want it
+to edit anyway, `--edit-format whole` asks it to rewrite files rather than
+produce diffs, which a 3b manages far more often.
+
+---
+
 ## The checklist
 
 Everything typed goes in the **VS Codium integrated terminal** (``View → Terminal``, or
@@ -29,17 +67,17 @@ Everything typed goes in the **VS Codium integrated terminal** (``View → Termi
 - [ ] **VS Codium** installed from <https://vscodium.com> and it opens
 - [ ] **Extensions** installed: Python (`ms-python.python`), Jupyter (`ms-toolsai.jupyter`), Continue (`Continue.continue`)
 - [ ] **Course materials** downloaded — *Code → Download ZIP* from <https://github.com/warint/quantitative-methods>, unzipped **directly on your Desktop** as `quantitative-methods`, and opened with `File → Open Folder…`
-- [ ] **Python 3.11 or 3.12** from <https://www.python.org/downloads/> — on Windows, *"Add python.exe to PATH"* ticked
-- [ ] `python3 --version` prints 3.11.x or 3.12.x
+- [ ] **Python 3.12.10 specifically** — not "the latest" — from <https://www.python.org/downloads/release/python-31210/>; on Windows tick *"Add python.exe to PATH"*. Later 3.12 releases are security-only and ship as source code with no installer, and `aider-chat` requires Python `<3.13`, so 3.13 and 3.14 cannot run this course's toolchain
+- [ ] `python3.12 --version` prints 3.12.x — on Windows `py -3.12 --version`, and `py --list` shows every Python you have. Build the environment with the version named (`py -3.12 -m venv .venv`, `python3.12 -m venv .venv`), because a bare `py` or `python3` picks the newest one installed
 - [ ] `.venv` created and activated — your prompt shows `(.venv)`
 - [ ] `pip install -r requirements.txt` completed without red text
 - [ ] `python -c "import numpy, pandas, sklearn; print('ok')"` prints `ok`
 - [ ] **Ollama** installed from <https://ollama.com/download>; `ollama --version` works
-- [ ] A model pulled: `qwen2.5-coder:3b` (8 GB RAM), `:7b` (16 GB), or `:14b` (32 GB+)
+- [ ] A model pulled: **`qwen2.5-coder:3b`** — the default, and the one that works without a dedicated graphics card. Try `:7b` only after `ollama ps` shows **100% GPU** on the 3b
 - [ ] `ollama pull nomic-embed-text` — needed in Session 09
-- [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:7b "hello"`. It still answers.
-- [ ] **aider** installed and talking to Ollama — `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` in one terminal, `aider --model ollama_chat/qwen2.5-coder:7b` in another
-- [ ] `verify_environment.py` shows five passing checks, and you have the output to bring
+- [ ] **The wifi test:** turn wifi off, run `ollama run qwen2.5-coder:3b "hello"`. It still answers
+- [ ] **aider** installed **outside** the course environment, via pipx — `python3.12 -m pip install --user pipx`, `python3.12 -m pipx ensurepath`, new terminal, `pipx install aider-chat` (`py` for `python3` on Windows) — never `pip install aider-chat` into `.venv`. `aider --version` answers in a new terminal
+- [ ] `verify_environment.py` passes **with the environment activated** — the prompt shows `(.venv)`. Check 0 reports which interpreter is running; if it fails, every package check below it fails too and means nothing. Bring the output
 
 Git and GitHub are **not** part of Session 01. They are set up before Session 02:
 [`setup-git-and-github.md`](../../02-exploratory-data-analysis/00-pre-session/setup-git-and-github.md).
@@ -56,7 +94,7 @@ version: 0.0.1
 models:
   - name: Local coder
     provider: ollama
-    model: qwen2.5-coder:7b
+    model: qwen2.5-coder:3b
     roles: [chat, edit, apply]
   - name: Local embedder
     provider: ollama
@@ -79,13 +117,22 @@ press `Ctrl/Cmd+L`.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `ollama: command not found` | Not on PATH yet | Open a new terminal; on Windows restart VS Codium |
-| `python3: command not found` (Windows) | PATH box not ticked | Try `python`; if still missing, re-run the installer |
+| Dependency resolver errors while installing aider | It was installed into `.venv`, where it competes with the course's packages | Install it with pipx instead — see the checklist above |
+| Dependency conflicts installing aider, or a build error naming a compiler | Your Python is 3.13 or newer; aider requires `<3.13` | Give aider a 3.12 of its own: `pipx install --python python3.12 aider-chat` |
+| `pipx` or `aider` *n'est pas reconnu* / *not recognized* | `pip install --user` writes scripts to a folder Windows does not have on PATH | `py -m pipx …` works regardless; `py -m pipx ensurepath` plus a new terminal fixes PATH itself |
+| A newly installed extension or command does nothing | The window or terminal predates the install | *Developer: Reload Window*; for PATH changes, quit VS Codium and reopen |
+| `Python introuvable` / `Python was not found` (Windows) | The Microsoft Store alias is shadowing Python | Start → **Manage app execution aliases** → turn **off** `python.exe` and `python3.exe`, then open a new terminal. Do not install from the Store. |
+| `python3: command not found` (Windows) | There is no `python3` on Windows | Use `py`. If that is missing too, re-run the python.org installer with **Add python.exe to PATH** ticked |
 | Continue answers nothing | Server not running | `ollama serve` in a separate terminal |
-| Model extremely slow | Too large for your RAM | Pull a smaller variant (`:3b`) |
-| aider "forgets" the file you gave it | Ollama's 2k default context | Start it as `OLLAMA_CONTEXT_LENGTH=8192 ollama serve` |
-| `connection refused` from aider | `ollama serve` not running | Start it, leave that terminal open |
+| Model extremely slow | `ollama ps` shows 100% CPU — no dedicated graphics card | Normal on most laptops with the 3b. A larger model will be slower, not faster |
+| aider "forgets" the file you gave it | The context window is too small — `ollama ps` shows it | Raise it in the **Ollama app's own settings** (Settings → Context length), then quit Ollama from the tray or menu bar and restart. The app overrides `setx` and `launchctl`, so those appear to do nothing. Linux: `systemctl edit ollama.service` |
+| `address already in use`, or *une seule utilisation de chaque adresse de socket* | Ollama is already running; the installer starts it on every platform | Do not run `ollama serve`. Set the variable, then restart Ollama itself |
+| `connection refused` from aider | Nothing listening on 11434 | Start Ollama — the app on macOS and Windows, `sudo systemctl start ollama` on Linux |
 | `ModuleNotFoundError` inside VS Codium | Wrong interpreter | `Ctrl/Cmd+Shift+P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check `(.venv)` is in your prompt |
+| Windows: *l'exécution de scripts est désactivée sur ce système* | PowerShell's execution policy blocks `Activate.ps1` | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` — user-scoped, no admin rights, asked once |
+| Windows: *le répertoire n'est pas vide* when deleting `.venv` | VS Codium holds the interpreter it has selected | Quit VS Codium; delete from a plain PowerShell; `cmd /c "rmdir /s /q .venv"` as a last resort |
+| `deactivate` is not recognised | Activation defines it, so it exists only inside an active environment | You are not in one. Skip it — the prompt shows `(.venv)` when you are |
 | LaTeX shows as raw `$...$` | Preview extension missing | Install *Markdown Preview Enhanced*; open with `Ctrl/Cmd+K V` |
 | Apple Silicon: slow inference | Rosetta Python | Install the arm64 build |
 

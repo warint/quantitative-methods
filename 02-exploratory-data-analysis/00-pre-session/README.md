@@ -3,7 +3,7 @@
 > **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-02-pre-session.html)** ·
 > source: [`MATH60033A-S02-Pre-Session.qmd`](MATH60033A-S02-Pre-Session.qmd)
 
-> Complete **all four steps** before class. Expect 90–120 minutes, plus 45 for the git setup below.
+> Complete **all three steps** before class. Expect 90–120 minutes, plus 45 for the git setup below.
 
 | | Before class | Used in the practice for |
 |---|---|---|
@@ -13,19 +13,41 @@
 
 ---
 
-## ⚠️ Session 2 only — set up git and your group repository
+## ⚠️ Session 2 only — set up git and clone the course repository
 
-Before the four steps, work through
+Before the three steps below, work through
 **[`setup-git-and-github.md`](setup-git-and-github.md)**. Budget 45 minutes.
 
 From this session onward you are assessed as a group, and your commit history is one of the four
 records used to check that all three members did the work. That record only exists if git knows
 who you are.
 
-You must arrive with a private group repository that your teammates **and the instructor** can
-see, and with at least one commit pushed from your own machine.
+**Session 01 gave you a ZIP. A ZIP cannot push, so from here you work in a clone:**
 
-Slides: [`slides-github-and-teamwork.qmd`](slides-github-and-teamwork.qmd)
+Session 01 unzipped to `Desktop/quantitative-methods`, and the clone wants that same path — so
+move the old folder aside first, or git refuses to start.
+
+```bash
+cd ~/Desktop                     # Windows: Set-Location "$HOME\Desktop"
+mv quantitative-methods quantitative-methods-session01
+
+git clone https://github.com/warint/quantitative-methods.git
+cd quantitative-methods
+
+python3 -m venv .venv            # Windows: py -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+python -c "import qmib; print(qmib.load('core').shape)"   # expect (450, 11)
+```
+
+Copy anything you wrote during Session 01 out of `quantitative-methods-session01`, then delete it,
+so there is only one copy of the course on your machine.
+
+There is **no separate group repository**. Everyone works in this one, and each group has a
+branch, `group-XX`. You must arrive having cloned it and pushed at least one commit to your
+group's branch from your own machine — which needs you to be added as a **collaborator** first,
+so send your GitHub username to the instructor if you have not.
 
 ---
 
@@ -57,7 +79,7 @@ Refresh these before class; we will use them without re-deriving them.
 
 - **Mean and median.** The mean is the balance point; the median is the middle of the ordering.
 - **Variance and standard deviation.** $s^2 = \frac{1}{n-1}\sum_i (x_i - \bar x)^2$ — note the $n-1$.
-- **Quantiles.** $\tilde q_p$ is the value below which about $100p\%$ of the data falls.
+- **Quantiles.** $\tilde q_p$ is the value below which about $100p$% of the data falls.
 - **A straight line.** $y = \beta_0 + \beta_1 x$: what the intercept and the slope each mean.
 
 If any of these is unfamiliar, work through it with your local LLM *before* class, and bring your

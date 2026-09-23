@@ -7,7 +7,7 @@
 |  |  |
 |---|---|
 | **Format** | **Paper. Handwritten, in pen.** |
-| **Duration** | 2 hours |
+| **Duration** | 3 hours |
 | **Total** | 100 points |
 | **Permitted** | a pen, and a **non-programmable calculator** |
 | **Not permitted** | any computer, phone, tablet or smartwatch · any networked device · **no internet** · notes, textbooks, formula sheets |
@@ -45,7 +45,7 @@
 > **Part D — judgement.** Knowing what a number does *not* license you to say. The hardest part,
 > and the one that separates an analyst from a technician.
 >
-> Suggested timing: **A 20 min · B 40 min · C 35 min · D 20 min**, leaving five to check.
+> Suggested timing: **A 30 min · B 60 min · C 45 min · D 35 min**, leaving ten to check.
 
 ---
 
@@ -125,8 +125,8 @@ wrong with that, and say which standard error is the right one here and why.
 
 For a two-regressor problem (both predictors standardised, no intercept) you are given:
 
-$$X^\top X = \begin{pmatrix} 10 & 4 \\ 4 & 8 \end{pmatrix}, \qquad
-   X^\top y = \begin{pmatrix} 26 \\ 20 \end{pmatrix}$$
+$$X^\top X = \begin{pmatrix} 10 & 4 \cr 4 & 8 \end{pmatrix}, \qquad
+   X^\top y = \begin{pmatrix} 26 \cr 20 \end{pmatrix}$$
 
 **(a)** *(2)* Compute $\hat\beta^{\text{OLS}}$. Show the determinant and the inverse.
 
@@ -141,13 +141,13 @@ regularisation would still be well-defined here even if $X^\top X$ were singular
 
 With standardised columns, the partial correlations of four predictors with the current residual are
 
-$$\rho = (0.42,\; -0.18,\; 0.09,\; 0.31)$$
+$$\rho = (0.42,\thickspace -0.18,\thickspace 0.09,\thickspace 0.31)$$
 
 **(a)** *(2)* Compute the lasso coordinate updates with $\lambda = 0.20$ (i.e. $\alpha = 1$).
 Which variables are selected?
 
 **(b)** *(3)* Compute the elastic net updates with $\lambda = 0.20$ and $\alpha = 0.5$, using
-$\hat\beta_j = S_{\lambda\alpha}(\rho_j) \,/\, \big(1 + \lambda(1-\alpha)\big)$.
+$\hat\beta_j = S_{\lambda\alpha}(\rho_j) \thinspace/\thinspace \big(1 + \lambda(1-\alpha)\big)$.
 
 **(c)** *(1)* State the difference in the selected set, and name the property of the elastic net
 that explains it.
@@ -178,11 +178,11 @@ measure of centre you would report — and why.
 
 The true model is
 
-$$\log w_i = \beta_0 + \beta_1 \,\text{educ}_i + \beta_2 \,\text{ability}_i + u_i,
+$$\log w_i = \beta_0 + \beta_1 \thinspace\text{educ}_i + \beta_2 \thinspace\text{ability}_i + u_i,
 \qquad \beta_2 = 0.08$$
 
 and the auxiliary regression of ability on schooling gives
-$\text{ability}_i = \delta_0 + \delta_1 \,\text{educ}_i + v_i$ with $\delta_1 = 0.6$.
+$\text{ability}_i = \delta_0 + \delta_1 \thinspace\text{educ}_i + v_i$ with $\delta_1 = 0.6$.
 
 You estimate the **short** regression, omitting ability, and obtain $\hat\beta_1^{\text{short}} = 0.112$.
 
@@ -201,7 +201,7 @@ one sentence.
 
 A credit model gives, for (intercept, income in thousands, has_collateral):
 
-$$\hat\beta = (-3.2,\; 0.045,\; 0.8)$$
+$$\hat\beta = (-3.2,\thickspace 0.045,\thickspace 0.8)$$
 
 Consider an applicant with income 40 (thousand) and collateral = 1. The outcome $y = 1$ denotes
 default.
@@ -321,19 +321,27 @@ meantime.
 
 <br><br><br><br><br><br>
 
-## D2. From a narrative claim to a testable one *(8 points)*
+## D2. What a constructed measure licenses *(8 points)*
 
-The *Europe 2031* scenario assigns the United States roughly 12 times Europe's AI compute stock in
-2031, and treats compute as the dominant measure of geopolitical capability.
+Fraiberger, Lee, Puy and Sahay (2021), your Session 2 reading, build a **sentiment index** from the
+text of news articles about a country and relate it to that country's asset prices. Sentiment is
+never observed: it is constructed from word counts by a scoring rule the authors chose, then
+averaged over articles to give one number per country per period.
 
-**(a)** *(3)* State the assumption in a form that could be tested. Name one observable indicator,
-its publishing institution, and a trigger point with a horizon.
+Suppose the paper reports that a one-standard-deviation rise in the index is associated with a
+**0.4 percentage point** rise in next-month equity returns, significant at 1%, in a panel regression
+with country and month fixed effects.
 
-**(b)** *(3)* Which method from Sessions 1–7 would you use, and why that one rather than the
-obvious alternative?
+**(a)** *(3)* The index is a **measurement**, and the regression assumes it measures what its name
+says. Name **two distinct** threats to that assumption — not two versions of the same one — and for
+each, state the evidence that would reduce your concern.
 
-**(c)** *(2)* State one observation that would count as evidence **against** the assumption. If you
-believe the assumption is not falsifiable as stated, say so and explain what would have to change.
+**(b)** *(3)* A fund manager reads the result and proposes trading on the index. State what the
+0.4 points does and does **not** license, and name the **one specification detail** you would need
+before answering at all. Say why that detail, rather than the $p$-value, is what decides it.
+
+**(c)** *(2)* State one observation that would count as evidence that the index is capturing
+**something other than sentiment** while still producing this coefficient.
 
 <br><br><br><br><br><br>
 
