@@ -92,6 +92,7 @@ OPTIONAL = [
     ("shap", "model explanation (S8)"),
     ("doubleml", "causal ML reference (S11)"),
     ("econml", "causal forests (S11)"),
+    ("diff_diff", "difference-in-differences (S11)"),
 ]
 
 

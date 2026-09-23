@@ -44,18 +44,13 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models***, and its replication package
-([10.7910/DVN/NKWMQM](https://doi.org/10.7910/DVN/NKWMQM)) should already be unzipped at:
-
-```text
-07-pca-and-factor-analysis/data/replication/
-```
+The paper is **Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, Review of International Organizations 14(3)**. Its data needs no download: `qmib.load("kof")`.
 
 The session's own dataset, for comparison:
 
 ```python
 import qmib
-data = qmib.load("movies")
+data = qmib.load("kof")
 ```
 
 ---
@@ -109,6 +104,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Retaining components by a rule you did not state
 - Naming a component ("this is competitiveness") with no rotation caveat
 - Reporting variance explained as though it measured correctness
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-07.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

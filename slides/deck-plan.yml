@@ -18,16 +18,27 @@
 # given here, which overrides the derivation.
 
 01:
-  # The session-one deck has no divider slides — it is one continuous run
-  # through the syllabus — so its outline is written rather than derived.
+  # Neither session-one deck can derive a usable outline. The lecture is one
+  # continuous run through the syllabus with no divider slides; the pre-session
+  # has three `#` part headers, which the deriver does not read, so it fell back
+  # to listing all fifty of its slides. Both are written here instead.
   outline:
-    - The organising question, and what this course is actually for
-    - What makes the course unusual, and the rule behind it
-    - The arc of the twelve sessions
-    - How a session runs — pre-session, lecture, practice
-    - The four evaluations, and how a number becomes a letter
-    - Ethics, integrity, and what loses marks everywhere
-    - The second half — building your workstation
+    01-lecture:
+      - The organising question, and what this course is actually for
+      - What makes the course unusual, and the rule behind it
+      - The arc of the twelve sessions
+      - How a session runs — pre-session, lecture, practice
+      - The four evaluations, and how a number becomes a letter
+      - Ethics, integrity, and what loses marks everywhere
+      - The second half — building your workstation
+    00-pre-session:
+      - Why a local workstation, and what you are building
+      - Two rules before you start — where to type, and when to restart
+      - Part 1 — VS Codium, Python, the environment, the packages
+      - Part 2 — Continue, and a model inside the editor
+      - Part 3 — aider, in the terminal
+      - Before you arrive — the final check
+      - Appendix — when it goes wrong
   maths:
     - Separate a **scenario** from a **forecast**, and say why only one carries a probability
     - State the **prediction / inference** split and say which one a question needs
@@ -42,31 +53,52 @@
     - Judge whether a strategic question wants an effect or a forecast
 
 02:
+  # The pre-session deck runs to twenty-four slides — the standard brief plus the
+  # git walkthrough — so the derived outline listed every one of them. Written
+  # here instead; the lecture and practice decks still derive theirs.
+  outline:
+    00-pre-session:
+      - What to do before class, and how long it takes
+      - Read the paper
+      - Get both datasets — the paper's, and your own angle
+      - Self-check, and what the session will ask of you
+      - Before you run anything — the environment
+      - Session 02 only — git, GitHub, and your group branch
+      - When it goes wrong
+  # Regression opens session 03 rather than closing this one: the hour here is
+  # about one variable at a time, and the moment two variables enter the same
+  # sentence the question becomes whether the line can be trusted.
   maths:
     - Distinguish **mean, median and trimmed mean**, and say which question each answers
     - Explain why the sample variance divides by $n-1$
     - Test **skewness** and **excess kurtosis** against $2\sqrt{6/n}$ and $4\sqrt{6/n}$
-    - Derive the least-squares slope, and read "controlling for" as a residual regression
   python:
     - Compute the moments directly, and check them against a library
-    - Fit a simple and a multiple regression with `smf.ols`, and read `.params`
-    - Draw a scatter and a fitted line, and label both axes in units
+    - Load the course panel with `pd.read_parquet` and `.dropna`, and say how many rows went
+    - Take any quantile — median, quartile, percentile — with `.quantile`
   ib:
-    - Quote a slope **in units** a manager can act on
     - Read a mean–median gap as evidence about a distribution's shape
-    - Say why a slope is an association, and what more is needed to call it a cause
+    - Choose the summary a manager should see when one country dominates the total
+    - Say what heavy tails cost a plan built on an average
 
 03:
+  # The hour opens by fitting the model — the section moved here from session
+  # 02 — and spends the rest of itself asking whether that fit can be trusted.
   maths:
+    - Derive the least-squares slope, and read "controlling for" as a residual regression
     - Read **residuals versus fitted** and say what structure it reveals
     - Compute **leverage** from the hat matrix, and show it sums to $p$
     - Separate an outlier from an influential point with **Cook's distance**
     - Compare models on **AIC**, and say why that is not model selection
   python:
+    - Fit a simple and a multiple regression with `smf.ols`, and read `.params`
     - Pull diagnostics from a fitted model with `get_influence()`
     - Build the four diagnostic plots yourself rather than calling one function
     - Compare candidate specifications side by side on AIC and BIC
+    - Report the comparison as a publication table with `qmib.regtable`
   ib:
+    - Quote a slope **in units** a manager can act on
+    - Say why a slope is an association, and what more is needed to call it a cause
     - Say whether a published coefficient survives its own diagnostics
     - Decide what to do about the one country that moves the whole result
     - Refuse a model whose residuals show it has missed the structure
@@ -93,6 +125,7 @@
   outline:
     - Where we are, and the opening claim that turns out to be wrong
     - A situation you will meet — more candidate predictors than countries
+    - Stepwise selection, and why its choices do not survive a resample
     - Ridge, and what it does to the SVD spectrum
     - Lasso, and why corners produce exact zeros
     - Soft-thresholding, and the coefficient path
@@ -101,6 +134,7 @@
     - Three limitations to state out loud
     - Key takeaways, and on to the practice
   maths:
+    - Say why a greedy **stepwise** search is unstable, and what that argues for
     - Derive the ridge estimator and show how it shrinks the **SVD spectrum**
     - Explain geometrically why the lasso produces exact zeros and ridge does not
     - State the **elastic net** objective and what $\ell_2$ adds under correlation
@@ -110,7 +144,7 @@
     - Choose $(\alpha,\lambda)$ with `RidgeCV`, `LassoCV`, `ElasticNetCV`
     - Read a coefficient path and a cross-validation curve
   ib:
-    - Work with more candidate predictors than countries
+    - Choose among 56 candidate determinants of bilateral FDI
     - Say why a variable the lasso dropped is not thereby irrelevant
     - Report a penalised model honestly, including what selection did
 

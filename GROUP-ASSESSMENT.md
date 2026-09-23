@@ -305,7 +305,7 @@ Same tick count. Completely different students. The verdict column knows the dif
 > Participation is worth 10% and it is not attendance. It is **active engagement**, and three
 > routes count: contributing in the room — a question that changed how another group saw their
 > result, a connection between angles, a challenge that landed — working the ninety minutes of the
-> practice with your group, and completing an optional QMIB Lab App knowledge check at home.
+> practice with your group, and completing an optional [QMIB Lab](https://warin.ca/qmib-labs/) knowledge check at home.
 > What is marked is sustained engagement across the term, judged on its own terms and never as a
 > ranking against each other.
 >

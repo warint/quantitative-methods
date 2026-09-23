@@ -55,12 +55,18 @@ open_svg <- function(path, width = 10, height = 5.625) {
 
 headline <- function(title, subtitle = NULL) {
   mtext(title, side = 3, adj = 0, line = 1.55, font = 2, cex = 1.05, col = INK)
-  segments(par("usr")[1], par("usr")[4] + 0.025 * diff(par("usr")[3:4]),
-           par("usr")[1] + 0.07 * diff(par("usr")[1:2]),
-           par("usr")[4] + 0.025 * diff(par("usr")[3:4]), col = RED, lwd = 4,
-           xpd = NA)
   if (!is.null(subtitle))
     mtext(subtitle, side = 3, adj = 0, line = 0.25, cex = 0.68, col = MUTED)
+  # The accent rule was drawn 2.5% of the panel height above the plot region,
+  # which is where mtext line 0.25 falls — so on every figure that had a
+  # subtitle, the rule struck the subtitle through. With a subtitle it now sits
+  # above the title; without one it stays where it was, underlining the title.
+  y <- if (is.null(subtitle))
+    par("usr")[4] + 0.025 * diff(par("usr")[3:4])
+  else
+    par("usr")[4] + 2.9 * par("cxy")[2]
+  segments(par("usr")[1], y, par("usr")[1] + 0.07 * diff(par("usr")[1:2]), y,
+           col = RED, lwd = 4, xpd = NA)
 }
 
 direct_label <- function(x, y, label, col = INK, pos = 4, ...) {
@@ -121,38 +127,119 @@ text(5.4, max(y) * .22, "A long right tail pulls\nthe mean farther right", adj =
 headline("Skewness separates the mean from the median")
 dev.off()
 
-open_svg(asset("S02", "shape.svg"), width = 11, height = 5.6)
-par(mfrow = c(1, 2), mar = c(3.1, 3.2, 3.7, .8))
-x <- seq(-4, 4, length.out = 500)
-plot(x, dnorm(x), type = "n", axes = FALSE, xlab = "", ylab = "Density",
-     ylim = c(0, .55)); abline(h = 0, col = INK)
-lines(x, dnorm(x), col = INK, lwd = 2)
-right <- dlnorm(x + 4.1, 1, .48); right <- right / max(right) * .43
+# Three panels rather than two. On one linear-density panel the three kurtosis
+# curves sit almost on top of each other — the tail mass that *defines* kurtosis
+# is a rounding error next to a peak of 0.4, so the picture showed a difference
+# the eye could not resolve. The third panel is the same three curves over the
+# right tail alone, where the whole panel is under 0.09 and the ordering is
+# plain: one curve stops dead, one decays, one is still visible at 4.6.
+# Taller than the two-panel version it replaces, and with larger type: at 96%
+# of a 1280px slide this raster is drawn at about 0.55 scale, so a label set at
+# the old cex arrived at half the size of the body text beside it.
+open_svg(asset("S02", "shape.svg"), width = 13.5, height = 5.6)
+par(mfrow = c(1, 3), mar = c(3.2, 3.6, 4.4, 1.0), cex.lab = 1.25)
+
+lab_cex <- 1.3
+note <- function(x, y, label, col = INK, pos = 4)
+  text(x, y, label, col = col, pos = pos, font = 2, cex = lab_cex, xpd = NA)
+panel_title <- function(main, sub) {
+  title(main, adj = 0, line = 2.2, font.main = 2, cex.main = 1.45)
+  mtext(sub, side = 3, adj = 0, line = 0.9, cex = 0.85, col = MUTED)
+}
+
+x  <- seq(-4.8, 4.8, length.out = 1400)
+xs <- seq(-4, 4, length.out = 700)
+
+# --- skewness ---------------------------------------------------------------
+plot(xs, dnorm(xs), type = "n", axes = FALSE, xlab = "", ylab = "Density",
+     xlim = c(-4, 4), ylim = c(0, .70)); abline(h = 0, col = INK)
+# The shift puts the lognormal's own left edge exactly on the panel's, so the
+# mirrored copy lands on the right edge and neither is clipped mid-fall.
+right <- dlnorm(xs + 4.1, 1, .48); right <- right / max(right) * .43
 left <- rev(right)
-lines(x, right, col = RED, lwd = 2.2); lines(x, left, col = BLUE, lwd = 2.2)
-# Each label beside its own curve. They sat on the opposite side of the panel
-# from the curve they name — colour-matched, but reading as swapped.
-direct_label(-2.15, .30, "right-skewed", RED, 2)
-direct_label(2.15, .30, "left-skewed", BLUE, 4)
-title("Skewness: which tail is longer?", adj = 0, line = 1.3, font.main = 2)
-plot(x, dnorm(x), type = "n", axes = FALSE, xlab = "", ylab = "Density",
-     ylim = c(0, .65)); abline(h = 0, col = INK)
+lines(xs, dnorm(xs), col = INK, lwd = 2.2)
+lines(xs, right, col = RED, lwd = 2.6); lines(xs, left, col = BLUE, lwd = 2.6)
+# The three labels sit in the empty band above the curves, each over the curve
+# it names. They used to sit on the opposite side of the panel from that curve —
+# colour-matched, and so reading as swapped.
+note(-4.0, .655, "right-skewed", RED, 4)
+text(0, .655, "symmetric", col = INK, font = 2, cex = lab_cex)
+note(4.0, .655, "left-skewed", BLUE, 2)
+panel_title("Skewness", "which tail is longer?")
+
+# --- kurtosis, whole distribution -------------------------------------------
 # All three curves have variance 1, so the only thing differing is shape. This
 # matters: "lighter tails" used to be dnorm(sd = 1.35), which has *identical*
 # kurtosis to the standard normal — kurtosis is scale-invariant — and visibly
 # more mass in the tails, so the picture claimed the opposite of what it showed.
-#   heavy: t(5) scaled to unit variance, excess kurtosis +5.3
-#   light: Beta(2,2) mapped to unit variance, excess kurtosis -0.86, and
-#          compactly supported, so its tails visibly stop rather than thin out.
+#   heavy: t(5) scaled to unit variance, leptokurtic
+#   light: Beta(2,2) mapped to unit variance, platykurtic, and compactly
+#          supported, so its tails visibly stop rather than merely thinning.
 s_t <- sqrt(3 / 5); a_b <- sqrt(5)
-normal <- dnorm(x)
-heavy  <- dt(x / s_t, df = 5) / s_t
-light  <- ifelse(abs(x) < a_b, dbeta((x + a_b) / (2 * a_b), 2, 2) / (2 * a_b), NA)
-lines(x, normal, col = INK, lwd = 2); lines(x, heavy, col = RED, lwd = 2.2)
-lines(x, light, col = BLUE, lwd = 2.2)
-direct_label(.35, .53, "heavier tails", RED, 4)
-direct_label(-2.05, .105, "lighter tails", BLUE, 2)
-title("Kurtosis: how much mass reaches the tails?", adj = 0, line = 1.3, font.main = 2)
+dens_heavy <- function(z) dt(z / s_t, df = 5) / s_t
+dens_light <- function(z) ifelse(abs(z) < a_b,
+                                 dbeta((z + a_b) / (2 * a_b), 2, 2) / (2 * a_b), 0)
+# Excess kurtosis by numerical integration, so the labels state what is drawn
+# rather than what a textbook says about a distribution drawn differently.
+g2 <- function(f) integrate(function(z) z^4 * f(z), -Inf, Inf,
+                            rel.tol = 1e-10)$value - 3
+g2_heavy <- g2(dens_heavy); g2_light <- g2(dens_light)
+
+normal <- dnorm(x); heavy <- dens_heavy(x)
+light  <- ifelse(abs(x) < a_b, dens_light(x), NA)
+
+plot(x, normal, type = "n", axes = FALSE, xlab = "", ylab = "Density",
+     xlim = c(-4, 4), ylim = c(0, .78))
+# The band the third panel opens up, drawn under the curves so it reads as a
+# window onto them rather than as a block beside them.
+rect(2, 0, 4.8, .78, col = "#F1ECE2", border = NA)
+abline(h = 0, col = INK)
+lines(x, normal, col = INK, lwd = 2.2)
+lines(x, heavy, col = RED, lwd = 2.6)
+lines(x, light, col = BLUE, lwd = 2.6)
+# A three-line key in the empty upper left, rather than labels laid over the
+# curves: at unit variance the three peaks are only 0.16 apart vertically, and
+# there is no point on any curve where a label does not touch another.
+key <- function(i, col, label) {
+  y <- .755 - (i - 1) * .075
+  segments(-3.95, y, -3.45, y, col = col, lwd = 3.4)
+  text(-3.35, y, label, col = col, font = 2, cex = lab_cex, pos = 4)
+}
+key(1, RED,  sprintf("leptokurtic   %+.2f", g2_heavy))
+key(2, INK,          "mesokurtic     0.00")
+key(3, BLUE, sprintf("platykurtic   %+.2f", g2_light))
+text(3.4, .74, "the next panel", col = MUTED, font = 3, cex = .95)
+panel_title("Kurtosis", "same variance, three shapes")
+
+# --- kurtosis, the tail on its own scale ------------------------------------
+xt <- seq(2, 4.6, length.out = 900)
+ht <- dens_heavy(xt); nt <- dnorm(xt)
+lt <- ifelse(xt < a_b, dens_light(xt), NA)
+keep <- !is.na(lt)
+plot(xt, ht, type = "n", xlab = "", ylab = "Density", xlim = c(2, 4.6),
+     ylim = c(0, .092), axes = FALSE)
+polygon(c(xt, rev(xt)), c(ht, rep(0, length(xt))),
+        col = adjustcolor(RED, alpha.f = .12), border = NA)
+polygon(c(xt, rev(xt)), c(nt, rep(0, length(xt))),
+        col = adjustcolor(INK, alpha.f = .10), border = NA)
+polygon(c(xt[keep], rev(xt[keep])), c(lt[keep], rep(0, sum(keep))),
+        col = adjustcolor(BLUE, alpha.f = .16), border = NA)
+lines(xt, nt, col = INK, lwd = 2.2)
+lines(xt, ht, col = RED, lwd = 2.6)
+lines(xt[keep], lt[keep], col = BLUE, lwd = 2.6)
+points(a_b, 0, pch = 19, col = BLUE, cex = 1.0)
+axis(1, at = c(2, 4.6), labels = FALSE, tcl = 0, col = INK)
+axis(1, at = 2:4, col = INK, col.axis = INK, cex.axis = 1.1)
+axis(2, at = c(0, .03, .06, .09), col = INK, col.axis = INK, cex.axis = 1.1)
+# Hairline leaders, in the muted grey: a leader drawn in the curve's own colour
+# and weight reads as another curve, which on this panel is the one thing it
+# must not do.
+segments(2.42, .0755, 2.27, .0165, col = MUTED, lwd = .8)
+note(2.34, .082, "platykurtic: stops dead at 2.24", BLUE, 4)
+segments(3.30, .0272, 3.55, .0055, col = MUTED, lwd = .8)
+note(3.18, .0312, "leptokurtic: still there at 4.6", RED, 4)
+note(2.70, .0088, "normal", INK, 1)
+panel_title("The right tail alone", "on its own scale: all under 0.09")
 dev.off()
 
 # Session 03: diagnostics -----------------------------------------------------
@@ -191,7 +278,7 @@ dev.off()
 
 set.seed(22)
 open_svg(asset("S03", "nonlinearity.svg"), width = 10.5, height = 6)
-par(mfrow = c(2, 1), mar = c(2.5, 4, 2.4, 1))
+par(mfrow = c(2, 1), mar = c(3.6, 4, 2.4, 1))
 x <- seq(0, 10, length.out = 90); y <- 1 + .72 * x - .06 * x^2 + rnorm(90, 0, .48); fit <- lm(y ~ x)
 plot(x, y, pch = 16, col = adjustcolor(BLUE, .65), axes = FALSE, xlab = "", ylab = "Outcome")
 axis(2); abline(fit, col = RED, lwd = 2.2); lines(x, 1 + .72 * x - .06 * x^2, col = INK, lwd = 2.4)
@@ -203,7 +290,7 @@ dev.off()
 
 set.seed(33)
 open_svg(asset("S03", "heteroskedasticity.svg"), width = 10.5, height = 6)
-par(mfrow = c(2, 1), mar = c(2.5, 4, 2.4, 1))
+par(mfrow = c(2, 1), mar = c(3.6, 4, 2.4, 1))
 x <- seq(0.2, 10, length.out = 110); y <- 1 + .55 * x + rnorm(110, 0, .18 + .12 * x); fit <- lm(y ~ x)
 plot(x, y, pch = 16, col = adjustcolor(BLUE, .65), axes = FALSE, xlab = "", ylab = "Outcome")
 axis(2); abline(fit, col = INK, lwd = 2.4); title("Uncertainty grows with the fitted value", adj = 0, font.main = 2)

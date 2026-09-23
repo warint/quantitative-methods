@@ -89,11 +89,11 @@ discrimination and is badly miscalibrated.
 ## B1 *(6)*
 
 **(a)** $t = \dfrac{0.42}{0.10} = \mathbf{4.20}$. Interval:
-$0.42 \pm 1.96(0.10) = 0.42 \pm 0.196 = \mathbf{[0.224,\, 0.616]}$. Since $|t| > 1.96$ and the
+$0.42 \pm 1.96(0.10) = 0.42 \pm 0.196 = \mathbf{[0.224,\thinspace 0.616]}$. Since $|t| > 1.96$ and the
 interval excludes zero, it **is** significant at 5%.
 
 **(b)** $t = \dfrac{0.42}{0.25} = \mathbf{1.68}$. Interval:
-$0.42 \pm 1.96(0.25) = 0.42 \pm 0.49 = \mathbf{[-0.070,\, 0.910]}$. The point estimate has **not
+$0.42 \pm 1.96(0.25) = 0.42 \pm 0.49 = \mathbf{[-0.070,\thinspace 0.910]}$. The point estimate has **not
 moved** — clustering changes the standard error, not the coefficient. But the standard error is
 $2.5\times$ larger, the interval now **contains zero**, and the result is no longer significant.
 
@@ -114,17 +114,17 @@ and are therefore too small. The honest report is the clustered one.
 
 **(a)** $\det(X^\top X) = 10(8) - 4(4) = 80 - 16 = 64$.
 
-$$(X^\top X)^{-1} = \tfrac{1}{64}\begin{pmatrix} 8 & -4 \\ -4 & 10\end{pmatrix},
+$$(X^\top X)^{-1} = \tfrac{1}{64}\begin{pmatrix} 8 & -4 \cr -4 & 10\end{pmatrix},
 \qquad
-\hat\beta = \tfrac{1}{64}\begin{pmatrix} 8(26) - 4(20) \\ -4(26) + 10(20)\end{pmatrix}
-= \tfrac{1}{64}\begin{pmatrix}128 \\ 96\end{pmatrix}
-= \begin{pmatrix} \mathbf{2.00} \\ \mathbf{1.50}\end{pmatrix}$$
+\hat\beta = \tfrac{1}{64}\begin{pmatrix} 8(26) - 4(20) \cr -4(26) + 10(20)\end{pmatrix}
+= \tfrac{1}{64}\begin{pmatrix}128 \cr 96\end{pmatrix}
+= \begin{pmatrix} \mathbf{2.00} \cr \mathbf{1.50}\end{pmatrix}$$
 
-**(b)** $X^\top X + 2I = \begin{pmatrix}12 & 4\\ 4 & 10\end{pmatrix}$, $\det = 120 - 16 = 104$.
+**(b)** $X^\top X + 2I = \begin{pmatrix}12 & 4\cr 4 & 10\end{pmatrix}$, $\det = 120 - 16 = 104$.
 
-$$\hat\beta^{\text{ridge}} = \tfrac{1}{104}\begin{pmatrix}10(26) - 4(20) \\ -4(26) + 12(20)\end{pmatrix}
-= \tfrac{1}{104}\begin{pmatrix}180 \\ 136\end{pmatrix}
-= \begin{pmatrix}\mathbf{1.7308} \\ \mathbf{1.3077}\end{pmatrix}$$
+$$\hat\beta^{\text{ridge}} = \tfrac{1}{104}\begin{pmatrix}10(26) - 4(20) \cr -4(26) + 12(20)\end{pmatrix}
+= \tfrac{1}{104}\begin{pmatrix}180 \cr 136\end{pmatrix}
+= \begin{pmatrix}\mathbf{1.7308} \cr \mathbf{1.3077}\end{pmatrix}$$
 
 **(c)** Shrinkage **13.5%** and **12.8%** respectively. Ridge remains well-defined under singularity
 because $X^\top X + \lambda I \succ 0$ for any $\lambda > 0$ — regularisation is not only a
@@ -137,7 +137,7 @@ bias–variance device, it makes the problem well-posed, including when $p > n$.
 
 **(a)** $S_{0.20}(\rho)$:
 
-| $\rho_j$ | $\|\rho_j\| - 0.20$ | $\hat\beta_j$ |
+| $\rho_j$ | $\Vert\rho_j\Vert - 0.20$ | $\hat\beta_j$ |
 |---|---|---|
 | 0.42 | 0.22 | **0.22** |
 | −0.18 | −0.02 → 0 | **0** |

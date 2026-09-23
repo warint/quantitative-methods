@@ -10,17 +10,18 @@
 > source: [`MATH60033A-S05-Pre-Session.qmd`](MATH60033A-S05-Pre-Session.qmd)
 
 
-**ISLR ch. 6.2**  
-Source: https://www.statlearning.com/  
-*Why:* Ridge, lasso, and the tuning-parameter picture.
+**Blonigen & Piger (2014), 'Determinants of foreign direct investment', Canadian Journal of
+Economics 47(3), 775–812**  
+Source: https://doi.org/10.1111/caje.12091 · free preprint: https://www.nber.org/papers/w16704  
+*Why:* This is the session's question asked of a real international-business problem. Eight
+prior studies disagree about which variables belong in an FDI regression (their table 1); the
+authors collect 56 candidates and report which survive (their table 3). Read those two tables
+first. The practice puts the lasso on the same 56 variables, two decades later.
 
-**Zou & Hastie (2005), 'Regularization and variable selection via the elastic net', JRSS-B 67(2)**  
-Source: https://doi.org/10.1111/j.1467-9868.2005.00503.x  
-*Why:* The original argument for combining the two penalties. Read the motivation and section 2.
-
-**ESL sec. 3.4**  
-Source: https://hastie.su.domains/ElemStatLearn/  
-*Why:* The SVD treatment of shrinkage.
+*Optional background, if you want the mathematics:* ISLR ch. 6.2 (https://www.statlearning.com/)
+for the tuning-parameter picture, and Zou & Hastie (2005),
+https://doi.org/10.1111/j.1467-9868.2005.00503.x, for the elastic net's original argument.
+Neither is examinable; the lecture derives what it needs.
 
 
 ---
@@ -62,7 +63,7 @@ mine = pd.read_parquet("data/spine/<your file>.parquet")
 df   = mine.merge(core, on=["geo", "time"], how="left")   # not for angle E
 ```
 
-**Before class:** Count your candidate predictors and compute their correlation matrix. Report the maximum off-diagonal absolute correlation. If it is above 0.9, note which pair.
+**Before class:** Count your candidate predictors and compute their correlation matrix. Report the maximum off-diagonal absolute correlation. If it is above 0.9, note which pair. Do the same for the 56 FDI candidates — that number is what decides lasso versus elastic net.
 
 > Read your [data dictionary](../../data/spine/dictionaries/) first. Its **Traps** section lists
 > the things that have cost somebody a week, and its **First look** items take ten minutes. Knowing
@@ -75,29 +76,30 @@ df   = mine.merge(core, on=["geo", "time"], how="left")   # not for angle E
 > [`PROVENANCE.md`](../../data/spine/PROVENANCE.md).
 
 <details>
-<summary>Teaching dataset for the method exercise (optional)</summary>
+<summary>The paper's dataset — required, not optional</summary>
 
-**FRED-MD: a monthly US macroeconomic panel (~127 series)**
+**56 candidate determinants of bilateral FDI, 2019**
 
-Source: Federal Reserve Bank of St. Louis (McCracken & Ng)
-URL: <https://www.stlouisfed.org/research/economists/mccracken/fred-databases>
-
-Download `current.csv` from the FRED-MD page. The first row contains the
-transformation codes (1 = level, 2 = first difference, 5 = log difference, ...). Apply them before
-modelling - the series are not stationary in levels.
+The data behind Blonigen & Piger (2014), rebuilt from the sources the paper names: OECD bilateral
+FDI positions, the CEPII gravity database, the World Development Indicators and Freedom House.
+7,051 directed country pairs. Every number is real — unlike the rest of the spine, this file is
+not a teaching fixture.
 
 ```python
-import pandas as pd
-raw = pd.read_csv("data/fred_md_current.csv")
-tcode = raw.iloc[0, 1:].astype(int)
-df = raw.iloc[1:].set_index("sasdate")
+import qmib
+
+fdi = qmib.load("fdi")
+cov = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
+print(fdi.shape, len(cov))          # (7051, 60) 56
 ```
 
-This is a genuinely wide problem: many correlated series, a short sample. Exactly where
-regularisation earns its keep.
+Nothing to download: the file is committed to the repository. The
+[data dictionary](../../data/spine/dictionaries/S05-fdi.md) names every source, every trap, and
+the six places where the rebuild had to substitute for a series the original publisher has since
+withdrawn.
 
-Use this if you want to see the method work on known ground before turning it on your own angle.
-The result you report must come from **your project**.
+This is a genuinely wide problem: 56 candidates, many of them correlated, and a sample that
+shrinks fast once you require them all. Exactly where regularisation earns its keep.
 
 </details>
 

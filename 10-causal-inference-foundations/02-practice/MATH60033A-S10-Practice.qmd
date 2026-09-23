@@ -31,10 +31,12 @@ format:
 3. Reproduce — 20 min
 4. Apply to your own angle — 35 min
 5. Break one assumption — 15 min
-6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
+6. Report it as one table
+7. Write it down — 20 min
+8. Submitting
+9. What loses marks
+10. Two-minute report
+11. After class, if you want it
 
 ## What session 10 is for {.scrollable}
 ::::: columns
@@ -74,102 +76,16 @@ format:
 
 ## Your Python so far {.scrollable}
 
-The 74 names below came out of sessions 2–9. Today's slides assume them, and add to them. The ones marked are the newest, from session 9.
+Everything you need to type is on one sheet — how to start Python in VS Codium on
+your platform, how to make a file and run it, the DataFrame basics, and every name from sessions 1 to 10, each with a line showing it in use.
 
-### Load and shape
+> **[Python Cheatsheet · Session 10](https://warint.github.io/quantitative-methods/python-cheatsheet-10.pdf)** (PDF) ·
+> in the repository at `10-…/PYTHON-CHEATSHEET.pdf`
 
-- `.dropna` — drop rows with missing values
-- `.merge` — join two frames on a key
-- `.shape` — rows and columns
-- `pd.read_parquet` — a parquet file, directly
-- `qmib.load` — a course dataset, by name
-- `pd.get_dummies` — categories to indicator columns
-- `StandardScaler` — standardise before you penalise
-- `make_pipeline` — so the scaler is fitted on train only
-
-### Describe
-
-- `.mean / .median` — the two centres, and their gap
-- `.quantile` — any quantile, including the median
-- `.std / .var` — spread, dividing by $n-1$
-- `stats.trim_mean` — the mean after cutting both tails
-- `.value_counts` — how unbalanced is the outcome
-- `pd.crosstab` — a contingency table in one call
-- `np.linalg.eigvalsh` — eigenvalues of a symmetric matrix
-- `np.cov` — the matrix the model is trying to reproduce · *new in session 9*
-
-### Fit
-
-- `.fit()` — estimate the model you specified
-- `smf.ols` — least squares, from a formula
-- `OrderedModel` — ordered categories, proportional odds
-- `sm.MNLogit` — unordered categories, one baseline
-- `sm.add_constant` — the intercept, when there is no formula
-- `smf.logit` — binary outcome, from a formula
-- `Ridge / Lasso / ElasticNet` — the three penalties
-- `I(x**2)` — a quadratic term, inside a formula
-- `PanelOLS` — fixed effects, entity intercepts absorbed
-- `RandomEffects` — the other panel estimator, and its assumption
-- `a * b` — interaction — expands to `a + b + a:b`
-- `Factor` — statsmodels' factor analysis, by maximum likelihood
-- `PCA` — components, on standardised columns
-- `prince.FAMD` — when the columns are mixed numeric and categorical
-- `KNeighborsClassifier` — predict a class from the k closest rows
-- `KNeighborsRegressor` — the same idea, averaging a number
-- `RandomForestClassifier` — the comparison that complexity has to beat
-- `semopy.Model` — from a model description string · *new in session 9*
-
-### Read the fit
-
-- `.params` — the coefficients, in units of $y$
-- `.rsquared` — share of variance explained
-- `.mse_resid` — its square root is the RSE, in units
-- `.resid / .fittedvalues` — what is left, and what was predicted
-- `.rsquared_adj` — penalised for the extra predictor
-- `.get_prediction` — with an interval, via `.summary_frame()`
-- `.predict` — fitted probabilities, not classes
-- `np.exp` — a log-odds becomes an odds ratio
-- `.coef_ / .alpha_` — scikit-learn's spelling of `.params`
-- `.components_` — the loadings — variables on components
-- `.explained_variance_ratio_` — what the scree plot is drawn from
-- `.rotate('varimax')` — same fit, readable loadings — and no new evidence
-- `.inspect()` — loadings and paths, estimated · *new in session 9*
-
-### Diagnose
-
-- `.cooks_distance` — influence: leverage $\times$ residual
-- `.get_influence()` — the whole diagnostic bundle
-- `.hat_matrix_diag` — leverage; sums to $p$, always
-- `.resid_studentized_internal` — residuals on a common scale
-- `classification_report` — precision and recall, per class
-- `confusion_matrix` — the four cells accuracy hides
-- `permutation_importance` — importance without coefficients: scramble a column
-
-### Choose and validate
-
-- `.aic / .bic` — compare non-nested models
-- `.llf` — log-likelihood, for the LR test
-- `stats.chi2.sf` — the $p$-value of that test
-- `KFold` — and do it $k$ times
-- `RidgeCV / LassoCV / ElasticNetCV` — $\lambda$ by cross-validation
-- `lasso_path` — the whole coefficient path
-- `mean_squared_error` — score it on the held-out part
-- `np.logspace` — a grid that is even in $\log\lambda$
-- `train_test_split` — hold something back
-- `.compare_f_test` — an F-test, for nested models only
-- `np.linalg.pinv` — pseudo-inverse, for the Hausman statistic
-- `.best_params_ / .best_score_` — what the search chose, and how it scored
-- `GridSearchCV` — search a hyperparameter by cross-validation
-- `cross_val_score` — one number, k folds, any scorer
-- `semopy.calc_stats` — CFI, TLI, RMSEA — report all three · *new in session 9*
-
-### Plot
-
-- `plt.scatter` — the data, before anything else
-- `plt.xlabel / plt.ylabel` — say the units, every time
-- `plt.axhline / plt.axvline` — draw the threshold you are judging against
-- `plt.stem` — one spike per observation
-- `plt.subplots` — several panels, one figure
+::: {.muted}
+Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is
+assumed.
+:::
 
 <!-- END deck-frontmatter -->
 
@@ -219,11 +135,11 @@ Take the result the paper rests on, and reproduce it. The package you downloaded
 ```python
 import qmib
 
-data = qmib.load("core")     # the session's own data, for comparison
+data = qmib.load("core")     # the session's own data
 ```
 
 ::: {.muted}
-Paper: Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning* · [10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA)
+Paper: Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a Randomized Experiment*, Quarterly Journal of Economics 132(2) · [10.7910/DVN/QOGMVI](https://doi.org/10.7910/DVN/QOGMVI)
 :::
 
 ::: {.check}
@@ -261,6 +177,30 @@ your answer.
 ::: {.check}
 This is the part that carries the marks. A group that shows how its result falls apart understands
 it; a group that only shows it holding does not yet know.
+:::
+
+## Report it as one table
+
+Step 3 left you with two fits: the model as specified, and the model after you
+broke something. Put them in one table rather than two blocks of output — the
+comparison is the finding.
+
+```python
+import qmib
+
+print(qmib.regtable([before, after],
+                    names=["as specified", "assumption broken"]))
+```
+
+::: {.check}
+Read **across** the row, not down the column: what happened to the coefficient
+you care about, in its own units, and what happened to its standard error.
+:::
+
+::: {.muted}
+Coefficients too small to read at one decimal — a logit's usually are? `digits=3`.
+`.as_latex()` if you would rather paste it into the write-up than screenshot it.
+Pass `stats=` to change the rows at the foot.
 :::
 
 ## 4 · Write it down — 20 min
@@ -312,4 +252,23 @@ And everywhere in this course: an association described in causal language.
 
 ::: {.muted}
 Listen for traceable evidence, not confidence of delivery.
+:::
+
+
+## After class, if you want it
+
+::: {.step}
+The **QMIB Lab** has a knowledge check on what you have just done:
+**[warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-10.html)**
+:::
+
+::: {.check}
+Optional, never a prerequisite for the next lecture, and never marked for
+correctness. A completed report counts because **attempting it is the engagement
+being measured** — it is one of the three routes to the participation mark.
+:::
+
+::: {.warn}
+What **is** required before the next session: the article, its Dataverse package,
+and the self-check. That is the pre-session deck, not this.
 :::

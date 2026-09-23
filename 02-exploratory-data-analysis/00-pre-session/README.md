@@ -79,7 +79,7 @@ Refresh these before class; we will use them without re-deriving them.
 
 - **Mean and median.** The mean is the balance point; the median is the middle of the ordering.
 - **Variance and standard deviation.** $s^2 = \frac{1}{n-1}\sum_i (x_i - \bar x)^2$ — note the $n-1$.
-- **Quantiles.** $\tilde q_p$ is the value below which about $100p\%$ of the data falls.
+- **Quantiles.** $\tilde q_p$ is the value below which about $100p$% of the data falls.
 - **A straight line.** $y = \beta_0 + \beta_1 x$: what the intercept and the slope each mean.
 
 If any of these is unfamiliar, work through it with your local LLM *before* class, and bring your

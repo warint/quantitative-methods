@@ -16,6 +16,28 @@ cannot drift apart again.
 # it here moves the whole course's group work to a new directory.
 COHORT = "A2026"
 
+# The QMIB Lab App: the optional at-home knowledge check that is the third
+# route to participation marks. Live since September 2026; the course pages
+# said "the link is announced in class" until then.
+LAB_URL = "https://warin.ca/qmib-labs/"
+# One lab per session, sessions 02 to 11. Session 01 installs the workstation
+# and session 12 is the presentations, so neither has one.
+LAB_SESSIONS = tuple(f"{n:02d}" for n in range(2, 12))
+
+
+def lab_url(num):
+    """The lab for one session, or None where there is no lab."""
+    return f"{LAB_URL}qmib-lab-{num}.html" if num in LAB_SESSIONS else None
+
+# Harvard Dataverse puts a guestbook on some deposits, and a guestbook cannot
+# be answered from the terminal: the access API returns HTTP 400 whatever you
+# send it. Those sessions get this note instead of a broken curl recipe.
+GUESTBOOK_NOTE = (
+    "This deposit sits behind a Dataverse **guestbook**, so the `curl` recipe above returns an "
+    "error for this session. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, "
+    "accept the terms once, and unzip it to the same folder. Everything after that is identical."
+)
+
 SESSIONS = {
     "01": dict(
         dir="01-foundations-scenarios-and-tools",
@@ -31,7 +53,7 @@ SESSIONS = {
         title="Exploratory Data Analysis, and the First Model",
         short="Exploratory data analysis",
         question="Before you model anything, what does the data actually look like?",
-        methods="mean/median/trimmed, variance, IQR, skewness, kurtosis, simple and multiple regression",
+        methods="mean/median/trimmed, variance, IQR, skewness, kurtosis, the empirical rule",
         theme="Which summary of your key variable would you defend in print?",
         generated=False,          # pages written by hand; decks still generated
         objectives=[
@@ -39,7 +61,7 @@ SESSIONS = {
             "Explain why the sample variance divides by $n-1$",
             "Apply the **empirical rule**, and state the precondition that makes it valid",
             "Compute **skewness** and **excess kurtosis**, and test each against its threshold",
-            "Fit a simple regression and state the slope **in units**",
+            "Say which summary you would defend in print, and why the other two mislead",
         ],
         reading="Fraiberger et al. (2021), *Media sentiment and international asset prices*",
         reading_url="https://doi.org/10.1016/j.jinteco.2021.103526",
@@ -61,20 +83,26 @@ SESSIONS = {
         title="Regression: Adequacy, Validity, and Robustness",
         short="Regression diagnostics",
         question="You have fitted a regression. Can it be trusted?",
-        methods="residual diagnostics, leverage, Cook's distance, information criteria",
+        methods="least squares, residual diagnostics, influence and Cook's distance, information criteria",
         theme="Which model would survive a referee?",
         objectives=[
+            "Fit a simple and a multiple regression, and state the slope **in units**",
             "Read a **residuals-versus-fitted** plot and say what structure it reveals",
             "Diagnose non-constant variance from a **scale–location** plot",
-            "Compute **leverage** and say which observations have the power to move the line",
-            "Use **Cook's distance** to separate an outlier from an influential point",
-            "Compare candidate models on **AIC**, and say why that is not model selection",
+            "Tell an outlier, a **leverage point** and an **influential point** apart",
+            "Use **Cook's distance** to find the observations that move the answer",
+            "Compare candidate models on **AIC and BIC**, and say why that is not model selection",
         ],
         reading="Amsili, van Es & Schindelbeck (2024), *Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity*",
         reading_url="https://doi.org/10.1080/00103624.2024.2336573",
         dataverse="10.7910/DVN/U5DAEP",
+        data_extra=(
+            "This deposit is **about 220 MB** — much the largest in the course. Start the download "
+            "before you sit down to read, not while the room is waiting for you."
+        ),
         dataset="core",
-        dataset_note="the same regression Session 02 fitted — GDP per capita on productivity",
+        dataset_note="the regression fitted at the top of the lecture — GDP per capita on productivity",
+        practice_extra="regtable",   # the practice ends with two models to compare
         deliverable=("a diagnostic report on your group's own regression: four plots, the "
                      "observations you investigated, and a 250-word note on which conclusions "
                      "survived the diagnostics and which did not"),
@@ -104,6 +132,7 @@ SESSIONS = {
         dataverse="10.7910/DVN/ONOFS7",
         dataset="loans",
         dataset_note="Lending Club — 9,578 three-year loans, FICO scores and default",
+        practice_extra="regtable",   # two logits to compare, full against reduced
         deliverable=("a logistic model of a binary outcome in your own project data, with the "
                      "odds ratios interpreted in words, one nested comparison tested, and a note "
                      "on what the model does not license you to say"),
@@ -119,21 +148,23 @@ SESSIONS = {
         title="Regularisation: Ridge, Lasso, and the Elastic Net",
         short="Regularisation",
         question="When is a deliberately biased estimator the better one?",
-        methods="soft-thresholding, coordinate descent, the grouping effect",
+        methods="stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect",
         theme="Of many indicators, which few actually carry the signal?",
         generated=False,          # repository-native pages; decks still generated
         objectives=[
+            "Say why a greedy **stepwise** search is unstable, and what that instability argues for",
             "State the ridge and lasso objectives and say **what each penalty buys**",
             "Explain why ridge shrinkage is **targeted** rather than blunt",
             "Derive **soft-thresholding** and use it to explain the lasso's exact zeros",
             "Choose between lasso and elastic net from the **correlation structure**",
             "Report $\\lambda$ by cross-validation, and know why post-selection inference is invalid",
         ],
-        reading="Frandi et al. (2016), *Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee*",
-        reading_url="https://doi.org/10.1007/s10994-016-5578-4",
-        dataverse="10.7910/DVN/QJEUKR",
-        dataset="core",
-        dataset_note="a wide slice of the spine — more candidate indicators than usable rows",
+        reading="Blonigen & Piger (2014), *Determinants of foreign direct investment*, Canadian Journal of Economics 47(3)",
+        reading_url="https://doi.org/10.1111/caje.12091",
+        dataverse=None,           # no package published; rebuilt by scripts/build_fdi_determinants.py
+        dataset="fdi",
+        dataset_note=("56 candidate determinants of bilateral FDI, 2019 — the paper's design "
+                      "rebuilt from OECD, CEPII, World Bank and Freedom House"),
         deliverable=("a penalised fit on your own angle: the path, the chosen $\\lambda$, what "
                      "survived, and what that does not license you to claim"),
         loses_marks=[
@@ -141,6 +172,8 @@ SESSIONS = {
             "Standardising before the cross-validation split",
             "Reporting the selected set as \"the variables that matter\"",
             "Reporting post-selection p-values with no caveat",
+            "Presenting a stepwise selection as though the data had chosen it",
+            "Reading a dropped variable as evidence of no effect",
         ],
     ),
     "06": dict(
@@ -186,11 +219,13 @@ SESSIONS = {
             "State the difference between **PCA** and **factor analysis**, and when each applies",
             "Say why a factor is identified only **up to rotation**",
         ],
-        reading="Koopman & Mesters (2017), *Empirical Bayes Methods for Dynamic Factor Models*",
-        reading_url="https://doi.org/10.1162/REST_a_00614",
-        dataverse="10.7910/DVN/NKWMQM",
-        dataset="movies",
-        dataset_note="45,000 films — budget, popularity, revenue, runtime and votes",
+        reading=("Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, "
+                 "Review of International Organizations 14(3)"),
+        reading_url="https://doi.org/10.1007/s11558-019-09344-2",
+        dataverse=None,           # the index itself is the data, published by KOF ETH Zurich
+        dataset="kof",
+        dataset_note=("the KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions "
+                      "each split into de facto and de jure"),
         deliverable=("a dimension-reduction of your project's indicators: the scree plot, the "
                      "number retained with its justification, the loadings interpreted, and a "
                      "note on what you are *not* entitled to call the components"),
@@ -215,11 +250,14 @@ SESSIONS = {
             "Choose $k$ by cross-validation, and read the trade-off the curve shows",
             "Say what happens to KNN as the number of predictors grows",
         ],
-        reading="Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling*",
-        reading_url="https://doi.org/10.1080/00103624.2025.2454015",
-        dataverse="10.7910/DVN/HGBPCW",
-        dataset="core",
-        dataset_note="the course spine, plus the Smarket returns used in the lecture",
+        reading=("Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield "
+                 "curve and financial crisis prediction: evidence from a machine learning approach*, "
+                 "Journal of International Economics 145"),
+        reading_url="https://doi.org/10.1016/j.jinteco.2023.103773",
+        dataverse=None,           # built on the public Macrohistory database
+        dataset="jst",
+        dataset_note=("the Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, "
+                      "88 financial crises, with the paper's predictors already derived"),
         deliverable=("a KNN classifier on a binary outcome from your angle, with $k$ chosen by "
                      "cross-validation, compared against a sensible benchmark, and a note on "
                      "whether the flexibility earned its keep"),
@@ -273,11 +311,14 @@ SESSIONS = {
             "Check **overlap** and **balance**, and say what to do when they fail",
             "Report an **ATT**, and state the assumption it rests on",
         ],
-        reading="Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning*",
-        reading_url="https://doi.org/10.1093/ectj/utac018",
-        dataverse="10.7910/DVN/FS0KBA",
+        reading=("Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a "
+                 "Randomized Experiment*, Quarterly Journal of Economics 132(2)"),
+        reading_url="https://doi.org/10.1093/qje/qjx002",
+        dataverse="10.7910/DVN/QOGMVI",
+        data_extra=GUESTBOOK_NOTE,
         dataset="core",
         dataset_note="the spine's documented treatment, with a known effect to recover",
+        practice_extra="regtable",   # an outcome model before and after matching
         deliverable=("a matched comparison on your own data: the naive difference, the overlap "
                      "check, the balance table, the matched estimate, and the paragraph defending "
                      "conditional ignorability — that paragraph carries the marks"),
@@ -302,11 +343,14 @@ SESSIONS = {
             "Explain what an **instrument** must satisfy, and why good ones are rare",
             "Say what neither design can rescue",
         ],
-        reading="Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity*",
-        reading_url="https://doi.org/10.1162/rest_a_00759",
-        dataverse="10.7910/DVN/PIAZWN",
+        reading=("Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at "
+                 "the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)"),
+        reading_url="https://doi.org/10.1257/aeri.20190536",
+        dataverse="10.7910/DVN/JV7FCH",
+        data_extra=GUESTBOOK_NOTE,
         dataset="core",
         dataset_note="the spine's post-2021 structural break, treated as a policy change",
+        practice_extra="regtable",   # two DiD specifications side by side
         deliverable=("a difference-in-differences estimate on your angle, with the parallel-trends "
                      "evidence shown rather than asserted, and a note on the threat you consider "
                      "most serious"),

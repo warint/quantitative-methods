@@ -60,7 +60,7 @@ function** $L(y, \hat y)$ prices a single mistake.
 |---|---|---|
 | Squared error | $(y-\hat y)^2$ | continuous outcomes; Sessions 02–05 |
 | Absolute error | $\lvert y - \hat y\rvert$ | continuous outcomes, robust to outliers |
-| 0–1 loss | $\mathbb{1}\{y \neq \hat y\}$ | classification; Session 06 |
+| 0–1 loss | $\mathbb{1}\lbrace y \neq \hat y\rbrace$ | classification; Session 06 |
 | Log loss | $-\log \hat p_y$ | probability forecasts; Sessions 06–07 |
 
 The **risk** of a predictor $g$ is its expected loss over the whole population — not over your
@@ -99,13 +99,13 @@ expectation (the law of iterated expectations, $\mathbb{E}[Z] = \mathbb{E}\big[\
 condition on $X$ first, and since $\mathbb{E}[Y\mid X] - g(X)$ is a function of $X$ it passes
 outside the inner expectation, leaving
 
-$$\mathbb{E}\big[(Y - \mathbb{E}[Y\mid X])\,(\mathbb{E}[Y\mid X] - g(X))\big]
+$$\mathbb{E}\big[(Y - \mathbb{E}[Y\mid X])\thinspace(\mathbb{E}[Y\mid X] - g(X))\big]
 = \mathbb{E}\Big[(\mathbb{E}[Y\mid X] - g(X))\underbrace{\mathbb{E}\big[Y - \mathbb{E}[Y\mid X]
-\;\big|\; X\big]}_{= \,0}\Big] = 0 .$$
+\thickspace\big|\thickspace X\big]}_{= \thinspace0}\Big] = 0 .$$
 
 So what is left is
 
-$$\boxed{\;R(g) = \sigma^2 + \mathbb{E}\big[(\mathbb{E}[Y\mid X] - g(X))^2\big]\;}$$
+$$\boxed{\thickspace R(g) = \sigma^2 + \mathbb{E}\big[(\mathbb{E}[Y\mid X] - g(X))^2\big]\thickspace}$$
 
 The first term does not depend on $g$ at all. The second is a squared quantity, so it is
 non-negative, and it is zero exactly when $g(x) = \mathbb{E}[Y\mid X=x]$.
@@ -117,7 +117,7 @@ non-negative, and it is zero exactly when $g(x) = \mathbb{E}[Y\mid X=x]$.
 **For classification.** Under 0–1 loss the same argument gives the **Bayes classifier** — predict
 the most probable class,
 
-$$g^\star(x) = \arg\max_k \; P(Y = k \mid X = x),$$
+$$g^\star(x) = \arg\max_k \thickspace P(Y = k \mid X = x),$$
 
 whose risk, the **Bayes error rate**, is $1 - \mathbb{E}\big[\max_k P(Y=k\mid X)\big]$.
 

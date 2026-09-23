@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Ferman & Pinto (2019), *Inference in Differences-in-Differences with Few Treated Groups and Heteroskedasticity***, and its replication package
-([10.7910/DVN/PIAZWN](https://doi.org/10.7910/DVN/PIAZWN)) should already be unzipped at:
-
-```text
-11-causal-inference-did/data/replication/
-```
+The paper is **Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)**. Its replication package ([10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH)) should already be unzipped at `11-causal-inference-did/data/replication/`.
 
 The session's own dataset, for comparison:
 
@@ -89,6 +84,10 @@ A 250-word note in your submissions folder:
 - Which assumption you broke, and what it did
 - What this result does **not** license you to claim
 
+> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row.
+
 ---
 
 ## Submitting
@@ -109,6 +108,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Reading the post-treatment dummy as the effect
 - An instrument justified only by its first stage
 - Claiming a causal effect the design cannot deliver
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-11.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

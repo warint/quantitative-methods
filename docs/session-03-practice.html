@@ -1079,10 +1079,12 @@ Thierry Warin, PhD
 <li>Reproduce — 20 min</li>
 <li>Apply to your own angle — 35 min</li>
 <li>Break one assumption — 15 min</li>
+<li>Report it as one table</li>
 <li>Write it down — 20 min</li>
 <li>Submitting</li>
 <li>What loses marks</li>
 <li>Two-minute report</li>
+<li>After class, if you want it</li>
 </ol>
 </section>
 <section id="what-session-3-is-for" class="slide level2 scrollable">
@@ -1091,6 +1093,7 @@ Thierry Warin, PhD
 <div class="column" style="width:33%;">
 <h3 id="the-mathematics">The mathematics</h3>
 <ul>
+<li>Derive the least-squares slope, and read “controlling for” as a residual regression</li>
 <li>Read <strong>residuals versus fitted</strong> and say what structure it reveals</li>
 <li>Compute <strong>leverage</strong> from the hat matrix, and show it sums to <span class="math inline">\(p\)</span></li>
 <li>Separate an outlier from an influential point with <strong>Cook’s distance</strong></li>
@@ -1099,13 +1102,17 @@ Thierry Warin, PhD
 </div><div class="column" style="width:33%;">
 <h3 id="the-python">The Python</h3>
 <ul>
+<li>Fit a simple and a multiple regression with <code>smf.ols</code>, and read <code>.params</code></li>
 <li>Pull diagnostics from a fitted model with <code>get_influence()</code></li>
 <li>Build the four diagnostic plots yourself rather than calling one function</li>
 <li>Compare candidate specifications side by side on AIC and BIC</li>
+<li>Report the comparison as a publication table with <code>qmib.regtable</code></li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
 <ul>
+<li>Quote a slope <strong>in units</strong> a manager can act on</li>
+<li>Say why a slope is an association, and what more is needed to call it a cause</li>
 <li>Say whether a published coefficient survives its own diagnostics</li>
 <li>Decide what to do about the one country that moves the whole result</li>
 <li>Refuse a model whose residuals show it has missed the structure</li>
@@ -1114,37 +1121,13 @@ Thierry Warin, PhD
 </section>
 <section id="your-python-so-far" class="slide level2 scrollable">
 <h2>Your Python so far</h2>
-<p>The 15 names below came out of session 2. Today’s slides assume them, and add to them.</p>
-<h3 id="load-and-shape">Load and shape</h3>
-<ul>
-<li><code>.dropna</code> — drop rows with missing values</li>
-<li><code>.merge</code> — join two frames on a key</li>
-<li><code>.shape</code> — rows and columns</li>
-<li><code>pd.read_parquet</code> — a parquet file, directly</li>
-<li><code>qmib.load</code> — a course dataset, by name</li>
-</ul>
-<h3 id="describe">Describe</h3>
-<ul>
-<li><code>.mean / .median</code> — the two centres, and their gap</li>
-<li><code>.quantile</code> — any quantile, including the median</li>
-<li><code>.std / .var</code> — spread, dividing by <span class="math inline">\(n-1\)</span></li>
-<li><code>stats.trim_mean</code> — the mean after cutting both tails</li>
-</ul>
-<h3 id="fit">Fit</h3>
-<ul>
-<li><code>.fit()</code> — estimate the model you specified</li>
-<li><code>smf.ols</code> — least squares, from a formula</li>
-</ul>
-<h3 id="read-the-fit">Read the fit</h3>
-<ul>
-<li><code>.params</code> — the coefficients, in units of <span class="math inline">\(y\)</span></li>
-<li><code>.rsquared</code> — share of variance explained</li>
-</ul>
-<h3 id="plot">Plot</h3>
-<ul>
-<li><code>plt.scatter</code> — the data, before anything else</li>
-<li><code>plt.xlabel / plt.ylabel</code> — say the units, every time</li>
-</ul>
+<p>Everything you need to type is on one sheet — how to start Python in VS Codium on your platform, how to make a file and run it, the DataFrame basics, and every name from sessions 1 to 3, each with a line showing it in use.</p>
+<blockquote>
+<p><strong><a href="https://warint.github.io/quantitative-methods/python-cheatsheet-03.pdf">Python Cheatsheet · Session 03</a></strong> (PDF) · in the repository at <code>03-…/PYTHON-CHEATSHEET.pdf</code></p>
+</blockquote>
+<div class="muted">
+<p>Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is assumed.</p>
+</div>
 <!-- END deck-frontmatter -->
 </section>
 <section>
@@ -1206,7 +1189,7 @@ Thierry Warin, PhD
 <p>Take the result the paper rests on, and reproduce it. The package you downloaded is at <code>03-regression-adequacy-and-validity/data/replication/</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb3-2"><a href></a></span>
-<span id="cb3-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)     <span class="co"># the session&#39;s own data, for comparison</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)     <span class="co"># the session&#39;s own data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="muted">
 <p>Paper: Amsili, van Es &amp; Schindelbeck (2024), <em>Pedotransfer Functions for Field Capacity, Permanent Wilting Point, and Available Water Capacity</em> · <a href="https://doi.org/10.7910/DVN/U5DAEP">10.7910/DVN/U5DAEP</a></p>
 </div>
@@ -1237,6 +1220,20 @@ Thierry Warin, PhD
 <p>This is the part that carries the marks. A group that shows how its result falls apart understands it; a group that only shows it holding does not yet know.</p>
 </div>
 </section>
+<section id="report-it-as-one-table" class="slide level2">
+<h2>Report it as one table</h2>
+<p>Step 3 left you with two fits: the model as specified, and the model after you broke something. Put them in one table rather than two blocks of output — the comparison is the finding.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb5-2"><a href></a></span>
+<span id="cb5-3"><a href></a><span class="bu">print</span>(qmib.regtable([before, after],</span>
+<span id="cb5-4"><a href></a>                    names<span class="op">=</span>[<span class="st">&quot;as specified&quot;</span>, <span class="st">&quot;assumption broken&quot;</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Read <strong>across</strong> the row, not down the column: what happened to the coefficient you care about, in its own units, and what happened to its standard error.</p>
+</div>
+<div class="muted">
+<p>Coefficients too small to read at one decimal — a logit’s usually are? <code>digits=3</code>. <code>.as_latex()</code> if you would rather paste it into the write-up than screenshot it. Pass <code>stats=</code> to change the rows at the foot.</p>
+</div>
+</section>
 <section id="write-it-down-20-min" class="slide level2">
 <h2>4 · Write it down — 20 min</h2>
 <p>250 words in your submissions folder:</p>
@@ -1253,9 +1250,9 @@ Thierry Warin, PhD
 </section>
 <section id="submitting" class="slide level2">
 <h2>Submitting</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="fu">git</span> add groups/A2026/group-XX/session-03</span>
-<span id="cb5-2"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Session 03 practice — group XX&quot;</span></span>
-<span id="cb5-3"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href></a><span class="fu">git</span> add groups/A2026/group-XX/session-03</span>
+<span id="cb6-2"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Session 03 practice — group XX&quot;</span></span>
+<span id="cb6-3"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="get">
 <p><strong>Deliverable.</strong> A diagnostic report on your group’s own regression: four plots, the observations you investigated, and a 250-word note on which conclusions survived the diagnostics and which did not.</p>
 </div>
@@ -1294,6 +1291,18 @@ Thierry Warin, PhD
 </table>
 <div class="muted">
 <p>Listen for traceable evidence, not confidence of delivery.</p>
+</div>
+</section>
+<section id="after-class-if-you-want-it" class="slide level2">
+<h2>After class, if you want it</h2>
+<div class="step">
+<p>The <strong>QMIB Lab</strong> has a knowledge check on what you have just done: <strong><a href="https://warin.ca/qmib-labs/qmib-lab-03.html">warin.ca/qmib-labs</a></strong></p>
+</div>
+<div class="check">
+<p>Optional, never a prerequisite for the next lecture, and never marked for correctness. A completed report counts because <strong>attempting it is the engagement being measured</strong> — it is one of the three routes to the participation mark.</p>
+</div>
+<div class="warn">
+<p>What <strong>is</strong> required before the next session: the article, its Dataverse package, and the self-check. That is the pre-session deck, not this.</p>
 </div>
 
 </section></section>

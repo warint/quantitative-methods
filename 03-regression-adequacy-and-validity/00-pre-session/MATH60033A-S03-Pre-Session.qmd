@@ -29,10 +29,9 @@ format:
 1. What to do, and how long it takes
 2. Read the paper
 3. Get BOTH datasets
-4. 2b · The course data
-5. Self-check
-6. What the session will ask of you
-7. Running the code
+4. The course data
+5. Self-check, and what the session will ask of you
+6. Before you run anything
 
 ## What session 3 is for {.scrollable}
 ::::: columns
@@ -41,6 +40,7 @@ format:
 
 ### The mathematics
 
+- Derive the least-squares slope, and read "controlling for" as a residual regression
 - Read **residuals versus fitted** and say what structure it reveals
 - Compute **leverage** from the hat matrix, and show it sums to $p$
 - Separate an outlier from an influential point with **Cook's distance**
@@ -52,9 +52,11 @@ format:
 
 ### The Python
 
+- Fit a simple and a multiple regression with `smf.ols`, and read `.params`
 - Pull diagnostics from a fitted model with `get_influence()`
 - Build the four diagnostic plots yourself rather than calling one function
 - Compare candidate specifications side by side on AIC and BIC
+- Report the comparison as a publication table with `qmib.regtable`
 
 ::::
 
@@ -62,6 +64,8 @@ format:
 
 ### The international business
 
+- Quote a slope **in units** a manager can act on
+- Say why a slope is an association, and what more is needed to call it a cause
 - Say whether a published coefficient survives its own diagnostics
 - Decide what to do about the one country that moves the whole result
 - Refuse a model whose residuals show it has missed the structure
@@ -146,6 +150,11 @@ Expand-Archive replication.zip .; Remove-Item replication.zip; cd -
 structure — do not tidy it.
 :::
 
+::: {.warn}
+This deposit is **about 220 MB** — much the largest in the course. Start the download before you sit down to read, not while the room is waiting for you.
+:::
+
+
 ## 2b · The course data
 
 ```python
@@ -168,12 +177,12 @@ whatever the room's wifi is doing.
 :::
 
 ::: {.muted}
-The same regression session 02 fitted — gdp per capita on productivity · everything available: `qmib.catalog()`
+The regression fitted at the top of the lecture — GDP per capita on productivity · everything available: `qmib.catalog()`
 :::
 
-## 3 · Self-check
+## 3 · Self-check, and what the session will ask of you
 
-Answer on paper. If you cannot, that is what the lecture is for.
+Answer these on paper. If you cannot, that is what the lecture is for.
 
 ::: {.tight}
 1. In one sentence: what does this session's method let you claim that the previous one did not?
@@ -181,16 +190,15 @@ Answer on paper. If you cannot, that is what the lecture is for.
 3. Which claim in the paper rests on this method — and how hard does it lean on it?
 :::
 
-## What the session will ask of you
-
-By the end you should be able to:
+By the end of the session you should be able to:
 
 ::: {.tight}
+- Fit a simple and a multiple regression, and state the slope **in units**
 - Read a **residuals-versus-fitted** plot and say what structure it reveals
 - Diagnose non-constant variance from a **scale–location** plot
-- Compute **leverage** and say which observations have the power to move the line
-- Use **Cook's distance** to separate an outlier from an influential point
-- Compare candidate models on **AIC**, and say why that is not model selection
+- Tell an outlier, a **leverage point** and an **influential point** apart
+- Use **Cook's distance** to find the observations that move the answer
+- Compare candidate models on **AIC and BIC**, and say why that is not model selection
 :::
 
 ::: {.get}
@@ -198,18 +206,28 @@ By the end you should be able to:
 `qmib.load()` run at least once · your self-check answers on paper.
 :::
 
-## Running the code
+## Before you run anything
 
-Everything runs in the **VS Codium terminal**, with the project environment active:
+Everything runs in the **VS Codium terminal**, from the repository root, with the project
+environment active. Activate it in **every new terminal**, not only the first:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-.venv\Scripts\activate         # Windows
-python
+source .venv/bin/activate        # macOS and Linux
 ```
 
+```powershell
+.venv\Scripts\activate           # Windows (PowerShell)
+```
+
+::: {.check}
+Your prompt must begin with **`(.venv)`**. Without it `python` and `pip` are your system's, and
+nothing the course installed is visible to them.
+:::
+
 ::: {.muted}
-Missing a package? `pip install -r requirements.txt` from the repository root.
+`ModuleNotFoundError` means the packages went somewhere else, or were never installed. Check the
+prompt first, then `pip install -r requirements.txt` — **from the repository root, with the
+environment active**. Building the environment from scratch is Session 01, step 1.4.
 :::
 
 ::: {.muted}

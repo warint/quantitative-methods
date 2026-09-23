@@ -31,10 +31,12 @@ format:
 3. Reproduce — 20 min
 4. Apply to your own angle — 35 min
 5. Break one assumption — 15 min
-6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
+6. Report it as one table
+7. Write it down — 20 min
+8. Submitting
+9. What loses marks
+10. Two-minute report
+11. After class, if you want it
 
 ## What session 3 is for {.scrollable}
 ::::: columns
@@ -43,6 +45,7 @@ format:
 
 ### The mathematics
 
+- Derive the least-squares slope, and read "controlling for" as a residual regression
 - Read **residuals versus fitted** and say what structure it reveals
 - Compute **leverage** from the hat matrix, and show it sums to $p$
 - Separate an outlier from an influential point with **Cook's distance**
@@ -54,9 +57,11 @@ format:
 
 ### The Python
 
+- Fit a simple and a multiple regression with `smf.ols`, and read `.params`
 - Pull diagnostics from a fitted model with `get_influence()`
 - Build the four diagnostic plots yourself rather than calling one function
 - Compare candidate specifications side by side on AIC and BIC
+- Report the comparison as a publication table with `qmib.regtable`
 
 ::::
 
@@ -64,6 +69,8 @@ format:
 
 ### The international business
 
+- Quote a slope **in units** a manager can act on
+- Say why a slope is an association, and what more is needed to call it a cause
 - Say whether a published coefficient survives its own diagnostics
 - Decide what to do about the one country that moves the whole result
 - Refuse a model whose residuals show it has missed the structure
@@ -74,37 +81,16 @@ format:
 
 ## Your Python so far {.scrollable}
 
-The 15 names below came out of session 2. Today's slides assume them, and add to them.
+Everything you need to type is on one sheet — how to start Python in VS Codium on
+your platform, how to make a file and run it, the DataFrame basics, and every name from sessions 1 to 3, each with a line showing it in use.
 
-### Load and shape
+> **[Python Cheatsheet · Session 03](https://warint.github.io/quantitative-methods/python-cheatsheet-03.pdf)** (PDF) ·
+> in the repository at `03-…/PYTHON-CHEATSHEET.pdf`
 
-- `.dropna` — drop rows with missing values
-- `.merge` — join two frames on a key
-- `.shape` — rows and columns
-- `pd.read_parquet` — a parquet file, directly
-- `qmib.load` — a course dataset, by name
-
-### Describe
-
-- `.mean / .median` — the two centres, and their gap
-- `.quantile` — any quantile, including the median
-- `.std / .var` — spread, dividing by $n-1$
-- `stats.trim_mean` — the mean after cutting both tails
-
-### Fit
-
-- `.fit()` — estimate the model you specified
-- `smf.ols` — least squares, from a formula
-
-### Read the fit
-
-- `.params` — the coefficients, in units of $y$
-- `.rsquared` — share of variance explained
-
-### Plot
-
-- `plt.scatter` — the data, before anything else
-- `plt.xlabel / plt.ylabel` — say the units, every time
+::: {.muted}
+Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is
+assumed.
+:::
 
 <!-- END deck-frontmatter -->
 
@@ -154,7 +140,7 @@ Take the result the paper rests on, and reproduce it. The package you downloaded
 ```python
 import qmib
 
-data = qmib.load("core")     # the session's own data, for comparison
+data = qmib.load("core")     # the session's own data
 ```
 
 ::: {.muted}
@@ -196,6 +182,30 @@ your answer.
 ::: {.check}
 This is the part that carries the marks. A group that shows how its result falls apart understands
 it; a group that only shows it holding does not yet know.
+:::
+
+## Report it as one table
+
+Step 3 left you with two fits: the model as specified, and the model after you
+broke something. Put them in one table rather than two blocks of output — the
+comparison is the finding.
+
+```python
+import qmib
+
+print(qmib.regtable([before, after],
+                    names=["as specified", "assumption broken"]))
+```
+
+::: {.check}
+Read **across** the row, not down the column: what happened to the coefficient
+you care about, in its own units, and what happened to its standard error.
+:::
+
+::: {.muted}
+Coefficients too small to read at one decimal — a logit's usually are? `digits=3`.
+`.as_latex()` if you would rather paste it into the write-up than screenshot it.
+Pass `stats=` to change the rows at the foot.
 :::
 
 ## 4 · Write it down — 20 min
@@ -247,4 +257,23 @@ And everywhere in this course: an association described in causal language.
 
 ::: {.muted}
 Listen for traceable evidence, not confidence of delivery.
+:::
+
+
+## After class, if you want it
+
+::: {.step}
+The **QMIB Lab** has a knowledge check on what you have just done:
+**[warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-03.html)**
+:::
+
+::: {.check}
+Optional, never a prerequisite for the next lecture, and never marked for
+correctness. A completed report counts because **attempting it is the engagement
+being measured** — it is one of the three routes to the participation mark.
+:::
+
+::: {.warn}
+What **is** required before the next session: the article, its Dataverse package,
+and the self-check. That is the pre-session deck, not this.
 :::

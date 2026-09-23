@@ -40,6 +40,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | Reading, concept review, data download, self-check | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: the mathematics of the method | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
+| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-05.html) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive with the reading done and
 a working environment; the practice session assumes you arrive with the data already downloaded.
@@ -48,27 +49,34 @@ a working environment; the practice session assumes you arrive with the data alr
 
 ## Data for this session
 
-**FRED-MD: a monthly US macroeconomic panel (~127 series)**
+**56 candidate determinants of bilateral FDI, 2019**
 
-Source: Federal Reserve Bank of St. Louis (McCracken & Ng)
-URL: https://www.stlouisfed.org/research/economists/mccracken/fred-databases
+The dataset behind Blonigen & Piger (2014), rebuilt from the sources the paper names.
+7,051 directed country pairs; every number real.
 
-Download instructions: [`data/README.md`](data/README.md)
+```python
+import qmib
+fdi = qmib.load("fdi")
+```
+
+Sources: OECD (FDI positions) · CEPII Gravity · World Development Indicators · Freedom House
+Built by [`scripts/build_fdi_determinants.py`](../scripts/build_fdi_determinants.py) ·
+[data dictionary](../data/spine/dictionaries/S05-fdi.md)
 
 ---
 
 ## Deliverable
 
 `groups/A2026/group-XX/session-NN/` with the coordinate-descent implementation,
-the CV surface, the stability plot, and a 300-word note answering: *a policymaker asks which
-indicators drive industrial production. Given your stability results, what can you honestly tell
-them, and what must you refuse to claim?*
+the CV surface, the stability plot, and a 300-word note answering: *a trade ministry asks which
+factors attract foreign direct investment. Given your stability results, what can you honestly
+tell them, and what must you refuse to claim?*
 
 ---
 
 ## Before the next session
 
-- ISLR ch. 4.1-4.3 (classification, logistic regression) before Session 6.
+- Read the Session 06 article and download its Dataverse package before the next lecture.
 
 ---
 

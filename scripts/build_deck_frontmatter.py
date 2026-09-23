@@ -12,9 +12,11 @@ session nine already knows where to look for what the hour is for:
      the mathematics, the Python, and the international-business claim it
      licenses. Authored in `slides/deck-plan.yml`, so the three stay parallel
      across twelve weeks instead of drifting into whatever each deck felt like.
-  3. **Your Python so far** — the functions taught in *earlier* sessions, on the
-     lecture and practice decks. A cumulative toolkit, so the code on the slide
-     is never the first time a name has been seen.
+  3. **Your Python so far** — a pointer to the session's `PYTHON-CHEATSHEET.pdf`,
+     on the lecture and practice decks. The cumulative list of names used to be
+     printed on this slide; it is reference material, and reference material
+     belongs beside the keyboard rather than on a screen behind the speaker, so
+     `scripts/build_cheatsheets.py` puts it on a page students can print.
 
 The slides are written between HTML markers and regenerated in place, so this
 can be re-run after any edit to a deck and the block will be rebuilt rather than
@@ -47,6 +49,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "slides" / "deck-plan.yml"
+
+PAGES = "https://warint.github.io/quantitative-methods"
+CHEATSHEET = "PYTHON-CHEATSHEET"
 
 BEGIN = "<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->"
 END = "<!-- END deck-frontmatter -->"
@@ -84,14 +89,16 @@ TOOLKIT = {
     ".std / .var": ("02", "Describe", "spread, dividing by $n-1$"),
     ".quantile": ("02", "Describe", "any quantile, including the median"),
     "stats.trim_mean": ("02", "Describe", "the mean after cutting both tails"),
-    "smf.ols": ("02", "Fit", "least squares, from a formula"),
-    ".fit()": ("02", "Fit", "estimate the model you specified"),
-    ".params": ("02", "Read the fit", "the coefficients, in units of $y$"),
-    ".rsquared": ("02", "Read the fit", "share of variance explained"),
-    "plt.scatter": ("02", "Plot", "the data, before anything else"),
-    "plt.xlabel / plt.ylabel": ("02", "Plot", "say the units, every time"),
 
-    # ---- Session 03 · adequacy and validity ------------------------------
+    # ---- Session 03 · fitting a line, then adequacy and validity ---------
+    # The fitting names sat under session 02 while the regression section
+    # closed that deck. That section now opens this one, so they move with it.
+    "smf.ols": ("03", "Fit", "least squares, from a formula"),
+    ".fit()": ("03", "Fit", "estimate the model you specified"),
+    ".params": ("03", "Read the fit", "the coefficients, in units of $y$"),
+    ".rsquared": ("03", "Read the fit", "share of variance explained"),
+    "plt.scatter": ("03", "Plot", "the data, before anything else"),
+    "plt.xlabel / plt.ylabel": ("03", "Plot", "say the units, every time"),
     ".get_influence()": ("03", "Diagnose", "the whole diagnostic bundle"),
     ".hat_matrix_diag": ("03", "Diagnose", "leverage; sums to $p$, always"),
     ".cooks_distance": ("03", "Diagnose", "influence: leverage $\\times$ residual"),
@@ -99,6 +106,7 @@ TOOLKIT = {
     ".resid / .fittedvalues": ("03", "Read the fit", "what is left, and what was predicted"),
     ".rsquared_adj": ("03", "Read the fit", "penalised for the extra predictor"),
     ".mse_resid": ("03", "Read the fit", "its square root is the RSE, in units"),
+    "qmib.regtable": ("03", "Read the fit", "several models as one publication table"),
     ".aic / .bic": ("03", "Choose and validate", "compare non-nested models"),
     "plt.axhline / plt.axvline": ("03", "Plot", "draw the threshold you are judging against"),
     "plt.stem": ("03", "Plot", "one spike per observation"),
@@ -237,7 +245,9 @@ def clean_title(raw):
                lambda m: "$" + m.group(1).replace("\\^", "^") + "$", raw)
     t = re.sub(r"\{[^}]*\}", "", t)                 # the attribute block
     t = re.sub(r"\*\*(.*?)\*\*", r"\1", t)          # bold inside a title
-    t = re.sub(r"^\d+(?:\\?\.\d+)*\\?\.?\s+", "", t)    # "2\. " and "2.2 "
+    # "2\. ", "2.2 " and "2b " — the last is the sub-step form the pre-session
+    # decks use, which used to survive into the outline as "2b · The course data".
+    t = re.sub(r"^\d+[a-z]?(?:\\?\.\d+)*\\?\.?\s+", "", t)
     t = t.replace(chr(92) + chr(39), chr(39))        # pandoc escapes apostrophes
     t = re.sub(r"\s*-{2,}\s*", " \u2014 ", t)          # "Model --- Maximise"
     t = re.sub(r"\s+", " ", t).strip(" -\u2014\u00b7:")
@@ -333,38 +343,31 @@ def render_goals(goals, sess):
 
 
 def render_toolkit(sess):
-    """The Python taught before this session, grouped by what it is for."""
-    earlier = {k: v for k, v in TOOLKIT.items() if v[0] < sess}
-    if not earlier:
-        return None
+    """A pointer to this session's cheatsheet.
 
-    newest = max(v[0] for v in earlier.values())
-    by_group = OrderedDict((g, []) for g in GROUPS)
-    for name, (when, group, gloss) in sorted(earlier.items(), key=lambda kv: (kv[1][0], kv[0])):
-        by_group[group].append((name, when, gloss))
-    by_group = OrderedDict((g, v) for g, v in by_group.items() if v)
-
-    oldest = min(v[0] for v in earlier.values())
-    # Marking the newest session's entries only helps when there is something to
-    # contrast them with. On the first toolkit slide everything is new, and
-    # saying so about every line says nothing.
-    mark_new = oldest != newest
-
-    rows = []
-    for group, entries in by_group.items():
-        rows.append(f"\n### {group}\n")
-        for name, when, gloss in entries:
-            mark = f" · *new in session {int(newest)}*" if mark_new and when == newest else ""
-            rows.append(f"- `{name}` — {gloss}{mark}")
-
-    n = len(earlier)
-    where = (f"session {int(oldest)}" if oldest == newest
-             else f"sessions {int(oldest)}–{int(newest)}")
-    lead = (f"The {n} names below came out of {where}. Today's slides assume them, "
-            "and add to them.")
-    if mark_new:
-        lead += f" The ones marked are the newest, from session {int(newest)}."
-    return f"## Your Python so far {{.scrollable}}\n\n{lead}\n" + "\n".join(rows) + "\n"
+    This slide used to print the whole cumulative list of names — by session 08
+    that was forty lines of reference material on a slide, unreadable from the
+    back of a room and impossible to copy from. The list now lives in
+    `PYTHON-CHEATSHEET.pdf`, built by `scripts/build_cheatsheets.py`, and the
+    slide says where it is.
+    """
+    url = f"{PAGES}/python-cheatsheet-{sess}.pdf"
+    # The sheet is cumulative and includes today: session 03's covers sessions
+    # 1, 2 and 3. Saying "last week's" would send students hunting for the rest.
+    # Session 01 has nothing behind it, and the sheet is its own subject anyway.
+    tail = ("and the four DataFrame moves you will use every week from now on"
+            if int(sess) == 1 else
+            f"the DataFrame basics, and every name from sessions 1 to {int(sess)}, each with a "
+            f"line showing it in use")
+    return (f"## Your Python so far {{.scrollable}}\n\n"
+            f"Everything you need to type is on one sheet — how to start Python in VS Codium on\n"
+            f"your platform, how to make a file and run it, {tail}.\n\n"
+            f"> **[Python Cheatsheet · Session {sess}]({url})** (PDF) ·\n"
+            f"> in the repository at `{sess}-…/{CHEATSHEET}.pdf`\n\n"
+            "::: {.muted}\n"
+            "Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is\n"
+            "assumed.\n"
+            ":::\n")
 
 
 def block_for(sess, kind, text, plan):

@@ -26,56 +26,13 @@ format:
 
 ## Outline · Before class {.center .scrollable}
 
-1. Why this, and not a notebook in the cloud
-2. What you are building
-3. What your machine needs
-4. What "slower" actually means
-5. Where do I type this?
-6. One rule before you start: restart after installing
-7. VS Codium
-8. Extensions
-9. The course materials
-10. Install Python 3.12
-11. Why 3.12 and not the newest
-12. Create the environment
-13. Activate it
-14. Install the packages
-15. Why a model in the editor
-16. What Continue and Ollama need
-17. Install Ollama, pull the model
-18. Which model size
-19. Open Continue's config
-20. What to put in it
-21. Check the context window
-22. Why a second one in the terminal
-23. What aider needs, and what it can do without a GPU
-24. One thing aider does for you
-25. Step out of the environment
-26. Install pipx
-27. Install aider
-28. Point it at your model
-29. "Add .aider* to .gitignore?"
-30. Ask it something real
-31. It is thinking, not stuck
-32. Two terminals is the working pattern
-33. The final check
-34. Using the model well
-35. Also before class
-36. Ready?
-37. Nothing here is your fault
-38. Windows: the star is not a tick
-39. Windows: "l'exécution de scripts est désactivée"
-40. Windows: still cannot activate?
-41. Built it on the wrong version? Start over
-42. `deactivate` is not a command
-43. Windows: "Python introuvable"
-44. Windows: checking it took
-45. Only if CONTEXT is small
-46. Check it took
-47. Linux, or no desktop app
-48. If pipx will not cooperate
-49. `aider n'est pas reconnu`?
-50. When it goes wrong
+1. Why a local workstation, and what you are building
+2. Two rules before you start — where to type, and when to restart
+3. Part 1 — VS Codium, Python, the environment, the packages
+4. Part 2 — Continue, and a model inside the editor
+5. Part 3 — aider, in the terminal
+6. Before you arrive — the final check
+7. Appendix — when it goes wrong
 
 ## What session 1 is for {.scrollable}
 ::::: columns
@@ -230,32 +187,19 @@ d'applet de commande»*, or *"is not recognized as a cmdlet"*. It means the file
 exists and your shell cannot see it — never that the install failed.
 :::
 
-## 1.1 — VS Codium
+## 1.1 — VS Codium, and its extensions
 
 Download from **[vscodium.com](https://vscodium.com)** and install it as you would any application.
+You will live in two panels: the **editor** on the right, the **terminal** below it.
 
-::: {.step}
-You will live in two panels: the **editor** on the right, and the **terminal** below it. Everything
-in this course happens in one or the other.
-:::
-
-## 1.2 — Extensions
-
-VS Codium uses the **Open VSX** registry, not Microsoft's Marketplace.
+Then add four extensions. VS Codium uses the **Open VSX** registry, not Microsoft's Marketplace —
+**View → Extensions**, or `Cmd/Ctrl + Shift + X`.
 
 ::: {.tight}
 - **Python** (ms-python) — syntax, linting, the interpreter picker
 - **Jupyter** — for running cells inside a file
 - **Quarto** — to preview the lecture decks
-:::
-
-::: {.tight}
-- **Continue** — the assistant panel inside the editor, which part 2 points at
-  your local model
-:::
-
-::: {.muted}
-Extensions view: **View → Extensions**, or `Cmd/Ctrl + Shift + X`.
+- **Continue** — the assistant panel, which part 2 points at your local model
 :::
 
 ::: {.check}
@@ -263,7 +207,7 @@ Extensions view: **View → Extensions**, or `Cmd/Ctrl + Shift + X`.
 Window*. An extension that has just been installed is not active until you do.
 :::
 
-## 1.3 — The course materials
+## 1.2 — The course materials
 
 Download the repository as a ZIP, unzip it **directly on your Desktop**, and keep the folder name:
 
@@ -282,7 +226,7 @@ these slides will work.
 In Session 02 you will do this properly, with git and your own group branch.
 :::
 
-## 1.4 — Install Python 3.12 {#step-4}
+## 1.3 — Install Python 3.12 {#step-4}
 
 ::: {.warn}
 **3.12.10 specifically.** Not "the latest", not whatever the download page
@@ -325,81 +269,91 @@ installed at all.
 - 3.12 is supported until **October 2028**, well past this course
 :::
 
-## 1.5 — Create the environment {#step-4b}
+## 1.4 — Create the environment, and activate it {#step-4b}
 
-From the repository root. **Name the version** — a bare `python3` or `py` picks
-the newest you have installed.
-
-```bash
-python3.12 -m venv .venv          # macOS
-```
+From the repository root, two commands. **Name the version** on the first — a bare
+`python3` or `py` picks the newest you have installed.
 
 ```bash
-python3.12 -m venv .venv          # Linux
+python3.12 -m venv .venv          # macOS and Linux
 ```
 
 ```powershell
-py -3.12 -m venv .venv            # Windows
+py -3.12 -m venv .venv            # Windows (PowerShell)
 ```
 
-::: {.muted}
-Check first if you like: `python3.12 --version`, or `py -3.12 --version` on
-Windows.
+Then activate it. **Every new terminal**, not only this one:
+
+```bash
+source .venv/bin/activate         # macOS and Linux
+```
+
+```powershell
+.venv\Scripts\activate            # Windows (PowerShell)
+```
+
+::: {.check}
+Your prompt must now begin with **`(.venv)`**. If it does not, the activation did
+not take, and nothing you install afterwards will be visible to the course.
 :::
 
 ::: {.muted}
 **If it does not work:**
 
 - [Windows: `py --list` shows a star on the wrong version](#fix-star)
-:::
-
-## 1.6 — Activate it {#step-4c}
-
-```bash
-source .venv/bin/activate         # macOS
-```
-
-```bash
-source .venv/bin/activate         # Linux
-```
-
-```powershell
-.venv\Scripts\activate            # Windows
-```
-
-::: {.check}
-Your prompt should now begin with **`(.venv)`**. If it does not, the activation
-did not take, and nothing you install afterwards will be visible to the course.
-:::
-
-::: {.muted}
-**If it does not work:**
-
 - [Windows: *«l'exécution de scripts est désactivée»*](#fix-execution-policy)
 - [Activation fails for some other reason](#fix-activate)
 :::
 
-## 1.7 — Install the packages {#step-4d}
+## 1.5 — Before you install: three things must be true {#step-4d}
+
+::: {.warn}
+`pip install` typed without these puts the packages somewhere the course cannot
+see. The symptom arrives a week later, as `ModuleNotFoundError`, and looks like
+a broken laptop rather than a missed step.
+:::
+
+::: {.tight}
+1. You are in the **VS Codium terminal**, in `Desktop/quantitative-methods` —
+   `ls` on macOS and Linux, `dir` on Windows, should list `requirements.txt`
+2. Your prompt begins with **`(.venv)`**
+3. That environment holds the right interpreter
+:::
 
 ```bash
 python --version                  # must say 3.12.x
-pip install -r requirements.txt
+pip -V                            # the path it prints must contain .venv
 ```
-
-::: {.warn}
-Check the version **before** installing. If it is not 3.12, the environment was
-built by the wrong interpreter — see *Built it on the wrong version?*
-:::
 
 ::: {.muted}
 Inside an activated environment, plain `python` and `pip` are the right commands
-on all three platforms. The version-naming was only needed to create it.
+on all three platforms. Naming the version was only needed to create it.
+
+**If it does not work:** [`python --version` is not 3.12](#fix-wrong-version)
 :::
 
-::: {.muted}
-**If it does not work:**
+## 1.6 — Install the packages
 
-- [`python --version` is not 3.12](#fix-wrong-version)
+Now, and only now:
+
+```bash
+pip install -r requirements.txt
+```
+
+::: {.step}
+It reads `requirements.txt` from the folder you are standing in and installs
+every line of it **into `.venv`** — pandas, statsmodels, scikit-learn and the
+rest. A few minutes, and a lot of output. Warnings are normal; only `ERROR` is not.
+:::
+
+::: {.check}
+Then prove it landed in the right place:
+
+```bash
+python -c "import pandas, statsmodels, sklearn; print('ok')"
+```
+
+If that prints `ok`, part 1 is finished.
 :::
 
 # Part 2 — Continue {background-color="#E3120B" style="color:#F7F4ED"}
@@ -993,7 +947,7 @@ alone.
 :::
 
 ::: {.muted}
-[← back to 1.5 — Create the environment](#step-4b)
+[← back to 1.4 — Create the environment, and activate it](#step-4b)
 :::
 
 ## Windows: "l'exécution de scripts est désactivée" {#fix-execution-policy}
@@ -1029,7 +983,7 @@ and you will need it in every new terminal.
 :::
 
 ::: {.muted}
-[← back to 1.6 — Activate it](#step-4c)
+[← back to 1.4 — Create the environment, and activate it](#step-4b)
 :::
 
 ## Windows: still cannot activate? {#fix-activate}
@@ -1058,7 +1012,7 @@ for anything in this course, which always names the version.
 :::
 
 ::: {.muted}
-[← back to 1.6 — Activate it](#step-4c)
+[← back to 1.4 — Create the environment, and activate it](#step-4b)
 :::
 
 ## Built it on the wrong version? Start over {#fix-wrong-version}
@@ -1094,7 +1048,7 @@ where `Remove-Item` will not.
 :::
 
 ::: {.muted}
-[← back to 1.7 — Install the packages](#step-4d)
+[← back to 1.5 — Before you install](#step-4d)
 :::
 
 ## `deactivate` is not a command {#fix-deactivate}
@@ -1156,7 +1110,7 @@ That checkbox is off by default and is the single most common setup failure.
 :::
 
 ::: {.muted}
-[← back to 1.4 — Install Python 3.12](#step-4)
+[← back to 1.3 — Install Python 3.12](#step-4)
 :::
 
 ## Windows: checking it took {#fix-python-path}
@@ -1182,7 +1136,7 @@ installed version and picks the newest. Inside an activated `.venv`, plain
 :::
 
 ::: {.muted}
-[← back to 1.4 — Install Python 3.12](#step-4)
+[← back to 1.3 — Install Python 3.12](#step-4)
 :::
 
 ## Only if CONTEXT is small {#fix-context}

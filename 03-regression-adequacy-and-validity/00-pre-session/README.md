@@ -37,9 +37,9 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
 **Harvard Dataverse: [10.7910/DVN/U5DAEP](https://doi.org/10.7910/DVN/U5DAEP)**
 
@@ -50,6 +50,8 @@ Download it once, and unzip it here — the folder is git-ignored, so nothing la
 ```
 
 Keep the authors' own folder structure and README.
+
+> **Note.** This deposit is **about 220 MB** — much the largest in the course. Start the download before you sit down to read, not while the room is waiting for you.
 
 ### b) The course data, for your own angle
 
@@ -65,7 +67,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-The same regression session 02 fitted — gdp per capita on productivity.
+The regression fitted at the top of the lecture — GDP per capita on productivity.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

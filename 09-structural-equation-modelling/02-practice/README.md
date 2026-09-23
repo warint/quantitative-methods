@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***, and its replication package
-([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at:
-
-```text
-09-structural-equation-modelling/data/replication/
-```
+The paper is **Bennani & Romelli (2024), *Exploring the informativeness and drivers of tone during committee meetings***. Its replication package ([10.7910/DVN/TZEN38](https://doi.org/10.7910/DVN/TZEN38)) should already be unzipped at `09-structural-equation-modelling/data/replication/`.
 
 The session's own dataset, for comparison:
 
@@ -109,6 +104,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Treating good fit as confirmation of the causal structure
 - Adding correlated residuals until the model fits
 - Naming a latent variable without defending the name
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-09.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

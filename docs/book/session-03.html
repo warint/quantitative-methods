@@ -375,12 +375,12 @@ window.Quarto = {
 </div>
 <p>Set the problem up. You have <span class="math inline">\(n\)</span> observations, a response <span class="math inline">\(y\)</span>, and a matrix <span class="math inline">\(X\)</span> holding a column of ones and <span class="math inline">\(p-1\)</span> predictors. You want coefficients <span class="math inline">\(\beta\)</span> such that <span class="math inline">\(X\beta\)</span> is close to <span class="math inline">\(y\)</span>. Least squares defines “close” as the sum of squared vertical distances, and chooses</p>
 <p><span class="math display">\[
-\hat\beta \;=\; \arg\min_{\beta} \; \lVert y - X\beta \rVert^2 .
+\hat\beta \thickspace=\thickspace \arg\min_{\beta} \thickspace \lVert y - X\beta \rVert^2 .
 \]</span></p>
 <p>Squared, rather than absolute, distance is worth pausing on, because the choice is not obvious and it has consequences you will meet later in the chapter. Squaring makes the objective differentiable everywhere, which is what delivers the closed-form solution below; it also makes the fitted values a <em>linear</em> function of <span class="math inline">\(y\)</span>, which is what makes the whole diagnostic apparatus possible. The price is that squaring gives a doubled error four times the weight of a single one, so least squares is structurally sensitive to observations far from the line. Every technique in this chapter for finding influential points is, in a sense, paying off the debt incurred by that square.</p>
 <p>Differentiating and setting to zero gives the <em>normal equations</em> <span class="math inline">\(X^{\top}X\beta = X^{\top}y\)</span>, whose solution — whenever <span class="math inline">\(X^{\top}X\)</span> can be inverted — is</p>
 <p><span class="math display">\[
-\hat\beta \;=\; (X^{\top}X)^{-1} X^{\top} y .
+\hat\beta \thickspace=\thickspace (X^{\top}X)^{-1} X^{\top} y .
 \]</span></p>
 <p>Every equation in this chapter is something you can execute, and executing it is the fastest way to find out whether you have understood what it claims. The normal equations are the first: solve them by hand and the answer must be, to floating-point precision, whatever <code>statsmodels</code> returns.</p>
 <div id="check-ols" class="cell" data-execution_count="1">
@@ -418,9 +418,9 @@ agree to      2.49e-09</code></pre>
 <p>That is an algebraic fact. It requires no assumption about the world, no probability, no error term. Feed it any numbers and it returns coefficients. This is exactly why diagnostics are necessary: <strong>the formula never refuses.</strong> It has no way to tell you that the relationship is curved, that one country is dragging the whole line, or that the standard errors it reports are fiction. It returns the same confident four decimal places either way.</p>
 <p>The statistical content arrives only when you attach a model,</p>
 <p><span class="math display">\[
-y \;=\; X\beta + \varepsilon ,
+y \thickspace=\thickspace X\beta + \varepsilon ,
 \]</span></p>
-<p>and make claims about <span class="math inline">\(\varepsilon\)</span>. The Gauss–Markov theorem says that if the model is correctly specified, if <span class="math inline">\(\operatorname{E}[\varepsilon \mid X] = 0\)</span>, and if the errors have constant variance and are mutually uncorrelated, then <span class="math inline">\(\hat\beta\)</span> is the Best Linear Unbiased Estimator: no other estimator that is both linear in <span class="math inline">\(y\)</span> and unbiased has smaller variance. Note what is <em>not</em> on that list. Normality is not required for Gauss–Markov. It is required for something else — the exactness of the <span class="math inline">\(t\)</span> and <span class="math inline">\(F\)</span> distributions in small samples — and confusing the two is one of the most common errors in applied work.</p>
+<p>and make claims about <span class="math inline">\(\varepsilon\)</span>. The Gauss–Markov theorem says that if the model is correctly specified, if <span class="math inline">\(\mathrm{E}[\varepsilon \mid X] = 0\)</span>, and if the errors have constant variance and are mutually uncorrelated, then <span class="math inline">\(\hat\beta\)</span> is the Best Linear Unbiased Estimator: no other estimator that is both linear in <span class="math inline">\(y\)</span> and unbiased has smaller variance. Note what is <em>not</em> on that list. Normality is not required for Gauss–Markov. It is required for something else — the exactness of the <span class="math inline">\(t\)</span> and <span class="math inline">\(F\)</span> distributions in small samples — and confusing the two is one of the most common errors in applied work.</p>
 <p>The word “regression” itself arrived later and by accident. Francis Galton, studying the heights of parents and children, found that tall parents had children who were tall but <em>less</em> tall, and called this “regression towards mediocrity” <span class="citation" data-cites="galton1886">(<a href="#ref-galton1886" role="doc-biblioref">Galton 1886</a>)</span>. He was naming a substantive biological phenomenon. The name stuck to the statistical method he had used to find it, which is why a technique for fitting conditional means is called by a word that means moving backwards.</p>
 <div class="archive">
 <p><span class="archive-label">From the archive · Galton, 1886</span></p>
@@ -587,23 +587,23 @@ Figure&nbsp;3.2: Anscombe’s quartet. Identical means, variances, correlations,
 <h2 data-number="3.3" class="anchored" data-anchor-id="what-the-residual-knows"><span class="header-section-number">3.3</span> What the residual knows</h2>
 <p>Write <span class="math inline">\(\hat y = X\hat\beta\)</span>. Substituting the estimator,</p>
 <p><span class="math display">\[
-\hat y \;=\; X(X^{\top}X)^{-1}X^{\top} y \;=\; Hy ,
+\hat y \thickspace=\thickspace X(X^{\top}X)^{-1}X^{\top} y \thickspace=\thickspace Hy ,
 \]</span></p>
 <p>where <span class="math inline">\(H = X(X^{\top}X)^{-1}X^{\top}\)</span> is the <em>hat matrix</em> — so named because it puts the hat on <span class="math inline">\(y\)</span>. Geometrically it is the orthogonal projection onto the column space of <span class="math inline">\(X\)</span>: it takes the <span class="math inline">\(n\)</span>-dimensional vector of observations and casts its shadow onto the <span class="math inline">\(p\)</span>-dimensional subspace the model can reach. That picture is worth holding, because it makes the next two properties obvious rather than algebraic. <span class="math inline">\(H\)</span> is symmetric (<span class="math inline">\(H = H^{\top}\)</span>) and idempotent (<span class="math inline">\(HH = H\)</span>) — projecting a shadow again does nothing, since it is already flat.</p>
 <p>The residual vector is what the projection could not reach,</p>
 <p><span class="math display">\[
-e \;=\; y - \hat y \;=\; (I - H)\, y ,
+e \thickspace=\thickspace y - \hat y \thickspace=\thickspace (I - H)\thinspace y ,
 \]</span></p>
 <p>and it is orthogonal to every column of <span class="math inline">\(X\)</span> by construction. That orthogonality is the reason residual plots are informative <em>and</em> the reason they can mislead: <span class="math inline">\(e\)</span> is guaranteed to be uncorrelated with each predictor whether or not the model is right, so a flat residual plot against <span class="math inline">\(x\)</span> is not evidence of anything. What is <em>not</em> guaranteed is the absence of non-linear structure, which is exactly what you are looking for.</p>
-<p>Now the consequence that governs every diagnostic below. If <span class="math inline">\(\operatorname{Var}(\varepsilon) = \sigma^2 I\)</span>, then</p>
+<p>Now the consequence that governs every diagnostic below. If <span class="math inline">\(\mathrm{Var}(\varepsilon) = \sigma^2 I\)</span>, then</p>
 <p><span class="math display">\[
-\operatorname{Var}(e) \;=\; \sigma^{2}(I - H),
+\mathrm{Var}(e) \thickspace=\thickspace \sigma^{2}(I - H),
 \qquad\text{so}\qquad
-\operatorname{Var}(e_i) \;=\; \sigma^{2}\,(1 - h_{ii}).
+\mathrm{Var}(e_i) \thickspace=\thickspace \sigma^{2}\thinspace(1 - h_{ii}).
 \]</span></p>
 <p><strong>The residuals do not have constant variance even when the errors do.</strong> An observation with large <span class="math inline">\(h_{ii}\)</span> has a residual squeezed towards zero as a matter of arithmetic, not because the model fits it well. The most dangerous points therefore look like the best-behaved ones. This is why raw residuals are the wrong thing to plot, and why everything below is built on the <em>standardised</em> residual</p>
 <p><span class="math display">\[
-r_i \;=\; \frac{e_i}{s\sqrt{1 - h_{ii}}},
+r_i \thickspace=\thickspace \frac{e_i}{s\sqrt{1 - h_{ii}}},
 \qquad s^2 = \frac{e^{\top}e}{n-p},
 \]</span></p>
 <p>which divides out the arithmetic squeeze and restores comparability. Plotting <span class="math inline">\(r_i\)</span> against <span class="math inline">\(\hat y_i\)</span> is the single most informative diagnostic there is <span class="citation" data-cites="anscombe1963">(<a href="#ref-anscombe1963" role="doc-biblioref">Anscombe and Tukey 1963</a>)</span>. Under an adequate model the cloud is structureless: flat, centred on zero, of even width. Curvature means the functional form is wrong. A widening fan means the variance is not constant. Both are visible instantly and neither is visible in <span class="math inline">\(R^2\)</span>.</p>
@@ -661,9 +661,9 @@ Figure&nbsp;3.3: Diagnostics for GDP per capita on the productivity index — th
 <p>Before the diagnostics, the summary statistics they are meant to supplement. The total variation in <span class="math inline">\(y\)</span> splits into the part the model accounts for and the part it does not,</p>
 <p><span class="math display">\[
 \underbrace{\textstyle\sum_i (y_i - \bar y)^2}_{\text{TSS}}
-\;=\;
+\thickspace=\thickspace
 \underbrace{\textstyle\sum_i (\hat y_i - \bar y)^2}_{\text{ESS}}
-\;+\;
+\thickspace+\thickspace
 \underbrace{\textstyle\sum_i e_i^2}_{\text{RSS}},
 \qquad
 R^2 = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}} .
@@ -672,12 +672,12 @@ R^2 = 1 - \frac{\mathrm{RSS}}{\mathrm{TSS}} .
 <p>Its defect is the one Anscombe exploited: <span class="math inline">\(R^2\)</span> cannot fall when a predictor is added, however irrelevant, because the extra column can always be given a coefficient of zero. Two corrections are standard.</p>
 <div class="definition">
 <p><span class="term"><strong>Adjusted <span class="math inline">\(R^2\)</span></strong></span> — <span class="math inline">\(R^2\)</span> with a penalty for the parameters spent: <span class="math display">\[
-R^2_{\text{adj}} \;=\; 1 - \frac{\mathrm{RSS}/(n-p)}{\mathrm{TSS}/(n-1)} .
+R^2_{\text{adj}} \thickspace=\thickspace 1 - \frac{\mathrm{RSS}/(n-p)}{\mathrm{TSS}/(n-1)} .
 \]</span> It can decrease when a useless variable is added, which is the point. It is still not a model-selection criterion — see AIC below.</p>
 </div>
 <div class="definition">
 <p><span class="term"><strong>Residual standard error</strong></span> — the typical size of a residual, in the units of <span class="math inline">\(y\)</span>: <span class="math display">\[
-\mathrm{RSE} \;=\; s \;=\; \sqrt{\frac{\mathrm{RSS}}{n-p}} .
+\mathrm{RSE} \thickspace=\thickspace s \thickspace=\thickspace \sqrt{\frac{\mathrm{RSS}}{n-p}} .
 \]</span> Unlike <span class="math inline">\(R^2\)</span> it is not unitless, which makes it the more honest number to report: “typically wrong by 6,000 euros” means something, where “<span class="math inline">\(R^2 = 0.63\)</span>” means something only relative to the variance of this particular sample.</p>
 </div>
 <div id="check-fit" class="cell" data-execution_count="5">
@@ -718,9 +718,9 @@ Typical miss: 9,376 euros of GDP per capita, against a mean of 30,403.</code></p
 <p><span class="term"><strong>Leverage</strong></span> — the diagonal element <span class="math inline">\(h_{ii}\)</span> of the hat matrix, equal to <span class="math inline">\(\partial \hat y_i / \partial y_i\)</span>: how much the fitted value at observation <span class="math inline">\(i\)</span> responds to a change in the observed value at <span class="math inline">\(i\)</span>. Leverage is a property of <span class="math inline">\(X\)</span> alone. It does not involve <span class="math inline">\(y\)</span> at all, so an observation can have high leverage and fit perfectly.</p>
 </div>
 <p>That derivative reading is the one to carry. If <span class="math inline">\(h_{ii} = 0.9\)</span>, then moving that observation’s <span class="math inline">\(y\)</span> up by one unit drags its own fitted value up by 0.9 — the line follows it almost exactly, which is another way of saying the line is not being constrained by anything else in that region.</p>
-<p>Because <span class="math inline">\(H\)</span> projects onto a <span class="math inline">\(p\)</span>-dimensional space, <span class="math inline">\(\sum_i h_{ii} = \operatorname{tr}(H) = p\)</span>, so leverage is a fixed budget of <span class="math inline">\(p\)</span> shared among <span class="math inline">\(n\)</span> observations. The average is exactly <span class="math inline">\(p/n\)</span>, and each <span class="math inline">\(h_{ii}\)</span> lies in <span class="math inline">\([0,1]\)</span>. The conventional flag is <span class="math inline">\(h_{ii} &gt; 2p/n\)</span> — twice the average — which is a rule of thumb and nothing more <span class="citation" data-cites="hoaglin1978">(<a href="#ref-hoaglin1978" role="doc-biblioref">Hoaglin and Welsch 1978</a>)</span>. In simple regression it has a transparent form,</p>
+<p>Because <span class="math inline">\(H\)</span> projects onto a <span class="math inline">\(p\)</span>-dimensional space, <span class="math inline">\(\sum_i h_{ii} = \mathrm{tr}(H) = p\)</span>, so leverage is a fixed budget of <span class="math inline">\(p\)</span> shared among <span class="math inline">\(n\)</span> observations. The average is exactly <span class="math inline">\(p/n\)</span>, and each <span class="math inline">\(h_{ii}\)</span> lies in <span class="math inline">\([0,1]\)</span>. The conventional flag is <span class="math inline">\(h_{ii} &gt; 2p/n\)</span> — twice the average — which is a rule of thumb and nothing more <span class="citation" data-cites="hoaglin1978">(<a href="#ref-hoaglin1978" role="doc-biblioref">Hoaglin and Welsch 1978</a>)</span>. In simple regression it has a transparent form,</p>
 <p><span class="math display">\[
-h_{ii} \;=\; \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j - \bar x)^2},
+h_{ii} \thickspace=\thickspace \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j - \bar x)^2},
 \]</span></p>
 <p>which says exactly what leverage means: a floor of <span class="math inline">\(1/n\)</span> that everyone gets, plus a term that grows with squared distance from the centre of the predictor space, measured in units of the predictors’ own spread. Two consequences follow directly. Leverage is minimised at <span class="math inline">\(x_i = \bar x\)</span> and grows quadratically away from it. And it is <em>relative</em> — the same observation is high-leverage in a narrow sample and unremarkable in a wide one, so leverage is a statement about the design, not about the observation.</p>
 <div id="check-leverage" class="cell" data-execution_count="6">
@@ -761,8 +761,8 @@ average leverage p/n = 0.00467;  27 observations exceed the 2p/n convention</cod
 <h2 data-number="3.6" class="anchored" data-anchor-id="influence-separating-the-outlier-from-the-point-that-matters"><span class="header-section-number">3.6</span> Influence: separating the outlier from the point that matters</h2>
 <div class="definition">
 <p><span class="term"><strong>Cook’s distance</strong></span> — how much the entire vector of fitted values moves when observation <span class="math inline">\(i\)</span> is deleted, scaled to be comparable across observations and models: <span class="math display">\[
-D_i \;=\; \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y_{(i)})}{p\,s^2}
-\;=\; \frac{r_i^{2}}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} .
+D_i \thickspace=\thickspace \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y_{(i)})}{p\thinspace s^2}
+\thickspace=\thickspace \frac{r_i^{2}}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} .
 \]</span></p>
 </div>
 <p>The second form is the one to internalise <span class="citation" data-cites="cook1977">(<a href="#ref-cook1977" role="doc-biblioref">Cook 1977</a>)</span>. Cook’s distance is a <em>product</em> of two quantities: how badly the point is fitted, <span class="math inline">\(r_i^2\)</span>, and how much power it has to pull, <span class="math inline">\(h_{ii}/(1-h_{ii})\)</span>. Because it is a product, either factor being near zero makes the whole thing near zero — which is why the two things students conflate are genuinely different:</p>
@@ -887,13 +887,13 @@ Figure&nbsp;3.5: Normal quantile–quantile plot of the standardised residuals. 
 </section>
 <section id="when-the-variance-is-not-constant" class="level2" data-number="3.8">
 <h2 data-number="3.8" class="anchored" data-anchor-id="when-the-variance-is-not-constant"><span class="header-section-number">3.8</span> When the variance is not constant</h2>
-<p>Heteroscedasticity is the failure most often misdiagnosed, so be precise about what it costs. Under heteroscedasticity <span class="math inline">\(\hat\beta\)</span> remains <strong>unbiased</strong> and <strong>consistent</strong>. The coefficients are not wrong. What breaks is <span class="math inline">\(\operatorname{Var}(\hat\beta)\)</span>: the usual <span class="math inline">\(s^2 (X^{\top}X)^{-1}\)</span> is no longer the right formula, so the standard errors, <span class="math inline">\(t\)</span> statistics, confidence intervals and <span class="math inline">\(p\)</span>-values are all computed from an expression that does not apply. You have the right answer with the wrong uncertainty attached — which, if the question is whether an effect is distinguishable from zero, is the part that matters.</p>
+<p>Heteroscedasticity is the failure most often misdiagnosed, so be precise about what it costs. Under heteroscedasticity <span class="math inline">\(\hat\beta\)</span> remains <strong>unbiased</strong> and <strong>consistent</strong>. The coefficients are not wrong. What breaks is <span class="math inline">\(\mathrm{Var}(\hat\beta)\)</span>: the usual <span class="math inline">\(s^2 (X^{\top}X)^{-1}\)</span> is no longer the right formula, so the standard errors, <span class="math inline">\(t\)</span> statistics, confidence intervals and <span class="math inline">\(p\)</span>-values are all computed from an expression that does not apply. You have the right answer with the wrong uncertainty attached — which, if the question is whether an effect is distinguishable from zero, is the part that matters.</p>
 <p>The formal test regresses the squared residuals on the predictors and asks whether they explain anything <span class="citation" data-cites="breusch1979">(<a href="#ref-breusch1979" role="doc-biblioref">Breusch and Pagan 1979</a>)</span>. Worth running, but the scale–location plot usually tells you first, and the test carries the same sample-size pathology as every other.</p>
 <p>The modern response is not to model the variance but to stop relying on the assumption. White’s heteroscedasticity-consistent estimator replaces the misapplied middle of the sandwich with the squared residuals themselves <span class="citation" data-cites="white1980">(<a href="#ref-white1980" role="doc-biblioref">White 1980</a>)</span>:</p>
 <p><span class="math display">\[
-\widehat{\operatorname{Var}}(\hat\beta)
+\widehat{\mathrm{Var}}(\hat\beta)
 = (X^{\top}X)^{-1}
-\Big(\textstyle\sum_i e_i^2 \, x_i x_i^{\top}\Big)
+\Big(\textstyle\sum_i e_i^2 \thinspace x_i x_i^{\top}\Big)
 (X^{\top}X)^{-1}.
 \]</span></p>
 <div id="check-hc" class="cell" data-execution_count="10">
@@ -1014,7 +1014,7 @@ Table&nbsp;3.1
 <p>Having diagnosed a problem you will usually fit an alternative — a quadratic term, a log transform, an extra control — and need a basis for preferring one. <span class="math inline">\(R^2\)</span> cannot supply it, because adding any variable, however irrelevant, cannot decrease <span class="math inline">\(R^2\)</span>.</p>
 <p>Akaike’s criterion comes at it from prediction rather than fit. It estimates the expected Kullback–Leibler divergence between the fitted model and the process that generated the data, and reduces to</p>
 <p><span class="math display">\[
-\mathrm{AIC} \;=\; -2 \log \hat{L} + 2k
+\mathrm{AIC} \thickspace=\thickspace -2 \log \hat{L} + 2k
 \]</span></p>
 <p>for a model with <span class="math inline">\(k\)</span> estimated parameters and maximised likelihood <span class="math inline">\(\hat L\)</span> <span class="citation" data-cites="akaike1974">(<a href="#ref-akaike1974" role="doc-biblioref">Akaike 1974</a>)</span>. Be careful with <span class="math inline">\(k\)</span>: the variance <span class="math inline">\(\sigma^2\)</span> was estimated from the data too, so a strict count includes it, while <code>statsmodels</code> counts only the regression coefficients for OLS. The two differ by a constant — 2 in AIC — which is invisible in any comparison and alarming the first time you find your own calculation disagreeing with the library. The cell below shows both. The first term rewards fit, the second charges two units per parameter, and lower is better. The Bayesian criterion replaces the penalty with <span class="math inline">\(k \log n\)</span>, harsher for any <span class="math inline">\(n &gt; 7\)</span>, and aims at a different target — the true model, if one is among the candidates, rather than the best predictor <span class="citation" data-cites="schwarz1978">(<a href="#ref-schwarz1978" role="doc-biblioref">Schwarz 1978</a>)</span>. They disagree by construction, and which you use should follow from which question you are asking.</p>
 <div id="check-aic" class="cell" data-execution_count="12">

@@ -125,8 +125,8 @@ wrong with that, and say which standard error is the right one here and why.
 
 For a two-regressor problem (both predictors standardised, no intercept) you are given:
 
-$$X^\top X = \begin{pmatrix} 10 & 4 \\ 4 & 8 \end{pmatrix}, \qquad
-   X^\top y = \begin{pmatrix} 26 \\ 20 \end{pmatrix}$$
+$$X^\top X = \begin{pmatrix} 10 & 4 \cr 4 & 8 \end{pmatrix}, \qquad
+   X^\top y = \begin{pmatrix} 26 \cr 20 \end{pmatrix}$$
 
 **(a)** *(2)* Compute $\hat\beta^{\text{OLS}}$. Show the determinant and the inverse.
 
@@ -141,13 +141,13 @@ regularisation would still be well-defined here even if $X^\top X$ were singular
 
 With standardised columns, the partial correlations of four predictors with the current residual are
 
-$$\rho = (0.42,\; -0.18,\; 0.09,\; 0.31)$$
+$$\rho = (0.42,\thickspace -0.18,\thickspace 0.09,\thickspace 0.31)$$
 
 **(a)** *(2)* Compute the lasso coordinate updates with $\lambda = 0.20$ (i.e. $\alpha = 1$).
 Which variables are selected?
 
 **(b)** *(3)* Compute the elastic net updates with $\lambda = 0.20$ and $\alpha = 0.5$, using
-$\hat\beta_j = S_{\lambda\alpha}(\rho_j) \,/\, \big(1 + \lambda(1-\alpha)\big)$.
+$\hat\beta_j = S_{\lambda\alpha}(\rho_j) \thinspace/\thinspace \big(1 + \lambda(1-\alpha)\big)$.
 
 **(c)** *(1)* State the difference in the selected set, and name the property of the elastic net
 that explains it.
@@ -178,11 +178,11 @@ measure of centre you would report — and why.
 
 The true model is
 
-$$\log w_i = \beta_0 + \beta_1 \,\text{educ}_i + \beta_2 \,\text{ability}_i + u_i,
+$$\log w_i = \beta_0 + \beta_1 \thinspace\text{educ}_i + \beta_2 \thinspace\text{ability}_i + u_i,
 \qquad \beta_2 = 0.08$$
 
 and the auxiliary regression of ability on schooling gives
-$\text{ability}_i = \delta_0 + \delta_1 \,\text{educ}_i + v_i$ with $\delta_1 = 0.6$.
+$\text{ability}_i = \delta_0 + \delta_1 \thinspace\text{educ}_i + v_i$ with $\delta_1 = 0.6$.
 
 You estimate the **short** regression, omitting ability, and obtain $\hat\beta_1^{\text{short}} = 0.112$.
 
@@ -201,7 +201,7 @@ one sentence.
 
 A credit model gives, for (intercept, income in thousands, has_collateral):
 
-$$\hat\beta = (-3.2,\; 0.045,\; 0.8)$$
+$$\hat\beta = (-3.2,\thickspace 0.045,\thickspace 0.8)$$
 
 Consider an applicant with income 40 (thousand) and collateral = 1. The outcome $y = 1$ denotes
 default.

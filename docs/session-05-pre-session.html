@@ -1069,6 +1069,7 @@ Thierry Warin, PhD
 </section>
 <section class="slide level2">
 
+<!-- authored: do not regenerate -->
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 </section>
 <section id="outline-before-class" class="slide level2 center scrollable">
@@ -1076,11 +1077,11 @@ Thierry Warin, PhD
 <ol type="1">
 <li>What to do, and how long it takes</li>
 <li>Read the paper</li>
-<li>Get BOTH datasets</li>
-<li>2b · The course data</li>
-<li>Self-check</li>
-<li>What the session will ask of you</li>
-<li>Running the code</li>
+<li>What the paper found</li>
+<li>Get both datasets</li>
+<li>Your own angle</li>
+<li>Self-check, and what the session will ask of you</li>
+<li>Before you run anything</li>
 </ol>
 </section>
 <section id="what-session-5-is-for" class="slide level2 scrollable">
@@ -1089,6 +1090,7 @@ Thierry Warin, PhD
 <div class="column" style="width:33%;">
 <h3 id="the-mathematics">The mathematics</h3>
 <ul>
+<li>Say why a greedy <strong>stepwise</strong> search is unstable, and what that argues for</li>
 <li>Derive the ridge estimator and show how it shrinks the <strong>SVD spectrum</strong></li>
 <li>Explain geometrically why the lasso produces exact zeros and ridge does not</li>
 <li>State the <strong>elastic net</strong> objective and what <span class="math inline">\(\ell_2\)</span> adds under correlation</li>
@@ -1104,7 +1106,7 @@ Thierry Warin, PhD
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
 <ul>
-<li>Work with more candidate predictors than countries</li>
+<li>Choose among 56 candidate determinants of bilateral FDI</li>
 <li>Say why a variable the lasso dropped is not thereby irrelevant</li>
 <li>Report a penalised model honestly, including what selection did</li>
 </ul>
@@ -1135,7 +1137,7 @@ Thierry Warin, PhD
 </tr>
 <tr class="even">
 <td><strong>2</strong></td>
-<td>Get <strong>both</strong> datasets — the paper’s, and your own angle</td>
+<td>Load <strong>both</strong> datasets — the paper’s, and your own angle</td>
 <td>10 min</td>
 </tr>
 <tr class="odd">
@@ -1151,10 +1153,11 @@ Thierry Warin, PhD
 </section>
 <section id="read-the-paper" class="slide level2">
 <h2>1 · Read the paper</h2>
-<p><strong>Frandi et al. (2016), <em>Fast and Scalable Lasso via Stochastic Frank-Wolfe Methods with a Convergence Guarantee</em></strong></p>
+<p><strong>Blonigen &amp; Piger (2014), <em>Determinants of foreign direct investment</em>, Canadian Journal of Economics 47(3), 775–812</strong></p>
 <div class="muted">
-<p><a href="https://doi.org/10.1007/s10994-016-5578-4">Read the article</a></p>
+<p><a href="https://doi.org/10.1111/caje.12091">Read the article</a> · free preprint: <a href="https://www.nber.org/papers/w16704">NBER w16704</a></p>
 </div>
+<p>Empirical studies of FDI disagree about which variables belong in the regression. Blonigen and Piger collect <strong>56 candidate determinants</strong>, run every model, and ask which variables survive. About sixteen do.</p>
 <p>Read for the <strong>argument</strong>, not for coverage. Annotate four things:</p>
 <table class="caption-top">
 <tbody>
@@ -1176,65 +1179,79 @@ Thierry Warin, PhD
 </tr>
 </tbody>
 </table>
+<div class="check">
+<p>Two tables carry the paper. <strong>Table 1</strong> shows eight prior studies disagreeing about what to include — that is the problem. <strong>Table 3</strong> is the answer: 56 variables, an inclusion probability for each. Read those two before anything else.</p>
+</div>
+</section>
+<section id="what-the-paper-found" class="slide level2">
+<h2>What the paper found</h2>
+<p>Of 56 candidates, the ones that survive (log-levels, inclusion probability ≥ 85%):</p>
+<div class="tight">
+<ul>
+<li><strong>Gravity</strong> — parent GDP, host GDP, distance</li>
+<li><strong>Cultural distance</strong> — common official language, colonial relationship</li>
+<li><strong>Trade agreements</strong> — regional trade agreement, customs union</li>
+<li><strong>Income and endowments</strong> — parent GDP per capita, host skill level</li>
+</ul>
+</div>
+<p>And the ones that do not:</p>
+<div class="tight">
+<ul>
+<li>host <strong>business costs</strong>, host <strong>communications infrastructure</strong>, host <strong>financial depth</strong>, host <strong>institutions</strong> — the variables a great many published FDI papers lean on</li>
+</ul>
+</div>
+<div class="warn">
+<p>“Many covariates found significant by previous studies are not robust.” That sentence is the paper, and it is also the reason this session exists.</p>
+</div>
 </section>
 <section id="get-both-datasets" class="slide level2">
-<h2>2 · Get BOTH datasets</h2>
+<h2>2 · Get both datasets</h2>
 <div class="warn">
-<p>The practice uses two: the <strong>paper’s data</strong>, to reproduce one of its results, and <strong>your own angle</strong>, to apply the method. Have both before you arrive.</p>
+<p>The practice uses two: the <strong>paper’s data</strong>, to test its result, and <strong>your own angle</strong>, to apply the method. Have both before you arrive.</p>
 </div>
-<p><strong>a) The paper’s replication package</strong> — Harvard Dataverse</p>
-<div class="step">
-<p><a href="https://doi.org/10.7910/DVN/QJEUKR">10.7910/DVN/QJEUKR</a></p>
+<p><strong>a) The paper’s data, rebuilt</strong></p>
+<p>The authors published no replication package — the paper says only that a list of sources is available on request. So the course rebuilt their design from the three sources they name (CEPII’s gravity database, the World Development Indicators, the Penn World Tables) plus the OECD for the dependent variable, for <strong>2019</strong> instead of their 2000.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb1-2"><a href></a></span>
+<span id="cb1-3"><a href></a>fdi <span class="op">=</span> qmib.load(<span class="st">&quot;fdi&quot;</span>)</span>
+<span id="cb1-4"><a href></a><span class="bu">print</span>(fdi.shape)          <span class="co"># 7,051 directed country pairs, 56 candidates</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Everything in it is real. <code>scripts/build_fdi_determinants.py</code> is the script that built it, and the <a href="https://github.com/warint/quantitative-methods/blob/main/data/spine/dictionaries/S05-fdi.md">data dictionary</a> names every source and every place the rebuild departs from the paper.</p>
 </div>
-<p>Download it from the terminal — no Dataverse account, no browser. From the repository root:</p>
-<p><strong>macOS and Linux</strong></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> 05-ridge-lasso-elastic-net/data/replication <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> 05-ridge-lasso-elastic-net/data/replication</span>
-<span id="cb1-2"><a href></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> replication.zip <span class="dt">\</span></span>
-<span id="cb1-3"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR&quot;</span></span>
-<span id="cb1-4"><a href></a><span class="fu">unzip</span> <span class="at">-q</span> replication.zip <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> replication.zip <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> <span class="at">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Windows PowerShell</strong></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href></a>mkdir <span class="dv">05</span><span class="op">-</span>ridge-lasso-elastic-net<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication<span class="op">;</span> <span class="fu">cd</span> <span class="dv">05</span><span class="op">-</span>ridge-lasso-elastic-net<span class="op">/</span><span class="kw">data</span><span class="op">/</span>replication</span>
-<span id="cb2-2"><a href></a><span class="fu">curl</span><span class="op">.</span><span class="fu">exe</span> <span class="op">-</span>L <span class="op">-</span>o replication<span class="op">.</span><span class="fu">zip</span> `</span>
-<span id="cb2-3"><a href></a>  <span class="st">&quot;https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/QJEUKR&quot;</span></span>
-<span id="cb2-4"><a href></a>Expand-Archive replication<span class="op">.</span><span class="fu">zip</span> <span class="op">.;</span> <span class="fu">Remove-Item</span> replication<span class="op">.</span><span class="fu">zip</span><span class="op">;</span> <span class="fu">cd</span> <span class="op">-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p><code>data/replication/</code> is git-ignored, so nothing large is committed. Keep the authors’ own structure — do not tidy it.</p>
+<div class="muted">
+<p>Because the year is different, the practice is a <strong>question</strong>, not an arithmetic check: do the determinants that held in 2000 still hold two decades on?</p>
 </div>
 </section>
-<section id="b-the-course-data" class="slide level2">
-<h2>2b · The course data</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb3-2"><a href></a></span>
-<span id="cb3-3"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># the spine, shared by every group</span></span>
-<span id="cb3-4"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># REPLACE with your own angle</span></span>
-<span id="cb3-5"><a href></a></span>
-<span id="cb3-6"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="b-your-own-angle" class="slide level2">
+<h2>2b · Your own angle</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># the spine, shared by every group</span></span>
+<span id="cb2-2"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># REPLACE with your own angle</span></span>
+<span id="cb2-3"><a href></a></span>
+<span id="cb2-4"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>Run this <strong>before</strong> you arrive. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing.</p>
+<p>Run this <strong>before</strong> you arrive. It reads from the repository and caches as parquet, so the practice works whatever the room’s wifi is doing.</p>
 </div>
 <div class="warn">
 <p><code>angle_c_country</code> is an example, not your angle. Yours is named in <a href="https://github.com/warint/quantitative-methods/blob/main/RESEARCH-MANDATES.md"><code>RESEARCH-MANDATES.md</code></a>.</p>
 </div>
 <div class="muted">
-<p>A wide slice of the spine — more candidate indicators than usable rows · everything available: <code>qmib.catalog()</code></p>
+<p>Everything available: <code>qmib.catalog()</code></p>
 </div>
 </section>
-<section id="self-check" class="slide level2">
-<h2>3 · Self-check</h2>
-<p>Answer on paper. If you cannot, that is what the lecture is for.</p>
+<section id="self-check-and-what-the-session-will-ask-of-you" class="slide level2">
+<h2>3 · Self-check, and what the session will ask of you</h2>
+<p>Answer these on paper. If you cannot, that is what the lecture is for.</p>
 <div class="tight">
 <ol type="1">
-<li>In one sentence: what does this session’s method let you claim that the previous one did not?</li>
-<li>What must be true of your data for it to apply?</li>
-<li>Which claim in the paper rests on this method — and how hard does it lean on it?</li>
+<li>The paper runs every one of <span class="math inline">\(2^{56}\)</span> models. Why can you not simply run the regression with all 56 variables in it and read the t-statistics?</li>
+<li>Two candidate determinants are correlated at 0.97 and both matter. What will the lasso do?</li>
+<li>The paper reports that host institutions have a low inclusion probability. Does that mean institutions do not affect FDI?</li>
 </ol>
 </div>
-</section>
-<section id="what-the-session-will-ask-of-you" class="slide level2">
-<h2>What the session will ask of you</h2>
-<p>By the end you should be able to:</p>
+<p>By the end of the session you should be able to:</p>
 <div class="tight">
 <ul>
+<li>Say why a greedy <strong>stepwise</strong> search is unstable, and what that instability argues for</li>
 <li>State the ridge and lasso objectives and say <strong>what each penalty buys</strong></li>
 <li>Explain why ridge shrinkage is <strong>targeted</strong> rather than blunt</li>
 <li>Derive <strong>soft-thresholding</strong> and use it to explain the lasso’s exact zeros</li>
@@ -1243,17 +1260,19 @@ Thierry Warin, PhD
 </ul>
 </div>
 <div class="get">
-<p><strong>Arrive with:</strong> the paper read and annotated · the replication package unzipped · <code>qmib.load()</code> run at least once · your self-check answers on paper.</p>
+<p><strong>Arrive with:</strong> the paper read and annotated · <code>qmib.load(&quot;fdi&quot;)</code> run at least once · your own angle loaded · your self-check answers on paper.</p>
 </div>
 </section>
-<section id="running-the-code" class="slide level2">
-<h2>Running the code</h2>
-<p>Everything runs in the <strong>VS Codium terminal</strong>, with the project environment active:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS / Linux</span></span>
-<span id="cb4-2"><a href></a><span class="ex">.venv\Scripts\activate</span>         <span class="co"># Windows</span></span>
-<span id="cb4-3"><a href></a><span class="ex">python</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="before-you-run-anything" class="slide level2">
+<h2>Before you run anything</h2>
+<p>Everything runs in the <strong>VS Codium terminal</strong>, from the repository root, with the project environment active. Activate it in <strong>every new terminal</strong>, not only the first:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb4-1"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate           <span class="co"># Windows (PowerShell)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="check">
+<p>Your prompt must begin with <strong><code>(.venv)</code></strong>. Without it <code>python</code> and <code>pip</code> are your system’s, and nothing the course installed is visible to them.</p>
+</div>
 <div class="muted">
-<p>Missing a package? <code>pip install -r requirements.txt</code> from the repository root.</p>
+<p><code>ModuleNotFoundError</code> means the packages went somewhere else, or were never installed. Check the prompt first, then <code>pip install -r requirements.txt</code> — <strong>from the repository root, with the environment active</strong>. Building the environment from scratch is Session 01, step 1.4.</p>
 </div>
 <div class="muted">
 <p>Session 05: <a href="https://github.com/warint/quantitative-methods/blob/main/05-ridge-lasso-elastic-net/README.md"><code>README.md</code></a> · the lecture: <a href="https://github.com/warint/quantitative-methods/blob/main/05-ridge-lasso-elastic-net/01-lecture/README.md"><code>01-lecture/</code></a></p>

@@ -4,8 +4,12 @@
 
 Sessions 01, 02, 05 and 12 are hand-written and are left alone; the spec marks
 them `generated=False`. Everything else — README, pre-session, practice brief,
-data page — is regenerated, and the session tables in README.md and SYLLABUS.md
-are rewritten between markers so the three can never disagree.
+data page — is regenerated from the spec.
+
+The session tables in README.md and SYLLABUS.md are **not** rewritten here.
+`session_table()` below produces the rows, but neither file carries markers to
+write them between, so the tables are maintained by hand and have to be kept in
+step with `methods` and `theme` when either changes.
 """
 
 import datetime
@@ -14,10 +18,56 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import (COHORT, SESSIONS, ordered, generated, MIDTERM_AFTER,  # noqa: E402
-                         DATES, ASYNCHRONOUS, WHEN, ROOM)
+from course_spec import (COHORT, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E402
+                         generated, MIDTERM_AFTER, DATES, ASYNCHRONOUS, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
+
+
+def _paper_data_block(s):
+    """The 'where the paper's data comes from' block.
+
+    Most sessions point at a Harvard Dataverse deposit. Sessions 07 and 08 rest
+    on a public database instead — the KOF Globalisation Index, the Macrohistory
+    database — which the course loader fetches, so there is nothing to unzip.
+    """
+    if s.get("dataverse"):
+        return (
+            f"**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**\n\n"
+            "Download it once, and unzip it here — the folder is git-ignored, so nothing "
+            "large is committed:\n\n"
+            f"```text\n{s['dir']}/data/replication/\n```\n\n"
+            "Keep the authors' own folder structure and README."
+            + (f"\n\n> **Note.** {s['data_extra']}" if s.get("data_extra") else "")
+        )
+    return (
+        "The paper has **no replication deposit**, but it rests on a database its publisher "
+        "puts online for anyone. The course loader fetches it once and caches it, so there is "
+        "nothing to download by hand:\n\n"
+        f"```python\nimport qmib\n\ndata = qmib.load(\"{s['dataset']}\")\n```\n\n"
+        "Run it **before** class: it is a single download, and thirty people fetching it at "
+        "once in the room is not a download."
+    )
+
+
+def _paper_data_pointer(s):
+    """One sentence saying where the paper's data is, for the practice page."""
+    if s.get("dataverse"):
+        return (
+            f"Its replication package ([{s['dataverse']}](https://doi.org/{s['dataverse']})) "
+            f"should already be unzipped at `{s['dir']}/data/replication/`."
+        )
+    return f"Its data needs no download: `qmib.load(\"{s['dataset']}\")`."
+
+
+def sentence(s):
+    """Capitalise the first letter and leave the rest alone.
+
+    `str.capitalize()` lowercases everything after it, which turned "GDP per
+    capita" into "Gdp per capita" and "Lending Club" into "Lending club" on
+    every data page that named one.
+    """
+    return s[:1].upper() + s[1:]
 
 
 def _when(num):
@@ -35,6 +85,10 @@ def link(num):
 def session_readme(num, s):
     prev, nxt = PREV_NEXT[num]
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
+    # Sessions 01 and 12 have no lab, so they get no row rather than a dead one.
+    lab = lab_url(num)
+    lab_row = (f"| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on "
+               f"this session | [warin.ca/qmib-labs]({lab}) |\n") if lab else ""
     return f"""# Session {num} — {s['title']}
 
 > **{s['question']}**
@@ -72,7 +126,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: {s['methods']} | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
-
+{lab_row}
 The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
 practice assumes you arrive with the data loaded.
 
@@ -80,7 +134,7 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**{s['dataset_note'].capitalize()}** — one line to load it:
+**{sentence(s['dataset_note'])}** — one line to load it:
 
 ```python
 import qmib
@@ -142,19 +196,11 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**
-
-Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
-
-```text
-{s['dir']}/data/replication/
-```
-
-Keep the authors' own folder structure and README.
+{_paper_data_block(s)}
 
 ### b) The course data, for your own angle
 
@@ -170,7 +216,7 @@ mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 print(data.shape, core.shape, mine.shape)
 ```
 
-{s['dataset_note'].capitalize()}.
+{sentence(s['dataset_note'])}.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
@@ -206,6 +252,23 @@ Answer on paper. If you cannot, that is what the lecture is for.
 
 def practice(num, s):
     loses = "\n".join(f"- {m}" for m in s["loses_marks"])
+    lab = lab_url(num)
+    # Sessions that teach a reporting tool say so in the brief as well as on the
+    # deck, so a group working from this page alone does not miss it.
+    table = ("""
+\n> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row."""
+             if s.get("practice_extra") == "regtable" else "")
+    after = f"""---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session]({lab})** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
+
+""" if lab else ""
     return f"""# Session {num} — Group practice (second half, ~90 min)
 
 # {s['title']}
@@ -252,12 +315,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **{s['reading']}**, and its replication package
-([{s['dataverse']}](https://doi.org/{s['dataverse']})) should already be unzipped at:
-
-```text
-{s['dir']}/data/replication/
-```
+The paper is **{s['reading']}**. {_paper_data_pointer(s)}
 
 The session's own dataset, for comparison:
 
@@ -295,7 +353,7 @@ A 250-word note in your submissions folder:
 
 - What you found, in units
 - Which assumption you broke, and what it did
-- What this result does **not** license you to claim
+- What this result does **not** license you to claim{table}
 
 ---
 
@@ -315,7 +373,7 @@ Everyone pushes at least once. The log is the record of participation.
 
 {loses}
 
----
+{after}---
 
 [<- The lecture](../01-lecture/README.md) · [Session {num} overview](../README.md)
 """
@@ -324,7 +382,7 @@ Everyone pushes at least once. The log is the record of participation.
 def data_page(num, s):
     return f"""# Session {num} — Data
 
-**{s['dataset_note'].capitalize()}**
+**{sentence(s['dataset_note'])}**
 
 ```python
 import qmib

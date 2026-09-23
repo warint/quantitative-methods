@@ -454,11 +454,11 @@ variables selected at least once: 29 of 29</code></pre>
 <p>Gauss–Markov said least squares is best among <em>unbiased</em> linear estimators. Chapter 3 treated that as reassurance. Read it again as a restriction: the theorem says nothing about estimators that accept bias, and it leaves open whether one of those might have smaller error overall.</p>
 <p>Decompose the expected squared error of an estimate <span class="math inline">\(\hat\theta\)</span> of a quantity <span class="math inline">\(\theta\)</span>:</p>
 <p><span class="math display">\[
-\operatorname{E}\big[(\hat\theta - \theta)^2\big]
-\;=\;
-\underbrace{\big(\operatorname{E}[\hat\theta] - \theta\big)^2}_{\text{bias}^2}
-\;+\;
-\underbrace{\operatorname{Var}(\hat\theta)}_{\text{variance}} .
+\mathrm{E}\big[(\hat\theta - \theta)^2\big]
+\thickspace=\thickspace
+\underbrace{\big(\mathrm{E}[\hat\theta] - \theta\big)^2}_{\text{bias}^2}
+\thickspace+\thickspace
+\underbrace{\mathrm{Var}(\hat\theta)}_{\text{variance}} .
 \]</span></p>
 <p>Least squares sets the first term to zero exactly. If the second term is large — and with twenty-nine correlated predictors and thirty-seven observations it is enormous — then accepting a little bias to remove a lot of variance is a straightforwardly better trade. That is the entire argument for this chapter, and it is a decision-theoretic argument rather than a statistical convention.</p>
 <div id="check-variance" class="cell" data-execution_count="3">
@@ -492,13 +492,13 @@ It is a model with almost as many parameters as observations.</code></pre>
 <p>Hoerl and Kennard proposed adding a penalty on the squared size of the coefficients <span class="citation" data-cites="hoerl1970">(<a href="#ref-hoerl1970" role="doc-biblioref">Hoerl and Kennard 1970</a>)</span>:</p>
 <p><span class="math display">\[
 \hat\beta^{\text{ridge}}
-\;=\;
-\arg\min_\beta \; \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_2^2,
+\thickspace=\thickspace
+\arg\min_\beta \thickspace \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_2^2,
 \qquad \lambda \ge 0 .
 \]</span></p>
 <p>Unlike the lasso below, this has a closed form, and the form is the argument:</p>
 <p><span class="math display">\[
-\hat\beta^{\text{ridge}} \;=\; (X^\top X + \lambda I)^{-1} X^\top y .
+\hat\beta^{\text{ridge}} \thickspace=\thickspace (X^\top X + \lambda I)^{-1} X^\top y .
 \]</span></p>
 <p>Compare it to <span class="math inline">\((X^\top X)^{-1}X^\top y\)</span>. The only change is <span class="math inline">\(\lambda I\)</span> added to the diagonal — which is why the method is called <em>ridge</em>, and why it works when least squares cannot: <span class="math inline">\(X^\top X\)</span> may be singular or nearly so, but <span class="math inline">\(X^\top X + \lambda I\)</span> is invertible for any <span class="math inline">\(\lambda &gt; 0\)</span>. Ridge is defined even when <span class="math inline">\(p &gt; n\)</span>, where least squares has no unique solution at all.</p>
 <div id="check-ridge" class="cell" data-execution_count="4">
@@ -546,14 +546,14 @@ directions in which they barely vary are shrunk almost to nothing.</code></pre>
 <p>Tibshirani’s change is a single character: penalise the sum of absolute values rather than of squares <span class="citation" data-cites="tibshirani1996">(<a href="#ref-tibshirani1996" role="doc-biblioref">Tibshirani 1996</a>)</span>.</p>
 <p><span class="math display">\[
 \hat\beta^{\text{lasso}}
-\;=\;
-\arg\min_\beta \; \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_1 .
+\thickspace=\thickspace
+\arg\min_\beta \thickspace \lVert y - X\beta \rVert^2 + \lambda \lVert \beta \rVert_1 .
 \]</span></p>
 <p>There is no closed form in general, but there is in the case that explains everything. Suppose the predictors are orthonormal, so <span class="math inline">\(X^\top X = I\)</span> and the least-squares solution is <span class="math inline">\(\hat\beta^{\text{OLS}}_j = z_j\)</span>. The objective then separates into one problem per coefficient, and each has the solution</p>
 <p><span class="math display">\[
 \hat\beta_j^{\text{lasso}}
-\;=\;
-\operatorname{sign}(z_j)\big(|z_j| - \lambda/2\big)_+
+\thickspace=\thickspace
+\mathrm{sign}(z_j)\big(|z_j| - \lambda/2\big)_+
 \]</span></p>
 <p>— the <em>soft-thresholding</em> operator. Read what it does. Every coefficient is pulled toward zero by the same fixed amount <span class="math inline">\(\lambda/2\)</span>, and any coefficient whose least-squares value was smaller than that amount is pulled <em>past</em> zero and held there. The zeros are not a numerical accident. They are what happens when a constant subtraction meets a small number.</p>
 <p>Ridge, in the same orthonormal case, gives <span class="math inline">\(z_j / (1 + \lambda)\)</span> — a <em>proportional</em> shrinkage, which multiplies small coefficients by a factor and therefore never reaches zero.</p>
@@ -665,7 +665,7 @@ Figure&nbsp;5.1: Why the lasso produces zeros and ridge does not. Contours of th
 <p>The lasso has a specific weakness. Among a group of strongly correlated predictors it tends to pick one, essentially arbitrarily, and zero the rest. If the group is a set of imperfect measurements of the same underlying thing, the choice is close to random, and it will change on a resample — the stepwise instability returning in a new form.</p>
 <p>Zou and Hastie’s elastic net penalises both norms at once <span class="citation" data-cites="zou2005">(<a href="#ref-zou2005" role="doc-biblioref">Zou and Hastie 2005</a>)</span>:</p>
 <p><span class="math display">\[
-\hat\beta^{\text{EN}} = \arg\min_\beta \;
+\hat\beta^{\text{EN}} = \arg\min_\beta \thickspace
 \lVert y - X\beta\rVert^2
 + \lambda\Big(\alpha \lVert\beta\rVert_1 + \tfrac{1-\alpha}{2}\lVert\beta\rVert_2^2\Big).
 \]</span></p>

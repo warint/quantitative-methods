@@ -42,7 +42,7 @@ import pathlib
 
 import pandas as pd
 
-__all__ = ["load", "view", "catalog", "path", "ROOT", "REMOTE"]
+__all__ = ["load", "view", "catalog", "regtable", "path", "ROOT", "REMOTE"]
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -72,6 +72,13 @@ PUBLISHED = {
     # — now 404s, so the primary is the ISLP authors' own copy and the mirror is
     # the Rdatasets archive, which carries an extra `rownames` column that
     # _read() drops along with the other index columns.
+    # Session 07: the KOF Globalisation Index, ETH Zurich. The overall index and
+    # its eight sub-indices, each split into de facto and de jure.
+    "kof": ("https://ethz.ch/content/dam/ethz/special-interest/dual/kof-dam/"
+            "documents/Globalization/2025/KOFGI_2025_public.xlsx", None),
+    # Session 08: the Jorda-Schularick-Taylor Macrohistory Database, R6. Eighteen
+    # advanced economies, 1870-2020, with the crisis dates the literature uses.
+    "jst": ("https://www.macrohistory.net/app/download/9834512569/JSTdatasetR6.xlsx", None),
     "smarket":    ("https://raw.githubusercontent.com/intro-stat-learning/ISLP/"
                    "main/ISLP/data/Smarket.csv",
                    "https://vincentarelbundock.github.io/Rdatasets/csv/ISLR/Smarket.csv"),
@@ -91,10 +98,13 @@ SPINE_FILES = {
     "angle_d_product": "angle_d_product.parquet",
     "angle_e_centralbank": "angle_e_centralbank.parquet",
     "angle_e_national": "angle_e_national.parquet",
+    "fdi": "fdi_determinants.parquet",
 }
 
 DESCRIPTIONS = {
     "core": "European panel: GDP, population, employment, productivity, investment",
+    "fdi": "Bilateral FDI positions, 2019, with 56 candidate determinants "
+           "(OECD, CEPII gravity, World Bank, Freedom House) — Session 05",
     "loans": "Lending Club — 9,578 three-year loans, FICO and default",
     "redwines": "Portuguese red wines — 1,599 bottles, physico-chemical measures",
     "hsbdemo": "High school programme choice — 200 students (multinomial)",
@@ -104,6 +114,8 @@ DESCRIPTIONS = {
     "glassdoor": "Glassdoor pay data — salary, bonus, gender, education, age",
     "movies": "Movie metadata — budget, popularity, revenue, runtime, votes",
     "efa": "Questionnaire on car purchase decisions — 14 items (factor analysis)",
+    "kof": "KOF Globalisation Index — 200+ countries, 1970–2022, eight sub-indices",
+    "jst": "Macrohistory database — 18 economies, 1870–2020, 88 financial crises",
 }
 
 
@@ -133,8 +145,14 @@ def _download(url: str) -> pd.DataFrame:
     # the TLS-inspecting proxies common on university networks.
     import requests
 
-    r = requests.get(url, timeout=60)
+    # Some publishers (ETH's KOF among them) reject requests that arrive
+    # without a browser User-Agent, with a 404 rather than a 403.
+    r = requests.get(url, timeout=120, headers={"User-Agent": "Mozilla/5.0 (qmib course loader)"})
     r.raise_for_status()
+    if url.endswith((".xlsx", ".xls")):
+        # Bytes, not text: an Excel file is a zip archive and does not survive
+        # being decoded to a string.
+        return pd.read_excel(io.BytesIO(r.content))
     sep = ";" if "winequality" in url else ","
     return pd.read_csv(io.StringIO(r.text), sep=sep)
 
@@ -240,6 +258,104 @@ def view(df: pd.DataFrame, n: int = 12, name: str | None = None):
                  f'{summary.to_html()}</details>'))
     return None
 
+# The default rows for the bottom of a regression table. Ordinary functions of
+# a fitted model, so a reader can see there is no magic — and so a caller can
+# pass their own dict and get different ones.
+#
+# Two sets, because a logit has no R-squared and no residual standard error. Ask
+# for them anyway and `summary_col` prints the label with an empty cell beside
+# it, which reads as "zero" rather than "not defined for this model".
+REG_STATS = {
+    "Observations": lambda m: f"{int(m.nobs):,}",
+    "R-squared": lambda m: f"{m.rsquared:.3f}",
+    "Adjusted R-squared": lambda m: f"{m.rsquared_adj:.3f}",
+    "Residual SE": lambda m: f"{m.mse_resid ** 0.5:,.0f}",
+}
+
+REG_STATS_DISCRETE = {
+    "Observations": lambda m: f"{int(m.nobs):,}",
+    "Pseudo R-squared": lambda m: f"{m.prsquared:.3f}",
+    "Log-likelihood": lambda m: f"{m.llf:,.1f}",
+    "AIC": lambda m: f"{m.aic:,.1f}",
+}
+
+
+def _default_stats(models):
+    """The fit statistics that exist for this kind of model."""
+    first = models[0]
+    if hasattr(first, "rsquared"):          # OLS, RLM, Gaussian GLM
+        return REG_STATS
+    if hasattr(first, "prsquared"):         # logit, probit, MNLogit
+        return REG_STATS_DISCRETE
+    return {"Observations": lambda m: f"{int(m.nobs):,}"}
+
+
+def regtable(models, names=None, stats=None, order=None, digits=1, title=None):
+    """A publication-style comparison of fitted models — R's stargazer, here.
+
+    >>> m1 = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+    >>> m2 = smf.ols("gdp_pc_eur ~ productivity_idx + gfcf_meur", data=d).fit()
+    >>> print(qmib.regtable([m1, m2], names=["simple", "+ investment"]))
+
+    One column per model, coefficients with significance stars, standard errors
+    in parentheses beneath, and a block of fit statistics at the foot. The
+    result renders as text, and carries `.as_latex()` and `.as_html()` for the
+    book and the decks.
+
+    This is `statsmodels.iolib.summary2.summary_col` with two rough edges taken
+    off, and nothing else — no new dependency, and the twenty lines below are
+    readable, which is the point of doing it here rather than importing a
+    package. The edges:
+
+    * `summary_col` applies one float format to coefficients *and* to
+      R-squared, so a table in euros prints its R-squared as `0.6`. The fit
+      statistics are formatted by the functions in `stats` instead, each to
+      whatever suits it.
+    * It then appends its own R-squared rows on top of those, so the table
+      states R-squared twice, once uselessly. Those two rows are removed.
+
+    `order` puts the predictors in the order you want and pushes the intercept
+    to the bottom, which is where a reader looks for it, if at all.
+    """
+    from statsmodels.iolib.summary2 import summary_col
+
+    models = list(models)
+    stats = _default_stats(models) if stats is None else stats
+    if names is None:
+        names = [f"({i})" for i in range(1, len(models) + 1)]
+
+    table = summary_col(
+        models,
+        stars=True,
+        float_format=f"%.{digits}f",
+        model_names=[f"({i}) {n}" if not n.startswith("(") else n
+                     for i, n in enumerate(names, 1)],
+        info_dict=stats,
+        regressor_order=list(order) if order else None,
+    )
+
+    # summary_col's own R-squared rows, formatted with float_format and so
+    # unreadable in any table whose coefficients are not on a 0-1 scale. The
+    # rows from `stats` are kept; these two are dropped by position, because
+    # the labels are not unique once `stats` names one of them too.
+    body = table.tables[0]
+    drop = [i for i, label in enumerate(body.index)
+            if label in ("R-squared", "R-squared Adj.")][:2]
+
+    # And any row that came out empty across every column — a statistic asked
+    # for that this model does not define. A labelled blank row is worse than no
+    # row: it reads as a zero.
+    drop += [i for i in range(len(body))
+             if i not in drop and str(body.index[i]).strip()
+             and not any(str(v).strip() for v in body.iloc[i])]
+    if drop:
+        table.tables[0] = body.iloc[[i for i in range(len(body)) if i not in drop]]
+
+    if title:
+        table.add_title(title)
+    return table
+
+
 def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
     """Normalise the published files so the column names are predictable."""
     df = df.rename(columns=lambda c: str(c).strip().lower().replace(".", "_").replace(" ", "_"))
@@ -252,6 +368,27 @@ def _tidy(df: pd.DataFrame, name: str) -> pd.DataFrame:
     if name == "smarket":
         # The Rdatasets mirror carries R's row numbers as a first column.
         df = df.drop(columns=[c for c in ("rownames", "unnamed:_0") if c in df.columns])
+    if name == "jst":
+        # The predictors Bluwstein et al. (2023) build their early-warning
+        # models from, derived here so the practice starts from the question
+        # rather than from twenty lines of panel arithmetic. Two-year changes
+        # throughout, which is the horizon the paper uses.
+        df = df.sort_values(["country", "year"])
+        g = df.groupby("country")
+        df["credit_gdp"] = df["tloans"] / df["gdp"]
+        df["credit_growth"] = g["credit_gdp"].diff(2)
+        df["yield_slope"] = df["ltrate"] - df["stir"]
+        df["money_growth"] = g.apply(
+            lambda t: (t["money"] / t["gdp"]).diff(2), include_groups=False
+        ).reset_index(level=0, drop=True)
+        df["cpi_growth"] = g["cpi"].pct_change(2)
+        df["pubdebt_change"] = g["debtgdp"].diff(2)
+        df["ca_gdp"] = df["ca"] / df["gdp"]
+        df["investment_change"] = g["iy"].diff(2)
+        # The outcome: a crisis begins within the next two years.
+        nxt = g["crisisjst"].shift(-1).fillna(0) + g["crisisjst"].shift(-2).fillna(0)
+        df["crisis_next2"] = (nxt > 0).astype(int)
+        df = df.reset_index(drop=True)
     if name == "movies":
         # The raw file mixes numbers and strings in several columns, which
         # parquet will not store. Coerce the numeric ones and drop the rest.

@@ -44,12 +44,7 @@ Take the result the pre-session reading rests on, and reproduce it — or establ
 and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
 that is not attempted earns none.
 
-The paper is **Bodory, Huber & Lafférs (2022), *Evaluating (weighted) dynamic treatment effects by double machine learning***, and its replication package
-([10.7910/DVN/FS0KBA](https://doi.org/10.7910/DVN/FS0KBA)) should already be unzipped at:
-
-```text
-10-causal-inference-foundations/data/replication/
-```
+The paper is **Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a Randomized Experiment*, Quarterly Journal of Economics 132(2)**. Its replication package ([10.7910/DVN/QOGMVI](https://doi.org/10.7910/DVN/QOGMVI)) should already be unzipped at `10-causal-inference-foundations/data/replication/`.
 
 The session's own dataset, for comparison:
 
@@ -89,6 +84,10 @@ A 250-word note in your submissions folder:
 - Which assumption you broke, and what it did
 - What this result does **not** license you to claim
 
+> **Put the two fits in one table**, not two blocks of output —
+> `qmib.regtable([before, after], names=["as specified", "assumption broken"])`.
+> The comparison is the finding, and it is read across the row.
+
 ---
 
 ## Submitting
@@ -109,6 +108,14 @@ Everyone pushes at least once. The log is the record of participation.
 - Matching on a variable affected by the treatment
 - Calling an association causal because you controlled for something
 - Omitting the balance table
+
+---
+
+## After class, if you want it
+
+The **[QMIB Lab for this session](https://warin.ca/qmib-labs/qmib-lab-10.html)** has a knowledge check on what you have just done. It is
+optional, never a prerequisite for the next lecture, and never marked for correctness — a completed
+report counts because attempting it is the engagement being measured.
 
 ---
 

@@ -17,8 +17,8 @@ Budget **60–90 minutes**.
 
 ## 1. The reading — 45–60 min
 
-**Amsili, van Es & Schindelbeck (2025), *Pedotransfer Functions for Soil Protein Based on Random Forest Modeling***
-[Read the article](https://doi.org/10.1080/00103624.2025.2454015)
+**Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach*, Journal of International Economics 145**
+[Read the article](https://doi.org/10.1016/j.jinteco.2023.103773)
 
 Read for the **argument**, not for coverage:
 
@@ -37,19 +37,19 @@ Read for the **argument**, not for coverage:
 
 You need **two** datasets in the practice, and both should be on your machine before you arrive.
 
-### a) The paper's replication package
+### a) The paper's data
 
-This is what you reproduce in the first twenty minutes of the practice.
+This is what you work against in the first twenty minutes of the practice.
 
-**Harvard Dataverse: [10.7910/DVN/HGBPCW](https://doi.org/10.7910/DVN/HGBPCW)**
+The paper has **no replication deposit**, but it rests on a database its publisher puts online for anyone. The course loader fetches it once and caches it, so there is nothing to download by hand:
 
-Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
+```python
+import qmib
 
-```text
-08-knn-and-bias-variance/data/replication/
+data = qmib.load("jst")
 ```
 
-Keep the authors' own folder structure and README.
+Run it **before** class: it is a single download, and thirty people fetching it at once in the room is not a download.
 
 ### b) The course data, for your own angle
 
@@ -58,14 +58,14 @@ This is what you apply the method to in the second half.
 ```python
 import qmib
 
-data = qmib.load("core")      # what the lecture uses
+data = qmib.load("jst")      # what the lecture uses
 core = qmib.load("core")                 # shared by every group
 mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
 
 print(data.shape, core.shape, mine.shape)
 ```
 
-The course spine, plus the smarket returns used in the lecture.
+The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived.
 
 > Run this **before** class. It downloads once and caches as parquet, so the practice works
 > whatever the room's wifi is doing. `qmib.catalog()` lists everything available.

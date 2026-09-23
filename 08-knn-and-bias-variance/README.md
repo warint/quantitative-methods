@@ -39,6 +39,7 @@ By the end of this session you should be able to:
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
 | **First half** (~90 min) | In class | Lecture: the Bayes classifier, distance, choosing $k$ by cross-validation | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
+| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-08.html) |
 
 The pre-session work is **not optional**. The lecture assumes you arrive having read the paper; the
 practice assumes you arrive with the data loaded.
@@ -47,11 +48,11 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The course spine, plus the smarket returns used in the lecture** — one line to load it:
+**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — one line to load it:
 
 ```python
 import qmib
-data = qmib.load("core")
+data = qmib.load("jst")
 ```
 
 See [`data/README.md`](data/README.md) and your group's

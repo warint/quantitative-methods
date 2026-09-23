@@ -91,7 +91,7 @@ what is absent — that nothing else in the model measures it.
 The corresponding equation for indicator $j$ of construct $\xi$ is
 
 $$
-x_j \;=\; \lambda_j \xi + \delta_j ,
+x_j \thickspace=\thickspace \lambda_j \xi + \delta_j ,
 $$
 
 with $\lambda_j$ the loading and $\delta_j$ everything specific to that
@@ -117,7 +117,7 @@ possible to the observed $S$. The discrepancy is what all the fit statistics
 measure, and the $\chi^2$ test is a formal test of
 
 $$
-H_0: \; \Sigma = \Sigma(\theta) ,
+H_0: \thickspace \Sigma = \Sigma(\theta) ,
 $$
 
 that is, of *exact* fit. Its degrees of freedom are the number of distinct
@@ -252,6 +252,84 @@ the constructs replaces what would otherwise be sixteen arrows between
 indicators, which is the economy the latent-variable approach buys — and the
 $\zeta$ is the honest part, standing for everything about *experience* that
 *value* does not account for.
+
+## What the estimator assumes
+
+Nothing above said how $\theta$ is chosen. The default, in `semopy` as in
+`lavaan`, is **maximum likelihood**, and the likelihood it maximises is the
+multivariate normal one. That assumption is not decoration: the $\chi^2$
+statistic and every standard error in the output are derived from it.
+
+When the data are not multivariate normal — and survey items with floor or
+ceiling effects rarely are — the failure runs in one direction, which is what
+makes it dangerous. The $\chi^2$ statistic is inflated, so a model that fits is
+rejected. The standard errors are too small, so paths look more significant than
+they are. Non-normality does not make you cautious. It makes you confident.
+
+The assumption is checked at two levels, and the second is not implied by the
+first. Univariately, a Shapiro–Wilk test on each indicator. Multivariately —
+which is the assumption actually being made — Mardia's measures of skewness and
+kurtosis, built from the Mahalanobis cross-products
+$d_{ij} = (x_i - \bar x)^\top S^{-1} (x_j - \bar x)$:
+
+$$
+b_1 = \frac{1}{n^2}\sum_i \sum_j d_{ij}^3 ,
+\qquad
+b_2 = \frac{1}{n}\sum_i d_{ii}^2 .
+$$
+
+Under multivariate normality $\tfrac{n}{6} b_1$ is $\chi^2$ with
+$k(k+1)(k+2)/6$ degrees of freedom, and $b_2$ has mean $k(k+2)$ — every
+indicator can pass Shapiro–Wilk while the joint distribution fails both.
+
+```{python}
+#| label: check-mardia
+#| code-summary: "Run it: Mardia's test on the indicators fitted above"
+
+from scipy import stats
+
+indicators = ["price", "resale_value", "maintenance", "fuel_efficiency",
+              "safety", "space_comfort", "technology", "after_sales_service"]
+X = survey[indicators].to_numpy(float)
+n, k = X.shape
+
+# The cross-product matrix. Its diagonal holds each row's squared Mahalanobis
+# distance from the centroid; the off-diagonal entries are what make b1 a
+# measure of *joint* skewness rather than eight separate ones.
+Xc = X - X.mean(0)
+D = Xc @ np.linalg.inv(np.cov(X, rowvar=False, bias=True)) @ Xc.T
+
+b1 = (D ** 3).sum() / n ** 2          # sum over every pair i, j
+b2 = (np.diag(D) ** 2).sum() / n      # diagonal only — the squared distances
+
+chi2, df = n * b1 / 6, k * (k + 1) * (k + 2) // 6
+z = (b2 - k * (k + 2)) / np.sqrt(8 * k * (k + 2) / n)
+
+print(f"n = {n}, k = {k} indicators\n")
+print(f"skewness  b1 = {b1:6.3f}   chi2 = {chi2:6.1f}  df = {df}"
+      f"   p = {stats.chi2.sf(chi2, df):.4f}")
+print(f"kurtosis  b2 = {b2:6.2f}   expected {k * (k + 2)}"
+      f"          z = {z:5.2f}   p = {2 * stats.norm.sf(abs(z)):.4f}")
+```
+
+Which is the uncomfortable part. The measurement model fitted earlier in this
+chapter was estimated by maximum likelihood on data whose joint skewness rejects
+normality at $p < 0.001$, with kurtosis borderline. Everything the next section
+says about its fit is therefore computed from a statistic the data do not quite
+license — and this is the normal situation with survey data, not a contrived
+one.
+
+The answer is not to abandon the model but to change the estimator. **Robust
+maximum likelihood** — `MLR`, resting on the Satorra–Bentler scaled $\chi^2$ —
+keeps the ML point estimates unchanged and rescales the test statistic and the
+standard errors by the non-normality actually observed. The paths do not move;
+the claims made about them get weaker, which is the correction being asked for.
+For ordinal indicators, **WLSMV** goes further and treats a five-point item as a
+coarsened continuous variable rather than pretending its categories are numbers.
+
+So report the estimator alongside the fit. `ML` and `MLR` on one model return
+the same coefficients and different $p$-values, and on data like these only one
+of the two is defensible.
 
 ## The fit indices, and what each would have to be
 
