@@ -59,11 +59,9 @@ loans = qmib.load("loans")
 4. Let's use another example
 5. Inference and goodness of fit
 6. Let's see another example
-7. Comparing logistic models
-8. Model selection
-9. Ordinal logistic regression
-10. Multinomial logistic regression
-11. Conclusion
+7. Ordinal logistic regression
+8. Multinomial logistic regression
+9. Conclusion
 
 ## What session 4 is for {.scrollable}
 ::::: columns
@@ -822,227 +820,6 @@ The pseudo-R2 can be computed for multiple logistic regression in the same way a
 This suggests that a moderate amount of variability in the binary response can be explained by the physio-chemical predictors.
 ::::::::::::::::::::::::::::::::::::::
 
-## Comparing logistic models {#imported-s04-021 .center .scrollable}
-
-## Comparing logistic models {#imported-s04-022 .scrollable}
-
-:::::::::::::::::::::::: panel-tabset
-### Comparison 1
-
-Recall that the simple logistic regression model used to model Y, a Bernoulli variable with probability of success [\\(\\pi\\)]{.math .inline} is given by:
-
-[\\\[ \\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1 x_1 + \\beta_2 x_2 + \... + \\beta_p x_p)}} \\\]]{.math .display}
-
-The estimates for the model then become:
-
-[\\\[ p = P(Y=1) = \\frac{1}{1+e\^{-(b_0+ b_1 x_1 + b_2 x_2 + \... + b_p x_p)}} \\\]]{.math .display}
-
-### Comparison 2
-
-Residuals in logistic regression:
-
--   Residuals in logistic regression can then be calculated just like in linear regression:
-
-[\\\[e = y - p\\\]]{.math .display}
-
-Here, [\\(p\\)]{.math .inline} is the estimated probability of the response taking on the value 1, and [\\(Y\\)]{.math .inline} is either 0 or 1.
-
-This results in the estimated residuals, [\\(e\\)]{.math .inline}, only being able to take on two values for any predicted value.
-
-### Comparison 3
-
-::::::::: columns
-::::: {.column style="width:50%;"}
-Let us use our *loans* dataset.
-
-:::::
-
-::::: {.column style="width:50%;"}
-Below is the residual scatter plot for the logistic model predicting loan default from FICO score:
-
-The pattern emerges because of the discreteness in the binary response.
-
-:::: cell
-<div>
-
-<figure>
-<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-36-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::::
-
-### Comparison 4
-
-::::::::: columns
-::::: {.column style="width:50%;"}
-Because of this pattern (based on the response being binary), performing model diagnostics in logistic regression is not easy.
-
-Using logistic regression as a predictive model is still valid.
-
-```{python}
-#| echo: true
-
-import matplotlib.pyplot as plt
-
-# Predict across the whole FICO range rather than only where data sit, so the
-# S-shape is visible instead of implied.
-grid = pd.DataFrame({"fico": range(550, 901)})
-
-# alpha=0.2 because 9,578 points at exactly 0 and 1 would otherwise be two
-# solid bars, hiding where the mass actually is.
-plt.scatter(loans["fico"], loans["default"], s=4, alpha=0.2)
-plt.plot(grid["fico"], m2.predict(grid), color="blue", lw=3)
-plt.xlabel("FICO"); plt.ylabel("P(default)")
-plt.show()
-```
-:::::
-
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
-
-<figure>
-<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-38-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::::
-
-### Comparison 5
-
-Comparing logistic models is similar to the approach we took with linear regression.
-
--   If two models are nested, a formal significance test, the chi-squared test [\\(\\chi\^2\\)]{.math .inline}, can be performed.
-
--   If two models are not nested, then Akaike Information Criterion (AIC) can be compared.
-
-> Backward stepwise regression (using AIC) can be used to select a best predictive model.
-
-### Comparison 6
-
-We've seen that FICO score is predictive of whether a borrower defaults on a loan.
-
-> Can we improve our model by using the purpose of the loan as an additional predictor?
-
-The variable 'purpose' has 7 categories, so R will create 6 binary predictors to define it in a logistic regression model.
-
--   To determine if it is important, a single test for one coefficient is not possible since there are six of them, so we need a different approach.
-
-#### Chi-squared test {#chi-squared-test .unnumbered}
-
-Formally the hypotheses being tested in a chi-squared test in logistic regression are:
-
--   [\\(H_0\\)]{.math .inline}: the [\\(\\beta\\)]{.math .inline}s associated with the extra variables are all zero
-
--   [\\(H_1\\)]{.math .inline}: at least one of the extra [\\(\\beta\\)]{.math .inline}s is not zero.
-
-> A large chi-squared statistic is in favor of the alternative hypothesis.
-
--   If the [\\(p-value\\)]{.math .inline} is small, then there is evidence to suggest that the extra variables are important.
-
--   The chi-squared test in logistic regression is the analog to the F-test in linear regression.
-
-#### Chi-squared test {#chi-squared-test-1 .unnumbered}
-
-Comparing two models to predict defaulted loans in R:
-
-```{python}
-#| echo: true
-
-# Two nested models: m3 is m2 plus the loan purpose. C() tells the formula that
-# purpose is categorical, so it becomes a set of indicator columns rather than
-# being read as a number — the most common silent error in formula syntax.
-m2 = smf.logit("default ~ fico", data=loans).fit()
-m3 = smf.logit("default ~ fico + C(purpose)", data=loans).fit()
-```
-
-```{python}
-#| echo: true
-
-from scipy import stats
-
-# Likelihood-ratio test: does purpose earn its extra parameters?
-lr = 2 * (m3.llf - m2.llf)
-df = int(m3.df_model - m2.df_model)
-print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
-```
-
-### Comparison 7
-
-
-The chi-squared test has a very small p-value (certainly less than 0.0001).
-
-> We can conclude that the purpose for their loan is an important predictor (beyond just FICO score).
-::::::::::::::::::::::::
-
-## Model selection {#imported-s04-023 .center .scrollable}
-
-## Model selection {#imported-s04-024 .scrollable}
-
-::::::::::::: panel-tabset
-### Stepwise 1
-
-Stepwise model selection can be used in logistic regression (just like in linear regression) using AIC as the criterion to choose the best predictive model.
-
-The algorithm is the same. For backwards selection:
-
--   Start with the 'full' model
-
--   Remove the variable that would result in an model that improves AIC the most
-
--   Continue removing variables, one at a time, until AIC cannot be improved (smallest AIC).
-
-### Stepwise 2
-
-To predict whether a borrower defaults on a loan, let's start with a 'full model' that uses the following predictors:
-
--   FICO score
-
--   Debt to income ratio (dti)
-
--   Annual income (on the log scale)
-
--   Interest rate
-
--   Purpose (7 categories: credit card, educational, etc.)
-
-### Stepwise 3
-
-```{python}
-#| echo: true
-
-# Compare candidate models on AIC rather than running an automatic search:
-# it is clearer what you chose, and why.
-candidates = [
-    "default ~ fico",
-    "default ~ fico + int_rate",
-    "default ~ fico + int_rate + log_annual_inc + dti",
-]
-for formula in candidates:
-    m = smf.logit(formula, data=loans).fit(disp=0)
-    print(f"AIC {m.aic:9.1f}   {formula}")
-```
-
-### Stepwise 4
-
-AIC was calculated to be 8067.1.
-
-Looks like 'dti' is unimportant. Let's see what gets removed after performing a backward stepwise approach
-
-### Stepwise 5
-
-Removing 'dti' improved the AIC slightly (8067.1 to 8066.99).
-
-We stop after dropping 'dti' because all other models with one fewer predictor have higher AIC.
-
-Notice: 'purpose', with its six binary variables, is either entirely included or not included at all.
-:::::::::::::
-
 ## Ordinal logistic regression {#imported-s04-025 .center .scrollable}
 
 ## Ordinal logistic regression {#imported-s04-026 .scrollable}
@@ -1368,7 +1145,11 @@ Say "relative to academic" every time. Nothing here compares general with vocati
 
 ### MLR 7
 
-**Does SES matter at all?** SES has four coefficients — two indicators in two equations — so no single z-test answers that. Use the likelihood-ratio test from earlier in the session:
+**Does SES matter at all?** SES has four coefficients — two indicators in two equations — so no single z-test answers that. Use a **likelihood-ratio test**: fit the model with and without SES, and compare their maximised log-likelihoods.
+
+$$LR = 2\,(\ell_{\text{full}} - \ell_{\text{restricted}}) \sim \chi^2_{q}$$
+
+where $q$ is the number of coefficients dropped — here four. A large $LR$ means the dropped coefficients were doing work. It is the logistic analogue of the $F$-test for nested linear models.
 
 ```{python}
 #| echo: true
@@ -1454,7 +1235,7 @@ out.round(3)
 
 -   Model fit can be evaluated using measures such as McFadden's pseudo-R².
 
--   Competing models can be compared via χ² tests for nested models and AIC for non-nested models, with stepwise procedures as an option.
+-   A set of coefficients, such as all the levels of one categorical predictor, is tested jointly with a likelihood-ratio (χ²) test.
 
 -   Applications to credit risk and wine quality illustrated the interpretive and practical uses of logistic regression.
 
@@ -1466,7 +1247,7 @@ out.round(3)
 
 1.  Logistic regression provides a robust framework for modeling binary and categorical outcomes, ensuring probabilities are always between 0 and 1.
 
-2.  Inference and model fit rely on likelihood-based methods (Wald tests, χ² tests, AIC, pseudo-R²), rather than variance decomposition.
+2.  Inference and model fit rely on likelihood-based methods (Wald tests, likelihood-ratio χ² tests, pseudo-R²), rather than variance decomposition.
 
 3.  Extensions to ordinal and multinomial logit models allow richer analysis of categorical responses in applied business research.
 
