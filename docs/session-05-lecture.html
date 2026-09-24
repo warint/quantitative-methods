@@ -442,7 +442,6 @@
   <meta name="generator" content="quarto-1.7.31">
 
   <meta name="author" content="Thierry Warin">
-  <meta name="dcterms.date" content="2026-09-24">
   <title>Regularisation: Ridge, Lasso, and the Elastic Net</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1067,7 +1066,6 @@ Thierry Warin
     </div>
 </div>
 
-  <p class="date">24 September 2026</p>
 </section>
 <section class="slide level2">
 
@@ -1189,7 +1187,7 @@ Thierry Warin
 </div>
 </div>
 <div id="tabset-2-2">
-<div id="4c3696d7" class="cell" data-execution_count="2">
+<div id="791e2986" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a>raw <span class="op">=</span> pd.read_parquet(<span class="st">&quot;../../data/spine/angle_c_country.parquet&quot;</span>)</span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a>YCOL  <span class="op">=</span> <span class="st">&quot;rd_pct_gdp&quot;</span>                           <span class="co"># what we are trying to explain</span></span>
@@ -1221,7 +1219,7 @@ Thierry Warin
 <div id="tabset-3-1">
 <p>Twenty-nine candidates, thirty-seven rows. The mechanical response is to let the data choose: start from nothing, add whichever variable improves the fit most, stop when none does.</p>
 <p>That is <strong>forward stepwise selection</strong>, the standard answer for decades and still the default in a great deal of applied software. It is worth watching it fail carefully, because everything after this slide is a response to the way it fails.</p>
-<div id="28ff4851" class="cell" data-execution_count="3">
+<div id="6ea6a813" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
 <span id="cb3-2"><a href></a></span>
 <span id="cb3-3"><a href></a><span class="kw">def</span> forward_aic(X, y):</span>
@@ -1237,7 +1235,7 @@ Thierry Warin
 </div>
 </div>
 <div id="tabset-3-2">
-<div id="be176f01" class="cell" data-execution_count="4">
+<div id="2f6c8e05" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># Ground truth, from scripts/build_spine/make_fixtures.py: of the fifteen aux_</span></span>
 <span id="cb4-2"><a href></a><span class="co"># columns, every third carries a weak signal and the other ten are pure noise.</span></span>
 <span id="cb4-3"><a href></a><span class="co"># No real dataset tells you this; the fixture was built so that it can.</span></span>
@@ -1261,7 +1259,7 @@ Thierry Warin
 </section>
 <section id="now-run-it-again-on-a-resample" class="slide level2">
 <h2>Now run it again on a resample</h2>
-<div id="d500ec75" class="cell" data-execution_count="5">
+<div id="e1f5f44f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb6-2"><a href></a></span>
 <span id="cb6-3"><a href></a>rng, B, counts <span class="op">=</span> np.random.default_rng(<span class="dv">60033</span>), <span class="dv">100</span>, Counter()</span>
@@ -1295,7 +1293,7 @@ selected at least once: 29 of 29</code></pre>
 <ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">The code</a></li><li><a href="#tabset-4-2">The result</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1">
-<div id="48730845" class="cell" data-execution_count="6">
+<div id="8ecf6f24" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="kw">def</span> test_rmse(model):</span>
 <span id="cb8-2"><a href></a>    <span class="co">&quot;&quot;&quot;Fit on the training split, score on the untouched 30%.&quot;&quot;&quot;</span></span>
 <span id="cb8-3"><a href></a>    model.fit(Xtr, ytr)                        <span class="co"># the model never sees Xte here</span></span>
@@ -1326,7 +1324,7 @@ selected at least once: 29 of 29</code></pre>
 </div>
 </div>
 <div id="tabset-4-2">
-<div id="c38f4374" class="cell" data-execution_count="7">
+<div id="d8a3cda1" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1392,7 +1390,7 @@ selected at least once: 29 of 29</code></pre>
 </section>
 <section id="ridge-in-three-lines" class="slide level2">
 <h2>Ridge in three lines</h2>
-<div id="edd7e01b" class="cell" data-execution_count="9">
+<div id="5637857c" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a><span class="co"># A pipeline, not three separate steps, because the scaler must be fitted on</span></span>
 <span id="cb9-2"><a href></a><span class="co"># the training rows only. Fit it on everything and the test set has leaked into</span></span>
 <span id="cb9-3"><a href></a><span class="co"># the training procedure, and the honest 30% you held out is no longer honest.</span></span>
@@ -1439,7 +1437,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 <ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-5-1">The picture</a></li><li><a href="#tabset-5-2">Corners produce zeros</a></li></ul>
 <div class="tab-content">
 <div id="tabset-5-1">
-<div id="bb0881b7" class="cell" data-execution_count="10">
+<div id="aba9a95b" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1491,7 +1489,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </div>
 </div>
 <div id="tabset-6-3">
-<div id="ce5b9e4a" class="cell" data-execution_count="11">
+<div id="e6560e0c" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1554,7 +1552,7 @@ largest |coef|:  OLS 0.396   ridge 0.055</code></pre>
 </section>
 <section id="what-survived-on-our-data" class="slide level2">
 <h2>What survived, on our data</h2>
-<div id="a8a8566a" class="cell" data-execution_count="13">
+<div id="c595c5a2" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># LassoCV does two things at once: it fits the whole path of lambdas, and it</span></span>
 <span id="cb11-2"><a href></a><span class="co"># uses 5-fold cross-validation to choose which one to keep. Ztr, not Xtr — the</span></span>
 <span id="cb11-3"><a href></a><span class="co"># penalty is on coefficient size, so the columns must be on a common scale.</span></span>
@@ -1604,7 +1602,7 @@ auxiliary series kept: 0 of 15</code></pre>
 <section id="limitation-2-is-not-academic" class="slide level2">
 <h2>Limitation 2 is not academic</h2>
 <p>Our five AI-adoption columns are all measuring roughly the same thing:</p>
-<div id="90d77bf5" class="cell" data-execution_count="14">
+<div id="06aaef60" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Five columns that are all, in substance, &quot;how much AI does this country use&quot;.</span></span>
 <span id="cb13-2"><a href></a>GRP <span class="op">=</span> [<span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;ai_use_ml&quot;</span>, <span class="st">&quot;ai_use_ge3&quot;</span>, <span class="st">&quot;ai_text_mining&quot;</span>, <span class="st">&quot;ai_image_reco&quot;</span>]</span>
 <span id="cb13-3"><a href></a></span>
@@ -1732,7 +1730,7 @@ auxiliary series kept: 0 of 15</code></pre>
 </div>
 </div>
 <div id="tabset-8-2">
-<div id="ee955fc6" class="cell" data-execution_count="16">
+<div id="228cf278" class="cell" data-execution_count="16">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
