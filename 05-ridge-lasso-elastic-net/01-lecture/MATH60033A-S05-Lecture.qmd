@@ -62,7 +62,7 @@ Z = StandardScaler().fit_transform(X)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Where we are, and the opening claim that turns out to be wrong
+1. The opening claim that turns out to be wrong
 2. A situation you will meet — more candidate predictors than countries
 3. Stepwise selection, and why its choices do not survive a resample
 4. Ridge, and what it does to the SVD spectrum
@@ -125,28 +125,14 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-# {background-color="#16181A" style="color:#F7F6F3"}
-
-::: {style="margin-top: 1.2em"}
-### When is a deliberately biased estimator the better one? {style="color:#F7F6F3"}
-:::
-
 # 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
 
-## Where we are
-
-| Session | What it gave you |
-|---|---|
-| **02** | The least-squares fit, and the geometry that produces it |
-| **03** | An honest interval, and the diagnostics that decide which one |
-| **04** | A number for out-of-sample error, and how to get it honestly |
-
-::: {.check}
-Session 04 gave you a **measuring instrument**. It did not give you a way to *improve* the number
-it measures. Today is the first session that does.
-:::
-
 ## The opening claim, and why it is wrong
+
+::::: panel-tabset
+### The claim
+
+**When is a deliberately biased estimator the better one?**
 
 > OLS is the **best linear unbiased** estimator.
 
@@ -162,7 +148,7 @@ Nobody asked whether $\text{bias} = 0$ was the right constraint. Accept a little
 reduction in variance, and total error falls. That trade is what regularisation is.
 :::
 
-## What today adds, in one line
+### What today adds
 
 ::: {.tight}
 - A **dial** — $\lambda$ — that moves you along the bias–variance curve of Session 04 *on purpose*
@@ -175,9 +161,14 @@ Sessions 06 through 11 all reuse this dial. Penalised logistic regression, tree 
 principal components, the number of clusters — every one of them is a $\lambda$ under another name.
 :::
 
+:::::
+
 # 2 · The problem, on real data {background-color="#16181A" style="color:#F7F6F3"}
 
 ## A situation you will actually meet
+
+::::: panel-tabset
+### The data
 
 We want to explain **R&D intensity** (R&D as % of GDP) across European countries from digital and
 AI-adoption indicators.
@@ -193,7 +184,7 @@ This is the ordinary condition of applied macro work: a wide table, a short usab
 prior about which columns matter.
 :::
 
-## What complete-case analysis leaves you
+### What survives complete-case
 
 ```{python}
 #| echo: true
@@ -216,7 +207,12 @@ $n = 37$, $p = 29$. With an intercept, **seven** residual degrees of freedom. Th
 exotic case — it is what happens every time a new survey wave meets an old panel.
 :::
 
-## The obvious thing to try first
+:::::
+
+## The obvious thing to try first: stepwise
+
+::::: panel-tabset
+### The search
 
 Twenty-nine candidates, thirty-seven rows. The mechanical response is to let the data choose: start
 from nothing, add whichever variable improves the fit most, stop when none does.
@@ -241,7 +237,7 @@ def forward_aic(X, y):
     return chosen
 ```
 
-## It keeps fifteen, and three of them are noise
+### What it keeps
 
 ```{python}
 #| echo: true
@@ -260,6 +256,8 @@ print(f"   pure noise among them: {sorted(c for c in selected if c in noise)}")
 Three false positives out of fifteen might be dismissed as bad luck. The next slide is the part
 that cannot be.
 :::
+
+:::::
 
 ## Now run it again on a resample
 
@@ -288,30 +286,10 @@ last. A hair's difference at step three changes the whole path. So stop making i
 and shrink coefficients **continuously** instead. That is the rest of this session.
 :::
 
-## Why OLS cannot cope here
-
-```{python}
-#| echo: true
-# The condition number is the ratio of the largest singular value to the
-# smallest: how much a small wobble in the data can be amplified in the
-# coefficients. Under about 30 is comfortable; 1e3 and above means the design
-# is nearly collinear and OLS coefficients are being solved out of noise.
-print(f"condition number of the standardised design: {np.linalg.cond(Ztr):.1e}")
-```
-
-::: {.tight}
-- Session 02: $\kappa(X)$ near $10^{16}$ means the design is **numerically singular**
-- Session 03: the variance of $\hat\beta_j$ is $\sigma^2 / [(1-R_j^2)\,\mathrm{SS}_j]$ — and
-  $R_j^2 \to 1$ here
-- So the coefficients exist, but they are noise amplified
-:::
-
-::: {.check}
-The diagnostic you learned in Session 03 does not just warn you. It tells you **which tool to reach
-for next**.
-:::
-
 ## Four estimators, one held-out test set
+
+::::: panel-tabset
+### The code
 
 ```{python}
 #| echo: true
@@ -346,7 +324,7 @@ scores = {
 test-fold information leaks into the standardisation. Session 04, leakage #1.
 :::
 
-## The result
+### The result
 
 ```{python}
 fig, ax = plt.subplots(figsize=(7.2, 3.1))
@@ -367,8 +345,6 @@ plt.show()
 OLS beats *predicting the mean* by 9%. Ridge beats it by 57%.
 :::
 
-## Read that again
-
 ::: {.tight}
 - With 29 predictors and 37 rows, **OLS is worth almost nothing** — it is fitting noise
 - The penalised fits cut the error by **more than half**, using the *same* columns
@@ -379,6 +355,8 @@ OLS beats *predicting the mean* by 9%. Ridge beats it by 57%.
 This is the entire argument for regularisation, and it took four lines of code to make. The rest of
 the session is about *why* it works and *how* to set the dial.
 :::
+
+:::::
 
 # 3 · Ridge {background-color="#16181A" style="color:#F7F6F3"}
 
@@ -416,6 +394,10 @@ $p$. There are only $r$ directions in which the data vary at all.
 ::: {.step}
 So ridge does not scale coefficients down uniformly. It multiplies the $j$-th principal direction of
 the design by a factor that depends on **how much the data vary in that direction**.
+:::
+
+::: {.check}
+Directions where the data **vary a lot** carry real information — ridge leaves them alone. Directions where the data are **nearly collinear** are where OLS goes insane — ridge crushes them. Ridge is a **targeted damping** of exactly the directions in which your data carry least information.
 :::
 
 ## The shrinkage factor, drawn
@@ -456,27 +438,7 @@ Right: on our actual design, effective df slides smoothly from 24 — the rank, 
 columns — down toward 0.
 :::
 
-## Why that shape is the whole point
-
-::: {.step}
-Directions where the data **vary a lot** carry real information — ridge leaves them alone.
-Directions where the data are **nearly collinear** are where OLS goes insane — ridge crushes them.
-:::
-
-$$\mathrm{df}(\lambda) = \sum_{j=1}^{r} \frac{d_j^2}{d_j^2+\lambda}
-\quad\text{falls smoothly from } r = \mathrm{rank}(X) \text{ to } 0$$
-
-::: {.muted}
-Not from $p$. When $p > n$ the design has at most $n$ independent directions, so effective df is
-capped at $\mathrm{rank}(X)$ however small you make $\lambda$ — 24 here, never 29.
-:::
-
-::: {.check}
-Ridge is a **targeted damping of exactly the directions in which your data carry least information**.
-It is not a blunt instrument, and describing it as "shrinking the coefficients" undersells it.
-:::
-
-## Ridge in three lines, explained
+## Ridge in three lines
 
 ```{python}
 #| echo: true
@@ -498,17 +460,8 @@ Line 1 is not optional. A penalty on $\|\beta\|_2^2$ punishes a coefficient meas
 differently from one measured in thousands of euros. **Standardise, or the penalty is arbitrary.**
 :::
 
-## Bias–variance, explicitly
-
-::: {.tight}
-- $\mathrm{Var}(\hat\beta^{\text{ridge}})$ is **decreasing** in $\lambda$
-- $\text{Bias}^2$ is **increasing** in $\lambda$
-- There always exists some $\lambda > 0$ whose MSE is **strictly lower** than OLS
-:::
-
 ::: {.check}
-That last line is Hoerl and Kennard, 1970, and it genuinely surprised the profession. It should
-change how you hear the phrase "best unbiased estimator" for the rest of your career.
+Variance falls with $\lambda$, bias rises, and some $\lambda > 0$ always has **strictly lower** MSE than OLS (Hoerl and Kennard, 1970). "Best unbiased" is not "best".
 :::
 
 # 4 · Lasso {background-color="#16181A" style="color:#F7F6F3"}
@@ -531,6 +484,9 @@ $\|\beta\|_1 \le t$.
 :::
 
 ## The picture that explains the zeros
+
+::::: panel-tabset
+### The picture
 
 ```{python}
 fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.15))
@@ -585,7 +541,7 @@ Grey ellipses: contours of equal RSS, expanding from the OLS solution. Shaded re
 budget $t$ allows. The estimate is where they first touch.
 :::
 
-## Corners produce zeros
+### Corners produce zeros
 
 ::: {.step}
 The $\ell_1$ region is a **diamond**: it has corners, and every corner sits **on an axis**, where one
@@ -603,7 +559,12 @@ coordinates exactly zero, and a whole lattice of lower-dimensional edges and fac
 coordinates are still zero. Sparsity is not a trick — it is the **shape of the constraint**.
 :::
 
-## Where the zeros come from, algebraically
+:::::
+
+## Soft-thresholding
+
+::::: panel-tabset
+### Where the zeros come from
 
 Hold every $\beta_k$, $k \neq j$, fixed. With standardised columns the univariate problem is
 
@@ -618,7 +579,7 @@ an inner product with the partial residual, not a correlation coefficient bounde
 Convex, but not differentiable at $0$. The subgradient of $|\beta_j|$ there is the whole interval
 $[-1, 1]$ — which is exactly what allows a *flat spot* at zero.
 
-## Soft-thresholding
+### The operator
 
 $$\hat\beta_j = S_\lambda(\rho_j) = \mathrm{sign}(\rho_j)\big(|\rho_j| - \lambda\big)_+$$
 
@@ -632,7 +593,7 @@ Cycling this update over $j$ until convergence is *coordinate descent*. It is wh
 fits a 200-predictor lasso path faster than you can type the command.
 :::
 
-## The operator, drawn
+### Drawn
 
 ```{python}
 rho = np.linspace(-1.0, 1.0, 400)
@@ -662,6 +623,8 @@ plt.show()
 Ridge (dash-dot) passes through the origin with a shallower slope — it approaches zero but reaches it
 only when $\lambda = \infty$. The lasso (solid) has a flat interval **at** zero.
 :::
+
+:::::
 
 ## Do it by hand, once
 
@@ -792,6 +755,15 @@ Strict convexity for any $\alpha < 1$ is what buys the **grouping effect**: two 
 receive **identical** coefficients, where the lasso had to pick.
 :::
 
+The coordinate update is soft-threshold, **then divide**:
+
+$$\hat\beta_j = \frac{S_{\lambda\alpha}(\rho_j)}{1 + \lambda(1-\alpha)}$$
+
+::: {.check}
+Same worked example, $\lambda = 0.2$, $\alpha = 0.5$: threshold at $0.10$, divide by $1.10$ →
+$(0.291,\, -0.073,\, 0,\, 0.191)$. **Three survive instead of two.**
+:::
+
 ## The grouping effect, measured
 
 ```{python}
@@ -825,24 +797,16 @@ Same data, same $\lambda$, 300 resamples. The lasso keeps the group leader and d
 neighbours; the elastic net admits them.
 :::
 
-## Why this matters for a paper
-
 ::: {.step}
 For a macro panel where a dozen series measure one construct, this is the difference between a model
 that says *"AI adoption matters"* and one that says *"industrial production of durable goods
 excluding motor vehicles, specifically."*
 :::
 
-The coordinate update is soft-threshold, **then divide**:
-
-$$\hat\beta_j = \frac{S_{\lambda\alpha}(\rho_j)}{1 + \lambda(1-\alpha)}$$
-
-::: {.check}
-Same worked example, $\lambda = 0.2$, $\alpha = 0.5$: threshold at $0.10$, divide by $1.10$ →
-$(0.291,\, -0.073,\, 0,\, 0.191)$. **Three survive instead of two.**
-:::
-
 ## Watch the two penalties, side by side {#playground}
+
+::::: panel-tabset
+### The set-up
 
 Everything in this section can be watched happening. **[The TensorFlow
 Playground](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=None&regularizationRate=0)** with the hidden layers removed is not a neural network at
@@ -860,7 +824,7 @@ So the question is the one this whole session asks: **which does the penalty
 keep?**
 :::
 
-## Run it three times
+### Run it three times
 
 ::: {.step}
 **[No penalty](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&noise=0&networkShape=&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&initZero=false&hideText=false&regularization=None&regularizationRate=0)** — all seven connections stay, at some weight. Nothing
@@ -885,7 +849,7 @@ squares, everything else exactly zero — while **L2 keeps 7 of 7**, its largest
 weights on the same two.
 :::
 
-## The elastic net is the dial between them
+### The dial between them
 
 The playground offers L1 or L2. It does not offer the mixture — which is the gap
 this section exists to fill.
@@ -906,9 +870,14 @@ Four minutes here makes the coefficient path concrete: you have now *seen* the
 thing that path is a plot of.
 :::
 
+:::::
+
 # 6 · Choosing $\lambda$ {background-color="#16181A" style="color:#F7F6F3"}
 
-## The path, and where it starts
+## The CV curve
+
+::::: panel-tabset
+### The path
 
 Fit over a **decreasing** grid from
 
@@ -922,7 +891,7 @@ Then cross-validate **jointly** over $(\alpha, \lambda)$. Not sequentially: the 
 depends on $\alpha$.
 :::
 
-## The CV curve
+### The curve
 
 ```{python}
 folds = KFold(n_splits=5, shuffle=True, random_state=0)
@@ -954,7 +923,7 @@ Dotted line: one standard error above the minimum. Everything below it is statis
 indistinguishable from the best.
 :::
 
-## Two conventions, and when to use which
+### Two conventions
 
 | | definition | use it when |
 |---|---|---|
@@ -965,6 +934,8 @@ indistinguishable from the best.
 $\lambda_{1se}$ costs you nothing detectable in accuracy and buys a much smaller model. Prefer it
 whenever a human has to read the coefficient table — which, in this course, is always.
 :::
+
+:::::
 
 ## The warning that ends the session
 
@@ -981,9 +952,10 @@ anti-conservative.
 - Honest post-selection inference needs the debiasing machinery of **Session 10**
 :::
 
-# 7 · Takeaways {background-color="#16181A" style="color:#F7F6F3"}
-
 ## Key takeaways
+
+::::: panel-tabset
+### Takeaways
 
 ::: {.tight}
 1. Leaving the unbiased class is a **choice with a payoff** — here, half the test error
@@ -994,7 +966,7 @@ anti-conservative.
 6. Post-selection inference is a different problem, and it is not solved by ignoring it
 :::
 
-## What loses marks
+### What loses marks
 
 ::: {.tight}
 - Penalising **unstandardised** predictors — the penalty is then in arbitrary units
@@ -1003,6 +975,8 @@ anti-conservative.
 - Reporting post-lasso $p$-values with no caveat
 - Choosing $\lambda$ on the test set, then reporting the test error
 :::
+
+:::::
 
 ## Now, the practice
 
