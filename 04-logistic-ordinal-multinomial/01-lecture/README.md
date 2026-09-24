@@ -82,7 +82,6 @@ If a package is missing, `pip install -r requirements.txt` from the repository r
 
 - Reporting log-odds as though they were probabilities
 - Interpreting an odds ratio as a relative risk
-- Comparing non-nested models with a likelihood-ratio test
 - Reporting accuracy on an imbalanced outcome with no base rate
 
 ---
