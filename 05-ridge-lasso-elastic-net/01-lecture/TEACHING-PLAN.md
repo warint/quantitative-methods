@@ -21,9 +21,9 @@ Write on the board: *"OLS is the best linear unbiased estimator."* Then: *"today
 | Minutes | |
 |---|---|
 | **0–06** | The hook and the Gauss–Markov callback. |
-| **06–32** | Ridge. Closed form, existence for $p > n$, then **the SVD reading**: $\hat y = \sum_j u_j \frac{d_j^2}{d_j^2+\lambda}u_j^\top y$. Make the point that ridge is *targeted*: it damps exactly the directions where the data carry least information. Effective df. |
+| **06–32** | Ridge, by picture: the two archers, the dial, then the wobbling-coefficients scatter — two correlated predictors, OLS spread along the diagonal, ridge tight. The closed form and the SVD reading are in chapter 5; point there rather than derive. |
 | **32–52** | Lasso. Draw the diamond and the ellipse. The corner argument. Then contrast with the smooth $\ell_2$ ball — no corners, no zeros. |
-| **52–70** | **Derive soft-thresholding** from the subgradient condition at zero. This is the derivation of the session; do it properly. Land on $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ and read it aloud in words. |
+| **52–70** | Soft-thresholding as a rule, not a derivation: the "how hard it pushes" picture, then the dead-zone plot, then $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ read aloud in words. Work the example by hand. The subgradient derivation is in chapter 5. |
 | **70–82** | Elastic net. Strict convexity, the grouping effect, why it matters for macro panels where a dozen series measure one construct. |
 | **82–90** | Choosing $\lambda$: the path, $\lambda_{\min}$ vs $\lambda_{1se}$, and the warning that post-selection standard errors are invalid. |
 
