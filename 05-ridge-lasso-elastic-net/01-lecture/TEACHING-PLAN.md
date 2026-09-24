@@ -25,7 +25,7 @@ Write on the board: *"OLS is the best linear unbiased estimator."* Then: *"today
 | **32–52** | Lasso. Draw the diamond and the ellipse. The corner argument. Then contrast with the smooth $\ell_2$ ball — no corners, no zeros. |
 | **52–70** | Soft-thresholding as a rule, not a derivation: the "how hard it pushes" picture, then the dead-zone plot, then $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ read aloud in words. Work the example by hand. The subgradient derivation is in chapter 5. |
 | **70–82** | Elastic net. Strict convexity, the grouping effect, why it matters for macro panels where a dozen series measure one construct. |
-| **82–90** | Choosing $\lambda$: the path, $\lambda_{\min}$ vs $\lambda_{1se}$, and the warning that post-selection standard errors are invalid. |
+| **82–90** | Setting $\lambda$: one slide, cross-validation does it and `LassoCV` is one line. Spend the time instead on the warning that post-selection $p$-values are invalid. |
 
 ---
 

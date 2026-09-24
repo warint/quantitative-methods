@@ -38,7 +38,7 @@ from sklearn.linear_model import (LinearRegression, Ridge, Lasso, ElasticNet,
                                   RidgeCV, LassoCV, ElasticNetCV, lasso_path)
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 raw = pd.read_parquet("../../data/spine/angle_c_country.parquet")
@@ -860,75 +860,33 @@ thing that path is a plot of.
 
 :::::
 
-# 6 · Choosing $\lambda$ {background-color="#16181A" style="color:#F7F6F3"}
+# 6 · Setting the dial {background-color="#16181A" style="color:#F7F6F3"}
 
-## Cross-validation, drawn {.scrollable}
+## Let the data set the dial {.scrollable}
 
 ```{python}
-fig, ax = plt.subplots(figsize=(7.6, 2.9))
-K = 5
-for r in range(K):
-    for c in range(K):
-        val = (c == r)
-        ax.add_patch(plt.Rectangle((c, K - 1 - r), .95, .8,
-                     color=CL.warn if val else CL.accent, alpha=.85 if val else .35))
-    ax.text(K + .15, K - 1 - r + .4, f"round {r + 1}: fit on blue, score on red",
-            va="center", fontsize=8.5)
-ax.text(2.5, K + .15, "the training rows, cut into 5 folds", ha="center", fontsize=9)
-ax.set_xlim(-.1, K + 3.2); ax.set_ylim(-.2, K + .5); ax.axis("off")
+lc = LassoCV(alphas=np.logspace(-3, 0.2, 60), cv=5, random_state=0, max_iter=50_000).fit(Z, y)
+cv_err = lc.mse_path_.mean(axis=1)
+fig, ax = plt.subplots(figsize=(7.2, 2.8))
+ax.semilogx(lc.alphas_, cv_err, color=CL.accent, lw=2.6)
+ax.axvline(lc.alpha_, color=CL.good, ls="--", lw=1.6)
+ax.text(lc.alpha_ * 1.15, cv_err.max() * .8, "the λ that predicts\nheld-out rows best",
+        color=CL.good, fontsize=9, fontweight="600")
+ax.set_xlabel("penalty λ  →"); ax.set_ylabel("error on held-out rows")
 plt.show()
 ```
 
-::: {.check}
-For **each** candidate $\lambda$: fit five times, each time holding one fold out, and average the five scores. Pick the $\lambda$ with the best average. The test set is never touched.
-:::
-
-## The CV curve, and which λ to report {.scrollable}
-
-::::: panel-tabset
-### The curve
+You do not pick $\lambda$ by hand. **Cross-validation** does it: hide a fifth of the training rows, fit on the rest, score on the hidden fifth; repeat for each fifth, for every candidate $\lambda$, and keep the one that predicts best. One line:
 
 ```{python}
-folds = KFold(n_splits=5, shuffle=True, random_state=0)
-grid2 = np.logspace(-3, 0.2, 60)
-lc = LassoCV(alphas=grid2, cv=folds, random_state=0, max_iter=50_000).fit(Z, y)
-mse = lc.mse_path_.mean(axis=1)
-se = lc.mse_path_.std(axis=1) / np.sqrt(lc.mse_path_.shape[1])
-i_min = int(np.argmin(mse))
-thresh = mse[i_min] + se[i_min]
-i_1se = int(np.min(np.where(mse <= thresh)[0]))   # alphas are descending: the first index is the largest lambda
-nzs = [(np.abs(Lasso(alpha=a, max_iter=50_000).fit(Z, y).coef_) > 1e-8).sum() for a in lc.alphas_]
-
-fig, ax = plt.subplots(figsize=(7.2, 3.0))
-ax.errorbar(lc.alphas_, mse, yerr=se, fmt="o", ms=3, lw=.9,
-            color=CL.accent, ecolor=CL.line, capsize=2)
-ax.set_xscale("log")
-for i, c, lab_, ha, f in [(i_min, CL.warn, "best λ", "right", 1 / 1.08),
-                          (i_1se, CL.good, "simplest λ\nwithin 1 SE", "left", 1.08)]:
-    ax.axvline(lc.alphas_[i], color=c, ls="--", lw=1.6)
-    ax.text(lc.alphas_[i] * f, mse.max() * .7, f"{lab_}\n{nzs[i]} predictors",
-            color=c, fontsize=8.5, fontweight="600", ha=ha)
-ax.axhline(thresh, color=CL.muted, ls=":", lw=1.2)
-ax.set_xlabel("penalty λ"); ax.set_ylabel("5-fold CV error")
-plt.show()
+#| echo: true
+#| eval: false
+LassoCV(cv=5).fit(Z, y).alpha_      # also RidgeCV, ElasticNetCV
 ```
 
 ::: {.muted}
-Dotted line: one standard error above the minimum. Every λ below it is statistically indistinguishable from the best.
+The practice also asks for the **simplest λ** — the largest one whose error is statistically indistinguishable from the best. It gives a smaller model at no visible cost in accuracy.
 :::
-
-### Two conventions
-
-| | what it is | use it when |
-|---|---|---|
-| **best λ** ($\lambda_{\min}$) | lowest CV error | prediction is the deliverable |
-| **simplest λ** ($\lambda_{1se}$) | **largest** λ within one SE of the best | the model must be explained |
-
-::: {.check}
-The simplest λ costs nothing detectable in accuracy and gives a much smaller model. Prefer it whenever a human has to read the coefficients — in this course, always.
-:::
-
-:::::
 
 ## The warning that ends the session {.scrollable}
 
@@ -1002,7 +960,7 @@ plt.show()
 2. Ridge shrinks every coefficient, most where predictors are tangled; it never selects
 3. The lasso's zeros come from its **corners**: weak evidence is set to exactly zero
 4. When predictors come in families, the elastic net keeps the family; the lasso keeps one member
-5. Choose $\lambda$ by cross-validation — the simplest λ within 1 SE when the model must be explained
+5. Let cross-validation set $\lambda$ — never the test set
 6. $p$-values after selection are not valid
 :::
 
