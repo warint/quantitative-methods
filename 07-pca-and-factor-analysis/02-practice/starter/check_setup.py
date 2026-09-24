@@ -15,12 +15,12 @@ import importlib
 import os
 import sys
 
-# Work from the repository root whichever way the script was started — the Run
-# button in VS Codium, or `python` from another folder.
-try:
-    ROOT = Path(__file__).resolve().parents[3]
-except NameError:            # lines sent one by one with Shift+Enter: the
-    ROOT = Path.cwd()        # terminal already starts in the repository root
+# Work from the repository root — the folder that holds qmib.py — wherever this
+# file is saved and however it is run (Run button, terminal, or Shift+Enter).
+starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
+ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
+if ROOT is None:
+    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
 
