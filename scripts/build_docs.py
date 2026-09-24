@@ -42,8 +42,8 @@ SESSIONS = {
            "Regularisation: shrinkage, sparsity and the grouping effect"),
     "06": ("Regression: Advanced Considerations",
            "Panel data, non-linearity, categorical variables and interactions"),
-    "07": ("Principal Component and Factor Analyses",
-           "Dimension reduction, and when to use which"),
+    "07": ("Replication Workshop",
+           "Five papers, one toolkit: three hours rebuilding published results, in autonomy"),
     "08": ("KNN and Friends",
            "The Bayes classifier, k-nearest neighbours and the bias–variance trade-off"),
     "09": ("Structural Equation Modelling",
@@ -55,6 +55,8 @@ SESSIONS = {
     "12": ("What the Twelve Weeks Were For",
            "The closing address: what the term established, why it matters in private "
            "and public organisations, and Europe 2031 read with the tools you now have"),
+    "13": ("One More Thing: PCA and Factor Analysis",
+           "After the course, for self-study: dimension reduction, and when to use which"),
 }
 
 STYLE = """

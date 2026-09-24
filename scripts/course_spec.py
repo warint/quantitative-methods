@@ -20,14 +20,17 @@ COHORT = "A2026"
 # route to participation marks. Live since September 2026; the course pages
 # said "the link is announced in class" until then.
 LAB_URL = "https://warin.ca/qmib-labs/"
-# One lab per session, sessions 02 to 11. Session 01 installs the workstation
-# and session 12 is the presentations, so neither has one.
-LAB_SESSIONS = tuple(f"{n:02d}" for n in range(2, 12))
+# One lab per taught session. Session 01 installs the workstation, session 07
+# is the replication workshop and session 12 is the presentations, so none of
+# them has one. The lab app numbers its labs by the original calendar, so the
+# PCA lab is still "07" although PCA is now taught in session 13.
+LAB_FILES = {f"{n:02d}": f"{n:02d}" for n in range(2, 12) if n != 7} | {"13": "07"}
+LAB_SESSIONS = tuple(sorted(LAB_FILES))
 
 
 def lab_url(num):
     """The lab for one session, or None where there is no lab."""
-    return f"{LAB_URL}qmib-lab-{num}.html" if num in LAB_SESSIONS else None
+    return f"{LAB_URL}qmib-lab-{LAB_FILES[num]}.html" if num in LAB_FILES else None
 
 # Harvard Dataverse puts a guestbook on some deposits, and a guestbook cannot
 # be answered from the terminal: the access API returns HTTP 400 whatever you
@@ -204,34 +207,32 @@ SESSIONS = {
         ],
     ),
     "07": dict(
-        dir="07-pca-and-factor-analysis",
-        title="Principal Component and Factor Analyses",
-        short="PCA and factor analysis",
-        question="How many independent things are actually being measured?",
-        methods="eigenvalues, loadings, scree plots, rotation, FAMD",
-        theme="How many distinct dimensions does your angle really have?",
+        dir="07-pca-and-factor-analysis",   # the path the book's chapter 7 is built from
+        title="Replication Workshop: Five Papers, One Toolkit",
+        short="Replication workshop",
+        question="Can you reproduce what the papers claim, with only what you have learned?",
+        methods="the readings of sessions 2–6, replicated in Python with the code seen in class",
+        theme="Which of the five published results survives your own replication?",
+        generated=False,          # a hand-written workshop, not a lecture-plus-practice
         objectives=[
-            "Explain why PCA requires **standardised** inputs, and what happens if you forget",
-            "Read a **scree plot** and defend the number of components you retained",
-            "Distinguish a **loading** from a **score**, and say what each is for",
-            "State the difference between **PCA** and **factor analysis**, and when each applies",
-            "Say why a factor is identified only **up to rotation**",
+            "State each paper's **research question**, and the result it rests on, in one sentence",
+            "Rebuild a published result from the authors' own files, with **only the Python seen in class**",
+            "Say how close the replication came, and **where** and **why** it differs",
+            "Re-read each result through the course's diagnostics — thresholds, residuals, odds ratios, penalties, fixed effects",
+            "Say what each published result does **not** license",
         ],
-        reading=("Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, "
-                 "Review of International Organizations 14(3)"),
-        reading_url="https://doi.org/10.1007/s11558-019-09344-2",
-        dataverse=None,           # the index itself is the data, published by KOF ETH Zurich
-        dataset="kof",
-        dataset_note=("the KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions "
-                      "each split into de facto and de jure"),
-        deliverable=("a dimension-reduction of your project's indicators: the scree plot, the "
-                     "number retained with its justification, the loadings interpreted, and a "
-                     "note on what you are *not* entitled to call the components"),
+        reading="the five readings of sessions 2–6, one per replication",
+        reading_url="https://github.com/warint/quantitative-methods/blob/main/REPLICATIONS.md",
+        dataverse=None,           # four packages already downloaded in sessions 2, 3, 4 and 6
+        dataset="fdi",            # the only one that needs no download
+        dataset_note="the four Dataverse packages of sessions 2, 3, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
+        deliverable=("a replication log: for each paper attempted, the published number, yours, "
+                     "the gap and its explanation, and one sentence on what the result does not license"),
         loses_marks=[
-            "Running PCA on unstandardised columns",
-            "Retaining components by a rule you did not state",
-            "Naming a component (\"this is competitiveness\") with no rotation caveat",
-            "Reporting variance explained as though it measured correctness",
+            "Reporting a replicated number without the published one beside it",
+            "Calling a replication failed without saying where it breaks",
+            "Reaching for a method the course has not taught to force a match",
+            "Pasting output with no sentence saying what it means",
         ],
     ),
     "08": dict(
@@ -368,6 +369,39 @@ SESSIONS = {
         theme="—",
         generated=False,
     ),
+    "13": dict(
+        dir="13-one-more-thing",
+        title="One More Thing: Principal Component and Factor Analyses",
+        short="One more thing — PCA and factor analysis",
+        question="How many independent things are actually being measured?",
+        # Unscheduled: after session 12, for self-study, and not examined. It
+        # was session 07 until that became the replication workshop.
+        methods="eigenvalues, loadings, scree plots, rotation, FAMD",
+        theme="How many distinct dimensions does your angle really have?",
+        objectives=[
+            "Explain why PCA requires **standardised** inputs, and what happens if you forget",
+            "Read a **scree plot** and defend the number of components you retained",
+            "Distinguish a **loading** from a **score**, and say what each is for",
+            "State the difference between **PCA** and **factor analysis**, and when each applies",
+            "Say why a factor is identified only **up to rotation**",
+        ],
+        reading=("Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, "
+                 "Review of International Organizations 14(3)"),
+        reading_url="https://doi.org/10.1007/s11558-019-09344-2",
+        dataverse=None,           # the index itself is the data, published by KOF ETH Zurich
+        dataset="kof",
+        dataset_note=("the KOF Globalisation Index — 180 countries, 1970–2023, six sub-dimensions "
+                      "each split into de facto and de jure"),
+        deliverable=("a dimension-reduction of your project's indicators: the scree plot, the "
+                     "number retained with its justification, the loadings interpreted, and a "
+                     "note on what you are *not* entitled to call the components"),
+        loses_marks=[
+            "Running PCA on unstandardised columns",
+            "Retaining components by a rule you did not state",
+            "Naming a component (\"this is competitiveness\") with no rotation caveat",
+            "Reporting variance explained as though it measured correctness",
+        ],
+    ),
 }
 
 # The timetable, as published. Wednesdays 15:30–18:30, Décelles — Victoriaville,
@@ -393,16 +427,21 @@ DATES = {
 
 ASYNCHRONOUS = {"06"}
 
+# Sessions with no date: session 13 runs after the course, as self-study.
+UNSCHEDULED = {"13"}
+
 NO_CLASS = ["2026-09-30", "2026-10-21"]
 
 # The midterm sits after Session 07 in the calendar but examines Sessions 1–6:
-# Session 07 is taught before it and is not on the paper.
+# Session 07 is the replication workshop that reviews them, and is not on the
+# paper.
 MIDTERM_DATE = "2026-10-28"
 MIDTERM_ROOM = "room to be announced"
 
 ORAL_EXAM = "Monday 14 December 2026 (to be confirmed)"
 
-MIDTERM_AFTER = "07"   # written 28 Oct; examines everything taught before it
+MIDTERM_AFTER = "07"   # where the midterm sits in the calendar: written 28 Oct
+MIDTERM_COVERS = "06"  # the last session it examines
 
 
 def ordered():

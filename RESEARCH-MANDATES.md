@@ -216,7 +216,7 @@ The theme is the same for everyone; the execution is yours, on your project.
 | 04 | Logistic regression | **Can we predict a discrete outcome honestly?** |
 | 05 | Regularisation | **Of many indicators, which few actually carry the signal?** |
 | 06 | Panel data and interactions | **Does your finding survive the structure of your data?** |
-| 07 | PCA and factor analysis | **How many distinct dimensions does your angle really have?** |
+| 07 | Replication workshop | **Which of the five published results survives your own replication?** |
 | 08 | KNN and bias–variance | **Does flexibility buy you anything on your own data?** |
 | 09 | Structural equation modelling | **What is the construct behind your indicators?** |
 | 10 | Causal inference (1/2) | **Can your project support a causal claim at all?** |

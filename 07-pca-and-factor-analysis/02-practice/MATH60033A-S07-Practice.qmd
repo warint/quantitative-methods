@@ -1,6 +1,6 @@
 ---
-title: "Session 7: Practice"
-subtitle: "How many distinct dimensions does your angle really have?"
+title: "Session 7: The workshop"
+subtitle: "Five papers, one toolkit — the step-by-step plan"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 course-session: "07"
@@ -19,23 +19,19 @@ format:
     height: 760
     margin: 0.06
     smaller: true
-    footer: "MATH60033A · Session 07 practice · Thierry Warin, PhD · HEC Montréal"
+    footer: "MATH60033A · Session 07 workshop · Thierry Warin, PhD · HEC Montréal"
 ---
+
+<!-- authored: do not regenerate -->
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · The workshop {.center .scrollable}
 
-1. Ninety minutes
-2. Before you start
-3. Reproduce — 20 min
-4. Apply to your own angle — 35 min
-5. Break one assumption — 15 min
-6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
-10. After class, if you want it
+1. The plan
+2. Part 0 · Set up
+3. Part 1 · Each replication, the same way
+4. Part 2 · The log
 
 ## What session 7 is for {.scrollable}
 ::::: columns
@@ -44,10 +40,9 @@ format:
 
 ### The mathematics
 
-- Explain why PCA requires **standardised** inputs, and what happens if you forget
-- Read a **scree plot** and defend the number of components retained
-- Distinguish a **loading** from a **score**
-- Say why a factor is identified only **up to rotation**
+- State each paper's **research question** and the result it rests on
+- Say how close a replication came, and **where** and **why** it differs
+- Re-read a published result through the diagnostics of sessions 2 to 6
 
 ::::
 
@@ -55,9 +50,9 @@ format:
 
 ### The Python
 
-- Compute components from the correlation matrix, and check against a library
-- Plot the scree and the loadings, and label the axes with variance explained
-- Rotate a factor solution and watch the fit stay identical
+- Load an authors' replication file — `.dta`, `.xlsx`, `.tab`, `.csv` — into pandas
+- Rebuild a published estimate with **only the code seen in class**
+- Run a whole analysis as one script in VS Codium, step by step
 
 ::::
 
@@ -65,9 +60,9 @@ format:
 
 ### The international business
 
-- Build an index — competitiveness, openness, capability — from correlated indicators
-- Defend the name you gave a component to a sceptical reader
-- Say what a composite indicator hides as well as what it summarises
+- Read five international-business papers as claims to be checked
+- Say what each published result does **not** license
+- Keep a replication log a referee could follow
 
 ::::
 
@@ -88,161 +83,129 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-# Practice {background-color="#E3120B" style="color:#F7F4ED"}
+## The plan {.center .scrollable}
 
-::: {style="margin-top: 1.0em; color:#F7F4ED"}
-### How many distinct dimensions does your angle really have?
-:::
+## Where everything is {.scrollable}
 
-## Ninety minutes
-
-| | | |
-|---|---|---|
-| **00–20** | Reproduce | one result from the paper you read |
-| **20–55** | Apply | the method, to **your own angle** |
-| **55–70** | Break | one assumption, deliberately |
-| **70–90** | Write, and report | 250 words, then two minutes to the room |
-
-::: {.warn}
-The presenter is drawn **at random** when your group is called. All three of you prepare.
-:::
-
-## Before you start
-
-Everyone pushes at least once. Replace `XX` with your group number — group 07 uses `group-07`.
-
-```bash
-git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-07      # macOS and Linux
-```
-
-```powershell
-git checkout -b group-XX
-mkdir groups/A2026/group-XX/session-07         # Windows — no -p
-```
-
-::: {.muted}
-PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
-The git log is the participation record. It is not a formality.
-:::
-
-## 1 · Reproduce — 20 min
-
-Take the result the paper rests on, and put it to the test on the database the paper itself uses. There is nothing to unzip — the loader has it.
-
-```python
-import qmib
-
-data = qmib.load("kof")     # the session's own data
-```
-
-::: {.muted}
-Paper: Gygli, Haelg, Potrafke & Sturm (2019), *The KOF Globalisation Index — revisited*, Review of International Organizations 14(3) · data: `qmib.load("kof")`
-:::
-
-::: {.check}
-A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.
-:::
-
-::: {.muted}
-"It did not work" is not a diagnosis. Where did it stop, and what did you check?
-:::
-
-## 2 · Apply to your own angle — 35 min
-
-```python
-core = qmib.load("core")
-mine = qmib.load("angle_c_country")     # your angle — see your dictionary
-df   = core.merge(mine, on=["geo", "time"], how="inner")
-```
-
-Fit the session's method on **your** data, and report what the lecture said to report — in the
-units of your own variables.
-
-::: {.warn}
-A coefficient without units is not a finding.
-:::
-
-## 3 · Break one assumption — 15 min
-
-Every method in this course rests on something.
-
-::: {.step}
-Find the assumption this one leans on hardest. Break it **deliberately**. Record what happened to
-your answer.
-:::
-
-::: {.check}
-This is the part that carries the marks. A group that shows how its result falls apart understands
-it; a group that only shows it holding does not yet know.
-:::
-
-## 4 · Write it down — 20 min
-
-250 words in your submissions folder:
-
-::: {.tight}
-- What you found, **in units**
-- Which assumption you broke, and what it did
-- What this result does **not** license you to claim
-:::
-
-::: {.muted}
-And the standing rule: one LLM output you identified as wrong, and how you established that.
-:::
-
-## Submitting
-
-```bash
-git add groups/A2026/group-XX/session-07
-git commit -m "Session 07 practice — group XX"
-git push -u origin group-XX
-```
-
-::: {.get}
-**Deliverable.** A dimension-reduction of your project's indicators: the scree plot, the number retained with its justification, the loadings interpreted, and a note on what you are *not* entitled to call the components.
-:::
-
-## What loses marks
-
-::: {.tight}
-- Running PCA on unstandardised columns
-- Retaining components by a rule you did not state
-- Naming a component ("this is competitiveness") with no rotation caveat
-- Reporting variance explained as though it measured correctness
-:::
-
-::: {.warn}
-And everywhere in this course: an association described in causal language.
-:::
-
-## Two-minute report
+Everything is in `07-pca-and-factor-analysis/02-practice/`:
 
 | | |
 |---|---|
-| **One number** | with its units and its uncertainty |
-| **One assumption** | the one you broke, and what happened |
-| **One limit** | what you cannot claim from this |
-
-::: {.muted}
-Listen for traceable evidence, not confidence of delivery.
-:::
-
-
-## After class, if you want it
-
-::: {.step}
-The **QMIB Lab** has a knowledge check on what you have just done:
-**[warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-07.html)**
-:::
+| `README.md` | this plan, with every command to copy |
+| `starter/check_setup.py` | Part 0: is everything in place? |
+| `starter/r1_…py` to `starter/r5_…py` | one script per paper, cut into numbered steps |
+| `replications/R1-…md` to `replications/R5-…md` | one guide per paper: the same steps, and what you should see |
+| `replication-log.md` | the deliverable: copy it to your group folder |
 
 ::: {.check}
-Optional, never a prerequisite for the next lecture, and never marked for
-correctness. A completed report counts because **attempting it is the engagement
-being measured** — it is one of the three routes to the participation mark.
+Keep the **guide** open on one side of the screen and the **script** on the other.
 :::
 
+## The three hours {.scrollable}
+
+| When | Part | Guide | Script |
+|---|---|---|---|
+| 0:00 – 0:15 | **0 · Set up** | `README.md`, Part 0 | `check_setup.py` |
+| 0:15 – 0:45 | **R1** · Fraiberger et al. (2021) | `R1-fraiberger-2021.md` | `r1_fraiberger_2021.py` |
+| 0:45 – 1:15 | **R2** · Amsili et al. (2024) | `R2-amsili-2024.md` | `r2_amsili_2024.py` |
+| 1:15 – 1:45 | **R3** · Saganowski et al. (2019) | `R3-saganowski-2019.md` | `r3_saganowski_2019.py` |
+| 1:45 – 1:55 | *Break* | | |
+| 1:55 – 2:25 | **R4** · Blonigen & Piger (2014) | `R4-blonigen-piger-2014.md` | `r4_blonigen_piger_2014.py` |
+| 2:25 – 2:50 | **R5** · Topalova & Khandelwal (2011) | `R5-topalova-khandelwal-2011.md` | `r5_topalova_khandelwal_2011.py` |
+| 2:50 – 3:00 | **2 · The log** | `replication-log.md` | |
+
 ::: {.warn}
-What **is** required before the next session: the article, its Dataverse package,
-and the self-check. That is the pre-session deck, not this.
+Behind? Move on at the half-hour mark. A finished log for three papers beats a half-finished one
+for five.
+:::
+
+## Part 0 · Set up {.center .scrollable}
+
+## Five steps, fifteen minutes {.scrollable}
+
+::: {.tight}
+1. **File → Open Folder…** → `Desktop/quantitative-methods`
+2. Terminal: `git checkout main` then `git pull`
+3. The `.venv` Python — macOS and Linux `source .venv/bin/activate` · Windows `.venv\Scripts\Activate.ps1`
+4. Run `starter/check_setup.py` with **Run** ▷ — every line `OK`
+5. `MISSING` data? The pre-session page, section 2. Start another paper while it downloads.
+:::
+
+::: {.step}
+**One step at a time:** select a step's lines, **Shift+Enter**, read the output, compare with
+**You should see**. Then the next step — they build on each other.
+:::
+
+## Part 1 · Each replication, the same way {.center .scrollable}
+
+## Thirty minutes per paper {.scrollable}
+
+| Minutes | Do | In the guide |
+|---|---|---|
+| 0 – 3 | Read what the paper asks, and write down the target number | *The paper in brief* · *The research question* · *The published target* |
+| 3 – 5 | Know what one row of the data is | *Data* |
+| 5 – 22 | Run the steps, one at a time, checking each against **You should see** | *Steps* |
+| 22 – 26 | Say how close you came, and why | *Compare with the paper* |
+| 26 – 30 | Write the block in your log | *What this does not license* |
+
+::: {.check}
+A number that differs from **You should see** is not a failure — it is a finding. Stop, and find
+out whether it is your data, your code, or the version of a package.
+:::
+
+## If you work as a team {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+### Split and teach
+
+- Each person takes one or two papers
+- At **2:25**: five minutes each — target, your number, the gap, the catch
+- Everyone's log then covers all five
+::::
+
+:::: {.column width="50%"}
+### Pairs at one screen
+
+- One types, one reads the guide aloud and checks the numbers
+- Swap at every paper
+::::
+:::::
+
+::: {.step}
+Every member runs at least one script on their own machine. The log names who did what.
+:::
+
+## Part 2 · The log {.center .scrollable}
+
+## Fill it in, commit, push {.scrollable}
+
+::::: panel-tabset
+### macOS and Linux
+
+```bash
+git checkout -b group-XX
+mkdir -p groups/A2026/group-XX/session-07
+cp 07-pca-and-factor-analysis/02-practice/replication-log.md groups/A2026/group-XX/session-07/
+git add groups/A2026/group-XX/session-07
+git commit -m "Session 07 replication log"
+git push -u origin group-XX
+```
+
+### Windows
+
+```powershell
+git checkout -b group-XX
+New-Item -ItemType Directory -Force groups\A2026\group-XX\session-07
+Copy-Item 07-pca-and-factor-analysis\02-practice\replication-log.md groups\A2026\group-XX\session-07\
+git add groups/A2026/group-XX/session-07
+git commit -m "Session 07 replication log"
+git push -u origin group-XX
+```
+:::::
+
+::: {.muted}
+Replace `XX` with your group number — group 07 uses `group-07`. One block per paper attempted:
+the question, the target, your number, the gap and why, the diagnostic that changed your reading,
+and what the result does not license.
 :::

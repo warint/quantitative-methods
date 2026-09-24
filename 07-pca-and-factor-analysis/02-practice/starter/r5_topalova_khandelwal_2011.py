@@ -1,0 +1,116 @@
+"""
+Replication 5 · Session 06 · Topalova & Khandelwal (2011)
+*Trade liberalization and firm productivity: the case of India*
+
+Step-by-step guide: 07-pca-and-factor-analysis/02-practice/replications/R5-topalova-khandelwal-2011.md
+
+Run it in VS Codium with the Run button (the triangle, top right), or from the
+repository root in the terminal:
+
+    python 07-pca-and-factor-analysis/02-practice/starter/r5_topalova_khandelwal_2011.py
+
+Work one step at a time: select a step's lines and press Shift+Enter to run only
+those, read the output, and compare it with "You should see" in the guide.
+"""
+
+from pathlib import Path
+import os
+import sys
+
+# Work from the repository root whichever way the script was started, so the
+# data paths below and `import qmib` both resolve.
+try:
+    ROOT = Path(__file__).resolve().parents[3]
+except NameError:            # lines sent one by one with Shift+Enter: the
+    ROOT = Path.cwd()        # terminal already starts in the repository root
+os.chdir(ROOT)
+sys.path.insert(0, str(ROOT))
+OUTPUT = Path("07-pca-and-factor-analysis/02-practice/output")   # figures land here
+OUTPUT.mkdir(exist_ok=True)
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from linearmodels.panel import PanelOLS, RandomEffects
+
+
+# Step 1 · Load the firm-year panel and look at it
+# read_stata keeps Stata's types: industrycode and companyname arrive as text.
+firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+print(firms.shape)
+print(firms[["companyname", "industrycode", "yr", "tfp1000",
+             "lagtariff", "laginputariff"]].head())
+print(firms[["id", "industrycode", "yr"]].dtypes)
+
+# Step 2 · Keep the paper's sample: years before 1997, no missing values
+# The do-file runs "keep if yr<1997" (line 281); Stata then silently drops
+# any row with a missing regressor, so we do the same explicitly.
+cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
+        "foreign", "medium", "small", "age", "age2"]
+sample = firms[firms["yr"] < 1997].dropna(subset=cols)
+print(sample.shape)                        # rows and columns
+print(sample["id"].nunique(), "firms")
+print(sample["yr"].value_counts().sort_index())
+
+# Step 3 · See the reform: average tariffs by year
+# The variation we exploit: tariffs fell a lot, and by different amounts
+# in different industries.
+by_year = sample.groupby("yr")[["lagtariff", "laginputariff"]].mean()
+print(by_year.round(3))
+by_year.plot(marker="o")
+plt.ylabel("average lagged tariff (1 = 100%)")
+plt.title("India's tariff cuts, estimation sample")
+plt.savefig(OUTPUT / "tariffs_by_year.png", dpi=150, bbox_inches="tight")
+
+# Step 4 · Pooled OLS with year dummies, classical standard errors
+# One regression on all firm-years, as if every row were independent.
+formula = ("tfp1000 ~ lagtariff + laginputariff + prgroup + govown + foreign"
+           " + medium + small + age + age2 + C(yr)")
+pooled = smf.ols(formula, data=sample).fit()
+print(pooled.params[["lagtariff", "laginputariff"]].round(4))
+print(pooled.bse[["lagtariff", "laginputariff"]].round(4))
+
+# Step 5 · The same pooled OLS, standard errors clustered by firm
+# A firm appears up to 8 times, so its errors are not independent.
+# Same coefficients, honest standard errors. This is the paper's column 1.
+pooled_cl = smf.ols(formula, data=sample).fit(
+    cov_type="cluster", cov_kwds={"groups": sample["id"]})
+print(pooled_cl.params[["lagtariff", "laginputariff"]].round(4))
+print(pooled_cl.bse[["lagtariff", "laginputariff"]].round(4))
+
+# Step 6 · Give the data a panel index: entity first, then time
+# linearmodels reads the firm and the year from a two-level index.
+panel = sample.set_index(["id", "yr"])
+y = panel["tfp1000"]
+X = panel[["lagtariff", "laginputariff", "age", "age2"]]
+print(panel.index.names, panel.shape)
+
+# Step 7 · Firm and year fixed effects, clustered by firm (column 3)
+# Firm effects absorb everything a firm never changes (ownership, size class),
+# so those dummies are left out. Only within-firm changes identify the slopes.
+fe = PanelOLS(y, X, entity_effects=True, time_effects=True).fit(
+    cov_type="clustered", cluster_entity=True)
+print(fe)
+
+# Step 8 · Random effects, with year dummies and the firm characteristics
+# RE can keep time-invariant variables, but only by assuming the firm effect
+# is unrelated to the tariffs.
+years = ["yeardum2", "yeardum3", "yeardum4", "yeardum5",
+         "yeardum6", "yeardum7", "yeardum8"]                # 1989 is the base
+X_re = sm.add_constant(panel[cols[1:] + years])
+re = RandomEffects(y, X_re).fit(cov_type="clustered", cluster_entity=True)
+print(re.params[["lagtariff", "laginputariff"]].round(4))
+print(re.std_errors[["lagtariff", "laginputariff"]].round(4))
+
+# Step 9 · Put the four estimates side by side
+# One row per estimator: the two coefficients, then their standard errors.
+keys = ["lagtariff", "laginputariff"]
+table = pd.DataFrame({
+    "pooled, classical SE": list(pooled.params[keys]) + list(pooled.bse[keys]),
+    "pooled, firm-clustered": list(pooled_cl.params[keys]) + list(pooled_cl.bse[keys]),
+    "firm + year FE (col. 3)": list(fe.params[keys]) + list(fe.std_errors[keys]),
+    "random effects": list(re.params[keys]) + list(re.std_errors[keys])},
+    index=["b output tariff", "b input tariff", "se output tariff", "se input tariff"])
+print(table.T.round(3).to_string())
+print("observations:", int(pooled.nobs), fe.nobs, re.nobs)

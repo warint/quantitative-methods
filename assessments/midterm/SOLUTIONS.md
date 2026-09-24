@@ -57,17 +57,19 @@ same $x_i$ and the training error:
 $\mathbb{E}[\mathrm{Err}_{\text{in}}] - \mathbb{E}[\mathrm{err}] = \frac{2}{n}\sum_i \mathrm{Cov}(\hat y_i, y_i)$.
 It is the degree to which the model chases its own training labels.
 
-**A6** *(3)* — The first principal component is the unit-length direction $v_1$ maximising the
-**variance of the projection** $Xv$ — equivalently, the eigenvector of $\hat\Sigma$ with the
-largest eigenvalue. Inputs must be **standardised** because the objective is variance, so without
-it whichever variable is measured in the largest units becomes the first component. A **loading**
-is a weight on a *variable* (a column of $V$: how the variable contributes to a component); a
-**score** is the value of a component for an *observation* ($XV$: where that row sits in the new
-coordinates).
+**A6** *(3)* — Firm fixed effects give every firm its own intercept, so the slope is estimated
+from variation **within** each firm over time: everything about a firm that does not change —
+management, location, sector, observed or not — is removed. The cost is that the effect of anything
+constant within a firm **cannot be estimated** (it is absorbed), and precision falls because the
+between-firm variation is thrown away. Random effects keeps that variation by treating the firm
+intercepts as random draws, which is valid only if they are **uncorrelated with the regressors**.
+The **Hausman test** compares the two: a significant difference says the random-effects assumption
+fails, so report fixed effects.
 
-> *1 mark for variance maximisation, 1 for the standardisation reason — the reason, not just
-> "because you should" — and 1 for the loading/score distinction. A student who says PCA "reduces
-> dimensions" without naming what is maximised earns 0 for the first part.*
+> *1 mark for "within variation removes all time-invariant characteristics, observed or not", 1 for
+> the cost (time-invariant regressors absorbed, less precision), 1 for the random-effects assumption
+> with the Hausman test named. Choosing between them "by which is significant" earns 0 for the last
+> mark.*
 
 **A7** *(3)* — $\sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big)$. Score:
 $\nabla\ell(\beta) = X^\top(y - p)$ — the residual is orthogonal to every regressor at the optimum,
@@ -392,8 +394,8 @@ countries is not the thing that was estimated.
   window, which no measure of prior sentiment should do.
 
 **Also full marks:** observing that (c) as posed is the general problem with any named latent
-quantity — the name is not identified by the fit, which is Session 7's rotation problem in another
-setting — provided the student gives one concrete observation as well.
+quantity — the name is not identified by the fit, which is the rotation problem of factor analysis
+(session 13) in another setting — provided the student gives one concrete observation as well.
 
 > *This is the best answer available on the paper. If you found it unprompted, you are ready for the
 > final paper.*
@@ -405,7 +407,7 @@ setting — provided the student gives one concrete observation as well.
 The four parts diagnose four different failures, and the total hides which one is yours. Add up each
 part separately and read the row that applies:
 
-| Weak in | What it means | What to do before Session 7 |
+| Weak in | What it means | What to do next |
 |---|---|---|
 | **A** | You are working from impressions, not definitions | Re-do the pre-session self-checks in writing |
 | **A1, A2 or B1** | Session 02–04 foundations: partialling out, and what cross-validation estimates | Re-derive FWL on paper, then re-run one of your own CV scripts and say what each fold is estimating |

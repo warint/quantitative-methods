@@ -1,4 +1,4 @@
-"""Session 07: compare a tree, random forest, and gradient boosting."""
+"""Session 13: compare a tree, random forest, and gradient boosting."""
 
 from pathlib import Path
 

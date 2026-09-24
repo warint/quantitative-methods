@@ -138,13 +138,14 @@ answerable question, where to find data, and what each session asks of you.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| **07** | Wed 14 Oct | PCA and factor analysis |
-| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–7 · room to be announced |
+| **07** | Wed 14 Oct | Replication workshop — five papers, one toolkit · **in autonomy** |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
 | **12** | Wed 2 Dec | Final group presentations, and the closing address |
+| **13** | unscheduled | One more thing — PCA and factor analysis · self-study, not examined |
 
 **No class** on 30 September, 21 October.
 
@@ -154,8 +155,12 @@ answerable question, where to find data, and what each session asks of you.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> The **midterm is written on 28 October** and covers **everything taught before it** —
-> Sessions 1 to 7, up to and including principal component and factor analysis.
+> Session 07 (14 October) is a **replication workshop**: three hours in autonomy, alone or in teams,
+> rebuilding one published result from each of the sessions 2–6 readings with the Python seen in
+> class. It is the revision session for the midterm.
+>
+> The **midterm is written on 28 October** and covers **Sessions 1 to 6**. PCA and factor analysis
+> are now session 13, "One more thing" — after the course, for self-study, and not examined.
 
 ---
 

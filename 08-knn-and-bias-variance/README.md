@@ -66,4 +66,4 @@ In `groups/A2026/group-XX/session-08/`: a KNN classifier on a binary outcome fro
 
 ---
 
-[<- [Session 07: Principal Component and Factor Analyses](../07-pca-and-factor-analysis/README.md)](../07-pca-and-factor-analysis/README.md) | [[Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md) ->](../09-structural-equation-modelling/README.md)
+[<- [Session 07: Replication Workshop: Five Papers, One Toolkit](../07-pca-and-factor-analysis/README.md)](../07-pca-and-factor-analysis/README.md) | [[Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md) ->](../09-structural-equation-modelling/README.md)

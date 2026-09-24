@@ -135,13 +135,14 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| **07** | Wed 14 Oct | PCA and factor analysis |
-| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–7 · room to be announced |
+| **07** | Wed 14 Oct | Replication workshop — five papers, one toolkit · **in autonomy** |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
 | **12** | Wed 2 Dec | Final group presentations, and the closing address |
+| **13** | unscheduled | One more thing — PCA and factor analysis · self-study, not examined |
 
 **No class** on 30 September, 21 October.
 
@@ -151,8 +152,12 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> The **midterm is written on 28 October** and covers **everything taught before it** —
-> Sessions 1 to 7, up to and including principal component and factor analysis.
+> Session 07 (14 October) is a **replication workshop**: three hours in autonomy, alone or in teams,
+> rebuilding one published result from each of the sessions 2–6 readings with the Python seen in
+> class. It is the revision session for the midterm.
+>
+> The **midterm is written on 28 October** and covers **Sessions 1 to 6**. PCA and factor analysis
+> are now session 13, "One more thing" — after the course, for self-study, and not examined.
 
 ---
 
@@ -166,19 +171,22 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 04 | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
 | 05 | Regularisation: Ridge, Lasso, and the Elastic Net | stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
-| — | **MIDTERM** *(in class, covering Sessions 1–7)* | | |
-| 07 | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
+| 07 | Replication Workshop: Five Papers, One Toolkit | the readings of sessions 2–6, replicated in Python with the code seen in class | Which of the five published results survives your own replication? |
+| — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |
 | 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | 10 | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
 | 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
 | 12 | Final Group Presentations | Closing address | What the twelve weeks established |
+| 13 | One More Thing: Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | *(self-study, after the course, not examined)* |
 
 **The arc.** Session 2 describes one variable, then relates two — the smallest possible model.
 Session 3 asks whether that model can be trusted, which is where diagnostics live. Session 4 carries
 regression to discrete outcomes, and Session 5 to problems with more predictors than you can
-estimate. Session 6 takes the panel structure of international data seriously. Sessions 7 to 9 turn
-to structure nobody labelled: dimensions, neighbours, and quantities you cannot observe directly.
+estimate. Session 6 takes the panel structure of international data seriously. Session 7 stops to rebuild
+one published result from each of those five sessions' readings, with nothing but the code already
+taught. Sessions 8 and 9 turn to structure nobody labelled: neighbours, and quantities you cannot
+observe directly — and session 13, after the course, adds dimensions.
 Sessions 10 and 11 confront the question the first nine sessions cannot answer — whether anything
 *caused* anything — and Session 12 is where you defend your own attempt.
 
@@ -277,10 +285,10 @@ instructor's attention is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
-Written **Wednesday 28 October**. Covers **Sessions 1–7** — everything taught before the paper:
-exploratory data analysis and the first regression, regression diagnostics and validity, logistic
-regression, regularisation, panel data and interactions, and principal component and factor
-analysis.
+Written **Wednesday 28 October**. Covers **Sessions 1–6**: exploratory data analysis and the first
+regression, regression diagnostics and validity, logistic regression, regularisation, and panel
+data and interactions. Session 7, the replication workshop, reviews all five on real data and adds
+no new material.
 
 Four parts: **definitions** (state it precisely), **calculations** (derive and compute),
 **diagnostics** (read an output and find the fault), **interpretation** (say what may and may not

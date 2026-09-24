@@ -1,6 +1,6 @@
 # Midterm examination
 
-**Quantitative Methods in International Business · Sessions 1–7**
+**Quantitative Methods in International Business · Sessions 1–6**
 
 ---
 
@@ -80,8 +80,9 @@ the covariance between fitted values and outcomes.
 
 <br><br><br>
 
-**A6.** *(3)* State what the first principal component **maximises**, why the inputs must be
-**standardised** first, and the difference between a **loading** and a **score**.
+**A6.** *(3)* In a panel of firms observed over several years, state what **firm fixed effects**
+remove, what they cost you, and what **random effects** assume instead. Name the test that compares
+the two.
 
 <br><br><br>
 

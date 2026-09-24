@@ -1,9 +1,9 @@
 """
-Session 07 practice starter
+Session 13 practice starter
 Does flexibility pay? A controlled comparison
 
 Run from this folder:
-    python session07_lab.py
+    python session13_lab.py
 
 Reproducibility rules for this course:
     * set every random seed explicitly
@@ -18,7 +18,7 @@ RANDOM_SEED = 60033
 rng = np.random.default_rng(RANDOM_SEED)
 
 def load_data(path):
-    """Load the cached dataset for session 07.
+    """Load the cached dataset for session 13.
 
     See ../../data/README.md for how to produce the cache file.
     """
