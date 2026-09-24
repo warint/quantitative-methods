@@ -124,7 +124,6 @@ SESSIONS = {
             "Say why the **linear probability model** fails, and where it fails worst",
             "Interpret a logistic coefficient as a **log-odds**, and its exponential as an odds ratio",
             "Compute a fitted probability by hand from $x^\\top\\hat\\beta$",
-            "Compare nested models with a **likelihood-ratio test**",
             "Extend the model to **ordinal** and **multinomial** outcomes, and say what each assumes",
         ],
         reading="Saganowski et al. (2019), *Analysis of group evolution prediction in complex networks*",
@@ -132,10 +131,10 @@ SESSIONS = {
         dataverse="10.7910/DVN/ONOFS7",
         dataset="loans",
         dataset_note="Lending Club — 9,578 three-year loans, FICO scores and default",
-        practice_extra="regtable",   # two logits to compare, full against reduced
+        practice_extra="regtable",   # two logits side by side, before and after the broken assumption
         deliverable=("a logistic model of a binary outcome in your own project data, with the "
-                     "odds ratios interpreted in words, one nested comparison tested, and a note "
-                     "on what the model does not license you to say"),
+                     "odds ratios interpreted in words, and a note on what the model does not "
+                     "license you to say"),
         loses_marks=[
             "Reporting log-odds as though they were probabilities",
             "Interpreting an odds ratio as a relative risk",

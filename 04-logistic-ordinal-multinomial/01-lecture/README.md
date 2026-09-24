@@ -48,7 +48,6 @@ By the end of the session you should be able to:
 - Say why the **linear probability model** fails, and where it fails worst
 - Interpret a logistic coefficient as a **log-odds**, and its exponential as an odds ratio
 - Compute a fitted probability by hand from $x^\top\hat\beta$
-- Compare nested models with a **likelihood-ratio test**
 - Extend the model to **ordinal** and **multinomial** outcomes, and say what each assumes
 
 ---
