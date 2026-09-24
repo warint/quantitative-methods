@@ -1,0 +1,258 @@
+---
+title: "Midterm Summary · Sessions 1 to 6"
+subtitle: "MATH60033A · Quantitative Methods in International Business"
+author: "Thierry Warin, PhD · HEC Montréal · A2026"
+format:
+  pdf:
+    documentclass: article
+    papersize: letter
+    geometry: [top=1.5cm, bottom=1.6cm, left=1.8cm, right=1.8cm]
+    fontsize: 10pt
+    linestretch: 1.0
+    colorlinks: true
+    linkcolor: accent
+    urlcolor: accent
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titling}
+        \usepackage{xcolor}
+        \usepackage{enumitem}
+        \usepackage{tcolorbox}
+        \definecolor{accent}{HTML}{E3120B}
+        \definecolor{ink}{HTML}{222222}
+        \definecolor{muted}{HTML}{6B6B67}
+        \definecolor{paper}{HTML}{F7F4ED}
+        \setlist{itemsep=1pt, topsep=2pt, parsep=0pt}
+        \setlength{\parskip}{3pt}
+        \pretitle{\begin{flushleft}\Large\bfseries\color{ink}}
+        \posttitle{\end{flushleft}\vspace{-0.8em}{\color{accent}\rule{3.2em}{2pt}}\vspace{0.2em}}
+        \preauthor{\begin{flushleft}\footnotesize\color{muted}}
+        \postauthor{\end{flushleft}\vspace{-1.2em}}
+        \date{}
+        \usepackage{titlesec}
+        \titleformat{\section}{\large\bfseries\color{ink}}{}{0pt}{}[{\color{accent}\titlerule[0.8pt]}]
+        \titlespacing*{\section}{0pt}{8pt}{4pt}
+        \titleformat{\subsection}{\normalsize\bfseries\color{accent}}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{5pt}{1pt}
+        \newtcolorbox{keybox}{colback=paper, colframe=paper, boxrule=0pt, arc=0pt,
+          left=5pt, right=5pt, top=3pt, bottom=3pt, before skip=4pt, after skip=4pt}
+        \newtcolorbox{warnbox}{colback=white, colframe=accent, boxrule=0.6pt, arc=0pt,
+          left=5pt, right=5pt, top=3pt, bottom=3pt, before skip=4pt, after skip=4pt}
+---
+
+::: {.content-visible when-format="pdf"}
+\vspace{-0.6em}
+:::
+
+**How to use these six pages.** A map, not a substitute for the sessions: for each one, the ideas to *state*, the formulas to *use* with a calculator, and a worked example with its own numbers. The last page lists what loses marks. Then sit the sample paper (`assessments/midterm/EXAM.md`) under exam conditions, and only afterwards open `SOLUTIONS.md`.
+
+\begin{keybox}
+\textbf{The paper.} Three hours, on paper, in pen. A simple calculator; no notes, no computer, no internet. Four parts: \textbf{A} definitions (state it precisely) · \textbf{B} calculations (derive and compute, working shown) · \textbf{C} diagnosis (read an output, find the planted fault) · \textbf{D} judgement (say what a number does and does not license). Working is marked: a clean method with an arithmetic slip earns most of the marks. The syllabus also examines \textbf{Session 7} (PCA and factor analysis), which this summary does not cover.
+\end{keybox}
+
+# Session 1 · What the course asks of you
+
+The course is about **claims**: what a number lets you say, and what it does not. Three habits run through every answer. **Every number has units**: "one more point of X is associated with 0.31 more units of Y, holding Z fixed", not "a slope of 0.31". **Association is not causation**: unless the design isolates a cause, write *is associated with*, never *drives* or *causes*. **Say what you would check**: name the diagnostic that could prove you wrong.
+
+# Session 2 · Describing a variable before you model it
+
+## Centre
+
+- **Mean** $\bar x = \frac1n\sum_i x_i$: the balance point. Pulled by extreme values.
+- **Median**: the middle observation. Robust to outliers; answers "what is typical?".
+- **Trimmed mean**: the mean after dropping a fixed share (e.g. 10%) from each tail; a compromise.
+- Mean $>$ median suggests a long **right** tail; mean $<$ median a long **left** tail. For a skewed variable, report the median (or both) and say why.
+
+## Spread
+
+- **Sample variance** $s^2 = \frac{1}{n-1}\sum_i (x_i-\bar x)^2$. Divide by $n-1$ because $\bar x$ was estimated from the same data: the deviations sum to zero, so only $n-1$ are free. Dividing by $n$ would underestimate the variance.
+- **Standard deviation** $s = \sqrt{s^2}$, in the units of $x$. **IQR** $= Q_3 - Q_1$, the spread of the middle half, robust to outliers.
+- **Standard error** of the mean: $SE(\bar x) = s/\sqrt n$. The SD is the spread of the **observations**; the SE is the spread of a **number computed from them**. More data shrinks the SE, not the SD.
+
+## Shape
+
+$$g_1 = \frac{1}{n}\frac{\sum_i (x_i-\bar x)^3}{s^3} \qquad\qquad g_2 = \frac{1}{n}\frac{\sum_i (x_i-\bar x)^4}{s^4} - 3$$
+
+- $g_1 > 0$: right-skewed; $g_1 < 0$: left-skewed. $g_2 > 0$: heavier tails than a normal (**excess** kurtosis; a normal has $g_2 = 0$).
+- **Tests.** Substantially skewed if $|g_1| > 2\sqrt{6/n}$; substantially kurtic if $|g_2| > 4\sqrt{6/n}$. Always report the statistic **with** its threshold.
+- **Empirical rule** (68–95–99.7% within 1, 2, 3 SDs) holds only for a roughly **normal** variable. Symmetric is not the same as normal, and the rule does not apply to a variable you have shown to be skewed.
+
+\begin{keybox}
+\textbf{Worked example.} $n = 24$, $\bar x = 50$, median $= 46$, $s = 10$, $\sum (x_i-\bar x)^3 = 26{,}400$, $\sum (x_i-\bar x)^4 = 1{,}020{,}000$.\\
+$g_1 = \frac{1}{24}\cdot\frac{26{,}400}{1{,}000} = 1.10$; threshold $2\sqrt{6/24} = 2(0.5) = 1.00$ → substantially \textbf{right}-skewed, consistent with mean $>$ median.\\
+$g_2 = \frac{1}{24}\cdot\frac{1{,}020{,}000}{10{,}000} - 3 = 4.25 - 3 = 1.25$; threshold $4(0.5) = 2.00$ → not substantially kurtic. Report the \textbf{median} as the centre.
+\end{keybox}
+
+\newpage
+
+# Session 3 · Can the regression be trusted?
+
+## The model and the fit
+
+$y_i = \beta_0 + \beta_1 x_{i1} + \dots + \beta_k x_{ik} + \varepsilon_i$. **Least squares** picks the $\hat\beta$ that minimise $\sum_i (y_i - \hat y_i)^2$; in matrix form $\hat\beta = (X^\top X)^{-1}X^\top y$. The residual is $e_i = y_i - \hat y_i$.
+
+- **Slope in units:** a one-unit rise in $x_j$ is associated with a $\hat\beta_j$-unit change in $y$, **holding the other regressors fixed**.
+- **What "controlling for" means (Frisch–Waugh–Lovell).** $\hat\beta_j$ equals the slope from regressing the part of $y$ not explained by the other regressors on the part of $x_j$ not explained by them. It is a **partial** relationship, not a marginal one.
+- **Omitted variable bias.** If the true model includes $z$ with coefficient $\beta_z$, and $z = \delta_0 + \delta_1 x + v$, then the short regression of $y$ on $x$ alone gives $\mathbb{E}[\hat\beta_1^{\,short}] = \beta_1 + \beta_z\delta_1$. The bias has the sign of $\beta_z \times \delta_1$.
+- **Unbiasedness** needs linearity, $\mathbb{E}[\varepsilon \mid X] = 0$ (exogeneity) and full column rank. Constant variance is **not** needed for unbiasedness, only for the usual standard errors and for efficiency.
+
+## Adequacy: how much does the line explain?
+
+$R^2 = 1 - \frac{SSR}{SST}$, the share of the variance of $y$ explained. **Adjusted** $R^2 = 1 - (1-R^2)\frac{n-1}{n-k-1}$ penalises extra regressors. **RSE** $= \sqrt{SSR/(n-k-1)}$, the typical size of a residual, in units of $y$. A high $R^2$ says nothing about causation or about whether the assumptions hold.
+
+## Inference
+
+$t = \hat\beta_j / SE(\hat\beta_j)$; 95% interval $\hat\beta_j \pm 1.96\,SE(\hat\beta_j)$. Significant at 5% when $|t| > 1.96$, i.e. when the interval excludes 0. **Not significant is not "no effect"**: a wide interval that includes both 0 and large values is simply uninformative.
+
+## Validity: do the assumptions hold?
+
+The **residuals-versus-fitted** plot is the instrument. Look for:
+
+- **Linearity** — a curve in the residuals means the functional form is wrong (add a quadratic, transform).
+- **Nearly normal residuals** — a Q–Q plot; matters most for intervals in small samples.
+- **Constant variance** — a **fan** (residuals spread out as fitted values grow; clearer on a **scale–location** plot) is heteroskedasticity. The coefficients stay unbiased but the classical SEs are wrong → use **robust** (HC) standard errors.
+- **Multicollinearity** — a variance inflation factor $VIF_j = 1/(1-R_j^2)$ above about 10 means $x_j$ is nearly a combination of the others: large SEs, unstable signs.
+
+## Robustness: which observations move the answer?
+
+- **Outlier**: a large residual. **Leverage point**: an unusual $x$. **Influential point**: one whose removal changes the fit — typically high leverage *and* a large residual.
+- **Leverage** $h_{ii}$ is the $i$-th diagonal of the hat matrix $H = X(X^\top X)^{-1}X^\top$; $0 \le h_{ii} \le 1$ and $\sum_i h_{ii} = p$, the number of parameters. Average leverage is $p/n$.
+- **Cook's distance** combines leverage and residual into one number per observation; inspect the spikes (a common flag is $D_i > 4/n$). Investigate an influential point; never delete it silently.
+
+## Parsimony: comparing candidate models
+
+$AIC = -2\ell + 2p$ and $BIC = -2\ell + p\ln n$, where $\ell$ is the maximised log-likelihood. **Lower is better**, and only on the **same rows**. BIC penalises extra parameters more heavily, so the two can disagree. Comparing a few candidates you chose is honest; letting a search pick the model is not model selection (Session 5 shows why).
+
+\begin{keybox}
+\textbf{Worked example.} $\hat\beta_1 = 0.30$, $SE = 0.12$: $t = 2.5$, interval $0.30 \pm 0.235 = (0.065,\ 0.535)$, significant at 5\%. With standard errors clustered by country the SE becomes $0.20$: $t = 1.5$, interval $(-0.092,\ 0.692)$, no longer significant. The coefficient did not change; what you may claim did.\\
+\textbf{OVB:} $\beta_z = 0.05$, $\delta_1 = 0.4$ → bias $= +0.02$. If the short slope is $0.09$, the implied $\beta_1 = 0.07$.
+\end{keybox}
+
+\newpage
+
+# Session 4 · Binary, ordinal and multinomial outcomes
+
+## Why not OLS on a 0/1 outcome?
+
+The **linear probability model** $P(Y=1) = \beta_0 + \beta_1 x$ can predict probabilities below 0 or above 1, worst at extreme $x$. The **logistic** function keeps them in $(0, 1)$:
+
+$$p(x) = P(Y=1 \mid x) = \frac{1}{1 + e^{-x^\top\beta}}, \qquad \ln\frac{p}{1-p} = x^\top\beta .$$
+
+- $\beta_j$ is a change in the **log-odds**. $e^{\beta_j}$ is an **odds ratio**: the odds are multiplied by $e^{\beta_j}$ per unit of $x_j$. An OR of 1.30 means odds 30% higher, **not** a probability 30% higher.
+- **Marginal effect** on the probability: $\partial p/\partial x_j = p(1-p)\,\beta_j$. It depends on where you evaluate it, and is largest at $p = 0.5$.
+- Estimated by **maximum likelihood**. **Wald test**: $z = \hat\beta_j/SE$, one coefficient at a time. **Likelihood-ratio test**: $LR = 2(\ell_{full} - \ell_{restricted}) \sim \chi^2_q$, for $q$ coefficients jointly (e.g. all the dummies of one categorical variable).
+- **McFadden's pseudo-$R^2$** $= 1 - \ell_{model}/\ell_{null}$. Not a share of variance; values of 0.2–0.4 already indicate a good fit.
+
+## Ordinal logit (ordered categories)
+
+$\ln\frac{P(Y \le j)}{P(Y > j)} = c_j - x^\top\beta$, with $J-1$ **cutpoints** $c_1 < c_2 < \dots$ and **one** $\beta$ per predictor. Positive $\beta$ pushes up the scale. Category probabilities are **differences** of cumulative ones: $P(Y = j) = F(c_j - \eta) - F(c_{j-1} - \eta)$. **Proportional odds**: the same odds ratio applies at every cut — check it by fitting a binary logit at each cut.
+
+## Multinomial logit (unordered categories)
+
+Pick a **baseline** category. Each other category $k$ gets its own equation $\ln\frac{P(k)}{P(\text{base})} = x^\top\beta_k$. $e^{\beta}$ is a **relative risk ratio** against the baseline. Probabilities: $P(k) = e^{\eta_k}/\sum_m e^{\eta_m}$, with $\eta_{base} = 0$. A negative coefficient does **not** mean that category's probability falls: every equation moves at once.
+
+## From a probability to a decision
+
+- A threshold turns $p$ into a yes/no. If a missed positive costs $c_{FN}$ and a false alarm $c_{FP}$, the cost-minimising threshold is $\tau^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}$ — not 0.5.
+- **Accuracy** is meaningless with a rare outcome: with a 3% base rate, "never" is 97% accurate. Report the base rate, **precision** $= TP/(TP+FP)$ and **recall** $= TP/(TP+FN)$.
+- **Discrimination** (AUC: does the model rank positives above negatives?) is not **calibration** (does $p = 0.2$ happen 20% of the time?). A high AUC does not make the probabilities usable.
+
+\begin{keybox}
+\textbf{Worked example.} $\hat\beta = (-2.0,\ 0.03,\ 0.5)$ for (intercept, income in thousands, collateral). Applicant: income 50, collateral 1.
+$x^\top\hat\beta = -2.0 + 0.03(50) + 0.5 = 0$ → $p = 1/(1+e^{0}) = 0.50$.
+Odds ratio for collateral $e^{0.5} \approx 1.65$: odds 65\% higher.
+Marginal effect of income: $0.5 \times 0.5 \times 0.03 = 0.0075$, i.e. \textbf{0.75 percentage points} per thousand.
+If a missed default costs 3 times a false alarm: $\tau^\star = 1/(1+3) = 0.25$; since $0.50 > 0.25$, flag the applicant.
+\end{keybox}
+
+\newpage
+
+# Session 5 · Regularisation
+
+## Why a biased estimator can win
+
+Test error $= \text{bias}^2 + \text{variance} + \text{irreducible noise}$. OLS is unbiased, but with few rows and many correlated predictors its **variance** is enormous. Accepting a little bias for a large cut in variance lowers the total. The penalty $\lambda$ is the dial: $\lambda = 0$ is OLS; $\lambda \to \infty$ sets every coefficient to 0 (predict the mean).
+
+**Stepwise selection** makes one in-or-out decision at a time; resample the rows and it picks a different model, noise included. "The data chose these variables" is not a finding.
+
+## Ridge
+
+$$\hat\beta^{ridge} = \arg\min_\beta \sum_i (y_i - x_i^\top\beta)^2 + \lambda\sum_j \beta_j^2 = (X^\top X + \lambda I)^{-1}X^\top y$$
+
+Shrinks every coefficient toward 0, never exactly to 0; shrinks most where predictors are nearly collinear. $X^\top X + \lambda I$ is invertible for any $\lambda > 0$, **even when $p > n$**. **Standardise first**: the penalty is scale-dependent.
+
+## Lasso and soft-thresholding
+
+The lasso penalises $\lambda\sum_j |\beta_j|$. Its diamond-shaped budget has **corners on the axes**, so some coefficients are **exactly 0**: it selects. Coordinate update (standardised columns, $\rho_j$ = covariance of $x_j$ with the partial residual):
+
+$$\hat\beta_j = S_\lambda(\rho_j) = \operatorname{sign}(\rho_j)\,\big(|\rho_j| - \lambda\big)_+ \qquad\text{(zero if } |\rho_j| \le \lambda\text{; else shrink by } \lambda\text{)}$$
+
+Limits to state: with $p > n$ it keeps at most $n$ variables; among correlated predictors it keeps one, almost arbitrarily; the selected set is not "the true model".
+
+## Elastic net
+
+Mixes both penalties with weight $\alpha$ ($\alpha = 1$ lasso, $\alpha = 0$ ridge). Update: $\hat\beta_j = S_{\lambda\alpha}(\rho_j)\,/\,\big(1 + \lambda(1-\alpha)\big)$. The **grouping effect**: correlated predictors enter together rather than one standing in for all.
+
+## Choosing $\lambda$, and what not to claim
+
+- **$K$-fold cross-validation**: fit on $K-1$ folds, score on the held-out fold, repeat, average; keep the best $\lambda$. Larger $K$ → less bias (each fit uses more data) but more variance and more computation; $K = 5$ or 10 is the compromise. **$\lambda_{1se}$** = the largest $\lambda$ within one SE of the best: a smaller model at no visible cost.
+- **Leakage**: imputation, standardisation and feature screening must happen **inside** each fold; for time series, split by time, never shuffle. Otherwise the CV score is optimistic.
+- **p-values after selection are not valid**: the same data chose the variables and then tested them.
+
+\begin{keybox}
+\textbf{Worked example — ridge.} $X^\top X = \begin{pmatrix}5&2\\2&4\end{pmatrix}$, $X^\top y = \begin{pmatrix}9\\8\end{pmatrix}$.
+OLS: $\det = 20-4 = 16$, inverse $\frac{1}{16}\begin{pmatrix}4&-2\\-2&5\end{pmatrix}$, $\hat\beta = \frac{1}{16}(20,\,22) = (1.250,\ 1.375)$.
+Ridge, $\lambda = 1$: $\begin{pmatrix}6&2\\2&5\end{pmatrix}$, $\det = 26$, $\hat\beta = \frac{1}{26}(29,\,30) = (1.115,\ 1.154)$ — shrinkage 10.8\% and 16.1\%.\\[2pt]
+\textbf{Worked example — soft-thresholding.} $\rho = (0.50,\ -0.12,\ 0.25)$, $\lambda = 0.15$.
+Lasso: $(0.35,\ 0,\ 0.10)$ — two survive. Elastic net, $\alpha = 0.5$: threshold $0.075$, divide by $1.075$ → $(0.395,\ -0.042,\ 0.163)$ — all three survive.
+\end{keybox}
+
+\newpage
+
+# Session 6 · Panel data, dummies, interactions, non-linearity
+
+## Panel data
+
+A **panel** follows the same units (countries, firms) over time. Observations of the same country are not independent, so **pooled OLS with classical standard errors understates uncertainty**. Use standard errors **clustered by unit**.
+
+- **Fixed effects (FE)**: one intercept per unit. Uses only variation *within* each unit over time, so it removes every time-invariant characteristic (geography, institutions, culture) — at the cost of not estimating the effect of anything that does not vary over time.
+- **Random effects (RE)**: treats unit intercepts as random draws, **assuming they are uncorrelated with the regressors**. More efficient; biased if that assumption fails.
+- **Hausman test**: compares FE and RE. A significant difference says the RE assumption fails → prefer FE. Choose on the assumption, **never** on which one gives the significant answer.
+
+## Dummies, interactions and curvature
+
+- A categorical variable with $m$ levels enters as $m-1$ **dummies**; each coefficient is a difference from the **reference** level, which you must name.
+- **Interaction** $y = \beta_0 + \beta_1 x + \beta_2 d + \beta_3 (x \times d)$: the slope of $x$ is $\beta_1$ when $d = 0$ and $\beta_1 + \beta_3$ when $d = 1$. Report the slope **in each group**, not $\beta_3$ alone.
+- **Quadratic** $y = \beta_0 + \beta_1 x + \beta_2 x^2$: the effect of $x$ is $\beta_1 + 2\beta_2 x$ and depends on $x$; the turning point is $x^\star = -\beta_1/(2\beta_2)$. Never interpret $\beta_1$ on its own.
+- **Comparing models**: F-test or LR test for nested models; AIC/BIC for non-nested ones, always on the same rows.
+
+\begin{keybox}
+\textbf{Worked example.} $\hat y = 1.0 + 0.8x - 0.02x^2$: effect of $x$ at $x = 10$ is $0.8 - 0.04(10) = 0.40$; turning point $x^\star = 0.8/0.04 = 20$.
+With $\hat y = 2 + 0.5x + 1.2d - 0.3(x\times d)$: slope $0.5$ when $d = 0$, $0.2$ when $d = 1$.
+\end{keybox}
+
+\newpage
+
+# What loses marks, session by session
+
+\begin{warnbox}
+\textbf{2} · a summary pasted without interpretation · a skewness or kurtosis without its threshold · calling a variable normal because it is symmetric · the empirical rule on a skewed variable.\\
+\textbf{3} · a slope without units or without "holding the others fixed" · classical SEs under a visible fan · reading "not significant" as "no effect" · deleting an influential point silently · comparing AIC on different rows.\\
+\textbf{4} · log-odds reported as probabilities · an odds ratio read as a relative risk · accuracy on a rare outcome with no base rate · a 0.5 threshold with unequal costs.\\
+\textbf{5} · penalising unstandardised predictors · standardising or screening before the CV split · the lasso's selected set called "the variables that matter" · post-selection p-values · a dropped variable read as "no effect".\\
+\textbf{6} · pooled OLS on a panel with classical SEs · FE or RE chosen by significance · an interaction without the slope in each group · a quadratic read from $\beta_1$ alone.
+\end{warnbox}
+
+# Writing a Part D answer
+
+Part D rewards a **well-argued refusal**. A strong answer does four things, in order:
+
+1. **Say what the number is.** "Seven variables that jointly predict well at one $\lambda$, on one sample" — not "the drivers".
+2. **Say what it does not license**, and why: no causal design, a constructed measure, selection that invalidates the p-values.
+3. **Name the evidence that would change your answer**: a design that isolates the cause, a validation of the measure, a stability check across resamples, an out-of-sample test.
+4. **Recommend what to do meanwhile**: report the association with its uncertainty, run the named diagnostic first, and hold any decision that assumes causation.
+
+\begin{keybox}
+\textbf{Formulas worth carrying in your head.} $s^2$ with $n-1$ · $SE = s/\sqrt n$ · $2\sqrt{6/n}$ and $4\sqrt{6/n}$ · $\hat\beta = (X^\top X)^{-1}X^\top y$ · $t = \hat\beta/SE$ and $\hat\beta \pm 1.96\,SE$ · OVB $= \beta_z\delta_1$ · $\sum h_{ii} = p$ · $AIC = -2\ell + 2p$ · $p = 1/(1+e^{-x^\top\beta})$ · odds ratio $e^{\beta}$ · $p(1-p)\beta$ · $LR = 2\Delta\ell$ · $\tau^\star = c_{FP}/(c_{FP}+c_{FN})$ · $(X^\top X + \lambda I)^{-1}X^\top y$ · $S_\lambda(\rho)$ · $S_{\lambda\alpha}(\rho)/(1+\lambda(1-\alpha))$ · $\beta_1 + 2\beta_2 x$ and $-\beta_1/(2\beta_2)$.
+\end{keybox}

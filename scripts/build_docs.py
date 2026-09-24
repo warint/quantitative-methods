@@ -147,6 +147,13 @@ def main():
         n_sheets += 1
     print(f"published {n_sheets} python cheatsheets to docs/")
 
+    # The six-page midterm summary. Rendered from its .qmd by hand:
+    #   quarto render assessments/midterm/MIDTERM-SUMMARY.qmd --to pdf
+    summary = ROOT / "assessments" / "midterm" / "MIDTERM-SUMMARY.pdf"
+    if summary.exists():
+        shutil.copy2(summary, DOCS / "midterm-summary.pdf")
+        print("published the midterm summary to docs/")
+
     decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:
         raise SystemExit("No rendered decks found — run scripts/render_session_lectures.sh first.")
