@@ -3,7 +3,7 @@ Session 07 · Step 0 — is everything in place?
 
 Run this first, from the repository root (the folder that contains qmib.py):
 
-    python 07-pca-and-factor-analysis/02-practice/starter/check_setup.py
+    python 07-replication-workshop/02-practice/starter/check_setup.py
 
 It checks the Python packages the five replications use, and that each paper's
 data is where the scripts expect it. Every line should say OK. Anything that

@@ -12,7 +12,7 @@ left unchanged.
 | S04 | Original S05 | Logistic, ordinal, and multinomial regression | `04-logistic-ordinal-multinomial/01-lecture/MATH60033A-S04-Lecture.qmd` |
 | S05 | Repository-native | Ridge, lasso, and elastic net regularisation | `05-ridge-lasso-elastic-net/01-lecture/MATH60033A-S05-Lecture.qmd` |
 | S06 | Original S06 | Advanced regression considerations | `06-advanced-regression/01-lecture/MATH60033A-S06-Lecture.qmd` |
-| S07 | Repository-native | Replication workshop: five papers, one toolkit | `07-pca-and-factor-analysis/01-lecture/MATH60033A-S07-Lecture.qmd` |
+| S07 | Repository-native | Replication workshop: five papers, one toolkit | `07-replication-workshop/01-lecture/MATH60033A-S07-Lecture.qmd` |
 | S08 | Original S08 | K-nearest neighbours and the bias–variance trade-off | `08-knn-and-bias-variance/01-lecture/MATH60033A-S08-Lecture.qmd` |
 | S09 | Original S09 | Structural equation modelling | `09-structural-equation-modelling/01-lecture/MATH60033A-S09-Lecture.qmd` |
 | S10 | Original S10 | Causal inference: logic and tools | `10-causal-inference-foundations/01-lecture/MATH60033A-S10-Lecture.qmd` |

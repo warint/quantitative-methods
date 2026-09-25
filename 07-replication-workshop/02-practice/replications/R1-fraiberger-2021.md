@@ -272,5 +272,5 @@ paper, Fig. 2B h=0                         0.049  102665
 - **Extreme returns** (China 21 May 1992: +105%; Turkey 1991: +77% / −39%) dominate the return kurtosis. Clip the histogram's range, or the plot is one spike.
 - **Missing columns.** `AE`, `F*_d_returns_h/l`, `commo` and `R_DJ_global` are referenced in the do-files but absent from `regression_sample.dta`. `pd.read_stata(..., columns=[...])` raises a `ValueError` naming them if you ask for them.
 - **Clustering on dates:** statsmodels wants numbers for `groups`, hence `dd["DATE"].astype("int64")`.
-- **Figures** are saved in `07-pca-and-factor-analysis/02-practice/output/`, which git ignores.
+- **Figures** are saved in `07-replication-workshop/02-practice/output/`, which git ignores.
 - Runtime is about 2–3 seconds end to end.

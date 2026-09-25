@@ -2,12 +2,12 @@
 Replication 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
 *Media sentiment and international asset prices*
 
-Step-by-step guide: 07-pca-and-factor-analysis/02-practice/replications/R1-fraiberger-2021.md
+Step-by-step guide: 07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
 
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
 
-    python 07-pca-and-factor-analysis/02-practice/starter/r1_fraiberger_2021.py
+    python 07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
@@ -25,7 +25,7 @@ if ROOT is None:
     sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-pca-and-factor-analysis/02-practice/output")   # figures land here
+OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import numpy as np

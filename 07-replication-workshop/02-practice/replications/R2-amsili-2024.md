@@ -334,4 +334,4 @@ parameters. In accuracy terms, though, the product terms cut RMSE only from 0.04
 - **AWC is not always exactly FC − PWP** in this file: `(d.AWC - (d.FC_10kPa - d.PWP_1500kPa)).abs().max()`
   returns 0.191. If you switch the exercise to AWC, model the `AWC` column as given, and don't
   rebuild it from the other two.
-- **Figures** are saved in `07-pca-and-factor-analysis/02-practice/output/`, which git ignores.
+- **Figures** are saved in `07-replication-workshop/02-practice/output/`, which git ignores.

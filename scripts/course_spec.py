@@ -207,7 +207,7 @@ SESSIONS = {
         ],
     ),
     "07": dict(
-        dir="07-pca-and-factor-analysis",   # the path the book's chapter 7 is built from
+        dir="07-replication-workshop",   # the path the book's chapter 7 is built from
         title="Replication Workshop: Five Papers, One Toolkit",
         short="Replication workshop",
         question="Can you reproduce what the papers claim, with only what you have learned?",

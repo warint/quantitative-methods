@@ -1,6 +1,6 @@
 """Write the two solution slides for each paper of the session 07 deck.
 
-    python 07-pca-and-factor-analysis/01-lecture/build_solution_slides.py
+    python 07-replication-workshop/01-lecture/build_solution_slides.py
 
 For every starter script in ../02-practice/starter/ this writes an include file,
 _solutions-rN.qmd, holding two slides:

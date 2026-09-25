@@ -66,4 +66,4 @@ In `groups/A2026/group-XX/session-06/`: a panel specification of your project's 
 
 ---
 
-[<- [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md)](../05-ridge-lasso-elastic-net/README.md) | [[Session 07: Replication Workshop: Five Papers, One Toolkit](../07-pca-and-factor-analysis/README.md) ->](../07-pca-and-factor-analysis/README.md)
+[<- [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md)](../05-ridge-lasso-elastic-net/README.md) | [[Session 07: Replication Workshop: Five Papers, One Toolkit](../07-replication-workshop/README.md) ->](../07-replication-workshop/README.md)

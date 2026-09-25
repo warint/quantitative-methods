@@ -93,9 +93,9 @@ the terminal:
 Open [`starter/check_setup.py`](starter/check_setup.py) and press the **Run** triangle (top right).
 Or, in the terminal:
 
-- **macOS:** `python3 07-pca-and-factor-analysis/02-practice/starter/check_setup.py`
-- **Linux:** `python3 07-pca-and-factor-analysis/02-practice/starter/check_setup.py`
-- **Windows:** `python 07-pca-and-factor-analysis\02-practice\starter\check_setup.py`
+- **macOS:** `python3 07-replication-workshop/02-practice/starter/check_setup.py`
+- **Linux:** `python3 07-replication-workshop/02-practice/starter/check_setup.py`
+- **Windows:** `python 07-replication-workshop\02-practice\starter\check_setup.py`
 
 **You should see** a list in which every line says `OK`. A line that says `MISSING`:
 
@@ -112,7 +112,7 @@ steps in the same order.
 - **Run one step:** select its lines and press **Shift+Enter**. VS Codium sends them to a Python
   terminal and prints the result. Variables stay in memory, so the next step can use them.
 - **Run the whole script:** the **Run** triangle. Every script takes a few seconds.
-- **Figures** are saved in `07-pca-and-factor-analysis/02-practice/output/`. Open them from the
+- **Figures** are saved in `07-replication-workshop/02-practice/output/`. Open them from the
   Explorer on the left.
 
 Run the steps **in order**: step 5 needs what step 4 made.
@@ -149,14 +149,14 @@ paper you attempted:
 ```bash
 git checkout -b group-XX
 mkdir -p groups/A2026/group-XX/session-07
-cp 07-pca-and-factor-analysis/02-practice/replication-log.md groups/A2026/group-XX/session-07/
+cp 07-replication-workshop/02-practice/replication-log.md groups/A2026/group-XX/session-07/
 ```
 
 On **Windows (PowerShell)**, the last two lines are:
 
 ```powershell
 New-Item -ItemType Directory -Force groups\A2026\group-XX\session-07
-Copy-Item 07-pca-and-factor-analysis\02-practice\replication-log.md groups\A2026\group-XX\session-07\
+Copy-Item 07-replication-workshop\02-practice\replication-log.md groups\A2026\group-XX\session-07\
 ```
 
 Then commit and push, the same on every platform:

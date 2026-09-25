@@ -14,7 +14,7 @@ workshop 180 min · no lecture · students work alone or in teams
 ## Before the day
 
 - Run every script once on your own machine, from the repository root:
-  `python 07-pca-and-factor-analysis/02-practice/starter/r1_fraiberger_2021.py`, and so on to `r5`.
+  `python 07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py`, and so on to `r5`.
   Each takes two seconds. If a Dataverse package has been updated since 24 September 2026 and a
   number moves, correct the guide and the slide to match the script.
 - Remind the class two days ahead that the four packages must be downloaded **before** they
