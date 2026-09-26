@@ -376,7 +376,8 @@ are thinking of doing during your MSc.
 **The oral, 15 minutes per student, examined individually, the day after the paper is due —
 Monday 14 December 2026** (to be confirmed). No slides, no documents. Roughly half
 on the methods used in your own paper — derive the estimator, state the assumptions, say what would
-break the result — and half on the course, Sessions 02 to 11.
+break the result — and half on the course, Sessions 02 to 11. Marked 5 for command of your own method, 5 for command
+of the course, and 5 for honesty under pressure.
 
 > **Why an oral on top of a paper.** A paper can be written slowly, with help, over weeks. Fifteen
 > minutes without documents establishes what you can reconstruct and defend in real time — which is

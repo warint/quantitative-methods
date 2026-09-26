@@ -147,10 +147,16 @@ the semester, and a 15-minute oral the day after it is due.**
 | Results and honest evaluation | 20 |
 | Writing, references, repository and statements | 15 |
 
-**The oral** is roughly half on your paper and half on Sessions 02 to 11, and it is marked on three
-things: **command of your own method** (derive it, state its assumptions, say what breaks it),
-**command of the course** (connect your paper to the methods you did not use), and **honesty under
-pressure** (concede precisely what cannot be claimed). In English or French, your choice.
+**The oral** is roughly half on your paper and half on Sessions 02 to 11, and it is marked out of 15 in three
+equal parts:
+
+| | Points |
+|---|---|
+| **Command of your own method** — derive it, state its assumptions, say what breaks it | 5 |
+| **Command of the course** — connect your paper to the methods you did not use | 5 |
+| **Honesty under pressure** — concede precisely what cannot be claimed | 5 |
+
+In English or French, your choice.
 
 - A paper submitted **without an LLM-use statement is returned ungraded**.
 - The individual multiplier **never** applies: both parts already measure you alone.

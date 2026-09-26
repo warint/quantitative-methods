@@ -224,11 +224,13 @@ Two things, roughly half the time each:
 
 ### How it is marked
 
-| | What earns full marks |
-|---|---|
-| **Command of your own method** | Derives it, states the assumptions, knows what breaks it |
-| **Command of the course** | Connects your paper to the methods you did not use, and says why |
-| **Honesty under pressure** | Concedes precisely what cannot be claimed, and says how you would find out |
+Out of 15, in three equal parts:
+
+| | Points | What earns full marks |
+|---|---|---|
+| **Command of your own method** | 5 | Derives it, states the assumptions, knows what breaks it |
+| **Command of the course** | 5 | Connects your paper to the methods you did not use, and says why |
+| **Honesty under pressure** | 5 | Concedes precisely what cannot be claimed, and says how you would find out |
 
 > **Saying "I do not know" costs you very little.** Defending an indefensible claim costs you a
 > great deal.
