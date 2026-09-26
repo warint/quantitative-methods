@@ -73,8 +73,8 @@ Full detail, including your group's allocation: [`RESEARCH-MANDATES.md`](../../R
 |---|---|---|
 | **Participation** | 10% | individual, continuous — in the room, in the practice, or via the optional labs |
 | **Midterm exam** | 30% | individual, in class, **Wed 28 October** |
-| **Team work** | 20% | groups of three, presented Session 12 |
-| **Final exam** | 40% | **individual** research paper (25) + individual oral, 15 min (15) |
+| **Team work** | 20% | groups of three — the SDAfrique methods paper, presented Session 12, due Sun 13 December |
+| **Final exam** | 40% | **individual** research paper (25), due Sun 13 December + individual oral, 15 min (15), Mon 14 December |
 
 Participation is **active engagement**, and three routes count equally: contributing in the room,
 engaging in the 90-minute practice, and completing an optional [QMIB Lab](https://warin.ca/qmib-labs/) knowledge check after a

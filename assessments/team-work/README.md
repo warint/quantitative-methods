@@ -1,15 +1,22 @@
-# Final exam — research paper and oral
+# Team work — the SDAfrique methods paper
 
-**40% of the final grade** · **written alone**, English, academic format · **oral examined
-individually, 15 minutes per student**
+**20% of the final grade** · **written by your team of three** (your practice group), English,
+academic format · **presented and defended in Session 12** · paper due **Sunday 13 December 2026, 23:59**
 
 > You will write for a reader who exists, who is not your professor, and who will use what you
-> write — and then you will answer for it, alone.
+> write — and then you will defend it, in front of the room.
 
-| Component | Weight | Form |
-|---|---|---|
-| **Research paper** | 25 | Individual |
-| **Oral examination** | 15 | Individual, 15 minutes |
+| Component | Weight | Form | When |
+|---|---|---|---|
+| **Methods paper and repository** | 16 | Team of three | Sunday 13 December 2026, 23:59 |
+| **Presentation and defence** | 4 | Team, questions to named members | Session 12, Wednesday 2 December |
+
+The [individual multiplier](../../GROUP-ASSESSMENT.md) applies to these 20 points, and only to them.
+
+> **This is not the final exam.** The final exam (40%) is an *individual* research paper on a
+> question of your own, plus a 15-minute individual oral: see
+> [`../final-exam/`](../final-exam/README.md). Both papers are due on the same day, and the oral is
+> the day after.
 
 ---
 
@@ -24,7 +31,7 @@ individually, 15 minutes per student**
 7. [The implementation note](#7-the-implementation-note)
 8. [Authorship and LLM statements](#8-authorship-and-llm-statements)
 9. [Rubric — the paper](#9-rubric--the-paper)
-10. [The oral examination](#10-the-oral-examination)
+10. [The presentation and defence](#10-the-presentation-and-defence)
 11. [Timeline and submission](#11-timeline-and-submission)
 
 ---
@@ -44,7 +51,7 @@ health service delivery. They work in R and Markdown, and present their findings
 **Your commission is to write a methods paper that an SDAfrique student in her second or third year
 could pick up and use.**
 
-Concretely: take the method your group spent eleven weeks mastering on European data, carry it — **on your own** — to a
+Concretely: take the method your group spent eleven weeks mastering on European data, carry it — **as a team** — to a
 problem in Africa, and write the paper that makes the method usable by someone who works in R, on a
 modest machine, with limited bandwidth, on a problem she chose herself.
 
@@ -176,7 +183,7 @@ a proposed alternative is welcome and often better.
    not the conclusion.
 5. **Modest in compute.** Must run on a laptop without a GPU, in under an hour.
 
-Confirm your question with the instructor by the date in §10.
+Confirm your question with the instructor by the date in §11.
 
 ---
 
@@ -216,7 +223,7 @@ All open, all reachable from most of Africa.
 
 ## 6. Structure of the paper
 
-**Between 6,000 and 8,000 words, including references and appendices.** Standard academic format, single-authored. The research question must be on an **international** topic.
+**Between 6,000 and 8,000 words, including references and appendices.** Standard academic format, written by the three members of the team. The research question must be on an **international** topic.
 
 | § | Section | Guidance |
 |---|---|---|
@@ -226,7 +233,7 @@ All open, all reachable from most of Africa.
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations. Include the descriptive table a referee will ask for. |
 | 4 | **Method** | **Derive it.** Not "we use elastic net (Zou and Hastie 2005)" but the objective function, what the penalty does, why the tuning parameter is chosen as it is. Assume a reader who knows regression but not your method. |
 | 5 | **Results** | Main result with uncertainty and against a named benchmark. Figures with captions that say what they *show*. |
-| 6 | **Robustness and limitations** | What you tested, what moved, what did not. The paragraph naming what would change your conclusion. |
+| 6 | **Robustness, limitations and governance** | What you tested, what moved, what did not; the paragraph naming what would change your conclusion. Then the governance content from Session 11.4, written for your SDAfrique client: what the model is for, what it must **not** be used for, how it was validated, where it is weakest, and how she should monitor it. |
 | 7 | **Implementation note for R users** | See §7. This is graded separately and heavily. |
 | 8 | **Conclusion** | What an SDAfrique team should take from this, and what they should not. |
 | — | **References** | Consistent style. APA or Chicago; choose one. |
@@ -272,24 +279,27 @@ It must contain:
 
 ### Authorship and acknowledgements
 
-The paper is **single-authored**. You are responsible for every sentence in it.
+The paper has **three authors**, the members of your team, and each of you is responsible for
+every sentence in it.
 
-That does not mean you worked in a vacuum, and the paper should say so. Use the
-[CRediT taxonomy](https://credit.niso.org/) to record what you did, and an acknowledgement to
-record what others contributed without meeting the bar for authorship:
+Use the [CRediT taxonomy](https://credit.niso.org/) to record who did what, and an acknowledgement
+to record what others contributed without meeting the bar for authorship:
 
-> **Author contributions.** *Conceptualization, Methodology, Formal analysis, Software,
-> Visualization, Writing – original draft, Writing – review & editing:* A.B.
+> **Author contributions.** *Conceptualization:* A.B., C.D., E.F. *Methodology, Formal analysis:*
+> A.B. *Software, Data curation:* C.D. *Writing – original draft:* E.F. *Writing – review & editing:*
+> all authors.
 >
-> **Acknowledgements.** The author thanks [SDAfrique student] for framing the problem and for
-> feedback on an earlier draft, and [group members] for discussion of the method during the
-> practice sessions. Responsibility for the content is the author's alone.
+> **Acknowledgements.** The authors thank [SDAfrique student] for framing the problem and for
+> feedback on an earlier draft. Responsibility for the content is the authors' alone.
 
 > **Why acknowledge rather than co-author.** Authorship implies responsibility for the whole. Your
 > SDAfrique contact set the problem and will use the result, but did not write the paper and cannot
 > answer for its statistics — that is what an acknowledgement is for. Getting this distinction right
 > is itself part of the training: misplaced authorship is one of the most common integrity failures
 > in academic publishing.
+>
+> **Why the contributions statement matters here.** It is read alongside the git contribution
+> report and the confidential peer ratings when the individual multiplier is set.
 
 ### LLM use statement
 
@@ -312,7 +322,7 @@ assistant gives you against the actual publisher record. Report what you found.
 
 ## 9. Rubric — the paper
 
-Out of 100, for the 25 points the paper carries.
+Out of 100, for the 16 points the paper and its repository carry.
 
 | Component | Weight | What earns full marks |
 |---|---|---|
@@ -343,55 +353,24 @@ Out of 100, for the 25 points the paper carries.
 
 ---
 
-## 10. The oral examination
+## 10. The presentation and defence
 
-**15 minutes, one student at a time, no documents.**
+**Session 12, Wednesday 2 December — 4 of the 20 points.**
 
-The paper is written by three people. The oral is where the course establishes what **each** of
-them understands. It is not a presentation and there are no slides — you sit down and answer
-questions.
+Each team presents its paper to a decision-maker who will not read the code: the question, the
+answer, how far to trust it, and what the SDAfrique team should do with it. Then questions.
 
-### What is examined
+- **Questions are directed at a named member**, not at the group. The instructor chooses who
+  answers — the same principle as the weekly presenter draw.
+- The paper is still a draft at this point; the presentation is where you find out which parts of
+  it do not survive a question. Use what you learn in the final version.
 
-Two things, roughly half the time each:
-
-1. **The methods used in your paper.** Why that estimator and not the obvious alternative. What
-   the assumptions are. What would break the result. Where the uncertainty comes from and what it
-   covers.
-2. **The course content.** Anything from Sessions 02 to 11. Derive something on paper if asked.
-
-### What this is designed to catch
-
-> A paper can be written by a team in which one person did the modelling, one wrote the prose and
-> one watched. The paper cannot tell me which. Fifteen minutes can.
-
-It is also the reason the individual multiplier does **not** apply here: the oral already measures
-the individual directly, so there is nothing to correct for.
-
-### Questions you should expect
-
-- *Derive the estimator you used. You may use the board.*
-- *Your paper reports X. What would have to be true about the data for that to be wrong?*
-- *You chose method A over method B. Defend that against someone who prefers B.*
-- *Where in your paper is a claim your design cannot support? There is usually one.*
-- *Explain [some result from Session 0N] and why it mattered for your paper — or why it did not.*
-
-### How it is marked
+Format, timing and the questions to prepare for: [Session 12](../../12-group-presentations/README.md).
 
 | | What earns full marks |
 |---|---|
-| **Command of your own method** | Derives it, states the assumptions, knows what breaks it |
-| **Command of the course** | Connects your paper to the methods you did not use, and says why |
-| **Honesty under pressure** | Concedes precisely what cannot be claimed, and says how you would find out |
-
-> **Saying "I do not know" costs you very little.** Defending an indefensible claim costs you a
-> great deal. That has been true in every practice session this term and it is true here.
-
-### Practical
-
-- Scheduled in the two weeks after the paper deadline; slots circulated in advance.
-- Bring nothing. Your paper is in front of the examiner.
-- Conducted in English or French, your choice — state it when you book.
+| **Clarity of the recommendation** | A decision-maker could act on it without reading the paper |
+| **Answers under questioning** | Whoever is named can defend the method, the number and its limits |
 
 ---
 
@@ -399,15 +378,13 @@ the individual directly, so there is nothing to correct for.
 
 | When | What |
 |---|---|
-| **After Session 7** | Teams formed (three authors; they need not be your practice group). Registered with the instructor. |
 | **After Session 8** | One-page proposal: question, data sources with links, method, why it matters locally. Approved before you proceed. |
 | **After Session 10** | Literature review draft — the sources and the argument, not yet polished prose. Formative feedback returned. |
-| **Session 12 week** | Full draft optional, for comment. Take this up; it is free. |
-| **Two weeks after Session 12** | **Final submission** of the paper. |
-| **The two weeks following** | **Oral examinations**, 15 minutes per student. |
+| **Session 12 — Wed 2 December** | **Presentation and defence** (4 points). |
+| **Sunday 13 December 2026, 23:59** | **Final submission** of the paper and its repository (16 points) — the same deadline as the individual final paper. |
 
-**Submit:** the paper as PDF, and the repository as a link or archive. The repository must run from
-a clean clone. If it does not run, the analysis component cannot be marked.
+**Submit:** the paper as PDF in `groups/A2026/group-XX/team-paper/`, and the repository must run
+from a clean clone. If it does not run, the analysis component cannot be marked.
 
 Late: 10% per day to a maximum of three days.
 
@@ -427,4 +404,5 @@ Write it for her.
 ---
 
 *Related: [syllabus](../../SYLLABUS.md) · [research mandates](../../RESEARCH-MANDATES.md) ·
+[group assessment](../../GROUP-ASSESSMENT.md) · [the final exam](../final-exam/README.md) ·
 [SDAfrique](https://sdafrique.org)*

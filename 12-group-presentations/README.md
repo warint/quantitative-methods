@@ -43,7 +43,7 @@ one that has been listening to presentations for three hours.
 | 1:10–1:25 | Break | |
 | 1:25–1:45 | **Closing address** — *What the twelve weeks were for* | *second half opens* |
 | 1:45–2:50 | Presentations 6–10 | |
-| 2:50–3:00 | Results, next steps, and the final paper | |
+| 2:50–3:00 | Results, next steps, and the two papers due 13 December | |
 
 Ten presentations at 13 minutes is 2h10; with the opening, the break, the address and the close
 that is exactly three hours, and there is no slack in it. A group that runs long is taking the time
@@ -63,27 +63,28 @@ out of the address or out of another group.
 
 ## Deliverables and weighting
 
-Team work is **20% of the course grade**. Within it:
+Team work is **20% of the course grade**: the SDAfrique methods paper your group has been writing
+since Session 8. Full brief: [`assessments/team-work/`](../assessments/team-work/README.md).
 
-| Component | Weight | What is assessed |
-|---|---|---|
-| **Model governance file** | 7 / 20 | The seven headings from Session 11.4. Sections 5 (Limitations) and 6 (Monitoring) carry the most weight. |
-| **Reproducible analysis** | 7 / 20 | Runs end-to-end from a clean clone plus `pip install -r requirements.txt`. Seeds set. Data cached, not downloaded at runtime. |
-| **Revised Session 1 memo + change log** | 3 / 20 | Original and revision submitted together, with a one-page account of what changed and which session changed it. |
-| **Presentation and defence** | 3 / 20 | Clarity of the recommendation; quality of answers under questioning. |
+| Component | Weight | When | What is assessed |
+|---|---|---|---|
+| **Presentation and defence** | 4 / 20 | **Today** | Clarity of the recommendation; quality of answers under questioning, by whichever member is named. |
+| **Methods paper and repository** | 16 / 20 | **Sunday 13 December, 23:59** | The paper's rubric: question, literature, data, method, honest evaluation, governance section, the R implementation note. The repository runs end to end from a clean clone plus `pip install -r requirements.txt`, seeds set, data cached. |
+
+Today the paper is still a draft. Use the questions you are asked to fix the final version.
 
 The [individual multiplier](../GROUP-ASSESSMENT.md) applies to these 20 points only — never to the
-midterm or the final exam, which are assessed separately. The **final exam (40%)** — a research
-an individual paper plus a 15-minute individual oral — is a distinct deliverable with its own
-brief:
-[`assessments/final-paper/`](../assessments/final-paper/README.md).
+midterm or the final exam, which are assessed separately. The **final exam (40%)** — an individual
+research paper, due the same Sunday, plus a 15-minute individual oral the next day — has its own
+brief: [`assessments/final-exam/`](../assessments/final-exam/README.md).
 
-Submit everything to `groups/A2026/group-XX/session-12/` — the deck, the governance file, the analysis, and the revised memo. Preparation checklist:
+Submit today's deck to `groups/A2026/group-XX/session-12/`, and the paper with its repository to
+`groups/A2026/group-XX/team-paper/` by the deadline. Preparation checklist:
 [`00-pre-session/README.md`](00-pre-session/README.md).
 
-The governance file, backtest and shift diagnostic were drafted in the
-[Session 11 practice](../11-causal-inference-did/02-practice/README.md) — this session assesses
-the finished versions.
+The governance content, backtest and shift diagnostic were drafted in the
+[Session 11 practice](../11-causal-inference-did/02-practice/README.md); they now sit in section 6
+of the paper.
 
 ---
 

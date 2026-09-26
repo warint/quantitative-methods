@@ -438,6 +438,9 @@ NO_CLASS = ["2026-09-30", "2026-10-21"]
 MIDTERM_DATE = "2026-10-28"
 MIDTERM_ROOM = "room to be announced"
 
+# The team paper and the individual final paper share one deadline, the day
+# before the oral.
+PAPERS_DUE = "Sunday 13 December 2026, 23:59"
 ORAL_EXAM = "Monday 14 December 2026 (to be confirmed)"
 
 MIDTERM_AFTER = "07"   # where the midterm sits in the calendar: written 28 Oct

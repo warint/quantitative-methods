@@ -52,7 +52,7 @@ A problem someone else chose, in a context you do not live in, is harder than a 
 - You cannot assume the institutional background; you have to learn it.
 - Every assumption you absorbed without noticing becomes visible the moment the setting changes.
 
-It is also the same commission as your [final paper](assessments/final-paper/README.md). The term is
+It is also the same commission as your [team paper](assessments/team-work/README.md). The term is
 not eleven exercises followed by an unrelated assignment: **it is one project, approached with a new
 method every week.**
 
@@ -308,7 +308,7 @@ Each session's practice produces a short section; by Session 12 you have a paper
 | **References** | Every one verified against the publisher record |
 
 > **Three to five articles here, not fifteen.** The heavier review belongs to the
-> [final exam paper](assessments/final-paper/README.md). This is the working draft that grows into it.
+> [team paper](assessments/team-work/README.md). This is the working draft that grows into it.
 
 **On the conclusion.** It is the one section that must speak to the people who gave you the problem.
 Practical implications for *their* context, in language they can use — not a restatement of your
@@ -354,4 +354,4 @@ from. Write something they can use, credit them, and do not overstate what your 
 
 ---
 
-[Syllabus](SYLLABUS.md) · [Group assessment](GROUP-ASSESSMENT.md) · [Final exam brief](assessments/final-paper/README.md)
+[Syllabus](SYLLABUS.md) · [Group assessment](GROUP-ASSESSMENT.md) · [Team work brief](assessments/team-work/README.md) · [Final exam brief](assessments/final-exam/README.md)

@@ -146,7 +146,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 
 **No class** on 30 September, 21 October.
 
-**Oral examination:** Monday 14 December 2026 (to be confirmed).
+**Team paper and final paper due:** Sunday 13 December 2026, 23:59. **Oral examination:** Monday 14 December 2026 (to be confirmed).
 
 > Session 06 (7 October) is **asynchronous** — the lecture deck, the pre-session and the practice
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
@@ -198,8 +198,8 @@ Sessions 10 and 11 confront the question the first nine sessions cannot answer �
 |---|---|---|---|
 | **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional labs | every session |
 | **Midterm exam** | **30%** | individual, on paper, pen and calculator only — no computer, no internet | Wed 28 October |
-| **Team work** | **20%** | groups of three (practice groups) | Session 12 |
-| **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | end of term |
+| **Team work** | **20%** | groups of three (practice groups) — the SDAfrique methods paper | presented Session 12 · due Sun 13 December |
+| **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | paper Sun 13 December · oral Mon 14 December |
 
 ### From a numerical mark to a letter
 
@@ -222,10 +222,8 @@ the conversion is curved**, with the class **median at B+**.
 
 | | |
 |---|---|
-| Model governance file | 7 |
-| Reproducible analysis | 7 |
-| Revised Session 1 memo + change log | 3 |
-| Presentation and defence | 3 |
+| The SDAfrique methods paper and its repository — due Sunday 13 December | 16 |
+| Presentation and defence — Session 12 | 4 |
 
 **Individual accountability.** An individual multiplier derived from confidential peer ratings,
 gated on the git contribution history, applies to the **team work 20% only** — never to the
@@ -311,7 +309,7 @@ be claimed).
 
 Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/).
 
-### Team work — 20%, Session 12
+### Team work — 20%: the SDAfrique methods paper
 
 Eleven weeks of work with a **real client**: a student in the
 [Science des Données au Féminin en Afrique](https://sdafrique.org) programme who has identified a
@@ -321,15 +319,17 @@ problem in her own community and will use what you produce.
 04 onward: you agree what the question is, you send a draft rather than only a final version, and
 you hand back something she can act on without you in the room.
 
-Three parts: a **model governance file** that she could act on — what the model is for, what it
-must not be used for, how it was validated, and where it is weakest — a **reproducible analysis**
-that runs from a clean clone on modest hardware, and a **presentation** to a decision-maker who
-will not read your code.
+What you hand her is a **methods paper**, written by your team of three: your group's method,
+carried from European data to a problem in francophone Africa, written so that a student working
+in R, on a modest machine, can use it. It comes with a **reproducible repository**, a **governance
+section** — what the model is for, what it must not be used for, how it was validated, where it is
+weakest — and an **implementation note for R users**. You **present and defend** it in Session 12
+(4 of the 20); the finished paper is due **Sunday 13 December** (16 of the 20).
 
-> **Why the governance file carries the most weight.** Because it is where every other skill in the
-> course has to be written down for someone else — someone in another country, working in another
-> language, on another machine. Its Limitations section is the hardest paragraph you will write this
-> semester.
+> **Why the governance section carries so much weight.** Because it is where every other skill in
+> the course has to be written down for someone else — someone in another country, working in
+> another language, on another machine. Its Limitations paragraph is the hardest you will write
+> this semester.
 >
 > **Why a real client rather than a simulated one.** Because a client who will actually use the
 > result asks different questions from a marker, and cannot be satisfied with a number that is
@@ -343,36 +343,36 @@ will not read your code.
 > **Why you defend it out loud.** Because a question you did not anticipate is the fastest test of
 > whether you understood your own analysis. The instructor chooses who answers.
 
-Details and rubric: [Session 12](12-group-presentations/README.md).
+Full brief and rubric: [`assessments/team-work/`](assessments/team-work/README.md) · the defence: [Session 12](12-group-presentations/README.md).
 
 ### Final exam — 40%: research paper (25) + individual oral (15)
 
-An academic paper, **written alone**, that takes the method your group mastered on European data
-and **transfers it to a problem in francophone Africa**, written for a specific reader: a student
-in the [Science des Données au Féminin en Afrique](https://sdafrique.org) programme who works in R.
+An academic research paper, **written alone**, due **Sunday 13 December 2026** — the same day as the
+team paper — on a question **of your own**. It uses **one** technique seen in the semester, on a
+topic that is **international**, and it should be the paper you would want on your CV: the first
+piece of research you could show a supervisor, and the seed of the supervised project or thesis you
+are thinking of doing during your MSc.
 
 > **Why this one is individual.** Everything else in the second half of the course is collective:
-> the practice sessions, the project, the presentation. This is the piece where you answer for your
-> own judgement, with nobody to divide the work with. It is the closest thing in the course to what
-> you will be asked to do in a job.
-
-> **Why transfer rather than extension.** Re-running your method on more of the same data proves
-> you can run code. Carrying it to a new context — new data, new constraints, new reader — is the
-> only evidence that you understood the method rather than the pipeline. Every assumption you
-> absorbed without noticing becomes visible the moment the setting changes.
+> the practice sessions, the replications, the team paper. This is the piece where you answer for
+> your own judgement, with nobody to divide the work with.
 >
-> **Why a real reader.** SDAfrique trains one hundred francophone African women a year in data
-> science, in teams, on problems they identify in their own communities. They will read what you
-> write. Constraints follow immediately and they are not hypothetical: bandwidth is limited, so your
-> data must be small enough to download; hardware is modest, so your method must run without a GPU;
-> the working language of the programme is R, so you must separate *method* from *implementation*
-> clearly enough that an R user can follow. Writing under real constraints for a real audience is a
-> different intellectual act from writing for a marker.
+> **Why a question of your own.** Every other piece of work this term started from a question
+> someone handed you. Research starts one step earlier — turning a curiosity into something
+> answerable with data you can get — and that is the step a thesis will ask of you. Choose a
+> question you will still care about next year.
 >
-> **Why 40%.** Because it is the piece that asks the most: a literature review, a defensible design,
-> an honest evaluation, and prose that survives contact with a reader who did not take this course.
+> **Why one method.** A paper that runs six methods and reports whichever looks best has searched
+> for a result rather than answered a question. One method, understood completely — its
+> assumptions, its failure modes, the obvious alternative — makes a stronger paper and a far easier
+> oral.
+>
+> **Why 40%.** Because it is the piece that asks the most: a question, a literature review, a
+> defensible design, an honest evaluation, and prose that survives a reader who did not take this
+> course.
 
-**The oral, 15 minutes per student, examined individually.** No slides, no documents. Roughly half
+**The oral, 15 minutes per student, examined individually, the day after the paper is due —
+Monday 14 December 2026** (to be confirmed). No slides, no documents. Roughly half
 on the methods used in your own paper — derive the estimator, state the assumptions, say what would
 break the result — and half on the course, Sessions 02 to 11.
 
@@ -387,7 +387,7 @@ break the result — and half on the course, Sessions 02 to 11.
 **The shape of the paper.** **6,000–8,000 words, including references and appendices**: a research
 question on an **international** topic, a literature review of **10 academic articles**, the
 data, the model, the results, and references. Full brief:
-[`assessments/final-paper/`](assessments/final-paper/README.md).
+[`assessments/final-exam/`](assessments/final-exam/README.md).
 
 ---
 
@@ -409,7 +409,7 @@ Budget 45 minutes.
 
 > **Why local rather than hosted.** Partly governance — data sovereignty is a real constraint in
 > institutions and you should experience working inside it. Partly honesty — a frontier model
-> masks how much of your competence is yours. And partly because the final paper is written for
+> masks how much of your competence is yours. And partly because the team paper is written for
 > readers whose access to compute is not what yours is.
 
 ---
@@ -437,7 +437,7 @@ You are never penalised for using the model. You are penalised for using it uncr
 > replicates?"* That question turns a misleading answer into a useful one. The model would not have
 > volunteered it. **You have to know enough to ask.**
 >
-> This is precisely why the final paper requires a literature review, and why the review is not a
+> This is precisely why both papers require a literature review, and why the review is not a
 > formality. A dozen papers on your topic give you priors: the standard controls, the usual data
 > problems, the range in which a coefficient is plausible. Armed with those, you can ask your
 > assistant *"why is my estimate three times what the literature reports?"* — and that question is
@@ -475,9 +475,9 @@ for the work, and a model can hold neither. It is credited in a statement, never
 may it be cited as a source: if you learned something from it, find and cite the actual source.
 
 **3. Every use must be disclosed.** Each deliverable carries an LLM statement naming the tool, the
-version, and what it was used for. *"We used AI for assistance"* is not a disclosure. For the final
-paper the requirement is set out in
-[`assessments/final-paper/`](assessments/final-paper/README.md#llm-use-statement).
+version, and what it was used for. *"We used AI for assistance"* is not a disclosure. For the two papers the requirement is set out in
+[`assessments/team-work/`](assessments/team-work/README.md#llm-use-statement) and
+[`assessments/final-exam/`](assessments/final-exam/README.md#6-authorship-and-llm-statement).
 
 **4. You are fully responsible for every word and every number you submit** — including the ones the
 assistant produced. "The model wrote it" is not a defence, in this course or after it. If you cannot
@@ -549,7 +549,8 @@ Per-session readings, including the journal articles, are listed in each session
 | [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md) | The ten projects, ten groups, session themes, data sources |
 | [`GROUP-ASSESSMENT.md`](GROUP-ASSESSMENT.md) | Participation, presenter draw, contribution report, peer ratings |
 | [`assessments/midterm/`](assessments/midterm/) | Example paper and full solutions |
-| [`assessments/final-paper/`](assessments/final-paper/README.md) | The SDAfrique brief and rubric |
+| [`assessments/team-work/`](assessments/team-work/README.md) | Team work: the SDAfrique methods paper — brief and rubric |
+| [`assessments/final-exam/`](assessments/final-exam/README.md) | Final exam: the individual research paper and the oral — brief and rubric |
 | `NN-session-slug/` | Per-session pre-session, lecture, and practice |
 
 ---
