@@ -118,6 +118,11 @@ That is a real relationship, not a simulated one, and it carries obligations:
   use.
 - **Acknowledge them by name** in the paper, as the source of the problem.
 
+**It is their project, and their intellectual property.** The problem, their data and the project
+they build belong to them. What your group provides is **intelligence** — analysis, method,
+evaluation — **not software**: they build their own project, in R, and you do not code it for
+them. Details: [the team-work brief](assessments/team-work/README.md#whose-project-it-is).
+
 > **What being a client does not mean.** They are not a source of requirements you satisfy
 > mechanically, and they are not a decoration on an exercise you would have done anyway. The reason
 > this is harder than an instructor-set problem is that you cannot quietly redefine the question to

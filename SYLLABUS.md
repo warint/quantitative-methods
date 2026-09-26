@@ -338,6 +338,10 @@ weakest — and an **implementation note for R users**. You **present and defend
 > technically correct and practically useless. She is your client, **not your co-author** — see
 > [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md).
 >
+> **Whose project it is.** The project and its intellectual property belong to the SDAfrique team.
+> You provide intelligence — analysis, method, evaluation — and you do **not** code their software:
+> they build it themselves, in R.
+>
 > **Why reproducibility is graded, not assumed.** A result that does not reproduce from a clean
 > clone is not a result. This is not pedantry: it is the difference between a finding and an
 > anecdote, and it is the standard every serious journal now applies.

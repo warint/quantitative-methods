@@ -81,6 +81,9 @@ computer, no internet · Sessions 1 to 6.**
 
 **The SDAfrique methods paper**: your practice group's method, carried from European data to a
 problem in francophone Africa, written for a student in the SDAfrique programme who works in R.
+The project and its **intellectual property belong to the SDAfrique team**: you provide
+intelligence — analysis, method, evaluation — and you **do not code their software**
+([details](team-work/README.md#whose-project-it-is)).
 
 | Part | Points | When |
 |---|---|---|

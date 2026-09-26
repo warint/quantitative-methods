@@ -22,7 +22,7 @@ The [individual multiplier](../../GROUP-ASSESSMENT.md) applies to these 20 point
 
 ## Contents
 
-1. [The commission](#1-the-commission)
+1. [The commission](#1-the-commission) — and [whose project it is](#whose-project-it-is)
 2. [Why transfer, and not extension](#2-why-transfer-and-not-extension)
 3. [Why a literature review](#3-why-a-literature-review)
 4. [Choosing your question](#4-choosing-your-question)
@@ -57,6 +57,28 @@ modest machine, with limited bandwidth, on a problem she chose herself.
 
 **This is not a simulated client.** The papers judged strong will be offered to the SDAfrique
 programme. Write accordingly.
+
+### Whose project it is
+
+**The project belongs to the SDAfrique team.** They chose the problem, it sits in their community,
+and the **intellectual property** in it stays with them: the question, their data, the project they
+build and whatever it becomes. Nothing in this course transfers any of it to you, to HEC Montréal
+or to the instructor.
+
+**What your team provides is intelligence**: an analysis of their problem with a method you
+command, the evidence on how far that method can be trusted, and what they need to apply it
+themselves — the literature, the method derived, an honest evaluation, an implementation note.
+That is what the paper is. The paper is yours, written by the three of you (§8); the project it
+serves is theirs.
+
+**You do not code their software.** The SDAfrique team builds its own project, in R. Your
+repository exists to reproduce *your* analysis, and the twenty to forty lines of R in the
+implementation note exist to show the method working on a small extract. Neither is a product
+delivered to them, and neither should become one. If you find yourself writing their application,
+stop: the point is that they can build it without you.
+
+**If they share data with you**, use it only for this work, with their agreement, and do not put it
+in your repository or your paper without their explicit permission.
 
 ---
 
@@ -264,7 +286,8 @@ It must contain:
 3. **The pitfalls that cost you time.** Whatever you got wrong, and how you noticed. Be specific.
    This is the most useful paragraph in the paper.
 4. **A minimal reproducible example.** Twenty to forty lines of R that run on a small extract and
-   produce one interpretable output. It must actually run — test it.
+   produce one interpretable output. It must actually run — test it. It demonstrates the method; it is
+   not their software, which they build themselves (§1).
 5. **Resource requirements.** Download size, RAM, runtime. Say it plainly.
 
 > **Why it carries 15 marks.** Because a method you can only apply inside your own environment is not
