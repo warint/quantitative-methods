@@ -201,6 +201,8 @@ Sessions 10 and 11 confront the question the first nine sessions cannot answer �
 | **Team work** | **20%** | groups of three (practice groups) — the SDAfrique methods paper | presented Session 12 · due Sun 13 December |
 | **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) | paper Sun 13 December · oral Mon 14 December |
 
+> **Everything about the grade, on one page:** [`assessments/README.md`](assessments/README.md).
+
 ### From a numerical mark to a letter
 
 The four components give a mark out of 100. That mark is then **converted to a letter grade, and
@@ -549,6 +551,7 @@ Per-session readings, including the journal articles, are listed in each session
 | [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md) | The ten projects, ten groups, session themes, data sources |
 | [`GROUP-ASSESSMENT.md`](GROUP-ASSESSMENT.md) | Participation, presenter draw, contribution report, peer ratings |
 | [`assessments/midterm/`](assessments/midterm/) | Example paper and full solutions |
+| [`assessments/README.md`](assessments/README.md) | How the course is graded, on one page |
 | [`assessments/team-work/`](assessments/team-work/README.md) | Team work: the SDAfrique methods paper — brief and rubric |
 | [`assessments/final-exam/`](assessments/final-exam/README.md) | Final exam: the individual research paper and the oral — brief and rubric |
 | `NN-session-slug/` | Per-session pre-session, lecture, and practice |

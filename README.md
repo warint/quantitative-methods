@@ -306,6 +306,7 @@ the analysis is commented on, not marked. What is recorded is that you engaged w
 **Letter grades are curved**, with the class **median at B+**. The curve applies once, at the
 conversion from the mark out of 100 to a letter — never inside a single component.
 
+- **How the course is graded, on one page:** [`assessments/README.md`](assessments/README.md)
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)
 - Team work brief (the SDAfrique paper): [`assessments/team-work/`](assessments/team-work/README.md)
 - Final exam brief (individual paper + oral): [`assessments/final-exam/`](assessments/final-exam/README.md)
