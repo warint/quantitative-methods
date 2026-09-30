@@ -146,14 +146,14 @@ TOOLKIT = {
     ".compare_f_test": ("06", "Choose and validate", "an F-test, for nested models only"),
     "np.linalg.pinv": ("06", "Choose and validate", "pseudo-inverse, for the Hausman statistic"),
 
-    # ---- Session 07 · PCA and factor analysis ----------------------------
-    "PCA": ("07", "Fit", "components, on standardised columns"),
-    ".explained_variance_ratio_": ("07", "Read the fit", "what the scree plot is drawn from"),
-    ".components_": ("07", "Read the fit", "the loadings — variables on components"),
-    "prince.FAMD": ("07", "Fit", "when the columns are mixed numeric and categorical"),
-    "Factor": ("07", "Fit", "statsmodels' factor analysis, by maximum likelihood"),
-    ".rotate('varimax')": ("07", "Read the fit", "same fit, readable loadings — and no new evidence"),
-    "np.linalg.eigvalsh": ("07", "Describe", "eigenvalues of a symmetric matrix"),
+    # ---- Session 13 · PCA and factor analysis (was session 07) ----------
+    "PCA": ("13", "Fit", "components, on standardised columns"),
+    ".explained_variance_ratio_": ("13", "Read the fit", "what the scree plot is drawn from"),
+    ".components_": ("13", "Read the fit", "the loadings — variables on components"),
+    "prince.FAMD": ("13", "Fit", "when the columns are mixed numeric and categorical"),
+    "Factor": ("13", "Fit", "statsmodels' factor analysis, by maximum likelihood"),
+    ".rotate('varimax')": ("13", "Read the fit", "same fit, readable loadings — and no new evidence"),
+    "np.linalg.eigvalsh": ("13", "Describe", "eigenvalues of a symmetric matrix"),
 
     # ---- Session 08 · nearest neighbours and the trade-off ---------------
     "KNeighborsClassifier": ("08", "Fit", "predict a class from the k closest rows"),

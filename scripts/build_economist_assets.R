@@ -25,7 +25,7 @@ paths <- c(
   S02 = "02-exploratory-data-analysis/01-lecture/economist-assets",
   S03 = "03-regression-adequacy-and-validity/01-lecture/economist-assets",
   S04 = "04-logistic-ordinal-multinomial/01-lecture/economist-assets",
-  S07 = "07-pca-and-factor-analysis/01-lecture/economist-assets",
+  S07 = "13-one-more-thing/01-lecture/economist-assets",
   S08 = "08-knn-and-bias-variance/01-lecture/economist-assets",
   S09 = "09-structural-equation-modelling/01-lecture/economist-assets",
   S10 = "10-causal-inference-foundations/01-lecture/economist-assets",

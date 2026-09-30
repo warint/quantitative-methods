@@ -47,30 +47,12 @@ pd.set_option("display.max_columns", 10)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Quote of the day
-2. Bias — Variance Trade-off
-3. Classification
-4. Classification (cont.)
-5. The Bayes Classifier
-6. The Bayes Classifier (cont.)
-7. Watch a decision boundary being built
-8. Four things to try, and what each one shows
-9. What step 4 was really about
-10. K-Nearest Neighbors
-11. K-Nearest Neighbors (cont.)
-12. KNN by hand (you are the algorithm)
-13. KNN by hand (you are the algorithm) (cont.)
-14. KNN by hand
-15. KNN in code (you are no longer the algorithm)
-16. Machine Learning: using KNN as an example
-17. Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.)
-18. Train on everything before 2005, test on 2005 — a time split, not a random one (cont.)
-19. KNN has no coefficients — importance is measured by scrambling a column (cont.)
-20. The confusion matrix, and the accuracy that goes with it (cont.)
-21. Big lessons from ML
-22. Big lessons
-23. Big lessons (cont.)
-24. Before the next session
+1. The bias–variance trade-off
+2. Classification
+3. K-nearest neighbours
+4. KNN by hand (you are the algorithm)
+5. KNN in code (you are no longer the algorithm)
+6. Big lessons from ML
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -124,88 +106,69 @@ assumed.
 <!-- END deck-frontmatter -->
 
 ## Quote of the day {#imported-s08-001 .scrollable}
+
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
 
-## Bias--Variance Trade-off {#imported-s08-002 .scrollable}
+## The bias–variance trade-off {.center .scrollable}
 
-![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="78%"}
+## Bias and variance, in four pictures {#imported-s08-002 .scrollable}
 
-## Bias--Variance Trade-off {#imported-s08-003 .scrollable}
-
-![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="78%"}
-
-## Bias--Variance Trade-off {#imported-s08-004 .scrollable}
+::::::::: panel-tabset
+### Bias and variance
 
 ![](economist-assets/bias-variance.png){style="display: block; margin: auto;" width="78%"}
 
-## Bias--Variance Trade-off {#imported-s08-005 .scrollable}
+### Underfitting
 
 ![](economist-assets/underfit.png){style="display: block; margin: auto;" width="78%"}
 
-## Bias--Variance Trade-off {#imported-s08-006 .scrollable}
+### Overfitting
 
 ![](economist-assets/overfit.png){style="display: block; margin: auto;" width="78%"}
 
-## Bias--Variance Trade-off {#imported-s08-007 .scrollable}
+### Error against complexity
 
 ![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="78%"}
 
-## Classification {#imported-s08-008 .scrollable}
+:::::::::
 
-## Classification (cont.) {#imported-s08-009 .scrollable}
+## Classification {.center .scrollable}
 
-::: panel-tabset
-### Principle
+## Training error and test error {#imported-s08-009 .scrollable}
 
-Thus far, our discussion of model accuracy has been focused on the **regression setting**.
+The bias–variance trade-off carries over to classification, with one change: $y_i$ is now a **category**, not a number. Accuracy is counted in mistakes.
 
-But many of the concepts that we have encountered, such as the bias-variance trade-off, transfer over to the classification setting with only some modifications due to the fact that [[[[y]{#MJXp-Span-3 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-4 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-2 .MJXp-msubsup}]{#MJXp-Span-1 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is no longer numerical.
-
-> Suppose that we seek to estimate [[[f]{#MJXp-Span-6 .MJXp-mi .MJXp-italic}]{#MJXp-Span-5 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} on the basis of training observations [[[[(]{#MJXp-Span-9 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[x]{#MJXp-Span-11 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[1]{#MJXp-Span-12 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-10 .MJXp-msubsup}[,]{#MJXp-Span-13 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[[y]{#MJXp-Span-15 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[1]{#MJXp-Span-16 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-14 .MJXp-msubsup}[)]{#MJXp-Span-17 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[,]{#MJXp-Span-18 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-19 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-20 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-21 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[,]{#MJXp-Span-22 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[(]{#MJXp-Span-23 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[x]{#MJXp-Span-25 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[n]{#MJXp-Span-26 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-24 .MJXp-msubsup}[,]{#MJXp-Span-27 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[[y]{#MJXp-Span-29 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[n]{#MJXp-Span-30 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-28 .MJXp-msubsup}[)]{#MJXp-Span-31 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-8 .MJXp-mrow}]{#MJXp-Span-7 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}, where now [[[[y]{#MJXp-Span-34 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[1]{#MJXp-Span-35 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-33 .MJXp-msubsup}[,]{#MJXp-Span-36 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-37 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-38 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[.]{#MJXp-Span-39 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[,]{#MJXp-Span-40 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[[y]{#MJXp-Span-42 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[n]{#MJXp-Span-43 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-41 .MJXp-msubsup}]{#MJXp-Span-32 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} are qualitative.
-
--   The most common approach for quantifying the accuracy of our estimate [[[[[[[ˆ]{#MJXp-Span-48 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -0.92em;"}[f]{#MJXp-Span-47 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-46 .MJXp-munderover}]{#MJXp-Span-45 .MJXp-mrow}]{#MJXp-Span-44 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is the training *error rate*, the proportion of mistakes that are made if we apply error rate our estimate [[[[[[[ˆ]{#MJXp-Span-53 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -0.92em;"}[f]{#MJXp-Span-52 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-51 .MJXp-munderover}]{#MJXp-Span-50 .MJXp-mrow}]{#MJXp-Span-49 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} to the training observations [[[[[[[ˆ]{#MJXp-Span-58 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -0.92em;"}[f]{#MJXp-Span-57 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-56 .MJXp-munderover}]{#MJXp-Span-55 .MJXp-mrow}]{#MJXp-Span-54 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}:
-
-[[[[[1]{#MJXp-Span-61 .MJXp-mn}]{.MJXp-box}[[[]{.MJXp-rule style="height: 1em; border-top-width: medium; border-top-style: none; border-top-color: currentcolor; border-bottom: 1px solid; margin: 0.1em 0px;"}[[n]{#MJXp-Span-62 .MJXp-mi .MJXp-italic}]{.MJXp-box}]{.MJXp-denom}]{.MJXp-box style="margin-top: -0.9em;"}]{#MJXp-Span-60 .MJXp-mfrac style="vertical-align: 0.25em;"}[[[[n]{#MJXp-Span-69 .MJXp-mi .MJXp-italic style="margin-right: 0px; margin-left: 0px;"}]{.MJXp-script}[[∑]{.MJXp-largeop}]{#MJXp-Span-64 .MJXp-mo style="margin-left: 0.111em; margin-right: 0.167em;"}]{.MJXp-over}[[[i]{#MJXp-Span-66 .MJXp-mi .MJXp-italic}[=]{#MJXp-Span-67 .MJXp-mo}[1]{#MJXp-Span-68 .MJXp-mn}]{#MJXp-Span-65 .MJXp-mrow style="margin-left: 0px;"}]{.MJXp-script}]{#MJXp-Span-63 .MJXp-munderover}[I]{#MJXp-Span-70 .MJXp-mi .MJXp-italic}[[[(]{.MJXp-right .MJXp-scale7 style="font-size: 1.978em; margin-left: -0.05em;"}]{#MJXp-Span-72 .MJXp-mo style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"}[[y]{#MJXp-Span-74 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-75 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-73 .MJXp-msubsup}[≠]{#MJXp-Span-76 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-81 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-80 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-79 .MJXp-munderover}]{#MJXp-Span-78 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-82 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-77 .MJXp-msubsup}[[)]{.MJXp-right .MJXp-scale7 style="font-size: 1.978em; margin-left: -0.05em;"}]{#MJXp-Span-83 .MJXp-mo style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"}]{#MJXp-Span-71 .MJXp-mrow}]{#MJXp-Span-59 .MJXp-math .MJXp-display}]{.MathJax_Preview style="color: inherit;"}
-
-Here [[[[[[[[ˆ]{#MJXp-Span-89 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-88 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-87 .MJXp-munderover}]{#MJXp-Span-86 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-90 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-85 .MJXp-msubsup}]{#MJXp-Span-84 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is the predicted class label for the *i*th observation using [[[[[[[ˆ]{#MJXp-Span-95 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -0.92em;"}[f]{#MJXp-Span-94 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-93 .MJXp-munderover}]{#MJXp-Span-92 .MJXp-mrow}]{#MJXp-Span-91 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}. And [[[I]{#MJXp-Span-97 .MJXp-mi .MJXp-italic}[(]{#MJXp-Span-98 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[y]{#MJXp-Span-100 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-101 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-99 .MJXp-msubsup}[≠]{#MJXp-Span-102 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-107 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-106 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-105 .MJXp-munderover}]{#MJXp-Span-104 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-108 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-103 .MJXp-msubsup}[)]{#MJXp-Span-109 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-96 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is an *indicator variable* that equals 1 if [[[(]{#MJXp-Span-111 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[y]{#MJXp-Span-113 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-114 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-112 .MJXp-msubsup}[≠]{#MJXp-Span-115 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-120 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-119 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-118 .MJXp-munderover}]{#MJXp-Span-117 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-121 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-116 .MJXp-msubsup}[)]{#MJXp-Span-122 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-110 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} and 0 if [[[(]{#MJXp-Span-124 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[y]{#MJXp-Span-126 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-127 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-125 .MJXp-msubsup}[=]{#MJXp-Span-128 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-133 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-132 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-131 .MJXp-munderover}]{#MJXp-Span-130 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-134 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-129 .MJXp-msubsup}[)]{#MJXp-Span-135 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-123 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}.
-
-### The test error
-
-[[[[[1]{#MJXp-Span-138 .MJXp-mn}]{.MJXp-box}[[[]{.MJXp-rule style="height: 1em; border-top-width: medium; border-top-style: none; border-top-color: currentcolor; border-bottom: 1px solid; margin: 0.1em 0px;"}[[n]{#MJXp-Span-139 .MJXp-mi .MJXp-italic}]{.MJXp-box}]{.MJXp-denom}]{.MJXp-box style="margin-top: -0.9em;"}]{#MJXp-Span-137 .MJXp-mfrac style="vertical-align: 0.25em;"}[[[[n]{#MJXp-Span-146 .MJXp-mi .MJXp-italic style="margin-right: 0px; margin-left: 0px;"}]{.MJXp-script}[[∑]{.MJXp-largeop}]{#MJXp-Span-141 .MJXp-mo style="margin-left: 0.111em; margin-right: 0.167em;"}]{.MJXp-over}[[[i]{#MJXp-Span-143 .MJXp-mi .MJXp-italic}[=]{#MJXp-Span-144 .MJXp-mo}[1]{#MJXp-Span-145 .MJXp-mn}]{#MJXp-Span-142 .MJXp-mrow style="margin-left: 0px;"}]{.MJXp-script}]{#MJXp-Span-140 .MJXp-munderover}[I]{#MJXp-Span-147 .MJXp-mi .MJXp-italic}[[[(]{.MJXp-right .MJXp-scale7 style="font-size: 1.978em; margin-left: -0.05em;"}]{#MJXp-Span-149 .MJXp-mo style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"}[[y]{#MJXp-Span-151 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-152 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-150 .MJXp-msubsup}[≠]{#MJXp-Span-153 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-158 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-157 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-156 .MJXp-munderover}]{#MJXp-Span-155 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-159 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-154 .MJXp-msubsup}[[)]{.MJXp-right .MJXp-scale7 style="font-size: 1.978em; margin-left: -0.05em;"}]{#MJXp-Span-160 .MJXp-mo style="margin-left: 0em; margin-right: 0em; vertical-align: -0.244em;"}]{#MJXp-Span-148 .MJXp-mrow}]{#MJXp-Span-136 .MJXp-math .MJXp-display}]{.MathJax_Preview style="color: inherit;"}
-
-If [[[I]{#MJXp-Span-162 .MJXp-mi .MJXp-italic}[(]{#MJXp-Span-163 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[y]{#MJXp-Span-165 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[i]{#MJXp-Span-166 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-164 .MJXp-msubsup}[≠]{#MJXp-Span-167 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-172 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-171 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-170 .MJXp-munderover}]{#MJXp-Span-169 .MJXp-mrow style="margin-right: 0.05em;"}[i]{#MJXp-Span-173 .MJXp-mi .MJXp-italic .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-168 .MJXp-msubsup}[)]{#MJXp-Span-174 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-161 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} = 0 then the [[[[i]{#MJXp-Span-177 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[[t]{#MJXp-Span-179 .MJXp-mi .MJXp-italic}[h]{#MJXp-Span-180 .MJXp-mi .MJXp-italic}]{#MJXp-Span-178 .MJXp-mrow .MJXp-script style="vertical-align: 0.5em;"}]{#MJXp-Span-176 .MJXp-msubsup}]{#MJXp-Span-175 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} observation was classified correctly by our variable classification method; otherwise it was misclassified.
-
-Hence this equation computes the fraction of incorrect classifications.
-
-The equation is referred to as the *training error* rate because it is computed based on the data that was used to train our classifier.
-
-> As in the error regression setting, we are most interested in the error rates that result from applying our classifier to test observations that were not used in training.
-
-The *test error* rate associated with a set of test observations of the form *test error* [[[(]{#MJXp-Span-182 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[x]{#MJXp-Span-184 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[0]{#MJXp-Span-185 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-183 .MJXp-msubsup}[,]{#MJXp-Span-186 .MJXp-mo style="margin-left: 0em; margin-right: 0.222em;"}[[y]{#MJXp-Span-188 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[0]{#MJXp-Span-189 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-187 .MJXp-msubsup}[)]{#MJXp-Span-190 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-181 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is given by:
-
-[[[A]{#MJXp-Span-192 .MJXp-mi .MJXp-italic}[v]{#MJXp-Span-193 .MJXp-mi .MJXp-italic}[e]{#MJXp-Span-194 .MJXp-mi .MJXp-italic}[(]{#MJXp-Span-195 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[I]{#MJXp-Span-196 .MJXp-mi .MJXp-italic}[(]{#MJXp-Span-197 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[[y]{#MJXp-Span-199 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[0]{#MJXp-Span-200 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-198 .MJXp-msubsup}[≠]{#MJXp-Span-201 .MJXp-mo style="margin-left: 0.333em; margin-right: 0.333em;"}[[[[[[ˆ]{#MJXp-Span-206 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-205 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-204 .MJXp-munderover}]{#MJXp-Span-203 .MJXp-mrow style="margin-right: 0.05em;"}[0]{#MJXp-Span-207 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-202 .MJXp-msubsup}[)]{#MJXp-Span-208 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}[)]{#MJXp-Span-209 .MJXp-mo style="margin-left: 0em; margin-right: 0em;"}]{#MJXp-Span-191 .MJXp-math .MJXp-display}]{.MathJax_Preview style="color: inherit;"}
-
-where [[[[[[[[ˆ]{#MJXp-Span-215 .MJXp-mo style="margin-left: 0px; margin-right: 0px;"}]{style="margin-bottom: -1.17em;"}[y]{#MJXp-Span-214 .MJXp-mi .MJXp-italic}]{.MJXp-over}]{#MJXp-Span-213 .MJXp-munderover}]{#MJXp-Span-212 .MJXp-mrow style="margin-right: 0.05em;"}[0]{#MJXp-Span-216 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-211 .MJXp-msubsup}]{#MJXp-Span-210 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} is the predicted class label that results from applying the classifier to the test observation with predictor [[[[x]{#MJXp-Span-219 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[0]{#MJXp-Span-220 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-218 .MJXp-msubsup}]{#MJXp-Span-217 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}. A good classifier is one for which the test error is smallest.
+::: {.tight}
+- The **training error rate** is the share of mistakes on the observations used to fit the model:
 :::
 
-## The Bayes Classifier {#imported-s08-010 .scrollable}
+$$\frac{1}{n}\sum_{i=1}^{n} I(y_i \neq \hat y_i)$$
 
-::::: panel-tabset
-### The Bayes classifier
+where $I(y_i \neq \hat y_i)$ is 1 if observation $i$ is misclassified and 0 otherwise.
 
-It is possible to show that the test error rate given in is minimized, on average, by a very simple classifier that *assigns each observation to the most likely class, given its predictor values*.
+::: {.tight}
+- The **test error rate** is the same share on observations the model has **not** seen, $\text{Ave}\big(I(y_0 \neq \hat y_0)\big)$
+:::
 
-In other words, we should simply assign a test observation with predictor vector [[[[x]{#MJXp-Span-223 .MJXp-mi .MJXp-italic style="margin-right: 0.05em;"}[0]{#MJXp-Span-224 .MJXp-mn .MJXp-script style="vertical-align: -0.4em;"}]{#MJXp-Span-222 .MJXp-msubsup}]{#MJXp-Span-221 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} to the class [[[j]{#MJXp-Span-226 .MJXp-mi .MJXp-italic}]{#MJXp-Span-225 .MJXp-math}]{.MathJax_Preview style="color: inherit;"} for which:
+::: {.check}
+As in regression, the test error is the one we care about. A good classifier is the one whose **test** error is smallest.
+:::
 
-[[[Pr]{#MJXp-Span-228 .MJXp-mo}]{#MJXp-Span-227 .MJXp-math}]{.MathJax_Preview style="color: inherit;"}
+## The Bayes classifier {#imported-s08-010 .scrollable}
 
-is largest.
+::::::::: panel-tabset
+### The rule
 
-> Note that this equation is a *conditional probability*: it is the probability conditional that [Y = j]{.MathJax_Preview}, given the observed predictor vector [x_0]{.MathJax_Preview}.
+The test error rate is minimised, on average, by a very simple rule: **assign each observation to its most likely class, given its predictors.** That is, give $x_0$ the class $j$ for which
 
-This very simple classifier is called the **Bayes classifier**.
+$$\Pr(Y = j \mid X = x_0)$$
 
-In a two-class problem where there are only two possible response values, say *class 1* or *class 2*, the Bayes classifier corresponds to predicting class one if [\\Pr\\left(Y=j\\ \|\\ X\\ =x_0\\right) \> 0.5]{.MathJax_Preview}, and class two otherwise.
+is largest. This is the **Bayes classifier**.
+
+::: {.tight}
+- It is a *conditional probability*: the probability that $Y = j$, given the observed predictors $x_0$
+- With two classes, predict class 1 when $\Pr(Y = 1 \mid X = x_0) > 0.5$, and class 2 otherwise
+:::
 
 ### Example
 
@@ -222,11 +185,8 @@ This figure provides an example using a simulated data set in a two-dimensional 
 ::: pull-right
 ![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="100%"}
 :::
-:::::
 
-## The Bayes Classifier (cont.) {#imported-s08-011 .scrollable}
-
-> \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
+:::::::::
 
 ## Watch a decision boundary being built {#playground}
 
@@ -247,7 +207,7 @@ matter here. What is on screen is a decision boundary and a test error, which
 are the two objects of this session.
 :::
 
-## Four things to try, and what each one shows
+## Four things to try, and what each one shows {.scrollable}
 
 ::: {.step}
 **1 · Remove both hidden layers**, leaving the inputs wired straight to the
@@ -276,7 +236,7 @@ next section.
 is the radius, and in that coordinate the problem was always linear.
 :::
 
-## What step 4 was really about
+## What step 4 was really about {.scrollable}
 
 ::: {.tight}
 You can buy the non-linearity with **model flexibility**, or with **a feature you
@@ -296,10 +256,12 @@ the non-linearity in by hand as a quadratic; this session measures what it costs
 when you cannot.
 :::
 
-## K-Nearest Neighbors {#imported-s08-012 .scrollable}
+## K-nearest neighbours {.center .scrollable}
 
-::: panel-tabset
-### K-Nearest Neightbors
+## From the Bayes classifier to KNN {#imported-s08-012 .scrollable}
+
+::::::::: panel-tabset
+### The idea
 
 In theory we would always like to predict qualitative responses using the Bayes classifier.
 
@@ -311,21 +273,17 @@ Many approaches attempt to estimate the conditional distribution of [Y]{.MathJax
 
 > One such method is the K-nearest neighbors (KNN) classifier.
 
-### Mathematics
+### The rule
 
-Given a positive integer [K]{.MathJax_Preview} and a test observation [x_0]{.MathJax_Preview}, the KNN classifier first identifies the neighbors [K]{.MathJax_Preview} points in the training data that are closest to [x_0]{.MathJax_Preview}, represented by [N_0]{.MathJax_Preview}.
+Given a positive integer $K$ and a test observation $x_0$, KNN finds the $K$ training points closest to $x_0$ — call them $N_0$ — and estimates each class's probability as its share of them:
 
-It then estimates the conditional probability for class [j]{.MathJax_Preview} as the fraction of points in [N_0]{.MathJax_Preview} whose response values equal [j]{.MathJax_Preview}:
+$$\Pr(Y = j \mid X = x_0) = \frac{1}{K}\sum_{i \in N_0} I(y_i = j)$$
 
-[Pr\\left(Y=j\\ \|\\ X\\ =x_0\\right) = \\frac{1}{K}\\sum\_{i∈N_0}I\\left(y_i =j\\right)]{.MathJax_Preview}
+It then applies the Bayes rule to that estimate: $x_0$ goes to the class with the largest share.
 
-Finally, KNN applies Bayes rule and classifies the test observation [x_0]{.MathJax_Preview} to the class with the largest probability.
-:::
+:::::::::
 
-## K-Nearest Neighbors (cont.) {#imported-s08-013 .scrollable}
-
-::::: panel-tabset
-### Goal
+## KNN with K = 3 {#imported-s08-013 .scrollable}
 
 ::: pull-left
 Our goal is to make a prediction for the point labeled by the black cross. Suppose that we choose [K = 3]{.MathJax_Preview}.
@@ -343,15 +301,10 @@ Right-hand panel of the figure: we have applied the KNN approach with [K = 3]{.M
 ![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="100%"}
 :::
 
-### Example
+## How close KNN gets, and the choice of K {#imported-s08-014 .scrollable}
 
-![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="78%"}
-:::::
-
-## K-Nearest Neighbors (cont.) {#imported-s08-014 .scrollable}
-
-::::::: panel-tabset
-### Efficiency
+::::::::: panel-tabset
+### Close to Bayes
 
 ::: pull-left
 Despite the fact that it is a very simple approach, KNN can often produce classifiers that are surprisingly close to the optimal Bayes classifier.
@@ -382,48 +335,31 @@ This corresponds to a low-variance but high-bias classifier.
 ::: pull-right
 ![](economist-assets/complexity-compare.png){style="display: block; margin: auto;" width="100%"}
 :::
-:::::::
 
-## K-Nearest Neighbors (cont.) {#imported-s08-015 .scrollable}
+:::::::::
 
-::::::: panel-tabset
-### Goal
+## Training error is not test error {#imported-s08-015 .scrollable}
 
 ::: pull-left
-Just as in the regression setting, there is not a strong relationship between the training error rate and the test error rate. With [K = 1]{.MathJax_Preview}, the KNN training error rate is 0, but the test error rate may be quite high.
+With $K = 1$ the KNN training error rate is 0, but the test error rate may be quite high. In general, as a classifier becomes more flexible, the training error falls but the test error may not.
 
-In general, as we use more flexible classification methods, the training error rate will decline but the test error rate may not.
+The figure: training error (blue, 200 observations) and test error (orange, 5,000 observations) as flexibility, $1/K$, increases. The black dashed line is the Bayes error rate.
+
+::: {.check}
+Choosing the level of flexibility is the whole game, and the U-shape of the test error is what makes it hard.
+:::
 :::
 
 ::: pull-right
 ![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="100%"}
 :::
 
-### Errors
+## KNN by hand (you are the algorithm) {.center .scrollable}
 
-::: pull-left
-The KNN training error rate (blue, 200 observations) and test error rate (orange, 5,000 observations) on the data from the first figure, as the level of flexibility (assessed using [1/K]{.MathJax_Preview}) increases.
+## Six observations and a test point {#imported-s08-017 .scrollable}
 
-The black dashed line indicates the Bayes error rate.
-
-The jumpiness of the curves is due to the small size of the training data set.
-
-Choosing the correct level of flexibility is critical to the success of any statistical learning method.
-
-The bias-variance tradeoff, and the resulting U-shape in the test error, can make this a difficult task.
-:::
-
-::: pull-right
-![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="100%"}
-:::
-:::::::
-
-## KNN by hand (you are the algorithm) {#imported-s08-016 .scrollable}
-
-## KNN by hand (you are the algorithm) (cont.) {#imported-s08-017 .scrollable}
-
-::::::: panel-tabset
-### Example
+::::::::: panel-tabset
+### The data
 
 The table provides a training data set containing six observations, three predictors, and one qualitative response variable.
 
@@ -446,7 +382,7 @@ Suppose we wish to use this data set to make a prediction for [Y]{.MathJax_Previ
   6                                  1                                1                                1 Red
 :::
 
-### Euclidean distance
+### The distances
 
 ::: pull-left
 [d(a,b) = d(b,a) = \\sqrt{\\sum\_{i=1}\^{p}(a_i - b_i)\^2}]{.MathJax_Preview}
@@ -484,18 +420,19 @@ for i, d in enumerate(dist, 1):
   5                                 -1                                0                                1 Green                                                  1.4142
   6                                  1                                1                                1 Red                                                    1.7321
 :::
-:::::::
 
-## KNN by hand {#imported-s08-018 .scrollable}
+:::::::::
 
-::: panel-tabset
-### Question
+## Predict with K = 1, then K = 3 {#imported-s08-018 .scrollable}
+
+::::::::: panel-tabset
+### K = 1
 
 -   What is our prediction with [K = 1]{.MathJax_Preview}? Why?
 
 > Green, since the single nearest neighbor to [Z]{.MathJax_Preview} is observation 5.
 
-### Solution
+### K = 1: the neighbour
 
         \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`                                                                                                                     \`[d(X, Z)]{.MathJax_Preview}\`
   --- -------------------------------- -------------------------------- -------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -505,18 +442,14 @@ for i, d in enumerate(dist, 1):
   4                                  0                                1                                2 Green                                                                                                                                         2.2361
   5                                 -1                                0                                1 [Green]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}   [1.4142]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
   6                                  1                                1                                1 Red                                                                                                                                           1.7321
-:::
 
-## KNN by hand {#imported-s08-019 .scrollable}
-
-::: panel-tabset
-### Question
+### K = 3
 
 -   What is our prediction with [K = 3]{.MathJax_Preview}? Why?
 
 > Red, since the three nearest neighbors to [Z]{.MathJax_Preview} are observations 5, 6 and 2; two are "Red".
 
-### Solution
+### K = 3: the neighbours
 
         \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`                                                                                                                     \`[d(X, Z)]{.MathJax_Preview}\`
   --- -------------------------------- -------------------------------- -------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -526,9 +459,10 @@ for i, d in enumerate(dist, 1):
   4                                  0                                1                                2 Green                                                                                                                                         2.2361
   5                                 -1                                0                                1 [Green]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}   [1.4142]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
   6                                  1                                1                                1 [Red]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}     [1.7321]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
-:::
 
-## KNN by hand {#imported-s08-020 .scrollable}
+:::::::::
+
+## A nonlinear boundary: large K or small? {#imported-s08-020 .scrollable}
 
 -   If the Bayes decision boundary in this problem is highly nonlinear, then would we expect the best value for [K]{.MathJax_Preview} to be large or small? Why?
 
@@ -536,17 +470,13 @@ Solution
 
 We would expect a small K to perform better for a nonlinear decision boundary. A small \`[K]{.MathJax_Preview}\` would be more 'flexible' and the KNN boundary would be pulled in different directions easier, whereas a large K would have a 'smoothing' effect and produce a more linear boundary (hence, a worse classifier), because it takes more points into account.
 
-## KNN in code (you are no longer the algorithm) {#imported-s08-021 .scrollable}
+## KNN in code (you are no longer the algorithm) {.center .scrollable}
 
-## Machine Learning: using KNN as an example {#imported-s08-022 .scrollable}
+## The data: the stock market {#imported-s08-023 .scrollable}
 
--   How does an AI work?
+> How does an AI work? The KNN mathematics, now inside an algorithm — what does it change?
 
-> The KNN mathematics, now integrated in an algorithm, what does it change?
-
-## Machine Learning: using KNN as an example {#imported-s08-023 .scrollable}
-
-::: panel-tabset
+::::::::: panel-tabset
 ### Data collection
 
 ```{python}
@@ -572,12 +502,23 @@ We have a labeled dataset here about the stock market. A data frame with 1250 ob
   [Direction]{.MathJax_Preview}   A factor with levels Down and Up indicating whether the market had a positive or negative return on a given day
 
 Pre-processing means that we will create the train and the test datasets (they will be called train and test). We also need to consider a variable with the labeled value, here \"Direction\" (it is a factor with the \"up\" and \"down\" values).
-:::
 
-## Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.) {#imported-s08-024 .scrollable}
+:::::::::
 
-::: panel-tabset
-### Steps
+## The workflow, and how it is scored {#imported-s08-024 .scrollable}
+
+::::::::: panel-tabset
+### Four steps
+
+1.  Data collection
+
+2.  Model training with or without cross-validation and pre-processing of data
+
+3.  Model testing
+
+4.  Prediction on user\'s data
+
+### What KNN needs
 
 We will now perform KNN.
 
@@ -589,11 +530,11 @@ We will now perform KNN.
 
 4.  A value for [K]{.MathJax_Preview}, the number of nearest neighbors to be used by the classifier (will be determined automatically).
 
-### Confusion Matrix
+### Confusion matrix
 
 ![](economist-assets/confusion-matrix.png){style="display: block; margin: auto;" width="72%"}
 
-### Interpretation
+### Reading it
 
 Based on the above confusion matrix, we can calculate the following values and prepare for plotting the ROC curve.
 
@@ -618,22 +559,10 @@ Scaling/normalization:
 Centering/standardization:
 
 [x\_{standardized} = \\frac{x - \\mu}{\\sigma}]{.MathJax_Preview}
-:::
 
-## Smarket: 1,250 daily S&P 500 returns. ISLR ships it as a CSV. (cont.) {#imported-s08-025 .scrollable}
+:::::::::
 
-::: panel-tabset
-### Steps
-
-1.  Data collection
-
-2.  Model training with or without cross-validation and pre-processing of data
-
-3.  Model testing
-
-4.  Prediction on user\'s data
-
-### Step 1: Data collection
+## Step 1: a time split, not a random one {#imported-s08-025 .scrollable}
 
 ```{python}
 #| echo: true
@@ -647,12 +576,11 @@ test  = smarket[smarket["year"] == 2005]
 print(f"train {len(train)} days (2001-2004)   test {len(test)} days (2005)")
 train.head()
 ```
-:::
 
-## Train on everything before 2005, test on 2005 — a time split, not a random one (cont.) {#imported-s08-026 .scrollable}
+## Step 2: choose k by cross-validation {#imported-s08-026 .scrollable}
 
-::: panel-tabset
-### Step 2: Code
+::::::::: panel-tabset
+### Code
 
 ```{python}
 #| echo: true
@@ -694,9 +622,7 @@ print(f"always predicting the majority class = {y_tr.value_counts(normalize=True
 print("\nThe search picks a large k, and it barely beats the constant rule.")
 ```
 
-### Step 2: Output
-
-### Step 2: Plot
+### Plot
 
 ```{python}
 #| echo: true
@@ -716,9 +642,9 @@ plt.xlabel("k (number of neighbours)"); plt.ylabel("CV accuracy")
 plt.legend(); plt.tight_layout(); plt.show()
 ```
 
-![](imported-assets/index_files/figure-html/unnamed-chunk-26-1.png)
+:::::::::
 
-### Step 2: TL;DR
+## Step 2 (cont.): the chosen k, and which inputs matter {.scrollable}
 
 Best tuning:
 
@@ -747,12 +673,11 @@ for name, m, s in zip(X_te.columns, imp.importances_mean, imp.importances_std):
 print("\nBoth are near zero, and a negative mean is not a paradox —")
 print("it says scrambling the column *helped*, which is what noise does.")
 ```
-:::
 
-## KNN has no coefficients — importance is measured by scrambling a column (cont.) {#imported-s08-027 .scrollable}
+## Step 3: test, once {#imported-s08-027 .scrollable}
 
-::: panel-tabset
-### Step 3: Test
+::::::::: panel-tabset
+### Predictions
 
 Let us predict the Direction, and see what it does predict indeed.
 
@@ -772,7 +697,7 @@ df_knn_predict[["year", "lag1", "lag2", "direction", "knn_predict"]].head()
 knn_predict[:6]
 ```
 
-### Step 3: Code - Test
+### Confusion matrix
 
 Since we have the actual labels with in the test\$Direction variable for the test dataset, we will be able to check the performance of the prediction on the test dataset. Let\'s produce the confusion matrix based on the optimal parameters from the knnfit with the new dataset called test_final:
 
@@ -795,13 +720,9 @@ acc = (knn_predict == y_te).mean()
 print(f"KNN accuracy {acc:.4f}   always-predict-{y_te.mode()[0]} {base:.4f}")
 ```
 
-### Step 3: Output - Test
-:::
+:::::::::
 
-## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-028 .scrollable}
-
-::: panel-tabset
-### Step 4: Prediction - Code
+## Step 4: the whole workflow in one cell {#imported-s08-028 .scrollable}
 
 Here we will perform a **point estimate** prediction. You can use your own features to see what the model will predict\...
 
@@ -824,28 +745,7 @@ print(f"chosen k = {workflow.best_params_['kneighborsclassifier__n_neighbors']},
       f"test accuracy = {workflow.score(test[['lag1','lag2']], test['direction']):.4f}")
 ```
 
-### Step 4: Output
-
-### Step 4: Visual
-
-![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="100%"}
-:::
-
-## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-029 .scrollable}
-
-You survived your second session on Machine Learning! Congrats!
-
-## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-030 .scrollable}
-
-You survived your second session on Machine Learning! Congrats!
-
-> Wait! I am not an expert! I will never be!!!
->
-> I only know the K-Nearest-Neighbor classification technique!!!
-
-## The confusion matrix, and the accuracy that goes with it (cont.) {#imported-s08-031 .scrollable}
-
-You survived your second session on Machine Learning! Congrats!
+## You survived your second session on machine learning {#imported-s08-031 .scrollable}
 
 > Wait! I am not an expert! I will never be!!!
 >
@@ -853,7 +753,7 @@ You survived your second session on Machine Learning! Congrats!
 
 OK, let\'s step back first\...
 
-## Big lessons from ML {#imported-s08-032 .scrollable}
+## Big lessons from ML {.center .scrollable}
 
 ## Big lessons {#imported-s08-033 .scrollable}
 
@@ -867,7 +767,7 @@ OK, let\'s step back first\...
 
     -   a process: the 7 principles of ML (see the previous session)
 
--   You can run the lm(), glm(), plm() in the context of ML: k-fold cross validation, training/testing, predictions
+-   You can run the regressions of sessions 2–6 — `smf.ols`, `smf.logit`, panel models — in the context of ML: k-fold cross-validation, training/testing, predictions
 
 -   ML aims at:
 
@@ -875,10 +775,10 @@ OK, let\'s step back first\...
 
     -   as such, it is a **GIGANTIC improvement** of current quantitative studies
 
-## Big lessons (cont.) {#imported-s08-034 .scrollable}
+## Beyond one classifier {#imported-s08-034 .scrollable}
 
-::: panel-tabset
-### Neural Network - Not exam material
+::::::::: panel-tabset
+### Classification: iris
 
 ```{python}
 #| echo: true
@@ -896,7 +796,7 @@ knn_iris = GridSearchCV(
 print(f"best k = {knn_iris.best_params_}, accuracy = {knn_iris.best_score_:.3f}")
 ```
 
-### ML Regression
+### Regression: house prices
 
 ```{python}
 #| echo: true
@@ -922,7 +822,7 @@ for name, mdl in [("KNN, k=5", make_pipeline(StandardScaler(), KNeighborsRegress
 print(f"\nprice sd = {yh.std():,.0f} — the number any model has to beat")
 ```
 
-### glmboost
+### In parallel
 
 ```{python}
 #| echo: true
@@ -938,7 +838,7 @@ print(f"best k = {knn_par.best_params_['kneighborsclassifier__n_neighbors']}, "
       f"CV accuracy = {knn_par.best_score_:.4f}")
 ```
 
-### RF
+### A random forest
 
 ```{python}
 #| echo: true
@@ -957,7 +857,8 @@ print("constant rule. The lesson is not about the method — it is that this")
 print("problem may carry no signal at these two lags, and no amount of")
 print("compute manufactures one.")
 ```
-:::
+
+:::::::::
 
 
 ## Before the next session {.scrollable}

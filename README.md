@@ -114,7 +114,7 @@ attacks it **on its own project**, then reports for two minutes. Ten different p
 per week; the synthesis is about how the method behaves across very different data, which is where
 its assumptions become visible.
 
-This is the same commission as the final paper. The term is not eleven exercises followed by an
+This is the same commission as the team paper. The term is not eleven exercises followed by an
 unrelated assignment — **it is one project, approached with a new method every week.**
 
 **Full brief: [`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)** — how to turn a problem into an
@@ -138,24 +138,29 @@ answerable question, where to find data, and what each session asks of you.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| **07** | Wed 14 Oct | PCA and factor analysis |
-| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–7 · room to be announced |
+| **07** | Wed 14 Oct | Replication workshop — five papers, one toolkit · **in autonomy** |
+| — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
 | **10** | Wed 18 Nov | Causal inference (1/2) |
 | **11** | Wed 25 Nov | Causal inference (2/2) |
 | **12** | Wed 2 Dec | Final group presentations, and the closing address |
+| **13** | unscheduled | One more thing — PCA and factor analysis · self-study, not examined |
 
 **No class** on 30 September, 21 October.
 
-**Oral examination:** Monday 14 December 2026 (to be confirmed).
+**Team paper and final paper due:** Sunday 13 December 2026, 23:59. **Oral examination:** Monday 14 December 2026 (to be confirmed).
 
 > Session 06 (7 October) is **asynchronous** — the lecture deck, the pre-session and the practice
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> The **midterm is written on 28 October** and covers **everything taught before it** —
-> Sessions 1 to 7, up to and including principal component and factor analysis.
+> Session 07 (14 October) is a **replication workshop**: three hours in autonomy, alone or in teams,
+> rebuilding one published result from each of the sessions 2–6 readings with the Python seen in
+> class. It is the revision session for the midterm.
+>
+> The **midterm is written on 28 October** and covers **Sessions 1 to 6**. PCA and factor analysis
+> are now session 13, "One more thing" — after the course, for self-study, and not examined.
 
 ---
 
@@ -169,7 +174,7 @@ answerable question, where to find data, and what each session asks of you.
 | [04](04-logistic-ordinal-multinomial/README.md) | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
 | [05](05-ridge-lasso-elastic-net/README.md) | Regularisation: Ridge, Lasso, and the Elastic Net | stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | [06](06-advanced-regression/README.md) | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
-| [07](07-pca-and-factor-analysis/README.md) | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
+| [07](07-replication-workshop/README.md) | Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | How many distinct dimensions does your angle really have? |
 | [08](08-knn-and-bias-variance/README.md) | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | [09](09-structural-equation-modelling/README.md) | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | [10](10-causal-inference-foundations/README.md) | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
@@ -283,11 +288,13 @@ Full detail, and the reasoning behind each component: **[`SYLLABUS.md`](SYLLABUS
 |---|---|---|
 | **Participation** | **10%** | individual, continuous — in the room, in the practice, or through the optional [QMIB Lab](https://warin.ca/qmib-labs/) reports |
 | **Midterm exam** | **30%** | individual, on paper — pen and calculator only, no computer, no internet · **Wed 28 October** |
-| **Team work** | **20%** | groups of three, presented Session 12 |
-| **Final exam** | **40%** | **individual** research paper (25) + individual oral, 15 min (15) |
+| **Team work** | **20%** | groups of three — the SDAfrique methods paper: presented Session 12, due **Sun 13 December** |
+| **Final exam** | **40%** | **individual** research paper (25), due **Sun 13 December** + individual oral, 15 min (15), **Mon 14 December** |
 
-Team work (20) breaks down as governance file 7 · reproducible analysis 7 · revised Session 1
-memo 3 · presentation and defence 3.
+Team work (20) is the SDAfrique methods paper and its repository (16), due Sunday 13 December,
+and its presentation and defence in Session 12 (4). The final exam (40) is an individual research
+paper on an international question of your own (25), due the same Sunday, and a 15-minute oral the
+next day (15).
 
 **Participation (10) is active engagement, earned by any of three routes:** contributing in the
 room, engaging in the 90-minute practice, or submitting an optional
@@ -299,8 +306,10 @@ the analysis is commented on, not marked. What is recorded is that you engaged w
 **Letter grades are curved**, with the class **median at B+**. The curve applies once, at the
 conversion from the mark out of 100 to a letter — never inside a single component.
 
+- **How the course is graded, on one page:** [`assessments/README.md`](assessments/README.md)
 - Example midterm with full solutions: [`assessments/midterm/`](assessments/midterm/EXAM.md)
-- Final exam brief (paper + oral): [`assessments/final-paper/`](assessments/final-paper/README.md)
+- Team work brief (the SDAfrique paper): [`assessments/team-work/`](assessments/team-work/README.md)
+- Final exam brief (individual paper + oral): [`assessments/final-exam/`](assessments/final-exam/README.md)
 - Session 12 rubric: [`12-group-presentations/`](12-group-presentations/README.md)
 
 Groups confirm their project dataset by Session 10 and draft three of the four components in the
@@ -387,7 +396,7 @@ qmib/
 └── 12-group-presentations/
     ├── README.md                      schedule, deck rules, rubric, peer review
     ├── 00-pre-session/README.md       the production checklist
-    └── submissions/                   group-XX/ — deck, governance file, analysis
+    └── submissions/                   group-XX/ — deck, team paper, analysis
 ```
 
 Two files sit outside that pattern:

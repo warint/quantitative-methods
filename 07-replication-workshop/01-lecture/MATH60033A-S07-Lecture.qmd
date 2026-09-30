@@ -1,0 +1,651 @@
+---
+title: "Session 7 · Replication Workshop"
+subtitle: "Five papers, one toolkit — three hours, in autonomy"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+course-session: "07"
+format:
+  revealjs:
+    theme: [default, ../../slides/economist.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    code-copy: true
+    footer: "MATH60033A · Session 07 · Thierry Warin, PhD · HEC Montréal"
+---
+
+<!-- authored: do not regenerate -->
+
+```{python}
+#| echo: false
+# The solution tabs below run the five starter scripts, step by step, in one
+# kernel. Library warnings (convergence notes, future deprecations) are not
+# part of any answer, so they are kept off the slides.
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. How the afternoon works
+2. Replication 1 · Session 02 · News sentiment and stock returns
+3. Replication 2 · Session 03 · A soil regression, diagnosed
+4. Replication 3 · Session 04 · What happens next to a social group
+5. Replication 4 · Session 05 · 56 candidate determinants of FDI
+6. Replication 5 · Session 06 · India's tariff cuts and firm productivity
+7. Closing the afternoon
+
+## What session 7 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- State each paper's **research question** and the result it rests on
+- Say how close a replication came, and **where** and **why** it differs
+- Re-read a published result through the diagnostics of sessions 2 to 6
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Load an authors' replication file — `.dta`, `.xlsx`, `.tab`, `.csv` — into pandas
+- Rebuild a published estimate with **only the code seen in class**
+- Run a whole analysis as one script in VS Codium, step by step
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Read five international-business papers as claims to be checked
+- Say what each published result does **not** license
+- Keep a replication log a referee could follow
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+Everything you need to type is on one sheet — how to start Python in VS Codium on
+your platform, how to make a file and run it, the DataFrame basics, and every name from sessions 1 to 7, each with a line showing it in use.
+
+> **[Python Cheatsheet · Session 07](https://warint.github.io/quantitative-methods/python-cheatsheet-07.pdf)** (PDF) ·
+> in the repository at `07-…/PYTHON-CHEATSHEET.pdf`
+
+::: {.muted}
+Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is
+assumed.
+:::
+
+<!-- END deck-frontmatter -->
+
+<!-- The numbers on these slides are the ones the starter scripts in
+     02-practice/starter/ print, run on the authors' packages on 24 September
+     2026. If a package is updated and a script's output changes, change the
+     slide to match the script, never the other way round. -->
+
+## How the afternoon works {.center .scrollable}
+
+## No new method {.scrollable}
+
+For three hours you go back to the five papers you read before sessions 2 to 6, open the authors'
+own data, and rebuild a published result **with only the Python you typed in class**.
+
+::: {.tight}
+- **One script per paper**, cut into numbered steps: `02-practice/starter/`
+- **One guide per paper**, with the same steps and the exact numbers **you should see**: `02-practice/replications/`
+- **One log**, filled in as you go: `02-practice/replication-log.md`
+:::
+
+::: {.check}
+Three of the five land on the published number. One lands on it partly by luck. One has no
+published number to land on. Finding out which is which — and why — is the afternoon's work.
+:::
+
+::: {.muted}
+It is also the best revision there is for the midterm on 28 October: every idea from sessions 2 to 6
+comes back once, on real data, in the order it was taught.
+:::
+
+## The three hours {.scrollable}
+
+| When | What |
+|---|---|
+| **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run `check_setup.py` |
+| **0:15 – 0:45** | **Replication 1** · Session 02 · news sentiment and stock returns |
+| **0:45 – 1:15** | **Replication 2** · Session 03 · a soil regression, diagnosed |
+| **1:15 – 1:45** | **Replication 3** · Session 04 · what happens next to a social group |
+| 1:45 – 1:55 | Break |
+| **1:55 – 2:25** | **Replication 4** · Session 05 · 56 candidate determinants of FDI |
+| **2:25 – 2:50** | **Replication 5** · Session 06 · India's tariff cuts and firm productivity |
+| **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push |
+
+::: {.warn}
+**Fall behind? Move on at the half-hour mark anyway.** A finished log for three papers beats a
+half-finished one for five.
+:::
+
+## Alone, or as a team {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+### Alone
+
+Do the replications in order. Guide open on one side of the screen, script on the other.
+::::
+
+:::: {.column width="50%"}
+### As a team of 2 to 5
+
+- **Split and teach.** Each person takes one or two papers. At 2:25, five minutes each to walk
+  the others through the target, your number, the gap, the catch.
+- **Pair at one screen.** One types, one reads the guide and checks the numbers. Swap every paper.
+::::
+:::::
+
+::: {.step}
+Either way, **every member runs at least one script on their own machine**, and the log says who
+did what.
+:::
+
+## Part 0 · Set up, in five steps {.scrollable}
+
+::: {.tight}
+1. **File → Open Folder…** → `Desktop/quantitative-methods`, the folder with `qmib.py`
+2. **Terminal → New Terminal**, then `git checkout main` and `git pull`
+3. Choose the `.venv` Python, bottom right — or activate it:
+   macOS and Linux `source .venv/bin/activate` · Windows `.venv\Scripts\Activate.ps1`
+4. Open `02-practice/starter/check_setup.py` and press **Run** ▷ — every line should say `OK`
+5. A `MISSING` data line? The pre-session page has one command per platform that fetches it.
+   Start on a paper you *do* have while it downloads.
+:::
+
+## Running a script one step at a time {.scrollable}
+
+Every script is cut into blocks that begin `# Step 1 · …`, `# Step 2 · …` — the guide has the same
+steps, in the same order.
+
+::: {.tight}
+- **One step:** select its lines, press **Shift+Enter**. The result prints in the terminal, and the
+  variables stay in memory for the next step.
+- **The whole script:** the **Run** triangle ▷, top right. Each takes a few seconds.
+- **Figures** land in `07-replication-workshop/02-practice/output/`.
+:::
+
+::: {.check}
+After every step, compare what you got with **You should see**. If a number differs, stop and find
+out why. That is the exercise, not a detour from it.
+:::
+
+## Every guide has the same seven parts {.scrollable}
+
+| | | |
+|---|---|---|
+| **1** | The paper in brief, and the research question | read first — two minutes |
+| **2** | The published target | the number you aim at, and where it is printed |
+| **3** | Data | the file, what one row is, the variables that matter |
+| **4** | Steps | seven to ten, each with code and **You should see** |
+| **5** | Compare with the paper | how close, and why |
+| **6** | What this does not license | the midterm's Part D |
+| **7** | Pitfalls | what tripped us, so it does not trip you |
+
+## Replication 1 · Session 02 · News sentiment and stock returns {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Fraiberger, Lee, Puy & Ranciere (2021)**, *Media sentiment and international asset prices*,
+Journal of International Economics · [article](https://doi.org/10.1016/j.jinteco.2021.103526)
+
+The authors turn millions of Reuters articles about 25 countries into a **daily news-sentiment
+index**: the share of positive words minus the share of negative ones, standardised within each
+country. They ask whether a better-than-usual news day predicts higher stock returns.
+
+> **Does a one-standard-deviation rise in a country's news sentiment go with higher stock returns
+> there the next day, once past returns, volume, volatility and global risk are held fixed?**
+
+::: {.muted}
+**Target:** the coefficient on yesterday's sentiment, 25-country panel, horizon 0 — **0.049**
+(s.e. 0.007), N = 102,665 · package file `public/results/figure_2b.csv`, column 1.
+:::
+
+## What you will do · the session-02 toolkit, on 246,550 country-days {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+**Describe before you model** — steps 1–6
+
+1. Load only the columns you need
+2. What is one row, and what is missing?
+3. Centre: mean, trimmed mean, median
+4. Spread, and the empirical rule
+5. Shape, tested against $2\sqrt{6/n}$ and $4\sqrt{6/n}$
+6. Look at it
+::::
+
+:::: {.column width="50%"}
+**Then the first regression** — steps 7–10
+
+7. The simplest regression, and the slope **in units**
+8. Add what the paper controls for
+9. Add dummies for extreme-return days
+10. Compare with the published number
+::::
+:::::
+
+{{< include _solutions-r1.qmd >}}
+
+## What you should find {.scrollable}
+
+| | slope on yesterday's sentiment | N |
+|---|---|---|
+| Step 7 · simple regression | 0.074 | 138,913 |
+| Step 8 · + country effects and eight lags of everything | 0.070 | 104,073 |
+| Step 9 · + dummies for extreme-return days | **0.049** (s.e. 0.0068) | 104,073 |
+| **Paper**, Figure 2B, h = 0 | **0.049** (s.e. 0.007) | 102,665 |
+
+::: {.warn}
+**The match is partly luck.** The package does not ship the extreme-day dummies, so step 9 rebuilds
+them with a 3-sd rule. Their own coefficients (8.35, −6.98) are not the paper's (12.6, −11.0), and
+the slope moves from 0.043 to 0.055 as the cut-off moves from 2 to 4 sd.
+:::
+
+::: {.check}
+What *is* robust: most of the gap between 0.07 and 0.05 is a few hundred extreme days — the
+kurtosis of step 5 ($g_2 = 161$ for returns) showing up in the regression.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** The same event can move both the news and the market; a one-day lag does not
+  rule that out.
+- **No trading rule.** 0.05 percentage points a day, with $R^2 \approx 0.001$, is far below a daily
+  return standard deviation of about 1.9 points — before costs.
+- **No claim that the rebuilt dummies are the authors'.** Report step 9 as an approximation.
+:::
+
+::: {.muted}
+Pitfall to know before you start: the panel has **calendar** days, weekends included. Sentiment
+exists on Sundays; returns do not.
+:::
+
+## Replication 2 · Session 03 · A soil regression, diagnosed {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Amsili, van Es & Schindelbeck (2024)**, *Pedotransfer functions for field capacity, permanent
+wilting point, and available water capacity based on random forest modeling*, Communications in
+Soil Science and Plant Analysis · [article](https://doi.org/10.1080/00103624.2024.2336573)
+
+Measuring how much water a soil holds takes a laboratory. The authors predict it from cheap,
+routine measurements — sand, clay, organic matter — with a random forest, and report a linear
+regression alongside it.
+
+> **Can cheap, routinely measured soil properties predict a soil's water-holding capacity well
+> enough to replace direct measurement — and does a random forest do better than a regression?**
+
+::: {.muted}
+**Target:** Equation 6 and Figure 2c, p. 8 — the linear model for field capacity, adjusted
+$R^2 = 0.79$, RMSE $= 0.043$. The course does not teach random forests, so you replicate the
+regression, and then do what the paper does not: diagnose it.
+:::
+
+## What you will do · the session-03 toolkit, on 7,232 soils {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+**Reproduce** — steps 1–4
+
+1. Load the data (the first sheet is metadata)
+2. Put the predictors in the paper's units, g per g
+3. Fit the paper's regression: sand, clay, SOM and their three products
+4. Adjusted $R^2$ and RMSE
+::::
+
+:::: {.column width="50%"}
+**Diagnose** — steps 5–10
+
+5. Residuals versus fitted
+6. Scale–location, and HC1 errors
+7. Leverage
+8. Cook's distance
+9. The tallest spike — refit without it
+10. AIC and BIC: are the product terms worth it?
+::::
+:::::
+
+{{< include _solutions-r2.qmd >}}
+
+## What you should find {.scrollable}
+
+::: {.check}
+**It replicates exactly.** All seven coefficients of Equation 6 match to three decimals; adjusted
+$R^2$ 0.794 against 0.79, RMSE 0.0433 against 0.043. The regression sits between the paper's two
+random forests (0.042 and 0.036).
+:::
+
+::: {.warn}
+**And one soil decides an interaction.** Row 5986 — a 78%-clay soil with a field capacity of
+0.09 — has a Cook's distance of 0.56, about 23 times the next row. With it, the clay×SOM term is
+−0.20 with $p = 0.72$; without it, **−1.20 with $p = 0.04$**. One sample out of 7,232.
+:::
+
+::: {.tight}
+- Residuals versus fitted: no curvature. Scale–location: the spread drifts up only slightly; HC1
+  errors are 1.3 to 2 times wider but change no verdict.
+- AIC and BIC both prefer the paper's model to main effects only, by 268 and 247 points.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No claim about the clay×SOM term either way.** It is fragile: report it with and without row
+  5986, and go and look at that soil before trusting it.
+- **No out-of-sample claim.** Every number here is in-sample. The paper's 16% advantage for the
+  random forest uses a validation set that is not in the package.
+- **No claim beyond the sampled soils.** A pedotransfer function is trusted only inside the range of
+  soils it was fitted on.
+:::
+
+::: {.muted}
+Removing a row is a **sensitivity check**, never a deletion. The rule from session 03: find the
+row, look at it, and report both fits.
+:::
+
+## Replication 3 · Session 04 · What happens next to a social group {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Saganowski, Bródka, Koziarski & Kazienko (2019)**, *Analysis of group evolution prediction in
+complex networks*, PLOS ONE · [article](https://doi.org/10.1371/journal.pone.0224194)
+
+The authors cut a social network into weekly windows, find its groups, and record what happened to
+each group next: it **dissolved, shrank, grew, continued, merged or split**. They describe each group
+with about 90 network measures and train fifteen classifiers to predict the event.
+
+> **Can a group's current structure predict which of six events will happen to it next?**
+
+::: {.warn}
+**There is no published number for this data.** The package holds the data for the paper's
+feature-ranking experiment, and the paper reports no accuracy for any of its 28 configurations. So
+you replicate the **design** — and test the paper's feature ranking (S1 File, Table F) with a
+likelihood-ratio test.
+:::
+
+## What you will do · the session-04 toolkit, on 995 groups {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+**Binary: does the group dissolve?** — steps 1–6
+
+1. Load the two halves: fit on one, test on the other
+2. Five readable features, and a 0/1 outcome
+3. Binary logit, and **odds ratios** in words
+4. Predicted probabilities for a small and a larger group
+5. **LR test** for the paper's three top features
+6. Out of sample: accuracy against the **base rate**
+::::
+
+:::: {.column width="50%"}
+**Multinomial: which of six events?** — steps 7–10
+
+7. Multinomial logit, with a named baseline
+8. The same LR test, with 15 degrees of freedom
+9. Accuracy and the paper's average F-measure
+10. Predicted probabilities across group size
+::::
+:::::
+
+{{< include _solutions-r3.qmd >}}
+
+## What you should find {.scrollable}
+
+::: {.tight}
+- **Odds ratios.** Doubling a group's size multiplies its odds of dissolving by **0.64**; one more
+  tie per member, by 0.64 as well.
+- **LR test.** The paper's three top features add information jointly: $LR = 18.20$, 3 df,
+  $p = 0.0004$ — but all of it comes from network density. Its **top-ranked** feature, aging, has
+  no effect here (odds ratio 0.998, $p = 0.91$).
+:::
+
+::: {.warn}
+**Significant is not predictive.** Out of sample the binary logit is right **63.2%** of the time;
+always saying "does not dissolve" is right **64.4%**. The multinomial reaches 46.9% against a base
+rate of 35.6%, but never predicts the three rare events, so its average F-measure is **0.237** —
+below the 0.29–0.36 the paper's tuned trees reach on another network.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No claim to have reproduced the paper's numbers** — it publishes none for this data, and the
+  logit uses 5 features where the paper uses 89.
+- **No precise p-values for the network-level features.** Density and leadership take only 46
+  values, one per week, shared by every group in it: the observations are not independent.
+- **No causal reading.** "Bigger groups dissolve less" describes message groups at one university.
+  Adding members would not, by itself, keep a group alive.
+:::
+
+::: {.muted}
+Pitfall: the folder and file names contain **spaces**. In Python a quoted string is fine; in a
+terminal, quote the path.
+:::
+
+## Replication 4 · Session 05 · 56 candidate determinants of FDI {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Blonigen & Piger (2014)**, *Determinants of foreign direct investment*, Canadian Journal of
+Economics · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704)
+
+Empirical FDI studies disagree about which variables belong in the regression. The authors put 56
+candidates into one Bayesian model average and let the data say which carry the signal: about
+sixteen survive — gravity, cultural distance, trade agreements, parent income — while many
+favourites of the literature do not.
+
+> **Of 56 candidate determinants of bilateral FDI, which few actually carry the signal?**
+
+::: {.muted}
+**Target:** the survivors with inclusion probability of 85% or more that the course names from the
+paper's Table 3 — nine of them. No package was published; the course rebuilt the design for 2019,
+and `qmib.load("fdi")` reads it — **no download**.
+:::
+
+## What you will do · the session-05 toolkit, on 765 country pairs {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+**Fit and compare** — steps 1–6
+
+1. Load the data, keep the log-levels sample
+2. Outcome and design: log FDI, the gravity trio in logs
+3. Write down the published target
+4. Hold out a test set
+5. OLS vs ridge vs lasso vs elastic net, standardised **inside** a pipeline
+6. Choose $\lambda$ by cross-validation, and the one-SE $\lambda$
+::::
+
+:::: {.column width="50%"}
+**Read and check** — steps 7–10
+
+7. What the lasso keeps
+8. Compare with the paper
+9. **Stability**: how often does each variable survive 20 half-samples?
+10. Picture the stability check
+::::
+:::::
+
+{{< include _solutions-r4.qmd >}}
+
+## What you should find {.scrollable}
+
+| test RMSE (log FDI) | predict the mean | OLS | ridge | lasso |
+|---|---|---|---|---|
+| 230 held-out pairs | 3.081 | 1.753 | 1.749 | **1.737** |
+
+::: {.check}
+**What holds.** At the one-SE $\lambda$ the lasso keeps 30 of 56 — and **all nine** of the paper's
+named survivors, with the expected signs. The gravity block, parent income and a shared language
+survive every one of the 20 resamples.
+:::
+
+::: {.warn}
+**What the lasso adds.** A tax-haven dummy survives *every* resample with the fifth-largest
+coefficient; the paper gave it an inclusion probability of 4%. Pass-through FDI via offshore centres
+grew a great deal between the paper's data and 2019.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No "the drivers of FDI".** The lasso's set is one good predictive model at one $\lambda$ on one
+  sample; the paper's BMA averages over many. Neither is a causal list.
+- **No "institutions do not matter".** A dropped variable is not a zero effect — it may be
+  correlated with one that was kept.
+- **No claim about all countries.** 36 OECD parents and 32 hosts survive listwise deletion.
+:::
+
+::: {.muted}
+Here the elastic net chooses a mixing weight of 1.0 — it *is* the lasso. With 535 training rows and
+56 predictors, OLS is not badly overfitted: the penalty buys 1%, not half.
+:::
+
+## Replication 5 · Session 06 · India's tariff cuts and firm productivity {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Topalova & Khandelwal (2011)**, *Trade liberalization and firm productivity: the case of India*,
+Review of Economics and Statistics · [article](https://doi.org/10.1162/REST_a_00095)
+
+In 1991 India cut its tariffs sharply because an IMF programme required it — not because some
+industries asked. The authors follow about 3,000 listed firms and separate two channels: lower
+tariffs on a firm's **output** (more competition) and on its **inputs** (cheaper intermediates).
+
+> **Within the same firm over time, does a fall in output or input tariffs raise productivity?**
+
+::: {.muted}
+**Target:** Table 5, column 3, p. 1003 — firm and year fixed effects, standard errors clustered by
+firm: output tariff **−0.032** [0.017], input tariff **−0.480** [0.098], N = 14,648. The do-file
+`Tables_restat.do`, lines 281–291, gives the exact specification.
+:::
+
+## What you will do · the session-06 toolkit, on a firm-year panel {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+**The pooled baseline** — steps 1–5
+
+1. Load the firm-year panel and look at it
+2. Keep the paper's sample: before 1997, no gaps
+3. See the reform: average tariffs by year
+4. Pooled OLS, classical standard errors
+5. The same, **clustered by firm** — the paper's column 1
+::::
+
+:::: {.column width="50%"}
+**The panel estimators** — steps 6–9
+
+6. Give the data a panel index: entity, then time
+7. **Firm and year fixed effects** — column 3
+8. **Random effects**
+9. The four estimates side by side
+::::
+:::::
+
+{{< include _solutions-r5.qmd >}}
+
+## What you should find {.scrollable}
+
+| | output tariff | input tariff |
+|---|---|---|
+| pooled OLS, classical SE | −0.011 (0.016) | +0.060 (0.039) |
+| pooled OLS, firm-clustered · **paper col. 1: −0.011 [0.022], 0.060 [0.075]** | −0.011 (0.022) | +0.060 (0.075) |
+| firm + year fixed effects · **paper col. 3: −0.032 [0.017], −0.480 [0.098]** | **−0.032 (0.017)** | **−0.480 (0.098)** |
+| random effects | −0.034 (0.014) | −0.307 (0.066) |
+
+::: {.check}
+**It reproduces to every printed digit.** And the table argues for itself: pooled OLS gives the
+input tariff the *wrong sign*; random effects lands between pooled and fixed effects, which is the
+evidence that the firm effect is correlated with the tariffs. Report fixed effects.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No general law that trade raises productivity.** The design rests on the 1991 reform being
+  imposed from outside. Fixed effects remove fixed differences between firms, not a time-varying
+  reverse channel.
+- **No welfare claim.** It is the within-firm change for surviving, listed firms — not entrants,
+  exiters, informal firms or consumers.
+- **No robust output-tariff effect.** At $p = 0.06$ it is significant only at 10%, and it moves
+  across the paper's own columns. The input-tariff effect is the solid one.
+:::
+
+## Closing the afternoon {.center .scrollable}
+
+## Part 2 · The log {.scrollable}
+
+Copy `02-practice/replication-log.md` into `groups/A2026/group-XX/session-07/` and fill in one
+block per paper:
+
+| | |
+|---|---|
+| the research question | in one sentence, your words |
+| the published target | table, column, number |
+| your number | the same quantity, with its standard error |
+| the gap, and why | or why there is none |
+| the diagnostic that changed your reading | two sentences |
+| what it does not license | one sentence |
+
+::: {.step}
+Then `git add`, `git commit -m "Session 07 replication log"`, `git push`. The exact commands, per
+platform, are at the end of the workshop page.
+:::
+
+## What loses marks {.scrollable}
+
+::: {.tight}
+- Reporting a replicated number without the published one beside it
+- Calling a replication failed without saying where it breaks
+- Reaching for a method the course has not taught to force a match
+- Pasting output with no sentence saying what it means
+:::
+
+::: {.check}
+A replication that fails **and says exactly where** earns full marks. One that "matches" by a
+method you cannot explain earns none.
+:::
+
+## Before the midterm {.scrollable}
+
+::: {.warn}
+**Midterm: Wednesday 28 October**, on paper, Sessions 1 to 6. No class on 21 October.
+:::
+
+::: {.step}
+Your log is your revision sheet: every block names the session idea it used. Then read the
+[midterm summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf) and sit the
+sample paper, `assessments/midterm/EXAM.md`, under exam conditions.
+:::
+
+::: {.muted}
+PCA and factor analysis, which this session used to teach, are now **session 13, "One more
+thing"** — after the course, for self-study, and not on the midterm.
+:::

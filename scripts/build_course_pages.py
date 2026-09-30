@@ -19,7 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from course_spec import (COHORT, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E402
-                         generated, MIDTERM_AFTER, DATES, ASYNCHRONOUS, WHEN, ROOM)
+                         generated, MIDTERM_AFTER, MIDTERM_COVERS, DATES, ASYNCHRONOUS,
+                         UNSCHEDULED, WHEN, ROOM)
 
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
 
@@ -72,6 +73,8 @@ def sentence(s):
 
 def _when(num):
     """The scheduled date line, so a session page always states when it runs."""
+    if num in UNSCHEDULED:
+        return "**Unscheduled** · after Session 12, for self-study · not examined"
     d = datetime.date.fromisoformat(DATES[num])
     tail = " · **asynchronous**" if num in ASYNCHRONOUS else ""
     return f"**{d:%A %-d %B %Y}** · {WHEN.split()[1]} · {ROOM}{tail}"
@@ -89,6 +92,11 @@ def session_readme(num, s):
     lab = lab_url(num)
     lab_row = (f"| **After class** | At home, optional | The **QMIB Lab** — a knowledge check on "
                f"this session | [warin.ca/qmib-labs]({lab}) |\n") if lab else ""
+    # The last session has no "next" link; before session 13 existed the last
+    # generated session always had one, and the whole page used to hang on it.
+    nav = f"[<- {link(prev)}](../{SESSIONS[prev]['dir']}/README.md)"
+    if nxt in SESSIONS:
+        nav += f" | [{link(nxt)} ->](../{SESSIONS[nxt]['dir']}/README.md)"
     return f"""# Session {num} — {s['title']}
 
 > **{s['question']}**
@@ -152,8 +160,8 @@ In `groups/{COHORT}/group-XX/session-{num}/`: {s['deliverable']}.
 
 ---
 
-[<- {link(prev)}](../{SESSIONS[prev]['dir']}/README.md) | [{link(nxt)} ->](../{SESSIONS[nxt]['dir']}/README.md)
-""" if nxt in SESSIONS else ""
+{nav}
+"""
 
 
 def pre_session(num, s):
@@ -419,7 +427,7 @@ def session_table(link_prefix=""):
         rows.append(f"| [{num}]({link_prefix}{s['dir']}/README.md) | {s['title']} | "
                     f"{s['methods']} | {s['question'] if num in ('01', '12') else s['theme']} |")
         if num == MIDTERM_AFTER:
-            rows.append(f"| — | **MIDTERM** *(in class, covering Sessions 1–{MIDTERM_AFTER.lstrip("0")})* | | |")
+            rows.append(f"| — | **MIDTERM** *(in class, covering Sessions 1–{MIDTERM_COVERS.lstrip("0")})* | | |")
     return "\n".join(rows)
 
 

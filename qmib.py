@@ -72,7 +72,7 @@ PUBLISHED = {
     # — now 404s, so the primary is the ISLP authors' own copy and the mirror is
     # the Rdatasets archive, which carries an extra `rownames` column that
     # _read() drops along with the other index columns.
-    # Session 07: the KOF Globalisation Index, ETH Zurich. The overall index and
+    # Session 13: the KOF Globalisation Index, ETH Zurich. The overall index and
     # its eight sub-indices, each split into de facto and de jure.
     "kof": ("https://ethz.ch/content/dam/ethz/special-interest/dual/kof-dam/"
             "documents/Globalization/2025/KOFGI_2025_public.xlsx", None),

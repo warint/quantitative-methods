@@ -48,7 +48,6 @@ By the end of the session you should be able to:
 - Say why the **linear probability model** fails, and where it fails worst
 - Interpret a logistic coefficient as a **log-odds**, and its exponential as an odds ratio
 - Compute a fitted probability by hand from $x^\top\hat\beta$
-- Compare nested models with a **likelihood-ratio test**
 - Extend the model to **ordinal** and **multinomial** outcomes, and say what each assumes
 
 ---
@@ -83,7 +82,6 @@ If a package is missing, `pip install -r requirements.txt` from the repository r
 
 - Reporting log-odds as though they were probabilities
 - Interpreting an odds ratio as a relative risk
-- Comparing non-nested models with a likelihood-ratio test
 - Reporting accuracy on an imbalanced outcome with no base rate
 
 ---

@@ -52,7 +52,7 @@ A problem someone else chose, in a context you do not live in, is harder than a 
 - You cannot assume the institutional background; you have to learn it.
 - Every assumption you absorbed without noticing becomes visible the moment the setting changes.
 
-It is also the same commission as your [final paper](assessments/final-paper/README.md). The term is
+It is also the same commission as your [team paper](assessments/team-work/README.md). The term is
 not eleven exercises followed by an unrelated assignment: **it is one project, approached with a new
 method every week.**
 
@@ -117,6 +117,11 @@ That is a real relationship, not a simulated one, and it carries obligations:
 - **Write the conclusion for them.** Practical implications in *their* context, in language they can
   use.
 - **Acknowledge them by name** in the paper, as the source of the problem.
+
+**It is their project, and their intellectual property.** The problem, their data and the project
+they build belong to them. What your group provides is **intelligence** — analysis, method,
+evaluation — **not software**: they build their own project, in R, and you do not code it for
+them. Details: [the team-work brief](assessments/team-work/README.md#whose-project-it-is).
 
 > **What being a client does not mean.** They are not a source of requirements you satisfy
 > mechanically, and they are not a decoration on an exercise you would have done anyway. The reason
@@ -216,7 +221,7 @@ The theme is the same for everyone; the execution is yours, on your project.
 | 04 | Logistic regression | **Can we predict a discrete outcome honestly?** |
 | 05 | Regularisation | **Of many indicators, which few actually carry the signal?** |
 | 06 | Panel data and interactions | **Does your finding survive the structure of your data?** |
-| 07 | PCA and factor analysis | **How many distinct dimensions does your angle really have?** |
+| 07 | Replication workshop | **Which of the five published results survives your own replication?** |
 | 08 | KNN and bias–variance | **Does flexibility buy you anything on your own data?** |
 | 09 | Structural equation modelling | **What is the construct behind your indicators?** |
 | 10 | Causal inference (1/2) | **Can your project support a causal claim at all?** |
@@ -308,7 +313,7 @@ Each session's practice produces a short section; by Session 12 you have a paper
 | **References** | Every one verified against the publisher record |
 
 > **Three to five articles here, not fifteen.** The heavier review belongs to the
-> [final exam paper](assessments/final-paper/README.md). This is the working draft that grows into it.
+> [team paper](assessments/team-work/README.md). This is the working draft that grows into it.
 
 **On the conclusion.** It is the one section that must speak to the people who gave you the problem.
 Practical implications for *their* context, in language they can use — not a restatement of your
@@ -354,4 +359,4 @@ from. Write something they can use, credit them, and do not overstate what your 
 
 ---
 
-[Syllabus](SYLLABUS.md) · [Group assessment](GROUP-ASSESSMENT.md) · [Final exam brief](assessments/final-paper/README.md)
+[Syllabus](SYLLABUS.md) · [Group assessment](GROUP-ASSESSMENT.md) · [Team work brief](assessments/team-work/README.md) · [Final exam brief](assessments/final-exam/README.md)
