@@ -73,11 +73,11 @@ def profile(df, col):
     c, s_, e, sh = centre(df[col]), spread(df[col]), empirical_rule(df[col]), shape(df[col])
 
     print(f"  n = {c['n']}")
-    print(f"  centre   mean {c['mean']:>14,.2f}   trimmed {c['trim_5%']:>14,.2f}"
-          f"   median {c['median']:>14,.2f}")
+    print(f"  centre   mean {c['mean']:>14,.4f}   trimmed {c['trim_5%']:>14,.4f}"
+          f"   median {c['median']:>14,.4f}")
     gap = (c["mean"] - c["median"]) / s_["sd"]
-    print(f"           mean - median = {c['mean'] - c['median']:,.2f}  ({gap:+.2f} sd)")
-    print(f"  spread   sd {s_['sd']:>16,.2f}   IQR {s_['IQR']:>16,.2f}")
+    print(f"           mean - median = {c['mean'] - c['median']:,.4f}  ({gap:+.2f} sd)")
+    print(f"  spread   sd {s_['sd']:>16,.4f}   IQR {s_['IQR']:>16,.4f}")
     print(f"  rule     within 1sd {e['within_1sd']:.1%} (68%) · 2sd {e['within_2sd']:.1%} (95%)"
           f" · 3sd {e['within_3sd']:.1%} (99.7%)")
     print(f"  shape    g1 = {sh['g1']:+.3f}  vs {sh['g1_threshold']:.3f}"
