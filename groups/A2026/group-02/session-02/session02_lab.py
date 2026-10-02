@@ -9,6 +9,7 @@ three variables your research question depends on. Everything else is written fo
 you; the work is deciding what the numbers mean.
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -86,6 +87,25 @@ def profile(df, col):
           f"   substantially kurtic: {sh['kurtic']}")
 
 
+def plot_variable(df, col, outdir="groups/A2026/group-02/session-02"):
+    """Histogram and boxplot side by side — does the picture agree with g1 and g2?"""
+    x = df[col].dropna()
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+
+    ax1.hist(x, bins=50)
+    ax1.axvline(x.mean(), color="red", linestyle="--", label="mean")
+    ax1.axvline(x.median(), color="black", label="median")
+    ax1.set_title(f"{col}: histogram")
+    ax1.legend()
+
+    ax2.boxplot(x)
+    ax2.set_title(f"{col}: boxplot")
+
+    fig.tight_layout()
+    fig.savefig(f"{outdir}/{col}.png", dpi=150)
+    plt.close(fig)
+
+
 def main():
     core = pd.read_parquet("data/spine/core.parquet")
     mine = pd.read_parquet(ANGLE)
@@ -97,13 +117,14 @@ def main():
             print(f"\n  !! {col} is not in this angle — check your data dictionary")
             continue
         profile(df, col)
+        plot_variable(df, col)
 
     print(f"\n{'=' * 62}")
     print("Now the part that carries the marks:")
     print("  1. Which summary would you put in a paper, and why that one?")
     print("  2. What does the shape cost you in Session 03?")
     print("  3. What would you check before trusting this profile?")
-    # TODO: plot each variable — histogram and boxplot side by side — and check
+    # DONE: plot each variable — histogram and boxplot side by side — and check
     #       that the picture agrees with g1 and g2. Where it does not, there is
     #       usually a second mode, which neither number can see.
 
