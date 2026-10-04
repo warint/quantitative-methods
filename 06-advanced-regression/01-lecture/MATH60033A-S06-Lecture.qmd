@@ -362,18 +362,50 @@ plt.show()
 The predicted probability of default falls as the credit score rises — and never leaves the 0–1 range.
 :::
 
-### Interpretation
+```{python}
+b1 = m.params["fico"]; OR = np.exp(b1); OR100 = np.exp(100 * b1)
+P = {f: float(m.predict(pd.DataFrame({"fico": [f]}))[0]) for f in (650, 700, 701, 750, 800)}
+odds = {f: P[f] / (1 - P[f]) for f in P}
+```
 
-The chain, from what Python gives you to what a reader understands:
+### Step 1 · Log-odds
 
-| You have | You do | You get |
+Python prints $b_1 =$ `{python} f"{b1:.4f}"`. Read it in two passes.
+
+**First the sign.** It is negative: a higher FICO score goes with a **lower** chance of default. The sign is the one thing you can read straight from a log-odds coefficient — positive raises the chance, negative lowers it.
+
+**Then the size.** "One more FICO point lowers the log-odds of default by `{python} f"{-b1:.4f}"`." That sentence is correct, but nobody thinks in log-odds: a reader cannot tell whether 0.0119 is a lot or a little.
+
+-   Why does the model use log-odds at all? Because on that scale the relationship is a **straight line**: every extra point changes the log-odds by the same amount, wherever you start.
+-   So the log-odds are the model's working scale. To talk to a reader, we convert them — first to **odds**, then to **probabilities**.
+
+### Step 2 · Odds
+
+**What are odds?** The chance that something happens divided by the chance that it does not: $\text{odds} = p / (1 - p)$.
+
+| probability of default $p$ | odds $p/(1-p)$ | in words |
 |---|---|---|
-| $b_1 =$ `{python} f"{m.params['fico']:.4f}"` | nothing | one more FICO point lowers the **log-odds** of default by `{python} f"{-m.params['fico']:.4f}"` |
-| $e^{b_1} =$ `{python} f"{np.exp(m.params['fico']):.3f}"` | exponentiate | the **odds** of default are `{python} f"{1 - np.exp(m.params['fico']):.1%}"` lower per point, ceteris paribus |
-| $b_0 + b_1 x$ | $e^{xb}/(1+e^{xb})$ | the **probability**: `{python} f"{float(m.predict(pd.DataFrame({'fico': [650]}))[0]):.2f}"` at 650, `{python} f"{float(m.predict(pd.DataFrame({'fico': [800]}))[0]):.2f}"` at 800 |
+| 0.50 | 1.00 | one default for every one repayment |
+| 0.20 | 0.25 | one default for every four repayments |
+| `{python} f"{P[700]:.3f}"` (FICO 700) | `{python} f"{odds[700]:.3f}"` | about one default for every `{python} f"{1/odds[700]:.0f}"` repayments |
 
--   The odds ratio is the same at every score; the change in **probability** is not — it is largest where the curve is steepest.
--   **Ordinal** and **multinomial** models follow the same chain — log-odds → odds (or relative risk) ratios → predicted probabilities. The next two slides show how.
+**The odds ratio** $e^{b_1} =$ `{python} f"{OR:.3f}"` is a **multiplier**: each extra FICO point multiplies the odds by `{python} f"{OR:.3f}"`, i.e. lowers them by `{python} f"{1 - OR:.1%}"`, holding everything else constant (*ceteris paribus*).
+
+-   Check it: odds at 700 = `{python} f"{odds[700]:.4f}"`; at 701 = `{python} f"{odds[700]:.4f}"` × `{python} f"{OR:.3f}"` = `{python} f"{odds[701]:.4f}"`.
+-   For a bigger step, multiply the coefficient first: 100 points → $e^{100 \times b_1} =$ `{python} f"{OR100:.3f}"`, odds about `{python} f"{1 - OR100:.0%}"` lower. From 700 to 800 the odds fall from `{python} f"{odds[700]:.3f}"` to `{python} f"{odds[800]:.3f}"`.
+-   The rule: if $e^b > 1$ the odds rise by $(e^b - 1) \times 100\%$; if $e^b < 1$ they fall by $(1 - e^b) \times 100\%$.
+
+### Step 3 · Probabilities
+
+Odds are still not what most readers want. For a **probability**, put the whole linear predictor through the logistic function: $p = e^{b_0 + b_1 x} / (1 + e^{b_0 + b_1 x})$. That is what `predict()` does.
+
+| FICO score | 650 | 700 | 750 | 800 |
+|---|---|---|---|---|
+| probability of default | `{python} f"{P[650]:.3f}"` | `{python} f"{P[700]:.3f}"` | `{python} f"{P[750]:.3f}"` | `{python} f"{P[800]:.3f}"` |
+| change over the previous 50 points | — | `{python} f"{P[700]-P[650]:+.3f}"` | `{python} f"{P[750]-P[700]:+.3f}"` | `{python} f"{P[800]-P[750]:+.3f}"` |
+
+-   Every 50-point step multiplies the odds by the **same** factor, yet the probability falls by less and less. The S-curve is steepest where defaults are common and flattens where they are already rare.
+-   So a logistic model has **no single "effect on the probability"**: it depends on where the borrower starts. Report probabilities at a few meaningful values — and only inside the scores you observed (612 to 827).
 
 ### What to write
 
@@ -429,12 +461,44 @@ probs_o.round(3)
 Each row sums to 1. The model computes $P(Y \le j) = F(c_j - x\beta)$ and takes differences to get each category.
 :::
 
-### Interpretation
+### Reading the odds ratios
 
--   **`pared`:** $b =$ `{python} f"{b_o['pared']:.3f}"`, so $e^{b} =$ `{python} f"{np.exp(b_o['pared']):.2f}"`. Students whose parents went to graduate school have `{python} f"{np.exp(b_o['pared']):.2f}"` times the odds of being in a **higher** category — at either cut, by proportional odds.
--   **`gpa`:** one more GPA point multiplies those odds by `{python} f"{np.exp(b_o['gpa']):.2f}"`.
--   **`public`:** $p =$ `{python} f"{om.pvalues['public']:.2f}"` — no detectable effect; report it as such, not as a percentage.
--   **In probabilities:** `pared` moves $P(\text{very likely})$ from `{python} f"{probs_o.loc['pared = 0', 'very likely']:.2f}"` to `{python} f"{probs_o.loc['pared = 1', 'very likely']:.2f}"`, and $P(\text{unlikely})$ from `{python} f"{probs_o.loc['pared = 0', 'unlikely']:.2f}"` to `{python} f"{probs_o.loc['pared = 1', 'unlikely']:.2f}"`. One coefficient shifts the whole distribution up the scale.
+```{python}
+up = 1 - probs_o["unlikely"]                    # P(somewhat or very likely)
+odds_up = up / (1 - up)
+```
+
+**What does "a higher category" mean?** There are two cuts: *somewhat or very likely* versus *unlikely*, and *very likely* versus the rest. An odds ratio says how the odds of being **above a cut** change — and, by proportional odds, it is the **same at both cuts**.
+
+**`pared`** (a parent went to graduate school): $b =$ `{python} f"{b_o['pared']:.3f}"`, positive, so it pushes students **up** the scale. $e^{b} =$ `{python} f"{np.exp(b_o['pared']):.2f}"`: their odds of being above any cut are `{python} f"{np.exp(b_o['pared']):.2f}"` times those of other students — `{python} f"{np.exp(b_o['pared']) - 1:.0%}"` higher.
+
+Check it with the predicted probabilities from the Results tab, at the first cut:
+
+| | $P(\text{somewhat or very likely})$ | odds |
+|---|---|---|
+| `pared = 0` | `{python} f"{up['pared = 0']:.3f}"` | `{python} f"{odds_up['pared = 0']:.3f}"` |
+| `pared = 1` | `{python} f"{up['pared = 1']:.3f}"` | `{python} f"{odds_up['pared = 1']:.3f}"` |
+
+and `{python} f"{odds_up['pared = 1']:.3f}"` / `{python} f"{odds_up['pared = 0']:.3f}"` = `{python} f"{odds_up['pared = 1'] / odds_up['pared = 0']:.2f}"` — the odds ratio.
+
+**`gpa`:** $e^{b} =$ `{python} f"{np.exp(b_o['gpa']):.2f}"` per full GPA point. A full point is a big move (GPA's standard deviation is about `{python} f"{dat['gpa'].std():.1f}"`); for a 0.4-point rise the odds ratio is $e^{0.4\,b} =$ `{python} f"{np.exp(0.4 * b_o['gpa']):.2f}"`.
+
+**`public`:** $p =$ `{python} f"{om.pvalues['public']:.2f}"`. The data cannot tell its effect from zero: report "no detectable effect", not "`{python} f"{1 - np.exp(b_o['public']):.0%}"` lower odds".
+
+### Reading the probabilities
+
+The Results table, row by row:
+
+-   Each row is a full distribution over the three answers, so it **sums to one**. Raising one category means lowering another.
+-   Moving `pared` from 0 to 1 takes $P(\text{unlikely})$ from `{python} f"{probs_o.loc['pared = 0', 'unlikely']:.2f}"` down to `{python} f"{probs_o.loc['pared = 1', 'unlikely']:.2f}"`, and $P(\text{very likely})$ from `{python} f"{probs_o.loc['pared = 0', 'very likely']:.2f}"` up to `{python} f"{probs_o.loc['pared = 1', 'very likely']:.2f}"`. One coefficient shifts the **whole distribution** up the scale.
+-   The **middle** category can go either way: it gains students from below and loses some to above. Here it moves from `{python} f"{probs_o.loc['pared = 0', 'somewhat likely']:.2f}"` to `{python} f"{probs_o.loc['pared = 1', 'somewhat likely']:.2f}"`.
+-   This is why you show probabilities: an odds ratio of 2.85 does not tell a reader that the share of "very likely" students more than doubles.
+
+### Common mistakes
+
+-   **The sign convention.** statsmodels writes $c_j - x\beta$, so a positive $\beta$ means *higher* categories. Some software writes $c_j + x\beta$; check before you read a sign.
+-   **Proportional odds is an assumption**, not a result. Fit a separate binary logit at each cut: if the slopes differ a lot, one number is the wrong summary (session 4, Appendix C).
+-   **The cutpoints** are not effects: they only place the thresholds between categories. Do not interpret them as you would a coefficient.
 
 :::::
 
@@ -484,12 +548,42 @@ probs_m.round(3)
 The model computes $P(Y = j) = e^{\eta_j} / \sum_k e^{\eta_k}$ (the **softmax**), with $\eta = 0$ for the baseline.
 :::
 
-### Interpretation
+### Reading the ratios
 
--   Exponentiated coefficients are **relative risk ratios** (RRR): they multiply the ratio $P(\text{category}) / P(\text{academic})$.
--   **`write`:** each extra point multiplies the general-to-academic ratio by `{python} f"{np.exp(mn.params.loc['write', 0]):.3f}"` and the vocation-to-academic ratio by `{python} f"{np.exp(mn.params.loc['write', 1]):.3f}"`: better writers lean towards the academic programme.
--   **In probabilities:** from a writing score of 35 to 65, $P(\text{academic})$ rises from `{python} f"{probs_m.loc[35, 'academic']:.2f}"` to `{python} f"{probs_m.loc[65, 'academic']:.2f}"`.
--   Say "**relative to academic**" every time — and report probabilities too: a coefficient moves a category against the baseline, not its own probability.
+```{python}
+rrr = np.exp(mn.params); pv = mn.pvalues
+```
+
+**Everything is relative to the baseline** (academic). A relative risk ratio (RRR) multiplies the ratio $P(\text{category}) / P(\text{academic})$ — how many students are in that programme for every academic one.
+
+**`write`, general vs academic:** RRR = `{python} f"{rrr.loc['write', 0]:.3f}"`. Each extra writing point multiplies the general-to-academic ratio by `{python} f"{rrr.loc['write', 0]:.3f}"`: `{python} f"{1 - rrr.loc['write', 0]:.1%}"` lower. Over 10 points, multiply the coefficient by 10: $e^{10b} =$ `{python} f"{rrr.loc['write', 0]**10:.2f}"` — the ratio is almost halved.
+
+**`write`, vocation vs academic:** RRR = `{python} f"{rrr.loc['write', 1]:.3f}"` per point, $e^{10b} =$ `{python} f"{rrr.loc['write', 1]**10:.2f}"` over 10 points. Writing pulls students away from vocation **faster** than away from general.
+
+**`high` SES, general vs academic:** RRR = `{python} f"{rrr.loc['high', 0]:.3f}"` ($p =$ `{python} f"{pv.loc['high', 0]:.3f}"`). Compared with a low-SES student, a high-SES student's general-to-academic ratio is about a third.
+
+**`middle` SES:** $p =$ `{python} f"{pv.loc['middle', 0]:.2f}"` and `{python} f"{pv.loc['middle', 1]:.2f}"` — no detectable difference from low SES in either equation.
+
+### Reading the probabilities
+
+From the Results table, middle-SES students:
+
+| writing score | 35 | 45 | 55 | 65 |
+|---|---|---|---|---|
+| academic | `{python} f"{probs_m.loc[35, 'academic']:.2f}"` | `{python} f"{probs_m.loc[45, 'academic']:.2f}"` | `{python} f"{probs_m.loc[55, 'academic']:.2f}"` | `{python} f"{probs_m.loc[65, 'academic']:.2f}"` |
+| general | `{python} f"{probs_m.loc[35, 'general']:.2f}"` | `{python} f"{probs_m.loc[45, 'general']:.2f}"` | `{python} f"{probs_m.loc[55, 'general']:.2f}"` | `{python} f"{probs_m.loc[65, 'general']:.2f}"` |
+| vocation | `{python} f"{probs_m.loc[35, 'vocation']:.2f}"` | `{python} f"{probs_m.loc[45, 'vocation']:.2f}"` | `{python} f"{probs_m.loc[55, 'vocation']:.2f}"` | `{python} f"{probs_m.loc[65, 'vocation']:.2f}"` |
+
+-   Academic rises steadily and vocation falls steadily: easy to read.
+-   **General first rises, then falls** — even though its coefficient on `write` is negative. Why? Vocation loses students faster than general does, and some of the weakest writers who leave vocation land in general.
+-   The lesson: a coefficient tells you how a category moves **against the baseline**, not how its own probability moves. Only the probabilities show that.
+
+### Common mistakes
+
+-   **Forgetting the baseline.** Every coefficient is "relative to academic". Choose another baseline and every number changes — so always name it.
+-   **Reading a negative coefficient as "less likely".** As the General row shows, a category's probability can rise while its coefficient is negative.
+-   **Comparing two non-baseline categories directly.** General vs vocation is not in the output; it is the difference of their coefficients, $b_{1k} - b_{2k}$.
+-   **Small categories** give unstable estimates: check how many students each programme has before trusting a coefficient.
 
 :::::
 
