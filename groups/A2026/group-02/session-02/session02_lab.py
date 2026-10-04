@@ -16,6 +16,11 @@ from scipy import stats
 
 ANGLE = "data/spine/angle_a_sector.parquet"      # <- your group's angle
 VARS = ["elec_use_gwh", "gva_meur", "energy_cost_share"]   # <- your three variables
+UNITS = {
+    "elec_use_gwh": "Electricity use (GWh)",
+    "gva_meur": "Gross value added (million EUR)",
+    "energy_cost_share": "Energy cost share (share of gross output, 0–1)",
+}
 
 
 def centre(x):
@@ -96,10 +101,14 @@ def plot_variable(df, col, outdir="groups/A2026/group-02/session-02"):
     ax1.axvline(x.mean(), color="red", linestyle="--", label="mean")
     ax1.axvline(x.median(), color="black", label="median")
     ax1.set_title(f"{col}: histogram")
+    ax1.set_xlabel(UNITS.get(col, col))
+    ax1.set_ylabel("Number of observations")
     ax1.legend()
 
     ax2.boxplot(x)
     ax2.set_title(f"{col}: boxplot")
+    ax2.set_ylabel(UNITS.get(col, col))
+    ax2.set_xticks([])
 
     fig.tight_layout()
     fig.savefig(f"{outdir}/{col}.png", dpi=150)
