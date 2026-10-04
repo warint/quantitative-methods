@@ -131,40 +131,86 @@ assumed.
 ### The picture
 
 ```{python}
-# Two archers, many shots each. The target is the true coefficient.
-rng = np.random.default_rng(5)
-A_shots = rng.normal(0, 1.0, (60, 2))                 # centred, scattered
-B_shots = rng.normal(0, .35, (60, 2)) + [.35, .25]    # slightly off, tight
+# The same regression, estimated on 1,000 different samples of 30 rows.
+# Two predictors correlated at 0.95; the true coefficient of x1 is 1.
+rng = np.random.default_rng(3)
+n, S = 30, 1000
+cov = [[1, .95], [.95, 1]]
+samples = []
+for _ in range(S):
+    Xs = rng.multivariate_normal([0, 0], cov, n)
+    samples.append((Xs, Xs @ [1, 1] + rng.normal(0, 1, n)))
+b_ols = np.array([LinearRegression().fit(Xs, ys).coef_[0] for Xs, ys in samples])
+b_rdg = np.array([Ridge(alpha=10).fit(Xs, ys).coef_[0] for Xs, ys in samples])
 
-fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.5))
-for ax, shots, c, ttl in [(axes[0], A_shots, CL.warn, "Archer A — unbiased (OLS)"),
-                          (axes[1], B_shots, CL.good, "Archer B — slightly biased (ridge)")]:
-    for r in (2.4, 1.6, .8):
-        ax.add_patch(plt.Circle((0, 0), r, fill=False, color=CL.line, lw=1.2))
-    ax.scatter(*shots.T, s=14, color=c, alpha=.75)
-    ax.scatter(0, 0, marker="+", s=160, color=CL.ink, zorder=5)
-    ax.scatter(*shots.mean(0), marker="X", s=90, color=CL.ink, zorder=6)
-    err = (shots ** 2).sum(1).mean()
-    ax.set_title(f"{ttl}\naverage squared miss = {err:.2f}", fontsize=9.5)
-    ax.set_xlim(-2.8, 2.8); ax.set_ylim(-2.8, 2.8)
-    ax.set_aspect("equal"); ax.axis("off")
+fig, ax = plt.subplots(figsize=(7.6, 3.2))
+bins = np.linspace(-1.5, 3.5, 51)
+ax.hist(b_ols, bins, color=CL.warn, alpha=.55, label="OLS")
+ax.hist(b_rdg, bins, color=CL.good, alpha=.75, label="ridge")
+ax.axvline(1, color=CL.ink, lw=1.6)
+ax.text(1.06, ax.get_ylim()[1] * .9, "true value = 1", fontsize=9)
+ax.set_xlabel(r"estimate of $\beta_1$, one per sample"); ax.set_ylabel("number of samples")
+ax.legend(fontsize=8, loc="upper right")
 plt.show()
 ```
 
 ::: {.muted}
-Black cross: where each archer hits on average. Archer A is centred on the target, Archer B is not — and B still misses by far less.
+OLS (red) is centred on the true value but spreads from about −0.5 to 2.5. Ridge (green) sits a little below the true value, and almost every estimate is close to it.
 :::
 
-### The point
+### In plain words
 
-> OLS is the **best linear unbiased** estimator.
+Imagine collecting a new sample, re-estimating, and doing it again and again.
 
-True — among estimators that are centred on the truth. But what you pay for is the **total miss**:
+- **Unbiased** means *right on average*: the estimates scatter around the true value, as OLS does above. OLS is the most precise estimator among those that are right on average.
+- But you only ever get **one** sample. What matters is how far **your** estimate is likely to land from the truth — the average miss.
 
-$$\text{error} = \text{bias}^2 + \text{variance} + \text{noise}$$
+```{python}
+#| output: asis
+rows = [("OLS", b_ols), ("ridge", b_rdg)]
+print("| | average estimate | typical spread | average squared miss |\n|---|---|---|---|")
+for name, b in rows:
+    print(f"| {name} | {b.mean():.2f} | {b.std():.2f} | {((b - 1) ** 2).mean():.2f} |")
+```
 
 ::: {.warn}
-When the shots scatter widely — few rows, many correlated predictors — accept a little bias to buy a large cut in variance. That trade is what **regularisation** is.
+Ridge is a little wrong on average (0.84 instead of 1) but much less scattered, so it misses by far less. Giving up a little "right on average" to gain a lot of precision: that trade is what **regularisation** is.
+:::
+
+### Bias–variance
+
+Yes — this is the **bias–variance trade-off**. The average squared miss splits in two:
+
+$$\text{average squared miss} = \underbrace{\text{bias}^2}_{\text{off-centre}} + \underbrace{\text{variance}}_{\text{scatter}}$$
+
+```{python}
+# Same samples, now for every value of the penalty λ (both coefficients)
+lams = np.logspace(-2, 3, 40)
+bias2, var = [], []
+for lam in lams:
+    B = []
+    for Xs, ys in samples[:400]:
+        Xc, yc = Xs - Xs.mean(0), ys - ys.mean()
+        B.append(np.linalg.solve(Xc.T @ Xc + lam * np.eye(2), Xc.T @ yc))
+    B = np.array(B)
+    bias2.append(((B.mean(0) - 1) ** 2).sum()); var.append(B.var(0).sum())
+bias2, var = np.array(bias2), np.array(var)
+total = bias2 + var
+
+fig, ax = plt.subplots(figsize=(7.6, 3.1))
+ax.semilogx(lams, total, color=CL.accent, lw=3.2, label="average squared miss")
+ax.semilogx(lams, var, color=CL.muted, lw=2, ls="--", label="variance (scatter)")
+ax.semilogx(lams, bias2, color=CL.warn, lw=2, label="bias² (off-centre)")
+ax.axvline(lams[np.argmin(total)], color=CL.good, lw=1.4, ls=":")
+ax.text(1.2e-2, total[0] * 1.08, "λ ≈ 0: OLS — no bias, large variance", color=CL.ink, fontsize=8.5)
+ax.text(1.5, total.max() * .62, "λ large: little variance,\nbut pulled far from the truth", color=CL.muted, fontsize=8.5)
+ax.set_xlabel("penalty λ  (more shrinkage →)"); ax.set_ylim(0, total.max() * 1.05)
+ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, .88))
+plt.show()
+```
+
+::: {.check}
+Turning up $\lambda$ adds bias and removes variance. The total is lowest in between (dotted line). The next slide shows the same U on real data, and session 08 returns to the trade-off with $k$-nearest neighbours.
 :::
 
 :::::
@@ -466,7 +512,7 @@ plt.show()
 ```
 
 ::: {.check}
-When two predictors move together, the data can tell you their **sum** but not how to split it — so OLS splits it differently every sample (the long diagonal cloud). Ridge refuses the extreme splits: slightly off-centre, far less spread. That is Archer B.
+When two predictors move together, the data can tell you their **sum** but not how to split it — so OLS splits it differently every sample (the long diagonal cloud). Ridge refuses the extreme splits: slightly off-centre, far less spread. That is the green histogram from the start of the session, seen in two dimensions.
 :::
 
 ## The ridge path {.scrollable}
