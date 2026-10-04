@@ -33,7 +33,7 @@ format:
 1. Where we are — four sessions, one toolkit
 2. Session 2 · describe one variable: goal, code, results, interpretation
 3. Session 3 · fit a line, then check it
-4. Session 4 · when the outcome is a category
+4. Session 4 · binary, ordinal and multinomial logistic regression
 5. Session 5 · too many predictors: let the computer choose
 6. Advanced · panel data, fixed or random effects
 7. Advanced · interactions — a slope per group
@@ -300,7 +300,7 @@ Left: residuals should scatter at random around zero. Right: the dashed line (4/
 
 :::::
 
-## Session 4 · When the outcome is a category: the goal and the code {.scrollable}
+## Session 4 · Two categories: binary logistic regression, the goal and the code {.scrollable}
 
 ::::: panel-tabset
 ### The question
@@ -341,7 +341,7 @@ m.predict(pd.DataFrame({"fico": [650, 700, 800]})).round(3)
 
 :::::
 
-## Session 4 · When the outcome is a category: results and interpretation {.scrollable}
+## Session 4 · Two categories: binary logistic regression, results and interpretation {.scrollable}
 
 ::::: panel-tabset
 ### Results
@@ -373,7 +373,7 @@ The chain, from what Python gives you to what a reader understands:
 | $b_0 + b_1 x$ | $e^{xb}/(1+e^{xb})$ | the **probability**: `{python} f"{float(m.predict(pd.DataFrame({'fico': [650]}))[0]):.2f}"` at 650, `{python} f"{float(m.predict(pd.DataFrame({'fico': [800]}))[0]):.2f}"` at 800 |
 
 -   The odds ratio is the same at every score; the change in **probability** is not — it is largest where the curve is steepest.
--   **Ordinal** and **multinomial** models follow the same chain: log-odds → odds (or relative risk) ratios → predicted probabilities.
+-   **Ordinal** and **multinomial** models follow the same chain — log-odds → odds (or relative risk) ratios → predicted probabilities. The next two slides show how.
 
 ### What to write
 
@@ -382,6 +382,114 @@ The chain, from what Python gives you to what a reader understands:
 ::: {.warn}
 Never report a log-odds as if it were a probability, and never predict outside the scores you observed.
 :::
+
+:::::
+
+## Session 4 · Ordered categories: ordinal logistic regression {.scrollable}
+
+::::: panel-tabset
+### Goal
+
+> **How likely is a student to apply to graduate school?** The answer is *unlikely* < *somewhat likely* < *very likely*: three categories with a natural **order**.
+
+-   A binary logit would throw information away (collapse to two categories); a multinomial logit would ignore the order.
+-   The **ordinal logit** models the **cumulative** log-odds — the chance of being *at or below* each cut:
+
+$$\ln\left(\frac{P(Y \le j)}{P(Y > j)}\right) = c_j - (\beta_1\,\text{pared} + \beta_2\,\text{public} + \beta_3\,\text{gpa}), \qquad j = 1, 2$$
+
+-   Two **cutpoints** $c_1 < c_2$ act as intercepts, one per cut. There is **one** $\beta$ per predictor, the same at both cuts: the **proportional-odds** assumption.
+-   Because of the minus sign, a **positive** $\beta$ pushes students **up** the scale.
+
+### Code
+
+```{python}
+#| echo: true
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+
+dat = qmib.load("ologit")
+order = ["unlikely", "somewhat likely", "very likely"]
+dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)  # keep the order
+
+om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]], distr="logit").fit(method="bfgs", disp=0)
+b_o = om.params[["pared", "public", "gpa"]]
+pd.DataFrame({"log-odds": b_o, "odds ratio": np.exp(b_o), "p-value": om.pvalues[b_o.index]}).round(3)
+```
+
+### Results
+
+```{python}
+#| echo: true
+# Two otherwise identical students (private school, GPA 3.0): parents with or without graduate school
+new = pd.DataFrame({"pared": [1, 0], "public": [0, 0], "gpa": [3.0, 3.0]})
+probs_o = pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["pared = 1", "pared = 0"])
+probs_o.round(3)
+```
+
+::: {.muted}
+Each row sums to 1. The model computes $P(Y \le j) = F(c_j - x\beta)$ and takes differences to get each category.
+:::
+
+### Interpretation
+
+-   **`pared`:** $b =$ `{python} f"{b_o['pared']:.3f}"`, so $e^{b} =$ `{python} f"{np.exp(b_o['pared']):.2f}"`. Students whose parents went to graduate school have `{python} f"{np.exp(b_o['pared']):.2f}"` times the odds of being in a **higher** category — at either cut, by proportional odds.
+-   **`gpa`:** one more GPA point multiplies those odds by `{python} f"{np.exp(b_o['gpa']):.2f}"`.
+-   **`public`:** $p =$ `{python} f"{om.pvalues['public']:.2f}"` — no detectable effect; report it as such, not as a percentage.
+-   **In probabilities:** `pared` moves $P(\text{very likely})$ from `{python} f"{probs_o.loc['pared = 0', 'very likely']:.2f}"` to `{python} f"{probs_o.loc['pared = 1', 'very likely']:.2f}"`, and $P(\text{unlikely})$ from `{python} f"{probs_o.loc['pared = 0', 'unlikely']:.2f}"` to `{python} f"{probs_o.loc['pared = 1', 'unlikely']:.2f}"`. One coefficient shifts the whole distribution up the scale.
+
+:::::
+
+## Session 4 · Unordered categories: multinomial logistic regression {.scrollable}
+
+::::: panel-tabset
+### Goal
+
+> **Which high-school programme does a student follow — academic, general or vocational?** Three categories with **no order**: vocational is not "more" than general.
+
+-   Pick a **baseline** category (academic, the most common). The model writes one log-odds equation **per other category**, each against the baseline:
+
+$$\ln\frac{P(\text{general})}{P(\text{academic})} = b_{10} + b_{11}\,\text{middle} + b_{12}\,\text{high} + b_{13}\,\text{write}$$
+
+$$\ln\frac{P(\text{vocation})}{P(\text{academic})} = b_{20} + b_{21}\,\text{middle} + b_{22}\,\text{high} + b_{23}\,\text{write}$$
+
+-   Unlike the ordinal model, every predictor gets **its own coefficient in each equation**. The equations are estimated together by maximum likelihood, so the three probabilities sum to one.
+
+### Code
+
+```{python}
+#| echo: true
+import statsmodels.api as sm
+
+ml = qmib.load("hsbdemo")
+levels = ["academic", "general", "vocation"]            # code 0 = academic = the baseline
+y_m = pd.Categorical(ml["prog"], categories=levels).codes
+X_m = pd.get_dummies(ml["ses"])[["middle", "high"]].astype(float)   # low SES is the reference
+X_m["write"] = ml["write"].astype(float)
+mn = sm.MNLogit(y_m, sm.add_constant(X_m)).fit(disp=0)
+
+b_m = mn.params.set_axis(["general vs academic", "vocation vs academic"], axis=1)
+pd.concat({"log-odds": b_m, "RRR": np.exp(b_m)}, axis=1).round(3)
+```
+
+### Results
+
+```{python}
+#| echo: true
+# Middle-SES students across the range of writing scores
+grid_m = pd.DataFrame({"const": 1.0, "middle": 1.0, "high": 0.0, "write": [35, 45, 55, 65]})
+probs_m = pd.DataFrame(mn.predict(grid_m).values, columns=levels, index=grid_m["write"])
+probs_m.round(3)
+```
+
+::: {.muted}
+The model computes $P(Y = j) = e^{\eta_j} / \sum_k e^{\eta_k}$ (the **softmax**), with $\eta = 0$ for the baseline.
+:::
+
+### Interpretation
+
+-   Exponentiated coefficients are **relative risk ratios** (RRR): they multiply the ratio $P(\text{category}) / P(\text{academic})$.
+-   **`write`:** each extra point multiplies the general-to-academic ratio by `{python} f"{np.exp(mn.params.loc['write', 0]):.3f}"` and the vocation-to-academic ratio by `{python} f"{np.exp(mn.params.loc['write', 1]):.3f}"`: better writers lean towards the academic programme.
+-   **In probabilities:** from a writing score of 35 to 65, $P(\text{academic})$ rises from `{python} f"{probs_m.loc[35, 'academic']:.2f}"` to `{python} f"{probs_m.loc[65, 'academic']:.2f}"`.
+-   Say "**relative to academic**" every time — and report probabilities too: a coefficient moves a category against the baseline, not its own probability.
 
 :::::
 
