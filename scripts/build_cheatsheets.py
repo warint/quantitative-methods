@@ -107,9 +107,10 @@ SNIPPETS = {
     "sm.MNLogit": "import statsmodels.api as sm\n"
                   "fit = sm.MNLogit(y, sm.add_constant(X)).fit()",
     "sm.add_constant": "X = sm.add_constant(X)            # the intercept, with no formula",
-    ".predict": "p = fit.predict(newdata)          # probabilities, not classes",
+    ".predict": "p = fit.predict(newdata)          # probability e^xb/(1+e^xb), not a class",
     ".get_prediction": "fit.get_prediction(newdata).summary_frame()  # with an interval",
-    "np.exp": "np.exp(fit.params)                # a log-odds becomes an odds ratio",
+    "np.exp": "fit.params                        # log-odds, as fitted\n"
+              "np.exp(fit.params)                # odds ratios: 1.65 = odds 65% higher",
     ".llf": "lr = 2 * (full.llf - reduced.llf)  # the likelihood-ratio statistic",
     "stats.chi2.sf": "stats.chi2.sf(lr, df=2)           # its p-value",
     "pd.get_dummies": 'X = pd.get_dummies(d[["grade"]], drop_first=True)',
@@ -120,10 +121,13 @@ SNIPPETS = {
     # ---- Session 05 -------------------------------------------------------
     "StandardScaler": "from sklearn.preprocessing import StandardScaler\n"
                       "Z = StandardScaler().fit(Xtr).transform(Xtr)   # fit on TRAIN only",
-    "make_pipeline": "pipe = make_pipeline(StandardScaler(), Ridge(alpha=1.0))\n"
-                     "# so the scaler never sees the held-out fold",
-    "Ridge / Lasso / ElasticNet": "Ridge(alpha=1.0).fit(Ztr, ytr)     # Lasso, ElasticNet take the same shape",
-    "RidgeCV / LassoCV / ElasticNetCV": "LassoCV(cv=5).fit(Ztr, ytr).alpha_     # lambda by cross-validation",
+    "make_pipeline": "pipe = make_pipeline(StandardScaler(), Lasso(alpha=0.8)).fit(X, y)\n"
+                     "# standardise first; the scaler never sees the held-out fold",
+    "Ridge / Lasso / ElasticNet": "Ridge(alpha=10)                    # alpha is lambda; shrinks, keeps all\n"
+                                  "Lasso(alpha=0.8)                   # sets weak ones to exactly 0\n"
+                                  "ElasticNet(alpha=1.0, l1_ratio=0.5)  # l1_ratio: 1 = lasso, 0 = ridge",
+    "RidgeCV / LassoCV / ElasticNetCV": "LassoCV(cv=5).fit(Ztr, ytr).alpha_     # lambda by cross-validation\n"
+                                        "ElasticNetCV(l1_ratio=[.1, .5, .9, 1], cv=5)  # and the mix too",
     "lasso_path": "alphas, coefs, _ = lasso_path(Z, y)    # the whole coefficient path",
     "train_test_split": "Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=7)",
     "KFold": "KFold(n_splits=5, shuffle=True, random_state=7)",
