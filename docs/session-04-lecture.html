@@ -1087,7 +1087,6 @@ Thierry Warin, PhD
 <li>Introduction</li>
 <li>Let’s start with an example</li>
 <li>The basics of logistic regression</li>
-<li>Inference and goodness of fit</li>
 <li>Let’s see another example</li>
 <li>Ordinal logistic regression</li>
 <li>Multinomial logistic regression</li>
@@ -1308,7 +1307,7 @@ Thierry Warin, PhD
 <blockquote>
 <p>Which loans are successfull and which one are not successful?</p>
 </blockquote>
-<div id="64c1ad7d" class="cell" data-execution_count="2">
+<div id="b01c5756" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a><span class="co"># One call. Downloaded once, then read from the local cache.</span></span>
@@ -1489,7 +1488,7 @@ text-align: right;
 <ul>
 <li>Let’s see how linear regression would address this problem.</li>
 </ul>
-<div id="ba09bbff" class="cell" data-execution_count="3">
+<div id="ce17ca99" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb2-2"><a href></a></span>
 <span id="cb2-3"><a href></a><span class="co"># The linear probability model: a straight line through 0/1 outcomes</span></span>
@@ -1502,7 +1501,7 @@ Dep. Variable:                default   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.022
 Method:                 Least Squares   F-statistic:                     219.4
 Date:                Sun, 04 Oct 2026   Prob (F-statistic):           4.23e-49
-Time:                        16:47:40   Log-Likelihood:                -3872.2
+Time:                        16:50:18   Log-Likelihood:                -3872.2
 No. Observations:                9578   AIC:                             7748.
 Df Residuals:                    9576   BIC:                             7763.
 Df Model:                           1                                         
@@ -1650,7 +1649,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 </div>
 <div id="tabset-2-6">
 <p>For our loan default data, the logistic regression in Python:</p>
-<div id="2c5528e6" class="cell" data-execution_count="4">
+<div id="6f94c6ae" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># Fit the logistic regression. The coefficients come out as log-odds.</span></span>
 <span id="cb4-2"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;default ~ fico&quot;</span>, data<span class="op">=</span>loans).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb4-3"><a href></a>m2.params.<span class="bu">round</span>(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1668,7 +1667,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-7">
 <p>Exponentiate the coefficient to get the <strong>odds ratio</strong>:</p>
-<div id="a9ee248c" class="cell" data-execution_count="5">
+<div id="22525ee9" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># Log-odds -&gt; odds ratio: take the exponential of each coefficient</span></span>
 <span id="cb6-2"><a href></a>np.exp(m2.params[<span class="st">&quot;fico&quot;</span>]).<span class="bu">round</span>(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -1689,7 +1688,7 @@ p = \frac{e^{b_0 + b_1 x}}{1 + e^{b_0 + b_1 x}}
 <li>FICO 600: <span class="math inline">\(b_0 + b_1 x = 6.719 - 0.011877 \times 600 = -0.407\)</span>, so <span class="math inline">\(p = \dfrac{e^{-0.407}}{1 + e^{-0.407}} = 0.40\)</span></li>
 <li>FICO 850: <span class="math inline">\(6.719 - 0.011877 \times 850 = -3.377\)</span>, so <span class="math inline">\(p = \dfrac{e^{-3.377}}{1 + e^{-3.377}} = 0.03\)</span></li>
 </ul>
-<div id="d688ee0a" class="cell" data-execution_count="6">
+<div id="4a3bf0f7" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># predict() does the same calculation for you</span></span>
 <span id="cb8-2"><a href></a>m2.predict(pd.DataFrame({<span class="st">&quot;fico&quot;</span>: [<span class="dv">600</span>, <span class="dv">700</span>, <span class="dv">850</span>]})).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -1715,99 +1714,26 @@ dtype: float64</code></pre>
 </div>
 </div>
 </section>
-<section id="imported-s04-016" class="slide level2 center scrollable">
-<h2>Inference and goodness of fit</h2>
-</section>
-<section id="imported-s04-017" class="slide level2 scrollable">
-<h2>Inference and goodness of fit</h2>
-<div class="panel-tabset">
-<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-3-1">IGF 1</a></li><li><a href="#tabset-3-2">IGF 2</a></li><li><a href="#tabset-3-3">IGF 3</a></li><li><a href="#tabset-3-4">IGF 4</a></li><li><a href="#tabset-3-5">IGF 5</a></li></ul>
-<div class="tab-content">
-<div id="tabset-3-1">
-<p>In the last segment, we learned how to estimate the coefficients of a simple logistic regression and obtain predictions.</p>
-<p>We now focus on:</p>
-<ul>
-<li><p><strong>Hypothesis testing</strong> for the coefficient of a predictor in logistic regression.</p></li>
-<li><p><strong>Confidence intervals</strong> for probabilities.</p></li>
-<li><p>An <strong>analogous measure</strong> to <span class="math inline">\(R^2\)</span> in linear regression.</p></li>
-</ul>
-</div>
-<div id="tabset-3-2">
-<p>Again, the simple logistic regression model is given by:</p>
-<p><span class="math display">\[ \pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1x)}} \]</span></p>
-<ul>
-<li><p>We usually consider both confidence intervals and hypothesis tests for <span class="math inline">\(\beta_1\)</span> (btw, not <span class="math inline">\(b_1\)</span>).</p></li>
-<li><p>Because the value of <span class="math inline">\(\beta_1\)</span> is difficult to interpret, we will focus mainly on hypothesis testing for <span class="math inline">\(\beta_1 = 0\)</span>.</p></li>
-</ul>
-</div>
-<div id="tabset-3-3">
-<ul>
-<li><p>No agreed-upon method for summarizing goodness-of-fit for logistic regression.</p></li>
-<li><p>The difficulty is that the notion of “percent variation explained” by the predictor is not as obvious as with linear regression.</p></li>
-</ul>
-</div>
-<div id="tabset-3-4">
-<p>Various suggestions have been proposed – we will use the pseudo-R2 measure (due to McFadden).</p>
-<ul>
-<li>Logistic regression models are fitted using the method of maximum likelihood - i.e. the parameter estimates are those values which maximize the likelihood of the data which have been observed. McFadden’s R squared measure is defined as:</li>
-</ul>
-<p><span class="math display">\[ R^{2}_{\text{McFadden}} = 1- \frac{log(L_c)}{log(L_{\text{null}})} \]</span></p>
-<ul>
-<li>where <span class="math inline">\(L_c\)</span> denotes the (maximized) likelihood value from the current fitted model, and <span class="math inline">\(L_{\text{null}}\)</span> denotes the corresponding value but for the null model - the model with only an intercept and no covariates.</li>
-</ul>
-</div>
-<div id="tabset-3-5">
-<p>This calculation looks similar to that of <span class="math inline">\(R^2\)</span> for linear regression.</p>
-<ul>
-<li>Analysis of goodness-of-fit for loan default logistic regression:</li>
-</ul>
-<div id="c895f6ff" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;default ~ fico&quot;</span>, data<span class="op">=</span>loans).fit()</span>
-<span id="cb10-2"><a href></a>null <span class="op">=</span> smf.logit(<span class="st">&quot;default ~ 1&quot;</span>, data<span class="op">=</span>loans).fit()</span>
-<span id="cb10-3"><a href></a></span>
-<span id="cb10-4"><a href></a><span class="co"># McFadden&#39;s pseudo R-squared</span></span>
-<span id="cb10-5"><a href></a>pseudo_r2 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> m2.llf <span class="op">/</span> null.llf</span>
-<span id="cb10-6"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pseudo R2 = </span><span class="sc">{</span>pseudo_r2<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Optimization terminated successfully.
-         Current function value: 0.427860
-         Iterations 6
-Optimization terminated successfully.
-         Current function value: 0.439760
-         Iterations 6
-pseudo R2 = 0.0271</code></pre>
-</div>
-</div>
-<p>Value is computed to be 0.0271</p>
-<ul>
-<li><p>Very low pseudo-R2 – roughly 2.7% of the “variation” explained by the FICO score.</p></li>
-<li><p>Generally do not expect high <span class="math inline">\(pseudo-R^2\)</span> values.</p></li>
-<li><p>Values as high as 0.4 or 0.5 indicate a very good fit for logistic regression.</p></li>
-</ul>
-</div>
-</div>
-</div>
-</section>
 <section id="imported-s04-018" class="slide level2 center scrollable">
 <h2>Let’s see another example</h2>
 </section>
 <section id="imported-s04-020" class="slide level2 scrollable">
 <h2>Portugal’s Red Wines</h2>
 <div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">Wine 1 · The data</a></li><li><a href="#tabset-4-2">Wine 2 · The equation</a></li><li><a href="#tabset-4-3">Wine 3 · The code</a></li><li><a href="#tabset-4-4">Wine 4 · Log-odds → odds</a></li><li><a href="#tabset-4-5">Wine 5 · Probabilities</a></li></ul>
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-3-1">Wine 1 · The data</a></li><li><a href="#tabset-3-2">Wine 2 · The equation</a></li><li><a href="#tabset-3-3">Wine 3 · The code</a></li><li><a href="#tabset-3-4">Wine 4 · Log-odds → odds</a></li><li><a href="#tabset-3-5">Wine 5 · Probabilities</a></li></ul>
 <div class="tab-content">
-<div id="tabset-4-1">
+<div id="tabset-3-1">
 <p>Can we use analytics to predict quality from the physio-chemical content of red wine?</p>
 <ul>
 <li><p>Data were collected on 1,599 bottles of Portuguese red wines.</p></li>
 <li><p>Each wine was evaluated by experts and classed “bad” (<span class="math inline">\(Y = 0\)</span>) or “good” (<span class="math inline">\(Y = 1\)</span>).</p></li>
 </ul>
-<div id="43cf8b56" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a><span class="co"># qmib.load() already returns good as 0/1, so no recoding is needed.</span></span>
-<span id="cb12-2"><a href></a><span class="co"># About one wine in seven is good: the classes are far from balanced.</span></span>
-<span id="cb12-3"><a href></a>redwines <span class="op">=</span> qmib.load(<span class="st">&quot;redwines&quot;</span>)</span>
-<span id="cb12-4"><a href></a>redwines[<span class="st">&quot;good&quot;</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="fb4198ad" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># qmib.load() already returns good as 0/1, so no recoding is needed.</span></span>
+<span id="cb10-2"><a href></a><span class="co"># About one wine in seven is good: the classes are far from balanced.</span></span>
+<span id="cb10-3"><a href></a>redwines <span class="op">=</span> qmib.load(<span class="st">&quot;redwines&quot;</span>)</span>
+<span id="cb10-4"><a href></a>redwines[<span class="st">&quot;good&quot;</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>good
 0    1382
 1     217
@@ -1815,7 +1741,7 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-4-2">
+<div id="tabset-3-2">
 <p>Eight predictors <span class="math inline">\(x_1, \dots, x_8\)</span> instead of one. The model is the same, with more terms:</p>
 <p><span class="math display">\[
 \ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_8 x_8,
@@ -1826,15 +1752,15 @@ Name: count, dtype: int64</code></pre>
 <li><p>Each <span class="math inline">\(\beta_j\)</span> is the change in the log-odds of a good rating for a one-unit increase in <span class="math inline">\(x_j\)</span>, <strong>holding the other seven constant</strong>.</p></li>
 </ul>
 </div>
-<div id="tabset-4-3">
-<div id="a636cc7c" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># Eight chemical measurements. Note what is absent: price, region, vintage.</span></span>
-<span id="cb14-2"><a href></a><span class="co"># The model can only speak about what is in this list.</span></span>
-<span id="cb14-3"><a href></a>predictors <span class="op">=</span> [<span class="st">&quot;fixed_acidity&quot;</span>, <span class="st">&quot;volatile_acidity&quot;</span>, <span class="st">&quot;residual_sugar&quot;</span>, <span class="st">&quot;chlorides&quot;</span>,</span>
-<span id="cb14-4"><a href></a>              <span class="st">&quot;total_sulfur_dioxide&quot;</span>, <span class="st">&quot;density&quot;</span>, <span class="st">&quot;sulphates&quot;</span>, <span class="st">&quot;alcohol&quot;</span>]</span>
-<span id="cb14-5"><a href></a></span>
-<span id="cb14-6"><a href></a>w1 <span class="op">=</span> smf.logit(<span class="st">&quot;good ~ &quot;</span> <span class="op">+</span> <span class="st">&quot; + &quot;</span>.join(predictors), data<span class="op">=</span>redwines).fit()</span>
-<span id="cb14-7"><a href></a><span class="bu">print</span>(w1.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-3-3">
+<div id="b0ab19ce" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a><span class="co"># Eight chemical measurements. Note what is absent: price, region, vintage.</span></span>
+<span id="cb12-2"><a href></a><span class="co"># The model can only speak about what is in this list.</span></span>
+<span id="cb12-3"><a href></a>predictors <span class="op">=</span> [<span class="st">&quot;fixed_acidity&quot;</span>, <span class="st">&quot;volatile_acidity&quot;</span>, <span class="st">&quot;residual_sugar&quot;</span>, <span class="st">&quot;chlorides&quot;</span>,</span>
+<span id="cb12-4"><a href></a>              <span class="st">&quot;total_sulfur_dioxide&quot;</span>, <span class="st">&quot;density&quot;</span>, <span class="st">&quot;sulphates&quot;</span>, <span class="st">&quot;alcohol&quot;</span>]</span>
+<span id="cb12-5"><a href></a></span>
+<span id="cb12-6"><a href></a>w1 <span class="op">=</span> smf.logit(<span class="st">&quot;good ~ &quot;</span> <span class="op">+</span> <span class="st">&quot; + &quot;</span>.join(predictors), data<span class="op">=</span>redwines).fit()</span>
+<span id="cb12-7"><a href></a><span class="bu">print</span>(w1.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Optimization terminated successfully.
          Current function value: 0.272694
@@ -1845,7 +1771,7 @@ Dep. Variable:                   good   No. Observations:                 1599
 Model:                          Logit   Df Residuals:                     1590
 Method:                           MLE   Df Model:                            8
 Date:                Sun, 04 Oct 2026   Pseudo R-squ.:                  0.3133
-Time:                        16:47:40   Log-Likelihood:                -436.04
+Time:                        16:50:18   Log-Likelihood:                -436.04
 converged:                       True   LL-Null:                       -634.96
 Covariance Type:            nonrobust   LLR p-value:                 5.414e-81
 ========================================================================================
@@ -1864,12 +1790,12 @@ alcohol                  0.7823      0.112      6.983      0.000       0.563    
 </div>
 </div>
 </div>
-<div id="tabset-4-4">
+<div id="tabset-3-4">
 <p>The coefficients are <strong>log-odds</strong>:</p>
-<div id="96165e80" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="co"># Log-odds: the coefficients as fitted</span></span>
-<span id="cb16-2"><a href></a>w1.params.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div id="bd6abf4b" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># Log-odds: the coefficients as fitted</span></span>
+<span id="cb14-2"><a href></a>w1.params.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>Intercept               226.750
 fixed_acidity             0.281
 volatile_acidity         -2.913
@@ -1883,11 +1809,11 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Exponentiate them to get <strong>odds ratios</strong>:</p>
-<div id="7dafce47" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="co"># Odds ratios: above 1 raises the odds, below 1 lowers them.</span></span>
-<span id="cb18-2"><a href></a><span class="co"># The intercept is left out: e^b0 is the odds when every predictor is zero.</span></span>
-<span id="cb18-3"><a href></a>np.exp(w1.params.drop(<span class="st">&quot;Intercept&quot;</span>)).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div id="4dd84e28" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="co"># Odds ratios: above 1 raises the odds, below 1 lowers them.</span></span>
+<span id="cb16-2"><a href></a><span class="co"># The intercept is left out: e^b0 is the odds when every predictor is zero.</span></span>
+<span id="cb16-3"><a href></a>np.exp(w1.params.drop(<span class="st">&quot;Intercept&quot;</span>)).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>fixed_acidity            1.325
 volatile_acidity         0.054
 residual_sugar           1.262
@@ -1905,15 +1831,15 @@ dtype: float64</code></pre>
 <li><p>Density and chlorides show 0.000: a one-unit change is far outside what these variables do in the data. Rescale a predictor before reading its odds ratio.</p></li>
 </ul>
 </div>
-<div id="tabset-4-5">
+<div id="tabset-3-5">
 <p>The odds ratio is the same everywhere; the change in <strong>probability</strong> is not. To get probabilities, apply <span class="math inline">\(p = e^{X\beta} / (1 + e^{X\beta})\)</span> to the whole linear predictor — which is what <code>predict()</code> does:</p>
-<div id="e043f31f" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a><span class="co"># Hold every other predictor at its mean and vary alcohol alone</span></span>
-<span id="cb20-2"><a href></a>grid <span class="op">=</span> pd.DataFrame({c: [redwines[c].mean()] <span class="op">*</span> <span class="dv">8</span> <span class="cf">for</span> c <span class="kw">in</span> predictors})</span>
-<span id="cb20-3"><a href></a>grid[<span class="st">&quot;alcohol&quot;</span>] <span class="op">=</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">16</span>)</span>
-<span id="cb20-4"><a href></a></span>
-<span id="cb20-5"><a href></a>grid[<span class="st">&quot;p_good&quot;</span>] <span class="op">=</span> w1.predict(grid)</span>
-<span id="cb20-6"><a href></a><span class="bu">print</span>(grid[[<span class="st">&quot;alcohol&quot;</span>, <span class="st">&quot;p_good&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="265c98e7" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="co"># Hold every other predictor at its mean and vary alcohol alone</span></span>
+<span id="cb18-2"><a href></a>grid <span class="op">=</span> pd.DataFrame({c: [redwines[c].mean()] <span class="op">*</span> <span class="dv">8</span> <span class="cf">for</span> c <span class="kw">in</span> predictors})</span>
+<span id="cb18-3"><a href></a>grid[<span class="st">&quot;alcohol&quot;</span>] <span class="op">=</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">16</span>)</span>
+<span id="cb18-4"><a href></a></span>
+<span id="cb18-5"><a href></a>grid[<span class="st">&quot;p_good&quot;</span>] <span class="op">=</span> w1.predict(grid)</span>
+<span id="cb18-6"><a href></a><span class="bu">print</span>(grid[[<span class="st">&quot;alcohol&quot;</span>, <span class="st">&quot;p_good&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   alcohol  p_good
 0        8   0.009
@@ -1939,20 +1865,20 @@ dtype: float64</code></pre>
 <section id="imported-s04-026" class="slide level2 scrollable">
 <h2>Ordinal logistic regression</h2>
 <div class="panel-tabset">
-<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-5-1">OLR 1 · The data</a></li><li><a href="#tabset-5-2">OLR 2 · The equation</a></li><li><a href="#tabset-5-3">OLR 3 · The code</a></li><li><a href="#tabset-5-4">OLR 4 · Log-odds → odds</a></li><li><a href="#tabset-5-5">OLR 5 · Probabilities</a></li></ul>
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">OLR 1 · The data</a></li><li><a href="#tabset-4-2">OLR 2 · The equation</a></li><li><a href="#tabset-4-3">OLR 3 · The code</a></li><li><a href="#tabset-4-4">OLR 4 · Log-odds → odds</a></li><li><a href="#tabset-4-5">OLR 5 · Probabilities</a></li></ul>
 <div class="tab-content">
-<div id="tabset-5-1">
+<div id="tabset-4-1">
 <p>A study looks at factors that influence the decision of whether to apply to graduate school. College juniors are asked if they are unlikely, somewhat likely, or very likely to apply. The outcome has three <strong>ordered</strong> categories, and the “distances” between them need not be equal.</p>
 <p>The predictors are <code>pared</code> (1 if at least one parent went to graduate school), <code>public</code> (1 if the undergraduate institution is public) and <code>gpa</code>.</p>
-<div id="ac131192" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb22-2"><a href></a></span>
-<span id="cb22-3"><a href></a><span class="co"># An ordered outcome: how likely a student says they are to apply to graduate</span></span>
-<span id="cb22-4"><a href></a><span class="co"># school. Unlikely &lt; somewhat likely &lt; very likely — an ordering the data carry</span></span>
-<span id="cb22-5"><a href></a><span class="co"># and that a plain multinomial model would throw away.</span></span>
-<span id="cb22-6"><a href></a>dat <span class="op">=</span> qmib.load(<span class="st">&quot;ologit&quot;</span>)</span>
-<span id="cb22-7"><a href></a>dat.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div id="84e1a71e" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb20-2"><a href></a></span>
+<span id="cb20-3"><a href></a><span class="co"># An ordered outcome: how likely a student says they are to apply to graduate</span></span>
+<span id="cb20-4"><a href></a><span class="co"># school. Unlikely &lt; somewhat likely &lt; very likely — an ordering the data carry</span></span>
+<span id="cb20-5"><a href></a><span class="co"># and that a plain multinomial model would throw away.</span></span>
+<span id="cb20-6"><a href></a>dat <span class="op">=</span> qmib.load(<span class="st">&quot;ologit&quot;</span>)</span>
+<span id="cb20-7"><a href></a>dat.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2019,7 +1945,7 @@ text-align: right;
 </div>
 </div>
 </div>
-<div id="tabset-5-2">
+<div id="tabset-4-2">
 <p>With <span class="math inline">\(J = 3\)</span> ordered categories, the ordinal logit models the <strong>cumulative</strong> log-odds — the chance of being <em>at or below</em> each cut:</p>
 <p><span class="math display">\[
 \ln\left(\frac{P(Y \le j)}{P(Y &gt; j)}\right) = c_j - (\beta_1\,\text{pared} + \beta_2\,\text{public} + \beta_3\,\text{gpa}), \qquad j = 1, 2
@@ -2031,19 +1957,19 @@ text-align: right;
 <li><p>Estimated by <strong>maximum likelihood</strong>: the cutpoints and the <span class="math inline">\(\beta\)</span>s are chosen jointly so that the answers we observe are as probable as possible.</p></li>
 </ul>
 </div>
-<div id="tabset-5-3">
-<div id="99b454ee" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href></a><span class="im">from</span> statsmodels.miscmodels.ordinal_model <span class="im">import</span> OrderedModel</span>
-<span id="cb23-2"><a href></a></span>
-<span id="cb23-3"><a href></a><span class="co"># Keep the order — &quot;unlikely&quot; &lt; &quot;somewhat likely&quot; &lt; &quot;very likely&quot;.</span></span>
-<span id="cb23-4"><a href></a><span class="co"># An ordinal model needs the ordering, not just the labels.</span></span>
-<span id="cb23-5"><a href></a>order <span class="op">=</span> [<span class="st">&quot;unlikely&quot;</span>, <span class="st">&quot;somewhat likely&quot;</span>, <span class="st">&quot;very likely&quot;</span>]</span>
-<span id="cb23-6"><a href></a>dat[<span class="st">&quot;apply_c&quot;</span>] <span class="op">=</span> pd.Categorical(dat[<span class="st">&quot;apply&quot;</span>], categories<span class="op">=</span>order, ordered<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb23-7"><a href></a></span>
-<span id="cb23-8"><a href></a><span class="co"># One slope per predictor and two cutpoints, not three separate models.</span></span>
-<span id="cb23-9"><a href></a>om <span class="op">=</span> OrderedModel(dat[<span class="st">&quot;apply_c&quot;</span>], dat[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]],</span>
-<span id="cb23-10"><a href></a>                  distr<span class="op">=</span><span class="st">&quot;logit&quot;</span>).fit(method<span class="op">=</span><span class="st">&quot;bfgs&quot;</span>, disp<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb23-11"><a href></a><span class="bu">print</span>(om.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-4-3">
+<div id="aa532373" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href></a><span class="im">from</span> statsmodels.miscmodels.ordinal_model <span class="im">import</span> OrderedModel</span>
+<span id="cb21-2"><a href></a></span>
+<span id="cb21-3"><a href></a><span class="co"># Keep the order — &quot;unlikely&quot; &lt; &quot;somewhat likely&quot; &lt; &quot;very likely&quot;.</span></span>
+<span id="cb21-4"><a href></a><span class="co"># An ordinal model needs the ordering, not just the labels.</span></span>
+<span id="cb21-5"><a href></a>order <span class="op">=</span> [<span class="st">&quot;unlikely&quot;</span>, <span class="st">&quot;somewhat likely&quot;</span>, <span class="st">&quot;very likely&quot;</span>]</span>
+<span id="cb21-6"><a href></a>dat[<span class="st">&quot;apply_c&quot;</span>] <span class="op">=</span> pd.Categorical(dat[<span class="st">&quot;apply&quot;</span>], categories<span class="op">=</span>order, ordered<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-7"><a href></a></span>
+<span id="cb21-8"><a href></a><span class="co"># One slope per predictor and two cutpoints, not three separate models.</span></span>
+<span id="cb21-9"><a href></a>om <span class="op">=</span> OrderedModel(dat[<span class="st">&quot;apply_c&quot;</span>], dat[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]],</span>
+<span id="cb21-10"><a href></a>                  distr<span class="op">=</span><span class="st">&quot;logit&quot;</span>).fit(method<span class="op">=</span><span class="st">&quot;bfgs&quot;</span>, disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb21-11"><a href></a><span class="bu">print</span>(om.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                             OrderedModel Results                             
 ==============================================================================
@@ -2051,7 +1977,7 @@ Dep. Variable:                apply_c   Log-Likelihood:                -358.51
 Model:                   OrderedModel   AIC:                             727.0
 Method:            Maximum Likelihood   BIC:                             747.0
 Date:                Sun, 04 Oct 2026                                         
-Time:                        16:47:40                                         
+Time:                        16:50:18                                         
 No. Observations:                 400                                         
 Df Residuals:                     395                                         
 Df Model:                           3                                         
@@ -2068,12 +1994,12 @@ somewhat likely/very likely     0.7398      0.080      9.236      0.000       0.
 </div>
 <p>The first three rows are the <span class="math inline">\(\beta\)</span>s, in log-odds. The last two are the cutpoints, on a scale explained in Appendix C.</p>
 </div>
-<div id="tabset-5-4">
+<div id="tabset-4-4">
 <p>The coefficients are <strong>log-odds</strong> — here, of being in a higher category:</p>
-<div id="4bd6b91a" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href></a><span class="co"># Log-odds: the slopes as fitted (the cutpoints are left out)</span></span>
-<span id="cb25-2"><a href></a>om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
+<div id="66e6f0d6" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href></a><span class="co"># Log-odds: the slopes as fitted (the cutpoints are left out)</span></span>
+<span id="cb23-2"><a href></a>om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>pared     1.048
 public   -0.059
 gpa       0.616
@@ -2081,10 +2007,10 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Exponentiate them to get <strong>proportional-odds ratios</strong>:</p>
-<div id="6bf7e9fd" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href></a><span class="co"># Proportional-odds ratios</span></span>
-<span id="cb27-2"><a href></a>np.exp(om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="16">
+<div id="8f5751af" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href></a><span class="co"># Proportional-odds ratios</span></span>
+<span id="cb25-2"><a href></a>np.exp(om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>pared     2.851
 public    0.943
 gpa       1.851
@@ -2097,19 +2023,19 @@ dtype: float64</code></pre>
 <li><p><code>gpa</code>: <span class="math inline">\(e^{0.616} = 1.85\)</span>. One more GPA point multiplies those odds by 1.85 (85% higher), ceteris paribus.</p></li>
 </ul>
 </div>
-<div id="tabset-5-5">
+<div id="tabset-4-5">
 <p>Odds are not probabilities. With <span class="math inline">\(\eta = x^\top\beta\)</span> and <span class="math inline">\(F(z) = e^{z} / (1 + e^{z})\)</span>:</p>
 <p><span class="math display">\[
 P(Y \le j) = F(c_j - \eta), \qquad
 P(Y = j) = P(Y \le j) - P(Y \le j - 1)
 \]</span></p>
 <p>Each category’s probability is a <strong>difference</strong> of cumulative ones. <code>predict()</code> does this for you:</p>
-<div id="dd652c99" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href></a><span class="co"># The same student, and an otherwise identical one whose parents did not</span></span>
-<span id="cb29-2"><a href></a><span class="co"># go to graduate school. Columns: unlikely, somewhat likely, very likely.</span></span>
-<span id="cb29-3"><a href></a>new <span class="op">=</span> pd.DataFrame({<span class="st">&quot;pared&quot;</span>: [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">&quot;public&quot;</span>: [<span class="dv">0</span>, <span class="dv">0</span>], <span class="st">&quot;gpa&quot;</span>: [<span class="fl">3.0</span>, <span class="fl">3.0</span>]})</span>
-<span id="cb29-4"><a href></a>pd.DataFrame(np.asarray(om.predict(new)), columns<span class="op">=</span>order, index<span class="op">=</span>[<span class="st">&quot;pared=1&quot;</span>, <span class="st">&quot;pared=0&quot;</span>]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="17">
+<div id="7860d2a1" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href></a><span class="co"># The same student, and an otherwise identical one whose parents did not</span></span>
+<span id="cb27-2"><a href></a><span class="co"># go to graduate school. Columns: unlikely, somewhat likely, very likely.</span></span>
+<span id="cb27-3"><a href></a>new <span class="op">=</span> pd.DataFrame({<span class="st">&quot;pared&quot;</span>: [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">&quot;public&quot;</span>: [<span class="dv">0</span>, <span class="dv">0</span>], <span class="st">&quot;gpa&quot;</span>: [<span class="fl">3.0</span>, <span class="fl">3.0</span>]})</span>
+<span id="cb27-4"><a href></a>pd.DataFrame(np.asarray(om.predict(new)), columns<span class="op">=</span>order, index<span class="op">=</span>[<span class="st">&quot;pared=1&quot;</span>, <span class="st">&quot;pared=0&quot;</span>]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2165,23 +2091,23 @@ text-align: right;
 <section id="imported-s04-028" class="slide level2 scrollable">
 <h2>Multinomial logistic regression</h2>
 <div class="panel-tabset">
-<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-6-1">MLR 1 · The data</a></li><li><a href="#tabset-6-2">MLR 2 · The equation</a></li><li><a href="#tabset-6-3">MLR 3 · The code</a></li><li><a href="#tabset-6-4">MLR 4 · Log-odds → relative risk ratios</a></li><li><a href="#tabset-6-5">MLR 5 · Probabilities</a></li></ul>
+<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-5-1">MLR 1 · The data</a></li><li><a href="#tabset-5-2">MLR 2 · The equation</a></li><li><a href="#tabset-5-3">MLR 3 · The code</a></li><li><a href="#tabset-5-4">MLR 4 · Log-odds → relative risk ratios</a></li><li><a href="#tabset-5-5">MLR 5 · Probabilities</a></li></ul>
 <div class="tab-content">
-<div id="tabset-6-1">
+<div id="tabset-5-1">
 <p>People’s occupational choices might be influenced by their parents’ occupations and their own education level. Here the choice is a high-school programme — academic, general or vocational — and the question is how it relates to family socio-economic status and writing ability.</p>
 <ul>
 <li><p>200 students. The outcome is <code>prog</code>, programme type, with <strong>no natural order</strong>.</p></li>
 <li><p>The predictors are <code>ses</code>, socio-economic status (low, middle, high), and <code>write</code>, a writing score.</p></li>
 </ul>
-<div id="b8291d27" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb30-2"><a href></a></span>
-<span id="cb30-3"><a href></a><span class="co"># An unordered outcome: which programme a student is in. There is no sense in</span></span>
-<span id="cb30-4"><a href></a><span class="co"># which vocation is &quot;more&quot; than general, so the ordinal machinery above does</span></span>
-<span id="cb30-5"><a href></a><span class="co"># not apply and the multinomial model is the right one.</span></span>
-<span id="cb30-6"><a href></a>ml <span class="op">=</span> qmib.load(<span class="st">&quot;hsbdemo&quot;</span>)</span>
-<span id="cb30-7"><a href></a>ml.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
+<div id="f1c2dac6" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb28-2"><a href></a></span>
+<span id="cb28-3"><a href></a><span class="co"># An unordered outcome: which programme a student is in. There is no sense in</span></span>
+<span id="cb28-4"><a href></a><span class="co"># which vocation is &quot;more&quot; than general, so the ordinal machinery above does</span></span>
+<span id="cb28-5"><a href></a><span class="co"># not apply and the multinomial model is the right one.</span></span>
+<span id="cb28-6"><a href></a>ml <span class="op">=</span> qmib.load(<span class="st">&quot;hsbdemo&quot;</span>)</span>
+<span id="cb28-7"><a href></a>ml.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2305,7 +2231,7 @@ text-align: right;
 </div>
 </div>
 </div>
-<div id="tabset-6-2">
+<div id="tabset-5-2">
 <p>With <span class="math inline">\(J = 3\)</span> unordered categories, pick one as the <strong>baseline</strong> — here academic, the most common. The model writes <span class="math inline">\(J - 1 = 2\)</span> log-odds equations, each comparing one category <strong>with the baseline</strong>:</p>
 <p><span class="math display">\[
 \ln\left(\frac{P(\text{general})}{P(\text{academic})}\right) = b_{10} + b_{11}\,\text{middle} + b_{12}\,\text{high} + b_{13}\,\text{write}
@@ -2319,26 +2245,26 @@ text-align: right;
 <li><p><code>middle</code> and <code>high</code> are indicators; <code>ses = low</code> is their reference category.</p></li>
 </ul>
 </div>
-<div id="tabset-6-3">
-<div id="462f7d45" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb31-2"><a href></a></span>
-<span id="cb31-3"><a href></a><span class="co"># The first level of a Categorical becomes code 0, and MNLogit uses code 0 as</span></span>
-<span id="cb31-4"><a href></a><span class="co"># the baseline, so every coefficient below reads &quot;relative to academic&quot;.</span></span>
-<span id="cb31-5"><a href></a><span class="co"># Reorder this list and every number changes meaning, with nothing in the</span></span>
-<span id="cb31-6"><a href></a><span class="co"># output to warn you.</span></span>
-<span id="cb31-7"><a href></a>levels <span class="op">=</span> [<span class="st">&quot;academic&quot;</span>, <span class="st">&quot;general&quot;</span>, <span class="st">&quot;vocation&quot;</span>]</span>
-<span id="cb31-8"><a href></a>ml[<span class="st">&quot;prog_c&quot;</span>] <span class="op">=</span> pd.Categorical(ml[<span class="st">&quot;prog&quot;</span>], categories<span class="op">=</span>levels).codes</span>
-<span id="cb31-9"><a href></a></span>
-<span id="cb31-10"><a href></a><span class="co"># Leave ses_low out, so low SES is the reference the other two are compared with</span></span>
-<span id="cb31-11"><a href></a>X <span class="op">=</span> pd.get_dummies(ml[[<span class="st">&quot;ses&quot;</span>]].astype(<span class="bu">str</span>))[[<span class="st">&quot;ses_middle&quot;</span>, <span class="st">&quot;ses_high&quot;</span>]].astype(<span class="bu">float</span>)</span>
-<span id="cb31-12"><a href></a>X[<span class="st">&quot;write&quot;</span>] <span class="op">=</span> ml[<span class="st">&quot;write&quot;</span>].astype(<span class="bu">float</span>)</span>
-<span id="cb31-13"><a href></a>X <span class="op">=</span> sm.add_constant(X)</span>
-<span id="cb31-14"><a href></a></span>
-<span id="cb31-15"><a href></a><span class="co"># MNLogit estimates J-1 sets of coefficients at once — here two, each against</span></span>
-<span id="cb31-16"><a href></a><span class="co"># the academic baseline.</span></span>
-<span id="cb31-17"><a href></a>mn <span class="op">=</span> sm.MNLogit(ml[<span class="st">&quot;prog_c&quot;</span>], X).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb31-18"><a href></a><span class="bu">print</span>(mn.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-5-3">
+<div id="e62a33ec" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb29-2"><a href></a></span>
+<span id="cb29-3"><a href></a><span class="co"># The first level of a Categorical becomes code 0, and MNLogit uses code 0 as</span></span>
+<span id="cb29-4"><a href></a><span class="co"># the baseline, so every coefficient below reads &quot;relative to academic&quot;.</span></span>
+<span id="cb29-5"><a href></a><span class="co"># Reorder this list and every number changes meaning, with nothing in the</span></span>
+<span id="cb29-6"><a href></a><span class="co"># output to warn you.</span></span>
+<span id="cb29-7"><a href></a>levels <span class="op">=</span> [<span class="st">&quot;academic&quot;</span>, <span class="st">&quot;general&quot;</span>, <span class="st">&quot;vocation&quot;</span>]</span>
+<span id="cb29-8"><a href></a>ml[<span class="st">&quot;prog_c&quot;</span>] <span class="op">=</span> pd.Categorical(ml[<span class="st">&quot;prog&quot;</span>], categories<span class="op">=</span>levels).codes</span>
+<span id="cb29-9"><a href></a></span>
+<span id="cb29-10"><a href></a><span class="co"># Leave ses_low out, so low SES is the reference the other two are compared with</span></span>
+<span id="cb29-11"><a href></a>X <span class="op">=</span> pd.get_dummies(ml[[<span class="st">&quot;ses&quot;</span>]].astype(<span class="bu">str</span>))[[<span class="st">&quot;ses_middle&quot;</span>, <span class="st">&quot;ses_high&quot;</span>]].astype(<span class="bu">float</span>)</span>
+<span id="cb29-12"><a href></a>X[<span class="st">&quot;write&quot;</span>] <span class="op">=</span> ml[<span class="st">&quot;write&quot;</span>].astype(<span class="bu">float</span>)</span>
+<span id="cb29-13"><a href></a>X <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb29-14"><a href></a></span>
+<span id="cb29-15"><a href></a><span class="co"># MNLogit estimates J-1 sets of coefficients at once — here two, each against</span></span>
+<span id="cb29-16"><a href></a><span class="co"># the academic baseline.</span></span>
+<span id="cb29-17"><a href></a>mn <span class="op">=</span> sm.MNLogit(ml[<span class="st">&quot;prog_c&quot;</span>], X).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb29-18"><a href></a><span class="bu">print</span>(mn.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                          MNLogit Regression Results                          
 ==============================================================================
@@ -2346,7 +2272,7 @@ Dep. Variable:                 prog_c   No. Observations:                  200
 Model:                        MNLogit   Df Residuals:                      192
 Method:                           MLE   Df Model:                            6
 Date:                Sun, 04 Oct 2026   Pseudo R-squ.:                  0.1182
-Time:                        16:47:40   Log-Likelihood:                -179.98
+Time:                        16:50:18   Log-Likelihood:                -179.98
 converged:                       True   LL-Null:                       -204.10
 Covariance Type:            nonrobust   LLR p-value:                 1.063e-08
 ==============================================================================
@@ -2368,12 +2294,12 @@ write         -0.1136      0.022     -5.113      0.000      -0.157      -0.070
 </div>
 <p><code>prog_c=1</code> is general vs academic; <code>prog_c=2</code> is vocation vs academic. Academic has no block: its coefficients are fixed at zero.</p>
 </div>
-<div id="tabset-6-4">
+<div id="tabset-5-4">
 <p>The coefficients are <strong>log-odds relative to the baseline</strong>:</p>
-<div id="abe1e6f5" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href></a><span class="co"># Log-odds. Column 0 is general vs academic; column 1 is vocation vs academic</span></span>
-<span id="cb33-2"><a href></a>mn.params.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="20">
+<div id="17d4122d" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href></a><span class="co"># Log-odds. Column 0 is general vs academic; column 1 is vocation vs academic</span></span>
+<span id="cb31-2"><a href></a>mn.params.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2427,10 +2353,10 @@ text-align: right;
 <li><p><span class="math inline">\(b_{23} = -0.114\)</span>: one more writing point lowers the log-odds of vocation vs academic by 0.114.</p></li>
 </ul>
 <p>Exponentiate them. In a multinomial model, <span class="math inline">\(e^{b}\)</span> is called a <strong>relative risk ratio</strong> (RRR): it multiplies the ratio <span class="math inline">\(P(\text{category}) / P(\text{academic})\)</span>.</p>
-<div id="75ba907d" class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href></a><span class="co"># Column 0 is general vs academic; column 1 is vocation vs academic</span></span>
-<span id="cb34-2"><a href></a>np.exp(mn.params).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="21">
+<div id="77400afa" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href></a><span class="co"># Column 0 is general vs academic; column 1 is vocation vs academic</span></span>
+<span id="cb32-2"><a href></a>np.exp(mn.params).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2485,19 +2411,19 @@ text-align: right;
 </ul>
 <p>Say “relative to academic” every time.</p>
 </div>
-<div id="tabset-6-5">
+<div id="tabset-5-5">
 <p>Odds are not probabilities. Each category gets a linear index, <span class="math inline">\(\eta_{\text{general}}\)</span> and <span class="math inline">\(\eta_{\text{vocation}}\)</span>, with <span class="math inline">\(\eta_{\text{academic}} = 0\)</span> for the baseline. Each probability is its exponentiated index over the sum of all three (the <strong>softmax</strong>):</p>
 <p><span class="math display">\[
 P(Y = j) = \frac{e^{\eta_j}}{e^{0} + e^{\eta_{\text{general}}} + e^{\eta_{\text{vocation}}}}
 \]</span></p>
-<div id="d3c9ca36" class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href></a><span class="co"># A middle-SES student with the average writing score, then middle-SES</span></span>
-<span id="cb35-2"><a href></a><span class="co"># students across the range of writing scores</span></span>
-<span id="cb35-3"><a href></a>grid <span class="op">=</span> pd.DataFrame({<span class="st">&quot;const&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;ses_middle&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;ses_high&quot;</span>: <span class="fl">0.0</span>,</span>
-<span id="cb35-4"><a href></a>                     <span class="st">&quot;write&quot;</span>: [<span class="fl">52.775</span>, <span class="dv">35</span>, <span class="dv">45</span>, <span class="dv">55</span>, <span class="dv">65</span>]})</span>
-<span id="cb35-5"><a href></a>out <span class="op">=</span> pd.DataFrame(mn.predict(grid).values, columns<span class="op">=</span>levels, index<span class="op">=</span>grid[<span class="st">&quot;write&quot;</span>])</span>
-<span id="cb35-6"><a href></a>out.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="22">
+<div id="12efe670" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href></a><span class="co"># A middle-SES student with the average writing score, then middle-SES</span></span>
+<span id="cb33-2"><a href></a><span class="co"># students across the range of writing scores</span></span>
+<span id="cb33-3"><a href></a>grid <span class="op">=</span> pd.DataFrame({<span class="st">&quot;const&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;ses_middle&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;ses_high&quot;</span>: <span class="fl">0.0</span>,</span>
+<span id="cb33-4"><a href></a>                     <span class="st">&quot;write&quot;</span>: [<span class="fl">52.775</span>, <span class="dv">35</span>, <span class="dv">45</span>, <span class="dv">55</span>, <span class="dv">65</span>]})</span>
+<span id="cb33-5"><a href></a>out <span class="op">=</span> pd.DataFrame(mn.predict(grid).values, columns<span class="op">=</span>levels, index<span class="op">=</span>grid[<span class="st">&quot;write&quot;</span>])</span>
+<span id="cb33-6"><a href></a>out.<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2619,9 +2545,9 @@ text-align: right;
 <section id="s04-appendix-a" class="slide level2 scrollable">
 <h2>Appendix A · FICO score: inference and intervals</h2>
 <div class="panel-tabset">
-<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-7-1">A1 · Confidence interval for β₁</a></li><li><a href="#tabset-7-2">A2 · The interval, computed</a></li><li><a href="#tabset-7-3">A3 · Testing β₁ = 0</a></li><li><a href="#tabset-7-4">A4 · Estimating π</a></li><li><a href="#tabset-7-5">A5 · Interval for a probability</a></li><li><a href="#tabset-7-6">A6 · The fitted curve</a></li></ul>
+<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-6-1">A1 · Confidence interval for β₁</a></li><li><a href="#tabset-6-2">A2 · The interval, computed</a></li><li><a href="#tabset-6-3">A3 · Testing β₁ = 0</a></li><li><a href="#tabset-6-4">A4 · Estimating π</a></li><li><a href="#tabset-6-5">A5 · Interval for a probability</a></li><li><a href="#tabset-6-6">A6 · The fitted curve</a></li></ul>
 <div class="tab-content">
-<div id="tabset-7-1">
+<div id="tabset-6-1">
 <p>The estimate <span class="math inline">\(b_1 = - 0.0119\)</span> is difficult to interpret exactly.</p>
 <p>But an important question is whether the data provide evidence that <span class="math inline">\(\beta_1 \neq 0\)</span>, which would imply that FICO scores are related to the probability of a loan default.</p>
 <p>We could construct a confidence interval for <span class="math inline">\(\beta_1\)</span> using the same approach as we did with linear regression.</p>
@@ -2631,7 +2557,7 @@ text-align: right;
 <li><p>However, we can assess whether <span class="math inline">\(\beta_1\)</span> is positive or negative through a confidence interval.</p></li>
 </ul>
 </div>
-<div id="tabset-7-2">
+<div id="tabset-6-2">
 <div class="columns">
 <div class="column" style="width:50%;">
 
@@ -2644,7 +2570,7 @@ text-align: right;
 <p><span class="math display">\[ = (-0.0135, -0.0103) \]</span></p>
 </div></div>
 </div>
-<div id="tabset-7-3">
+<div id="tabset-6-3">
 <p>we are usually interested in the following test:</p>
 <p><span class="math display">\[H_0: \beta_1 = 0\]</span></p>
 <p><span class="math display">\[H_1: \beta_1 \neq 0\]</span></p>
@@ -2653,7 +2579,7 @@ text-align: right;
 </ul>
 <p>Therefore FICO score is a statistically significant predictor of the probability of a loan default.</p>
 </div>
-<div id="tabset-7-4">
+<div id="tabset-6-4">
 <p>Estimating <span class="math inline">\(\pi\)</span></p>
 <blockquote>
 <p>A natural type of question to ask is: What is the probability of a loan default for a FICO score of (say) 700?</p>
@@ -2663,21 +2589,21 @@ text-align: right;
 </ul>
 <p><span class="math display">\[\pi = P(Y=1) = \frac{1}{1+e^{-(\beta_0+\beta_1x)}}\]</span></p>
 </div>
-<div id="tabset-7-5">
+<div id="tabset-6-5">
 <p>Instead of a point estimate of <span class="math inline">\(\pi\)</span>, <span class="math inline">\(p\)</span>, we can also compute a 95% confidence interval:</p>
 <p><span class="math display">\[p \pm 1.96 \times SE(b_1)\]</span></p>
 <p>The formula for SE(p) is complex, so we let Python do the work:</p>
-<div id="eac38222" class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href></a><span class="co"># The logistic fit this slide predicts from. It is fitted again later for the</span></span>
-<span id="cb36-2"><a href></a><span class="co"># likelihood-ratio test; defining it here keeps the deck runnable in slide</span></span>
-<span id="cb36-3"><a href></a><span class="co"># order, which the imported version was not.</span></span>
-<span id="cb36-4"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;default ~ fico&quot;</span>, data<span class="op">=</span>loans).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb36-5"><a href></a></span>
-<span id="cb36-6"><a href></a><span class="co"># get_prediction returns the interval as well as the point estimate. On the</span></span>
-<span id="cb36-7"><a href></a><span class="co"># probability scale that interval is asymmetric — which is correct, and the</span></span>
-<span id="cb36-8"><a href></a><span class="co"># reason not to build it by hand as estimate +/- 1.96 * se.</span></span>
-<span id="cb36-9"><a href></a>pred <span class="op">=</span> m2.get_prediction(pd.DataFrame({<span class="st">&quot;fico&quot;</span>: [<span class="dv">700</span>]})).summary_frame()</span>
-<span id="cb36-10"><a href></a><span class="bu">print</span>(pred[[<span class="st">&quot;predicted&quot;</span>, <span class="st">&quot;ci_lower&quot;</span>, <span class="st">&quot;ci_upper&quot;</span>]].<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9b4fb05b" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href></a><span class="co"># The logistic fit this slide predicts from. It is fitted again later for the</span></span>
+<span id="cb34-2"><a href></a><span class="co"># likelihood-ratio test; defining it here keeps the deck runnable in slide</span></span>
+<span id="cb34-3"><a href></a><span class="co"># order, which the imported version was not.</span></span>
+<span id="cb34-4"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;default ~ fico&quot;</span>, data<span class="op">=</span>loans).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb34-5"><a href></a></span>
+<span id="cb34-6"><a href></a><span class="co"># get_prediction returns the interval as well as the point estimate. On the</span></span>
+<span id="cb34-7"><a href></a><span class="co"># probability scale that interval is asymmetric — which is correct, and the</span></span>
+<span id="cb34-8"><a href></a><span class="co"># reason not to build it by hand as estimate +/- 1.96 * se.</span></span>
+<span id="cb34-9"><a href></a>pred <span class="op">=</span> m2.get_prediction(pd.DataFrame({<span class="st">&quot;fico&quot;</span>: [<span class="dv">700</span>]})).summary_frame()</span>
+<span id="cb34-10"><a href></a><span class="bu">print</span>(pred[[<span class="st">&quot;predicted&quot;</span>, <span class="st">&quot;ci_lower&quot;</span>, <span class="st">&quot;ci_upper&quot;</span>]].<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   predicted  ci_lower  ci_upper
 0     0.1686     0.161    0.1765</code></pre>
@@ -2688,7 +2614,7 @@ text-align: right;
 <p>We are 95% confident that the probability that a borrower with a FICO score of 700 would default is between 0.161 and 0.177.</p>
 </blockquote>
 </div>
-<div id="tabset-7-6">
+<div id="tabset-6-6">
 <div class="cell">
 <div>
 <figure>
@@ -2705,9 +2631,9 @@ text-align: right;
 <section id="s04-appendix-b" class="slide level2 scrollable">
 <h2>Appendix B · Portugal’s red wines: more detail</h2>
 <div class="panel-tabset">
-<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-8-1">B1 · Why several predictors</a></li><li><a href="#tabset-8-2">B2 · Descriptive statistics</a></li><li><a href="#tabset-8-3">B3 · Boxplots by outcome</a></li><li><a href="#tabset-8-4">B4 · Signs of the coefficients</a></li><li><a href="#tabset-8-5">B5 · Reading the signs</a></li><li><a href="#tabset-8-6">B6 · The magnitudes</a></li><li><a href="#tabset-8-7">B7 · Predicted probabilities, plotted</a></li><li><a href="#tabset-8-8">B8 · Significance</a></li><li><a href="#tabset-8-9">B9 · One bottle, with an interval</a></li><li><a href="#tabset-8-10">B10 · Pseudo-R²</a></li></ul>
+<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-7-1">B1 · Why several predictors</a></li><li><a href="#tabset-7-2">B2 · Descriptive statistics</a></li><li><a href="#tabset-7-3">B3 · Boxplots by outcome</a></li><li><a href="#tabset-7-4">B4 · Signs of the coefficients</a></li><li><a href="#tabset-7-5">B5 · Reading the signs</a></li><li><a href="#tabset-7-6">B6 · The magnitudes</a></li><li><a href="#tabset-7-7">B7 · Predicted probabilities, plotted</a></li><li><a href="#tabset-7-8">B8 · Significance</a></li><li><a href="#tabset-7-9">B9 · One bottle, with an interval</a></li><li><a href="#tabset-7-10">B10 · Pseudo-R²</a></li></ul>
 <div class="tab-content">
-<div id="tabset-8-1">
+<div id="tabset-7-1">
 <ul>
 <li><p>Analogous to linear regression, logistic regression benefits from using multiple predictors simultaneously.</p></li>
 <li><p>Pros and cons of multiple predictors:</p>
@@ -2719,14 +2645,14 @@ text-align: right;
 </ul></li>
 </ul>
 </div>
-<div id="tabset-8-2">
-<div id="44f78f18" class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb38-2"><a href></a></span>
-<span id="cb38-3"><a href></a><span class="co"># Every variable at a glance, before any model</span></span>
-<span id="cb38-4"><a href></a>redwines <span class="op">=</span> qmib.load(<span class="st">&quot;redwines&quot;</span>)</span>
-<span id="cb38-5"><a href></a>redwines.describe().<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="24">
+<div id="tabset-7-2">
+<div id="00ed6792" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href></a><span class="im">import</span> qmib</span>
+<span id="cb36-2"><a href></a></span>
+<span id="cb36-3"><a href></a><span class="co"># Every variable at a glance, before any model</span></span>
+<span id="cb36-4"><a href></a>redwines <span class="op">=</span> qmib.load(<span class="st">&quot;redwines&quot;</span>)</span>
+<span id="cb36-5"><a href></a>redwines.describe().<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -2859,20 +2785,20 @@ text-align: right;
 </div>
 </div>
 </div>
-<div id="tabset-8-3">
+<div id="tabset-7-3">
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="8e86fa57" class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb39-2"><a href></a></span>
-<span id="cb39-3"><a href></a><span class="co"># Boxplots by outcome, before any model. If a predictor&#39;s two boxes sit on top</span></span>
-<span id="cb39-4"><a href></a><span class="co"># of one another, no coefficient is going to rescue it — and if they separate</span></span>
-<span id="cb39-5"><a href></a><span class="co"># cleanly, you should expect the model to find that and be suspicious if not.</span></span>
-<span id="cb39-6"><a href></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">3.4</span>))</span>
-<span id="cb39-7"><a href></a><span class="cf">for</span> ax, col <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">&quot;fixed_acidity&quot;</span>, <span class="st">&quot;volatile_acidity&quot;</span>, <span class="st">&quot;alcohol&quot;</span>]):</span>
-<span id="cb39-8"><a href></a>    redwines.boxplot(column<span class="op">=</span>col, by<span class="op">=</span><span class="st">&quot;good&quot;</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb39-9"><a href></a>    ax.set_title(col)<span class="op">;</span> ax.set_xlabel(<span class="st">&quot;good&quot;</span>)</span>
-<span id="cb39-10"><a href></a>plt.suptitle(<span class="st">&quot;&quot;</span>)<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="d1a6dabe" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb37-2"><a href></a></span>
+<span id="cb37-3"><a href></a><span class="co"># Boxplots by outcome, before any model. If a predictor&#39;s two boxes sit on top</span></span>
+<span id="cb37-4"><a href></a><span class="co"># of one another, no coefficient is going to rescue it — and if they separate</span></span>
+<span id="cb37-5"><a href></a><span class="co"># cleanly, you should expect the model to find that and be suspicious if not.</span></span>
+<span id="cb37-6"><a href></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">3.4</span>))</span>
+<span id="cb37-7"><a href></a><span class="cf">for</span> ax, col <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">&quot;fixed_acidity&quot;</span>, <span class="st">&quot;volatile_acidity&quot;</span>, <span class="st">&quot;alcohol&quot;</span>]):</span>
+<span id="cb37-8"><a href></a>    redwines.boxplot(column<span class="op">=</span>col, by<span class="op">=</span><span class="st">&quot;good&quot;</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb37-9"><a href></a>    ax.set_title(col)<span class="op">;</span> ax.set_xlabel(<span class="st">&quot;good&quot;</span>)</span>
+<span id="cb37-10"><a href></a>plt.suptitle(<span class="st">&quot;&quot;</span>)<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -2893,7 +2819,7 @@ text-align: right;
 </div>
 </div></div>
 </div>
-<div id="tabset-8-4">
+<div id="tabset-7-4">
 <p>The estimated multiple logistic regression is therefore:</p>
 <p><span class="math display">\[\pi = P(Y=1) = \frac{1}{1+e^{-(227 + 0.281 x_1 -2.913 x_2 + ... + 0.782 x_p)}}\]</span></p>
 <p>A positive value of a coefficient means:</p>
@@ -2905,11 +2831,11 @@ text-align: right;
 <li>A one-unit increase in the predictor, holding the other predictors fixed, corresponds to a decrease in the probability of “success.”</li>
 </ul>
 </div>
-<div id="tabset-8-5">
+<div id="tabset-7-5">
 <p>An increase in fixed acidity, residual sugar, sulphates, and alcohol content correspond to higher wine quality, holding all other variables fixed.</p>
 <p>An increase in volatile acidity, chlorides, total sulfur dioxide and density correspond to lower wine quality, holding all other variables fixed.</p>
 </div>
-<div id="tabset-8-6">
+<div id="tabset-7-6">
 <p>Interpreting the magnitude of the coefficients:</p>
 <ul>
 <li>As with simple logistic regression, the actual values of the estimated coefficients do have an interpretation, but they are not straightforward.</li>
@@ -2918,7 +2844,7 @@ text-align: right;
 <p>It is more crucial to interpret when a coefficient is positive or negative.</p>
 </blockquote>
 </div>
-<div id="tabset-8-7">
+<div id="tabset-7-7">
 <div class="cell">
 <div>
 <figure>
@@ -2929,7 +2855,7 @@ text-align: right;
 </div>
 </div>
 </div>
-<div id="tabset-8-8">
+<div id="tabset-7-8">
 <p>Also we might want to know whether a coefficient is <span class="math inline">\(0\)</span> (i.e., whether the predictor is important).</p>
 <p>Can formally address this question using hypothesis tests:</p>
 <ul>
@@ -2937,7 +2863,7 @@ text-align: right;
 </ul>
 <p>There are no simple formulas for confidence intervals for the true probability, π, for a specific set of predictor values. But they are easily computed in Python.</p>
 </div>
-<div id="tabset-8-9">
+<div id="tabset-7-9">
 <p>Consider a bottle of wine with these characteristics:</p>
 <table class="caption-top">
 <colgroup>
@@ -2975,14 +2901,14 @@ text-align: right;
 </tr>
 </tbody>
 </table>
-<div id="9168d96f" class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href></a><span class="co"># One bottle: its predicted probability of a good rating, with a 95% interval</span></span>
-<span id="cb40-2"><a href></a>bottle <span class="op">=</span> pd.DataFrame({<span class="st">&quot;fixed_acidity&quot;</span>: [<span class="fl">6.2</span>], <span class="st">&quot;volatile_acidity&quot;</span>: [<span class="fl">0.36</span>],</span>
-<span id="cb40-3"><a href></a>                       <span class="st">&quot;residual_sugar&quot;</span>: [<span class="fl">2.2</span>], <span class="st">&quot;chlorides&quot;</span>: [<span class="fl">0.095</span>],</span>
-<span id="cb40-4"><a href></a>                       <span class="st">&quot;total_sulfur_dioxide&quot;</span>: [<span class="dv">42</span>], <span class="st">&quot;density&quot;</span>: [<span class="fl">0.9946</span>],</span>
-<span id="cb40-5"><a href></a>                       <span class="st">&quot;sulphates&quot;</span>: [<span class="fl">0.57</span>], <span class="st">&quot;alcohol&quot;</span>: [<span class="fl">11.7</span>]})</span>
-<span id="cb40-6"><a href></a>w1.get_prediction(bottle).summary_frame()[[<span class="st">&quot;predicted&quot;</span>, <span class="st">&quot;ci_lower&quot;</span>, <span class="st">&quot;ci_upper&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="26">
+<div id="8f2117fd" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href></a><span class="co"># One bottle: its predicted probability of a good rating, with a 95% interval</span></span>
+<span id="cb38-2"><a href></a>bottle <span class="op">=</span> pd.DataFrame({<span class="st">&quot;fixed_acidity&quot;</span>: [<span class="fl">6.2</span>], <span class="st">&quot;volatile_acidity&quot;</span>: [<span class="fl">0.36</span>],</span>
+<span id="cb38-3"><a href></a>                       <span class="st">&quot;residual_sugar&quot;</span>: [<span class="fl">2.2</span>], <span class="st">&quot;chlorides&quot;</span>: [<span class="fl">0.095</span>],</span>
+<span id="cb38-4"><a href></a>                       <span class="st">&quot;total_sulfur_dioxide&quot;</span>: [<span class="dv">42</span>], <span class="st">&quot;density&quot;</span>: [<span class="fl">0.9946</span>],</span>
+<span id="cb38-5"><a href></a>                       <span class="st">&quot;sulphates&quot;</span>: [<span class="fl">0.57</span>], <span class="st">&quot;alcohol&quot;</span>: [<span class="fl">11.7</span>]})</span>
+<span id="cb38-6"><a href></a>w1.get_prediction(bottle).summary_frame()[[<span class="st">&quot;predicted&quot;</span>, <span class="st">&quot;ci_lower&quot;</span>, <span class="st">&quot;ci_upper&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -3023,12 +2949,12 @@ text-align: right;
 <p>For wines with this physio-chemical composition, we are 95% confident that the probability of a “good” evaluation is between 0.097 and 0.202.</p>
 </blockquote>
 </div>
-<div id="tabset-8-10">
+<div id="tabset-7-10">
 <p>The pseudo-<span class="math inline">\(R^2\)</span> is computed for multiple logistic regression in the same way as in simple logistic regression:</p>
-<div id="a808c147" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href></a><span class="co"># McFadden&#39;s pseudo R-squared, from the two maximised log-likelihoods</span></span>
-<span id="cb41-2"><a href></a>w0 <span class="op">=</span> smf.logit(<span class="st">&quot;good ~ 1&quot;</span>, data<span class="op">=</span>redwines).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb41-3"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pseudo R2 = </span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> w1<span class="sc">.</span>llf <span class="op">/</span> w0<span class="sc">.</span>llf<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="db81206f" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href></a><span class="co"># McFadden&#39;s pseudo R-squared, from the two maximised log-likelihoods</span></span>
+<span id="cb39-2"><a href></a>w0 <span class="op">=</span> smf.logit(<span class="st">&quot;good ~ 1&quot;</span>, data<span class="op">=</span>redwines).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb39-3"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;pseudo R2 = </span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> w1<span class="sc">.</span>llf <span class="op">/</span> w0<span class="sc">.</span>llf<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>pseudo R2 = 0.313</code></pre>
 </div>
@@ -3041,16 +2967,16 @@ text-align: right;
 <section id="s04-appendix-c" class="slide level2 scrollable">
 <h2>Appendix C · Ordinal logistic regression: more detail</h2>
 <div class="panel-tabset">
-<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-9-1">C1 · The data, cross-tabulated</a></li><li><a href="#tabset-9-2">C2 · GPA by category</a></li><li><a href="#tabset-9-3">C3 · Reading the output: the cutpoints</a></li><li><a href="#tabset-9-4">C4 · A probability by hand</a></li><li><a href="#tabset-9-5">C5 · School type</a></li><li><a href="#tabset-9-6">C6 · GPA in detail</a></li><li><a href="#tabset-9-7">C7 · Is proportional odds plausible?</a></li></ul>
+<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-8-1">C1 · The data, cross-tabulated</a></li><li><a href="#tabset-8-2">C2 · GPA by category</a></li><li><a href="#tabset-8-3">C3 · Reading the output: the cutpoints</a></li><li><a href="#tabset-8-4">C4 · A probability by hand</a></li><li><a href="#tabset-8-5">C5 · School type</a></li><li><a href="#tabset-8-6">C6 · GPA in detail</a></li><li><a href="#tabset-8-7">C7 · Is proportional odds plausible?</a></li></ul>
 <div class="tab-content">
-<div id="tabset-9-1">
+<div id="tabset-8-1">
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="c605e9fe" class="cell" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href></a><span class="co"># Three ordered categories. Most students sit in the bottom one, which is</span></span>
-<span id="cb43-2"><a href></a><span class="co"># why &quot;unlikely&quot; dominates every predicted distribution that follows.</span></span>
-<span id="cb43-3"><a href></a>dat[<span class="st">&quot;apply&quot;</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="28">
+<div id="75bf1820" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href></a><span class="co"># Three ordered categories. Most students sit in the bottom one, which is</span></span>
+<span id="cb41-2"><a href></a><span class="co"># why &quot;unlikely&quot; dominates every predicted distribution that follows.</span></span>
+<span id="cb41-3"><a href></a>dat[<span class="st">&quot;apply&quot;</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>apply
 unlikely           220
 somewhat likely    140
@@ -3059,11 +2985,11 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<div id="793a1cea" class="cell" data-execution_count="29">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href></a><span class="co"># Cross-tabulate before fitting. A cell with almost no observations is where an</span></span>
-<span id="cb45-2"><a href></a><span class="co"># ordinal model will produce a large coefficient and a larger standard error.</span></span>
-<span id="cb45-3"><a href></a>pd.crosstab([dat[<span class="st">&quot;public&quot;</span>], dat[<span class="st">&quot;pared&quot;</span>]], dat[<span class="st">&quot;apply&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="29">
+<div id="de044012" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href></a><span class="co"># Cross-tabulate before fitting. A cell with almost no observations is where an</span></span>
+<span id="cb43-2"><a href></a><span class="co"># ordinal model will produce a large coefficient and a larger standard error.</span></span>
+<span id="cb43-3"><a href></a>pd.crosstab([dat[<span class="st">&quot;public&quot;</span>], dat[<span class="st">&quot;pared&quot;</span>]], dat[<span class="st">&quot;apply&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -3130,11 +3056,11 @@ text-align: right;
 </div></div>
 <p>The predictors are <code>pared</code> (1 if at least one parent went to graduate school), <code>public</code> (1 if the undergraduate institution is public) and <code>gpa</code>.</p>
 </div>
-<div id="tabset-9-2">
-<div id="9d13f87b" class="cell" data-execution_count="30">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href></a><span class="co"># Mean GPA rises with each category — the pattern the model will summarise.</span></span>
-<span id="cb46-2"><a href></a>dat.groupby(<span class="st">&quot;apply_c&quot;</span>, observed<span class="op">=</span><span class="va">True</span>)[<span class="st">&quot;gpa&quot;</span>].mean().<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="30">
+<div id="tabset-8-2">
+<div id="82a82109" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href></a><span class="co"># Mean GPA rises with each category — the pattern the model will summarise.</span></span>
+<span id="cb44-2"><a href></a>dat.groupby(<span class="st">&quot;apply_c&quot;</span>, observed<span class="op">=</span><span class="va">True</span>)[<span class="st">&quot;gpa&quot;</span>].mean().<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
 <pre><code>apply_c
 unlikely           2.952
 somewhat likely    3.030
@@ -3143,7 +3069,7 @@ Name: gpa, dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-9-3">
+<div id="tabset-8-3">
 <p><strong>Reading the output.</strong> The first three rows are the <span class="math inline">\(\beta\)</span>s, on the log-odds scale. Each <code>z</code> is <code>coef / std err</code>, and its p-value is a Wald test of <span class="math inline">\(\beta = 0\)</span>:</p>
 <ul>
 <li><code>pared</code> (1.048, <span class="math inline">\(p &lt; 0.001\)</span>) and <code>gpa</code> (0.616, <span class="math inline">\(p = 0.018\)</span>) are significant; <code>public</code> (<span class="math inline">\(-0.059\)</span>, <span class="math inline">\(p = 0.84\)</span>) is not.</li>
@@ -3152,16 +3078,16 @@ Name: gpa, dtype: float64</code></pre>
 <p><span class="math display">\[
 c_1 = 2.204, \qquad c_2 = c_1 + e^{0.740} = 2.204 + 2.096 = 4.299
 \]</span></p>
-<div id="3bc9abd5" class="cell" data-execution_count="31">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href></a><span class="co"># The cutpoints on the scale the model uses, with -inf and +inf at the ends</span></span>
-<span id="cb48-2"><a href></a>om.model.transform_threshold_params(om.params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="31">
+<div id="b6e6b410" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href></a><span class="co"># The cutpoints on the scale the model uses, with -inf and +inf at the ends</span></span>
+<span id="cb46-2"><a href></a>om.model.transform_threshold_params(om.params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
 <pre><code>array([      -inf, 2.20354835, 4.2989748 ,        inf])</code></pre>
 </div>
 </div>
 <p>There is no separate intercept: <span class="math inline">\(c_1\)</span> and <span class="math inline">\(c_2\)</span> are the intercepts.</p>
 </div>
-<div id="tabset-9-4">
+<div id="tabset-8-4">
 <p><strong>Computing a probability by hand.</strong> Take a student whose parents went to graduate school (<code>pared = 1</code>), at a private institution (<code>public = 0</code>), with a GPA of 3.0.</p>
 <ol type="1">
 <li>The linear index: <span class="math inline">\(\eta = 1.048(1) - 0.059(0) + 0.616(3.0) = 2.895\)</span></li>
@@ -3178,7 +3104,7 @@ c_1 = 2.204, \qquad c_2 = c_1 + e^{0.740} = 2.204 + 2.096 = 4.299
 </ul></li>
 </ol>
 </div>
-<div id="tabset-9-5">
+<div id="tabset-8-5">
 <p>School Type</p>
 <ul>
 <li><p><span class="math inline">\(e^{-0.059} = 0.943\)</span>. For students at a public institution, the <strong>odds</strong> of being <strong>more likely</strong> to apply are 5.7% lower [i.e., (1 − 0.943) × 100%] than for private-institution students, holding constant all other variables.</p></li>
@@ -3186,7 +3112,7 @@ c_1 = 2.204, \qquad c_2 = c_1 + e^{0.740} = 2.204 + 2.096 = 4.299
 <li><p>But the confidence interval for <span class="math inline">\(\beta_2\)</span> is <span class="math inline">\((-0.64, 0.53)\)</span> and <span class="math inline">\(p = 0.84\)</span>: the data cannot tell a 5.7% difference from none. <strong>Report it as no detectable effect</strong>, not as a 5.7% effect.</p></li>
 </ul>
 </div>
-<div id="tabset-9-6">
+<div id="tabset-8-6">
 <p>GPA</p>
 <ul>
 <li><p><span class="math inline">\(e^{0.616} = 1.85\)</span>. For every one-point increase in GPA, the <strong>odds</strong> of being <strong>more likely</strong> to apply (at either cut) are multiplied by 1.85 (i.e., increase 85%), holding constant all other variables.</p></li>
@@ -3194,18 +3120,18 @@ c_1 = 2.204, \qquad c_2 = c_1 + e^{0.740} = 2.204 + 2.096 = 4.299
 <li><p>Odds ratios multiply <strong>odds</strong>, not probabilities. How much a probability moves depends on where the student starts, which is why the predicted probabilities in OLR 5 are the better thing to show a reader.</p></li>
 </ul>
 </div>
-<div id="tabset-9-7">
+<div id="tabset-8-7">
 <p><strong>Is proportional odds plausible?</strong> Fit a separate binary logit at each cut and compare the slopes. If the assumption holds, they should be close.</p>
-<div id="d8ba955b" class="cell" data-execution_count="32">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href></a><span class="co"># Cut 1: somewhat or very likely vs unlikely. Cut 2: very likely vs the rest.</span></span>
-<span id="cb50-2"><a href></a>codes <span class="op">=</span> dat[<span class="st">&quot;apply_c&quot;</span>].cat.codes</span>
-<span id="cb50-3"><a href></a>cuts <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb50-4"><a href></a>    <span class="ss">f&quot;cut </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">&quot;</span>: smf.logit(<span class="st">&quot;y ~ pared + public + gpa&quot;</span>,</span>
-<span id="cb50-5"><a href></a>                          data<span class="op">=</span>dat.assign(y<span class="op">=</span>(codes <span class="op">&gt;=</span> k).astype(<span class="bu">int</span>))).fit(disp<span class="op">=</span><span class="dv">0</span>).params</span>
-<span id="cb50-6"><a href></a>    <span class="cf">for</span> k <span class="kw">in</span> (<span class="dv">1</span>, <span class="dv">2</span>)</span>
-<span id="cb50-7"><a href></a>})</span>
-<span id="cb50-8"><a href></a>cuts.assign(ordinal<span class="op">=</span>om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]]).<span class="bu">round</span>(<span class="dv">3</span>).drop(index<span class="op">=</span><span class="st">&quot;Intercept&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="32">
+<div id="1b67c3d9" class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href></a><span class="co"># Cut 1: somewhat or very likely vs unlikely. Cut 2: very likely vs the rest.</span></span>
+<span id="cb48-2"><a href></a>codes <span class="op">=</span> dat[<span class="st">&quot;apply_c&quot;</span>].cat.codes</span>
+<span id="cb48-3"><a href></a>cuts <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb48-4"><a href></a>    <span class="ss">f&quot;cut </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">&quot;</span>: smf.logit(<span class="st">&quot;y ~ pared + public + gpa&quot;</span>,</span>
+<span id="cb48-5"><a href></a>                          data<span class="op">=</span>dat.assign(y<span class="op">=</span>(codes <span class="op">&gt;=</span> k).astype(<span class="bu">int</span>))).fit(disp<span class="op">=</span><span class="dv">0</span>).params</span>
+<span id="cb48-6"><a href></a>    <span class="cf">for</span> k <span class="kw">in</span> (<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb48-7"><a href></a>})</span>
+<span id="cb48-8"><a href></a>cuts.assign(ordinal<span class="op">=</span>om.params[[<span class="st">&quot;pared&quot;</span>, <span class="st">&quot;public&quot;</span>, <span class="st">&quot;gpa&quot;</span>]]).<span class="bu">round</span>(<span class="dv">3</span>).drop(index<span class="op">=</span><span class="st">&quot;Intercept&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -3265,14 +3191,14 @@ text-align: right;
 <section id="s04-appendix-d" class="slide level2 scrollable">
 <h2>Appendix D · Multinomial logistic regression: more detail</h2>
 <div class="panel-tabset">
-<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-10-1">D1 · The data, cross-tabulated</a></li><li><a href="#tabset-10-2">D2 · Reading the output</a></li><li><a href="#tabset-10-3">D3 · Every coefficient</a></li><li><a href="#tabset-10-4">D4 · Does SES matter at all?</a></li><li><a href="#tabset-10-5">D5 · Probabilities by hand</a></li><li><a href="#tabset-10-6">D6 · Coefficients are not probability effects</a></li></ul>
+<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-9-1">D1 · The data, cross-tabulated</a></li><li><a href="#tabset-9-2">D2 · Reading the output</a></li><li><a href="#tabset-9-3">D3 · Every coefficient</a></li><li><a href="#tabset-9-4">D4 · Does SES matter at all?</a></li><li><a href="#tabset-9-5">D5 · Probabilities by hand</a></li><li><a href="#tabset-9-6">D6 · Coefficients are not probability effects</a></li></ul>
 <div class="tab-content">
-<div id="tabset-10-1">
-<div id="2d3cf84f" class="cell" data-execution_count="33">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href></a><span class="co"># Unordered outcome this time: academic, general, vocation have no natural</span></span>
-<span id="cb51-2"><a href></a><span class="co"># ranking, so the ordinal model above would impose one that is not there.</span></span>
-<span id="cb51-3"><a href></a>pd.crosstab(ml[<span class="st">&quot;ses&quot;</span>], ml[<span class="st">&quot;prog&quot;</span>], margins<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div id="tabset-9-1">
+<div id="b6fd0352" class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href></a><span class="co"># Unordered outcome this time: academic, general, vocation have no natural</span></span>
+<span id="cb49-2"><a href></a><span class="co"># ranking, so the ordinal model above would impose one that is not there.</span></span>
+<span id="cb49-3"><a href></a>pd.crosstab(ml[<span class="st">&quot;ses&quot;</span>], ml[<span class="st">&quot;prog&quot;</span>], margins<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
 <div>
 <style scoped>
 .dataframe tbody tr th:only-of-type {
@@ -3339,7 +3265,7 @@ text-align: right;
 </div>
 </div>
 </div>
-<div id="tabset-10-2">
+<div id="tabset-9-2">
 <p><strong>Reading the output.</strong> The summary has one block per equation. <code>prog_c=1</code> is general vs academic (the <span class="math inline">\(b_{1k}\)</span>); <code>prog_c=2</code> is vocation vs academic (the <span class="math inline">\(b_{2k}\)</span>). Code 0, academic, has no block: its coefficients are fixed at zero.</p>
 <p>Substituting the estimates:</p>
 <p><span class="math display">\[
@@ -3350,7 +3276,7 @@ text-align: right;
 \]</span></p>
 <p>The header gives the fit of the model as a whole: log-likelihood <span class="math inline">\(-179.98\)</span> against <span class="math inline">\(-204.10\)</span> for the intercept-only model, McFadden’s pseudo-<span class="math inline">\(R^2\)</span> = 0.118, and a likelihood-ratio p-value of <span class="math inline">\(10^{-8}\)</span> for all six slopes jointly.</p>
 </div>
-<div id="tabset-10-3">
+<div id="tabset-9-3">
 <p><strong>Interpreting the coefficients</strong> — each one is a change in the log odds of one programme <strong>relative to academic</strong>:</p>
 <ul>
 <li><p><span class="math inline">\(b_{13} = -0.058\)</span>: a one-point increase in <code>write</code> lowers the log odds of general vs academic by 0.058 (<span class="math inline">\(p = 0.007\)</span>).</p></li>
@@ -3362,25 +3288,25 @@ text-align: right;
 </ul>
 <p>Say “relative to academic” every time. Nothing here compares general with vocation directly; that is <span class="math inline">\(b_{2k} - b_{1k}\)</span>.</p>
 </div>
-<div id="tabset-10-4">
+<div id="tabset-9-4">
 <p><strong>Does SES matter at all?</strong> SES has four coefficients — two indicators in two equations — so no single z-test answers that. Use a <strong>likelihood-ratio test</strong>: fit the model with and without SES, and compare their maximised log-likelihoods.</p>
 <p><span class="math display">\[LR = 2\,(\ell_{\text{full}} - \ell_{\text{restricted}}) \sim \chi^2_{q}\]</span></p>
 <p>where <span class="math inline">\(q\)</span> is the number of coefficients dropped — here four. A large <span class="math inline">\(LR\)</span> means the dropped coefficients were doing work. It is the logistic analogue of the <span class="math inline">\(F\)</span>-test for nested linear models.</p>
-<div id="ba071ffa" class="cell" data-execution_count="34">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
-<span id="cb52-2"><a href></a></span>
-<span id="cb52-3"><a href></a><span class="co"># Drop both SES indicators from both equations and compare log-likelihoods</span></span>
-<span id="cb52-4"><a href></a>mn_noses <span class="op">=</span> sm.MNLogit(ml[<span class="st">&quot;prog_c&quot;</span>], X.drop(columns<span class="op">=</span>[<span class="st">&quot;ses_middle&quot;</span>, <span class="st">&quot;ses_high&quot;</span>])).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb52-5"><a href></a>lr <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (mn.llf <span class="op">-</span> mn_noses.llf)</span>
-<span id="cb52-6"><a href></a>df <span class="op">=</span> <span class="bu">int</span>(mn.df_model <span class="op">-</span> mn_noses.df_model)</span>
-<span id="cb52-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;chi2 = </span><span class="sc">{</span>lr<span class="sc">:.2f}</span><span class="ss">, df = </span><span class="sc">{</span>df<span class="sc">}</span><span class="ss">, p = </span><span class="sc">{</span>stats<span class="sc">.</span>chi2<span class="sc">.</span>sf(lr, df)<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e1c71e05" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb50-2"><a href></a></span>
+<span id="cb50-3"><a href></a><span class="co"># Drop both SES indicators from both equations and compare log-likelihoods</span></span>
+<span id="cb50-4"><a href></a>mn_noses <span class="op">=</span> sm.MNLogit(ml[<span class="st">&quot;prog_c&quot;</span>], X.drop(columns<span class="op">=</span>[<span class="st">&quot;ses_middle&quot;</span>, <span class="st">&quot;ses_high&quot;</span>])).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb50-5"><a href></a>lr <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (mn.llf <span class="op">-</span> mn_noses.llf)</span>
+<span id="cb50-6"><a href></a>df <span class="op">=</span> <span class="bu">int</span>(mn.df_model <span class="op">-</span> mn_noses.df_model)</span>
+<span id="cb50-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;chi2 = </span><span class="sc">{</span>lr<span class="sc">:.2f}</span><span class="ss">, df = </span><span class="sc">{</span>df<span class="sc">}</span><span class="ss">, p = </span><span class="sc">{</span>stats<span class="sc">.</span>chi2<span class="sc">.</span>sf(lr, df)<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>chi2 = 11.06, df = 4, p = 0.0259</code></pre>
 </div>
 </div>
 <p>With <span class="math inline">\(p \approx 0.026\)</span>, SES improves the model jointly, even though three of its four coefficients are not individually significant at 5%.</p>
 </div>
-<div id="tabset-10-5">
+<div id="tabset-9-5">
 <p><strong>Computing probabilities by hand.</strong> Take a middle-SES student with the average writing score, 52.8.</p>
 <ol type="1">
 <li>One linear index per equation, and zero for the baseline:
@@ -3398,7 +3324,7 @@ P(\text{academic}) = \frac{1}{1 + e^{-0.738} + e^{-0.486}} = \frac{1}{1 + 0.478 
 P(\text{general}) = \frac{0.478}{2.093} = 0.228, \qquad P(\text{vocation}) = \frac{0.615}{2.093} = 0.294
 \]</span></p>
 </div>
-<div id="tabset-10-6">
+<div id="tabset-9-6">
 <p><strong>Coefficients are not probability effects.</strong> <span class="math inline">\(b_{13}\)</span> is negative, yet in the table, <span class="math inline">\(P(\text{general})\)</span> <em>rises</em> from 0.192 to 0.232 as <code>write</code> goes from 35 to 45, and only then falls.</p>
 <ul>
 <li><p>The reason: <code>write</code> lowers the vocation-to-academic ratio twice as fast as the general-to-academic ratio. As the weakest writers move out of vocation, some of them land in general.</p></li>

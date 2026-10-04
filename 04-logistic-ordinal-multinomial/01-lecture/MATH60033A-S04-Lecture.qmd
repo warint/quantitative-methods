@@ -56,12 +56,11 @@ loans = qmib.load("loans")
 1. Introduction
 2. Let's start with an example
 3. The basics of logistic regression
-4. Inference and goodness of fit
-5. Let's see another example
-6. Ordinal logistic regression
-7. Multinomial logistic regression
-8. Conclusion
-9. Appendices
+4. Let's see another example
+5. Ordinal logistic regression
+6. Multinomial logistic regression
+7. Conclusion
+8. Appendices
 
 ## What session 4 is for {.scrollable}
 ::::: columns
@@ -428,75 +427,6 @@ With this equation we can predict the probability of default for any FICO score 
 </div>
 ::::
 :::::::::::::
-
-## Inference and goodness of fit {#imported-s04-016 .center .scrollable}
-
-## Inference and goodness of fit {#imported-s04-017 .scrollable}
-
-:::::: panel-tabset
-### IGF 1
-
-In the last segment, we learned how to estimate the coefficients of a simple logistic regression and obtain predictions.
-
-We now focus on:
-
--   **Hypothesis testing** for the coefficient of a predictor in logistic regression.
-
--   **Confidence intervals** for probabilities.
-
--   An **analogous measure** to [\\(R\^2\\)]{.math .inline} in linear regression.
-
-### IGF 2
-
-Again, the simple logistic regression model is given by:
-
-[\\\[ \\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1x)}} \\\]]{.math .display}
-
--   We usually consider both confidence intervals and hypothesis tests for [\\(\\beta_1\\)]{.math .inline} (btw, not [\\(b_1\\)]{.math .inline}).
-
--   Because the value of [\\(\\beta_1\\)]{.math .inline} is difficult to interpret, we will focus mainly on hypothesis testing for [\\(\\beta_1 = 0\\)]{.math .inline}.
-
-### IGF 3
-
--   No agreed-upon method for summarizing goodness-of-fit for logistic regression.
-
--   The difficulty is that the notion of "percent variation explained" by the predictor is not as obvious as with linear regression.
-
-### IGF 4
-
-Various suggestions have been proposed -- we will use the pseudo-R2 measure (due to McFadden).
-
--   Logistic regression models are fitted using the method of maximum likelihood - i.e. the parameter estimates are those values which maximize the likelihood of the data which have been observed. McFadden's R squared measure is defined as:
-
-[\\\[ R\^{2}\_{\\text{McFadden}} = 1- \\frac{log(L_c)}{log(L\_{\\text{null}})} \\\]]{.math .display}
-
--   where [\\(L_c\\)]{.math .inline} denotes the (maximized) likelihood value from the current fitted model, and [\\(L\_{\\text{null}}\\)]{.math .inline} denotes the corresponding value but for the null model - the model with only an intercept and no covariates.
-
-### IGF 5
-
-This calculation looks similar to that of [\\(R\^2\\)]{.math .inline} for linear regression.
-
--   Analysis of goodness-of-fit for loan default logistic regression:
-
-```{python}
-#| echo: true
-
-m2 = smf.logit("default ~ fico", data=loans).fit()
-null = smf.logit("default ~ 1", data=loans).fit()
-
-# McFadden's pseudo R-squared
-pseudo_r2 = 1 - m2.llf / null.llf
-print(f"pseudo R2 = {pseudo_r2:.4f}")
-```
-
-Value is computed to be 0.0271
-
--   Very low pseudo-R2 -- roughly 2.7% of the "variation" explained by the FICO score.
-
--   Generally do not expect high [\\(pseudo-R\^2\\)]{.math .inline} values.
-
--   Values as high as 0.4 or 0.5 indicate a very good fit for logistic regression.
-::::::
 
 ## Let's see another example {#imported-s04-018 .center .scrollable}
 
