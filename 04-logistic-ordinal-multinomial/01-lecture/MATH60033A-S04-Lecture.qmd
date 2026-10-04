@@ -56,13 +56,12 @@ loans = qmib.load("loans")
 1. Introduction
 2. Let's start with an example
 3. The basics of logistic regression
-4. Let's use another example
-5. Inference and goodness of fit
-6. Let's see another example
-7. Ordinal logistic regression
-8. Multinomial logistic regression
-9. Conclusion
-10. Appendices
+4. Inference and goodness of fit
+5. Let's see another example
+6. Ordinal logistic regression
+7. Multinomial logistic regression
+8. Conclusion
+9. Appendices
 
 ## What session 4 is for {.scrollable}
 ::::: columns
@@ -429,122 +428,6 @@ With this equation we can predict the probability of default for any FICO score 
 </div>
 ::::
 :::::::::::::
-
-## Let's use another example {#imported-s04-014 .center .scrollable}
-
-## FICO Score {#imported-s04-015 .scrollable}
-
-:::::::::::::::::: panel-tabset
-### 1 · Maximum likelihood
-
-A logistic regression is not fitted by least squares. It is fitted by **maximum likelihood**.
-
-For each loan $i$, the model gives a probability of default, $p_i = P(\text{default}_i = 1 \mid \text{fico}_i)$. A loan that defaulted contributes $p_i$ to the likelihood; a loan that was repaid contributes $1 - p_i$. The likelihood of the whole sample is the product:
-
-$$
-L(\beta_0, \beta_1) = \prod_{i=1}^{n} p_i^{\,y_i}\,(1 - p_i)^{1 - y_i},
-\qquad
-\ell = \ln L = \sum_{i=1}^{n} \Big[\, y_i \ln p_i + (1 - y_i) \ln (1 - p_i) \Big]
-$$
-
--   Maximum likelihood picks the $b_0$ and $b_1$ that make the defaults and repayments **we actually observed** as probable as possible.
-
--   There is no closed-form formula, as there is for OLS. The computer climbs $\ell$ step by step until it stops improving — the `Iterations` line in the output.
-
--   The maximised value $\hat\ell$ is the `Log-Likelihood` in the summary. Pseudo-$R^2$ and likelihood-ratio tests are built from it.
-
-### 2 · The equation
-
-For a binary outcome $Y$, the model is:
-
-$$
-\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_k X_k,
-\qquad p = P(Y = 1)
-$$
-
-The left-hand side is the **log-odds** of $Y = 1$. For the loans, with one predictor:
-
-$$
-\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1\,\text{fico},
-\qquad p = P(\text{default} = 1)
-$$
-
-$\beta_1$ is the change in the log-odds of default associated with a one-point increase in the FICO score, holding the other variables constant.
-
-### 3 · The code
-
-```{python}
-#| echo: true
-
-# The logistic fit. "Iterations" in the output is maximum likelihood at work:
-# there is no formula for the estimates, so they are found numerically.
-m2 = smf.logit("default ~ fico", data=loans).fit()
-print(m2.summary())
-```
-
-The estimated equation:
-
-$$
-\ln\left(\frac{p}{1-p}\right) = 6.719 - 0.0119\,\text{fico}
-$$
-
-### 4 · Log-odds → odds
-
-By default, the coefficients are in **log-odds**. $b_1 = -0.0119$: one more FICO point lowers the log-odds of default by 0.0119.
-
-If you exponentiate a coefficient, $e^{\beta_1}$, you obtain the **odds ratio**:
-
-```{python}
-#| echo: true
-
-# Exponentiate: the coefficients become odds ratios
-print(np.exp(m2.params).round(3))
-
-# One point is a small move. The odds ratio for 100 points:
-print(round(np.exp(100 * m2.params["fico"]), 3))
-```
-
--   $e^{-0.0119} = 0.988$: "A one-point increase in FICO is associated with odds of default about 1.2% lower, ceteris paribus."
-
--   $e^{100 \times (-0.0119)} = 0.305$: 100 more points and the odds of default are about 70% lower.
-
--   The rule: if $e^{b} > 1$, the odds rise by $(e^{b} - 1) \times 100\%$; if $e^{b} < 1$, they fall by $(1 - e^{b}) \times 100\%$. For $b = 0.50$, $e^{0.50} = 1.65$: odds 65% higher. For $b = -0.50$, $e^{-0.50} = 0.607$: odds 39.3% lower.
-
--   $e^{b_0} = 828$ is the odds at a FICO score of 0, which no one has. Do not report it.
-
-### 5 · Probabilities
-
-**Odds are not probabilities.** To obtain a predicted probability, transform the entire linear predictor:
-
-$$
-p = \frac{e^{X\beta}}{1 + e^{X\beta}}
-$$
-
-For a FICO score of 700: $Xb = 6.719 - 0.011877 \times 700 = -1.595$, so
-
-$$
-p = \frac{e^{-1.595}}{1 + e^{-1.595}} = \frac{0.203}{1.203} = 0.169
-$$
-
-```{python}
-#| echo: true
-
-# predict() applies the logistic transformation for you
-m2.predict(pd.DataFrame({"fico": [600, 700, 850]})).round(3)
-```
-
-So the chain is:
-
-| What you have | What you do | What you get |
-|---|---|---|
-| logit coefficient $\beta$ | nothing | the change in the **log-odds** |
-| $e^{\beta}$ | exponentiate the coefficient | the **odds ratio** |
-| $X\beta$ | logistic transformation, $e^{X\beta} / (1 + e^{X\beta})$ | the **probability** |
-
-::: {.muted}
-Confidence intervals for $\beta_1$ and for a predicted probability: Appendix A.
-:::
-::::::::::::::::::
 
 ## Inference and goodness of fit {#imported-s04-016 .center .scrollable}
 
