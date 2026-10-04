@@ -1,9 +1,11 @@
 ---
-title: "Session 6: Regression Analysis - Advanced Considerations"
+title: "Session 6: Sessions 2–5 in Review, and Three Advanced Techniques"
 subtitle: "Published course presentation · repository edition"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session6_cours/"
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -19,57 +21,24 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: "<style>.reveal .cell-output-display img{max-height:300px;width:auto;max-width:100%;}</style>"
     footer: "MATH60033A · Session 06 · Thierry Warin, PhD · HEC Montréal"
 ---
-
-<!-- Imported from https://warin.ca/quant/en/session6_cours/. The code cells below are live: they execute
-     against the course data at render time, so the output on the slides is the
-     output the students' own machines produce. -->
-```{python}
-#| label: setup
-#| echo: false
-
-import sys, warnings
-sys.path.insert(0, "../..")
-sys.path.insert(0, "../../slides")
-warnings.filterwarnings("ignore")
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import qmib
-
-pd.set_option("display.width", 96)
-pd.set_option("display.max_columns", 10)
-```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Quote of the day
-2. Where we left off
-3. Over to you
-4. Getting your hands dirty with Money Ball
-5. Panel data analysis
-6. Step 1. Running a TSCS model
-7. Step 2. Fixed effects versus random effects
-8. To go further
-9. To go further (cont.)
-10. Binary and categorical independent variables
-11. Binary and categorical independent variables (cont.)
-12. The R deck uses totalpay; here it is income plus bonus (cont.)
-13. Dummy variables for each level of education (cont.)
-14. Interaction terms
-15. Interaction terms (cont.)
-16. age * female expands to age + female + age:female — the interaction (cont.)
-17. Comparing models
-18. Comparing models (cont.)
-19. Lower AIC is better. The comparison only makes sense on the same rows. (cont.)
-20. Automatic model selection
-21. Python has no step(); choose among candidates explicitly. (cont.)
-22. Conclusion
-23. Before the next session
+1. Where we are — four sessions, one toolkit
+2. Session 2 · describe one variable: goal, code, results, interpretation
+3. Session 3 · fit a line, then check it
+4. Session 4 · when the outcome is a category
+5. Session 5 · too many predictors: let the computer choose
+6. Advanced · panel data, fixed or random effects
+7. Advanced · interactions — a slope per group
+8. Advanced · squared terms — effects that accelerate or level off
+9. Key takeaways
 
 ## What session 6 is for {.scrollable}
 ::::: columns
@@ -78,12 +47,11 @@ pd.set_option("display.max_columns", 10)
 
 ### The mathematics
 
-- State what a **panel** is, and why pooling understates uncertainty
-- Distinguish **fixed** from **random** effects, and say what each assumes
+- Summarise sessions 2 to 5 as goal, implementation, results and interpretation
+- State what a **panel** is, and distinguish **fixed** from **random** effects
+- Use the **Hausman test** to choose between fixed and random effects
 - Read an **interaction** as a slope that differs between groups
-- Compare non-nested models on information criteria rather than an $F$-test
-- Use the **Hausman test** to choose between fixed and random effects, and say what it assumes
-- Name the two pitfalls this session is really about — **multicollinearity** and **overfitting**
+- Read a **squared term** as an effect that accelerates or levels off
 
 ::::
 
@@ -91,9 +59,9 @@ pd.set_option("display.max_columns", 10)
 
 ### The Python
 
-- Fit pooled, fixed-effects and two-way models, and cluster the errors
-- Write a quadratic and an interaction in a formula, and interpret them in units
-- Put three specifications in one table and let the reader see the spread
+- Fit fixed- and random-effects models with `PanelOLS` and `RandomEffects`
+- Write an interaction (`a * b`) and a quadratic (`I(x**2)`) in a formula
+- Interpret both in units, from the fitted coefficients
 
 ::::
 
@@ -124,857 +92,460 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-## Quote of the day {#imported-s06-001 .scrollable}
-> True education is a kind of never ending story --- a matter of continual beginnings, of habitual fresh starts, of persistent newness.
->
-> [J. R. R. Tolkien](https://en.wikipedia.org/wiki/J._R._R._Tolkien){target="_blank"}
-
-## Where we left off {#imported-s06-002 .scrollable}
-> Latest session
->
-> from a sample to a predicted value
->
-> model accuracy
->
-> model validity
-
-## Over to you {#imported-s06-007 .scrollable}
-> Wait!
->
-> I want to do it myself!
-
-## Getting your hands dirty with Money Ball {#imported-s06-008 .scrollable}
-> Getting your hands dirty with Money Ball
-
-::: center
-:::
-
-## Getting your hands dirty with Money Ball {#imported-s06-009 .scrollable}
-
-> Homework: Be the hero
->
-> in your RStudio sessions, follow these steps [here](https://warin.ca/shiny/course-MQ-en/moneyball/){target="_blank"}
-
-## 1\. Panel data analysis {#imported-s06-010 .scrollable}
-
-## 1\. Panel data analysis {#imported-s06-011 .scrollable}
-
-#### Foundations of panel data
-
--   Step 1. Estimating a time-series cross-section model
-
--   Step 2. The question of fixed effects
-
-#### Advanced validity solutions (beyond the scope of this course) {#advanced-validity-solutions-beyond-the-scope-of-this-course-}
-
--   Step 3. Unbalanced panels
-
--   Step 4. Panel data\'s shape
-
-## Step 1. Running a TSCS model {#imported-s06-012 .scrollable}
+## Where we are {.scrollable}
 
 ```{python}
-#| echo: true
+#| label: setup
+#| echo: false
+import sys, warnings
+sys.path.insert(0, "../..")
+sys.path.insert(0, "../../slides")
+warnings.filterwarnings("ignore")
 
-import qmib
-
-# Country panel: government debt and economic-freedom indices
-mydata1 = qmib.load("panel")
-mydata1.head()
-```
-
-## Step 1. Running a TSCS model {#imported-s06-013 .scrollable}
-
-::::: panel-tabset
-### Code
-
-```{python}
-#| echo: true
-
-from linearmodels.panel import RandomEffects
-import pandas as pd
-
-# A panel needs a two-level index: entity, then time
-cols = ["grossdebt", "busfreedom", "finfreedom", "invfreedom"]
-panel = mydata1.dropna(subset=cols).set_index(["country", "year"])
-y = panel["grossdebt"]
-X = panel[["busfreedom", "finfreedom", "invfreedom"]]
-
-re_model = RandomEffects(y, X).fit()
-```
-
-Also, remember how useful this command can be:
-
-```{python}
-#| echo: true
-
-help(RandomEffects)
-```
-
-### Code 2
-
-```{python}
-#| echo: true
-
-print(re_model)
-```
-
-::: pull-left
-![](imported-assets/figures/regression2a.png){style="display: block; margin: auto;" width="100%"}
-:::
-
-::: pull-right
-![](imported-assets/figures/regression2b.png){style="display: block; margin: auto;" width="100%"}
-:::
-:::::
-
-## Step 2. Fixed effects versus random effects {#imported-s06-014 .scrollable}
-
-::: panel-tabset
-### Principles
-
-In terms of estimation techniques, we need to use time-series cross-section based techniques. First, we need to go through a couple of checkings. Among the first ones, we need to see whether we need a fixed-effects or a random-effects model.
-
-FE explore the relationship between predictor and outcome variables within an entity (country, person, company, etc.).
-
-Each entity has its own individual characteristics that may or may not influence the predictor variables (for example, being a male or female could influence the opinion toward certain issue; or the political system of a particular country could have some effect on trade or GDP; or the business practices of a company may influence its stock price).
-
-When using FE we assume that something within the individual may impact or bias the predictor or outcome variables and we need to control for this. This is the rationale behind the assumption of the correlation between entity's error term and predictor variables.
-
-FE remove the effect of those time-invariant characteristics so we can assess the net effect of the independent variable on the outcome variable.
-
-### Code
-
-Another important assumption of the FE model is that those time-invariant characteristics are unique to the individual and should not be correlated with other individual characteristics.
-
-Each entity is different therefore the entity's error term and the constant (which captures individual characteristics) should not be correlated with the others. If the error terms are correlated, then FE is no suitable since inferences may not be correct and you need to model that relationship (probably using random-effects), this is the main rationale for the Hausman test.
-
-```{python}
-#| echo: true
-
-from linearmodels.panel import PanelOLS
-
-# Fixed effects: one intercept per country, absorbed rather than estimated.
-# Only within-country variation identifies the slopes now.
-fixed = PanelOLS(y, X, entity_effects=True).fit()
-print(fixed)
-```
-
-## Step 2. Fixed effects versus random effects {.scrollable}
-
-The two estimators disagree. The **Hausman test** asks whether the disagreement
-is larger than sampling noise — and if it is, random effects is inconsistent.
-
-```{python}
-#| echo: true
+from plotstyle import setup, CL
+plt = setup()
 
 import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+import qmib
+
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
+
+Four sessions, one toolkit. Each one answered a different kind of question:
+
+| Session | The question | The method | The Python |
+|---|---|---|---|
+| **2** | What does one variable look like? | centre, spread, shape | `.mean()`, `.median()`, `.std()`, `stats.skew` |
+| **3** | How does $y$ move with $x$ — and can we trust the line? | OLS, $R^2$, residuals, Cook's distance | `smf.ols(...).fit()` |
+| **4** | What if $y$ is a category? | logistic, ordinal, multinomial | `smf.logit`, `np.exp`, `.predict` |
+| **5** | What if there are too many predictors? | stepwise, ridge, lasso, elastic net | `LassoCV`, `ElasticNetCV` |
+
+::: {.check}
+The first part of today puts the four side by side: for each, **the goal, the implementation, the results, the interpretation**. The second part adds three techniques that make the regression of session 3 fit real data: **panels, interactions, squared terms**.
+:::
+
+# Part 1 · Sessions 2–5 in review {background-color="#16181A" style="color:#F7F6F3"}
+
+## Session 2 · Describe one variable {.scrollable}
+
+::::: panel-tabset
+### Goal
+
+> **Before any model, know your variable.** How large is a typical value, how far do values spread, and is the distribution symmetric?
+
+Example: **GDP per capita** across 30 European countries, 2009–2023.
+
+| | Measures | Robust alternative |
+|---|---|---|
+| **Centre** | mean $\bar x$ | median, trimmed mean |
+| **Spread** | standard deviation $s$ | interquartile range (IQR) |
+| **Shape** | skewness $g_1$, excess kurtosis $g_2$ | — |
+
+### Implementation
+
+```{python}
+#| echo: true
 from scipy import stats
 
-# H = (b_FE - b_RE)' [Var(b_FE) - Var(b_RE)]^-1 (b_FE - b_RE), distributed chi2
-# with one degree of freedom per coefficient under the null. Note pinv, not inv:
-# the difference of two estimated covariance matrices is near-singular.
-diff  = fixed.params - re_model.params
-vdiff = fixed.cov - re_model.cov
-H = float(diff.values @ np.linalg.pinv(vdiff.values) @ diff.values)
-pval = 1 - stats.chi2.cdf(H, len(diff))
+core = qmib.load("core")
+gdp = core["gdp_pc_eur"].dropna()
 
-for k in fixed.params.index:
-    print(f"{k:12}  FE {fixed.params[k]:8.3f}   RE {re_model.params[k]:8.3f}"
-          f"   diff {diff[k]:8.3f}")
-print(f"\nHausman H = {H:.2f} on {len(diff)} df,  p = {pval:.4f}")
+summary = pd.Series({
+    "mean": gdp.mean(),
+    "median": gdp.median(),
+    "5% trimmed mean": stats.trim_mean(gdp, 0.05),
+    "standard deviation": gdp.std(ddof=1),
+    "IQR": gdp.quantile(0.75) - gdp.quantile(0.25),
+    "skewness g1": stats.skew(gdp),
+    "excess kurtosis g2": stats.kurtosis(gdp),
+})
+summary.round(2)
 ```
+
+### Results
+
+```{python}
+fig, ax = plt.subplots(figsize=(7.6, 2.8))
+ax.hist(gdp, bins=30, color=CL.accent, alpha=.8)
+ax.axvline(gdp.mean(), color=CL.warn, lw=2, label=f"mean = €{gdp.mean():,.0f}")
+ax.axvline(gdp.median(), color=CL.good, lw=2, ls="--", label=f"median = €{gdp.median():,.0f}")
+ax.set_xlabel("GDP per capita (EUR)"); ax.set_ylabel("country-years")
+ax.legend(fontsize=8)
+plt.show()
+```
+
+### Interpretation
+
+-   The mean (€`{python} f"{gdp.mean():,.0f}"`) is **above** the median (€`{python} f"{gdp.median():,.0f}"`): a few very rich countries pull the mean up.
+-   Skewness $g_1 =$ `{python} f"{stats.skew(gdp):.2f}"` is larger than $2\sqrt{6/n} =$ `{python} f"{2 * np.sqrt(6 / len(gdp)):.2f}"`: the distribution is **substantially right-skewed**.
+-   So the median and the IQR describe a "typical" country better than the mean and the standard deviation.
+
+::: {.check}
+Every number in session 2 describes **one** variable at a time. Session 3 puts two in the same sentence.
+:::
+
+:::::
+
+## Session 3 · Fit a line, then check it {.scrollable}
+
+::::: panel-tabset
+### Goal
+
+> **Do more productive European countries have higher income per head — and can we trust the answer?**
+
+$$y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \qquad \text{OLS: } \min \sum_i (y_i - \beta_0 - \beta_1 x_i)^2$$
+
+Fitting the line is the easy part. Then four questions:
+
+| Question | Tool |
+|---|---|
+| **Adequacy** — how much does it explain? | $R^2$, adjusted $R^2$, RSE |
+| **Validity** — do the assumptions hold? | residual plot |
+| **Robustness** — does one row drive it? | Cook's distance |
+| **Parsimony** — which model? | AIC, BIC |
+
+### Implementation
+
+```{python}
+#| echo: true
+d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
+
+fit = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
+print(fit.params.round(1))
+print(f"R-squared = {fit.rsquared:.3f}   AIC = {fit.aic:,.0f}")
+
+cooks_d = fit.get_influence().cooks_distance[0]     # one value per row
+```
+
+### Results
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(8.2, 2.7))
+axes[0].scatter(fit.fittedvalues, fit.resid, s=8, alpha=.5, color=CL.accent)
+axes[0].axhline(0, color=CL.ink, lw=1)
+axes[0].set_title("residuals vs fitted", fontsize=9.5)
+axes[0].set_xlabel("fitted GDP per capita"); axes[0].set_ylabel("residual")
+axes[1].stem(cooks_d, markerfmt=" ", basefmt=" ")
+axes[1].axhline(4 / len(d), color=CL.warn, ls="--")
+axes[1].set_title("Cook's distance, one spike per row", fontsize=9.5)
+axes[1].set_xlabel("observation")
+plt.show()
+```
+
+### Interpretation
+
+-   **The slope:** one more point of productivity goes with **€`{python} f"{fit.params['productivity_idx']:,.0f}"` more** GDP per capita, on average. Always say the units.
+-   **Adequacy:** $R^2 =$ `{python} f"{fit.rsquared:.2f}"` — the line accounts for `{python} f"{fit.rsquared:.0%}"` of the variation, but $R^2$ says nothing about whether the line is the right shape.
+-   **Validity:** a curve or a funnel in the residual plot is the model telling you what it missed.
+-   **Robustness:** a spike far above the others means one country-year is carrying the result — go and look at it.
 
 ::: {.warn}
-Rejecting tells you random effects is **wrong** here — not that fixed effects is
-right. What it leaves you with is an estimator that uses only within-country
-variation, and therefore cannot answer a question about differences *between*
-countries.
+Correlation is not causation: the slope says the two move together, not that raising productivity *would* raise income.
 :::
 
-Considering the results of the Hausman test with a \\(p-value \>0.05\\), we need a random effects model.
-:::
-
-## 2\. To go further {#imported-s06-015 .scrollable}
-
-## 2\. To go further (cont.) {#imported-s06-016 .scrollable}
-
-#### 2.1 Quadratic effects {#2-1-quadratic-effects-detail}
-
-::::: panel-tabset
-### Example
-
-::: pull-left
-Let's go to the real estate data. Let's see if selling price is related to Living.area. First visualize this relationship:
-
-```{python}
-#| echo: true
-
-import qmib
-import statsmodels.formula.api as smf
-
-re_data = qmib.load("realestate")
-re1 = smf.ols("price ~ living_area", data=re_data).fit()
-```
-:::
-
-::: pull-right
-![](imported-assets/index_files/figure-html/unnamed-chunk-9-1.png)
-:::
-
-### Results 1
-
-```{python}
-#| echo: true
-
-print(re1.summary())
-```
-
-### 2
-
-A one square foot increase in Living.area is associated with a \$114 increase in Price, on average.
-
-**What can we do if we suspect that this association accelerates (is not linear) as Living.area increases?**
-
--   A linear regression model with a quadratic effect allows for us to model associations that are non-linear.
-
-A quadratic effects regression model is a regression model that has one of the independent variable squared.
-
--   Thus the mean of the dependent variable \\(Y\\) can be modeled with predictor x1 as:
-
-\$\$\\mu = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_1\^2\$\$
-
-\\(\\beta_2\\) measures the amount of non-linearity in the relationship between \\(Y\\) and \\(x_1\\).
-
-If \\(\\beta_2\\) is zero, then the relationship simplifies to a linear one.
-
-So we can perform a \\(t-test\\) for \\(\\beta_2\\) to determine if the relationship is non-linear in this fashion.
-
-### 3
-
-Let's fit a regression model to predict Price from both \\(Living.area\\) and \\(Living.area\^2\\).
-
-```{python}
-#| echo: true
-
-re2 = smf.ols("price ~ living_area + I(living_area**2)", data=re_data).fit()
-print(re2.summary())   # the quadratic term is very significant
-```
-
-### 4
-
-Since quadratic effect is positive and the trend is positive for all reasonable values of Living.area, then we can say the association **accelerates** as Living.area increases.
-
-The \\(t-test\\) associated with \\(\\beta_2 = .04083\\) is very significant (p-value = 0.00001), and thus the quadratic effect is important.
-
-This model predicts Price better than just a linear one!
-
-The name 'linear' regression is actually a little misleading.
-
-It is called **linear regression** because the coefficients are linear terms, but the independent variable can be transformed in any fashion: \\(x_2\\), \\(log(x)\\), etc.
-
-Thus linear regression is actually quite powerful and flexible to model other associations, which is why it is used so often in practice.
 :::::
 
-## 2.2 Binary and categorical independent variables {#imported-s06-017 .scrollable}
+## Session 4 · When the outcome is a category {.scrollable}
 
-## 2.2 Binary and categorical independent variables (cont.) {#imported-s06-018 .scrollable}
+::::: panel-tabset
+### Goal
 
-#### 2.2 Binary and categorical independent variables {#2-2-binary-and-categorical-independent-variables}
+> **Which loans default?** The outcome is 0 or 1, so a straight line can predict probabilities below 0 or above 1.
 
-::: panel-tabset
-### Definitions
+Logistic regression models the **log-odds** instead, and is fitted by **maximum likelihood**:
 
-In this section, we show how to analyze regression equations when one or more independent variables are categorical. The key to the analysis is to express categorical variables as dummy variables.
+$$\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1\,\text{fico}, \qquad p = P(\text{default} = 1)$$
 
-##### What is a Dummy Variable? {#what-is-a-dummy-variable-}
+| Outcome | Model | Python |
+|---|---|---|
+| two categories | logistic | `smf.logit` |
+| ordered categories | ordinal logit | `OrderedModel` |
+| unordered categories | multinomial logit | `sm.MNLogit` |
 
-A dummy variable (aka, an indicator variable) is a numeric variable that represents categorical data, such as gender, race, political affiliation, etc.
-
-Technically, dummy variables are dichotomous, quantitative variables. Their range of values is small; they can take on only two quantitative values. As a practical matter, regression results are easiest to interpret when dummy variables are limited to two specific values, \\(1\\) or \\(0\\). Typically, \\(1\\) represents the presence of a qualitative attribute, and \\(0\\) represents the absence.
-
-#### How Many Dummy Variables? {#how-many-dummy-variables-}
-
-The number of dummy variables required to represent a particular categorical variable depends on the number of values that the categorical variable can assume. To represent a categorical variable that can assume \\(k\\) different values, a researcher would need to define \\(k - 1\\) dummy variables.
-
-### Example
-
-For example, suppose we are interested in political affiliation, a categorical variable that might assume three values - Republican, Democrat, or Independent.
-
-We could represent political affiliation with two dummy variables:
-
-\$\$X_1 = 1,\~if\~Republican;\~X_1 = 0,\~otherwise.\$\$
-
-\$\$X_2 = 1,\~if\~Democrat;\~X_2 = 0,\~otherwise.\$\$
-
-In this example, notice that we don\'t have to create a dummy variable to represent the \"Independent\" category of political affiliation.
-
-If \\(X_1=0\\) and \\(X_2=0\\), we know the voter is neither Republican nor Democrat. Therefore, voter must be Independent.
+### Implementation
 
 ```{python}
 #| echo: true
+loans = qmib.load("loans")
+m = smf.logit("default ~ fico", data=loans).fit(disp=0)
 
+print(m.params.round(4))                         # 1. log-odds
+print(np.exp(m.params["fico"]).round(4))         # 2. odds ratio
+m.predict(pd.DataFrame({"fico": [600, 700, 850]})).round(3)   # 3. probabilities
+```
+
+### Results
+
+```{python}
+grid = pd.DataFrame({"fico": np.arange(600, 851, 5)})
+fig, ax = plt.subplots(figsize=(7.6, 2.7))
+ax.plot(grid["fico"], m.predict(grid), color=CL.accent, lw=2.6)
+for f_ in (600, 700, 850):
+    p_ = float(m.predict(pd.DataFrame({"fico": [f_]}))[0])
+    ax.scatter(f_, p_, color=CL.warn, zorder=5)
+    ax.annotate(f"{p_:.2f}", (f_, p_), textcoords="offset points", xytext=(6, 6), fontsize=8.5)
+ax.set_xlabel("FICO score"); ax.set_ylabel("P(default)"); ax.set_ylim(0, .45)
+plt.show()
+```
+
+### Interpretation
+
+The chain, from what Python gives you to what a reader understands:
+
+| You have | You do | You get |
+|---|---|---|
+| $b_1 =$ `{python} f"{m.params['fico']:.4f}"` | nothing | one more FICO point lowers the **log-odds** of default by `{python} f"{-m.params['fico']:.4f}"` |
+| $e^{b_1} =$ `{python} f"{np.exp(m.params['fico']):.3f}"` | exponentiate | the **odds** of default are `{python} f"{1 - np.exp(m.params['fico']):.1%}"` lower per point, ceteris paribus |
+| $b_0 + b_1 x$ | $e^{xb}/(1+e^{xb})$ | the **probability**: `{python} f"{float(m.predict(pd.DataFrame({'fico': [600]}))[0]):.2f}"` at 600, `{python} f"{float(m.predict(pd.DataFrame({'fico': [850]}))[0]):.2f}"` at 850 |
+
+::: {.check}
+Ordinal and multinomial models follow the same chain: log-odds → odds (or relative risk) ratios → predicted probabilities.
+:::
+
+:::::
+
+## Session 5 · Too many predictors: let the computer choose {.scrollable}
+
+```{python}
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import statsmodels.api as sm
+
+raw = pd.read_parquet("../../data/spine/angle_c_country.parquet")
+YCOL = "rd_pct_gdp"
+XCOLS = [c for c in raw.columns if c not in ("geo", "time", "flag", YCOL)]
+d5 = raw.dropna(subset=[YCOL] + XCOLS)
+Xtr, Xte, ytr, yte = train_test_split(d5[XCOLS], d5[YCOL], test_size=0.3, random_state=7)
+```
+
+::::: panel-tabset
+### Goal
+
+> **Which of `{python} len(XCOLS)` candidate predictors explain R&D intensity, with only `{python} len(d5)` countries?** Choosing by hand is slow and subjective, and OLS with them all fits the noise.
+
+| Method | What it does |
+|---|---|
+| **Stepwise** (old style) | adds one predictor at a time while **AIC** improves |
+| **Ridge** | keeps all predictors, **shrinks** every coefficient |
+| **Lasso** | shrinks, and sets the weak ones to **exactly zero** |
+| **Elastic net** | like the lasso, but keeps correlated predictors **together** |
+
+All three penalised methods minimise $\sum_i (y_i - \hat y_i)^2 + \lambda \times \text{size of the coefficients}$, with $\lambda$ (`alpha` in Python) chosen by cross-validation.
+
+### Implementation
+
+```{python}
+#| echo: true
+def test_rmse(model):                  # fit on 70% of rows, score on the other 30%
+    pipe = make_pipeline(StandardScaler(), model).fit(Xtr, ytr)
+    kept = int(np.sum(np.abs(pipe[-1].coef_) > 1e-8))
+    return kept, mean_squared_error(yte, pipe.predict(Xte)) ** 0.5
+
+results = {
+    "OLS, all predictors": test_rmse(LinearRegression()),
+    "ridge":       test_rmse(RidgeCV(alphas=np.logspace(-3, 3, 60))),
+    "lasso":       test_rmse(LassoCV(cv=5, random_state=0, max_iter=50_000)),
+    "elastic net": test_rmse(ElasticNetCV(l1_ratio=0.5, cv=5, random_state=0, max_iter=50_000)),
+}
+```
+
+### Results
+
+```{python}
+#| echo: true
+pd.DataFrame(results, index=["predictors kept", "test RMSE"]).T.astype({"predictors kept": int}).round(3)
+```
+
+### Interpretation
+
+-   OLS with every predictor **fits the noise**: it has the largest error on new rows.
+-   The penalised models **cut that error** — nothing was added, the coefficients were only restrained.
+-   Ridge keeps all predictors; the lasso and the elastic net return a **short list**. The elastic net keeps groups of correlated predictors together, which is why it is our default.
+
+::: {.warn}
+What a method keeps is *a* set of predictors that predicts well on this sample — not "the variables that matter". And no $p$-values after selection.
+:::
+
+:::::
+
+# Part 2 · Three advanced techniques {background-color="#16181A" style="color:#F7F6F3"}
+
+## Panel data: the same countries, year after year {.scrollable}
+
+::::: panel-tabset
+### The idea
+
+A **panel** follows the same entities (countries, firms) over several periods. Here: government debt and economic-freedom indices for countries over the years.
+
+-   Countries differ in many ways we do not measure — institutions, history, culture. If those also affect debt, a plain regression mixes them into the slopes.
+-   **Fixed effects (FE):** give each country its own intercept. Only changes **within** a country over time identify the slopes, so anything constant about a country is controlled for.
+-   **Random effects (RE):** treat the country differences as random noise. More efficient, but only valid if those differences are unrelated to the predictors.
+
+$$\text{debt}_{it} = \alpha_i + \beta_1\,\text{busfreedom}_{it} + \beta_2\,\text{finfreedom}_{it} + \beta_3\,\text{invfreedom}_{it} + \varepsilon_{it}$$
+
+$\alpha_i$ is the country's own intercept; $i$ is the country, $t$ the year.
+
+### The code
+
+```{python}
+#| echo: true
+from linearmodels.panel import PanelOLS, RandomEffects
+
+mydata1 = qmib.load("panel")
+cols = ["grossdebt", "busfreedom", "finfreedom", "invfreedom"]
+panel = mydata1.dropna(subset=cols).set_index(["country", "year"])   # entity, then time
+y, X = panel["grossdebt"], panel[["busfreedom", "finfreedom", "invfreedom"]]
+
+fixed = PanelOLS(y, X, entity_effects=True).fit()     # one intercept per country
+random_ = RandomEffects(y, X).fit()
+pd.DataFrame({"fixed effects": fixed.params, "random effects": random_.params}).round(3)
+```
+
+:::::
+
+## Panel data: fixed or random effects? {.scrollable}
+
+::::: panel-tabset
+### The Hausman test
+
+If FE and RE give **similar** coefficients, RE is fine (and more precise). If they **differ** by more than sampling noise, RE is inconsistent: use FE.
+
+```{python}
+#| echo: true
+from scipy import stats
+
+diff = fixed.params - random_.params
+vdiff = fixed.cov - random_.cov
+H = float(diff.values @ np.linalg.pinv(vdiff.values) @ diff.values)
+p_value = stats.chi2.sf(H, len(diff))
+print(f"Hausman H = {H:.2f} on {len(diff)} df,  p = {p_value:.4f}")
+```
+
+### Interpretation
+
+-   **Small $p$ (below 0.05):** the two disagree → use **fixed effects**.
+-   **Large $p$:** no evidence they disagree → **random effects** is acceptable, and more precise.
+-   A fixed-effects slope answers a **within** question: when a country's business freedom rises, what happens to *its* debt? It cannot say why some countries have more debt than others.
+
+::: {.warn}
+Rejecting says random effects is wrong here — not that fixed effects is right. And report which one you used: the same data can give different answers under each.
+:::
+
+:::::
+
+## Interactions: a slope that differs between groups {.scrollable}
+
+::::: panel-tabset
+### The idea
+
+Does bonus pay fall with age **at the same rate** for men and women? A plain regression `bonus ~ age + female` assumes yes. An **interaction** lets the slope differ:
+
+$$\text{bonus} = \beta_0 + \beta_1\,\text{age} + \beta_2\,\text{female} + \beta_3\,(\text{age} \times \text{female})$$
+
+-   For men (female = 0): slope in age $= \beta_1$
+-   For women (female = 1): slope in age $= \beta_1 + \beta_3$
+-   $\beta_3$ is the **difference** between the two slopes. If $\beta_3 = 0$, the effect of age is the same for both.
+
+### The code
+
+```{python}
+#| echo: true
 glassdoor = qmib.load("glassdoor")
-
-# The R deck uses totalpay; here it is income plus bonus
-glassdoor["totalpay"] = glassdoor["income"] + glassdoor["bonus"]
-glassdoor.head()
-```
-
-### Code
-
-```{python}
-#| echo: true
-
-import matplotlib.pyplot as plt
-
 glassdoor["female"] = (glassdoor["gender"].str.lower() == "female").astype(int)
-glassdoor.boxplot(column="totalpay", by="female")
-plt.suptitle(""); plt.show()
 
-lm1 = smf.ols("totalpay ~ female", data=glassdoor).fit()
-```
-
-![](imported-assets/figures/binary1.png){style="display: block; margin: auto;" width="60%"}
-
-### Results
-
-```{python}
-#| echo: true
-
-print(lm1.summary())
-```
-
-### Lessons
-
-**Avoid the Dummy Variable Trap**
-
--   When defining dummy variables, a common mistake is to define too many variables. If a categorical variable can take on k values, it is tempting to define \\(k\\) dummy variables.
-
--   Resist this urge. Remember, you only need \\(k - 1\\) dummy variables.
-
-> A \\(k\^{th}\\) dummy variable is redundant; it carries no new information.
->
-> And it creates a severe multicollinearity problem for the analysis.
-
-Using \\(k\\) dummy variables when only \\(k - 1\\) dummy variables are required is known as the dummy variable trap.
-:::
-
-## The R deck uses totalpay; here it is income plus bonus (cont.) {#imported-s06-019 .scrollable}
-
-::: panel-tabset
-### Example
-
-**How to Interpret Dummy Variables**
-
-Once a categorical variable has been recoded as a dummy variable, the dummy variable can be used in regression analysis just like any other quantitative variable.
-
-For example, suppose we wanted to assess the relationship between household income and political affiliation (i.e., Republican, Democrat, or Independent). The regression equation might be:
-
-\$\$Income = \\beta_0 + \\beta_1 X_1+ \\beta_2 X_2\$\$
-
-where \\(\\beta_0\\), \\(\\beta_1\\), and \\(\\beta_2\\) are regression coefficients. \\(X_1\\) and \\(X_2\\) are regression coefficients defined as:
-
-\$\$X_1 = 1,\~if\~Republican;\~X_1=0,\~otherwise.\$\$ \$\$X_2 = 1,\~if\~Democrat;\~X_2 = 0,\~otherwise.\$\$
-
-The value of the categorical variable that is not represented explicitly by a dummy variable is called the reference group. In this example, the reference group consists of Independent voters.
-
-### Principles
-
-In this analysis, each dummy variable is compared with the **reference group**.
-
-In this example, a **positive regression coefficient** means that income is higher for the dummy variable political affiliation than for the reference group; a **negative regression coefficient** means that income is lower.
-
-If the regression coefficient is statistically significant, the income discrepancy with the reference group is also statistically significant.
-
-#### Categorical variables
-
-Another possible predictor in the dataset is 'education', which has 4 categories: high school, college, masters, and phd (highest degree attained).
-
-##### How can we incorporate this variable into a linear regression model? {#how-can-we-incorporate-this-variable-into-a-linear-regression-model-}
-
-If we define a new variable where 1 = high school, 2 = college, etc. and use it as a predictor in a regression model, then we incorrectly assume the step in pay from 1 to 2 (high school to college) is equivalent to a step in pay from 2 to 3 (college to masters).
-
-By creating 3 binary independent variable to represent the 4 groups, we can estimate the mean salary for each group separately.
-
-```{python}
-#| echo: true
-
-# Dummy variables for each level of education
-glassdoor["college"] = (glassdoor["education"] == "College").astype(int)
-glassdoor["masters"] = (glassdoor["education"] == "Masters").astype(int)
-glassdoor["phd"]     = (glassdoor["education"] == "PhD").astype(int)
-```
-
-### Model
-
-We use the following regression to model the mean of total pay:
-
-\$\$\\mu = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_3\$\$
-
-```{python}
-#| echo: true
-
-fit2 = smf.ols("totalpay ~ college + masters + phd", data=glassdoor).fit()
-print(fit2.summary())
-```
-
-### Interpretation
-
-**Interpretation of the intercept:** the mean pay for the high school group is the lowest at just under \$95,000.
-
-What is the mean pay for employees with a masters degree?
-
-Click here for answer
-
-\$\$94,871 + 9,187 = \\\$104,058\$\$
-
-R will perform linear regression automatically if you provide the categorical predictor:
-
--   here 'pay \~ education'.
-
-R will create the binary independent variable behind the scene, but may not choose the reference group you like.
-
-R chooses the reference group to be the one that is first in alphabetical order. You can override the default choice by R.
-
-Here R chooses college to be the reference group, and all the \\(\\beta\\) estimates are in reference to it.
-
-But the group means are all estimated the same as before. For the masters degree group:
-
-\$\$Ans: 98,673 + 5,386 = \$104,058.\$\$
-:::
-
-## Dummy variables for each level of education (cont.) {#imported-s06-020 .scrollable}
-
-::: panel-tabset
-### Prediction
-
-We may want to predict **pay** based on **gender, education, and age** all at once:
-
-The estimate \\(10633.59\\) for phd now represents the extra pay for employees with a phd relative to a high school degree while controlling for age and gender.
-
-\$\$\\mu = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_3\$\$
-
-where \\(x_1\\) is the indicator for 'college', \\(x_2\\) for 'masters', and \\(x_3\\) for 'phd'.
-
-The group that is left out is called the **reference group**.
-
-For the model with one categorical predictor, the intercept represents the mean of the reference group (the 'high school' group here).
-
-Note:
-
-In Python you rarely build these by hand: `pd.get_dummies(glassdoor, columns=["education"], drop_first=True)` makes the same columns in one call, and a formula like `totalpay ~ C(education)` makes them implicitly.
-
-### results
-
-```{python}
-#| echo: true
-
-lm3 = smf.ols("totalpay ~ female + college + masters + phd + age", data=glassdoor).fit()
-print(lm3.summary())
-```
-:::
-
-## 2.3 Interaction terms {#imported-s06-021 .scrollable}
-
-## 2.3 Interaction terms (cont.) {#imported-s06-022 .scrollable}
-
-#### 2.3 Interaction terms {#2-3-interaction-terms-detail}
-
-::::: panel-tabset
-### Context
-
-Let's look at a multiple regression to predict Y = bonus of employees based on \\(x_1 = age\\) and an \\(x_2 =female\\):
-
-```{python}
-#| echo: true
-
-fit5 = smf.ols("bonus ~ age + female", data=glassdoor).fit()
-print(fit5.summary())
-```
-
-\"A 1-year increase in age is associated with a 58.15 dollar decrease in bonus pay, controlling for gender.\"
-
-Key: this assumes the magnitude of the effect is the same for men as it is for women!
-
-#### How can we allow for the relationship of bonus pay with age to be different for men and women? {#how-can-we-allow-for-the-relationship-of-bonus-pay-with-age-to-be-different-for-men-and-women-}
-
-An interaction term is used to allow for the association between one predictor and the dependent variable to vary based on the levels of a categorical predictor.
-
-Note: the two independent variable could be unrelated with each other but still have an interaction effect on the dependent variable.
-
-To incorporate this into a regression model, we use the product of the two independent variable we think have an interaction effect.
-
-The model for the mean of the dependent variable, Y, can be written as:
-
-\$\$\\mu = \\beta_0 + \\beta_1 x_1 +\\beta_2 x_2 + \\beta_3 (x_1 \\times x_2)\$\$
-
-\\(\\beta_3\\) measures this interaction effect. If \\(\\beta_3 = 0\\), then the effects of \\(x_1\\) and \\(x_2\\) do not 'interact.'
-
-We can perform a \\(t-test\\) to see if this interaction effect is significant.
-
-### Code
-
-Let's look at a multiple regression **to predict bonus of employees based on age, an indicator for female, and the interaction between the two**:
-
-```{python}
-#| echo: true
-
-# age * female expands to age + female + age:female — the interaction
+# age * female expands to age + female + age:female
 fit6 = smf.ols("bonus ~ age * female", data=glassdoor).fit()
-print(fit6.summary())
+b = fit6.params
+print(f"slope in age, men   : {b['age']:8.2f} per year")
+print(f"slope in age, women : {b['age'] + b['age:female']:8.2f} per year")
+print(f"difference          : {b['age:female']:8.2f}   p = {fit6.pvalues['age:female']:.4f}")
 ```
 
-### Interpretation
-
-This model can be broken down into two cases: the **estimated bonus pay for men** and **separately for women**.
-
-For men (female = 0), the model becomes:
-
-\$\$\\hat y = 8570.98 - 51.45(age) + 698.33(0) - 15.38(age \\times 0)\$\$
-
-\$\$\\hat y = 8570.98 - 51.45(age)\$\$
-
-For women (female = 1), the model becomes:
-
-\$\$\\hat y = 8570.98 - 51.45(age) + 698.33(1) - 15.38(age \\times 1)\$\$
-
-\$\$\\hat y = 8570.98 + 698.33 - (51.45 + 15.38)(age)\$\$
-
-\$\$\\hat y = 9269.31 - 66.83(age)\$\$
-
-### Wow!
-
-::: pull-left
-![](imported-assets/index_files/figure-html/unnamed-chunk-22-1.png)
-:::
-
-::: pull-right
-Men (blue):
-
-\$\$\\hat y = 8570.98 - 51.45 (age)\$\$
-
-Women (red):
-
-\$\$\\hat y = 9269.31 - 66.83(age)\$\$
-:::
 :::::
 
-## age * female expands to age + female + age:female — the interaction (cont.) {#imported-s06-023 .scrollable}
-
-::: panel-tabset
-### Conclusion 1
-
-What can we conclude?
+## Interactions: reading the result {.scrollable}
 
 ```{python}
-#| echo: true
-
-# An interaction is two slopes reported as one number plus a difference.
-# `age` is now the slope for men; add the interaction for the women's slope.
-b = fit6.params
-print(f"slope in age, men    : {b['age']:8.2f}  per year")
-print(f"slope in age, women  : {b['age'] + b['age:female']:8.2f}  per year")
-print(f"difference           : {b['age:female']:8.2f}  <- the interaction")
-print(f"p on the difference  : {fit6.pvalues['age:female']:8.4f}")
+ages = np.linspace(glassdoor["age"].min(), glassdoor["age"].max(), 50)
+fig, ax = plt.subplots(figsize=(7.4, 2.7))
+ax.scatter(glassdoor["age"], glassdoor["bonus"], s=5, alpha=.25,
+           c=np.where(glassdoor["female"] == 1, CL.warn, CL.accent))
+for fem, colr, lab in [(0, CL.accent, "men"), (1, CL.warn, "women")]:
+    ax.plot(ages, fit6.predict(pd.DataFrame({"age": ages, "female": fem})), color=colr, lw=2.6, label=lab)
+ax.set_xlabel("age"); ax.set_ylabel("bonus (USD)"); ax.legend(fontsize=8)
+plt.show()
 ```
 
-### 2
+-   Bonus falls with age for both groups: by `{python} f"{-b['age']:.1f}"` dollars a year for men, `{python} f"{-(b['age'] + b['age:female']):.1f}"` for women.
+-   The difference between the slopes (`{python} f"{b['age:female']:.1f}"`) has $p =$ `{python} f"{fit6.pvalues['age:female']:.3f}"`: **not significant at 5%**, so we cannot say the age effect differs by gender.
+-   The `female` coefficient alone is the gap **at age 0** — a value no employee has. With an interaction, read the two slopes, not each coefficient separately.
 
-Bonus pay is negatively associated with age for men with a \\(p-value \< 0.0001\\).
-
-The \\(-15.379\\) estimate for the interaction term means this relationship is more severe for women, but is not significant \\(p-value = 0.0592\\).
-
-Be careful interpreting the positive coefficient for female:
-
--   this is the estimate when \\(age = 0\\), which is difficult to interpret in this model.
-
-### 3
-:::
-
-## 3\. Comparing models {#imported-s06-024 .scrollable}
-
-## 3\. Comparing models (cont.) {#imported-s06-025 .scrollable}
-
-#### 3.1 Comparing models done with lm() {#3-1-comparing-models-done-with-lm-}
+## Squared terms: when the effect is not a straight line {.scrollable}
 
 ::::: panel-tabset
-### Models
+### The idea
 
-Let's consider 2 models **to predict the mean selling price of homes** in the real estate data set:
+Does each extra square foot add the same amount to a house's price, or does the effect **accelerate**? Add the predictor **squared**:
 
-::: pull-left
-Model A:
+$$\text{price} = \beta_0 + \beta_1\,\text{area} + \beta_2\,\text{area}^2$$
 
-\$\$\\mu = \\beta_0 + \\beta_1(beds)\$\$
-:::
+-   $\beta_2 > 0$: the effect **accelerates** (a U-shape, upward curve). $\beta_2 < 0$: it **levels off** (an inverted U).
+-   The effect of one more square foot is no longer one number: it is $\beta_1 + 2\beta_2 \times \text{area}$, so it depends on the size of the house.
+-   It is still a **linear** regression: linear in the coefficients. Squares, logs, interactions are all allowed.
 
-::: pull-right
-Model B:
-
-\$\$\\mu = \\beta_0 + \\beta_1(beds) + \\beta_2(baths) + \\beta_3(area)\$\$
-
-> What is the main difference in the interpretation of \\(\\beta_1\\) in each of these models?
-
-Click here for answer
-
-It is the effect of beds on mean price, controlling for number of baths and living area in Model B (uncontrolled in Model A).
-:::
-
-### Code model A
+### The code
 
 ```{python}
 #| echo: true
+re_data = qmib.load("realestate")
 
-model_a = smf.ols("price ~ bedrooms", data=re_data).fit()
-print(model_a.summary())
+re1 = smf.ols("price ~ living_area", data=re_data).fit()
+re2 = smf.ols("price ~ living_area + I(living_area**2)", data=re_data).fit()   # I() = "compute this"
+
+print(re2.params.round(4))
+print(f"p-value on the squared term = {re2.pvalues['I(living_area ** 2)']:.5f}")
+print(f"adjusted R2: straight line {re1.rsquared_adj:.3f}  ->  with square {re2.rsquared_adj:.3f}")
 ```
 
-### Code model B
-
-```{python}
-#| echo: true
-
-model_b = smf.ols("price ~ bedrooms + bathrooms + living_area", data=re_data).fit()
-print(model_b.summary())
-```
-
-### Warning
-
-Notice the coefficient for bedrooms switched signs, and is significant in both models.
-
-> What does this tell us?
-
-Click here for answer
-
-Number of bedrooms is correlated with the other independent variable. This is called multicollinearity.
-
-> So which model is 'correct'?
-
-Click here for answer
-
-Both! There is really no such thing as a single correct model, only useful models. And both models are useful. - Model A suggests that adding a bedroom to a house is associated with a higher selling price. - Model B suggests that adding a bedroom without adding bathrooms or to the size of the living area is associated with a lower selling price. Both models provide insight into how these variables relate.
 :::::
 
-## 3\. Comparing models (cont.) {#imported-s06-026 .scrollable}
-
-::: panel-tabset
-### F-test 1
-
-\\(F-test\\) to compare **nested models**.
-
-> Two models are nested if all of the variables in the smaller model are also in the larger model.
-
-To formally compare two nested models, an F-test can be used to determine if the added variables provide extra predictive power.
-
-The **F-test** is essentially testing if the improvement in \\(R\^2\\) is significant (better than chance alone: if the added variables were truly unrelated to the dependent variable).
-
-### 2
-
-In the multiple linear regression model setup, the F-test measures the potential relationship between the dependent variable and ALL the independent variables:
-
-\$\$H_0: \\beta_1=\\beta_2=\...=\\beta_n=0\$\$
-
-\$\$H_1:\~at\~least\~one\~\\beta_j\~is\~non\~zero.\$\$
-
-Thus hypothesis test is performed by computing the \\(F-statistics\\):
-
-\$\$F=\\frac{(TSS-RSS)}{RSS} = \\frac{TSS}{RSS} - 1\$\$
-
-where \\(TSS=\\sum(y_i-\\bar{y})\^2\\) and \\(RSS=\\sum(y_i-\\hat{y})\^2\\).
-
-It is an analysis in fact of variance. Well, guess what? There is way to do it.
-
-Click here for answer
-
-The F-test is based on something called the analysis of variance (ANOVA) of the residuals in regression.
-
-### 3
-
-If the p-value is small, then there is evidence to suggest that the extra variables are important.
-
-Comparing Model A and Model B from before:
-
-Click here for answer
-
-The F-test has a very small p-value (certainly less than 0.0001). We can conclude that at least one of the two added variables, bathrooms and Living.area, provide added predictive ability.
-
-### 4
-
-If two models are **not nested**, then the Akaike's Information Criterion (AIC) is often used to determine which model is a better predictive one.
-
-The basic idea is that it adds a penalty factor to \\(1 -- R\^2\\) of a regression model based on the number of independent variable in the model.
-
-The lower the AIC for a model, the better.
-
-Let's consider a third model to predict the mean selling price of homes:
-
-\$\$\\mu + \\beta_0 + \\beta(area) + \\beta_2(area\^2) + \\beta_3(bathrooms) + \\beta_4(bathrooms\^2)\$\$
-
-Model C is not nested with either Model A (using bedrooms as a predictor alone) or Model B (using bedrooms, bathrooms, and area as independent variable).
-
-### 5
+## Squared terms: reading the result {.scrollable}
 
 ```{python}
-#| echo: true
-
-model_c = smf.ols("price ~ living_area + I(living_area**2) + bathrooms + I(bathrooms**2)",
-                  data=re_data).fit()
-print(model_c.summary())
+area = np.linspace(re_data["living_area"].min(), re_data["living_area"].max(), 100)
+fig, ax = plt.subplots(figsize=(7.4, 2.7))
+ax.scatter(re_data["living_area"], re_data["price"], s=5, alpha=.25, color=CL.muted)
+ax.plot(area, re1.predict(pd.DataFrame({"living_area": area})), color=CL.accent, lw=2, ls="--", label="straight line")
+ax.plot(area, re2.predict(pd.DataFrame({"living_area": area})), color=CL.warn, lw=2.6, label="with a squared term")
+ax.set_xlabel("living area (sq. ft)"); ax.set_ylabel("price (USD)"); ax.legend(fontsize=8)
+plt.show()
 ```
-
-### 6
-
-Here is the R output for calculating AIC for these 3 models:
 
 ```{python}
-#| echo: true
-
-# Lower AIC is better. The comparison only makes sense on the same rows.
-for name, m in [("A", model_a), ("B", model_b), ("C", model_c)]:
-    print(f"model {name}:  AIC {m.aic:10.1f}   adj R2 {m.rsquared_adj:.4f}")
+b1, b2 = re2.params["living_area"], re2.params["I(living_area ** 2)"]
 ```
 
-Click here for answer
+-   $\beta_2 =$ `{python} f"{b2:.4f}"` is positive and significant: the price **accelerates** with size.
+-   One more square foot adds about **$`{python} f"{b1 + 2 * b2 * 1500:,.0f}"`** to a 1,500 sq. ft house, but **$`{python} f"{b1 + 2 * b2 * 3000:,.0f}"`** to a 3,000 sq. ft one.
+-   Check the curve stays sensible over the range of your data — never extrapolate a quadratic beyond it.
 
-Model B has the lowest AIC, Model A has the highest AIC, and Model C is in between. Model B would be chosen as the best predictive model.
+## Key takeaways {.scrollable}
 
-Note: 'df' here represents the number of independent variable + 2.
+::: {.tight}
+1. **Session 2** — describe before you model: centre, spread, shape; median and IQR when the data are skewed
+2. **Session 3** — a slope is a sentence with units; then check adequacy, validity and robustness
+3. **Session 4** — for a category: log-odds → $e^{b}$ for odds → $e^{xb}/(1+e^{xb})$ for probabilities
+4. **Session 5** — with many predictors, let a penalty choose; the elastic net is the default
+5. **Panels** — fixed effects use only within-entity change; the Hausman test chooses FE or RE
+6. **Interactions** — `a * b` gives a slope per group; read the slopes, not the coefficients alone
+7. **Squared terms** — `I(x**2)` lets an effect accelerate or level off
 :::
-
-## Lower AIC is better. The comparison only makes sense on the same rows. (cont.) {#imported-s06-027 .scrollable}
-
-#### 3.2 Comparing models for TSCS {#3-2-comparing-models-for-tscs}
-
-::: panel-tabset
-### Nested models
-
-```{python}
-#| echo: true
-
-# An F-test for nested models: does B earn its extra terms over A?
-print(model_b.compare_f_test(model_a))
-```
-
-### Non-nested models
-
-```{python}
-#| echo: true
-
-# Non-nested models are compared on information criteria, not an F-test
-print(f"AIC  B {model_b.aic:.1f}   C {model_c.aic:.1f}")
-```
-:::
-
-## Automatic model selection {#imported-s06-028 .scrollable}
-
-::::::: panel-tabset
-### Context
-
-In many applications there are **many possible independent variables** from which to build a model.
-
-> Finding a good model becomes quite time consuming.
-
-If we want to consider quadratic effects, interactions, etc., then this becomes an even more burdensome task.
-
-A best predictive model (in linear regression) is **one that performs best at predicting the dependent variable for data that have not been observed yet** (called **out-of-sample prediction**).
-
-Models that have **too many independent variable in them will tend to perform well with the data at hand, but much poorer for future observations**.
-
-> This phenomenon is called **overfitting**.
-
-### Principles
-
-To **prevent overfitting**, we should choose the **independent variables that provide strong predictive power, and remove the independent variables that are poor**.
-
-To do this, we scan many potential models built upon various subsets of the independent variable, and choose the best model among all of them.
-
-We will use AIC as the measure to make this determination.
-
-### Stepwise
-
-::: pull-left
-One approach to build a best predictive model from many potential independent variable is through an approach called **stepwise regression**.
-
-One approach is **backward stepwise regression:**
-
-> start with the largest model (the model with all possible independent variable) and iteratively remove the worst predictor, one at a time, until all of the remaining independent variable provide explanatory power.
-:::
-
-::: pull-right
-1.  Start with the model with all independent variable.
-
-2.  Consider all models with one fewer predictor.
-
-3.  For each model, calculate AIC.
-
-4.  'Step' to the model with one fewer predictor that has the lowest AIC (if lower than the current model).
-
-5.  Iterate steps 2-4 until no more variables can be removed to improve AIC.
-:::
-
-### Code
-
-R prints out all of the steps in the backward stepwise command. This is just the first step:
-
-```{python}
-#| echo: true
-
-# Python has no step(); choose among candidates explicitly.
-predictors = ["living_area", "bedrooms", "bathrooms", "year", "garage"]
-for k in range(1, len(predictors) + 1):
-    formula = "price ~ " + " + ".join(predictors[:k])
-    m = smf.ols(formula, data=re_data).fit()
-    print(f"AIC {m.aic:10.1f}   {formula}")
-```
-
-::: pull-left
-![](imported-assets/figures/stepwise1.png){style="display: block; margin: auto;" width="80%"}
-:::
-
-::: pull-right
-![](imported-assets/figures/stepwise2.png){style="display: block; margin: auto;" width="80%"}
-:::
-:::::::
-
-## Python has no step(); choose among candidates explicitly. (cont.) {#imported-s06-029 .scrollable}
-
-::: panel-tabset
-### Results
-
-Here the best predictive model (of those considered) is the model with Living.area, bedrooms, and bathrooms as independent variables.
-
-> This approach does not perform an exhaustive search: there could be a model with a lower AIC that was never considered. But the resulting model is a good one.
-
-Note: the model with the lowest AIC is not guaranteed to be the best predictive model, but it is likely to be pretty close.
-
-There are **2 situations** in which automatic variable selection is typically used:
-
--   A final best predictive model is built from a **long' list of potential independent variables** (like performed here with the real estate data).
-
--   A single variable is of interest (like the effect of gender in the pay data set) and you want to build a model to control for all possible **confounders**. A best model is built from all of the other independent variables, and then gender is added to see if its effect is significant.
-
-### Principles
-
-When you perform **automatic stepwise regression**, you should report model estimates and \\(R\^2\\).
-
--   You should **not report** the \\(p-values\\) from the regression output table.
-
-This is a very subtle issue: we have considered many models so \\(p-values\\) lose their interpretation.
-
-This is related to the idea of **p-hacking**:
-
--   searching through many independent variables and only reporting the significant ones.
-:::
-
-## Conclusion {#imported-s06-030 .scrollable}
-
-## Conclusion {#imported-s06-031 .scrollable}
-
-In 5 sessions, we have covered all the relevant information and most important information to understand at 100% a table like this one:
-
-![](imported-assets/figures/regression1.png){style="display: block; margin: auto;" width="100%"}
-
 
 ## Before the next session {.scrollable}
 
