@@ -3,9 +3,18 @@
 
 ## The script, to copy {.scrollable}
 
-In VS Codium: **File → New File…** → *Python File*, paste, **save it inside the
-`quantitative-methods` folder** (for example as `r2.py`), and press **Run** ▷. It is the same
-file as `02-practice/starter/r2_amsili_2024.py`.
+::::::: panel-tabset
+### Get the file
+
+The whole script is one file: **[view it on GitHub](https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/starter/r2_amsili_2024.py)** or
+**[download it](https://raw.githubusercontent.com/warint/quantitative-methods/main/07-replication-workshop/02-practice/starter/r2_amsili_2024.py)** (right-click → *Save link as…*). It is the same file as
+`02-practice/starter/r2_amsili_2024.py`.
+
+Or build it by hand: in VS Codium, **File → New File…** → *Python File*, then paste the
+parts in the next tabs **in order**, one under the other. **Save it inside the
+`quantitative-methods` folder** (for example as `r2.py`), and press **Run** ▷.
+
+### Lines 1–18
 
 ```python
 """
@@ -26,7 +35,11 @@ those, read the output, and compare it with "You should see" in the guide.
 from pathlib import Path
 import os
 import sys
+```
 
+### Lines 20–36
+
+```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -44,7 +57,11 @@ import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
 DATA = "03-regression-adequacy-and-validity/data/replication/2015-2019_CompleteAWC_w.1and15bar_dataset_toshare.xlsx"
+```
 
+### Lines 38–49
+
+```python
 # Step 1 · Load the data (the first sheet is metadata; the data are on the second)
 sheets = pd.ExcelFile(DATA).sheet_names
 print(sheets)
@@ -57,7 +74,11 @@ print("missing values:", d.isna().sum().sum(), "| samples with SOM > 10%:", (d["
 for c in ["sand", "clay", "SOM"]:
     d[c + "_g"] = d[c] / 100
 print(d[["sand_g", "clay_g", "SOM_g", "FC_10kPa"]].head(3).round(3))
+```
 
+### Lines 51–62
+
+```python
 # Step 3 · Fit the paper's MLR: sand, clay, SOM and their three pairwise products
 formula = "FC_10kPa ~ sand_g + clay_g + SOM_g + sand_g:clay_g + sand_g:SOM_g + clay_g:SOM_g"
 fit = smf.ols(formula, data=d).fit()
@@ -70,7 +91,11 @@ rmse = np.sqrt(np.mean(fit.resid ** 2))
 print(f"adj. R2 = {fit.rsquared_adj:.3f}  (paper: 0.79)")
 print(f"RMSE    = {rmse:.4f} g/g  (paper MLR: 0.043; paper Full RF: 0.036)")
 print(f"n = {int(fit.nobs)}, parameters p = {int(fit.df_model) + 1}")
+```
 
+### Lines 64–72
+
+```python
 # Step 5 · Residuals versus fitted: is the line the right shape?
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.scatter(fit.fittedvalues, fit.resid, s=4, alpha=0.3)
@@ -80,7 +105,11 @@ plt.savefig(OUTPUT / "s03_resid_vs_fitted.png", dpi=110, bbox_inches="tight")
 # Mean and spread of the residuals in five bands of fitted value (1 = lowest fifth)
 band = np.digitize(fit.fittedvalues, fit.fittedvalues.quantile([0.2, 0.4, 0.6, 0.8])) + 1
 print(fit.resid.groupby(band).agg(["mean", "std"]).round(4))
+```
 
+### Lines 74–84
+
+```python
 # Step 6 · Scale-location: is the spread constant, and do robust (HC1) errors change a verdict?
 infl = fit.get_influence()
 std_resid = infl.resid_studentized_internal
@@ -92,7 +121,11 @@ print("corr(fitted, sqrt|std resid|) =", round(np.corrcoef(fit.fittedvalues, np.
 robust = smf.ols(formula, data=d).fit(cov_type="HC1")
 print(pd.DataFrame({"coef": fit.params, "SE classical": fit.bse, "SE HC1": robust.bse,
                     "p classical": fit.pvalues, "p HC1": robust.pvalues}).round(4))
+```
 
+### Lines 86–100
+
+```python
 # Step 7 · Leverage: which soils sit far from the others in (sand, clay, SOM) space?
 h = infl.hat_matrix_diag
 p, n = int(fit.df_model) + 1, int(fit.nobs)
@@ -108,7 +141,11 @@ ax.axhline(4 / n, color="red", ls="--")
 ax.set_xlabel("Observation"); ax.set_ylabel("Cook's distance")
 plt.savefig(OUTPUT / "s03_cooks_distance.png", dpi=110, bbox_inches="tight")
 print(f"largest Cook's D {cooks_d.max():.4f}; above 4/n ({4/n:.5f}): {(cooks_d > 4/n).sum()} rows")
+```
 
+### Lines 102–118
+
+```python
 # Step 9 · Look at the tallest spike, then refit without it (a sensitivity check, not a deletion)
 i = cooks_d.argmax()
 print(d.iloc[i][["State", "soil_texture_class", "sand", "clay", "SOM", "FC_10kPa", "PWP_1500kPa"]])
@@ -127,6 +164,7 @@ ic = pd.DataFrame({"k": [int(m.df_model) + 1 for m in (main, fit)],
 ic["dAIC"], ic["dBIC"] = ic.AIC - ic.AIC.min(), ic.BIC - ic.BIC.min()
 print(ic.round(4).to_string())
 ```
+:::::::
 
 ## The solutions, step by step {.scrollable}
 
@@ -217,12 +255,11 @@ print(f"RMSE    = {rmse:.4f} g/g  (paper MLR: 0.043; paper Full RF: 0.036)")
 print(f"n = {int(fit.nobs)}, parameters p = {int(fit.df_model) + 1}")
 ```
 
-### 5
+### 5 · code
 
 **Step 5 · Residuals versus fitted: is the line the right shape?**
 
-```{python}
-#| echo: true
+```python
 # Step 5 · Residuals versus fitted: is the line the right shape?
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.scatter(fit.fittedvalues, fit.resid, s=4, alpha=0.3)
@@ -234,12 +271,49 @@ band = np.digitize(fit.fittedvalues, fit.fittedvalues.quantile([0.2, 0.4, 0.6, 0
 print(fit.resid.groupby(band).agg(["mean", "std"]).round(4))
 ```
 
-### 6
+### 5 · result
+
+**Step 5 · Residuals versus fitted: is the line the right shape?** — what it prints
+
+```{python}
+#| echo: false
+#| layout-ncol: 2
+# Step 5 · Residuals versus fitted: is the line the right shape?
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(fit.fittedvalues, fit.resid, s=4, alpha=0.3)
+ax.axhline(0, color="red", ls="--")
+ax.set_xlabel("Fitted field capacity (g/g)"); ax.set_ylabel("Residual (g/g)")
+plt.savefig(OUTPUT / "s03_resid_vs_fitted.png", dpi=110, bbox_inches="tight")
+# Mean and spread of the residuals in five bands of fitted value (1 = lowest fifth)
+band = np.digitize(fit.fittedvalues, fit.fittedvalues.quantile([0.2, 0.4, 0.6, 0.8])) + 1
+print(fit.resid.groupby(band).agg(["mean", "std"]).round(4))
+```
+
+### 6 · code
 
 **Step 6 · Scale-location: is the spread constant, and do robust (HC1) errors change a verdict?**
 
+```python
+# Step 6 · Scale-location: is the spread constant, and do robust (HC1) errors change a verdict?
+infl = fit.get_influence()
+std_resid = infl.resid_studentized_internal
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(fit.fittedvalues, np.sqrt(np.abs(std_resid)), s=4, alpha=0.3)
+ax.set_xlabel("Fitted field capacity (g/g)"); ax.set_ylabel("sqrt(|standardised residual|)")
+plt.savefig(OUTPUT / "s03_scale_location.png", dpi=110, bbox_inches="tight")
+print("corr(fitted, sqrt|std resid|) =", round(np.corrcoef(fit.fittedvalues, np.sqrt(np.abs(std_resid)))[0, 1], 3))
+robust = smf.ols(formula, data=d).fit(cov_type="HC1")
+print(pd.DataFrame({"coef": fit.params, "SE classical": fit.bse, "SE HC1": robust.bse,
+                    "p classical": fit.pvalues, "p HC1": robust.pvalues}).round(4))
+```
+
+### 6 · result
+
+**Step 6 · Scale-location: is the spread constant, and do robust (HC1) errors change a verdict?** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
+#| layout-ncol: 2
 # Step 6 · Scale-location: is the spread constant, and do robust (HC1) errors change a verdict?
 infl = fit.get_influence()
 std_resid = infl.resid_studentized_internal
@@ -267,12 +341,28 @@ print(d.loc[h > 2*p/n, "soil_texture_class"].value_counts().head(5))
 print(d.iloc[np.argsort(h)[-3:]][["soil_texture_class", "sand", "clay", "SOM", "FC_10kPa"]].round(2))
 ```
 
-### 8
+### 8 · code
 
 **Step 8 · Cook's distance: which rows move the answer?**
 
+```python
+# Step 8 · Cook's distance: which rows move the answer?
+cooks_d = infl.cooks_distance[0]
+fig, ax = plt.subplots(figsize=(8, 3.5))
+ax.stem(cooks_d, markerfmt=",")
+ax.axhline(4 / n, color="red", ls="--")
+ax.set_xlabel("Observation"); ax.set_ylabel("Cook's distance")
+plt.savefig(OUTPUT / "s03_cooks_distance.png", dpi=110, bbox_inches="tight")
+print(f"largest Cook's D {cooks_d.max():.4f}; above 4/n ({4/n:.5f}): {(cooks_d > 4/n).sum()} rows")
+```
+
+### 8 · result
+
+**Step 8 · Cook's distance: which rows move the answer?** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
+#| layout-ncol: 2
 # Step 8 · Cook's distance: which rows move the answer?
 cooks_d = infl.cooks_distance[0]
 fig, ax = plt.subplots(figsize=(8, 3.5))

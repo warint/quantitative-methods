@@ -21,7 +21,7 @@ Write on the board: *"OLS is the best linear unbiased estimator."* Then: *"today
 | Minutes | |
 |---|---|
 | **0–06** | The hook and the Gauss–Markov callback. |
-| **06–32** | Ridge, by picture: the two archers, the dial, then the wobbling-coefficients scatter — two correlated predictors, OLS spread along the diagonal, ridge tight. The closed form and the SVD reading are in chapter 5; point there rather than derive. |
+| **06–32** | Ridge, by picture: OLS against ridge over 1,000 samples and the bias–variance U, the dial, then the wobbling-coefficients scatter — two correlated predictors, OLS spread along the diagonal, ridge tight. The closed form and the SVD reading are in chapter 5; point there rather than derive. |
 | **32–52** | Lasso. Draw the diamond and the ellipse. The corner argument. Then contrast with the smooth $\ell_2$ ball — no corners, no zeros. |
 | **52–70** | Soft-thresholding as a rule, not a derivation: the "how hard it pushes" picture, then the dead-zone plot, then $S_\lambda(\rho) = \mathrm{sign}(\rho)(|\rho|-\lambda)_+$ read aloud in words. Work the example by hand. The subgradient derivation is in chapter 5. |
 | **70–82** | Elastic net. Strict convexity, the grouping effect, why it matters for macro panels where a dozen series measure one construct. |

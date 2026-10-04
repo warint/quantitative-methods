@@ -4,6 +4,8 @@ subtitle: "After the course · for self-study · not examined"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session7_cours/"
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -19,6 +21,8 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px !important;width:auto !important;max-width:100% !important;object-fit:contain;}</style>"
     footer: "MATH60033A · Session 13 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -145,7 +149,8 @@ assumed.
 ::::: panel-tabset
 ### Steps
 
-::: pull-left
+:::: columns
+::: {.column width="45%"}
 1.  Gathering data
 
 2.  Pre-processing
@@ -161,9 +166,10 @@ assumed.
 7.  Out-of-sample Prediction
 :::
 
-::: pull-right
+::: {.column width="55%"}
 ![](economist-assets/cross-validation.png){style="display: block; margin: auto;" width="100%"}
 :::
+::::
 
 ### Theory
 
@@ -259,13 +265,15 @@ Thanks to this ordering of components, it is made possible **to retain only a fe
 
 ### Visuals
 
-::: pull-left
-![](economist-assets/pca-axes.png){style="display: block; margin: auto;" width="88%"}
+:::: columns
+::: {.column width="50%"}
+![](economist-assets/pca-axes.png){style="display: block; margin: auto;" width="100%"}
 :::
 
-::: pull-right
-![](economist-assets/pca-biplot.png){style="display: block; margin: auto;" width="88%"}
+::: {.column width="50%"}
+![](economist-assets/pca-biplot.png){style="display: block; margin: auto;" width="100%"}
 :::
+::::
 :::::
 
 ## Mathematical Model --- Maximize variance of the new components {#imported-s07-018 .scrollable}
@@ -650,13 +658,11 @@ data.head()
 # How many factors? The scree plot is the eigenvalues of the correlation
 # matrix, largest first — no model has to be fitted to draw it.
 ev = np.linalg.eigvalsh(np.corrcoef(z.to_numpy(), rowvar=False))[::-1]
-
-plt.figure(figsize=(7, 3.6))
+plt.figure(figsize=(7, 2.6))
 plt.plot(range(1, len(ev) + 1), ev, "o-")
 plt.axhline(1, color="red", ls="--")   # Kaiser: keep eigenvalues above 1
 plt.xlabel("Factor"); plt.ylabel("Eigenvalue")
 plt.tight_layout(); plt.show()
-
 print(f"Kaiser keeps {(ev > 1).sum()} factors; the elbow is nearer 3.")
 print("The two rules disagree, which is why the number is argued and not read off.")
 ```

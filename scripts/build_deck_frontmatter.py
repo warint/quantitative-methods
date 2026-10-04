@@ -119,7 +119,7 @@ TOOLKIT = {
     ".predict": ("04", "Read the fit", "fitted probabilities, not classes"),
     ".get_prediction": ("04", "Read the fit", "with an interval, via `.summary_frame()`"),
     ".llf": ("04", "Choose and validate", "log-likelihood, for the LR test"),
-    "np.exp": ("04", "Read the fit", "a log-odds becomes an odds ratio"),
+    "np.exp": ("04", "Read the fit", "log-odds to odds ratio; `.predict` for probabilities"),
     "stats.chi2.sf": ("04", "Choose and validate", "the $p$-value of that test"),
     "pd.get_dummies": ("04", "Load and shape", "categories to indicator columns"),
     "pd.crosstab": ("04", "Describe", "a contingency table in one call"),
@@ -129,7 +129,7 @@ TOOLKIT = {
     # ---- Session 05 · regularisation -------------------------------------
     "StandardScaler": ("05", "Load and shape", "standardise before you penalise"),
     "make_pipeline": ("05", "Load and shape", "so the scaler is fitted on train only"),
-    "Ridge / Lasso / ElasticNet": ("05", "Fit", "the three penalties"),
+    "Ridge / Lasso / ElasticNet": ("05", "Fit", "shrink all · zero the weak · keep twins together"),
     "RidgeCV / LassoCV / ElasticNetCV": ("05", "Choose and validate", "$\\lambda$ by cross-validation"),
     "lasso_path": ("05", "Choose and validate", "the whole coefficient path"),
     "train_test_split": ("05", "Choose and validate", "hold something back"),

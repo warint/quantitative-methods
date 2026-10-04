@@ -4,6 +4,8 @@ subtitle: "Published course presentation · repository edition"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session10_cours/"
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -19,6 +21,8 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;} .reveal .r-stretch{max-height:480px !important;margin-bottom:80px !important;object-fit:contain;}</style>"
     footer: "MATH60033A · Session 10 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -409,6 +413,9 @@ This output provides the estimated influence of each covariate on the likelihood
 
 Using the estimated scores, nearest-neighbor matching without replacement is implemented. This aligns each treated unit with a similar untreated unit based on the estimated propensity score.
 
+::::::: panel-tabset
+### The code
+
 ::::: cell
 ::: {#cb9 .sourceCode .cell-code}
 ``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
@@ -422,6 +429,9 @@ matched = pd.concat([treated, control.iloc[idx.ravel()]])
 print(f"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct controls")
 ```
 :::
+:::::
+
+### Before matching
 
 ::: {.cell-output .cell-output-stdout}
     Call:
@@ -439,7 +449,11 @@ print(f"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct contr
     age          0.1986
     education    0.1070
     experience   0.2060
+:::
 
+### After matching
+
+::: {.cell-output .cell-output-stdout}
     Summary of Balance for Matched Data:
                Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
     distance          0.3319        0.3288          0.0277     1.0908    0.0035
@@ -459,7 +473,8 @@ print(f"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct contr
     Unmatched     334       0
     Discarded       0       0
 :::
-:::::
+
+:::::::
 
 ## **Interpreting the Balance Table Before Matching** {#imported-s10-041 .scrollable}
 
@@ -623,6 +638,8 @@ plt.suptitle(""); plt.title("Before matching: age"); plt.show()
 
 ## **Step 6. Covariate balance assessment (continued)** {#imported-s10-054 .scrollable}
 
+Other diagnostic visuals include mirrored histograms or the "love plot" from the cobalt package, though the exercise here focuses on PSAgraphics.
+
 :::: cell
 ::: {#cb14 .sourceCode .cell-code}
 ``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
@@ -633,8 +650,6 @@ plt.suptitle(""); plt.title("After matching: age"); plt.show()
 ::::
 
 ![](imported-assets/index_files/figure-revealjs/unnamed-chunk-9-1.png){.r-stretch width="960"}
-
-Other diagnostic visuals include mirrored histograms or the "love plot" from the cobalt package, though the exercise here focuses on PSAgraphics.
 
 ## **Step 4. Estimating the treatment effect on the matched sample** {#imported-s10-055 .scrollable}
 

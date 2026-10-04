@@ -3,9 +3,18 @@
 
 ## The script, to copy {.scrollable}
 
-In VS Codium: **File → New File…** → *Python File*, paste, **save it inside the
-`quantitative-methods` folder** (for example as `r1.py`), and press **Run** ▷. It is the same
-file as `02-practice/starter/r1_fraiberger_2021.py`.
+::::::: panel-tabset
+### Get the file
+
+The whole script is one file: **[view it on GitHub](https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py)** or
+**[download it](https://raw.githubusercontent.com/warint/quantitative-methods/main/07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py)** (right-click → *Save link as…*). It is the same file as
+`02-practice/starter/r1_fraiberger_2021.py`.
+
+Or build it by hand: in VS Codium, **File → New File…** → *Python File*, then paste the
+parts in the next tabs **in order**, one under the other. **Save it inside the
+`quantitative-methods` folder** (for example as `r1.py`), and press **Run** ▷.
+
+### Lines 1–18
 
 ```python
 """
@@ -26,7 +35,11 @@ those, read the output, and compare it with "You should see" in the guide.
 from pathlib import Path
 import os
 import sys
+```
 
+### Lines 20–35
+
+```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -43,7 +56,11 @@ import pandas as pd
 from scipy import stats
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
+```
 
+### Lines 37–46
+
+```python
 # Step 1 · Load only the columns we need from the authors' regression file
 # The .dta has 119 columns; asking for a subset keeps it fast.
 path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
@@ -54,7 +71,11 @@ cols = ["iso", "DATE", "sent1_best", "returns", "F0_index", "dow2", "dow3", "dow
 d = pd.read_stata(path, columns=cols)
 print("rows, columns:", d.shape)
 print("countries:", d["iso"].nunique(), "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+```
 
+### Lines 48–60
+
+```python
 # Step 2 · What is one row? A country-day, including weekends. Count what is missing.
 d["weekday"] = d["DATE"].dt.dayofweek               # 0 = Monday ... 6 = Sunday
 d["weekend"] = d["weekday"] >= 5
@@ -68,7 +89,11 @@ print(f"n = {n:,}")
 print(f"mean     {s.mean():+.3f}")
 print(f"trim 5%  {stats.trim_mean(s, 0.05):+.3f}")
 print(f"median   {s.median():+.3f}")
+```
 
+### Lines 62–79
+
+```python
 # Step 4 · Spread: standard deviation, IQR, and the empirical rule
 print(f"sd  {s.std(ddof=1):.3f}   IQR  {s.quantile(0.75) - s.quantile(0.25):.3f}"
       f"   min {s.min():.2f}   max {s.max():.2f}")
@@ -87,7 +112,11 @@ def shape(x):
           f"   g2 = {g2:+.3f} (threshold ±{4 * np.sqrt(6 / n):.3f})")
 shape(s)            # the sentiment index
 shape(d["returns"])  # daily returns, for comparison
+```
 
+### Lines 81–89
+
+```python
 # Step 6 · Look at it: histograms of sentiment and of daily returns
 fig, ax = plt.subplots(1, 2, figsize=(10, 4))
 ax[0].hist(s, bins=100)
@@ -97,7 +126,11 @@ ax[1].hist(d["returns"].dropna(), bins=100, range=(-10, 10))
 ax[1].set_xlabel("Daily stock-index return (%), shown from -10 to +10")
 plt.savefig(OUTPUT / "fig_s02_distributions.png", dpi=120)
 plt.close()
+```
 
+### Lines 91–104
+
+```python
 # Step 7 · The simplest return regression: today's return on yesterday's sentiment
 # F0_index is today's return in %; L1_sent1_best is the previous day's sentiment z-score.
 m1 = smf.ols("F0_index ~ L1_sent1_best", data=d).fit(cov_type="HC1")
@@ -112,7 +145,11 @@ rhs = " + ".join(lag_cols) + " + dow2 + dow3 + dow4 + dow5 + C(iso)"
 m2 = smf.ols("F0_index ~ " + rhs, data=dd).fit(cov_type="cluster",
                                                cov_kwds={"groups": dd["DATE"].astype("int64")})
 print(f"slope {m2.params['L1_sent1_best']:.4f}  (se {m2.bse['L1_sent1_best']:.4f})  n = {int(m2.nobs):,}")
+```
 
+### Lines 106–117
+
+```python
 # Step 9 · Add dummies for extreme return days, as the paper does
 # The package does not ship the paper's dummies, so we build them the way 5_figure_1.do defines
 # a "large" move: more than 3 country standard deviations above / below the country mean.
@@ -125,7 +162,11 @@ m3 = smf.ols("F0_index ~ " + rhs + " + big_up + big_down", data=dd).fit(
 print(f"slope {m3.params['L1_sent1_best']:.4f}  (se {m3.bse['L1_sent1_best']:.4f})"
       f"  big_up {m3.params['big_up']:.2f}  big_down {m3.params['big_down']:.2f}")
 print("days flagged:", dd["big_up"].sum(), "up,", dd["big_down"].sum(), "down")
+```
 
+### Lines 119–124
+
+```python
 # Step 10 · Compare with the number the authors published (results/figure_2b.csv, column 1)
 print(pd.DataFrame({
     "slope on L1 sentiment": [m1.params["L1_sent1_best"], m2.params["L1_sent1_best"],
@@ -133,6 +174,7 @@ print(pd.DataFrame({
     "n": [int(m1.nobs), int(m2.nobs), int(m3.nobs), 102665]},
     index=["(7) simple", "(8) + FE and lags", "(9) + extreme-day dummies", "paper, Fig. 2B h=0"]).round(3))
 ```
+:::::::
 
 ## The solutions, step by step {.scrollable}
 

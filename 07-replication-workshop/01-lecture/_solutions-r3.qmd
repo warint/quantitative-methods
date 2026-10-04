@@ -3,9 +3,18 @@
 
 ## The script, to copy {.scrollable}
 
-In VS Codium: **File → New File…** → *Python File*, paste, **save it inside the
-`quantitative-methods` folder** (for example as `r3.py`), and press **Run** ▷. It is the same
-file as `02-practice/starter/r3_saganowski_2019.py`.
+::::::: panel-tabset
+### Get the file
+
+The whole script is one file: **[view it on GitHub](https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/starter/r3_saganowski_2019.py)** or
+**[download it](https://raw.githubusercontent.com/warint/quantitative-methods/main/07-replication-workshop/02-practice/starter/r3_saganowski_2019.py)** (right-click → *Save link as…*). It is the same file as
+`02-practice/starter/r3_saganowski_2019.py`.
+
+Or build it by hand: in VS Codium, **File → New File…** → *Python File*, then paste the
+parts in the next tabs **in order**, one under the other. **Save it inside the
+`quantitative-methods` folder** (for example as `r3.py`), and press **Run** ▷.
+
+### Lines 1–18
 
 ```python
 """
@@ -26,7 +35,11 @@ those, read the output, and compare it with "You should see" in the guide.
 from pathlib import Path
 import os
 import sys
+```
 
+### Lines 20–36
+
+```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -44,7 +57,11 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from scipy import stats
+```
 
+### Lines 38–46
+
+```python
 FOLDER = "04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
 FILE = FOLDER + "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.{}.csv"
 
@@ -54,7 +71,11 @@ test = pd.read_csv(FILE.format(2))
 print("train", train.shape, "| test", test.shape)
 print(pd.concat([train["event_type"].value_counts(), test["event_type"].value_counts()],
                 axis=1, keys=["train", "test"]))
+```
 
+### Lines 48–59
+
+```python
 # Step 2 · Five features in units a person can read, and a 0/1 outcome
 def features(df):
     return pd.DataFrame({
@@ -67,7 +88,11 @@ def features(df):
         "net_leadership": df["g1_network_leadership"] * 100})  # network centralisation, in points
 tr, te = features(train), features(test)
 print(tr.groupby("event")[["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]].median().round(2))
+```
 
+### Lines 61–73
+
+```python
 # Step 3 · Binary logit: does the group dissolve in the next week?
 full = smf.logit("dissolve ~ log2_size + avg_degree + aging + net_density + net_leadership", data=tr).fit(disp=0)
 print(full.summary().tables[1])
@@ -81,7 +106,11 @@ cases["log2_size"] = [2, 4]                            # 2**2 = 4 members, 2**4 
 pred = full.get_prediction(cases).summary_frame()
 pred.index = ["4 members", "16 members"]
 print(pred.round(3))
+```
 
+### Lines 75–85
+
+```python
 # Step 5 · Likelihood-ratio test: do the paper's three top-ranked features (Table F) add anything?
 small = smf.logit("dissolve ~ log2_size + avg_degree", data=tr).fit(disp=0)
 lr = 2 * (full.llf - small.llf)
@@ -93,7 +122,11 @@ p_test = full.predict(te)
 acc = ((p_test > 0.5).astype(int) == te["dissolve"]).mean()
 base = 1 - te["dissolve"].mean()                       # always say "does not dissolve"
 print(f"logit accuracy {acc:.3f} | base rate {base:.3f} | groups flagged as dissolving: {(p_test > 0.5).sum()} of {len(te)}")
+```
 
+### Lines 87–96
+
+```python
 # Step 7 · Multinomial logit over all six events, baseline = dissolving
 order = ["dissolving", "shrinking", "growing", "continuing", "merging", "splitting"]
 X_cols = ["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]
@@ -104,7 +137,11 @@ odds = np.exp(mn.params)
 odds.columns = order[1:]
 print("odds ratios, each event versus dissolving:")
 print(odds.round(3))
+```
 
+### Lines 98–116
+
+```python
 # Step 8 · LR test for the same three features, now in the multinomial (3 features x 5 equations)
 mn_small = sm.MNLogit(y_tr, sm.add_constant(tr[["log2_size", "avg_degree"]])).fit(disp=0, maxiter=200)
 lr_mn = 2 * (mn.llf - mn_small.llf)
@@ -124,7 +161,11 @@ for k in order:
     f[k] = float(2 * prec * rec / (prec + rec)) if prec + rec > 0 else 0.0
 print("F-measure by event:", {k: round(v, 3) for k, v in f.items()})
 print(f"accuracy {(guess == truth).mean():.3f} | base rate {(truth == 'dissolving').mean():.3f} | average F {np.mean(list(f.values())):.3f}")
+```
 
+### Lines 118–132
+
+```python
 # Step 10 · Picture: predicted probability of each event as the group grows
 grid = pd.DataFrame([typical] * 50)
 grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
@@ -141,6 +182,7 @@ plt.tight_layout()
 plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150)
 print("saved", OUTPUT / "s04_event_probabilities.png")
 ```
+:::::::
 
 ## The solutions, step by step {.scrollable}
 
@@ -320,12 +362,34 @@ print("F-measure by event:", {k: round(v, 3) for k, v in f.items()})
 print(f"accuracy {(guess == truth).mean():.3f} | base rate {(truth == 'dissolving').mean():.3f} | average F {np.mean(list(f.values())):.3f}")
 ```
 
-### 10
+### 10 · code
 
 **Step 10 · Picture: predicted probability of each event as the group grows**
 
+```python
+# Step 10 · Picture: predicted probability of each event as the group grows
+grid = pd.DataFrame([typical] * 50)
+grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
+curves = np.asarray(mn.predict(sm.add_constant(grid[X_cols], has_constant="add")))
+fig, ax = plt.subplots(figsize=(7, 4))
+for j, name in enumerate(order):
+    ax.plot(2 ** grid["log2_size"], curves[:, j], label=name)
+ax.set_xscale("log", base=2)
+ax.set_xlabel("group size (members, log scale)")
+ax.set_ylabel("predicted probability")
+ax.set_title("IrvineMessages, weekly windows: what happens next, by group size")
+ax.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150)
+print("saved", OUTPUT / "s04_event_probabilities.png")
+```
+
+### 10 · result
+
+**Step 10 · Picture: predicted probability of each event as the group grows** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
 # Step 10 · Picture: predicted probability of each event as the group grows
 grid = pd.DataFrame([typical] * 50)
 grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
