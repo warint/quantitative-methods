@@ -363,28 +363,59 @@ The logistic regression model can be estimated by the method of **maximum likeli
 
 -   [\\(b_1\\)]{.math .inline} is the estimate of [\\(\\beta_1\\)]{.math .inline}.
 
-### LR 6
+### LR 6 · Log-odds
 
-For our loan default data, the R output from estimating a logistic regression is as follows:
+For our loan default data, the logistic regression in Python:
 
+```{python}
+#| echo: true
 
-### LR 7
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("default ~ fico", data=loans).fit(disp=0)
+m2.params.round(4)
+```
 
-Using the R output, the estimated equation for the probability of a loan default is:
+The estimated equation, on the **log-odds** scale:
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 x)}} \\\]]{.math .display}
+$$
+\ln\left(\frac{p}{1-p}\right) = 6.719 - 0.0119\,\text{fico}
+$$
 
-With this equation we can predict probability of loan default for any FICO score [\\(x\\)]{.math .inline}.
+One more FICO point lowers the log-odds of default by 0.0119. True, but hard to picture — so we convert.
 
-### LR 8
+### LR 7 · Odds
 
--   Using the estimated equation, if someone's FICO score is 600 the probability of default is:
+Exponentiate the coefficient to get the **odds ratio**:
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 \\times 600)}} = 0.38 \\\]]{.math .display}
+```{python}
+#| echo: true
 
--   If someone's FICO score is 850 the probability of default is:
+# Log-odds -> odds ratio: take the exponential of each coefficient
+np.exp(m2.params["fico"]).round(4)
+```
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 \\times 850)}} = 0.03 \\\]]{.math .display}
+-   $e^{-0.0119} = 0.988$: each extra FICO point multiplies the odds of default by 0.988 — the odds are about **1.2% lower**, ceteris paribus.
+-   Over 100 points: $e^{100 \times (-0.0119)} = 0.305$ — the odds of default are about **70% lower**.
+
+### LR 8 · Predicted probability
+
+Odds are not probabilities. For a probability, put the **whole** linear predictor $b_0 + b_1 x$ through the logistic function:
+
+$$
+p = \frac{e^{b_0 + b_1 x}}{1 + e^{b_0 + b_1 x}}
+$$
+
+-   FICO 600: $b_0 + b_1 x = 6.719 - 0.011877 \times 600 = -0.407$, so $p = \dfrac{e^{-0.407}}{1 + e^{-0.407}} = 0.40$
+-   FICO 850: $6.719 - 0.011877 \times 850 = -3.377$, so $p = \dfrac{e^{-3.377}}{1 + e^{-3.377}} = 0.03$
+
+```{python}
+#| echo: true
+
+# predict() does the same calculation for you
+m2.predict(pd.DataFrame({"fico": [600, 700, 850]})).round(3)
+```
+
+With this equation we can predict the probability of default for any FICO score — and, unlike the linear model, it can never fall below 0 or rise above 1.
 
 ### LR 9
 
@@ -741,7 +772,16 @@ The first three rows are the $\beta$s, in log-odds. The last two are the cutpoin
 
 ### OLR 4 · Log-odds → odds
 
-The coefficients are **log-odds**. Exponentiate them to get **proportional-odds ratios**:
+The coefficients are **log-odds** — here, of being in a higher category:
+
+```{python}
+#| echo: true
+
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+om.params[["pared", "public", "gpa"]].round(3)
+```
+
+Exponentiate them to get **proportional-odds ratios**:
 
 ```{python}
 #| echo: true
@@ -856,6 +896,13 @@ print(mn.summary())
 ### MLR 4 · Log-odds → relative risk ratios
 
 The coefficients are **log-odds relative to the baseline**:
+
+```{python}
+#| echo: true
+
+# Log-odds. Column 0 is general vs academic; column 1 is vocation vs academic
+mn.params.round(3)
+```
 
 -   $b_{13} = -0.058$: one more writing point lowers the log-odds of general vs academic by 0.058.
 
