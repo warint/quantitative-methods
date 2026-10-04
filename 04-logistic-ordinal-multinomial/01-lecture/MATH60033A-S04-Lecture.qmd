@@ -21,6 +21,8 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: "<style>.reveal .cell-output-display img{max-height:400px;width:auto;max-width:100%;}</style>"
     footer: "MATH60033A · Session 04 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -218,7 +220,7 @@ import statsmodels.formula.api as smf
 
 # The linear probability model: a straight line through 0/1 outcomes
 m1 = smf.ols("default ~ fico", data=loans).fit()
-print(m1.summary())
+print(m1.summary().tables[1])          # the coefficient table
 ```
 
 ### 5
@@ -473,29 +475,21 @@ $$
 predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
               "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
 
-w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit()
+w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit(disp=0)
 print(w1.summary())
 ```
 
 ### Wine 4 · Log-odds → odds
 
-The coefficients are **log-odds**:
+The coefficients are **log-odds**; exponentiate them to get **odds ratios**:
 
 ```{python}
 #| echo: true
 
-# Log-odds: the coefficients as fitted
-w1.params.round(3)
-```
-
-Exponentiate them to get **odds ratios**:
-
-```{python}
-#| echo: true
-
-# Odds ratios: above 1 raises the odds, below 1 lowers them.
-# The intercept is left out: e^b0 is the odds when every predictor is zero.
-np.exp(w1.params.drop("Intercept")).round(3)
+# Log-odds as fitted, and their exponentials. Above 1 raises the odds, below 1
+# lowers them. The intercept is left out: e^b0 is the odds when all x are zero.
+b = w1.params.drop("Intercept")
+pd.DataFrame({"log-odds": b, "odds ratio": np.exp(b)}).round(3)
 ```
 
 -   Alcohol: $b = 0.782$, $e^{0.782} = 2.19$. "A one-point increase in alcohol content multiplies the odds of a good rating by 2.19 — 119% higher — ceteris paribus."
@@ -569,13 +563,10 @@ $$
 #| echo: true
 
 from statsmodels.miscmodels.ordinal_model import OrderedModel
-
-# Keep the order — "unlikely" < "somewhat likely" < "very likely".
-# An ordinal model needs the ordering, not just the labels.
+# Keep the order: unlikely < somewhat likely < very likely
 order = ["unlikely", "somewhat likely", "very likely"]
 dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
 
-# One slope per predictor and two cutpoints, not three separate models.
 om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
                   distr="logit").fit(method="bfgs", disp=0)
 print(om.summary())
@@ -685,11 +676,7 @@ $$
 #| echo: true
 
 import statsmodels.api as sm
-
-# The first level of a Categorical becomes code 0, and MNLogit uses code 0 as
-# the baseline, so every coefficient below reads "relative to academic".
-# Reorder this list and every number changes meaning, with nothing in the
-# output to warn you.
+# Code 0 (academic) is the baseline: every coefficient reads "relative to academic"
 levels = ["academic", "general", "vocation"]
 ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
 
@@ -697,42 +684,27 @@ ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
 X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_middle", "ses_high"]].astype(float)
 X["write"] = ml["write"].astype(float)
 X = sm.add_constant(X)
-
-# MNLogit estimates J-1 sets of coefficients at once — here two, each against
-# the academic baseline.
+# Two sets of coefficients at once, each against the academic baseline
 mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
-print(mn.summary())
+print(mn.summary().tables[1])          # the coefficient table
 ```
 
 `prog_c=1` is general vs academic; `prog_c=2` is vocation vs academic. Academic has no block: its coefficients are fixed at zero.
 
 ### MLR 4 · Log-odds → relative risk ratios
 
-The coefficients are **log-odds relative to the baseline**:
+The coefficients are **log-odds relative to the baseline**. Exponentiated, they are **relative risk ratios** (RRR): $e^{b}$ multiplies the ratio $P(\text{category}) / P(\text{academic})$.
 
 ```{python}
 #| echo: true
 
-# Log-odds. Column 0 is general vs academic; column 1 is vocation vs academic
-mn.params.round(3)
+# Log-odds and RRR, for general vs academic and vocation vs academic
+pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1) \
+  .set_axis(["log-odds: general", "log-odds: vocation", "RRR: general", "RRR: vocation"], axis=1).round(3)
 ```
 
--   $b_{13} = -0.058$: one more writing point lowers the log-odds of general vs academic by 0.058.
-
--   $b_{23} = -0.114$: one more writing point lowers the log-odds of vocation vs academic by 0.114.
-
-Exponentiate them. In a multinomial model, $e^{b}$ is called a **relative risk ratio** (RRR): it multiplies the ratio $P(\text{category}) / P(\text{academic})$.
-
-```{python}
-#| echo: true
-
-# Column 0 is general vs academic; column 1 is vocation vs academic
-np.exp(mn.params).round(3)
-```
-
--   `write`: $e^{-0.058} = 0.944$. Each extra point lowers the general-to-academic ratio by 5.6%, ceteris paribus.
-
--   `ses` low → high: $e^{-1.163} = 0.313$ for general vs academic — about a third.
+-   `write`: $b = -0.058$, $e^{-0.058} = 0.944$. Each extra point lowers the general-to-academic ratio by 5.6%, ceteris paribus.
+-   `ses` low → high: $b = -1.163$, $e^{-1.163} = 0.313$ for general vs academic — about a third.
 
 Say "relative to academic" every time.
 
@@ -747,18 +719,15 @@ $$
 ```{python}
 #| echo: true
 
-# A middle-SES student with the average writing score, then middle-SES
-# students across the range of writing scores
+# Middle-SES students: the average writer (52.8), then across the range
 grid = pd.DataFrame({"const": 1.0, "ses_middle": 1.0, "ses_high": 0.0,
                      "write": [52.775, 35, 45, 55, 65]})
 out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["write"])
 out.round(3)
 ```
 
-> A coefficient tells you how one category moves **against the baseline**, not how its own probability moves. Report predicted probabilities alongside the coefficients.
-
 ::: {.muted}
-Every coefficient read in turn, the joint test of SES, the computation by hand, and why $P(\text{general})$ can rise while $b_{13} < 0$: Appendix D.
+A coefficient moves a category **against the baseline**, not its own probability — so report probabilities too. More in Appendix D.
 :::
 :::::::::::::::::::::::::
 
@@ -1205,7 +1174,7 @@ $$
 \ln\left(\frac{P(\text{vocation})}{P(\text{academic})}\right) = 5.218 + 0.291\,\text{middle} - 0.983\,\text{high} - 0.114\,\text{write}
 $$
 
-The header gives the fit of the model as a whole: log-likelihood $-179.98$ against $-204.10$ for the intercept-only model, McFadden's pseudo-$R^2$ = 0.118, and a likelihood-ratio p-value of $10^{-8}$ for all six slopes jointly.
+The header of `print(mn.summary())` gives the fit of the model as a whole: log-likelihood $-179.98$ against $-204.10$ for the intercept-only model, McFadden's pseudo-$R^2$ = 0.118, and a likelihood-ratio p-value of $10^{-8}$ for all six slopes jointly.
 
 ### D3 · Every coefficient
 

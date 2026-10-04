@@ -17,6 +17,8 @@ format:
     width: 1280
     height: 760
     margin: 0.07
+    include-in-header:
+      text: "<style>.reveal .cell-output-display img{max-height:330px;width:auto;max-width:100%;}</style>"
     footer: "Quantitative Methods in International Business · Session 05 · Thierry Warin, PhD · HEC Montréal"
   pptx:
     slide-level: 2
@@ -173,8 +175,7 @@ Magic, but not truth: what any of these methods keeps is *a* set of predictors t
 #| echo: true
 import statsmodels.api as sm
 
-def forward_aic(X, y):
-    """Add whichever predictor lowers AIC most; stop when none does."""
+def forward_aic(X, y):          # add the predictor that lowers AIC most, until none does
     chosen, rest = [], list(X.columns)
     best = sm.OLS(y, np.ones((len(y), 1))).fit().aic        # start: no predictors
     while rest:
@@ -259,7 +260,10 @@ $$
 
 -   $\lambda$ ("lambda") is the **dial**. $\lambda = 0$: plain OLS. $\lambda$ very large: every coefficient is pushed to 0.
 -   A coefficient can stay large only if it **earns it**, by improving the fit by more than it costs.
--   The three methods differ only in how they measure "size":
+
+### Three ways to measure "size"
+
+The three methods differ only in how they measure the size of the coefficients:
 
 | Method | Size of the coefficients | In one phrase |
 |---|---|---|
@@ -333,22 +337,20 @@ firms["exports"] = (10 + 3 * productivity + 2 * size + 1.5 * rd_spending
                     + 1.5 * patents + rng.normal(0, 3, n))
 FEATURES = [c for c in firms.columns if c != "exports"]
 TRUTH = pd.Series([3, 2, 1.5, 1.5, 0, 0, 0], index=FEATURES)
-
-def coefs(model):
-    """Standardise, fit, and return the coefficients, one per predictor."""
-    pipe = make_pipeline(StandardScaler(), model).fit(firms[FEATURES], firms["exports"])
-    return pd.Series(pipe[-1].coef_, index=FEATURES).round(2) + 0.0   # + 0.0 removes "-0.0"
 ```
 
 ### First, plain OLS
 
 ```{python}
 #| echo: true
+def coefs(model):                      # standardise, fit, return the coefficients
+    pipe = make_pipeline(StandardScaler(), model).fit(firms[FEATURES], firms["exports"])
+    return pd.Series(pipe[-1].coef_, index=FEATURES).round(2) + 0.0   # + 0.0 removes "-0.0"
 pd.DataFrame({"truth": TRUTH, "OLS": coefs(LinearRegression())})
 ```
 
 ::: {.warn}
-OLS says **R&D spending lowers exports** (−1.07) and gives patents three times their true weight (4.41). It cannot tell the twins apart, so it splits their joint effect almost at random. And it gives the three useless predictors non-zero effects.
+OLS says **R&D lowers exports** (−1.07) and triples the weight of patents (4.41): it cannot tell the twins apart. And the useless predictors get non-zero effects.
 :::
 
 :::::
@@ -381,8 +383,7 @@ pd.DataFrame({"truth": TRUTH,
               "ridge": coefs(Ridge(alpha=10))})
 ```
 
--   R&D and patents now **share** the effect (1.05 and 1.91): both positive, both close to the truth.
--   The useless predictors are smaller, but **not zero**: ridge kept all seven. (`hq_floor` shows 0.00 only because of rounding: it is −0.003.)
+R&D and patents now **share** the effect (1.05 and 1.91), both positive. The useless predictors are smaller but **not zero** (`hq_floor` is −0.003, not 0): ridge kept all seven.
 
 ### On our data
 
@@ -405,6 +406,8 @@ plt.show()
 ::: {.muted}
 R&D intensity across European countries, the twelve largest OLS coefficients. OLS swings wildly in both directions; ridge keeps the same signs, mostly, at a fraction of the size.
 :::
+
+### The code
 
 ```{python}
 #| echo: true
@@ -447,8 +450,7 @@ pd.DataFrame({"truth": TRUTH,
               "lasso": coefs(Lasso(alpha=0.8))})
 ```
 
--   The three useless predictors are now **exactly 0**. The lasso found them.
--   But it also dropped `rd_spending` and gave its share to `patents` (2.43). A reader of this table would conclude "R&D does not matter, patents do" — the data cannot support that.
+The useless predictors are now **exactly 0**. But the lasso also dropped `rd_spending` and gave its share to `patents` (2.43) — a reader would conclude "R&D does not matter", which the data cannot support.
 
 ### By hand
 
@@ -480,6 +482,8 @@ ax.set_title(f"the lasso kept {len(kept)} of {P} candidates — "
 ax.grid(axis="y", visible=False)
 plt.show()
 ```
+
+### The code
 
 ```{python}
 #| echo: true
@@ -529,22 +533,18 @@ scikit-learn writes the ridge part with an extra factor ½. It changes nothing i
 
 ```{python}
 #| echo: true
-table = pd.DataFrame({"truth": TRUTH,
-                      "OLS":   coefs(LinearRegression()),
-                      "ridge": coefs(Ridge(alpha=10)),
-                      "lasso": coefs(Lasso(alpha=0.8)),
+table = pd.DataFrame({"truth": TRUTH, "OLS": coefs(LinearRegression()),
+                      "ridge": coefs(Ridge(alpha=10)), "lasso": coefs(Lasso(alpha=0.8)),
                       "elastic net": coefs(ElasticNet(alpha=1.0, l1_ratio=0.5))})
 table
 ```
 
--   The useless predictors: **0**, as with the lasso.
--   The twins: **both kept** (0.88 and 1.32), as with ridge.
--   The price: every surviving coefficient is shrunk a little toward zero. That is the bias you accept for a stable, readable model.
+The useless predictors are **0**, as with the lasso; the twins are **both kept** (0.88 and 1.32), as with ridge. The price: every surviving coefficient is shrunk a little toward zero.
 
 ### In one picture
 
 ```{python}
-fig, ax = plt.subplots(figsize=(7.8, 3.4))
+fig, ax = plt.subplots(figsize=(7.8, 2.9))
 cols = ["truth", "OLS", "ridge", "lasso", "elastic net"]
 colors = [CL.ink, CL.warn, CL.good, CL.accent, CL.muted]
 w = .16; pos = np.arange(len(FEATURES))
@@ -563,12 +563,10 @@ Black is the truth. OLS (red) misses most, including a wrong sign on R&D. Ridge 
 
 ### On our data
 
-Five of our real columns measure, in substance, one thing — how much AI a country's firms use. They are twins, five times over.
+Five of our columns all measure how much AI a country's firms use: twins, five times over.
 
 ```{python}
 #| echo: true
-from sklearn.linear_model import ElasticNetCV
-
 GRP = ["ai_use_any", "ai_use_ml", "ai_use_ge3", "ai_text_mining", "ai_image_reco"]
 enet = ElasticNetCV(l1_ratio=0.3, cv=5, random_state=0, max_iter=50_000).fit(Ztr, ytr)
 
@@ -577,7 +575,7 @@ pd.DataFrame({"lasso": lcv.coef_, "elastic net": enet.coef_},
 ```
 
 ::: {.check}
-Count the zeros: the lasso lets one AI measure, `ai_use_any`, speak for the whole family; the elastic net lets three of the five in. A paper should say "AI adoption matters", not "text mining, specifically".
+The lasso keeps one AI measure; the elastic net keeps three of the five. Say "AI adoption matters", not "text mining, specifically".
 :::
 
 :::::
@@ -605,7 +603,7 @@ All three: standardise first, and let cross-validation choose $\lambda$.
 ```{python}
 lc = LassoCV(alphas=np.logspace(-3, 0.2, 60), cv=5, random_state=0, max_iter=50_000).fit(Z, y)
 cv_err = lc.mse_path_.mean(axis=1)
-fig, ax = plt.subplots(figsize=(7.2, 2.8))
+fig, ax = plt.subplots(figsize=(7.2, 2.3))
 ax.semilogx(lc.alphas_, cv_err, color=CL.accent, lw=2.6)
 ax.axvline(lc.alpha_, color=CL.good, ls="--", lw=1.6)
 ax.text(lc.alpha_ * 1.15, cv_err.max() * .8, "the λ that predicts\nheld-out rows best",
@@ -614,7 +612,7 @@ ax.set_xlabel("penalty λ  →"); ax.set_ylabel("error on held-out rows")
 plt.show()
 ```
 
-In the firm example we chose $\lambda$ by hand, to show what each method does. In real work you do not. **Cross-validation** chooses it: hide a fifth of the training rows, fit on the rest, score on the hidden fifth; repeat for each fifth, for every candidate $\lambda$, and keep the one that predicts best. One line:
+In real work you do not choose $\lambda$ by hand. **Cross-validation** does it: hide a fifth of the rows, fit on the rest, score on the hidden fifth; repeat for each fifth and each $\lambda$; keep the best.
 
 ```{python}
 #| echo: true
@@ -623,7 +621,7 @@ LassoCV(cv=5).fit(Z, y).alpha_      # also RidgeCV, ElasticNetCV
 ```
 
 ::: {.muted}
-The practice also asks for the **simplest λ** — the largest one whose error is statistically indistinguishable from the best. It gives a smaller model at no visible cost in accuracy.
+The practice also asks for the **simplest λ**: the largest one whose error is indistinguishable from the best.
 :::
 
 ## Which one predicts best, on our data? {.scrollable}
@@ -861,7 +859,7 @@ for _ in range(S):
     br.append(Ridge(alpha=10).fit(Xs, ys).coef_)
 bo, br = np.array(bo), np.array(br)
 
-fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.5), sharex=True, sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 2.9), sharex=True, sharey=True)
 for ax, B_, c, name in [(axes[0], bo, CL.warn, "OLS"), (axes[1], br, CL.good, "ridge")]:
     ax.scatter(*B_.T, s=8, alpha=.45, color=c)
     ax.scatter(1, 1, marker="+", s=200, color=CL.ink, zorder=5)
@@ -901,13 +899,13 @@ One line per predictor. Blue: the 14 named indicators; grey: the 15 unvetted ser
 ## Appendix B · Why the lasso gives exact zeros {#s05-appendix-b .scrollable}
 
 ::::::: panel-tabset
-### B1 · Why absolute values give zeros
+### B1 · Why zeros
 
 The lasso charges $\lambda \sum_j |\beta_j|$ instead of $\lambda \sum_j \beta_j^2$. Why does that produce coefficients that are **exactly zero**?
 
 ```{python}
 b = np.linspace(-1.5, 1.5, 400)
-fig, axes = plt.subplots(1, 2, figsize=(7.8, 2.9))
+fig, axes = plt.subplots(1, 2, figsize=(7.8, 2.4))
 ax = axes[0]
 ax.plot(b, b**2, color=CL.good, lw=2.4, label=r"ridge: $\beta^2$")
 ax.plot(b, np.abs(b), color=CL.accent, lw=2.4, label=r"lasso: $|\beta|$")
@@ -931,10 +929,10 @@ plt.show()
 Ridge's push weakens as a coefficient gets small, so it never quite gets there. The lasso pushes just as hard at 0.01 as at 1 — so a coefficient that is not **earning its keep** is pushed all the way to zero, and stays there.
 :::
 
-### B2 · The same idea, as budgets
+### B2 · Budgets
 
 ```{python}
-fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.15))
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 2.4))
 bols = np.array([2.4, 0.9])
 A = np.array([[1.0, 0.72], [0.72, 1.0]])
 g = np.linspace(-1.2, 3.6, 320)
@@ -981,13 +979,13 @@ plt.show()
 The ellipses are equal-fit contours around OLS; the shaded shape is what the budget allows. The estimate is where they first touch. The diamond has **corners on the axes**, so the touch point usually has $\beta_2 = 0$. The disc has no corners: both stay nonzero.
 :::
 
-### B3 · The lasso rule, drawn
+### B3 · The rule, drawn
 
 ```{python}
 rho = np.linspace(-1.0, 1.0, 400)
 LAM = 0.30
 soft = np.sign(rho) * np.clip(np.abs(rho) - LAM, 0, None)
-fig, ax = plt.subplots(figsize=(7.0, 2.8))
+fig, ax = plt.subplots(figsize=(7.0, 2.5))
 ax.plot(rho, rho, color=CL.muted, ls="--", lw=1.4)
 ax.text(.45, .9, "no penalty", color=CL.muted, fontsize=8.5)
 ax.plot(rho, soft, color=CL.accent, lw=2.8)
@@ -1004,10 +1002,10 @@ plt.show()
 
 In words: **if the evidence for a variable is weaker than $\lambda$, its coefficient is zero; otherwise, shrink it toward zero by $\lambda$.** This is *soft-thresholding*, $\hat\beta_j = \mathrm{sign}(\rho_j)\,(|\rho_j| - \lambda)_+$. Its derivation is in chapter 5.
 
-### B4 · Coefficient paths, ridge against lasso
+### B4 · Paths
 
 ```{python}
-fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.95), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(7.7, 2.65), sharey=True)
 ax = axes[0]
 for k in range(P):
     aux = XCOLS[k].startswith("aux")
@@ -1032,7 +1030,7 @@ plt.show()
 Blue: the 14 named indicators. Grey: the 15 unvetted auxiliary series. Read left to right: as the penalty rises, ridge squeezes every line toward zero; the lasso switches them off one at a time.
 :::
 
-### B5 · The three budgets
+### B5 · Three budgets
 
 ```{python}
 fig, axes = plt.subplots(1, 3, figsize=(8.2, 3.0))
@@ -1062,7 +1060,7 @@ plt.show()
 #| out-width: 62%
 GRP = ["ai_use_any", "ai_use_ml", "ai_use_ge3", "ai_text_mining", "ai_image_reco"]
 Cm = d[GRP].corr().to_numpy()
-fig, ax = plt.subplots(figsize=(6.6, 3.3))
+fig, ax = plt.subplots(figsize=(6.6, 2.9))
 im = ax.imshow(Cm, cmap="Blues", vmin=0, vmax=1)
 lab = [g.replace("ai_", "") for g in GRP]
 ax.set_xticks(range(5)); ax.set_xticklabels(lab, rotation=35, fontsize=8)
