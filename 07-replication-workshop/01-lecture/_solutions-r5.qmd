@@ -3,9 +3,18 @@
 
 ## The script, to copy {.scrollable}
 
-In VS Codium: **File → New File…** → *Python File*, paste, **save it inside the
-`quantitative-methods` folder** (for example as `r5.py`), and press **Run** ▷. It is the same
-file as `02-practice/starter/r5_topalova_khandelwal_2011.py`.
+::::::: panel-tabset
+### Get the file
+
+The whole script is one file: **[view it on GitHub](https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/starter/r5_topalova_khandelwal_2011.py)** or
+**[download it](https://raw.githubusercontent.com/warint/quantitative-methods/main/07-replication-workshop/02-practice/starter/r5_topalova_khandelwal_2011.py)** (right-click → *Save link as…*). It is the same file as
+`02-practice/starter/r5_topalova_khandelwal_2011.py`.
+
+Or build it by hand: in VS Codium, **File → New File…** → *Python File*, then paste the
+parts in the next tabs **in order**, one under the other. **Save it inside the
+`quantitative-methods` folder** (for example as `r5.py`), and press **Run** ▷.
+
+### Lines 1–18
 
 ```python
 """
@@ -26,7 +35,11 @@ those, read the output, and compare it with "You should see" in the guide.
 from pathlib import Path
 import os
 import sys
+```
 
+### Lines 20–35
+
+```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -43,8 +56,11 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from linearmodels.panel import PanelOLS, RandomEffects
+```
 
+### Lines 38–54
 
+```python
 # Step 1 · Load the firm-year panel and look at it
 # read_stata keeps Stata's types: industrycode and companyname arrive as text.
 firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
@@ -62,7 +78,11 @@ sample = firms[firms["yr"] < 1997].dropna(subset=cols)
 print(sample.shape)                        # rows and columns
 print(sample["id"].nunique(), "firms")
 print(sample["yr"].value_counts().sort_index())
+```
 
+### Lines 56–64
+
+```python
 # Step 3 · See the reform: average tariffs by year
 # The variation we exploit: tariffs fell a lot, and by different amounts
 # in different industries.
@@ -72,7 +92,11 @@ by_year.plot(marker="o")
 plt.ylabel("average lagged tariff (1 = 100%)")
 plt.title("India's tariff cuts, estimation sample")
 plt.savefig(OUTPUT / "tariffs_by_year.png", dpi=150, bbox_inches="tight")
+```
 
+### Lines 66–80
+
+```python
 # Step 4 · Pooled OLS with year dummies, classical standard errors
 # One regression on all firm-years, as if every row were independent.
 formula = ("tfp1000 ~ lagtariff + laginputariff + prgroup + govown + foreign"
@@ -88,7 +112,11 @@ pooled_cl = smf.ols(formula, data=sample).fit(
     cov_type="cluster", cov_kwds={"groups": sample["id"]})
 print(pooled_cl.params[["lagtariff", "laginputariff"]].round(4))
 print(pooled_cl.bse[["lagtariff", "laginputariff"]].round(4))
+```
 
+### Lines 82–94
+
+```python
 # Step 6 · Give the data a panel index: entity first, then time
 # linearmodels reads the firm and the year from a two-level index.
 panel = sample.set_index(["id", "yr"])
@@ -102,7 +130,11 @@ print(panel.index.names, panel.shape)
 fe = PanelOLS(y, X, entity_effects=True, time_effects=True).fit(
     cov_type="clustered", cluster_entity=True)
 print(fe)
+```
 
+### Lines 96–104
+
+```python
 # Step 8 · Random effects, with year dummies and the firm characteristics
 # RE can keep time-invariant variables, but only by assuming the firm effect
 # is unrelated to the tariffs.
@@ -112,7 +144,11 @@ X_re = sm.add_constant(panel[cols[1:] + years])
 re = RandomEffects(y, X_re).fit(cov_type="clustered", cluster_entity=True)
 print(re.params[["lagtariff", "laginputariff"]].round(4))
 print(re.std_errors[["lagtariff", "laginputariff"]].round(4))
+```
 
+### Lines 106–116
+
+```python
 # Step 9 · Put the four estimates side by side
 # One row per estimator: the two coefficients, then their standard errors.
 keys = ["lagtariff", "laginputariff"]
@@ -125,6 +161,7 @@ table = pd.DataFrame({
 print(table.T.round(3).to_string())
 print("observations:", int(pooled.nobs), fe.nobs, re.nobs)
 ```
+:::::::
 
 ## The solutions, step by step {.scrollable}
 
@@ -192,12 +229,29 @@ print(sample["id"].nunique(), "firms")
 print(sample["yr"].value_counts().sort_index())
 ```
 
-### 3
+### 3 · code
 
 **Step 3 · See the reform: average tariffs by year**
 
+```python
+# Step 3 · See the reform: average tariffs by year
+# The variation we exploit: tariffs fell a lot, and by different amounts
+# in different industries.
+by_year = sample.groupby("yr")[["lagtariff", "laginputariff"]].mean()
+print(by_year.round(3))
+by_year.plot(marker="o")
+plt.ylabel("average lagged tariff (1 = 100%)")
+plt.title("India's tariff cuts, estimation sample")
+plt.savefig(OUTPUT / "tariffs_by_year.png", dpi=150, bbox_inches="tight")
+```
+
+### 3 · result
+
+**Step 3 · See the reform: average tariffs by year** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
+#| layout-ncol: 2
 # Step 3 · See the reform: average tariffs by year
 # The variation we exploit: tariffs fell a lot, and by different amounts
 # in different industries.
@@ -253,12 +307,26 @@ X = panel[["lagtariff", "laginputariff", "age", "age2"]]
 print(panel.index.names, panel.shape)
 ```
 
-### 7
+### 7 · code
 
 **Step 7 · Firm and year fixed effects, clustered by firm (column 3)**
 
+```python
+# Step 7 · Firm and year fixed effects, clustered by firm (column 3)
+# Firm effects absorb everything a firm never changes (ownership, size class),
+# so those dummies are left out. Only within-firm changes identify the slopes.
+fe = PanelOLS(y, X, entity_effects=True, time_effects=True).fit(
+    cov_type="clustered", cluster_entity=True)
+print(fe)
+```
+
+### 7 · result
+
+**Step 7 · Firm and year fixed effects, clustered by firm (column 3)** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
+#| classes: result-wide
 # Step 7 · Firm and year fixed effects, clustered by firm (column 3)
 # Firm effects absorb everything a firm never changes (ownership, size class),
 # so those dummies are left out. Only within-firm changes identify the slopes.

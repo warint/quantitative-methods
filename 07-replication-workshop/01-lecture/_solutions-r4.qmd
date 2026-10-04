@@ -3,9 +3,18 @@
 
 ## The script, to copy {.scrollable}
 
-In VS Codium: **File → New File…** → *Python File*, paste, **save it inside the
-`quantitative-methods` folder** (for example as `r4.py`), and press **Run** ▷. It is the same
-file as `02-practice/starter/r4_blonigen_piger_2014.py`.
+::::::: panel-tabset
+### Get the file
+
+The whole script is one file: **[view it on GitHub](https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/starter/r4_blonigen_piger_2014.py)** or
+**[download it](https://raw.githubusercontent.com/warint/quantitative-methods/main/07-replication-workshop/02-practice/starter/r4_blonigen_piger_2014.py)** (right-click → *Save link as…*). It is the same file as
+`02-practice/starter/r4_blonigen_piger_2014.py`.
+
+Or build it by hand: in VS Codium, **File → New File…** → *Python File*, then paste the
+parts in the next tabs **in order**, one under the other. **Save it inside the
+`quantitative-methods` folder** (for example as `r4.py`), and press **Run** ▷.
+
+### Lines 1–18
 
 ```python
 """
@@ -26,7 +35,11 @@ those, read the output, and compare it with "You should see" in the guide.
 from pathlib import Path
 import os
 import sys
+```
 
+### Lines 20–29
+
+```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -37,7 +50,11 @@ os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
 OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
 OUTPUT.mkdir(parents=True, exist_ok=True)
+```
 
+### Lines 31–39
+
+```python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -47,8 +64,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV, Lasso
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+```
 
+### Lines 42–55
 
+```python
 # Step 1 · Load the data and keep the log-levels sample
 fdi = qmib.load("fdi")
 cov = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
@@ -63,7 +83,11 @@ for v in ["parent_gdp", "host_gdp", "distance"]:
     X[v] = np.log(X[v])
 print("log FDI: mean", round(y.mean(), 2), "sd", round(y.std(), 2))
 print("constant columns:", [c for c in cov if X[c].nunique() == 1])
+```
 
+### Lines 57–66
+
+```python
 # Step 3 · The paper's retained determinants (pre-session deck, table 3, inclusion prob. >= 85%)
 paper = ["parent_gdp", "host_gdp", "distance",                  # gravity
          "common_language_official", "colonial_link",           # cultural distance
@@ -74,7 +98,11 @@ print("paper keeps (as named by the course):", len(paper))
 # Step 4 · Hold out 30% of the pairs; nothing below touches the test set until scoring
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0)
 print("train:", len(Xtr), "| test:", len(Xte))
+```
 
+### Lines 68–79
+
+```python
 # Step 5 · OLS vs ridge vs lasso vs elastic net, all standardised INSIDE a pipeline
 models = {
     "OLS":         make_pipeline(StandardScaler(), LinearRegression()),
@@ -87,7 +115,11 @@ print("predict the mean   test RMSE", round(np.sqrt(mean_squared_error(yte, np.f
 for name, m in models.items():
     m.fit(Xtr, ytr)
     print(f"{name:18s} test RMSE", round(np.sqrt(mean_squared_error(yte, m.predict(Xte))), 3))
+```
 
+### Lines 81–89
+
+```python
 # Step 6 · The lambdas cross-validation chose, and the one-standard-error lambda
 print("ridge alpha_:", round(models["ridge (CV)"][-1].alpha_, 3))
 print("elastic net alpha_:", round(models["elastic net"][-1].alpha_, 4), "l1_ratio_:", models["elastic net"][-1].l1_ratio_)
@@ -97,7 +129,11 @@ se = lcv.mse_path_.std(axis=1) / np.sqrt(5)        # its standard error
 lam_min = lcv.alpha_
 lam_1se = lcv.alphas_[mse <= mse.min() + se[mse.argmin()]].max()   # largest lambda within 1 SE
 print("lasso lambda_min:", round(lam_min, 4), "| lambda_1se:", round(lam_1se, 4))
+```
 
+### Lines 91–105
+
+```python
 # Step 7 · What the lasso keeps, at lambda_min and at lambda_1se
 keep_min = [v for v, b in zip(cov, lcv.coef_) if b != 0]
 las1 = make_pipeline(StandardScaler(), Lasso(alpha=lam_1se, max_iter=50_000)).fit(Xtr, ytr)
@@ -113,7 +149,11 @@ print("paper's survivors kept by lasso (1se):", len(overlap), "of", len(paper))
 print("paper's survivors dropped:", [v for v in paper if v not in keep_1se])
 print("kept by lasso but not on the paper's list:", len(keep_1se) - len(overlap))
 print("signs on the paper's list:", coef[paper].round(3).to_dict())
+```
 
+### Lines 107–118
+
+```python
 # Step 9 · Stability: refit at lambda_1se on 20 random half-samples; how often does each survive?
 rng = np.random.default_rng(60033)
 hits = pd.Series(0.0, index=cov)
@@ -126,7 +166,11 @@ print("paper's list, share of resamples kept:", freq[paper].to_dict())
 print("variables kept in >= 80% of resamples:", (freq >= 0.8).sum(), "| never kept:", (freq == 0).sum())
 print("the >= 80% group:", list(freq[freq >= 0.8].index))
 print("never kept:", list(freq[freq == 0].index))
+```
 
+### Lines 120–130
+
+```python
 # Step 10 · Picture the stability check: paper's survivors in a darker colour
 top = freq[freq > 0]
 colours = ["#1f4e79" if v in paper else "#9db4cc" for v in top.index]
@@ -139,6 +183,7 @@ plt.tight_layout()
 plt.savefig(OUTPUT / "s05_stability.png", dpi=150)
 print("saved", OUTPUT / "s05_stability.png")
 ```
+:::::::
 
 ## The solutions, step by step {.scrollable}
 
@@ -319,12 +364,30 @@ print("the >= 80% group:", list(freq[freq >= 0.8].index))
 print("never kept:", list(freq[freq == 0].index))
 ```
 
-### 10
+### 10 · code
 
 **Step 10 · Picture the stability check: paper's survivors in a darker colour**
 
+```python
+# Step 10 · Picture the stability check: paper's survivors in a darker colour
+top = freq[freq > 0]
+colours = ["#1f4e79" if v in paper else "#9db4cc" for v in top.index]
+fig, ax = plt.subplots(figsize=(7, 9))
+ax.barh(top.index[::-1], top.values[::-1], color=colours[::-1])
+ax.axvline(0.8, color="grey", ls=":", lw=1)
+ax.set_xlabel("share of 20 half-samples in which the lasso keeps the variable")
+ax.set_title("Lasso survival at lambda_1se\n(dark = the paper's survivors)")
+plt.tight_layout()
+plt.savefig(OUTPUT / "s05_stability.png", dpi=150)
+print("saved", OUTPUT / "s05_stability.png")
+```
+
+### 10 · result
+
+**Step 10 · Picture the stability check: paper's survivors in a darker colour** — what it prints
+
 ```{python}
-#| echo: true
+#| echo: false
 # Step 10 · Picture the stability check: paper's survivors in a darker colour
 top = freq[freq > 0]
 colours = ["#1f4e79" if v in paper else "#9db4cc" for v in top.index]

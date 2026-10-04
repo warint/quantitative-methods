@@ -6,6 +6,8 @@ institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session5_cours/"
 source-session: 5
 course-session: 4
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -22,7 +24,7 @@ format:
     margin: 0.06
     smaller: true
     include-in-header:
-      text: "<style>.reveal .cell-output-display img{max-height:400px;width:auto;max-width:100%;}</style>"
+      text: "<style>.reveal .cell-output-display img, .reveal figure img{max-height:360px;width:auto;max-width:100%;}</style>"
     footer: "MATH60033A · Session 04 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -470,8 +472,7 @@ $$
 ```{python}
 #| echo: true
 
-# Eight chemical measurements. Note what is absent: price, region, vintage.
-# The model can only speak about what is in this list.
+# Eight chemical measurements; price, region and vintage are absent
 predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
               "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
 
@@ -566,9 +567,7 @@ from statsmodels.miscmodels.ordinal_model import OrderedModel
 # Keep the order: unlikely < somewhat likely < very likely
 order = ["unlikely", "somewhat likely", "very likely"]
 dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
-
-om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
-                  distr="logit").fit(method="bfgs", disp=0)
+om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]], distr="logit").fit(method="bfgs", disp=0)
 print(om.summary())
 ```
 
@@ -637,17 +636,12 @@ The data in detail, the cutpoints, the computation by hand, `public`, and a chec
 People's occupational choices might be influenced by their parents' occupations and their own education level. Here the choice is a high-school programme — academic, general or vocational — and the question is how it relates to family socio-economic status and writing ability.
 
 -   200 students. The outcome is `prog`, programme type, with **no natural order**.
-
 -   The predictors are `ses`, socio-economic status (low, middle, high), and `write`, a writing score.
 
 ```{python}
 #| echo: true
 
-import qmib
-
-# An unordered outcome: which programme a student is in. There is no sense in
-# which vocation is "more" than general, so the ordinal machinery above does
-# not apply and the multinomial model is the right one.
+# Unordered: vocation is not "more" than general, so the model is multinomial
 ml = qmib.load("hsbdemo")
 ml.describe()
 ```
@@ -679,7 +673,6 @@ import statsmodels.api as sm
 # Code 0 (academic) is the baseline: every coefficient reads "relative to academic"
 levels = ["academic", "general", "vocation"]
 ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
-
 # Leave ses_low out, so low SES is the reference the other two are compared with
 X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_middle", "ses_high"]].astype(float)
 X["write"] = ml["write"].astype(float)

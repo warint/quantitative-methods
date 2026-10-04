@@ -7,6 +7,8 @@ jupyter: python3
 execute:
   echo: false
   warning: false
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -17,6 +19,8 @@ format:
     width: 1280
     height: 760
     margin: 0.07
+    include-in-header:
+      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}</style>"
     footer: "Quantitative Methods in International Business · Session 12 · Thierry Warin, PhD · HEC Montréal"
   pptx:
     slide-level: 2
@@ -250,6 +254,9 @@ of which removes the need for an argument about **why** treatment arrived where 
 Because the course data are fixtures generated from a known structure, several claims could be
 **verified** rather than asserted.
 
+::::: panel-tabset
+### The three identities
+
 ```{python}
 #| echo: true
 #| code-summary: "Three identities, one last time"
@@ -257,26 +264,27 @@ Because the course data are fixtures generated from a known structure, several c
 core = qmib.load("core").dropna(
     subset=["gdp_pc_eur", "productivity_idx", "employment_ths", "population"])
 y = core["gdp_pc_eur"]
-
 # 1. Pythagoras (session 2). The residual is orthogonal to the fit, so the
 #    sums of squares add exactly — not approximately.
 fit = sm.OLS(y, sm.add_constant(core[["productivity_idx"]])).fit()
 tss = ((y - y.mean()) ** 2).sum()
 ess = ((fit.fittedvalues - y.mean()) ** 2).sum()
 rss = (fit.resid ** 2).sum()
-
 # 2. Frisch-Waugh-Lovell (session 2). "Controlling for" IS residual regression.
 others = sm.add_constant(core[["employment_ths", "population"]])
 multi = sm.OLS(y, sm.add_constant(
     core[["productivity_idx", "employment_ths", "population"]])).fit()
 fwl = sm.OLS(sm.OLS(y, others).fit().resid,
              sm.OLS(core["productivity_idx"], others).fit().resid).fit()
-
-# 3. Leverage (session 3). The hat matrix diagonal sums to the number of
-#    parameters. Always. For every regression ever fitted.
+# 3. Leverage (session 3). The leverages sum to the number of parameters. Always.
 X = sm.add_constant(core[["productivity_idx"]]).to_numpy()
 h = np.einsum("ij,jk,ik->i", X, np.linalg.inv(X.T @ X), X)
+```
 
+### The check
+
+```{python}
+#| echo: true
 print(f"{'identity':44}{'discrepancy':>14}")
 print(f"{'TSS - (ESS + RSS)':44}{tss - ess - rss:14.3e}")
 print(f"{'multiple regression - FWL slope':44}"
@@ -287,6 +295,8 @@ print(f"{'sum of leverages - p':44}{abs(h.sum() - X.shape[1]):14.3e}")
 ::: {.check}
 These are algebraic identities. They hold for every regression, on every dataset, forever.
 :::
+
+:::::
 
 ## The failures were more instructive
 
