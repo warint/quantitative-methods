@@ -60,16 +60,14 @@ Z = StandardScaler().fit_transform(X)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. The opening claim that turns out to be wrong
-2. A situation you will meet — more candidate predictors than countries
-3. Stepwise selection, and why its choices do not survive a resample
-4. {'One idea': 'a price for large coefficients'}
-5. Ridge — shrink every coefficient, with an example
-6. Lasso — remove the weak ones, with an example and by hand
-7. Elastic net — keep correlated predictors together, with an example
-8. The three side by side, and choosing $\lambda$ by cross-validation
-9. What you may report, and key takeaways
-10. Appendices — the geometry and simulations behind the slides
+1. Automating model selection — stepwise, ridge, lasso, elastic net, in Python
+2. {'One idea': 'a price for large coefficients'}
+3. Ridge — shrink every coefficient, with an example
+4. Lasso — remove the weak ones, with an example and by hand
+5. Elastic net — keep correlated predictors together, with an example
+6. The three side by side, and choosing $\lambda$ by cross-validation
+7. What you may report, and key takeaways
+8. Appendices — the geometry and simulations behind the slides
 
 ## What session 5 is for {.scrollable}
 ::::: columns
@@ -78,8 +76,7 @@ Z = StandardScaler().fit_transform(X)
 
 ### The mathematics
 
-- Say why a greedy **stepwise** search is unstable, and what that argues for
-- Explain why accepting a little **bias** can lower the total error
+- Say how **stepwise** (AIC), **ridge**, the **lasso** and the **elastic net** each automate model selection
 - Say in plain words what **ridge**, the **lasso** and the **elastic net** each do to the coefficients
 - Say what the **elastic net** adds when predictors are correlated
 - Apply **soft-thresholding** by hand to a small example
@@ -124,254 +121,125 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-# 1 · What this adds {background-color="#16181A" style="color:#F7F6F3"}
+# 1 · Automating model selection {background-color="#16181A" style="color:#F7F6F3"}
 
-## Better than "best"? {.scrollable}
+## Let the computer choose the model {.scrollable}
 
 ::::: panel-tabset
-### The picture
+### The question
 
-```{python}
-# The same regression, estimated on 1,000 different samples of 30 rows.
-# Two predictors correlated at 0.95; the true coefficient of x1 is 1.
-rng = np.random.default_rng(3)
-n, S = 30, 1000
-cov = [[1, .95], [.95, 1]]
-samples = []
-for _ in range(S):
-    Xs = rng.multivariate_normal([0, 0], cov, n)
-    samples.append((Xs, Xs @ [1, 1] + rng.normal(0, 1, n)))
-b_ols = np.array([LinearRegression().fit(Xs, ys).coef_[0] for Xs, ys in samples])
-b_rdg = np.array([Ridge(alpha=10).fit(Xs, ys).coef_[0] for Xs, ys in samples])
+We want to explain **R&D intensity** (R&D as % of GDP) across European countries. We have **`{python} P` candidate predictors** but only **`{python} N` usable rows** — almost as many predictors as countries. Which ones go into the model?
 
-fig, ax = plt.subplots(figsize=(7.6, 3.2))
-bins = np.linspace(-1.5, 3.5, 51)
-ax.hist(b_ols, bins, color=CL.warn, alpha=.55, label="OLS")
-ax.hist(b_rdg, bins, color=CL.good, alpha=.75, label="ridge")
-ax.axvline(1, color=CL.ink, lw=1.6)
-ax.text(1.06, ax.get_ylim()[1] * .9, "true value = 1", fontsize=9)
-ax.set_xlabel(r"estimate of $\beta_1$, one per sample"); ax.set_ylabel("number of samples")
-ax.legend(fontsize=8, loc="upper right")
-plt.show()
-```
+Choosing by hand is slow and subjective. Instead, we can **automate model selection**:
 
-::: {.muted}
-OLS (red) is centred on the true value but spreads from about −0.5 to 2.5. Ridge (green) sits a little below the true value, and almost every estimate is close to it.
-:::
+| Method | How it chooses | Where you met it |
+|---|---|---|
+| **Stepwise** (the old style) | adds or drops one predictor at a time, keeps the change that lowers **AIC** most, and stops when nothing improves | AIC: session 03 |
+| **Ridge** | keeps every predictor, but **shrinks** all coefficients toward zero | today |
+| **Lasso** | shrinks, and sets the weak predictors to **exactly zero** — so it selects | today |
+| **Elastic net** | a mix of the two: selects like the lasso, but keeps correlated predictors **together** | today — our default |
 
-### In plain words
+### Not complicated…
 
-Imagine collecting a new sample, re-estimating, and doing it again and again.
+-   **Stepwise** is a loop: try each predictor, compare AIC, keep the best, repeat. Nothing more.
+-   **Ridge, lasso and elastic net** are OLS with **one extra term**: a price for large coefficients, set by a dial $\lambda$.
 
-- **Unbiased** means *right on average*: the estimates scatter around the true value, as OLS does above. OLS is the most precise estimator among those that are right on average.
-- But you only ever get **one** sample. What matters is how far **your** estimate is likely to land from the truth — the average miss.
+$$
+\text{OLS:}\ \min \sum_i (y_i - \hat y_i)^2
+\qquad\longrightarrow\qquad
+\text{penalised:}\ \min \sum_i (y_i - \hat y_i)^2 + \lambda \times \text{size of the coefficients}
+$$
 
-```{python}
-#| output: asis
-rows = [("OLS", b_ols), ("ridge", b_rdg)]
-print("| | average estimate | typical spread | average squared miss |\n|---|---|---|---|")
-for name, b in rows:
-    print(f"| {name} | {b.mean():.2f} | {b.std():.2f} | {((b - 1) ** 2).mean():.2f} |")
-```
+-   In Python, each is **one line**, and cross-validation chooses $\lambda$ for you.
+
+### …and a bit magic
+
+-   The computer screens dozens of candidates in a second — the screening you would otherwise do by eye, and by prejudice.
+-   On our data, the penalised models **cut the prediction error on new rows by more than half** compared with OLS. Nothing was added; the coefficients were only **restrained**.
+-   Stepwise makes all-or-nothing choices, one at a time, so resampling the rows often changes its model. The penalties shrink **smoothly**, which makes them more stable. That is why the elastic net is the modern default.
 
 ::: {.warn}
-Ridge is a little wrong on average (0.84 instead of 1) but much less scattered, so it misses by far less. Giving up a little "right on average" to gain a lot of precision: that trade is what **regularisation** is.
-:::
-
-### Bias–variance
-
-Yes — this is the **bias–variance trade-off**. The average squared miss splits in two:
-
-$$\text{average squared miss} = \underbrace{\text{bias}^2}_{\text{off-centre}} + \underbrace{\text{variance}}_{\text{scatter}}$$
-
-```{python}
-# Same samples, now for every value of the penalty λ (both coefficients)
-lams = np.logspace(-2, 3, 40)
-bias2, var = [], []
-for lam in lams:
-    B = []
-    for Xs, ys in samples[:400]:
-        Xc, yc = Xs - Xs.mean(0), ys - ys.mean()
-        B.append(np.linalg.solve(Xc.T @ Xc + lam * np.eye(2), Xc.T @ yc))
-    B = np.array(B)
-    bias2.append(((B.mean(0) - 1) ** 2).sum()); var.append(B.var(0).sum())
-bias2, var = np.array(bias2), np.array(var)
-total = bias2 + var
-
-fig, ax = plt.subplots(figsize=(7.6, 3.1))
-ax.semilogx(lams, total, color=CL.accent, lw=3.2, label="average squared miss")
-ax.semilogx(lams, var, color=CL.muted, lw=2, ls="--", label="variance (scatter)")
-ax.semilogx(lams, bias2, color=CL.warn, lw=2, label="bias² (off-centre)")
-ax.axvline(lams[np.argmin(total)], color=CL.good, lw=1.4, ls=":")
-ax.text(1.2e-2, total[0] * 1.08, "λ ≈ 0: OLS — no bias, large variance", color=CL.ink, fontsize=8.5)
-ax.text(1.5, total.max() * .62, "λ large: little variance,\nbut pulled far from the truth", color=CL.muted, fontsize=8.5)
-ax.set_xlabel("penalty λ  (more shrinkage →)"); ax.set_ylim(0, total.max() * 1.05)
-ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, .88))
-plt.show()
-```
-
-::: {.check}
-Turning up $\lambda$ adds bias and removes variance. The total is lowest in between (dotted line). The next slide shows the same U on real data, and session 08 returns to the trade-off with $k$-nearest neighbours.
+Magic, but not truth: what any of these methods keeps is *a* set of predictors that predicts well on this sample — not "the variables that matter".
 :::
 
 :::::
 
-## The dial {.scrollable}
-
-```{python}
-lam_grid = np.logspace(-3, 4, 80)
-tr_err, te_err = [], []
-for a in lam_grid:
-    m = Ridge(alpha=a).fit(Ztr, ytr)
-    tr_err.append(np.sqrt(mean_squared_error(ytr, m.predict(Ztr))))
-    te_err.append(np.sqrt(mean_squared_error(yte, m.predict(Zte))))
-best = int(np.argmin(te_err))
-
-fig, ax = plt.subplots(figsize=(7.6, 3.3))
-ax.semilogx(lam_grid, tr_err, color=CL.muted, lw=2, ls="--", label="error on the rows it was fitted to")
-ax.semilogx(lam_grid, te_err, color=CL.accent, lw=2.6, label="error on new rows (the test set)")
-ax.axvline(lam_grid[best], color=CL.good, lw=1.4, ls=":")
-ax.text(lam_grid[best] * 1.2, max(te_err) * .72, "sweet spot", color=CL.good, fontsize=9, fontweight="600")
-ax.text(1.2e-3, max(te_err) * .38, "λ ≈ 0: OLS\nmemorises the data", color=CL.warn, fontsize=8.5)
-ax.text(8e2, max(te_err) * .60, "λ huge: every\ncoefficient ≈ 0,\npredict the mean", color=CL.muted, fontsize=8.5)
-ax.set_xlabel("penalty λ  (turning the dial up →)"); ax.set_ylabel("RMSE")
-ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, .97))
-plt.show()
-```
-
-::: {.check}
-Today adds one **dial**, $\lambda$. At zero you have OLS; turned all the way up you have "predict the mean". Somewhere between, the error on new data is lowest. Sessions 06–11 reuse the same dial under other names: tree depth, number of components, number of neighbours.
-:::
-
-# 2 · The problem, on real data {background-color="#16181A" style="color:#F7F6F3"}
-
-## A table that is almost square {.scrollable}
+## The Python: four ways to choose {.scrollable}
 
 ::::: panel-tabset
-### The picture
-
-```{python}
-cases = [("Session 04 — loans,\nFICO only", 9578, 1),
-         ("Session 04 — red wines,\n8 chemicals", 1599, 8),
-         ("Today — R&D intensity,\n29 candidates", len(d), len(XCOLS))]
-fig, ax = plt.subplots(figsize=(7.6, 2.9))
-vals = [n / p for _, n, p in cases]
-ax.barh([c[0] for c in cases], vals, color=[CL.muted, CL.muted, CL.warn], height=.55)
-for i, v in enumerate(vals):
-    ax.text(v * 1.15, i, (f"{v:,.0f}" if v >= 10 else f"{v:.1f}") + " rows per predictor", va="center", fontsize=9)
-ax.axvline(10, color=CL.good, ls="--", lw=1.4)
-ax.text(11, 2.35, "rule of thumb: at least 10", color=CL.good, fontsize=8.5)
-ax.set_xscale("log"); ax.set_xlim(.5, 1e5); ax.invert_yaxis()
-ax.set_xlabel("rows per candidate predictor (log scale)"); ax.grid(axis="y", visible=False)
-plt.show()
-```
-
-We want to explain **R&D intensity** (R&D as % of GDP) across European countries from digital and AI-adoption indicators. The AI survey only starts in 2021, so most rows are incomplete; 15 of the columns are auxiliary series nobody has vetted.
-
-### The code
-
-```{python}
-#| echo: true
-raw = pd.read_parquet("../../data/spine/angle_c_country.parquet")
-
-YCOL  = "rd_pct_gdp"                           # what we are trying to explain
-# Everything that is not the outcome, a key, or a status flag is a candidate.
-XCOLS = [c for c in raw.columns if c not in ("geo", "time", "flag", YCOL)]
-
-# Complete-case only: dropping incomplete rows is not neutral, and here it
-# costs most of the sample.
-d = raw.dropna(subset=[YCOL] + XCOLS)
-print(f"usable rows n = {len(d)},  candidate predictors p = {len(XCOLS)}")
-```
-
-:::::
-
-## The obvious thing to try first: stepwise {.scrollable}
-
-::::: panel-tabset
-### How it works
-
-```{dot}
-digraph stepwise {
-  rankdir=LR; bgcolor="transparent";
-  node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#6E7275", fontname="Helvetica", fontsize=13];
-  edge [color="#6E7275", fontname="Helvetica", fontsize=11];
-  a [label="Start with\nno predictors"];
-  b [label="Try adding each\nremaining candidate"];
-  c [label="Keep the one that\nlowers AIC most"];
-  d [label="Did AIC\nimprove?", shape=diamond, fillcolor="#F7F6F3"];
-  e [label="Stop: this is\n\"the model\"", fillcolor="#FBE9E4", color="#B4553A"];
-  a -> b -> c -> d;
-  d -> b [label="yes"];
-  d -> e [label="no"];
-}
-```
-
-**Forward stepwise selection**: the standard answer for decades, and still the default in much applied software. Each step is an in-or-out decision that depends on every step before it.
-
-### The code
+### Stepwise (AIC)
 
 ```{python}
 #| echo: true
 import statsmodels.api as sm
 
 def forward_aic(X, y):
-    """Add whichever variable lowers AIC most; stop when none does."""
+    """Add whichever predictor lowers AIC most; stop when none does."""
     chosen, rest = [], list(X.columns)
-    best = sm.OLS(y, np.ones((len(y), 1))).fit().aic
+    best = sm.OLS(y, np.ones((len(y), 1))).fit().aic        # start: no predictors
     while rest:
-        s = sorted((sm.OLS(y, sm.add_constant(X[chosen + [c]])).fit().aic, c) for c in rest)
-        if s[0][0] >= best - 1e-9:
+        trials = sorted((sm.OLS(y, sm.add_constant(X[chosen + [c]])).fit().aic, c)
+                        for c in rest)
+        if trials[0][0] >= best:                            # nothing improves: stop
             break
-        best, pick = s[0]; chosen.append(pick); rest.remove(pick)
+        best, pick = trials[0]
+        chosen.append(pick); rest.remove(pick)
     return chosen
-
-# Ground truth, from scripts/build_spine/make_fixtures.py: of the fifteen aux_
-# columns, every third carries a weak signal and the other ten are pure noise.
-noise = {f"aux_{k:02d}" for k in range(15) if k % 3}
 
 Xc, yc = d[XCOLS].astype(float), d[YCOL].astype(float)
 selected = forward_aic(Xc, yc)
-print(f"stepwise kept {len(selected)} of {len(XCOLS)} candidates")
-print(f"   pure noise among them: {sorted(c for c in selected if c in noise)}")
+print(f"stepwise kept {len(selected)} of {len(XCOLS)}:", selected)
 ```
+
+### Ridge
+
+```{python}
+#| echo: true
+from sklearn.linear_model import RidgeCV
+
+ridge = make_pipeline(StandardScaler(),                        # same scale for all
+                      RidgeCV(alphas=np.logspace(-3, 3, 60))   # try 60 values of λ
+                      ).fit(Xc, yc)
+print(f"λ = {ridge[-1].alpha_:.2f}")
+print(f"ridge kept {np.sum(ridge[-1].coef_ != 0)} of {len(XCOLS)} — it never drops a predictor")
+```
+
+### Lasso
+
+```{python}
+#| echo: true
+from sklearn.linear_model import LassoCV
+
+lasso = make_pipeline(StandardScaler(),
+                      LassoCV(cv=5, random_state=0, max_iter=50_000)   # λ by 5-fold CV
+                      ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, lasso[-1].coef_) if b != 0]
+print(f"λ = {lasso[-1].alpha_:.4f}")
+print(f"lasso kept {len(kept)} of {len(XCOLS)}:", kept)
+```
+
+### Elastic net
+
+```{python}
+#| echo: true
+from sklearn.linear_model import ElasticNetCV
+
+enet = make_pipeline(StandardScaler(),
+                     ElasticNetCV(l1_ratio=0.5,            # half lasso, half ridge
+                                  cv=5, random_state=0, max_iter=50_000)
+                     ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, enet[-1].coef_) if b != 0]
+print(f"λ = {enet[-1].alpha_:.4f}")
+print(f"elastic net kept {len(kept)} of {len(XCOLS)}:", kept)
+```
+
+::: {.muted}
+In scikit-learn, $\lambda$ is called `alpha`, and the elastic net's mix is `l1_ratio` (1 = lasso, 0 = ridge). Here the mix is fixed at 0.5; pass a list, such as `l1_ratio=[0.1, 0.5, 0.9, 1]`, and cross-validation chooses it too. The next sections show what each penalty does, on an example where we know the right answer.
+:::
 
 :::::
 
-## Now run it again on a resample {.scrollable}
-
-```{python}
-from collections import Counter
-
-rng, B, counts = np.random.default_rng(60033), 100, Counter()
-for _ in range(B):                      # bootstrap: same data, resampled rows
-    idx = rng.integers(0, len(d), len(d))
-    counts.update(forward_aic(Xc.iloc[idx], yc.iloc[idx]))
-
-freq = pd.Series({c: counts.get(c, 0) / B for c in XCOLS}).sort_values(ascending=False)
-col = [CL.warn if c in noise else (CL.muted if c.startswith("aux") else CL.accent) for c in freq.index]
-fig, ax = plt.subplots(figsize=(7.8, 3.2))
-ax.bar(range(len(freq)), freq.values, color=col)
-ax.set_xticks(range(len(freq)))
-ax.set_xticklabels(freq.index, rotation=75, fontsize=6.5)
-ax.set_ylabel("share of 100 resamples\nin which it was kept"); ax.set_ylim(0, 1)
-ax.grid(axis="x", visible=False)
-from matplotlib.patches import Patch
-ax.legend(handles=[Patch(color=CL.accent, label="named indicator"),
-                   Patch(color=CL.muted, label="aux series, weak signal"),
-                   Patch(color=CL.warn, label="aux series, pure noise")], fontsize=7.5)
-plt.show()
-```
-
-::: {.warn}
-Resample the rows and stepwise picks a different model each time — and the **pure-noise series (red) are kept about as often as the real indicators (blue)**. "The data selected these variables" is not a finding.
-:::
-
-::: {.check}
-The fix: stop making in-or-out decisions one at a time, and **shrink all coefficients continuously** instead. That is the rest of the session.
-:::
-
-# 3 · One idea: a penalty {background-color="#16181A" style="color:#F7F6F3"}
+# 2 · One idea: a penalty {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The idea in one line {.scrollable}
 
@@ -389,7 +257,7 @@ $$
 \lambda \times \underbrace{\text{size of the coefficients}}_{\text{the penalty}}
 $$
 
--   $\lambda$ ("lambda") is the **dial** from the start of the session. $\lambda = 0$: plain OLS. $\lambda$ very large: every coefficient is pushed to 0.
+-   $\lambda$ ("lambda") is the **dial**. $\lambda = 0$: plain OLS. $\lambda$ very large: every coefficient is pushed to 0.
 -   A coefficient can stay large only if it **earns it**, by improving the fit by more than it costs.
 -   The three methods differ only in how they measure "size":
 
@@ -485,7 +353,7 @@ OLS says **R&D spending lowers exports** (−1.07) and gives patents three times
 
 :::::
 
-# 4 · Ridge {background-color="#16181A" style="color:#F7F6F3"}
+# 3 · Ridge {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Ridge: shrink every coefficient {.scrollable}
 
@@ -549,7 +417,7 @@ print(f"chosen lambda = {mod[-1].alpha_:.3f}")
 
 :::::
 
-# 5 · Lasso {background-color="#16181A" style="color:#F7F6F3"}
+# 4 · Lasso {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Lasso: shrink, and remove the weak {.scrollable}
 
@@ -634,7 +502,7 @@ So do **not** present a lasso selection as "the variables that matter". It is *a
 
 :::::
 
-# 6 · Elastic net {background-color="#16181A" style="color:#F7F6F3"}
+# 5 · Elastic net {background-color="#16181A" style="color:#F7F6F3"}
 
 ## Elastic net: the best of both {.scrollable}
 
@@ -714,7 +582,7 @@ Count the zeros: the lasso lets one AI measure, `ai_use_any`, speak for the whol
 
 :::::
 
-# 7 · Side by side {background-color="#16181A" style="color:#F7F6F3"}
+# 6 · Side by side {background-color="#16181A" style="color:#F7F6F3"}
 
 ## The three methods, compared {.scrollable}
 
@@ -918,7 +786,7 @@ Why: Appendix D shows pure noise passing a naive test after selection.
 ### In six lines
 
 ::: {.tight}
-1. Accepting a little bias can buy a large cut in variance — here, **half the test error**
+1. Model selection can be automated: **stepwise** (AIC) the old way; **ridge, lasso, elastic net** the modern way
 2. All three methods add a **price for large coefficients**; $\lambda$ (`alpha` in Python) sets the price
 3. **Ridge** shrinks every coefficient and removes none
 4. **Lasso** sets weak predictors to exactly zero — and keeps only one of a group of twins
@@ -1006,7 +874,7 @@ plt.show()
 ```
 
 ::: {.check}
-When two predictors move together, the data can tell you their **sum** but not how to split it — so OLS splits it differently every sample (the long diagonal cloud). Ridge refuses the extreme splits: slightly off-centre, far less spread. That is the green histogram from the start of the session, seen in two dimensions.
+When two predictors move together, the data can tell you their **sum** but not how to split it — so OLS splits it differently every sample (the long diagonal cloud). Ridge refuses the extreme splits: slightly off-centre, far less spread.
 :::
 
 ### A2 · The ridge path
