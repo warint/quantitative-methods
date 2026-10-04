@@ -124,40 +124,52 @@ Four sessions, one toolkit. Each one answered a different kind of question:
 | **5** | What if there are too many predictors? | stepwise, ridge, lasso, elastic net | `LassoCV`, `ElasticNetCV` |
 
 ::: {.check}
-The first part of today puts the four side by side: for each, **the goal, the implementation, the results, the interpretation**. The second part adds three techniques that make the regression of session 3 fit real data: **panels, interactions, squared terms**.
+The first part of today revisits the four, two slides each: **the goal and the code**, then **the results and their interpretation**, with the sentence you would write in a paper. The second part adds three techniques that make the regression of session 3 fit real data: **panels, interactions, squared terms**.
 :::
 
 # Part 1 · Sessions 2–5 in review {background-color="#16181A" style="color:#F7F6F3"}
 
-## Session 2 · Describe one variable {.scrollable}
+## Session 2 · Describe one variable: the goal and the code {.scrollable}
 
 ::::: panel-tabset
-### Goal
+### Why describe first
 
-> **Before any model, know your variable.** How large is a typical value, how far do values spread, and is the distribution symmetric?
+> **Before any model, know your variable.** How large is a typical value? How far apart are the values? Is the distribution symmetric, or does it have a long tail?
 
-Example: **GDP per capita** across 30 European countries, 2009–2023.
+Example: **GDP per capita** across 30 European countries, 2009–2023 — one row per country-year.
 
-| | Measures | Robust alternative |
-|---|---|---|
-| **Centre** | mean $\bar x$ | median, trimmed mean |
-| **Spread** | standard deviation $s$ | interquartile range (IQR) |
-| **Shape** | skewness $g_1$, excess kurtosis $g_2$ | — |
+-   A regression in session 3 will use this variable. If it is strongly skewed, a few very rich countries can drive the result.
+-   The description decides later choices: report the mean or the median? Model GDP or its logarithm? Look for outliers?
+-   It also catches errors early: a negative GDP or a value ten times too large shows up here, not in a regression table.
 
-### Implementation
+### Centre, spread, shape
+
+| | Measure | In plain words | Sensitive to extremes? |
+|---|---|---|---|
+| **Centre** | mean $\bar x = \frac{1}{n}\sum x_i$ | the balance point | yes |
+| | median | the middle value: half below, half above | no |
+| | trimmed mean | the mean after cutting 5% off each tail | little |
+| **Spread** | standard deviation $s$ | typical distance from the mean | yes |
+| | IQR $= Q_3 - Q_1$ | width of the middle 50% | no |
+| **Shape** | skewness $g_1$ | 0 = symmetric; $>0$ = long right tail | — |
+| | excess kurtosis $g_2$ | 0 = normal tails; $>0$ = more extreme values | — |
+
+Rule of thumb: the distribution is **substantially skewed** if $|g_1| > 2\sqrt{6/n}$.
+
+### The code
 
 ```{python}
 #| echo: true
 from scipy import stats
 
-core = qmib.load("core")
-gdp = core["gdp_pc_eur"].dropna()
+core = qmib.load("core")                   # 30 countries x 15 years
+gdp = core["gdp_pc_eur"].dropna()          # drop the missing years
 
 summary = pd.Series({
     "mean": gdp.mean(),
     "median": gdp.median(),
-    "5% trimmed mean": stats.trim_mean(gdp, 0.05),
-    "standard deviation": gdp.std(ddof=1),
+    "5% trimmed mean": stats.trim_mean(gdp, 0.05),   # cut 5% from each tail
+    "standard deviation": gdp.std(ddof=1),           # ddof=1: divide by n-1
     "IQR": gdp.quantile(0.75) - gdp.quantile(0.25),
     "skewness g1": stats.skew(gdp),
     "excess kurtosis g2": stats.kurtosis(gdp),
@@ -165,6 +177,11 @@ summary = pd.Series({
 summary.round(2)
 ```
 
+:::::
+
+## Session 2 · Describe one variable: results and interpretation {.scrollable}
+
+::::: panel-tabset
 ### Results
 
 ```{python}
@@ -177,11 +194,20 @@ ax.legend(fontsize=8)
 plt.show()
 ```
 
+::: {.muted}
+Most country-years sit between €10,000 and €45,000; a long tail runs to the right, out to €`{python} f"{gdp.max():,.0f}"`.
+:::
+
 ### Interpretation
 
--   The mean (€`{python} f"{gdp.mean():,.0f}"`) is **above** the median (€`{python} f"{gdp.median():,.0f}"`): a few very rich countries pull the mean up.
--   Skewness $g_1 =$ `{python} f"{stats.skew(gdp):.2f}"` is larger than $2\sqrt{6/n} =$ `{python} f"{2 * np.sqrt(6 / len(gdp)):.2f}"`: the distribution is **substantially right-skewed**.
--   So the median and the IQR describe a "typical" country better than the mean and the standard deviation.
+-   **Centre:** the mean (€`{python} f"{gdp.mean():,.0f}"`) is **above** the median (€`{python} f"{gdp.median():,.0f}"`). A few very rich countries pull the mean up; the median does not move.
+-   **Shape:** skewness $g_1 =$ `{python} f"{stats.skew(gdp):.2f}"` is far above the threshold $2\sqrt{6/n} =$ `{python} f"{2 * np.sqrt(6 / len(gdp)):.2f}"`: the distribution is **substantially right-skewed**.
+-   **Spread:** for a skewed variable, the IQR (€`{python} f"{gdp.quantile(.75) - gdp.quantile(.25):,.0f}"`) describes the typical range better than the standard deviation, which the tail inflates.
+-   **Consequence:** describe a "typical" country with the median and IQR, and consider modelling $\log(\text{GDP})$ later.
+
+### What to write
+
+> "GDP per capita has a median of €`{python} f"{gdp.median():,.0f}"` (IQR €`{python} f"{gdp.quantile(.25):,.0f}"`–€`{python} f"{gdp.quantile(.75):,.0f}"`, n = `{python} len(gdp)` country-years). The distribution is right-skewed ($g_1 =$ `{python} f"{stats.skew(gdp):.2f}"`), so we report medians."
 
 ::: {.check}
 Every number in session 2 describes **one** variable at a time. Session 3 puts two in the same sentence.
@@ -189,107 +215,152 @@ Every number in session 2 describes **one** variable at a time. Session 3 puts t
 
 :::::
 
-## Session 3 · Fit a line, then check it {.scrollable}
+## Session 3 · Fit a line, then check it: the goal and the code {.scrollable}
 
 ::::: panel-tabset
-### Goal
+### The question
 
 > **Do more productive European countries have higher income per head — and can we trust the answer?**
 
-$$y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \qquad \text{OLS: } \min \sum_i (y_i - \beta_0 - \beta_1 x_i)^2$$
+The model says GDP per capita ($y$) is a straight line in productivity ($x$), plus an error:
 
-Fitting the line is the easy part. Then four questions:
+$$y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$$
 
-| Question | Tool |
-|---|---|
-| **Adequacy** — how much does it explain? | $R^2$, adjusted $R^2$, RSE |
-| **Validity** — do the assumptions hold? | residual plot |
-| **Robustness** — does one row drive it? | Cook's distance |
-| **Parsimony** — which model? | AIC, BIC |
+-   $\beta_1$, the **slope**, is what we want: how much $y$ changes, on average, when $x$ is one unit higher.
+-   $\varepsilon_i$ is everything about country-year $i$ that productivity does not explain.
 
-### Implementation
+### How OLS chooses the line
+
+**Ordinary least squares** picks the line that makes the squared vertical distances as small as possible:
+
+$$\min_{\beta_0,\,\beta_1} \sum_i \big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
+
+Squaring makes every miss count, above or below the line, and punishes big misses most. Then four checks, because fitting is the easy part:
+
+| Question | Tool | A problem looks like |
+|---|---|---|
+| **Adequacy** — how much does it explain? | $R^2$, adjusted $R^2$ | a small share explained |
+| **Validity** — do the assumptions hold? | residual plot | a curve or a funnel |
+| **Robustness** — does one row drive it? | Cook's distance | one spike far above the rest |
+| **Parsimony** — which model? | AIC, BIC | — lower is better |
+
+### The code
 
 ```{python}
 #| echo: true
-d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])
+d = core.dropna(subset=["gdp_pc_eur", "productivity_idx"])   # rows with both values
 
+# "gdp_pc_eur explained by productivity_idx"; the intercept is added for you
 fit = smf.ols("gdp_pc_eur ~ productivity_idx", data=d).fit()
-print(fit.params.round(1))
-print(f"R-squared = {fit.rsquared:.3f}   AIC = {fit.aic:,.0f}")
 
-cooks_d = fit.get_influence().cooks_distance[0]     # one value per row
+print(fit.params.round(1))                        # intercept and slope
+print(f"R-squared = {fit.rsquared:.3f}   AIC = {fit.aic:,.0f}")
+cooks_d = fit.get_influence().cooks_distance[0]   # one value per row
 ```
 
+:::::
+
+## Session 3 · Fit a line, then check it: results and interpretation {.scrollable}
+
+::::: panel-tabset
 ### Results
 
 ```{python}
 fig, axes = plt.subplots(1, 2, figsize=(8.2, 2.7))
 axes[0].scatter(fit.fittedvalues, fit.resid, s=8, alpha=.5, color=CL.accent)
 axes[0].axhline(0, color=CL.ink, lw=1)
-axes[0].set_title("residuals vs fitted", fontsize=9.5)
+axes[0].set_title("validity: residuals vs fitted", fontsize=9.5)
 axes[0].set_xlabel("fitted GDP per capita"); axes[0].set_ylabel("residual")
 axes[1].stem(cooks_d, markerfmt=" ", basefmt=" ")
 axes[1].axhline(4 / len(d), color=CL.warn, ls="--")
-axes[1].set_title("Cook's distance, one spike per row", fontsize=9.5)
+axes[1].set_title("robustness: Cook's distance, one spike per row", fontsize=9.5)
 axes[1].set_xlabel("observation")
 plt.show()
 ```
 
+::: {.muted}
+Left: residuals should scatter at random around zero. Right: the dashed line (4/n) is a prompt to look at a row, not a rule for dropping it.
+:::
+
 ### Interpretation
 
--   **The slope:** one more point of productivity goes with **€`{python} f"{fit.params['productivity_idx']:,.0f}"` more** GDP per capita, on average. Always say the units.
--   **Adequacy:** $R^2 =$ `{python} f"{fit.rsquared:.2f}"` — the line accounts for `{python} f"{fit.rsquared:.0%}"` of the variation, but $R^2$ says nothing about whether the line is the right shape.
--   **Validity:** a curve or a funnel in the residual plot is the model telling you what it missed.
--   **Robustness:** a spike far above the others means one country-year is carrying the result — go and look at it.
+-   **The slope:** one more point of productivity goes with **€`{python} f"{fit.params['productivity_idx']:,.0f}"` more** GDP per capita, on average. Say the units: euros per index point.
+-   **The intercept** (€`{python} f"{fit.params['Intercept']:,.0f}"`) is the prediction at productivity 0, far outside the data (72 to 129). Do not interpret it.
+-   **Adequacy:** $R^2 =$ `{python} f"{fit.rsquared:.2f}"` — productivity accounts for `{python} f"{fit.rsquared:.0%}"` of the variation in GDP per capita. It says nothing about whether a straight line is the right shape.
+-   **Validity:** any curve or funnel in the residual plot is structure the line missed — a reason to try a squared term or a log (Part 2).
+-   **Robustness:** if one spike towers over the others, one country-year is carrying the result. Find out which, and report the fit with and without it.
+
+### What to write
+
+> "Across `{python} len(d)` country-years, a one-point higher productivity index is associated with €`{python} f"{fit.params['productivity_idx']:,.0f}"` higher GDP per capita (SE `{python} f"{fit.bse['productivity_idx']:,.0f}"`; $R^2 =$ `{python} f"{fit.rsquared:.2f}"`)."
 
 ::: {.warn}
-Correlation is not causation: the slope says the two move together, not that raising productivity *would* raise income.
+"Associated with", not "causes": the slope says the two move together. Higher income can also buy the capital that raises productivity.
 :::
 
 :::::
 
-## Session 4 · When the outcome is a category {.scrollable}
+## Session 4 · When the outcome is a category: the goal and the code {.scrollable}
 
 ::::: panel-tabset
-### Goal
+### The question
 
-> **Which loans default?** The outcome is 0 or 1, so a straight line can predict probabilities below 0 or above 1.
+> **Which loans default?** `default` is 1 if the borrower did not repay, 0 otherwise.
 
-Logistic regression models the **log-odds** instead, and is fitted by **maximum likelihood**:
-
-$$\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1\,\text{fico}, \qquad p = P(\text{default} = 1)$$
+-   A straight line through 0s and 1s (the *linear probability model*) can predict probabilities **below 0 or above 1**: for a very good credit score it predicts a negative chance of default.
+-   We need a model whose predictions always stay between 0 and 1. The **logistic** function does that: it bends the line into an S-shape.
 
 | Outcome | Model | Python |
 |---|---|---|
-| two categories | logistic | `smf.logit` |
-| ordered categories | ordinal logit | `OrderedModel` |
-| unordered categories | multinomial logit | `sm.MNLogit` |
+| two categories (default or not) | logistic | `smf.logit` |
+| ordered categories (unlikely < likely < very likely) | ordinal logit | `OrderedModel` |
+| unordered categories (academic, general, vocational) | multinomial logit | `sm.MNLogit` |
 
-### Implementation
+### Log-odds and maximum likelihood
+
+The model is linear on the **log-odds** scale:
+
+$$\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1\,\text{fico}, \qquad p = P(\text{default} = 1)$$
+
+-   $\frac{p}{1-p}$ is the **odds**: a probability of 0.2 is odds of 0.25, "one default for four repayments".
+-   It is not fitted by least squares but by **maximum likelihood**: Python picks the $\beta$s that make the defaults and repayments we actually observed as probable as possible.
+-   The price: the coefficients come out as log-odds, which nobody reads directly. So we convert them, in two steps.
+
+### The code
 
 ```{python}
 #| echo: true
 loans = qmib.load("loans")
-m = smf.logit("default ~ fico", data=loans).fit(disp=0)
+m = smf.logit("default ~ fico", data=loans).fit(disp=0)   # maximum likelihood
 
-print(m.params.round(4))                         # 1. log-odds
-print(np.exp(m.params["fico"]).round(4))         # 2. odds ratio
-m.predict(pd.DataFrame({"fico": [600, 700, 850]})).round(3)   # 3. probabilities
+print(m.params.round(4))                         # step 0: log-odds
+print(np.exp(m.params["fico"]).round(4))         # step 1: odds ratio
+# step 2: probabilities, inside the range of the data (FICO 612 to 827)
+m.predict(pd.DataFrame({"fico": [650, 700, 800]})).round(3)
 ```
 
+:::::
+
+## Session 4 · When the outcome is a category: results and interpretation {.scrollable}
+
+::::: panel-tabset
 ### Results
 
 ```{python}
-grid = pd.DataFrame({"fico": np.arange(600, 851, 5)})
+grid = pd.DataFrame({"fico": np.arange(612, 828, 5)})
 fig, ax = plt.subplots(figsize=(7.6, 2.7))
 ax.plot(grid["fico"], m.predict(grid), color=CL.accent, lw=2.6)
-for f_ in (600, 700, 850):
+for f_ in (650, 700, 800):
     p_ = float(m.predict(pd.DataFrame({"fico": [f_]}))[0])
     ax.scatter(f_, p_, color=CL.warn, zorder=5)
     ax.annotate(f"{p_:.2f}", (f_, p_), textcoords="offset points", xytext=(6, 6), fontsize=8.5)
-ax.set_xlabel("FICO score"); ax.set_ylabel("P(default)"); ax.set_ylim(0, .45)
+ax.set_xlabel("FICO score"); ax.set_ylabel("P(default)"); ax.set_ylim(0, .4)
 plt.show()
 ```
+
+::: {.muted}
+The predicted probability of default falls as the credit score rises — and never leaves the 0–1 range.
+:::
 
 ### Interpretation
 
@@ -299,15 +370,22 @@ The chain, from what Python gives you to what a reader understands:
 |---|---|---|
 | $b_1 =$ `{python} f"{m.params['fico']:.4f}"` | nothing | one more FICO point lowers the **log-odds** of default by `{python} f"{-m.params['fico']:.4f}"` |
 | $e^{b_1} =$ `{python} f"{np.exp(m.params['fico']):.3f}"` | exponentiate | the **odds** of default are `{python} f"{1 - np.exp(m.params['fico']):.1%}"` lower per point, ceteris paribus |
-| $b_0 + b_1 x$ | $e^{xb}/(1+e^{xb})$ | the **probability**: `{python} f"{float(m.predict(pd.DataFrame({'fico': [600]}))[0]):.2f}"` at 600, `{python} f"{float(m.predict(pd.DataFrame({'fico': [850]}))[0]):.2f}"` at 850 |
+| $b_0 + b_1 x$ | $e^{xb}/(1+e^{xb})$ | the **probability**: `{python} f"{float(m.predict(pd.DataFrame({'fico': [650]}))[0]):.2f}"` at 650, `{python} f"{float(m.predict(pd.DataFrame({'fico': [800]}))[0]):.2f}"` at 800 |
 
-::: {.check}
-Ordinal and multinomial models follow the same chain: log-odds → odds (or relative risk) ratios → predicted probabilities.
+-   The odds ratio is the same at every score; the change in **probability** is not — it is largest where the curve is steepest.
+-   **Ordinal** and **multinomial** models follow the same chain: log-odds → odds (or relative risk) ratios → predicted probabilities.
+
+### What to write
+
+> "Each additional FICO point is associated with `{python} f"{1 - np.exp(m.params['fico']):.1%}"` lower odds of default (odds ratio `{python} f"{np.exp(m.params['fico']):.3f}"`). The predicted probability of default falls from `{python} f"{float(m.predict(pd.DataFrame({'fico': [650]}))[0]):.2f}"` at a score of 650 to `{python} f"{float(m.predict(pd.DataFrame({'fico': [800]}))[0]):.2f}"` at 800."
+
+::: {.warn}
+Never report a log-odds as if it were a probability, and never predict outside the scores you observed.
 :::
 
 :::::
 
-## Session 5 · Too many predictors: let the computer choose {.scrollable}
+## Session 5 · Too many predictors: the goal and the code {.scrollable}
 
 ```{python}
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
@@ -315,7 +393,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-import statsmodels.api as sm
 
 raw = pd.read_parquet("../../data/spine/angle_c_country.parquet")
 YCOL = "rd_pct_gdp"
@@ -325,51 +402,83 @@ Xtr, Xte, ytr, yte = train_test_split(d5[XCOLS], d5[YCOL], test_size=0.3, random
 ```
 
 ::::: panel-tabset
-### Goal
+### The question
 
-> **Which of `{python} len(XCOLS)` candidate predictors explain R&D intensity, with only `{python} len(d5)` countries?** Choosing by hand is slow and subjective, and OLS with them all fits the noise.
+> **Which of `{python} len(XCOLS)` candidate predictors explain R&D intensity, with only `{python} len(d5)` countries?**
 
-| Method | What it does |
-|---|---|
-| **Stepwise** (old style) | adds one predictor at a time while **AIC** improves |
-| **Ridge** | keeps all predictors, **shrinks** every coefficient |
-| **Lasso** | shrinks, and sets the weak ones to **exactly zero** |
-| **Elastic net** | like the lasso, but keeps correlated predictors **together** |
+-   With almost as many predictors as rows, OLS **fits the noise**: large coefficients, wrong signs, useless variables kept. It looks perfect on the data it was fitted to and fails on new data.
+-   Choosing the predictors by hand is slow and subjective. So we **automate model selection**.
 
-All three penalised methods minimise $\sum_i (y_i - \hat y_i)^2 + \lambda \times \text{size of the coefficients}$, with $\lambda$ (`alpha` in Python) chosen by cross-validation.
+### Four ways to choose
 
-### Implementation
+| Method | What it does | In one phrase |
+|---|---|---|
+| **Stepwise** (old style) | adds one predictor at a time while **AIC** improves | a greedy loop |
+| **Ridge** | keeps all predictors, **shrinks** every coefficient | a tax on big coefficients |
+| **Lasso** | shrinks, and sets the weak ones to **exactly zero** | an entry fee: the weak leave |
+| **Elastic net** | a mix: zeros like the lasso, keeps correlated predictors **together** | our default |
+
+The three penalised methods all minimise
+
+$$\sum_i (y_i - \hat y_i)^2 + \lambda \times \text{size of the coefficients}$$
+
+$\lambda$ (`alpha` in Python) sets the price: 0 gives OLS, a huge value pushes everything to 0. **Cross-validation** chooses it, and the predictors must be **standardised** first.
+
+### The code
 
 ```{python}
 #| echo: true
 def test_rmse(model):                  # fit on 70% of rows, score on the other 30%
-    pipe = make_pipeline(StandardScaler(), model).fit(Xtr, ytr)
-    kept = int(np.sum(np.abs(pipe[-1].coef_) > 1e-8))
+    pipe = make_pipeline(StandardScaler(), model).fit(Xtr, ytr)   # standardise first
+    kept = int(np.sum(np.abs(pipe[-1].coef_) > 1e-8))             # non-zero coefficients
     return kept, mean_squared_error(yte, pipe.predict(Xte)) ** 0.5
 
 results = {
     "OLS, all predictors": test_rmse(LinearRegression()),
-    "ridge":       test_rmse(RidgeCV(alphas=np.logspace(-3, 3, 60))),
+    "ridge":       test_rmse(RidgeCV(alphas=np.logspace(-3, 3, 60))),   # λ by CV
     "lasso":       test_rmse(LassoCV(cv=5, random_state=0, max_iter=50_000)),
     "elastic net": test_rmse(ElasticNetCV(l1_ratio=0.5, cv=5, random_state=0, max_iter=50_000)),
 }
 ```
 
+:::::
+
+## Session 5 · Too many predictors: results and interpretation {.scrollable}
+
+```{python}
+res = pd.DataFrame(results, index=["predictors kept", "test RMSE"]).T.astype({"predictors kept": int})
+```
+
+::::: panel-tabset
 ### Results
 
 ```{python}
 #| echo: true
-pd.DataFrame(results, index=["predictors kept", "test RMSE"]).T.astype({"predictors kept": int}).round(3)
+res.round(3)
+```
+
+```{python}
+fig, ax = plt.subplots(figsize=(7.2, 2.0))
+ax.barh(res.index, res["test RMSE"], color=[CL.warn, CL.good, CL.accent, CL.muted], height=.6)
+for i, v in enumerate(res["test RMSE"]):
+    ax.text(v + .005, i, f"{v:.3f}", va="center", fontsize=8.5)
+ax.invert_yaxis(); ax.set_xlabel("error on new rows (test RMSE) — lower is better")
+ax.grid(axis="y", visible=False)
+plt.show()
 ```
 
 ### Interpretation
 
--   OLS with every predictor **fits the noise**: it has the largest error on new rows.
--   The penalised models **cut that error** — nothing was added, the coefficients were only restrained.
--   Ridge keeps all predictors; the lasso and the elastic net return a **short list**. The elastic net keeps groups of correlated predictors together, which is why it is our default.
+-   **OLS with every predictor** has the largest error on rows it never saw (`{python} f"{res.loc['OLS, all predictors', 'test RMSE']:.3f}"`): it learned the noise of the training rows.
+-   The **penalised models** cut that error by more than half. Nothing was added — the coefficients were only restrained.
+-   **Ridge** keeps all `{python} len(XCOLS)` predictors; the **lasso** keeps `{python} int(res.loc['lasso', 'predictors kept'])` and the **elastic net** `{python} int(res.loc['elastic net', 'predictors kept'])`. When predictors come in correlated groups, the elastic net keeps the group, which is why it is our default.
+
+### What to write
+
+> "We selected predictors with an elastic net (mix 0.5, λ chosen by 5-fold cross-validation on standardised predictors). It keeps `{python} int(res.loc['elastic net', 'predictors kept'])` of `{python} len(XCOLS)` candidates and reduces the test error from `{python} f"{res.loc['OLS, all predictors', 'test RMSE']:.3f}"` (OLS) to `{python} f"{res.loc['elastic net', 'test RMSE']:.3f}"`."
 
 ::: {.warn}
-What a method keeps is *a* set of predictors that predicts well on this sample — not "the variables that matter". And no $p$-values after selection.
+Do not write "these are the variables that matter": the selection is *a* set that predicts well on this sample. And no $p$-values after selection.
 :::
 
 :::::
