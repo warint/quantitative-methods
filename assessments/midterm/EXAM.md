@@ -352,5 +352,7 @@ before answering at all. Say why that detail, rather than the $p$-value, is what
 
 *Worked solutions, with the marks shown per sub-part: [`SOLUTIONS.md`](SOLUTIONS.md)*
 
+*More to train on: [`PRACTICE.md`](PRACTICE.md), 77 questions by session and by part, with an [answer key](PRACTICE-ANSWERS.md).*
+
 > Sit the paper first, closed book and timed. The solutions are only worth reading against an
 > attempt you have already made.
