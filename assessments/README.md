@@ -74,6 +74,9 @@ computer, no internet · Sessions 1 to 6.**
 - Practise on the [sample paper](midterm/EXAM.md) under exam conditions, then check it against the
   [worked solutions](midterm/SOLUTIONS.md). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
+- **Train with the [practice questions](midterm/PRACTICE.md)**: 77 questions in the exam's four
+  parts, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
+  answering on paper.
 
 ---
 
