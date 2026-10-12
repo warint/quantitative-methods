@@ -15,6 +15,8 @@ kind of thinking it marks:
 | **C — diagnosis** | find the planted error in an output or a procedure | 8 items |
 | **D — judgement** | say what a number does *not* license | 5 prompts |
 
+**To print:** [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf) · [answer key](https://warint.github.io/quantitative-methods/midterm-practice-answers.pdf) (PDF).
+
 Each question carries its session in brackets, so you can train one session at a time.
 
 > **How to use it.** Answer first, on paper, without notes. Only then open the

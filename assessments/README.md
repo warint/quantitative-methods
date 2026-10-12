@@ -76,7 +76,8 @@ computer, no internet · Sessions 1 to 6.**
   covers every session examined.
 - **Train with the [practice questions](midterm/PRACTICE.md)**: 77 questions in the exam's four
   parts, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
-  answering on paper.
+  answering on paper. Printable: [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf)
+  · [answers](https://warint.github.io/quantitative-methods/midterm-practice-answers.pdf) (PDF).
 
 ---
 

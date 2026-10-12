@@ -156,6 +156,15 @@ def main():
         shutil.copy2(summary, DOCS / "midterm-summary.pdf")
         print("published the midterm summary to docs/")
 
+    # The practice questions and their answer key, rendered to PDF by
+    # scripts/build_midterm_practice.py in the summary's house style.
+    for stem, dest in [("PRACTICE", "midterm-practice.pdf"),
+                       ("PRACTICE-ANSWERS", "midterm-practice-answers.pdf")]:
+        src = ROOT / "assessments" / "midterm" / f"{stem}.pdf"
+        if src.exists():
+            shutil.copy2(src, DOCS / dest)
+            print(f"published {dest} to docs/")
+
     decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:
         raise SystemExit("No rendered decks found — run scripts/render_session_lectures.sh first.")
