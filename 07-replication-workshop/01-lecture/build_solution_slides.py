@@ -43,7 +43,7 @@ def split(script):
 
 # Steps whose code and output together are taller than a slide, measured on the
 # rendered deck. Re-measure after editing a script; add the step here if it spills.
-LONG = {"r2": {"9"}}     # measured on the rendered deck
+LONG = {"r2": {"9"}, "r4": {"12"}}     # measured on the rendered deck
 WIDE = set()             # a printout too long for one column
 
 

@@ -36,11 +36,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
+import statsmodels.api as sm
+from statsmodels.miscmodels.ordinal_model import OrderedModel
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+
 
 
 # Step 1 · Load the firms: one row is one firm in one year, 1989-1996
@@ -78,7 +81,72 @@ plt.xlabel("Fitted values"); plt.ylabel("Residuals")
 plt.savefig(OUTPUT / "s06_resid_vs_fitted.png", dpi=110, bbox_inches="tight")
 plt.show()
 
-# Step 6 · The candidates for ridge, lasso and elastic net (session 5)
+# Step 6 · Binary logit: log-odds (session 4, LR 6) — is the firm more productive than the median firm?
+d["high_tfp"] = (d["tfp1000"] > d["tfp1000"].median()).astype(int)   # 1 = above the median
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("high_tfp ~ lagtariff", data=d).fit(disp=0)
+print(m2.params.round(4))
+
+# Step 7 · Binary logit: odds (session 4, LR 7)
+# Log-odds -> odds ratio: take the exponential of each coefficient
+print(np.exp(m2.params["lagtariff"]).round(4))
+
+# Step 8 · Binary logit: predicted probability (session 4, LR 8)
+# predict() does the same calculation for you
+print(m2.predict(pd.DataFrame({"lagtariff": [0.4, 0.7, 1.0]})).round(3))   # inside the data: 0.1 to 3.5
+
+# Step 9 · Ordinal logit (session 4, OLR 3) — productivity in thirds: low < middle < high
+d["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])
+# Keep the order: low < middle < high
+order = ["low", "middle", "high"]
+d["tfp_c"] = pd.Categorical(d["tfp_third"], categories=order, ordered=True)
+om = OrderedModel(d["tfp_c"], d[["lagtariff", "laginputariff", "age"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
+
+# Step 10 · Ordinal logit: log-odds and odds (session 4, OLR 4)
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+print(om.params[["lagtariff", "laginputariff", "age"]].round(3))
+# Proportional-odds ratios
+print(np.exp(om.params[["lagtariff", "laginputariff", "age"]]).round(3))
+
+# Step 11 · Ordinal logit: probabilities (session 4, OLR 5)
+# The same firm (20 years old, input tariff 0.3) under a high and a low output tariff.
+# Columns: low, middle, high productivity.
+new = pd.DataFrame({"lagtariff": [1.0, 0.4], "laginputariff": [0.3, 0.3], "age": [20, 20]})
+print(pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["tariff 1.0", "tariff 0.4"]).round(3))
+
+# Step 12 · Multinomial logit (session 4, MLR 3) — who owns the firm? No natural order
+d["owner"] = "stand-alone"
+d.loc[d["prgroup"] == 1, "owner"] = "business group"
+d.loc[d["govown"] == 1, "owner"] = "state-owned"
+d.loc[d["foreign"] == 1, "owner"] = "foreign"
+# Code 0 (stand-alone) is the baseline: every coefficient reads "relative to stand-alone"
+levels = ["stand-alone", "business group", "state-owned", "foreign"]
+d["owner_c"] = pd.Categorical(d["owner"], categories=levels).codes
+# Leave large out, so large firms are the reference the other two sizes are compared with
+X = d[["medium", "small"]].astype(float)
+X["tfp1000"] = d["tfp1000"].astype(float)
+X = sm.add_constant(X)
+# Three sets of coefficients at once, each against the stand-alone baseline
+mn = sm.MNLogit(d["owner_c"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+
+# Step 13 · Multinomial logit: log-odds and relative risk ratios (session 4, MLR 4)
+pd.set_option("display.width", 130)       # six columns: print them side by side
+pd.set_option("display.max_columns", 10)
+# Log-odds and RRR, for each owner type vs stand-alone
+print(pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1)
+      .set_axis(["log-odds: group", "log-odds: state", "log-odds: foreign",
+                 "RRR: group", "RRR: state", "RRR: foreign"], axis=1).round(3))
+
+# Step 14 · Multinomial logit: probabilities (session 4, MLR 5)
+# Large firms: the median productivity, then across the range
+grid = pd.DataFrame({"const": 1.0, "medium": 0.0, "small": 0.0,
+                     "tfp1000": [d["tfp1000"].median(), -0.5, 0.0, 0.5]})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["tfp1000"].round(2))
+print(out.round(3))
+
+# Step 15 · The candidates for ridge, lasso and elastic net (session 5)
 d = d.copy()
 d["age2"] = d["age"] ** 2
 years = pd.get_dummies(d["yr"], prefix="yr", drop_first=True).astype(float)   # 1989 is the base
@@ -88,7 +156,7 @@ XCOLS = cols[1:] + ["age2"] + list(years.columns)
 Xc, yc = d[XCOLS].astype(float), d[YCOL].astype(float)
 print(f"{len(XCOLS)} candidates:", XCOLS)
 
-# Step 7 · Ridge (session 5)
+# Step 16 · Ridge (session 5)
 from sklearn.linear_model import RidgeCV
 
 ridge = make_pipeline(StandardScaler(),                        # same scale for all
@@ -97,7 +165,7 @@ ridge = make_pipeline(StandardScaler(),                        # same scale for 
 print(f"λ = {ridge[-1].alpha_:.2f}")
 print(f"ridge kept {np.sum(ridge[-1].coef_ != 0)} of {len(XCOLS)} — it never drops a predictor")
 
-# Step 8 · Lasso (session 5)
+# Step 17 · Lasso (session 5)
 from sklearn.linear_model import LassoCV
 
 lasso = make_pipeline(StandardScaler(),
@@ -107,7 +175,7 @@ kept = [c for c, b in zip(XCOLS, lasso[-1].coef_) if b != 0]
 print(f"λ = {lasso[-1].alpha_:.4f}")
 print(f"lasso kept {len(kept)} of {len(XCOLS)}:", kept)
 
-# Step 9 · Elastic net (session 5)
+# Step 18 · Elastic net (session 5)
 from sklearn.linear_model import ElasticNetCV
 
 enet = make_pipeline(StandardScaler(),
@@ -118,7 +186,7 @@ kept = [c for c, b in zip(XCOLS, enet[-1].coef_) if b != 0]
 print(f"λ = {enet[-1].alpha_:.4f}")
 print(f"elastic net kept {len(kept)} of {len(XCOLS)}:", kept)
 
-# Step 10 · The four, on rows they never saw (session 5, as reviewed in session 6)
+# Step 19 · The four, on rows they never saw (session 5, as reviewed in session 6)
 Xtr, Xte, ytr, yte = train_test_split(Xc, yc, test_size=0.3, random_state=7)
 
 def test_rmse(model):                  # fit on 70% of rows, score on the other 30%

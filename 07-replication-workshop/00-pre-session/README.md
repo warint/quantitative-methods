@@ -19,7 +19,7 @@ you know what the models will be fitted on.
 | 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* · [article](https://doi.org/10.1016/j.jinteco.2021.103526) | OLS and a binary logit |
 | 2 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* · [article](https://doi.org/10.1371/journal.pone.0224194) | binary, ordinal and multinomial logits |
 | 3 | Blonigen & Piger (2014), *Determinants of foreign direct investment* · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704) | OLS, ridge, lasso, elastic net |
-| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* · [article](https://doi.org/10.1162/REST_a_00095) | OLS, ridge, lasso, elastic net |
+| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* · [article](https://doi.org/10.1162/REST_a_00095) | OLS, binary, ordinal and multinomial logits, ridge, lasso, elastic net |
 
 ---
 

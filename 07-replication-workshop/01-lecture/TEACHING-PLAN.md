@@ -34,7 +34,7 @@ worth your attention in the first half hour.
 | 0:15 – 0:55 | Paper 1 · Fraiberger | Steps 2–8 — a slope of 0.07 points with R² ≈ 0.001, and P(up day) moving only from 0.50 to 0.54. Ask: *significant, but does it matter?* |
 | 0:55 – 1:35 | Paper 2 · Saganowski | Steps 3–11 — size lowers the chance of dissolving (binary) yet pushes groups toward **shrinking** (ordinal, multinomial). Ask: *which model answers which question?* |
 | 1:45 – 2:15 | Paper 3 · Blonigen & Piger | Step 8 — 765 pairs for 56 candidates: the penalised models edge OLS on held-out pairs, and the lasso keeps 43. Ask: *is a dropped variable "no effect"?* |
-| 2:15 – 2:50 | Paper 4 · Topalova & Khandelwal | Step 10 — with ~10,000 rows for 16 candidates, the penalties keep everything and tie OLS. Ask: *when does a penalty help, and when not?* |
+| 2:15 – 2:50 | Paper 4 · Topalova & Khandelwal | Steps 6–14 — the same tariff read three ways: odds of being above the median, the productivity thirds, and (multinomial) who owns the firm. Step 19 — with ~10,000 rows for 16 candidates, the penalties keep everything and tie OLS. Ask: *when does a penalty help, and when not?* |
 
 At **2:15**, remind split-and-teach teams to stop and teach each other.
 

@@ -1075,7 +1075,7 @@ Thierry Warin, PhD
 <li>Paper 1 · news sentiment and stock returns — OLS and a binary logit</li>
 <li>Paper 2 · social groups — binary, ordinal and multinomial logits</li>
 <li>Paper 3 · foreign direct investment — OLS, ridge, lasso, elastic net</li>
-<li>Paper 4 · tariffs and productivity — OLS, ridge, lasso, elastic net</li>
+<li>Paper 4 · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net</li>
 <li>The log, and before the midterm</li>
 </ol>
 </section>
@@ -1171,7 +1171,7 @@ Thierry Warin, PhD
 </tr>
 <tr class="even">
 <td><strong>2:15 – 2:50</strong></td>
-<td><strong>Paper 4</strong> · Session 06 data · tariffs and productivity — OLS, ridge, lasso, elastic net</td>
+<td><strong>Paper 4</strong> · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net</td>
 </tr>
 <tr class="odd">
 <td><strong>2:50 – 3:00</strong></td>
@@ -1302,7 +1302,7 @@ Thierry Warin, PhD
 <div class="tab-content">
 <div id="tabset-1-1">
 <p>The lines that open every script: find the repository, import what the steps use.</p>
-<div id="4ce83ec7" class="cell" data-execution_count="2">
+<div id="bee99d6a" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href></a><span class="im">import</span> os</span>
 <span id="cb1-3"><a href></a><span class="im">import</span> sys</span>
@@ -1326,7 +1326,7 @@ Thierry Warin, PhD
 </div>
 <div id="tabset-1-2">
 <p><strong>Step 1 · Load the data: one row is a country-day</strong></p>
-<div id="d40b2f50" class="cell" data-execution_count="3">
+<div id="de80d481" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="co"># Step 1 · Load the data: one row is a country-day</span></span>
 <span id="cb2-2"><a href></a>path <span class="op">=</span> <span class="st">&quot;02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta&quot;</span></span>
 <span id="cb2-3"><a href></a>d <span class="op">=</span> pd.read_stata(path, columns<span class="op">=</span>[<span class="st">&quot;iso&quot;</span>, <span class="st">&quot;DATE&quot;</span>, <span class="st">&quot;F0_index&quot;</span>, <span class="st">&quot;L1_sent1_best&quot;</span>, <span class="st">&quot;L1_vix&quot;</span>])</span>
@@ -1340,7 +1340,7 @@ Thierry Warin, PhD
 </div>
 <div id="tabset-1-3">
 <p><strong>Step 2 · Three lines of Python (session 03): today’s return on yesterday’s news</strong></p>
-<div id="b0db6006" class="cell" data-execution_count="4">
+<div id="d647ac74" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># Step 2 · Three lines of Python (session 03): today&#39;s return on yesterday&#39;s news</span></span>
 <span id="cb4-2"><a href></a><span class="co"># The formula reads &quot;F0_index explained by L1_sent1_best&quot;. statsmodels</span></span>
 <span id="cb4-3"><a href></a><span class="co"># adds the intercept for you; write ~ 0 + x if you ever want it suppressed,</span></span>
@@ -1359,7 +1359,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-4">
 <p><strong>Step 3 · How much did the line explain? (session 03)</strong></p>
-<div id="1fa8d0ff" class="cell" data-execution_count="5">
+<div id="df81d89b" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># Step 3 · How much did the line explain? (session 03)</span></span>
 <span id="cb6-2"><a href></a><span class="co"># R-squared is the share of variance the line accounts for — and nothing about</span></span>
 <span id="cb6-3"><a href></a><span class="co"># whether the line is the right shape. The rest of this hour is that difference.</span></span>
@@ -1371,7 +1371,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-5">
 <p><strong>Step 4 · Two predictors: what “controlling for” means (session 03)</strong></p>
-<div id="0e8f1ef2" class="cell" data-execution_count="6">
+<div id="6011ae98" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="co"># Step 4 · Two predictors: what &quot;controlling for&quot; means (session 03)</span></span>
 <span id="cb8-2"><a href></a><span class="co"># Adding a second predictor changes what the first coefficient means: it is now</span></span>
 <span id="cb8-3"><a href></a><span class="co"># the association holding global risk (yesterday&#39;s VIX) fixed, not the raw</span></span>
@@ -1388,7 +1388,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-6">
 <p><strong>Step 5 · The residual plot is the instrument (session 03)</strong></p>
-<div id="957ae4c6" class="cell" data-execution_count="7">
+<div id="2da0e1e9" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Step 5 · The residual plot is the instrument (session 03)</span></span>
 <span id="cb10-2"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-3"><a href></a>plt.scatter(model2.fittedvalues, model2.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
@@ -1406,7 +1406,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-7">
 <p><strong>Step 6 · Log-odds (session 04): does the market go up today?</strong></p>
-<div id="eec30e98" class="cell" data-execution_count="8">
+<div id="677cdd7e" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># Step 6 · Log-odds (session 04): does the market go up today?</span></span>
 <span id="cb11-2"><a href></a><span class="co"># Fit the logistic regression. The coefficients come out as log-odds.</span></span>
 <span id="cb11-3"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;up ~ L1_sent1_best&quot;</span>, data<span class="op">=</span>d).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
@@ -1420,7 +1420,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-8">
 <p><strong>Step 7 · Odds (session 04)</strong></p>
-<div id="592d6b00" class="cell" data-execution_count="9">
+<div id="6612db58" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Step 7 · Odds (session 04)</span></span>
 <span id="cb13-2"><a href></a><span class="co"># Log-odds -&gt; odds ratio: take the exponential of each coefficient</span></span>
 <span id="cb13-3"><a href></a><span class="bu">print</span>(np.exp(m2.params[<span class="st">&quot;L1_sent1_best&quot;</span>]).<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1431,7 +1431,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-1-9">
 <p><strong>Step 8 · Predicted probability (session 04)</strong></p>
-<div id="a77d0537" class="cell" data-execution_count="10">
+<div id="8fc1409f" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Step 8 · Predicted probability (session 04)</span></span>
 <span id="cb15-2"><a href></a><span class="co"># predict() does the same calculation for you: a bad, an ordinary and a good news day</span></span>
 <span id="cb15-3"><a href></a><span class="bu">print</span>(m2.predict(pd.DataFrame({<span class="st">&quot;L1_sent1_best&quot;</span>: [<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>]})).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1535,7 +1535,7 @@ dtype: float64</code></pre>
 <div class="tab-content">
 <div id="tabset-2-1">
 <p>The lines that open every script: find the repository, import what the steps use.</p>
-<div id="eff171f3" class="cell" data-execution_count="11">
+<div id="9bef745d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb17-2"><a href></a><span class="im">import</span> os</span>
 <span id="cb17-3"><a href></a><span class="im">import</span> sys</span>
@@ -1566,7 +1566,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-2">
 <p><strong>Step 1 · Load the groups, and what happened to each one next week</strong></p>
-<div id="2b5697c2" class="cell" data-execution_count="12">
+<div id="a73d7635" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="co"># Step 1 · Load the groups, and what happened to each one next week</span></span>
 <span id="cb18-2"><a href></a>FILE <span class="op">=</span> (<span class="st">&quot;04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/&quot;</span></span>
 <span id="cb18-3"><a href></a>        <span class="st">&quot;12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv&quot;</span>)</span>
@@ -1588,7 +1588,7 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 <div id="tabset-2-3">
 <p><strong>Step 2 · Three features a person can read</strong></p>
-<div id="0c9660b0" class="cell" data-execution_count="13">
+<div id="07fa3d85" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href></a><span class="co"># Step 2 · Three features a person can read</span></span>
 <span id="cb20-2"><a href></a>groups <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb20-3"><a href></a>    <span class="st">&quot;event&quot;</span>: raw[<span class="st">&quot;event_type&quot;</span>],</span>
@@ -1606,7 +1606,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-4">
 <p><strong>Step 3 · Binary logit: log-odds (session 04, LR 6)</strong></p>
-<div id="20c3d69e" class="cell" data-execution_count="14">
+<div id="f05d622c" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href></a><span class="co"># Step 3 · Binary logit: log-odds (session 04, LR 6)</span></span>
 <span id="cb22-2"><a href></a>groups[<span class="st">&quot;dissolve&quot;</span>] <span class="op">=</span> (groups[<span class="st">&quot;event&quot;</span>] <span class="op">==</span> <span class="st">&quot;dissolving&quot;</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb22-3"><a href></a><span class="co"># Fit the logistic regression. The coefficients come out as log-odds.</span></span>
@@ -1621,7 +1621,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-5">
 <p><strong>Step 4 · Binary logit: odds (session 04, LR 7)</strong></p>
-<div id="4877b25e" class="cell" data-execution_count="15">
+<div id="694f86b0" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href></a><span class="co"># Step 4 · Binary logit: odds (session 04, LR 7)</span></span>
 <span id="cb24-2"><a href></a><span class="co"># Log-odds -&gt; odds ratio: take the exponential of each coefficient</span></span>
 <span id="cb24-3"><a href></a><span class="bu">print</span>(np.exp(m2.params[<span class="st">&quot;log2_size&quot;</span>]).<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1632,7 +1632,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-6">
 <p><strong>Step 5 · Binary logit: predicted probability (session 04, LR 8)</strong></p>
-<div id="bfa3c668" class="cell" data-execution_count="16">
+<div id="459fd7f7" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href></a><span class="co"># Step 5 · Binary logit: predicted probability (session 04, LR 8)</span></span>
 <span id="cb26-2"><a href></a><span class="co"># predict() does the same calculation for you: groups of 4, 8 and 16 members</span></span>
 <span id="cb26-3"><a href></a><span class="bu">print</span>(m2.predict(pd.DataFrame({<span class="st">&quot;log2_size&quot;</span>: [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]})).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1646,7 +1646,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-7">
 <p><strong>Step 6 · Ordinal logit: the code (session 04, OLR 3)</strong></p>
-<div id="8d9175e2" class="cell" data-execution_count="17">
+<div id="15d04717" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href></a><span class="co"># Step 6 · Ordinal logit: the code (session 04, OLR 3)</span></span>
 <span id="cb28-2"><a href></a><span class="co"># Keep the order: shrinking &lt; continuing &lt; growing</span></span>
 <span id="cb28-3"><a href></a>order <span class="op">=</span> [<span class="st">&quot;shrinking&quot;</span>, <span class="st">&quot;continuing&quot;</span>, <span class="st">&quot;growing&quot;</span>]</span>
@@ -1661,7 +1661,7 @@ Dep. Variable:                event_c   Log-Likelihood:                -275.91
 Model:                   OrderedModel   AIC:                             561.8
 Method:            Maximum Likelihood   BIC:                             580.4
 Date:                Tue, 13 Oct 2026                                         
-Time:                        17:58:41                                         
+Time:                        18:16:51                                         
 No. Observations:                 304                                         
 Df Residuals:                     299                                         
 Df Model:                           3                                         
@@ -1679,7 +1679,7 @@ continuing/growing      -0.1979      0.132     -1.497      0.134      -0.457    
 </div>
 <div id="tabset-2-8">
 <p><strong>Step 7 · Ordinal logit: log-odds -&gt; odds (session 04, OLR 4)</strong></p>
-<div id="31f89603" class="cell" data-execution_count="18">
+<div id="afe19a29" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href></a><span class="co"># Step 7 · Ordinal logit: log-odds -&gt; odds (session 04, OLR 4)</span></span>
 <span id="cb30-2"><a href></a><span class="co"># Log-odds: the slopes as fitted (the cutpoints are left out)</span></span>
 <span id="cb30-3"><a href></a><span class="bu">print</span>(om.params[[<span class="st">&quot;log2_size&quot;</span>, <span class="st">&quot;avg_degree&quot;</span>, <span class="st">&quot;aging&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span>
@@ -1699,7 +1699,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-9">
 <p><strong>Step 8 · Ordinal logit: probabilities (session 04, OLR 5)</strong></p>
-<div id="275e6e9c" class="cell" data-execution_count="19">
+<div id="dd90f983" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href></a><span class="co"># Step 8 · Ordinal logit: probabilities (session 04, OLR 5)</span></span>
 <span id="cb32-2"><a href></a><span class="co"># A 4-member group, and an otherwise identical 16-member one.</span></span>
 <span id="cb32-3"><a href></a><span class="co"># Columns: shrinking, continuing, growing.</span></span>
@@ -1727,7 +1727,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-2-11">
 <p><strong>Step 9 · Multinomial logit: the code (session 04, MLR 3)</strong> — what it prints</p>
-<div id="54a9acaf" class="cell" data-execution_count="20">
+<div id="7e394f39" class="cell" data-execution_count="20">
 <div class="cell-output cell-output-stdout">
 <pre><code>==============================================================================
  event_c=1       coef    std err          z      P&gt;|z|      [0.025      0.975]
@@ -1756,7 +1756,7 @@ aging          0.0351      0.016      2.223      0.026       0.004       0.066
 </div>
 <div id="tabset-2-12">
 <p><strong>Step 10 · Multinomial logit: log-odds -&gt; relative risk ratios (session 04, MLR 4)</strong></p>
-<div id="8c5f1ca3" class="cell" data-execution_count="21">
+<div id="33c80234" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href></a><span class="co"># Step 10 · Multinomial logit: log-odds -&gt; relative risk ratios (session 04, MLR 4)</span></span>
 <span id="cb36-2"><a href></a><span class="co"># Log-odds and RRR, for shrinking, growing and continuing vs dissolving</span></span>
 <span id="cb36-3"><a href></a><span class="bu">print</span>(pd.concat({<span class="st">&quot;log-odds&quot;</span>: mn.params, <span class="st">&quot;RRR&quot;</span>: np.exp(mn.params)}, axis<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1773,7 +1773,7 @@ aging                     0.035              0.012                 0.035        
 </div>
 <div id="tabset-2-13">
 <p><strong>Step 11 · Multinomial logit: probabilities (session 04, MLR 5)</strong></p>
-<div id="1ed9bc4e" class="cell" data-execution_count="22">
+<div id="c8d957c2" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href></a><span class="co"># Step 11 · Multinomial logit: probabilities (session 04, MLR 5)</span></span>
 <span id="cb38-2"><a href></a><span class="co"># Typical groups (median degree and aging), from 4 to 32 members</span></span>
 <span id="cb38-3"><a href></a>grid <span class="op">=</span> pd.DataFrame({<span class="st">&quot;const&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;log2_size&quot;</span>: [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>],</span>
@@ -1876,7 +1876,7 @@ log2_size
 <div class="tab-content">
 <div id="tabset-3-1">
 <p>The lines that open every script: find the repository, import what the steps use.</p>
-<div id="7e0eb07b" class="cell" data-execution_count="23">
+<div id="936573ff" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb40-2"><a href></a><span class="im">import</span> os</span>
 <span id="cb40-3"><a href></a><span class="im">import</span> sys</span>
@@ -1907,7 +1907,7 @@ log2_size
 </div>
 <div id="tabset-3-2">
 <p><strong>Step 1 · Load the data: one row per country pair, log FDI, 56 candidates</strong></p>
-<div id="fe608c9d" class="cell" data-execution_count="24">
+<div id="434f6c24" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href></a><span class="co"># Step 1 · Load the data: one row per country pair, log FDI, 56 candidates</span></span>
 <span id="cb41-2"><a href></a>fdi <span class="op">=</span> qmib.load(<span class="st">&quot;fdi&quot;</span>)</span>
 <span id="cb41-3"><a href></a>YCOL <span class="op">=</span> <span class="st">&quot;log_fdi&quot;</span></span>
@@ -1924,7 +1924,7 @@ log2_size
 </div>
 <div id="tabset-3-3">
 <p><strong>Step 2 · OLS: three lines of Python (session 3)</strong></p>
-<div id="fe3352bf" class="cell" data-execution_count="25">
+<div id="7a4098d2" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href></a><span class="co"># Step 2 · OLS: three lines of Python (session 3)</span></span>
 <span id="cb43-2"><a href></a><span class="co"># The formula reads &quot;log_fdi explained by host_gdp&quot; (both in logs).</span></span>
 <span id="cb43-3"><a href></a>model <span class="op">=</span> smf.ols(<span class="st">&quot;log_fdi ~ host_gdp&quot;</span>, data<span class="op">=</span>d).fit()</span>
@@ -1941,7 +1941,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-3-4">
 <p><strong>Step 3 · How much did the line explain?</strong></p>
-<div id="8e82c219" class="cell" data-execution_count="26">
+<div id="49fb05e9" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href></a><span class="co"># Step 3 · How much did the line explain?</span></span>
 <span id="cb45-2"><a href></a><span class="co"># R-squared is the share of variance the line accounts for — and nothing about</span></span>
 <span id="cb45-3"><a href></a><span class="co"># whether the line is the right shape.</span></span>
@@ -1953,7 +1953,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-3-5">
 <p><strong>Step 4 · Two predictors: what “controlling for” means</strong></p>
-<div id="bea8cfd7" class="cell" data-execution_count="27">
+<div id="f2e83493" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href></a><span class="co"># Step 4 · Two predictors: what &quot;controlling for&quot; means</span></span>
 <span id="cb47-2"><a href></a><span class="co"># Adding distance changes what the host-GDP coefficient means: it is now the</span></span>
 <span id="cb47-3"><a href></a><span class="co"># association holding distance fixed, not the raw association.</span></span>
@@ -1971,7 +1971,7 @@ R-squared = 0.078</code></pre>
 </div>
 <div id="tabset-3-6">
 <p><strong>Step 5 · Ridge (session 5)</strong></p>
-<div id="26cf8908" class="cell" data-execution_count="28">
+<div id="455b15ec" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href></a><span class="co"># Step 5 · Ridge (session 5)</span></span>
 <span id="cb49-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> RidgeCV</span>
 <span id="cb49-3"><a href></a></span>
@@ -1989,7 +1989,7 @@ ridge kept 56 of 56 — it never drops a predictor</code></pre>
 </div>
 <div id="tabset-3-7">
 <p><strong>Step 6 · Lasso</strong></p>
-<div id="40920f4e" class="cell" data-execution_count="29">
+<div id="c21c84cf" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href></a><span class="co"># Step 6 · Lasso</span></span>
 <span id="cb51-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LassoCV</span>
 <span id="cb51-3"><a href></a></span>
@@ -2007,7 +2007,7 @@ lasso kept 34 of 56</code></pre>
 </div>
 <div id="tabset-3-8">
 <p><strong>Step 7 · Elastic net</strong></p>
-<div id="222dd537" class="cell" data-execution_count="30">
+<div id="9eec46e1" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href></a><span class="co"># Step 7 · Elastic net</span></span>
 <span id="cb53-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> ElasticNetCV</span>
 <span id="cb53-3"><a href></a></span>
@@ -2026,7 +2026,7 @@ elastic net kept 46 of 56</code></pre>
 </div>
 <div id="tabset-3-9">
 <p><strong>Step 8 · Which one predicts best? Fit on 70% of the pairs, score on 30%</strong></p>
-<div id="5726dada" class="cell" data-execution_count="31">
+<div id="4298a041" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href></a><span class="co"># Step 8 · Which one predicts best? Fit on 70% of the pairs, score on 30%</span></span>
 <span id="cb55-2"><a href></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(d[XCOLS], d[YCOL], test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">7</span>)</span>
 <span id="cb55-3"><a href></a></span>
@@ -2108,35 +2108,42 @@ elastic net                       47      1.595</code></pre>
 <h2>The data, and the models</h2>
 <p><strong>Topalova &amp; Khandelwal (2011)</strong>, <em>Trade liberalization and firm productivity</em> — the authors’ data: <strong>one row = one Indian manufacturing firm in one year</strong>, 1989–1996: 14,648 firm-years, 3,077 firms. Outcome: log productivity <code>tfp1000</code>.</p>
 <div class="columns">
-<div class="column" style="width:50%;">
-<p><strong>OLS</strong> — session 03’s cells</p>
+<div class="column" style="width:30%;">
+<p><strong>OLS</strong> — session 03</p>
 <ol type="1">
 <li>Load the firms</li>
 <li>Productivity on the output tariff</li>
-<li>How much did the line explain?</li>
-<li>Two predictors: + the input tariff</li>
+<li>How much did it explain?</li>
+<li><ul>
+<li>the input tariff</li>
+</ul></li>
 <li>Residuals versus fitted</li>
 </ol>
-</div><div class="column" style="width:50%;">
-<p><strong>Ridge, lasso, elastic net</strong> — session 05’s cells</p>
-<ol start="6" type="1">
-<li>16 candidates: tariffs, ownership, size, age, years</li>
-<li>Ridge</li>
-<li>Lasso</li>
-<li>Elastic net</li>
-<li>The four, on rows they never saw</li>
-</ol>
+</div><div class="column" style="width:36%;">
+<p><strong>Logits</strong> — session 04</p>
+<ul>
+<li><strong>6–8 · Binary:</strong> above the median? log-odds → odds → probabilities</li>
+<li><strong>9–11 · Ordinal:</strong> productivity in thirds, low &lt; middle &lt; high</li>
+<li><strong>12–14 · Multinomial:</strong> who owns the firm — stand-alone, group, state, foreign</li>
+</ul>
+</div><div class="column" style="width:34%;">
+<p><strong>Penalties</strong> — session 05</p>
+<ul>
+<li><strong>15 ·</strong> 16 candidates: tariffs, ownership, size, age, years</li>
+<li><strong>16–18 ·</strong> Ridge, lasso, elastic net</li>
+<li><strong>19 ·</strong> The four, on rows they never saw</li>
+</ul>
 </div></div>
 </section>
 <section id="the-solutions-step-by-step-3" class="slide level2 scrollable">
 <h2>The solutions, step by step</h2>
 <p>Each tab is one step, run when these slides were built: the code, then what it prints. Compare your own output with it line by line.</p>
 <div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">Set-up</a></li><li><a href="#tabset-4-2">1</a></li><li><a href="#tabset-4-3">2</a></li><li><a href="#tabset-4-4">3</a></li><li><a href="#tabset-4-5">4</a></li><li><a href="#tabset-4-6">5</a></li><li><a href="#tabset-4-7">6</a></li><li><a href="#tabset-4-8">7</a></li><li><a href="#tabset-4-9">8</a></li><li><a href="#tabset-4-10">9</a></li><li><a href="#tabset-4-11">10</a></li></ul>
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">Set-up</a></li><li><a href="#tabset-4-2">1</a></li><li><a href="#tabset-4-3">2</a></li><li><a href="#tabset-4-4">3</a></li><li><a href="#tabset-4-5">4</a></li><li><a href="#tabset-4-6">5</a></li><li><a href="#tabset-4-7">6</a></li><li><a href="#tabset-4-8">7</a></li><li><a href="#tabset-4-9">8</a></li><li><a href="#tabset-4-10">9</a></li><li><a href="#tabset-4-11">10</a></li><li><a href="#tabset-4-12">11</a></li><li><a href="#tabset-4-13">12 · code</a></li><li><a href="#tabset-4-14">12 · result</a></li><li><a href="#tabset-4-15">13</a></li><li><a href="#tabset-4-16">14</a></li><li><a href="#tabset-4-17">15</a></li><li><a href="#tabset-4-18">16</a></li><li><a href="#tabset-4-19">17</a></li><li><a href="#tabset-4-20">18</a></li><li><a href="#tabset-4-21">19</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1">
 <p>The lines that open every script: find the repository, import what the steps use.</p>
-<div id="8add78a2" class="cell" data-execution_count="32">
+<div id="ef122996" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb57-2"><a href></a><span class="im">import</span> os</span>
 <span id="cb57-3"><a href></a><span class="im">import</span> sys</span>
@@ -2156,16 +2163,18 @@ elastic net                       47      1.595</code></pre>
 <span id="cb57-17"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb57-18"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb57-19"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
-<span id="cb57-20"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb57-21"><a href></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb57-22"><a href></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
-<span id="cb57-23"><a href></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb57-24"><a href></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb57-20"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb57-21"><a href></a><span class="im">from</span> statsmodels.miscmodels.ordinal_model <span class="im">import</span> OrderedModel</span>
+<span id="cb57-22"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb57-23"><a href></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb57-24"><a href></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb57-25"><a href></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb57-26"><a href></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-4-2">
 <p><strong>Step 1 · Load the firms: one row is one firm in one year, 1989-1996</strong></p>
-<div id="3e942f73" class="cell" data-execution_count="33">
+<div id="19477fcd" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href></a><span class="co"># Step 1 · Load the firms: one row is one firm in one year, 1989-1996</span></span>
 <span id="cb58-2"><a href></a>firms <span class="op">=</span> pd.read_stata(<span class="st">&quot;06-advanced-regression/data/replication/prod_dataregression.dta&quot;</span>)</span>
 <span id="cb58-3"><a href></a>cols <span class="op">=</span> [<span class="st">&quot;tfp1000&quot;</span>, <span class="st">&quot;lagtariff&quot;</span>, <span class="st">&quot;laginputariff&quot;</span>, <span class="st">&quot;prgroup&quot;</span>, <span class="st">&quot;govown&quot;</span>,</span>
@@ -2189,7 +2198,7 @@ max        3.596      2.043          0.546</code></pre>
 </div>
 <div id="tabset-4-3">
 <p><strong>Step 2 · Three lines of Python (session 3): productivity on the output tariff</strong></p>
-<div id="5397d10b" class="cell" data-execution_count="34">
+<div id="ddfac835" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href></a><span class="co"># Step 2 · Three lines of Python (session 3): productivity on the output tariff</span></span>
 <span id="cb60-2"><a href></a><span class="co"># The formula reads &quot;tfp1000 explained by lagtariff&quot;. statsmodels adds the</span></span>
 <span id="cb60-3"><a href></a><span class="co"># intercept for you. The slope is in log points of productivity per one unit</span></span>
@@ -2205,7 +2214,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-4-4">
 <p><strong>Step 3 · How much did the line explain? (session 3)</strong></p>
-<div id="c637f6e8" class="cell" data-execution_count="35">
+<div id="7009bbdc" class="cell" data-execution_count="35">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href></a><span class="co"># Step 3 · How much did the line explain? (session 3)</span></span>
 <span id="cb62-2"><a href></a><span class="co"># R-squared is the share of variance the line accounts for — and nothing about</span></span>
 <span id="cb62-3"><a href></a><span class="co"># whether the line is the right shape.</span></span>
@@ -2217,7 +2226,7 @@ dtype: float64</code></pre>
 </div>
 <div id="tabset-4-5">
 <p><strong>Step 4 · Two predictors: what “controlling for” means (session 3)</strong></p>
-<div id="8bf2cb69" class="cell" data-execution_count="36">
+<div id="4b63c20e" class="cell" data-execution_count="36">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href></a><span class="co"># Step 4 · Two predictors: what &quot;controlling for&quot; means (session 3)</span></span>
 <span id="cb64-2"><a href></a><span class="co"># Adding a second predictor changes what the first coefficient means: it is now</span></span>
 <span id="cb64-3"><a href></a><span class="co"># the association holding the input tariff fixed, not the raw association.</span></span>
@@ -2235,7 +2244,7 @@ R-squared = 0.005</code></pre>
 </div>
 <div id="tabset-4-6">
 <p><strong>Step 5 · Residuals vs fitted (session 3): structure the straight line missed?</strong></p>
-<div id="04aebf52" class="cell" data-execution_count="37">
+<div id="02dc6f5b" class="cell" data-execution_count="37">
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href></a><span class="co"># Step 5 · Residuals vs fitted (session 3): structure the straight line missed?</span></span>
 <span id="cb66-2"><a href></a>fit <span class="op">=</span> model2</span>
 <span id="cb66-3"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
@@ -2253,95 +2262,288 @@ R-squared = 0.005</code></pre>
 </div>
 </div>
 <div id="tabset-4-7">
-<p><strong>Step 6 · The candidates for ridge, lasso and elastic net (session 5)</strong></p>
-<div id="7174fa06" class="cell" data-execution_count="38">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href></a><span class="co"># Step 6 · The candidates for ridge, lasso and elastic net (session 5)</span></span>
-<span id="cb67-2"><a href></a>d <span class="op">=</span> d.copy()</span>
-<span id="cb67-3"><a href></a>d[<span class="st">&quot;age2&quot;</span>] <span class="op">=</span> d[<span class="st">&quot;age&quot;</span>] <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb67-4"><a href></a>years <span class="op">=</span> pd.get_dummies(d[<span class="st">&quot;yr&quot;</span>], prefix<span class="op">=</span><span class="st">&quot;yr&quot;</span>, drop_first<span class="op">=</span><span class="va">True</span>).astype(<span class="bu">float</span>)   <span class="co"># 1989 is the base</span></span>
-<span id="cb67-5"><a href></a>d <span class="op">=</span> pd.concat([d, years], axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb67-6"><a href></a>YCOL <span class="op">=</span> <span class="st">&quot;tfp1000&quot;</span></span>
-<span id="cb67-7"><a href></a>XCOLS <span class="op">=</span> cols[<span class="dv">1</span>:] <span class="op">+</span> [<span class="st">&quot;age2&quot;</span>] <span class="op">+</span> <span class="bu">list</span>(years.columns)</span>
-<span id="cb67-8"><a href></a>Xc, yc <span class="op">=</span> d[XCOLS].astype(<span class="bu">float</span>), d[YCOL].astype(<span class="bu">float</span>)</span>
-<span id="cb67-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss"> candidates:&quot;</span>, XCOLS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Step 6 · Binary logit: log-odds (session 4, LR 6) — is the firm more productive than the median firm?</strong></p>
+<div id="e6d2c999" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href></a><span class="co"># Step 6 · Binary logit: log-odds (session 4, LR 6) — is the firm more productive than the median firm?</span></span>
+<span id="cb67-2"><a href></a>d[<span class="st">&quot;high_tfp&quot;</span>] <span class="op">=</span> (d[<span class="st">&quot;tfp1000&quot;</span>] <span class="op">&gt;</span> d[<span class="st">&quot;tfp1000&quot;</span>].median()).astype(<span class="bu">int</span>)   <span class="co"># 1 = above the median</span></span>
+<span id="cb67-3"><a href></a><span class="co"># Fit the logistic regression. The coefficients come out as log-odds.</span></span>
+<span id="cb67-4"><a href></a>m2 <span class="op">=</span> smf.logit(<span class="st">&quot;high_tfp ~ lagtariff&quot;</span>, data<span class="op">=</span>d).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb67-5"><a href></a><span class="bu">print</span>(m2.params.<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Intercept    0.5052
+lagtariff   -0.7278
+dtype: float64</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-8">
+<p><strong>Step 7 · Binary logit: odds (session 4, LR 7)</strong></p>
+<div id="29d13020" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href></a><span class="co"># Step 7 · Binary logit: odds (session 4, LR 7)</span></span>
+<span id="cb69-2"><a href></a><span class="co"># Log-odds -&gt; odds ratio: take the exponential of each coefficient</span></span>
+<span id="cb69-3"><a href></a><span class="bu">print</span>(np.exp(m2.params[<span class="st">&quot;lagtariff&quot;</span>]).<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.483</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-9">
+<p><strong>Step 8 · Binary logit: predicted probability (session 4, LR 8)</strong></p>
+<div id="5f9d0aa5" class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href></a><span class="co"># Step 8 · Binary logit: predicted probability (session 4, LR 8)</span></span>
+<span id="cb71-2"><a href></a><span class="co"># predict() does the same calculation for you</span></span>
+<span id="cb71-3"><a href></a><span class="bu">print</span>(m2.predict(pd.DataFrame({<span class="st">&quot;lagtariff&quot;</span>: [<span class="fl">0.4</span>, <span class="fl">0.7</span>, <span class="fl">1.0</span>]})).<span class="bu">round</span>(<span class="dv">3</span>))   <span class="co"># inside the data: 0.1 to 3.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0    0.553
+1    0.499
+2    0.445
+dtype: float64</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-10">
+<p><strong>Step 9 · Ordinal logit (session 4, OLR 3) — productivity in thirds: low &lt; middle &lt; high</strong></p>
+<div id="7ff8c8cf" class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href></a><span class="co"># Step 9 · Ordinal logit (session 4, OLR 3) — productivity in thirds: low &lt; middle &lt; high</span></span>
+<span id="cb73-2"><a href></a>d[<span class="st">&quot;tfp_third&quot;</span>] <span class="op">=</span> pd.qcut(d[<span class="st">&quot;tfp1000&quot;</span>], <span class="dv">3</span>, labels<span class="op">=</span>[<span class="st">&quot;low&quot;</span>, <span class="st">&quot;middle&quot;</span>, <span class="st">&quot;high&quot;</span>])</span>
+<span id="cb73-3"><a href></a><span class="co"># Keep the order: low &lt; middle &lt; high</span></span>
+<span id="cb73-4"><a href></a>order <span class="op">=</span> [<span class="st">&quot;low&quot;</span>, <span class="st">&quot;middle&quot;</span>, <span class="st">&quot;high&quot;</span>]</span>
+<span id="cb73-5"><a href></a>d[<span class="st">&quot;tfp_c&quot;</span>] <span class="op">=</span> pd.Categorical(d[<span class="st">&quot;tfp_third&quot;</span>], categories<span class="op">=</span>order, ordered<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb73-6"><a href></a>om <span class="op">=</span> OrderedModel(d[<span class="st">&quot;tfp_c&quot;</span>], d[[<span class="st">&quot;lagtariff&quot;</span>, <span class="st">&quot;laginputariff&quot;</span>, <span class="st">&quot;age&quot;</span>]], distr<span class="op">=</span><span class="st">&quot;logit&quot;</span>).fit(method<span class="op">=</span><span class="st">&quot;bfgs&quot;</span>, disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb73-7"><a href></a><span class="bu">print</span>(om.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                             OrderedModel Results                             
+==============================================================================
+Dep. Variable:                  tfp_c   Log-Likelihood:                -15982.
+Model:                   OrderedModel   AIC:                         3.197e+04
+Method:            Maximum Likelihood   BIC:                         3.201e+04
+Date:                Tue, 13 Oct 2026                                         
+Time:                        18:16:52                                         
+No. Observations:               14648                                         
+Df Residuals:                   14643                                         
+Df Model:                           3                                         
+=================================================================================
+                    coef    std err          z      P&gt;|z|      [0.025      0.975]
+---------------------------------------------------------------------------------
+lagtariff        -0.5092      0.081     -6.276      0.000      -0.668      -0.350
+laginputariff    -0.5095      0.211     -2.413      0.016      -0.923      -0.096
+age              -0.0077      0.001    -10.317      0.000      -0.009      -0.006
+low/middle       -1.3692      0.056    -24.598      0.000      -1.478      -1.260
+middle/high       0.3387      0.013     26.737      0.000       0.314       0.364
+=================================================================================</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-11">
+<p><strong>Step 10 · Ordinal logit: log-odds and odds (session 4, OLR 4)</strong></p>
+<div id="5824c1ad" class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href></a><span class="co"># Step 10 · Ordinal logit: log-odds and odds (session 4, OLR 4)</span></span>
+<span id="cb75-2"><a href></a><span class="co"># Log-odds: the slopes as fitted (the cutpoints are left out)</span></span>
+<span id="cb75-3"><a href></a><span class="bu">print</span>(om.params[[<span class="st">&quot;lagtariff&quot;</span>, <span class="st">&quot;laginputariff&quot;</span>, <span class="st">&quot;age&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb75-4"><a href></a><span class="co"># Proportional-odds ratios</span></span>
+<span id="cb75-5"><a href></a><span class="bu">print</span>(np.exp(om.params[[<span class="st">&quot;lagtariff&quot;</span>, <span class="st">&quot;laginputariff&quot;</span>, <span class="st">&quot;age&quot;</span>]]).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>lagtariff       -0.509
+laginputariff   -0.509
+age             -0.008
+dtype: float64
+lagtariff        0.601
+laginputariff    0.601
+age              0.992
+dtype: float64</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-12">
+<p><strong>Step 11 · Ordinal logit: probabilities (session 4, OLR 5)</strong></p>
+<div id="ba9cb4d6" class="cell" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href></a><span class="co"># Step 11 · Ordinal logit: probabilities (session 4, OLR 5)</span></span>
+<span id="cb77-2"><a href></a><span class="co"># The same firm (20 years old, input tariff 0.3) under a high and a low output tariff.</span></span>
+<span id="cb77-3"><a href></a><span class="co"># Columns: low, middle, high productivity.</span></span>
+<span id="cb77-4"><a href></a>new <span class="op">=</span> pd.DataFrame({<span class="st">&quot;lagtariff&quot;</span>: [<span class="fl">1.0</span>, <span class="fl">0.4</span>], <span class="st">&quot;laginputariff&quot;</span>: [<span class="fl">0.3</span>, <span class="fl">0.3</span>], <span class="st">&quot;age&quot;</span>: [<span class="dv">20</span>, <span class="dv">20</span>]})</span>
+<span id="cb77-5"><a href></a><span class="bu">print</span>(pd.DataFrame(np.asarray(om.predict(new)), columns<span class="op">=</span>order, index<span class="op">=</span>[<span class="st">&quot;tariff 1.0&quot;</span>, <span class="st">&quot;tariff 0.4&quot;</span>]).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              low  middle   high
+tariff 1.0  0.365   0.335  0.300
+tariff 0.4  0.297   0.335  0.367</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-13">
+<p><strong>Step 12 · Multinomial logit (session 4, MLR 3) — who owns the firm? No natural order</strong></p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href></a><span class="co"># Step 12 · Multinomial logit (session 4, MLR 3) — who owns the firm? No natural order</span></span>
+<span id="cb79-2"><a href></a>d[<span class="st">&quot;owner&quot;</span>] <span class="op">=</span> <span class="st">&quot;stand-alone&quot;</span></span>
+<span id="cb79-3"><a href></a>d.loc[d[<span class="st">&quot;prgroup&quot;</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">&quot;owner&quot;</span>] <span class="op">=</span> <span class="st">&quot;business group&quot;</span></span>
+<span id="cb79-4"><a href></a>d.loc[d[<span class="st">&quot;govown&quot;</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">&quot;owner&quot;</span>] <span class="op">=</span> <span class="st">&quot;state-owned&quot;</span></span>
+<span id="cb79-5"><a href></a>d.loc[d[<span class="st">&quot;foreign&quot;</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">&quot;owner&quot;</span>] <span class="op">=</span> <span class="st">&quot;foreign&quot;</span></span>
+<span id="cb79-6"><a href></a><span class="co"># Code 0 (stand-alone) is the baseline: every coefficient reads &quot;relative to stand-alone&quot;</span></span>
+<span id="cb79-7"><a href></a>levels <span class="op">=</span> [<span class="st">&quot;stand-alone&quot;</span>, <span class="st">&quot;business group&quot;</span>, <span class="st">&quot;state-owned&quot;</span>, <span class="st">&quot;foreign&quot;</span>]</span>
+<span id="cb79-8"><a href></a>d[<span class="st">&quot;owner_c&quot;</span>] <span class="op">=</span> pd.Categorical(d[<span class="st">&quot;owner&quot;</span>], categories<span class="op">=</span>levels).codes</span>
+<span id="cb79-9"><a href></a><span class="co"># Leave large out, so large firms are the reference the other two sizes are compared with</span></span>
+<span id="cb79-10"><a href></a>X <span class="op">=</span> d[[<span class="st">&quot;medium&quot;</span>, <span class="st">&quot;small&quot;</span>]].astype(<span class="bu">float</span>)</span>
+<span id="cb79-11"><a href></a>X[<span class="st">&quot;tfp1000&quot;</span>] <span class="op">=</span> d[<span class="st">&quot;tfp1000&quot;</span>].astype(<span class="bu">float</span>)</span>
+<span id="cb79-12"><a href></a>X <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb79-13"><a href></a><span class="co"># Three sets of coefficients at once, each against the stand-alone baseline</span></span>
+<span id="cb79-14"><a href></a>mn <span class="op">=</span> sm.MNLogit(d[<span class="st">&quot;owner_c&quot;</span>], X).fit(disp<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb79-15"><a href></a><span class="bu">print</span>(mn.summary().tables[<span class="dv">1</span>])          <span class="co"># the coefficient table</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-4-14">
+<p><strong>Step 12 · Multinomial logit (session 4, MLR 3) — who owns the firm? No natural order</strong> — what it prints</p>
+<div id="4580fb77" class="cell" data-execution_count="44">
+<div class="cell-output cell-output-stdout">
+<pre><code>==============================================================================
+ owner_c=1       coef    std err          z      P&gt;|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          2.6379      0.090     29.215      0.000       2.461       2.815
+medium        -2.2672      0.094    -24.199      0.000      -2.451      -2.084
+small         -3.6818      0.097    -38.053      0.000      -3.871      -3.492
+tfp1000       -0.3608      0.066     -5.431      0.000      -0.491      -0.231
+------------------------------------------------------------------------------
+ owner_c=2       coef    std err          z      P&gt;|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          1.0365      0.102     10.141      0.000       0.836       1.237
+medium        -2.9963      0.117    -25.712      0.000      -3.225      -2.768
+small         -4.3432      0.139    -31.274      0.000      -4.615      -4.071
+tfp1000       -1.5674      0.123    -12.791      0.000      -1.808      -1.327
+------------------------------------------------------------------------------
+ owner_c=3       coef    std err          z      P&gt;|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          0.9616      0.102      9.384      0.000       0.761       1.162
+medium        -2.4377      0.111    -21.885      0.000      -2.656      -2.219
+small         -3.7954      0.126    -30.059      0.000      -4.043      -3.548
+tfp1000        0.2759      0.114      2.420      0.016       0.052       0.499
+==============================================================================</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-15">
+<p><strong>Step 13 · Multinomial logit: log-odds and relative risk ratios (session 4, MLR 4)</strong></p>
+<div id="cc26e847" class="cell" data-execution_count="45">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb81-1"><a href></a><span class="co"># Step 13 · Multinomial logit: log-odds and relative risk ratios (session 4, MLR 4)</span></span>
+<span id="cb81-2"><a href></a>pd.set_option(<span class="st">&quot;display.width&quot;</span>, <span class="dv">130</span>)       <span class="co"># six columns: print them side by side</span></span>
+<span id="cb81-3"><a href></a>pd.set_option(<span class="st">&quot;display.max_columns&quot;</span>, <span class="dv">10</span>)</span>
+<span id="cb81-4"><a href></a><span class="co"># Log-odds and RRR, for each owner type vs stand-alone</span></span>
+<span id="cb81-5"><a href></a><span class="bu">print</span>(pd.concat({<span class="st">&quot;log-odds&quot;</span>: mn.params, <span class="st">&quot;RRR&quot;</span>: np.exp(mn.params)}, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb81-6"><a href></a>      .set_axis([<span class="st">&quot;log-odds: group&quot;</span>, <span class="st">&quot;log-odds: state&quot;</span>, <span class="st">&quot;log-odds: foreign&quot;</span>,</span>
+<span id="cb81-7"><a href></a>                 <span class="st">&quot;RRR: group&quot;</span>, <span class="st">&quot;RRR: state&quot;</span>, <span class="st">&quot;RRR: foreign&quot;</span>], axis<span class="op">=</span><span class="dv">1</span>).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         log-odds: group  log-odds: state  log-odds: foreign  RRR: group  RRR: state  RRR: foreign
+const              2.638            1.036              0.962      13.984       2.819         2.616
+medium            -2.267           -2.996             -2.438       0.104       0.050         0.087
+small             -3.682           -4.343             -3.795       0.025       0.013         0.022
+tfp1000           -0.361           -1.567              0.276       0.697       0.209         1.318</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-16">
+<p><strong>Step 14 · Multinomial logit: probabilities (session 4, MLR 5)</strong></p>
+<div id="199d8089" class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href></a><span class="co"># Step 14 · Multinomial logit: probabilities (session 4, MLR 5)</span></span>
+<span id="cb83-2"><a href></a><span class="co"># Large firms: the median productivity, then across the range</span></span>
+<span id="cb83-3"><a href></a>grid <span class="op">=</span> pd.DataFrame({<span class="st">&quot;const&quot;</span>: <span class="fl">1.0</span>, <span class="st">&quot;medium&quot;</span>: <span class="fl">0.0</span>, <span class="st">&quot;small&quot;</span>: <span class="fl">0.0</span>,</span>
+<span id="cb83-4"><a href></a>                     <span class="st">&quot;tfp1000&quot;</span>: [d[<span class="st">&quot;tfp1000&quot;</span>].median(), <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.0</span>, <span class="fl">0.5</span>]})</span>
+<span id="cb83-5"><a href></a>out <span class="op">=</span> pd.DataFrame(mn.predict(grid).values, columns<span class="op">=</span>levels, index<span class="op">=</span>grid[<span class="st">&quot;tfp1000&quot;</span>].<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb83-6"><a href></a><span class="bu">print</span>(out.<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         stand-alone  business group  state-owned  foreign
+tfp1000                                                   
+ 0.03          0.050           0.686        0.133    0.131
+-0.50          0.038           0.639        0.236    0.087
+ 0.00          0.049           0.685        0.138    0.128
+ 0.50          0.059           0.688        0.076    0.177</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-17">
+<p><strong>Step 15 · The candidates for ridge, lasso and elastic net (session 5)</strong></p>
+<div id="1081b759" class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href></a><span class="co"># Step 15 · The candidates for ridge, lasso and elastic net (session 5)</span></span>
+<span id="cb85-2"><a href></a>d <span class="op">=</span> d.copy()</span>
+<span id="cb85-3"><a href></a>d[<span class="st">&quot;age2&quot;</span>] <span class="op">=</span> d[<span class="st">&quot;age&quot;</span>] <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb85-4"><a href></a>years <span class="op">=</span> pd.get_dummies(d[<span class="st">&quot;yr&quot;</span>], prefix<span class="op">=</span><span class="st">&quot;yr&quot;</span>, drop_first<span class="op">=</span><span class="va">True</span>).astype(<span class="bu">float</span>)   <span class="co"># 1989 is the base</span></span>
+<span id="cb85-5"><a href></a>d <span class="op">=</span> pd.concat([d, years], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb85-6"><a href></a>YCOL <span class="op">=</span> <span class="st">&quot;tfp1000&quot;</span></span>
+<span id="cb85-7"><a href></a>XCOLS <span class="op">=</span> cols[<span class="dv">1</span>:] <span class="op">+</span> [<span class="st">&quot;age2&quot;</span>] <span class="op">+</span> <span class="bu">list</span>(years.columns)</span>
+<span id="cb85-8"><a href></a>Xc, yc <span class="op">=</span> d[XCOLS].astype(<span class="bu">float</span>), d[YCOL].astype(<span class="bu">float</span>)</span>
+<span id="cb85-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss"> candidates:&quot;</span>, XCOLS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>16 candidates: [&#39;lagtariff&#39;, &#39;laginputariff&#39;, &#39;prgroup&#39;, &#39;govown&#39;, &#39;foreign&#39;, &#39;medium&#39;, &#39;small&#39;, &#39;age&#39;, &#39;age2&#39;, &#39;yr_1990&#39;, &#39;yr_1991&#39;, &#39;yr_1992&#39;, &#39;yr_1993&#39;, &#39;yr_1994&#39;, &#39;yr_1995&#39;, &#39;yr_1996&#39;]</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-4-8">
-<p><strong>Step 7 · Ridge (session 5)</strong></p>
-<div id="0d8b2042" class="cell" data-execution_count="39">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href></a><span class="co"># Step 7 · Ridge (session 5)</span></span>
-<span id="cb69-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> RidgeCV</span>
-<span id="cb69-3"><a href></a></span>
-<span id="cb69-4"><a href></a>ridge <span class="op">=</span> make_pipeline(StandardScaler(),                        <span class="co"># same scale for all</span></span>
-<span id="cb69-5"><a href></a>                      RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))   <span class="co"># try 60 values of λ</span></span>
-<span id="cb69-6"><a href></a>                      ).fit(Xc, yc)</span>
-<span id="cb69-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>ridge[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb69-8"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;ridge kept </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(ridge[<span class="op">-</span><span class="dv">1</span>].coef_ <span class="op">!=</span> <span class="dv">0</span>)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss"> — it never drops a predictor&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-4-18">
+<p><strong>Step 16 · Ridge (session 5)</strong></p>
+<div id="ee268666" class="cell" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href></a><span class="co"># Step 16 · Ridge (session 5)</span></span>
+<span id="cb87-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> RidgeCV</span>
+<span id="cb87-3"><a href></a></span>
+<span id="cb87-4"><a href></a>ridge <span class="op">=</span> make_pipeline(StandardScaler(),                        <span class="co"># same scale for all</span></span>
+<span id="cb87-5"><a href></a>                      RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))   <span class="co"># try 60 values of λ</span></span>
+<span id="cb87-6"><a href></a>                      ).fit(Xc, yc)</span>
+<span id="cb87-7"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>ridge[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb87-8"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;ridge kept </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(ridge[<span class="op">-</span><span class="dv">1</span>].coef_ <span class="op">!=</span> <span class="dv">0</span>)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss"> — it never drops a predictor&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>λ = 47.64
 ridge kept 16 of 16 — it never drops a predictor</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-4-9">
-<p><strong>Step 8 · Lasso (session 5)</strong></p>
-<div id="06a3980e" class="cell" data-execution_count="40">
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href></a><span class="co"># Step 8 · Lasso (session 5)</span></span>
-<span id="cb71-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LassoCV</span>
-<span id="cb71-3"><a href></a></span>
-<span id="cb71-4"><a href></a>lasso <span class="op">=</span> make_pipeline(StandardScaler(),</span>
-<span id="cb71-5"><a href></a>                      LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)   <span class="co"># λ by 5-fold CV</span></span>
-<span id="cb71-6"><a href></a>                      ).fit(Xc, yc)</span>
-<span id="cb71-7"><a href></a>kept <span class="op">=</span> [c <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, lasso[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="cf">if</span> b <span class="op">!=</span> <span class="dv">0</span>]</span>
-<span id="cb71-8"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>lasso[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb71-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;lasso kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss">:&quot;</span>, kept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-4-19">
+<p><strong>Step 17 · Lasso (session 5)</strong></p>
+<div id="9080f726" class="cell" data-execution_count="49">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb89-1"><a href></a><span class="co"># Step 17 · Lasso (session 5)</span></span>
+<span id="cb89-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LassoCV</span>
+<span id="cb89-3"><a href></a></span>
+<span id="cb89-4"><a href></a>lasso <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb89-5"><a href></a>                      LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)   <span class="co"># λ by 5-fold CV</span></span>
+<span id="cb89-6"><a href></a>                      ).fit(Xc, yc)</span>
+<span id="cb89-7"><a href></a>kept <span class="op">=</span> [c <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, lasso[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="cf">if</span> b <span class="op">!=</span> <span class="dv">0</span>]</span>
+<span id="cb89-8"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>lasso[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb89-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;lasso kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss">:&quot;</span>, kept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>λ = 0.0003
 lasso kept 16 of 16: [&#39;lagtariff&#39;, &#39;laginputariff&#39;, &#39;prgroup&#39;, &#39;govown&#39;, &#39;foreign&#39;, &#39;medium&#39;, &#39;small&#39;, &#39;age&#39;, &#39;age2&#39;, &#39;yr_1990&#39;, &#39;yr_1991&#39;, &#39;yr_1992&#39;, &#39;yr_1993&#39;, &#39;yr_1994&#39;, &#39;yr_1995&#39;, &#39;yr_1996&#39;]</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-4-10">
-<p><strong>Step 9 · Elastic net (session 5)</strong></p>
-<div id="cee0e8e6" class="cell" data-execution_count="41">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href></a><span class="co"># Step 9 · Elastic net (session 5)</span></span>
-<span id="cb73-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> ElasticNetCV</span>
-<span id="cb73-3"><a href></a></span>
-<span id="cb73-4"><a href></a>enet <span class="op">=</span> make_pipeline(StandardScaler(),</span>
-<span id="cb73-5"><a href></a>                     ElasticNetCV(l1_ratio<span class="op">=</span><span class="fl">0.5</span>,            <span class="co"># half lasso, half ridge</span></span>
-<span id="cb73-6"><a href></a>                                  cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)</span>
-<span id="cb73-7"><a href></a>                     ).fit(Xc, yc)</span>
-<span id="cb73-8"><a href></a>kept <span class="op">=</span> [c <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, enet[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="cf">if</span> b <span class="op">!=</span> <span class="dv">0</span>]</span>
-<span id="cb73-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>enet[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb73-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;elastic net kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss">:&quot;</span>, kept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-4-20">
+<p><strong>Step 18 · Elastic net (session 5)</strong></p>
+<div id="23b22599" class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href></a><span class="co"># Step 18 · Elastic net (session 5)</span></span>
+<span id="cb91-2"><a href></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> ElasticNetCV</span>
+<span id="cb91-3"><a href></a></span>
+<span id="cb91-4"><a href></a>enet <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb91-5"><a href></a>                     ElasticNetCV(l1_ratio<span class="op">=</span><span class="fl">0.5</span>,            <span class="co"># half lasso, half ridge</span></span>
+<span id="cb91-6"><a href></a>                                  cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)</span>
+<span id="cb91-7"><a href></a>                     ).fit(Xc, yc)</span>
+<span id="cb91-8"><a href></a>kept <span class="op">=</span> [c <span class="cf">for</span> c, b <span class="kw">in</span> <span class="bu">zip</span>(XCOLS, enet[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="cf">if</span> b <span class="op">!=</span> <span class="dv">0</span>]</span>
+<span id="cb91-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;λ = </span><span class="sc">{</span>enet[<span class="op">-</span><span class="dv">1</span>]<span class="sc">.</span>alpha_<span class="sc">:.4f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb91-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;elastic net kept </span><span class="sc">{</span><span class="bu">len</span>(kept)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(XCOLS)<span class="sc">}</span><span class="ss">:&quot;</span>, kept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>λ = 0.0006
 elastic net kept 16 of 16: [&#39;lagtariff&#39;, &#39;laginputariff&#39;, &#39;prgroup&#39;, &#39;govown&#39;, &#39;foreign&#39;, &#39;medium&#39;, &#39;small&#39;, &#39;age&#39;, &#39;age2&#39;, &#39;yr_1990&#39;, &#39;yr_1991&#39;, &#39;yr_1992&#39;, &#39;yr_1993&#39;, &#39;yr_1994&#39;, &#39;yr_1995&#39;, &#39;yr_1996&#39;]</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-4-11">
-<p><strong>Step 10 · The four, on rows they never saw (session 5, as reviewed in session 6)</strong></p>
-<div id="21419186" class="cell" data-execution_count="42">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href></a><span class="co"># Step 10 · The four, on rows they never saw (session 5, as reviewed in session 6)</span></span>
-<span id="cb75-2"><a href></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(Xc, yc, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">7</span>)</span>
-<span id="cb75-3"><a href></a></span>
-<span id="cb75-4"><a href></a><span class="kw">def</span> test_rmse(model):                  <span class="co"># fit on 70% of rows, score on the other 30%</span></span>
-<span id="cb75-5"><a href></a>    pipe <span class="op">=</span> make_pipeline(StandardScaler(), model).fit(Xtr, ytr)   <span class="co"># standardise first</span></span>
-<span id="cb75-6"><a href></a>    kept <span class="op">=</span> <span class="bu">int</span>(np.<span class="bu">sum</span>(np.<span class="bu">abs</span>(pipe[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="op">&gt;</span> <span class="fl">1e-8</span>))             <span class="co"># non-zero coefficients</span></span>
-<span id="cb75-7"><a href></a>    <span class="cf">return</span> kept, mean_squared_error(yte, pipe.predict(Xte)) <span class="op">**</span> <span class="fl">0.5</span></span>
-<span id="cb75-8"><a href></a></span>
-<span id="cb75-9"><a href></a>results <span class="op">=</span> {</span>
-<span id="cb75-10"><a href></a>    <span class="st">&quot;OLS, all predictors&quot;</span>: test_rmse(LinearRegression()),</span>
-<span id="cb75-11"><a href></a>    <span class="st">&quot;ridge&quot;</span>:       test_rmse(RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))),   <span class="co"># λ by CV</span></span>
-<span id="cb75-12"><a href></a>    <span class="st">&quot;lasso&quot;</span>:       test_rmse(LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)),</span>
-<span id="cb75-13"><a href></a>    <span class="st">&quot;elastic net&quot;</span>: test_rmse(ElasticNetCV(l1_ratio<span class="op">=</span><span class="fl">0.5</span>, cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)),</span>
-<span id="cb75-14"><a href></a>}</span>
-<span id="cb75-15"><a href></a>res <span class="op">=</span> pd.DataFrame(results, index<span class="op">=</span>[<span class="st">&quot;predictors kept&quot;</span>, <span class="st">&quot;test RMSE&quot;</span>]).T.astype({<span class="st">&quot;predictors kept&quot;</span>: <span class="bu">int</span>})</span>
-<span id="cb75-16"><a href></a><span class="bu">print</span>(res.<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tabset-4-21">
+<p><strong>Step 19 · The four, on rows they never saw (session 5, as reviewed in session 6)</strong></p>
+<div id="004f92c1" class="cell" data-execution_count="51">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb93-1"><a href></a><span class="co"># Step 19 · The four, on rows they never saw (session 5, as reviewed in session 6)</span></span>
+<span id="cb93-2"><a href></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(Xc, yc, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb93-3"><a href></a></span>
+<span id="cb93-4"><a href></a><span class="kw">def</span> test_rmse(model):                  <span class="co"># fit on 70% of rows, score on the other 30%</span></span>
+<span id="cb93-5"><a href></a>    pipe <span class="op">=</span> make_pipeline(StandardScaler(), model).fit(Xtr, ytr)   <span class="co"># standardise first</span></span>
+<span id="cb93-6"><a href></a>    kept <span class="op">=</span> <span class="bu">int</span>(np.<span class="bu">sum</span>(np.<span class="bu">abs</span>(pipe[<span class="op">-</span><span class="dv">1</span>].coef_) <span class="op">&gt;</span> <span class="fl">1e-8</span>))             <span class="co"># non-zero coefficients</span></span>
+<span id="cb93-7"><a href></a>    <span class="cf">return</span> kept, mean_squared_error(yte, pipe.predict(Xte)) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb93-8"><a href></a></span>
+<span id="cb93-9"><a href></a>results <span class="op">=</span> {</span>
+<span id="cb93-10"><a href></a>    <span class="st">&quot;OLS, all predictors&quot;</span>: test_rmse(LinearRegression()),</span>
+<span id="cb93-11"><a href></a>    <span class="st">&quot;ridge&quot;</span>:       test_rmse(RidgeCV(alphas<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">60</span>))),   <span class="co"># λ by CV</span></span>
+<span id="cb93-12"><a href></a>    <span class="st">&quot;lasso&quot;</span>:       test_rmse(LassoCV(cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)),</span>
+<span id="cb93-13"><a href></a>    <span class="st">&quot;elastic net&quot;</span>: test_rmse(ElasticNetCV(l1_ratio<span class="op">=</span><span class="fl">0.5</span>, cv<span class="op">=</span><span class="dv">5</span>, random_state<span class="op">=</span><span class="dv">0</span>, max_iter<span class="op">=</span><span class="dv">50_000</span>)),</span>
+<span id="cb93-14"><a href></a>}</span>
+<span id="cb93-15"><a href></a>res <span class="op">=</span> pd.DataFrame(results, index<span class="op">=</span>[<span class="st">&quot;predictors kept&quot;</span>, <span class="st">&quot;test RMSE&quot;</span>]).T.astype({<span class="st">&quot;predictors kept&quot;</span>: <span class="bu">int</span>})</span>
+<span id="cb93-16"><a href></a><span class="bu">print</span>(res.<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                     predictors kept  test RMSE
 OLS, all predictors               16      0.296
@@ -2357,41 +2559,48 @@ elastic net                       16      0.296</code></pre>
 <section id="what-you-should-find-3" class="slide level2 scrollable">
 <h2>What you should find</h2>
 <table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
-<th></th>
-<th>slope on output tariff</th>
-<th>slope on input tariff</th>
-<th>R²</th>
+<th>Model</th>
+<th>In words</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Step 2 · one predictor</td>
-<td>−0.083</td>
-<td></td>
-<td>0.004</td>
+<td><strong>OLS</strong></td>
+<td>a tariff 10 points lower goes with productivity about 0.8% higher; R² 0.004</td>
 </tr>
 <tr class="even">
-<td>Step 4 · two predictors</td>
-<td>−0.066</td>
-<td>−0.075</td>
-<td>0.005</td>
+<td><strong>Binary logit</strong></td>
+<td>odds ratio 0.48 per unit of tariff; P(above the median) 0.45 → 0.55 as the tariff falls from 1.0 to 0.4</td>
+</tr>
+<tr class="odd">
+<td><strong>Ordinal logit</strong></td>
+<td>the same cut moves P(top third) from 0.30 to 0.37</td>
+</tr>
+<tr class="even">
+<td><strong>Multinomial logit</strong></td>
+<td>among large firms, the more productive are more often foreign-owned (RRR 1.32) and less often state-owned (0.21), <em>relative to stand-alone</em></td>
+</tr>
+<tr class="odd">
+<td><strong>Ridge, lasso, elastic net</strong></td>
+<td>λ near zero, all 16 kept, test RMSE 0.296 for all four</td>
 </tr>
 </tbody>
 </table>
-<div class="check">
-<p>A tariff 10 points lower goes with productivity about <strong>0.8% higher</strong> — and tariffs explain half a percent of the variation.</p>
-</div>
 <div class="warn">
-<p><strong>The penalty buys nothing here.</strong> λ near zero, all 16 kept, test RMSE <strong>0.296</strong> for all four models: with 14,648 rows for 16 candidates, OLS does not overfit.</p>
+<p><strong>The penalty buys nothing here:</strong> with 14,648 rows for 16 candidates, OLS does not overfit.</p>
 </div>
 </section>
 <section id="what-it-does-not-license-3" class="slide level2 scrollable">
 <h2>What it does not license</h2>
 <div class="tight">
 <ul>
-<li><strong>No causal claim.</strong> The slopes compare different firms in different years.</li>
+<li><strong>No causal claim.</strong> The slopes compare different firms in different years; ownership is described, not explained.</li>
 <li><strong>No “every variable matters”.</strong> Keeping all 16 means none hurts prediction, not that each matters.</li>
 <li><strong>No claim beyond these firms:</strong> listed manufacturers that survived, 1989–1996.</li>
 </ul>

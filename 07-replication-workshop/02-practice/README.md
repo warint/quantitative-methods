@@ -33,7 +33,7 @@ already know, run on new data, and the work is to read its output in words, with
 | **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits | [guide](replications/R2-saganowski-2019.md) · [script](starter/r2_saganowski_2019.py) |
 | 1:35 – 1:45 | Break | |
 | **1:45 – 2:15** | **Paper 3** · Session 05 data · foreign direct investment — OLS, ridge, lasso, elastic net | [guide](replications/R3-blonigen-piger-2014.md) · [script](starter/r3_blonigen_piger_2014.py) |
-| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, ridge, lasso, elastic net | [guide](replications/R4-topalova-khandelwal-2011.md) · [script](starter/r4_topalova_khandelwal_2011.py) |
+| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net | [guide](replications/R4-topalova-khandelwal-2011.md) · [script](starter/r4_topalova_khandelwal_2011.py) |
 | **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push | [`replication-log.md`](replication-log.md) |
 
 **If you fall behind,** move on at the half-hour mark anyway and come back later: a finished log for
@@ -135,7 +135,7 @@ Each guide has the same shape, so you always know where you are:
 | **1** | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | today's return on yesterday's news sentiment (OLS); an up day or a down day (binary logit) | sessions 03–04 |
 | **2** | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | does a group dissolve (binary logit); shrink, continue or grow (ordinal logit); which event (multinomial logit) | session 04 |
 | **3** | Blonigen & Piger (2014), *Determinants of foreign direct investment* | log FDI on a few gravity variables (OLS), then 56 candidates in ridge, the lasso and the elastic net, scored on held-out pairs | sessions 03 and 05 |
-| **4** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | productivity on output and input tariffs (OLS), then all the firm variables in ridge, the lasso and the elastic net | sessions 03 and 05 |
+| **4** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | productivity on output and input tariffs (OLS); above the median (binary), in thirds (ordinal), who owns the firm (multinomial); then all the firm variables in ridge, the lasso and the elastic net | sessions 03, 04 and 05 |
 
 ---
 

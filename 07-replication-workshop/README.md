@@ -27,7 +27,7 @@ It is also the revision session for the **midterm on 28 October**, which covers 
 | 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS, binary logit · sessions 03–04 | [Paper 1](02-practice/replications/R1-fraiberger-2021.md) |
 | 2 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | binary, ordinal and multinomial logits · session 04 | [Paper 2](02-practice/replications/R2-saganowski-2019.md) |
 | 3 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | OLS, ridge, lasso, elastic net · sessions 03 and 05 | [Paper 3](02-practice/replications/R3-blonigen-piger-2014.md) |
-| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS, ridge, lasso, elastic net · sessions 03 and 05 | [Paper 4](02-practice/replications/R4-topalova-khandelwal-2011.md) |
+| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS, the three logits, ridge, lasso, elastic net · sessions 03, 04 and 05 | [Paper 4](02-practice/replications/R4-topalova-khandelwal-2011.md) |
 
 ---
 

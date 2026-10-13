@@ -149,6 +149,8 @@ SNIPPETS = {
     "pd.read_stata": 'firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")',
     "np.log": "y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %",
     "pd.Categorical(ordered=True)": 'pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)',
+    "pd.qcut": 'd["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])',
+    ".loc": 'd.loc[d["foreign"] == 1, "owner"] = "foreign"   # only those rows change',
 
     # ---- Session 13 (taught in session 07 until A2026) ----------------------
     "PCA": "from sklearn.decomposition import PCA\n"
