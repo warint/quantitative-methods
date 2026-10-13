@@ -1,12 +1,12 @@
 # Paper 4 · Session 06 · Topalova & Khandelwal (2011)
 
 > **Reuses:** OLS (session 03) · ridge, lasso, elastic net (session 05) · **Time:** about 30 minutes ·
-> **Script:** [`starter/r5_topalova_khandelwal_2011.py`](../starter/r5_topalova_khandelwal_2011.py) ·
+> **Script:** [`starter/r4_topalova_khandelwal_2011.py`](../starter/r4_topalova_khandelwal_2011.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
 ## How to work through it
 
-Open `r5_topalova_khandelwal_2011.py` in VS Codium. Each step below is one block of the script,
+Open `r4_topalova_khandelwal_2011.py` in VS Codium. Each step below is one block of the script,
 marked `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the
 output, and check it against **You should see** before moving on.
 

@@ -1,58 +1,56 @@
-## Paper 3 · Session 05 · What attracts foreign direct investment {.center .scrollable}
+## Paper 4 · Session 06 · Tariffs and firm productivity {.center .scrollable}
 
 ## The data, and the models {.scrollable}
 
-**Blonigen & Piger (2014)**, *Determinants of foreign direct investment* · the course's rebuild of
-its data for 2019: `qmib.load("fdi")`. **One row = one parent → host country pair**; 765 pairs with
-positive FDI and all **56 candidate** predictors. Outcome: `log_fdi`.
+**Topalova & Khandelwal (2011)**, *Trade liberalization and firm productivity* — the authors' data:
+**one row = one Indian manufacturing firm in one year**, 1989–1996: 14,648 firm-years, 3,077 firms.
+Outcome: log productivity `tfp1000`.
 
 ::::: columns
 :::: {.column width="50%"}
-**OLS** — the code of session 03
+**OLS** — session 03's cells
 
-1. Load: logs, complete rows
-2. Three lines of Python: FDI on host GDP
+1. Load the firms
+2. Productivity on the output tariff
 3. How much did the line explain?
-4. Two predictors: + distance
+4. Two predictors: + the input tariff
+5. Residuals versus fitted
 ::::
 
 :::: {.column width="50%"}
-**Penalties** — the code of session 05
+**Ridge, lasso, elastic net** — session 05's cells
 
-5. Ridge, λ by cross-validation
-6. Lasso: how many kept?
-7. Elastic net, mix 0.5
-8. Which predicts best on held-out pairs?
+6. 16 candidates: tariffs, ownership, size, age, years
+7. Ridge
+8. Lasso
+9. Elastic net
+10. The four, on rows they never saw
 ::::
 :::::
-
-::: {.muted}
-Same code as in class; only the data and the variable names change. We do not follow the paper.
-:::
 
 {{< include _solutions-r4.qmd >}}
 
 ## What you should find {.scrollable}
 
-| | OLS, all 56 | ridge | lasso | elastic net |
-|---|---|---|---|---|
-| predictors kept (all rows) | 56 | 56 | 34 | 46 |
-| test RMSE (held-out 30%) | 1.631 | 1.606 | 1.596 | **1.595** |
+| | slope on output tariff | slope on input tariff | R² |
+|---|---|---|---|
+| Step 2 · one predictor | −0.083 | | 0.004 |
+| Step 4 · two predictors | −0.066 | −0.075 | 0.005 |
 
 ::: {.check}
-**OLS:** a host 1% larger holds about 0.5% more FDI, and a partner 1% farther away about 0.5% less,
-holding the other fixed. Host size alone explains 5% of the variation.
+A tariff 10 points lower goes with productivity about **0.8% higher** — and tariffs explain half a
+percent of the variation.
 :::
 
 ::: {.warn}
-**The penalties gain little here:** 765 pairs for 56 candidates is not a square table. The elastic
-net keeps 46 where the lasso keeps 34, because it lets correlated candidates in together.
+**The penalty buys nothing here.** λ near zero, all 16 kept, test RMSE **0.296** for all four
+models: with 14,648 rows for 16 candidates, OLS does not overfit.
 :::
 
 ## What it does not license {.scrollable}
 
 ::: {.tight}
-- **No causal claim.** A kept variable predicts FDI here; changing it need not attract any.
-- **No "no effect"** for a zeroed candidate: among correlated ones, the lasso keeps one almost at random.
-- **No p-values after selection**, and no claim beyond 765 data-rich, mostly OECD pairs.
+- **No causal claim.** The slopes compare different firms in different years.
+- **No "every variable matters".** Keeping all 16 means none hurts prediction, not that each matters.
+- **No claim beyond these firms:** listed manufacturers that survived, 1989–1996.
 :::

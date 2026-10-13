@@ -2,7 +2,7 @@
 Paper 3 · Session 05 · Blonigen & Piger (2014)
 *Determinants of foreign direct investment*
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R4-blonigen-piger-2014.md
+Step-by-step guide: 07-replication-workshop/02-practice/replications/R3-blonigen-piger-2014.md
 
 The data of the paper, the code of sessions 3 and 5: OLS, then ridge, the lasso
 and the elastic net, line for line as in class, with this data's variable names.
@@ -10,7 +10,7 @@ and the elastic net, line for line as in class, with this data's variable names.
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r4_blonigen_piger_2014.py
+    python 07-replication-workshop/02-practice/starter/r3_blonigen_piger_2014.py
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.

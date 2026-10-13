@@ -1,12 +1,12 @@
 # Paper 2 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
 
 > **Reuses:** binary, ordinal and multinomial logits (session 04) · **Time:** about 30 minutes ·
-> **Script:** [`starter/r3_saganowski_2019.py`](../starter/r3_saganowski_2019.py) ·
+> **Script:** [`starter/r2_saganowski_2019.py`](../starter/r2_saganowski_2019.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
 ## How to work through it
 
-Open `r3_saganowski_2019.py` in VS Codium. Each step below is one block of the script, marked
+Open `r2_saganowski_2019.py` in VS Codium. Each step below is one block of the script, marked
 `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the output, and
 check it against **You should see** before moving on. If a number differs, stop and find out why.
 

@@ -21,9 +21,9 @@ STARTER = HERE.parent / "02-practice" / "starter"
 
 PAPERS = [
     ("r1", "r1_fraiberger_2021.py"),
-    ("r3", "r3_saganowski_2019.py"),
-    ("r4", "r4_blonigen_piger_2014.py"),
-    ("r5", "r5_topalova_khandelwal_2011.py"),
+    ("r2", "r2_saganowski_2019.py"),
+    ("r3", "r3_blonigen_piger_2014.py"),
+    ("r4", "r4_topalova_khandelwal_2011.py"),
 ]
 
 STEP = re.compile(r"^# Step (\d+) · (.*)$", re.M)
@@ -43,7 +43,7 @@ def split(script):
 
 # Steps whose code and output together are taller than a slide, measured on the
 # rendered deck. Re-measure after editing a script; add the step here if it spills.
-LONG = {"r3": {"9"}}     # measured on the rendered deck
+LONG = {"r2": {"9"}}     # measured on the rendered deck
 WIDE = set()             # a printout too long for one column
 
 

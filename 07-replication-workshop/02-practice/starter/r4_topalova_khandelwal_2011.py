@@ -2,7 +2,7 @@
 Paper 4 · Session 06 · Topalova & Khandelwal (2011)
 *Trade liberalization and firm productivity: the case of India*
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R5-topalova-khandelwal-2011.md
+Step-by-step guide: 07-replication-workshop/02-practice/replications/R4-topalova-khandelwal-2011.md
 
 The authors' data, and the course's models: the OLS cells of session 3 and the
 ridge, lasso and elastic-net cells of session 5, line for line — only the data
@@ -11,7 +11,7 @@ and the variable names change.
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r5_topalova_khandelwal_2011.py
+    python 07-replication-workshop/02-practice/starter/r4_topalova_khandelwal_2011.py
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.

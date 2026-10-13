@@ -1,12 +1,12 @@
 # Paper 3 · Session 05 · Blonigen & Piger (2014)
 
 > **Reuses:** OLS (session 03) · ridge, lasso, elastic net (session 05) · **Time:** about 30 minutes ·
-> **Script:** [`starter/r4_blonigen_piger_2014.py`](../starter/r4_blonigen_piger_2014.py) ·
+> **Script:** [`starter/r3_blonigen_piger_2014.py`](../starter/r3_blonigen_piger_2014.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
 ## How to work through it
 
-Open `r4_blonigen_piger_2014.py` in VS Codium. Each step below is one block of the script, marked
+Open `r3_blonigen_piger_2014.py` in VS Codium. Each step below is one block of the script, marked
 `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the output, and
 check it against **You should see** before moving on. If a number differs, stop and find out why.
 
