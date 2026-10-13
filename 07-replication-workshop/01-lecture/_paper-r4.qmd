@@ -1,62 +1,58 @@
-## Paper 4 · Session 05 · 56 candidate determinants of FDI {.center .scrollable}
+## Paper 3 · Session 05 · What attracts foreign direct investment {.center .scrollable}
 
-## The paper, and its question {.scrollable}
+## The data, and the models {.scrollable}
 
-**Blonigen & Piger (2014)**, *Determinants of foreign direct investment*, Canadian Journal of
-Economics · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704)
+**Blonigen & Piger (2014)**, *Determinants of foreign direct investment* · the course's rebuild of
+its data for 2019: `qmib.load("fdi")`. **One row = one parent → host country pair**; 765 pairs with
+positive FDI and all **56 candidate** predictors. Outcome: `log_fdi`.
 
-Empirical FDI studies disagree about which variables belong in the regression. The authors put 56
-candidates into one Bayesian model average and let the data say which carry the signal: about
-sixteen survive — gravity, cultural distance, trade agreements, parent income — while many
-favourites of the literature do not.
+::::: columns
+:::: {.column width="50%"}
+**OLS** — the code of session 03
 
-> **Of 56 candidate determinants of bilateral FDI, which few actually carry the signal?**
+1. Load: logs, complete rows
+2. Three lines of Python: FDI on host GDP
+3. How much did the line explain?
+4. Two predictors: + distance
+::::
 
-## The data, and the simple models {.scrollable}
+:::: {.column width="50%"}
+**Penalties** — the code of session 05
 
-`qmib.load("fdi")` — **no download**: 765 country pairs complete on all 56 candidates, for **2019**
-(the paper used 2000). Outcome: the log of the FDI stock.
+5. Ridge, λ by cross-validation
+6. Lasso: how many kept?
+7. Elastic net, mix 0.5
+8. Which predicts best on held-out pairs?
+::::
+:::::
 
-| Steps | Session 05's code, unchanged |
-|---|---|
-| 1–2 | load, log FDI, hold out 30% of the pairs |
-| 3 | **OLS** on all 56 — the benchmark |
-| 4 | **Ridge**, λ by cross-validation |
-| 5 | **Lasso** — how many kept, which dropped |
-| 6 | **Elastic net**, `l1_ratio = 0.5` |
-| 7–8 | the four side by side; compare with the paper's survivors |
+::: {.muted}
+Same code as in class; only the data and the variable names change. We do not follow the paper.
+:::
 
 {{< include _solutions-r4.qmd >}}
 
 ## What you should find {.scrollable}
 
-| | OLS | ridge | lasso | elastic net |
+| | OLS, all 56 | ridge | lasso | elastic net |
 |---|---|---|---|---|
-| predictors kept | 56 | 56 | 48 | 51 |
-| test RMSE (log FDI) | 1.753 | 1.749 | **1.737** | 1.739 |
+| predictors kept (all rows) | 56 | 56 | 34 | 46 |
+| test RMSE (held-out 30%) | 1.631 | 1.606 | 1.596 | **1.595** |
 
 ::: {.check}
-**The core agrees with the paper.** Lasso and elastic net keep all nine of the paper's named
-survivors, with the expected signs: bigger economies and closer pairs hold more FDI. Political
-rights and civil liberties drop out, as in the paper.
+**OLS:** a host 1% larger holds about 0.5% more FDI, and a partner 1% farther away about 0.5% less,
+holding the other fixed. Host size alone explains 5% of the variation.
 :::
 
 ::: {.warn}
-**The penalty buys little here**: about 1% of test error. With 535 training rows for 56 candidates,
-OLS is not badly overfitted — and at this λ the lasso drops only 8 of 56.
+**The penalties gain little here:** 765 pairs for 56 candidates is not a square table. The elastic
+net keeps 46 where the lasso keeps 34, because it lets correlated candidates in together.
 :::
 
 ## What it does not license {.scrollable}
 
 ::: {.tight}
-- **No "the drivers of FDI".** One penalised model at one λ on one sample — not the paper's
-  average over many models, and not a causal list.
-- **No "institutions do not matter".** A dropped variable is not a zero effect; it may be correlated
-  with one that was kept.
-- **No claim about all countries.** 36 OECD parents and 32 hosts survive listwise deletion.
-:::
-
-::: {.muted}
-A tax-haven dummy is among the largest lasso coefficients, unlike in the paper: pass-through FDI via
-offshore centres grew a great deal between 2000 and 2019.
+- **No causal claim.** A kept variable predicts FDI here; changing it need not attract any.
+- **No "no effect"** for a zeroed candidate: among correlated ones, the lasso keeps one almost at random.
+- **No p-values after selection**, and no claim beyond 765 data-rich, mostly OECD pairs.
 :::

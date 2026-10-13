@@ -42,9 +42,9 @@ format:
 
 ### The mathematics
 
-- State each paper's **research question** and choose the simple model that answers it
+- Choose which of the course's models fits a new outcome — a number, a yes/no, ordered or unordered categories
 - Read every result as a sentence, in units, and say what it does **not** license
-- Say how a simple model differs from the paper's own design, and why the numbers differ
+- Compare OLS with ridge, the lasso and the elastic net on data the models did not see
 
 ::::
 
@@ -52,8 +52,8 @@ format:
 
 ### The Python
 
-- Load an authors' data file — `.dta`, `.xlsx`, `.csv` — into pandas
-- Fit OLS, the three logits, ridge, the lasso and the elastic net with **only the code seen in class**
+- Load a paper's data file — `.dta`, `.csv` — into pandas
+- Run the code cells of sessions 3 to 5 on new data, changing only the variable names
 - Run a whole analysis as one script in VS Codium, step by step
 
 ::::
@@ -62,7 +62,7 @@ format:
 
 ### The international business
 
-- Read five international-business papers as claims to be checked
+- Use international-business data from published papers
 - Explain a result to someone who will not read the code
 - Keep a log a referee could follow
 
@@ -81,7 +81,7 @@ you arrive, and badly if you spend the first hour downloading.
 
 | | | |
 |---|---|---|
-| **1** | Re-read the five abstracts: the question, and what the data are | 10 min |
+| **1** | Re-read the four abstracts: the question, and what the data are | 10 min |
 | **2** | Check the data is on your machine; download what is missing | 15 min, mostly waiting |
 | **3** | Write two lines per paper, from memory | 5 min |
 
@@ -92,15 +92,14 @@ where the commands can be copied.
 
 ## Re-read the papers {.center .scrollable}
 
-## The five papers, and the models you will fit {.scrollable}
+## The four papers, and the models you will fit {.scrollable}
 
 | # | Paper | What you will fit |
 |---|---|---|
-| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS and a binary logit |
-| 2 | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions …* | OLS, its diagnostics, a squared term |
-| 3 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction …* | binary, ordinal and multinomial logits |
-| 4 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | ridge, lasso, elastic net |
-| 5 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS with controls, a squared term |
+| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS, binary logit |
+| 2 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction …* | binary, ordinal and multinomial logits |
+| 3 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | OLS, ridge, lasso, elastic net |
+| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS, ridge, lasso, elastic net |
 
 ::: {.step}
 You read these before sessions 2 to 6. Re-read the **abstract** and the description of the
@@ -125,10 +124,9 @@ Every line that says `OK` is done. For each `MISSING`, run the matching line fro
 | Paper | Package | Download |
 |---|---|---|
 | 1 · Fraiberger et al. | 10.7910/DVN/QNKFJF | about 35 MB |
-| 2 · Amsili et al. | 10.7910/DVN/U5DAEP | about 220 MB |
-| 3 · Saganowski et al. | 10.7910/DVN/ONOFS7 | about 160 MB |
+| 2 · Saganowski et al. | 10.7910/DVN/ONOFS7 | about 160 MB |
 | 4 · Blonigen & Piger | none — `qmib.load("fdi")` | — |
-| 5 · Topalova & Khandelwal | 10.7910/DVN/8WEXYD | about 2 MB |
+| 4 · Topalova & Khandelwal | 10.7910/DVN/8WEXYD | about 2 MB |
 
 ## Download what is missing {.scrollable}
 
@@ -138,7 +136,6 @@ Every line that says `OK` is done. For each `MISSING`, run the matching line fro
 ```bash
 get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
 get QNKFJF 02-exploratory-data-analysis
-get U5DAEP 03-regression-adequacy-and-validity
 get ONOFS7 04-logistic-ordinal-multinomial
 get 8WEXYD 06-advanced-regression
 ```
@@ -148,7 +145,6 @@ get 8WEXYD 06-advanced-regression
 ```bash
 get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
 get QNKFJF 02-exploratory-data-analysis
-get U5DAEP 03-regression-adequacy-and-validity
 get ONOFS7 04-logistic-ordinal-multinomial
 get 8WEXYD 06-advanced-regression
 ```
@@ -164,7 +160,6 @@ function Get-Package($doi, $dir) {
   Remove-Item "$doi.zip"
 }
 Get-Package QNKFJF 02-exploratory-data-analysis
-Get-Package U5DAEP 03-regression-adequacy-and-validity
 Get-Package ONOFS7 04-logistic-ordinal-multinomial
 Get-Package 8WEXYD 06-advanced-regression
 ```

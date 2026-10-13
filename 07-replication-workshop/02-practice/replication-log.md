@@ -1,4 +1,4 @@
-# Session 07 log · Five papers, one toolkit
+# Session 07 log · Four papers, one toolkit
 
 Copy this file to `groups/A2026/group-XX/session-07/replication-log.md` (or, if you work alone,
 `.../session-07/<your-name>-replication-log.md`) and fill in one block per paper you worked on.
@@ -13,10 +13,8 @@ Three well-argued blocks are worth more than five rushed ones.
 | | |
 |---|---|
 | **Research question** (one sentence, your words) | |
-| **The model I fitted** (outcome, predictors, which session's code) | |
-| **The result, as a sentence** (with units, "holding … fixed" where it applies) | |
-| **What the paper did instead** (its design, in one sentence) | |
-| **Why its number is not mine** | |
+| **The models I ran** (outcome, predictors, which session's code) | |
+| **Each result, as a sentence** (with units, "holding … fixed" where it applies) | |
 
 **The check from class that changed how I read the result**, in two sentences:
 

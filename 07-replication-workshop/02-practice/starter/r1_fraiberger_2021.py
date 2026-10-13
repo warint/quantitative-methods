@@ -1,6 +1,6 @@
 """
 Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
-*Media sentiment and international asset prices*
+*Media sentiment and international asset prices* — the data, with the course's code
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
 
@@ -30,53 +30,54 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import numpy as np
 import pandas as pd
-from scipy import stats
+import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
-# Step 1 · Load the few columns the simple models need
+# Step 1 · Load the data: one row is a country-day
 path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-cols = ["iso", "DATE", "F0_index", "sent1_best", "L1_sent1_best", "L1_returns", "L1_vix"]
-d = pd.read_stata(path, columns=cols)
-print("rows:", len(d), "| countries:", d["iso"].nunique(),
-      "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+d = pd.read_stata(path, columns=["iso", "DATE", "F0_index", "L1_sent1_best", "L1_vix"])
+d = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_vix"])
+d["up"] = (d["F0_index"] > 0).astype(int)            # 1 if the market rose that day
+print(f"{len(d):,} country-days, {d['iso'].nunique()} countries, share of up days {d['up'].mean():.3f}")
 
-# Step 2 · One row is a country-day, weekends included: keep days with a return
-d["weekend"] = d["DATE"].dt.dayofweek >= 5
-print(pd.crosstab(d["weekend"], d["F0_index"].notna(), rownames=["weekend"], colnames=["has return"]))
-m = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_returns", "L1_vix"]).copy()
-m["up"] = (m["F0_index"] > 0).astype(int)            # 1 on a day the market rose
-print("rows for the models:", len(m))
+# Step 2 · Three lines of Python (session 03): today's return on yesterday's news
+# The formula reads "F0_index explained by L1_sent1_best". statsmodels
+# adds the intercept for you; write ~ 0 + x if you ever want it suppressed,
+# and know that R-squared stops being interpretable when you do.
+model = smf.ols("F0_index ~ L1_sent1_best", data=d).fit()
 
-# Step 3 · Describe the outcome and the predictor before modelling (session 02)
-r = m["F0_index"]
-print(f"return  : mean {r.mean():.3f}  median {r.median():.3f}  sd {r.std():.2f}  "
-      f"skew {stats.skew(r):.2f}  excess kurtosis {stats.kurtosis(r):.0f}")
-s = m["L1_sent1_best"]
-print(f"sentiment (yesterday): mean {s.mean():.2f}  sd {s.std():.2f}  median {s.median():.2f}")
-print(f"share of up days: {m['up'].mean():.3f}")
+# .params holds the two coefficients. The slope is in percentage points of
+# return per one standard deviation of sentiment — always say the units.
+print(model.params)
 
-# Step 4 · OLS: today's return on yesterday's sentiment (session 03)
-ols1 = smf.ols("F0_index ~ L1_sent1_best", data=m).fit()
-print(ols1.params.round(4))
-print(f"p-value on sentiment: {ols1.pvalues['L1_sent1_best']:.1e}   R2 = {ols1.rsquared:.4f}")
+# Step 3 · How much did the line explain? (session 03)
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape. The rest of this hour is that difference.
+print(f"R-squared = {model.rsquared:.3f}")
 
-# Step 5 · OLS with two controls: yesterday's return and yesterday's VIX
-ols2 = smf.ols("F0_index ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit()
-print(ols2.params.round(4))
-print(f"p-value on sentiment: {ols2.pvalues['L1_sent1_best']:.1e}   R2 = {ols2.rsquared:.4f}")
+# Step 4 · Two predictors: what "controlling for" means (session 03)
+# Adding a second predictor changes what the first coefficient means: it is now
+# the association holding global risk (yesterday's VIX) fixed, not the raw
+# association. The two answer different questions, and the number will move.
+model2 = smf.ols("F0_index ~ L1_sent1_best + L1_vix", data=d).fit()
+print(model2.params)
 
-# Step 6 · Binary logit: does the market go up today? (session 04)
-logit = smf.logit("up ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit(disp=0)
-print(pd.DataFrame({"log-odds": logit.params, "odds ratio": np.exp(logit.params)}).round(4))
-print(f"p-value on sentiment: {logit.pvalues['L1_sent1_best']:.1e}")
+# Step 5 · The residual plot is the instrument (session 03)
+# Residuals vs Fitted: is there structure the straight line missed?
+plt.scatter(model2.fittedvalues, model2.resid, s=12, alpha=0.6)
+plt.axhline(0, color="black", lw=1)
+plt.xlabel("Fitted values"); plt.ylabel("Residuals")
+plt.show()
 
-# Step 7 · Predicted probability of an up day, at three levels of yesterday's sentiment
-grid = pd.DataFrame({"L1_sent1_best": [-1.0, 0.0, 1.0],
-                     "L1_returns": m["L1_returns"].mean(), "L1_vix": m["L1_vix"].mean()})
-grid["P(up day)"] = logit.predict(grid)
-print(grid[["L1_sent1_best", "P(up day)"]].round(4).to_string(index=False))
+# Step 6 · Log-odds (session 04): does the market go up today?
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("up ~ L1_sent1_best", data=d).fit(disp=0)
+print(m2.params.round(4))
 
-# Step 8 · Our simple slopes next to the paper's, in words not in a match
-print(pd.Series({"Step 4 · sentiment only": ols1.params["L1_sent1_best"],
-                 "Step 5 · + yesterday's return and VIX": ols2.params["L1_sent1_best"],
-                 "Paper · 8 lags of everything, country effects, extreme days": 0.049}).round(3))
+# Step 7 · Odds (session 04)
+# Log-odds -> odds ratio: take the exponential of each coefficient
+print(np.exp(m2.params["L1_sent1_best"]).round(4))
+
+# Step 8 · Predicted probability (session 04)
+# predict() does the same calculation for you: a bad, an ordinary and a good news day
+print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))

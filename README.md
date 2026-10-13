@@ -138,7 +138,7 @@ answerable question, where to find data, and what each session asks of you.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| **07** | Wed 14 Oct | Replication workshop — five papers, one toolkit · **in autonomy** |
+| **07** | Wed 14 Oct | Workshop — four papers, one toolkit · **in autonomy** |
 | — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
@@ -155,9 +155,10 @@ answerable question, where to find data, and what each session asks of you.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> Session 07 (14 October) is a **replication workshop**: three hours in autonomy, alone or in teams,
-> rebuilding one published result from each of the sessions 2–6 readings with the Python seen in
-> class. It is the revision session for the midterm.
+> Session 07 (14 October) is a **workshop**: three hours in autonomy, alone or in teams, plugging the
+> data of four of the sessions 2–6 readings into the course's models — OLS, the logits, ridge, the
+> lasso, the elastic net — with exactly the Python seen in class. It is the revision session for the
+> midterm.
 >
 > The **midterm is written on 28 October** and covers **Sessions 1 to 6**. PCA and factor analysis
 > are now session 13, "One more thing" — after the course, for self-study, and not examined.

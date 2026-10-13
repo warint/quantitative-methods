@@ -1,12 +1,11 @@
 """
-Paper 3 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
+Paper 2 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
 *Analysis of group evolution prediction in complex networks*
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R3-saganowski-2019.md
 
-The session-04 code on the paper's data: a binary, an ordinal and a multinomial
-logit, each on three readable features. Not the paper's 15 classifiers — the
-three models you typed in class.
+The session-04 code, line for line, on this paper's data: a binary, an ordinal
+and a multinomial logit. Only the data and the variable names change.
 
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
@@ -37,76 +36,82 @@ warnings.filterwarnings("ignore")            # convergence notes are not part of
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.miscmodels.ordinal_model import OrderedModel
 
-FOLDER = "04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
-FILE = FOLDER + "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.{}.csv"
+pd.set_option("display.width", 130)       # as in the session-04 slides, a little wider
+pd.set_option("display.max_columns", 10)
 
-# Step 1 · Load the two halves: fit on one, test on the other
-train, test = pd.read_csv(FILE.format(1)), pd.read_csv(FILE.format(2))
-print("train", train.shape, "| test", test.shape)
-print(train["event_type"].value_counts(normalize=True).round(3))   # the base rates
+# Step 1 · Load the groups, and what happened to each one next week
+FILE = ("04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
+        "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv")
+raw = pd.read_csv(FILE)
+print(raw.shape)
+print(raw["event_type"].value_counts(normalize=True).round(3))   # the base rates
 
 # Step 2 · Three features a person can read
-def features(df):
-    return pd.DataFrame({
-        "event": df["event_type"],
-        "log2_size": np.log2(df["g1_size"]),            # +1 = the group is twice as big
-        "avg_degree": df["g1_avg_group_degree_total"],  # ties per member, inside the group
-        "aging": df["g1_IlhanAging"]})                  # how long its members have been around
-tr, te = features(train), features(test)
-X = ["log2_size", "avg_degree", "aging"]
-print(tr.groupby("event")[X].median().round(2))
+groups = pd.DataFrame({
+    "event": raw["event_type"],
+    "log2_size": np.log2(raw["g1_size"]),            # +1 = the group is twice as big
+    "avg_degree": raw["g1_avg_group_degree_total"],  # ties per member, inside the group
+    "aging": raw["g1_IlhanAging"]})                  # how long its members have been around
+print(groups[["log2_size", "avg_degree", "aging"]].median().round(2))
 
-# Step 3 · Binary logit: does the group dissolve next week?
-tr["dissolve"] = (tr["event"] == "dissolving").astype(int)
-bi = smf.logit("dissolve ~ log2_size + avg_degree + aging", data=tr).fit(disp=0)
-print(pd.DataFrame({"log-odds": bi.params, "odds ratio": np.exp(bi.params),
-                    "p-value": bi.pvalues}).round(3))
+# Step 3 · Binary logit: log-odds (session 04, LR 6)
+groups["dissolve"] = (groups["event"] == "dissolving").astype(int)
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("dissolve ~ log2_size", data=groups).fit(disp=0)
+print(m2.params.round(4))
 
-# Step 4 · From odds to probabilities: a 4-member and a 16-member group
-typical = tr[X].median()
-cases = pd.DataFrame([typical, typical], index=["4 members", "16 members"])
-cases["log2_size"] = [2, 4]                         # 2**2 = 4, 2**4 = 16
-print("P(dissolve):", bi.predict(cases).round(3).to_dict())
+# Step 4 · Binary logit: odds (session 04, LR 7)
+# Log-odds -> odds ratio: take the exponential of each coefficient
+print(np.exp(m2.params["log2_size"]).round(4))
 
-# Step 5 · Ordinal logit: shrinks < continues < grows
-levels = ["shrinking", "continuing", "growing"]
-sub = tr[tr["event"].isin(levels)].copy()
-sub["size_change"] = pd.Categorical(sub["event"], categories=levels, ordered=True)
-om = OrderedModel(sub["size_change"], sub[X], distr="logit").fit(method="bfgs", disp=0)
-print(pd.DataFrame({"log-odds": om.params[X], "odds ratio": np.exp(om.params[X]),
-                    "p-value": om.pvalues[X]}).round(3))
-print("P(shrink, continue, grow):")
-print(pd.DataFrame(np.asarray(om.predict(cases[X])), index=cases.index, columns=levels).round(3))
+# Step 5 · Binary logit: predicted probability (session 04, LR 8)
+# predict() does the same calculation for you: groups of 4, 8 and 16 members
+print(m2.predict(pd.DataFrame({"log2_size": [2, 3, 4]})).round(3))
 
-# Step 6 · Multinomial logit: four events, baseline = dissolving
-four = ["dissolving", "shrinking", "growing", "continuing"]   # merging and splitting: 17 groups
-m4 = tr[tr["event"].isin(four)]
-mn = sm.MNLogit(pd.Categorical(m4["event"], categories=four).codes,
-                sm.add_constant(m4[X])).fit(disp=0, maxiter=200)
-rrr = np.exp(mn.params)
-rrr.columns = four[1:]                              # each column: that event against dissolving
-print("relative risk ratios, against dissolving:")
-print(rrr.round(3))
+# Step 6 · Ordinal logit: the code (session 04, OLR 3)
+# Keep the order: shrinking < continuing < growing
+order = ["shrinking", "continuing", "growing"]
+dat = groups[groups["event"].isin(order)].copy()
+dat["event_c"] = pd.Categorical(dat["event"], categories=order, ordered=True)
+om = OrderedModel(dat["event_c"], dat[["log2_size", "avg_degree", "aging"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
 
-# Step 7 · Predicted probabilities across group size, other features at the median
-grid = pd.DataFrame({"log2_size": np.linspace(1.6, 6, 40), "avg_degree": typical["avg_degree"],
-                     "aging": typical["aging"]})
-probs = pd.DataFrame(np.asarray(mn.predict(sm.add_constant(grid, has_constant="add"))), columns=four)
-for e in four:
-    plt.plot(2 ** grid["log2_size"], probs[e], label=e)
-plt.xscale("log"); plt.xlabel("group size (members)"); plt.ylabel("predicted probability")
-plt.legend(); plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150, bbox_inches="tight"); plt.show()
+# Step 7 · Ordinal logit: log-odds -> odds (session 04, OLR 4)
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+print(om.params[["log2_size", "avg_degree", "aging"]].round(3))
+# Proportional-odds ratios
+print(np.exp(om.params[["log2_size", "avg_degree", "aging"]]).round(3))
 
-# Step 8 · Out of sample: accuracy on the test half against the base rate
-t4 = te[te["event"].isin(four)]
-guess = np.asarray(mn.predict(sm.add_constant(t4[X]))).argmax(axis=1)
-truth = pd.Categorical(t4["event"], categories=four).codes
-print(f"multinomial accuracy {(guess == truth).mean():.3f} | always 'dissolving' "
-      f"{(t4['event'] == 'dissolving').mean():.3f}")
-print(pd.crosstab(pd.Series(np.array(four)[truth], name="true"),
-                  pd.Series(np.array(four)[guess], name="predicted")))
+# Step 8 · Ordinal logit: probabilities (session 04, OLR 5)
+# A 4-member group, and an otherwise identical 16-member one.
+# Columns: shrinking, continuing, growing.
+new = pd.DataFrame({"log2_size": [2, 4], "avg_degree": [2.7, 2.7], "aging": [8.5, 8.5]})
+print(pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["4 members", "16 members"]).round(3))
+
+# Step 9 · Multinomial logit: the code (session 04, MLR 3)
+# Code 0 (dissolving) is the baseline: every coefficient reads "relative to dissolving"
+levels = ["dissolving", "shrinking", "growing", "continuing"]
+ml = groups[groups["event"].isin(levels)].copy()
+ml["event_c"] = pd.Categorical(ml["event"], categories=levels).codes
+X = ml[["log2_size", "avg_degree", "aging"]].astype(float)
+X = sm.add_constant(X)
+# Three sets of coefficients at once, each against the dissolving baseline
+mn = sm.MNLogit(ml["event_c"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+
+# Step 10 · Multinomial logit: log-odds -> relative risk ratios (session 04, MLR 4)
+# Log-odds and RRR, for shrinking, growing and continuing vs dissolving
+print(pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1)
+      .set_axis(["log-odds: shrinking", "log-odds: growing", "log-odds: continuing",
+                 "RRR: shrinking", "RRR: growing", "RRR: continuing"], axis=1).round(3))
+
+# Step 11 · Multinomial logit: probabilities (session 04, MLR 5)
+# Typical groups (median degree and aging), from 4 to 32 members
+grid = pd.DataFrame({"const": 1.0, "log2_size": [2, 3, 4, 5],
+                     "avg_degree": 2.7, "aging": 8.5})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["log2_size"])
+print(out.round(3))

@@ -1,6 +1,6 @@
 # Session 07 — The workshop (3 hours, in autonomy)
 
-# Five papers, one toolkit
+# Four papers, one toolkit
 
 > **[Open the workshop slides](https://warint.github.io/quantitative-methods/session-07-practice.html)** ·
 > source: [`MATH60033A-S07-Practice.qmd`](MATH60033A-S07-Practice.qmd)
@@ -9,16 +9,15 @@
 
 ## What this afternoon is
 
-No new method. For three hours you go back to the five papers you read before sessions 2 to 6,
-open the authors' own data, and fit **simple models with exactly the Python you typed in class** —
-`smf.ols`, `smf.logit`, `OrderedModel`, `sm.MNLogit`, `RidgeCV`, `LassoCV`, `ElasticNetCV`, and a
-squared term with `I(x**2)`.
+No new method. For three hours you take the data of four papers you read before sessions 2 to 6
+and plug it into the course's models, **with exactly the Python you typed in class** — `smf.ols`,
+`smf.logit`, `OrderedModel`, `sm.MNLogit`, `RidgeCV`, `LassoCV`, `ElasticNetCV`. Only the variable
+names change.
 
 Each paper is a script in [`starter/`](starter/) and a step-by-step guide in
 [`replications/`](replications/). The guide tells you, for every step, what to run, why, and the
-numbers **you should see**. You are **not** trying to reproduce the published numbers: you fit the
-simplest model that answers the paper's question, read it in words, and say how the authors' own
-design differs — and why it gives a different number.
+numbers **you should see**. You are **not** following the papers: each step is a code cell you
+already know, run on new data, and the work is to read its output in words, with units.
 
 > This is the best revision you can do for the midterm on **28 October**: every idea from
 > sessions 2 to 6 comes back once, on real data, in the order it was taught.
@@ -30,16 +29,15 @@ design differs — and why it gives a different number.
 | When | What | |
 |---|---|---|
 | **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run the check script | below |
-| **0:15 – 0:45** | **Paper 1** · Session 02 · news sentiment and stock returns — OLS, binary logit | [guide](replications/R1-fraiberger-2021.md) · [script](starter/r1_fraiberger_2021.py) |
-| **0:45 – 1:15** | **Paper 2** · Session 03 · soil water — OLS, diagnostics, a squared term | [guide](replications/R2-amsili-2024.md) · [script](starter/r2_amsili_2024.py) |
-| **1:15 – 1:45** | **Paper 3** · Session 04 · social groups — binary, ordinal, multinomial logits | [guide](replications/R3-saganowski-2019.md) · [script](starter/r3_saganowski_2019.py) |
-| 1:45 – 1:55 | Break | |
-| **1:55 – 2:25** | **Paper 4** · Session 05 · determinants of FDI — ridge, lasso, elastic net | [guide](replications/R4-blonigen-piger-2014.md) · [script](starter/r4_blonigen_piger_2014.py) |
-| **2:25 – 2:50** | **Paper 5** · Session 06 · tariffs and productivity — OLS, controls, a squared term | [guide](replications/R5-topalova-khandelwal-2011.md) · [script](starter/r5_topalova_khandelwal_2011.py) |
+| **0:15 – 0:55** | **Paper 1** · Session 02 data · news sentiment and stock returns — OLS, binary logit | [guide](replications/R1-fraiberger-2021.md) · [script](starter/r1_fraiberger_2021.py) |
+| **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits | [guide](replications/R3-saganowski-2019.md) · [script](starter/r3_saganowski_2019.py) |
+| 1:35 – 1:45 | Break | |
+| **1:45 – 2:15** | **Paper 3** · Session 05 data · foreign direct investment — OLS, ridge, lasso, elastic net | [guide](replications/R4-blonigen-piger-2014.md) · [script](starter/r4_blonigen_piger_2014.py) |
+| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, ridge, lasso, elastic net | [guide](replications/R5-topalova-khandelwal-2011.md) · [script](starter/r5_topalova_khandelwal_2011.py) |
 | **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push | [`replication-log.md`](replication-log.md) |
 
 **If you fall behind,** move on at the half-hour mark anyway and come back later: a finished log for
-three papers beats a half-finished one for five. **If you finish early,** each guide ends with
+three papers beats a half-finished one for four. **If you finish early,** each guide ends with
 *Pitfalls* — try the variation it suggests (another predictor, another penalty, another threshold).
 
 ---
@@ -51,10 +49,10 @@ script on the other.
 
 **As a team (2 to 5).** Two ways, pick one at the start:
 
-- **Split and teach.** Each person takes one or two papers. At **2:25**, stop and take five minutes
+- **Split and teach.** Each person takes one or two papers. At **2:15**, stop and take five minutes
   each to walk the others through *your* paper: the question, the model, the result in words, and
   how it differs from the paper.
-  Everyone's log then covers all five.
+  Everyone's log then covers all four.
 - **Pair at one screen.** One types, one reads the guide aloud and checks the numbers; swap at
   every paper.
 
@@ -121,26 +119,23 @@ Run the steps **in order**: step 5 needs what step 4 made.
 
 ---
 
-## Part 1 · The five papers
+## Part 1 · The four papers
 
 Each guide has the same shape, so you always know where you are:
 
-1. **The paper in brief** and **the research question** — read these first, two minutes.
-2. **Data** — the file, what one row is, the variables that matter.
-3. **The simple model, and why** — which session's code, and what question it answers.
-4. **Steps** — each with its code and **You should see**.
-5. **Interpretation** — the result as a sentence, in units.
-6. **How it differs from the paper** — the authors' design, yours, and why the numbers differ.
-7. **What this does not license** — the part the midterm's Part D asks about.
-8. **Pitfalls** — what tripped us, so it does not trip you.
+1. **The data** — one line on the paper, what one row is, the variables used.
+2. **The models, and where the code comes from** — which session's slide each step copies.
+3. **Steps** — each with its code and **You should see**.
+4. **Interpretation** — each result as a sentence, in units.
+5. **What this does not license** — the part the midterm's Part D asks about.
+6. **Pitfalls** — what tripped us, so it does not trip you.
 
 | # | Paper | The simple models | With the code of |
 |---|---|---|---|
-| **1** | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | today's return on yesterday's news sentiment (OLS, then with controls); an up day or a down day (binary logit) | sessions 02–04 |
-| **2** | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions for field capacity, wilting point and available water* | field capacity on sand, clay and organic matter (OLS), its diagnostics, a squared term | sessions 03 and 06 |
-| **3** | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | does a group dissolve (binary logit); shrink, continue or grow (ordinal logit); which event (multinomial logit) | session 04 |
-| **4** | Blonigen & Piger (2014), *Determinants of foreign direct investment* | 56 candidates: OLS as a benchmark, then ridge, the lasso and the elastic net, scored on held-out pairs | session 05 |
-| **5** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | productivity on output and input tariffs, then with controls (OLS); a squared term for age | sessions 03 and 06 |
+| **1** | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | today's return on yesterday's news sentiment (OLS); an up day or a down day (binary logit) | sessions 03–04 |
+| **2** | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | does a group dissolve (binary logit); shrink, continue or grow (ordinal logit); which event (multinomial logit) | session 04 |
+| **3** | Blonigen & Piger (2014), *Determinants of foreign direct investment* | log FDI on a few gravity variables (OLS), then 56 candidates in ridge, the lasso and the elastic net, scored on held-out pairs | sessions 03 and 05 |
+| **4** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | productivity on output and input tariffs (OLS), then all the firm variables in ridge, the lasso and the elastic net | sessions 03 and 05 |
 
 ---
 
@@ -178,7 +173,7 @@ Replace `XX` with your group number — group 07 uses `group-07`.
 
 - A coefficient with no sentence, no units, or no "holding the others fixed"
 - An odds ratio read as a probability, or a lasso zero read as "no effect"
-- Treating your simple model's number as the paper's result — or the paper's as yours
+- Presenting a number from a simple model as the paper's finding
 - Pasting output with no sentence saying what it means
 
 ---

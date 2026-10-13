@@ -43,7 +43,7 @@ SESSIONS = {
     "06": ("Regression: Advanced Considerations",
            "Panel data, non-linearity, categorical variables and interactions"),
     "07": ("Replication Workshop",
-           "Five papers, one toolkit: three hours rebuilding published results, in autonomy"),
+           "Four papers, one toolkit: the course's models on the papers' data, in autonomy"),
     "08": ("KNN and Friends",
            "The Bayes classifier, k-nearest neighbours and the bias–variance trade-off"),
     "09": ("Structural Equation Modelling",

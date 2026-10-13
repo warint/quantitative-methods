@@ -208,30 +208,30 @@ SESSIONS = {
     ),
     "07": dict(
         dir="07-replication-workshop",   # the path the book's chapter 7 is built from
-        title="Five Papers, One Toolkit",
-        short="Five papers, one toolkit",
-        question="What do the course's models say on the papers' own data?",
-        methods="the readings of sessions 2–6: simple models fitted on their data with the code seen in class",
-        theme="What does the simplest model say, and how does the paper's design differ?",
+        title="Four Papers, One Toolkit",
+        short="Four papers, one toolkit",
+        question="What do the course's models say on the papers' data?",
+        methods="the data of four readings, plugged into OLS, the logits, ridge, the lasso and the elastic net with the code seen in class",
+        theme="What does each model say, read in words?",
         generated=False,          # a hand-written workshop, not a lecture-plus-practice
         objectives=[
-            "State each paper's **research question** in one sentence, and choose the simple model that answers it",
-            "Fit OLS, the three logits, ridge, the lasso and the elastic net on the authors' own files, with **only the Python seen in class**",
+            "Choose which of the course's models fits a new outcome — a number, a yes/no, ordered or unordered categories",
+            "Run OLS, the three logits, ridge, the lasso and the elastic net on the papers' data, with **exactly the code seen in class**",
             "Read every result as a sentence, in units — slopes, odds ratios, probabilities, what a penalty kept",
-            "Say how the simple model differs from the paper's design, and **why** the numbers differ",
+            "Compare OLS with the penalised models on data they did not see",
             "Say what each result does **not** license",
         ],
-        reading="the five readings of sessions 2–6, one per paper",
+        reading="the data of four readings: sessions 2, 4, 5 and 6",
         reading_url="https://github.com/warint/quantitative-methods/blob/main/REPLICATIONS.md",
-        dataverse=None,           # four packages already downloaded in sessions 2, 3, 4 and 6
+        dataverse=None,           # three packages already downloaded in sessions 2, 4 and 6
         dataset="fdi",            # the only one that needs no download
-        dataset_note="the four Dataverse packages of sessions 2, 3, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
-        deliverable=("a log: for each paper attempted, the model you fitted, its result as a sentence, "
-                     "how the paper's design differs, and one sentence on what the result does not license"),
+        dataset_note="the three Dataverse packages of sessions 2, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
+        deliverable=("a log: for each paper attempted, the models you ran, each result as a sentence "
+                     "with units, and one sentence on what the results do not license"),
         loses_marks=[
             "A coefficient with no sentence, no units, or no \"holding the others fixed\"",
             "An odds ratio read as a probability, or a lasso zero read as \"no effect\"",
-            "Treating your simple model's number as the paper's result — or the paper's as yours",
+            "Presenting a number from a simple model as the paper's finding",
             "Pasting output with no sentence saying what it means",
         ],
     ),

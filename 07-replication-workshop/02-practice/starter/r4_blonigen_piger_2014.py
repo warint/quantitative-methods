@@ -1,8 +1,11 @@
 """
-Paper 4 · Session 05 · Blonigen & Piger (2014)
+Paper 3 · Session 05 · Blonigen & Piger (2014)
 *Determinants of foreign direct investment*
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R4-blonigen-piger-2014.md
+
+The data of the paper, the code of sessions 3 and 5: OLS, then ridge, the lasso
+and the elastic net, line for line as in class, with this data's variable names.
 
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
@@ -32,67 +35,89 @@ import warnings
 warnings.filterwarnings("ignore")       # convergence notes are not part of the answer
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import qmib
+import statsmodels.formula.api as smf
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 
-# Step 1 · Load the data: log FDI, 56 candidates, complete cases only
+# Step 1 · Load the data: one row per country pair, log FDI, 56 candidates
 fdi = qmib.load("fdi")
-cov = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
-d = fdi[fdi.fdi_stock_musd > 0].dropna(subset=cov)        # log drops zeros; complete cases
-y = np.log(d.fdi_stock_musd)                                # the outcome: log FDI stock
-X = d[cov].copy()
-for v in ["parent_gdp", "host_gdp", "distance"]:            # gravity variables in logs
-    X[v] = np.log(X[v])
-print("country pairs:", len(d), "| candidate predictors:", len(cov), "| rows per predictor:", round(len(d) / len(cov), 1))
+YCOL = "log_fdi"
+XCOLS = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
+d = fdi[fdi.fdi_stock_musd > 0].dropna(subset=XCOLS).copy()   # positive FDI, complete rows
+d["log_fdi"] = np.log(d["fdi_stock_musd"])
+for v in ["parent_gdp", "host_gdp", "distance"]:                # gravity variables in logs
+    d[v] = np.log(d[v])
+print(f"country pairs: {len(d)}   candidate predictors: {len(XCOLS)}")
 
-# Step 2 · Hold out 30% of the pairs: the test set is touched only to score
-Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0)
-rmse = lambda m: round(np.sqrt(mean_squared_error(yte, m.predict(Xte))), 3)
-print("train:", len(Xtr), "| test:", len(Xte))
+# Step 2 · OLS: three lines of Python (session 3)
+# The formula reads "log_fdi explained by host_gdp" (both in logs).
+model = smf.ols("log_fdi ~ host_gdp", data=d).fit()
 
-# Step 3 · Benchmark: OLS with all 56 candidates
-ols = make_pipeline(StandardScaler(), LinearRegression()).fit(Xtr, ytr)
-print("OLS: predictors kept 56 | test RMSE", rmse(ols))
+# .params holds the two coefficients. The slope is an elasticity: % more FDI
+# per 1% more host GDP — always say the units.
+print(model.params)
 
-# Step 4 · Ridge: shrink every coefficient, lambda (alpha) chosen by cross-validation
-ridge = make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-3, 3, 60))).fit(Xtr, ytr)
-print("ridge: lambda", round(ridge[-1].alpha_, 2), "| kept", int((ridge[-1].coef_ != 0).sum()),
-      "| test RMSE", rmse(ridge))
+# Step 3 · How much did the line explain?
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape.
+print(f"R-squared = {model.rsquared:.3f}")
 
-# Step 5 · Lasso: shrink, and set the weak coefficients to exactly zero
-lasso = make_pipeline(StandardScaler(), LassoCV(cv=5, random_state=0, max_iter=50_000)).fit(Xtr, ytr)
-kept_lasso = [v for v, b in zip(cov, lasso[-1].coef_) if b != 0]
-print("lasso: lambda", round(lasso[-1].alpha_, 4), "| kept", len(kept_lasso), "of 56 | test RMSE", rmse(lasso))
-print("dropped:", ", ".join(v for v in cov if v not in kept_lasso))
+# Step 4 · Two predictors: what "controlling for" means
+# Adding distance changes what the host-GDP coefficient means: it is now the
+# association holding distance fixed, not the raw association.
+model2 = smf.ols("log_fdi ~ host_gdp + distance", data=d).fit()
+print(model2.params)
+print(f"R-squared = {model2.rsquared:.3f}")
 
-# Step 6 · Elastic net: half lasso, half ridge (l1_ratio = 0.5)
+# Step 5 · Ridge (session 5)
+from sklearn.linear_model import RidgeCV
+
+Xc, yc = d[XCOLS].astype(float), d[YCOL].astype(float)
+ridge = make_pipeline(StandardScaler(),                        # same scale for all
+                      RidgeCV(alphas=np.logspace(-3, 3, 60))   # try 60 values of λ
+                      ).fit(Xc, yc)
+print(f"λ = {ridge[-1].alpha_:.2f}")
+print(f"ridge kept {np.sum(ridge[-1].coef_ != 0)} of {len(XCOLS)} — it never drops a predictor")
+
+# Step 6 · Lasso
+from sklearn.linear_model import LassoCV
+
+lasso = make_pipeline(StandardScaler(),
+                      LassoCV(cv=5, random_state=0, max_iter=50_000)   # λ by 5-fold CV
+                      ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, lasso[-1].coef_) if b != 0]
+print(f"λ = {lasso[-1].alpha_:.4f}")
+print(f"lasso kept {len(kept)} of {len(XCOLS)}")
+
+# Step 7 · Elastic net
+from sklearn.linear_model import ElasticNetCV
+
 enet = make_pipeline(StandardScaler(),
-                     ElasticNetCV(l1_ratio=0.5, cv=5, random_state=0, max_iter=50_000)).fit(Xtr, ytr)
-kept_enet = [v for v, b in zip(cov, enet[-1].coef_) if b != 0]
-print("elastic net: lambda", round(enet[-1].alpha_, 4), "| kept", len(kept_enet), "of 56 | test RMSE", rmse(enet))
-print("dropped:", ", ".join(v for v in cov if v not in kept_enet))
+                     ElasticNetCV(l1_ratio=0.5,            # half lasso, half ridge
+                                  cv=5, random_state=0, max_iter=50_000)
+                     ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, enet[-1].coef_) if b != 0]
+print(f"λ = {enet[-1].alpha_:.4f}")
+print(f"elastic net kept {len(kept)} of {len(XCOLS)}")
 
-# Step 7 · The four models side by side, and a picture of their test error
-table = pd.DataFrame({"predictors kept": [56, 56, len(kept_lasso), len(kept_enet)],
-                      "test RMSE": [rmse(ols), rmse(ridge), rmse(lasso), rmse(enet)]},
-                     index=["OLS", "ridge", "lasso", "elastic net"])
-print(table)
-fig, ax = plt.subplots(figsize=(6, 2.4))
-ax.barh(table.index[::-1], table["test RMSE"][::-1], color="#1f4e79")
-ax.set_xlabel("test RMSE, log FDI (lower is better)")
-plt.tight_layout(); plt.savefig(OUTPUT / "s05_test_rmse.png", dpi=150); plt.show()
+# Step 8 · Which one predicts best? Fit on 70% of the pairs, score on 30%
+Xtr, Xte, ytr, yte = train_test_split(d[XCOLS], d[YCOL], test_size=0.3, random_state=7)
 
-# Step 8 · Compare with the paper's robust determinants (inclusion probability >= 85%)
-paper = ["parent_gdp", "host_gdp", "distance", "common_language_official", "colonial_link",
-         "regional_trade_agreement", "customs_union", "parent_gdp_pc", "host_skill"]
-coef = pd.Series(lasso[-1].coef_, index=cov)
-print("paper's nine kept by the lasso:", sum(v in kept_lasso for v in paper), "| by the elastic net:",
-      sum(v in kept_enet for v in paper))
-print(coef[paper].round(2).to_string())
-print("largest lasso coefficients:", coef.abs().sort_values(ascending=False).head(6).index.tolist())
+def test_rmse(model):                  # fit on 70% of rows, score on the other 30%
+    pipe = make_pipeline(StandardScaler(), model).fit(Xtr, ytr)   # standardise first
+    kept = int(np.sum(np.abs(pipe[-1].coef_) > 1e-8))             # non-zero coefficients
+    return kept, mean_squared_error(yte, pipe.predict(Xte)) ** 0.5
+
+results = {
+    "OLS, all predictors": test_rmse(LinearRegression()),
+    "ridge":       test_rmse(RidgeCV(alphas=np.logspace(-3, 3, 60))),   # λ by CV
+    "lasso":       test_rmse(LassoCV(cv=5, random_state=0, max_iter=50_000)),
+    "elastic net": test_rmse(ElasticNetCV(l1_ratio=0.5, cv=5, random_state=0, max_iter=50_000)),
+}
+res = pd.DataFrame(results, index=["predictors kept", "test RMSE"]).T.astype({"predictors kept": int})
+print(res.round(3))
