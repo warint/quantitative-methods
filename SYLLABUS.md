@@ -135,7 +135,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | **04** | Wed 16 Sep | Logistic regression |
 | **05** | Wed 23 Sep | Regularisation |
 | **06** | Wed 7 Oct | Panel data and interactions · **asynchronous** |
-| **07** | Wed 14 Oct | Replication workshop — five papers, one toolkit · **in autonomy** |
+| **07** | Wed 14 Oct | Workshop — four papers, one toolkit · **in autonomy** |
 | — | Wed 28 Oct | **MIDTERM** — on paper, covering Sessions 1–6 · room to be announced |
 | **08** | Wed 4 Nov | KNN and bias–variance |
 | **09** | Wed 11 Nov | Structural equation modelling |
@@ -152,9 +152,10 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 > brief are all in the repository, and the two-minute reports move to the discussion thread. Treat
 > the same three hours as booked.
 >
-> Session 07 (14 October) is a **replication workshop**: three hours in autonomy, alone or in teams,
-> rebuilding one published result from each of the sessions 2–6 readings with the Python seen in
-> class. It is the revision session for the midterm.
+> Session 07 (14 October) is a **workshop**: three hours in autonomy, alone or in teams, plugging the
+> data of four of the sessions 2–6 readings into the course's models — OLS, the logits, ridge, the
+> lasso, the elastic net — with exactly the Python seen in class. It is the revision session for the
+> midterm.
 >
 > The **midterm is written on 28 October** and covers **Sessions 1 to 6**. PCA and factor analysis
 > are now session 13, "One more thing" — after the course, for self-study, and not examined.
@@ -171,7 +172,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 04 | Logistic Regression: Binary, Ordinal, and Multinomial | maximum likelihood, odds ratios, pseudo-$R^2$, likelihood-ratio tests | Can we predict a discrete outcome honestly? |
 | 05 | Regularisation: Ridge, Lasso, and the Elastic Net | stepwise selection and why it fails, soft-thresholding, coordinate descent, the grouping effect | Of many indicators, which few actually carry the signal? |
 | 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
-| 07 | Replication Workshop: Five Papers, One Toolkit | the readings of sessions 2–6, replicated in Python with the code seen in class | Which of the five published results survives your own replication? |
+| 07 | Four Papers, One Toolkit | the data of four readings, plugged into OLS, the logits, ridge, the lasso and the elastic net with the code seen in class | Which of the five published results survives your own replication? |
 | — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |
 | 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
@@ -285,29 +286,26 @@ instructor's attention is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
-Written **Wednesday 28 October**. Covers **Sessions 1–6**: exploratory data analysis and the first
-regression, regression diagnostics and validity, logistic regression, regularisation, and panel
-data and interactions. Session 7, the replication workshop, reviews all five on real data and adds
-no new material.
+Written **Wednesday 28 October**, **2 hours 30 minutes**. Covers **Sessions 1–6**: *Europe 2031*
+and what AI is, exploratory data analysis and the first regression, regression diagnostics and
+validity, logistic regression, regularisation, and transformations such as squared terms. Session 7,
+the replication workshop, reviews all of it on real data and adds no new material.
 
-Four parts: **definitions** (state it precisely), **calculations** (derive and compute),
-**diagnostics** (read an output and find the fault), **interpretation** (say what may and may not
-be claimed).
+Six parts, all about **understanding**, with very little arithmetic: *Europe 2031* in your own words,
+one of the readings (its question, its model, its limits, an alternative), **multiple choice**,
+**short answers** (state a concept precisely), **reading output** (interpret a table in words) and
+**judgement** (say what may and may not be claimed).
 
 > **Why an exam, when the real work is the project.** Because a group project cannot tell me what
 > *you* know. Three people and a language model produce a good notebook without any one of them
-> being able to derive the estimator inside it. The midterm is the only instrument in this course
-> that isolates your individual understanding of the mathematics.
+> being able to explain what the estimator inside it does. The midterm is the only instrument in
+> this course that isolates your individual understanding of the methods.
 >
-> **Why no documents.** Not to test memory for its own sake. The formulas that matter — the normal
-> equations, the bias–variance decomposition, the soft-thresholding operator, $\tau^\star =
-> c_{FP}/(c_{FP}+c_{FN})$ — are few, and having them *in your head* is what lets you notice, in the
-> middle of a meeting, that a proposed analysis cannot be right. Expertise you must look up is
-> expertise you will not deploy under pressure.
->
-> **Why a calculator.** Because the point is not arithmetic. You will compute a ridge estimate, a
-> soft-threshold, a marginal effect, a cost-optimal threshold. Doing these by hand once makes the
-> formulas concrete in a way that reading them never will.
+> **Why no documents.** Not to test memory for its own sake. The ideas that matter — what a
+> coefficient means and in what units, odds against probabilities, why a little bias can predict
+> better, what a selected variable list does and does not show — are few, and having them *in your
+> head* is what lets you notice, in the middle of a meeting, that a proposed analysis cannot be
+> right. Expertise you must look up is expertise you will not deploy under pressure.
 
 Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/).
 

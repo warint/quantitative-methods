@@ -1,0 +1,58 @@
+## Paper 1 · Session 02 · News sentiment and stock returns {.center .scrollable}
+
+## The data, and the models {.scrollable}
+
+The data of **Fraiberger, Lee, Puy & Ranciere (2021)**, *Media sentiment and international asset
+prices* — plugged into the course's models, not the paper's design.
+
+**One row** = one country on one calendar day: 25 countries, 1991–2017, **135,082** complete rows.
+`F0_index` today's return (%) · `L1_sent1_best` yesterday's news sentiment (sd) · `L1_vix`
+yesterday's VIX · `up` = 1 if the market rose.
+
+::::: columns
+:::: {.column width="50%"}
+**OLS** — the session 03 lecture, line for line
+
+1. Load the data
+2. *Three lines of Python*: return on sentiment
+3. *How much did the line explain?*
+4. *Two predictors*: + yesterday's VIX
+5. *The residual plot*
+::::
+
+:::: {.column width="50%"}
+**Binary logit** — the session 04 lecture, line for line
+
+6. *LR 6 · Log-odds*: up day on sentiment
+7. *LR 7 · Odds*
+8. *LR 8 · Predicted probability*
+::::
+:::::
+
+{{< include _solutions-r1.qmd >}}
+
+## What you should find {.scrollable}
+
+| | |
+|---|---|
+| OLS slope, sentiment alone | **0.072** points of return per sd |
+| … holding yesterday's VIX fixed | **0.069** |
+| R² | **0.001** |
+| Logit: odds ratio of an up day, per sd | **1.08** |
+| P(up day) after sentiment −1 / 0 / +1 sd | **0.499 / 0.519 / 0.538** |
+
+::: {.check}
+A better news day goes with a slightly higher return the next day: 0.07 points, against a daily
+return that varies by about 2 points. In probabilities, an up day goes from 50% to 54%.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** The same event can move both the news and the market; a one-day lag does not
+  rule that out.
+- **No trading rule.** 0.07 points a day, with $R^2 = 0.001$, is small next to the day-to-day noise
+  — and before costs.
+- **Significant is not large.** With 135,082 rows, almost any slope is significant: read its size
+  in units, and the R².
+:::

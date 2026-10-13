@@ -43,7 +43,7 @@ SESSIONS = {
     "06": ("Regression: Advanced Considerations",
            "Panel data, non-linearity, categorical variables and interactions"),
     "07": ("Replication Workshop",
-           "Five papers, one toolkit: three hours rebuilding published results, in autonomy"),
+           "Four papers, one toolkit: the course's models on the papers' data, in autonomy"),
     "08": ("KNN and Friends",
            "The Bayes classifier, k-nearest neighbours and the bias–variance trade-off"),
     "09": ("Structural Equation Modelling",
@@ -155,6 +155,15 @@ def main():
     if summary.exists():
         shutil.copy2(summary, DOCS / "midterm-summary.pdf")
         print("published the midterm summary to docs/")
+
+    # The practice questions and their answer key, rendered to PDF by
+    # scripts/build_midterm_practice.py in the summary's house style.
+    for stem, dest in [("PRACTICE", "midterm-practice.pdf"),
+                       ("PRACTICE-ANSWERS", "midterm-practice-answers.pdf")]:
+        src = ROOT / "assessments" / "midterm" / f"{stem}.pdf"
+        if src.exists():
+            shutil.copy2(src, DOCS / dest)
+            print(f"published {dest} to docs/")
 
     decks = sorted(glob.glob(str(ROOT / "[0-9][0-9]-*/0[0-2]-*/MATH60033A-S*.html")))
     if not decks:

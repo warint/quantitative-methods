@@ -45,15 +45,17 @@ format:
 \vspace{-0.6em}
 :::
 
-**How to use these six pages.** A map, not a substitute for the sessions: for each one, the ideas to *state*, the formulas to *use* with a calculator, and a worked example with its own numbers. The last page lists what loses marks. Then sit the sample paper (`assessments/midterm/EXAM.md`) under exam conditions, and only afterwards open `SOLUTIONS.md`.
+**How to use these pages.** A map, not a substitute for the sessions: for each one, the ideas to *state* and *explain*. The formulas are here because they make the ideas precise; the midterm asks you to understand them, not to compute with them. The last page lists what loses marks. Then sit the sample paper (`assessments/midterm/EXAM.md`) under exam conditions, and only afterwards open `SOLUTIONS.md`.
 
 \begin{keybox}
-\textbf{The paper.} Three hours, on paper, in pen. A simple calculator; no notes, no computer, no internet. Four parts: \textbf{A} definitions (state it precisely) · \textbf{B} calculations (derive and compute, working shown) · \textbf{C} diagnosis (read an output, find the planted fault) · \textbf{D} judgement (say what a number does and does not license). Working is marked: a clean method with an arithmetic slip earns most of the marks. The midterm examines \textbf{Sessions 1 to 6}, all covered here. Session 7, the replication workshop, reviews them on the five papers' own data.
+\textbf{The paper.} 2 hours 30 minutes, on paper, in pen. A simple calculator; no notes, no computer, no internet. It tests \textbf{understanding}, with very little arithmetic. Six parts: \textbf{I} \emph{Europe 2031} and what AI is, in words · \textbf{II} one of the readings: its question, its model, two critiques, another model · \textbf{A} 20 multiple-choice questions · \textbf{B} short answers (state a concept precisely) · \textbf{C} reading output (interpret a table in words) · \textbf{D} judgement (say what a result does and does not license). The midterm examines \textbf{Sessions 1 to 6}, all covered here. Session 7, the replication workshop, reviews them on the five papers' own data.
 \end{keybox}
 
 # Session 1 · What the course asks of you
 
 The course is about **claims**: what a number lets you say, and what it does not. Three habits run through every answer. **Every number has units**: "one more point of X is associated with 0.31 more units of Y, holding Z fixed", not "a slope of 0.31". **Association is not causation**: unless the design isolates a cause, write *is associated with*, never *drives* or *causes*. **Say what you would check**: name the diagnostic that could prove you wrong.
+
+**Europe 2031 and what AI is.** Know the scenario's argument and its premises, the seam between its fact-based prologue and its speculative narrative, and why a scenario is not a forecast (its numbers are parameters of the story). Be ready to explain, in words, what AI is and is not — the ideas of our Session 1 conversation — and to argue a position about Europe's options.
 
 # Session 2 · Describing a variable before you model it
 
@@ -68,7 +70,6 @@ The course is about **claims**: what a number lets you say, and what it does not
 
 - **Sample variance** $s^2 = \frac{1}{n-1}\sum_i (x_i-\bar x)^2$. Divide by $n-1$ because $\bar x$ was estimated from the same data: the deviations sum to zero, so only $n-1$ are free. Dividing by $n$ would underestimate the variance.
 - **Standard deviation** $s = \sqrt{s^2}$, in the units of $x$. **IQR** $= Q_3 - Q_1$, the spread of the middle half, robust to outliers.
-- **Standard error** of the mean: $SE(\bar x) = s/\sqrt n$. The SD is the spread of the **observations**; the SE is the spread of a **number computed from them**. More data shrinks the SE, not the SD.
 
 ## Shape
 
@@ -79,9 +80,7 @@ $$g_1 = \frac{1}{n}\frac{\sum_i (x_i-\bar x)^3}{s^3} \qquad\qquad g_2 = \frac{1}
 - **Empirical rule** (68–95–99.7% within 1, 2, 3 SDs) holds only for a roughly **normal** variable. Symmetric is not the same as normal, and the rule does not apply to a variable you have shown to be skewed.
 
 \begin{keybox}
-\textbf{Worked example.} $n = 24$, $\bar x = 50$, median $= 46$, $s = 10$, $\sum (x_i-\bar x)^3 = 26{,}400$, $\sum (x_i-\bar x)^4 = 1{,}020{,}000$.\\
-$g_1 = \frac{1}{24}\cdot\frac{26{,}400}{1{,}000} = 1.10$; threshold $2\sqrt{6/24} = 2(0.5) = 1.00$ → substantially \textbf{right}-skewed, consistent with mean $>$ median.\\
-$g_2 = \frac{1}{24}\cdot\frac{1{,}020{,}000}{10{,}000} - 3 = 4.25 - 3 = 1.25$; threshold $4(0.5) = 2.00$ → not substantially kurtic. Report the \textbf{median} as the centre.
+\textbf{Example, in words.} Firm size in a sample of exporters: the mean is 250 employees, the median 18. The mean sits far above the median because a few very large firms pull it up — a long \textbf{right} tail, which the skewness statistic confirms when it exceeds its threshold. So the typical exporter is small, not medium-sized: report the \textbf{median} and the IQR, say the distribution is right-skewed, and do not apply the 68–95–99.7 rule to it.
 \end{keybox}
 
 \newpage
@@ -95,15 +94,15 @@ $y_i = \beta_0 + \beta_1 x_{i1} + \dots + \beta_k x_{ik} + \varepsilon_i$. **Lea
 - **Slope in units:** a one-unit rise in $x_j$ is associated with a $\hat\beta_j$-unit change in $y$, **holding the other regressors fixed**.
 - **What "controlling for" means (Frisch–Waugh–Lovell).** $\hat\beta_j$ equals the slope from regressing the part of $y$ not explained by the other regressors on the part of $x_j$ not explained by them. It is a **partial** relationship, not a marginal one.
 - **Omitted variable bias.** If the true model includes $z$ with coefficient $\beta_z$, and $z = \delta_0 + \delta_1 x + v$, then the short regression of $y$ on $x$ alone gives $\mathbb{E}[\hat\beta_1^{\,short}] = \beta_1 + \beta_z\delta_1$. The bias has the sign of $\beta_z \times \delta_1$.
-- **Unbiasedness** needs linearity, $\mathbb{E}[\varepsilon \mid X] = 0$ (exogeneity) and full column rank. Constant variance is **not** needed for unbiasedness, only for the usual standard errors and for efficiency.
+- **Unbiasedness** needs linearity, $\mathbb{E}[\varepsilon \mid X] = 0$ (exogeneity) and full column rank. Constant variance is **not** needed for unbiasedness.
 
 ## Adequacy: how much does the line explain?
 
 $R^2 = 1 - \frac{SSR}{SST}$, the share of the variance of $y$ explained. **Adjusted** $R^2 = 1 - (1-R^2)\frac{n-1}{n-k-1}$ penalises extra regressors. **RSE** $= \sqrt{SSR/(n-k-1)}$, the typical size of a residual, in units of $y$. A high $R^2$ says nothing about causation or about whether the assumptions hold.
 
-## Inference
+## Significance
 
-$t = \hat\beta_j / SE(\hat\beta_j)$; 95% interval $\hat\beta_j \pm 1.96\,SE(\hat\beta_j)$. Significant at 5% when $|t| > 1.96$, i.e. when the interval excludes 0. **Not significant is not "no effect"**: a wide interval that includes both 0 and large values is simply uninformative.
+A coefficient is significant at 5% when its $p$-value is below 0.05: the data can tell it apart from zero. **Not significant is not "no effect"**: it means the data cannot distinguish the effect from zero — it may be small, or real but imprecisely measured.
 
 ## Validity: do the assumptions hold?
 
@@ -111,8 +110,8 @@ The **residuals-versus-fitted** plot is the instrument. Look for:
 
 - **Linearity** — a curve in the residuals means the functional form is wrong (add a quadratic, transform).
 - **Nearly normal residuals** — a Q–Q plot; matters most for intervals in small samples.
-- **Constant variance** — a **fan** (residuals spread out as fitted values grow; clearer on a **scale–location** plot) is heteroskedasticity. The coefficients stay unbiased but the classical SEs are wrong → use **robust** (HC) standard errors.
-- **Multicollinearity** — a variance inflation factor $VIF_j = 1/(1-R_j^2)$ above about 10 means $x_j$ is nearly a combination of the others: large SEs, unstable signs.
+- **Constant variance** — a **fan** (residuals spread out as fitted values grow; clearer on a **scale–location** plot) is heteroskedasticity. The coefficients stay unbiased, but the precision the model reports (its $p$-values) is unreliable.
+- **Multicollinearity** — a variance inflation factor $VIF_j = 1/(1-R_j^2)$ above about 10 means $x_j$ is nearly a combination of the others: imprecise coefficients, unstable signs.
 
 ## Robustness: which observations move the answer?
 
@@ -125,8 +124,8 @@ The **residuals-versus-fitted** plot is the instrument. Look for:
 $AIC = -2\ell + 2p$ and $BIC = -2\ell + p\ln n$, where $\ell$ is the maximised log-likelihood. **Lower is better**, and only on the **same rows**. BIC penalises extra parameters more heavily, so the two can disagree. Comparing a few candidates you chose is honest; letting a search pick the model is not model selection (Session 5 shows why).
 
 \begin{keybox}
-\textbf{Worked example.} $\hat\beta_1 = 0.30$, $SE = 0.12$: $t = 2.5$, interval $0.30 \pm 0.235 = (0.065,\ 0.535)$, significant at 5\%. With standard errors clustered by country the SE becomes $0.20$: $t = 1.5$, interval $(-0.092,\ 0.692)$, no longer significant. The coefficient did not change; what you may claim did.\\
-\textbf{OVB:} $\beta_z = 0.05$, $\delta_1 = 0.4$ → bias $= +0.02$. If the short slope is $0.09$, the implied $\beta_1 = 0.07$.
+\textbf{Example, in words.} GDP per capita on productivity, across European country-years. \emph{The sentence:} comparing two country-years one index point apart, the more productive one has on average about €1,100 more GDP per capita. \emph{The intercept} is the prediction at productivity zero, far outside the data — do not interpret it. \emph{$R^2 = 0.63$:} productivity accounts for about two-thirds of the variation, which says nothing about cause.\\
+\emph{Omitted variable:} if investment raises income \emph{and} goes with higher productivity, leaving it out lets productivity take credit for investment: the slope is biased \textbf{upward}. Adding investment changes the question the slope answers — and its size.
 \end{keybox}
 
 \newpage
@@ -141,7 +140,7 @@ $$p(x) = P(Y=1 \mid x) = \frac{1}{1 + e^{-x^\top\beta}}, \qquad \ln\frac{p}{1-p}
 
 - $\beta_j$ is a change in the **log-odds**. $e^{\beta_j}$ is an **odds ratio**: the odds are multiplied by $e^{\beta_j}$ per unit of $x_j$. An OR of 1.30 means odds 30% higher, **not** a probability 30% higher.
 - **Marginal effect** on the probability: $\partial p/\partial x_j = p(1-p)\,\beta_j$. It depends on where you evaluate it, and is largest at $p = 0.5$.
-- Estimated by **maximum likelihood**. **Wald test**: $z = \hat\beta_j/SE$, one coefficient at a time. **Likelihood-ratio test**: $LR = 2(\ell_{full} - \ell_{restricted}) \sim \chi^2_q$, for $q$ coefficients jointly (e.g. all the dummies of one categorical variable).
+- Estimated by **maximum likelihood**. **Wald test**: one coefficient at a time (its $p$-value). **Likelihood-ratio test**: $LR = 2(\ell_{full} - \ell_{restricted}) \sim \chi^2_q$, for $q$ coefficients jointly (e.g. all the dummies of one categorical variable).
 - **McFadden's pseudo-$R^2$** $= 1 - \ell_{model}/\ell_{null}$. Not a share of variance; values of 0.2–0.4 already indicate a good fit.
 
 ## Ordinal logit (ordered categories)
@@ -159,11 +158,7 @@ Pick a **baseline** category. Each other category $k$ gets its own equation $\ln
 - **Discrimination** (AUC: does the model rank positives above negatives?) is not **calibration** (does $p = 0.2$ happen 20% of the time?). A high AUC does not make the probabilities usable.
 
 \begin{keybox}
-\textbf{Worked example.} $\hat\beta = (-2.0,\ 0.03,\ 0.5)$ for (intercept, income in thousands, collateral). Applicant: income 50, collateral 1.
-$x^\top\hat\beta = -2.0 + 0.03(50) + 0.5 = 0$ → $p = 1/(1+e^{0}) = 0.50$.
-Odds ratio for collateral $e^{0.5} \approx 1.65$: odds 65\% higher.
-Marginal effect of income: $0.5 \times 0.5 \times 0.03 = 0.0075$, i.e. \textbf{0.75 percentage points} per thousand.
-If a missed default costs 3 times a false alarm: $\tau^\star = 1/(1+3) = 0.25$; since $0.50 > 0.25$, flag the applicant.
+\textbf{Example, in words.} A bank models default. \emph{The coefficient} on being a first-time borrower is positive: first-time borrowers are more likely to default — the sign is readable directly. \emph{Its odds ratio,} 1.65, means their \textbf{odds} of default are 65\% higher than those of comparable repeat borrowers — not that their probability is 65\% higher. \emph{The probability} depends on the whole profile: the model may give 0.50 for one applicant and 0.10 for another, and the same odds ratio moves the first far more than the second. \emph{The decision:} if a missed default costs much more than a false alarm, the bank should flag applicants well below 50\%: the threshold follows the costs, not the default of 0.5.
 \end{keybox}
 
 \newpage
@@ -196,40 +191,26 @@ Mixes both penalties with weight $\alpha$ ($\alpha = 1$ lasso, $\alpha = 0$ ridg
 
 ## Choosing $\lambda$, and what not to claim
 
-- **$K$-fold cross-validation**: fit on $K-1$ folds, score on the held-out fold, repeat, average; keep the best $\lambda$. Larger $K$ → less bias (each fit uses more data) but more variance and more computation; $K = 5$ or 10 is the compromise. **$\lambda_{1se}$** = the largest $\lambda$ within one SE of the best: a smaller model at no visible cost.
+- **$K$-fold cross-validation**: fit on $K-1$ folds, score on the held-out fold, repeat, average; keep the best $\lambda$. Larger $K$ → less bias (each fit uses more data) but more variance and more computation; $K = 5$ or 10 is the compromise. **$\lambda_{1se}$** = the largest $\lambda$ whose cross-validation error cannot be told apart from the best: a smaller model at no visible cost.
 - **Leakage**: imputation, standardisation and feature screening must happen **inside** each fold; for time series, split by time, never shuffle. Otherwise the CV score is optimistic.
 - **p-values after selection are not valid**: the same data chose the variables and then tested them.
 
 \begin{keybox}
-\textbf{Worked example — ridge.} $X^\top X = \begin{pmatrix}5&2\\2&4\end{pmatrix}$, $X^\top y = \begin{pmatrix}9\\8\end{pmatrix}$.
-OLS: $\det = 20-4 = 16$, inverse $\frac{1}{16}\begin{pmatrix}4&-2\\-2&5\end{pmatrix}$, $\hat\beta = \frac{1}{16}(20,\,22) = (1.250,\ 1.375)$.
-Ridge, $\lambda = 1$: $\begin{pmatrix}6&2\\2&5\end{pmatrix}$, $\det = 26$, $\hat\beta = \frac{1}{26}(29,\,30) = (1.115,\ 1.154)$ — shrinkage 10.8\% and 16.1\%.\\[2pt]
-\textbf{Worked example — soft-thresholding.} $\rho = (0.50,\ -0.12,\ 0.25)$, $\lambda = 0.15$.
-Lasso: $(0.35,\ 0,\ 0.10)$ — two survive. Elastic net, $\alpha = 0.5$: threshold $0.075$, divide by $1.075$ → $(0.395,\ -0.042,\ 0.163)$ — all three survive.
+\textbf{Example, in words.} Two predictors, firms' cloud use and their e-commerce sales, move almost together, and both matter. \emph{OLS} cannot tell them apart and may give one a large positive coefficient and the other a negative one. \emph{Ridge} shrinks both and lets them share the effect: stable, but it keeps every variable, useless ones included. \emph{The lasso} sets the useless predictors to exactly zero — and usually drops one of the two, almost at random. \emph{The elastic net} sets the useless ones to zero and keeps the pair together. In all three, a zero means "not needed for prediction here", never "no effect".
 \end{keybox}
 
 \newpage
 
-# Session 6 · Panel data, dummies, interactions, non-linearity
+# Session 6 · Transformations: when the effect is not a straight line
 
-## Panel data
+Linear regression is linear in the **coefficients**, not necessarily in $x$: you may add $x^2$, $\log x$ and other transformations, and it is still a linear regression.
 
-A **panel** follows the same units (countries, firms) over time. Observations of the same country are not independent, so **pooled OLS with classical standard errors understates uncertainty**. Use standard errors **clustered by unit**.
-
-- **Fixed effects (FE)**: one intercept per unit. Uses only variation *within* each unit over time, so it removes every time-invariant characteristic (geography, institutions, culture) — at the cost of not estimating the effect of anything that does not vary over time.
-- **Random effects (RE)**: treats unit intercepts as random draws, **assuming they are uncorrelated with the regressors**. More efficient; biased if that assumption fails.
-- **Hausman test**: compares FE and RE. A significant difference says the RE assumption fails → prefer FE. Choose on the assumption, **never** on which one gives the significant answer.
-
-## Dummies, interactions and curvature
-
-- A categorical variable with $m$ levels enters as $m-1$ **dummies**; each coefficient is a difference from the **reference** level, which you must name.
-- **Interaction** $y = \beta_0 + \beta_1 x + \beta_2 d + \beta_3 (x \times d)$: the slope of $x$ is $\beta_1$ when $d = 0$ and $\beta_1 + \beta_3$ when $d = 1$. Report the slope **in each group**, not $\beta_3$ alone.
-- **Quadratic** $y = \beta_0 + \beta_1 x + \beta_2 x^2$: the effect of $x$ is $\beta_1 + 2\beta_2 x$ and depends on $x$; the turning point is $x^\star = -\beta_1/(2\beta_2)$. Never interpret $\beta_1$ on its own.
-- **Comparing models**: F-test or LR test for nested models; AIC/BIC for non-nested ones, always on the same rows.
+- **Quadratic** $y = \beta_0 + \beta_1 x + \beta_2 x^2$: the effect of one more unit of $x$ is $\beta_1 + 2\beta_2 x$, so it **depends on $x$**. $\beta_2 < 0$: the effect weakens and can turn negative (an inverted U); $\beta_2 > 0$: it accelerates. Never interpret $\beta_1$ on its own.
+- Read the curve **inside the range of your data**; never extrapolate a quadratic beyond it.
+- A curve in the residual plot (Session 3) is the usual reason to add a squared term.
 
 \begin{keybox}
-\textbf{Worked example.} $\hat y = 1.0 + 0.8x - 0.02x^2$: effect of $x$ at $x = 10$ is $0.8 - 0.04(10) = 0.40$; turning point $x^\star = 0.8/0.04 = 20$.
-With $\hat y = 2 + 0.5x + 1.2d - 0.3(x\times d)$: slope $0.5$ when $d = 0$, $0.2$ when $d = 1$.
+\textbf{Example, in words.} Productivity rises with a firm's age, but more and more slowly, and eventually falls: a squared term with a negative sign. The effect of one more year is therefore not one number — large for young firms, smaller for mature ones, negative for the oldest. The coefficient on age alone is the effect at age zero; report the effect at a few meaningful ages instead, inside the range of the data.
 \end{keybox}
 
 \newpage
@@ -238,10 +219,10 @@ With $\hat y = 2 + 0.5x + 1.2d - 0.3(x\times d)$: slope $0.5$ when $d = 0$, $0.2
 
 \begin{warnbox}
 \textbf{2} · a summary pasted without interpretation · a skewness or kurtosis without its threshold · calling a variable normal because it is symmetric · the empirical rule on a skewed variable.\\
-\textbf{3} · a slope without units or without "holding the others fixed" · classical SEs under a visible fan · reading "not significant" as "no effect" · deleting an influential point silently · comparing AIC on different rows.\\
+\textbf{3} · a slope without units or without "holding the others fixed" · reading "not significant" as "no effect" · deleting an influential point silently · comparing AIC on different rows.\\
 \textbf{4} · log-odds reported as probabilities · an odds ratio read as a relative risk · accuracy on a rare outcome with no base rate · a 0.5 threshold with unequal costs.\\
 \textbf{5} · penalising unstandardised predictors · standardising or screening before the CV split · the lasso's selected set called "the variables that matter" · post-selection p-values · a dropped variable read as "no effect".\\
-\textbf{6} · pooled OLS on a panel with classical SEs · FE or RE chosen by significance · an interaction without the slope in each group · a quadratic read from $\beta_1$ alone.
+\textbf{6} · a quadratic read from $\beta_1$ alone · a curve extrapolated beyond the data.
 \end{warnbox}
 
 # Writing a Part D answer
@@ -254,5 +235,5 @@ Part D rewards a **well-argued refusal**. A strong answer does four things, in o
 4. **Recommend what to do meanwhile**: report the association with its uncertainty, run the named diagnostic first, and hold any decision that assumes causation.
 
 \begin{keybox}
-\textbf{Formulas worth carrying in your head.} $s^2$ with $n-1$ · $SE = s/\sqrt n$ · $2\sqrt{6/n}$ and $4\sqrt{6/n}$ · $\hat\beta = (X^\top X)^{-1}X^\top y$ · $t = \hat\beta/SE$ and $\hat\beta \pm 1.96\,SE$ · OVB $= \beta_z\delta_1$ · $\sum h_{ii} = p$ · $AIC = -2\ell + 2p$ · $p = 1/(1+e^{-x^\top\beta})$ · odds ratio $e^{\beta}$ · $p(1-p)\beta$ · $LR = 2\Delta\ell$ · $\tau^\star = c_{FP}/(c_{FP}+c_{FN})$ · $(X^\top X + \lambda I)^{-1}X^\top y$ · $S_\lambda(\rho)$ · $S_{\lambda\alpha}(\rho)/(1+\lambda(1-\alpha))$ · $\beta_1 + 2\beta_2 x$ and $-\beta_1/(2\beta_2)$.
+\textbf{Ideas worth carrying in your head.} Mean against median under skew · a slope is a sentence with units, holding the others fixed · $R^2$ is a share of variance, not proof of cause · adjusted $R^2$ penalises useless variables · not significant is not no effect · odds $= p/(1-p)$ · $e^{\beta}$ multiplies the odds, not the probability · a probability needs the whole linear predictor · accuracy means nothing without the base rate · ridge shrinks, the lasso zeroes, the elastic net keeps groups together · $\lambda$ is chosen by cross-validation, inside the folds · with a squared term, the effect depends on $x$ · association is not causation.
 \end{keybox}

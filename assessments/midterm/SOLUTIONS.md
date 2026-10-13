@@ -1,9 +1,9 @@
-# Midterm: worked solutions
+# Midterm sample paper — worked solutions
 
-**Every numerical answer here was verified programmatically.**
+**MATH60033A · Quantitative Methods in IB**
 
-> Use this to practise, not to read. Sit the paper first — closed book, three hours, pen and a
-> non-programmable calculator — and only then open this file. Marks are shown per sub-part so you
+> Use this to practise, not to read. Sit the paper first — closed book, 2 hours 30 minutes, pen and
+> a non-programmable calculator — and only then open this file. Marks are shown per sub-part so you
 > can see exactly where credit is earned.
 
 ---
@@ -14,403 +14,229 @@ Three principles, applied throughout.
 
 1. **Precision beats length.** A correct two-sentence answer scores full marks. A page that circles
    the right idea without stating it does not.
-2. **A justified refusal earns full marks.** Particularly in Part D. *"This cannot be claimed, and
-   here is what would be needed"* demonstrates the thing the course is trying to build. A confident
-   causal claim drawn from a lasso does not.
-3. **Follow-through credit is generous in Part B.** An arithmetic slip early should not cost the
-   later parts. Mark the method.
+2. **A justified refusal earns full marks.** Particularly in Parts II, C and D. *"This cannot be
+   claimed, and here is what would be needed"* demonstrates the thing the course is trying to build.
+3. **Your own words.** The answers below are model answers. Any precise formulation earns the marks;
+   in Part I there is no single right answer, and a well-argued position that disagrees with the
+   scenario scores as well as one that agrees.
 
 ---
 
-# Part A — Definitions *(24)*
+# Part I — Europe 2031 *(15)*
 
-**A1** *(3)* — Regressing $y$ on $x_j$ **and** the other regressors $X_{-j}$ gives the same
-$\hat\beta_j$ as: residualise $x_j$ on $X_{-j}$, residualise $y$ on $X_{-j}$, then regress one
-residual on the other. So $\hat\beta_j$ measures the relationship between $y$ and the part of $x_j$
-that the other regressors **cannot explain** — a partial, not a marginal, relationship.
+**I(a)** *(3)* — A **forecast** says what will probably happen and can carry a probability; a
+**scenario** is a coherent *if–then* story, built to expose assumptions and dependencies, and
+carries none *(1)*. The seam is between the prologue (to June 2026, drawn from the observed record)
+and the main narrative (from August 2026, constructed) *(1)*. 255.1 GW and 20.9 GW describe 2031:
+they are **parameters of the story**, chosen by its authors, with nothing to verify them against —
+quotable only as "what the scenario assumes" *(1)*.
 
-> *2 marks for the residual-on-residual statement, 1 for the interpretation. An answer that says
-> only "it controls for the other variables", without the partialling-out mechanism, earns 1.*
+**I(b)** *(4)* — The file holds the model's **parameters**: billions of numbers learned in training,
+plus the vocabulary that turns text into tokens *(1)*. When it answers, it computes, token after
+token, a probability for every possible next token given the text so far, and picks one — a very
+large prediction from patterns in its training data *(1.5)*. "Understands" overstates it: it can be
+fluent about a subject without a representation of it, and it is unreliable where its training data
+were thin or out of date — prediction is not understanding *(1.5)*.
 
-**A2** *(3)* — As $K$ rises each training set is larger, so the **bias** of the CV estimate falls:
-each fit is closer to the model you will actually deploy on all $n$ rows. The **variance** rises,
-because the $K$ training sets overlap more and the fold estimates become highly correlated — and the
-cost rises linearly in $K$. $K = 5$ or $10$ sits where the bias is already small and neither the
-variance nor the cost has yet blown up.
+**I(c)** *(4)* — Two examples of each *(2)*: "AI" — large language models, the lasso and other
+machine-learning methods tuned by cross-validation; older statistics — the mean and variance,
+least squares (early nineteenth century), the logistic model, maximum likelihood. Whether it matters
+*(2)*: the label does not change what a result licenses — a regression called "AI" is still an
+association, and an "AI" prediction still needs out-of-sample evidence. What matters is whether the
+method's assumptions are stated and checked, not its age or name.
 
-> *1 for bias falling, 1 for variance rising, 1 for the trade-off as the reason for the convention.
-> Accept computational cost as part of the third mark.*
-
-**A3** *(3)* — Linearity in parameters, strict exogeneity $\mathbb{E}[\varepsilon\mid X]=0$, and
-full column rank of $X$. **Homoskedasticity is not needed** — it is required for efficiency
-(Gauss–Markov), not for unbiasedness.
-
-> *The second sentence is the discriminating one. Listing the assumptions without saying which is
-> dispensable earns 1.*
-
-**A4** *(3)* — $h_{ii}$ is the $i$-th diagonal element of $H = X(X^\top X)^{-1}X^\top$; it measures
-how much $\hat y_i$ moves when $y_i$ moves, i.e. $\partial \hat y_i / \partial y_i$. Range
-$[0,1]$. $\sum_i h_{ii} = \mathrm{tr}(H) = p$, the number of parameters.
-
-**A5** *(3)* — Optimism is the expected difference between in-sample error on new outcomes at the
-same $x_i$ and the training error:
-$\mathbb{E}[\mathrm{Err}_{\text{in}}] - \mathbb{E}[\mathrm{err}] = \frac{2}{n}\sum_i \mathrm{Cov}(\hat y_i, y_i)$.
-It is the degree to which the model chases its own training labels.
-
-**A6** *(3)* — Firm fixed effects give every firm its own intercept, so the slope is estimated
-from variation **within** each firm over time: everything about a firm that does not change —
-management, location, sector, observed or not — is removed. The cost is that the effect of anything
-constant within a firm **cannot be estimated** (it is absorbed), and precision falls because the
-between-firm variation is thrown away. Random effects keeps that variation by treating the firm
-intercepts as random draws, which is valid only if they are **uncorrelated with the regressors**.
-The **Hausman test** compares the two: a significant difference says the random-effects assumption
-fails, so report fixed effects.
-
-> *1 mark for "within variation removes all time-invariant characteristics, observed or not", 1 for
-> the cost (time-invariant regressors absorbed, less precision), 1 for the random-effects assumption
-> with the Hausman test named. Choosing between them "by which is significant" earns 0 for the last
-> mark.*
-
-**A7** *(3)* — $\sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big)$. Score:
-$\nabla\ell(\beta) = X^\top(y - p)$ — the residual is orthogonal to every regressor at the optimum,
-exactly as in OLS with fitted probabilities in place of fitted values.
-
-> *Full credit requires both the identity and the score. Noticing the OLS parallel earns no extra
-> marks, but it is the right instinct.*
-
-**A8** *(3)* — **Discrimination** is the ability to rank: does the model give higher scores to
-positives than negatives (AUC)? **Calibration** is whether the number means what it says: among
-cases with $\hat p \approx 0.3$, do about 30% turn out positive? A model whose scores are a strictly
-increasing transformation of the true probabilities — say $\hat p = p^2$ — has perfect
-discrimination and is badly miscalibrated.
+**I(d)** *(4)* — A position *(2)* and one argument against it *(2)*. *Sovereignty*: control over
+critical infrastructure, data and security, no rents leaving Europe — against: very costly, chips
+and much of the stack still come from abroad, and Europe may lose a race it starts late.
+*Governed interdependence*: access to frontier capability now, at lower cost, with European law
+anchoring the critical parts — against: dependence on foreign firms and governments, leverage that
+can be used against Europe, rules that are hard to enforce. Credit either, if argued with reference
+to the scenario.
 
 ---
 
-# Part B — Calculations *(36)*
+# Part II — The reading *(10)*
 
-## B1 *(6)*
+**II(a)** *(2)* — Can cheap soil properties that labs already measure (texture, organic matter)
+predict a soil's water-holding capacity — field capacity, permanent wilting point, available water
+capacity — well enough to replace slow, expensive direct measurement, and does a random forest do
+better than a linear regression? *(1)* It matters because water-holding capacity drives irrigation
+and soil-health decisions, and measuring it directly is costly *(1)*.
 
-**(a)** $t = \dfrac{0.42}{0.10} = \mathbf{4.20}$. Interval:
-$0.42 \pm 1.96(0.10) = 0.42 \pm 0.196 = \mathbf{[0.224,\thinspace 0.616]}$. Since $|t| > 1.96$ and the
-interval excludes zero, it **is** significant at 5%.
+**II(b)** *(3)* — Outcome: field capacity, wilting point and available water capacity (g of water
+per g of soil) *(1)*. Unit: one topsoil sample sent to the Cornell Soil Health Laboratory, about
+7,200 samples from across the continental US *(0.5)*. Predictors: sand, clay and soil organic matter
+(and, for the full random forest, other routine lab measurements) *(0.5)*. Models compared: a
+multiple linear regression, a reduced random forest on the same inputs, and a full random forest *(1)*.
+The full random forest predicts best; the linear regression does about as well as the reduced one.
 
-**(b)** $t = \dfrac{0.42}{0.25} = \mathbf{1.68}$. Interval:
-$0.42 \pm 1.96(0.25) = 0.42 \pm 0.49 = \mathbf{[-0.070,\thinspace 0.910]}$. The point estimate has **not
-moved** — clustering changes the standard error, not the coefficient. But the standard error is
-$2.5\times$ larger, the interval now **contains zero**, and the result is no longer significant.
+**II(c)** *(3)* — Any two distinct critiques, 1.5 each:
 
-**(c)** "It is significant" is not a reason to prefer one standard error over another — that is
-choosing the method by the answer it gives. The **clustered** standard error is the right one here:
-30 countries observed over 12 years means the 360 rows are not independent, and errors within a
-country are almost certainly correlated across years. Classical standard errors assume independence
-and are therefore too small. The honest report is the clustered one.
+- **The comparison is not like for like**: the regression's fit is measured in-sample (adjusted
+  $R^2$), the random forests' out-of-bag; a fair comparison scores all models on the same held-out
+  data.
+- **Generalisation**: one US laboratory, topsoils only, soils above 10% organic matter excluded —
+  the functions may not hold for other regions, depths or soils, and predicting outside that range
+  is extrapolation.
+- **Reproducibility**: the validation dataset behind the headline gain is not in the replication
+  package, so that result cannot be checked.
+- **Influential observations**: a few extreme soils (very high clay) can move the linear model's
+  coefficients — check Cook's distance.
+- **Prediction, not explanation**: a good predictive fit does not say why texture and organic matter
+  matter; the coefficients should not be read as causal effects.
 
-> *Marking: (a) 2 — 1 for the $t$, 1 for the interval. (b) 2 — 1 for both recomputed values, 1 for
-> noting the coefficient is unchanged while the interval now covers zero. (c) 2 — 1 for naming the
-> circularity, 1 for clustering with the dependence argument.*
->
-> *Full marks in (c) also for noting that 30 clusters is on the low side, so a wild bootstrap or a
-> small-sample correction would be prudent.*
-
-## B2 *(6)*
-
-**(a)** $\det(X^\top X) = 10(8) - 4(4) = 80 - 16 = 64$.
-
-$$(X^\top X)^{-1} = \tfrac{1}{64}\begin{pmatrix} 8 & -4 \cr -4 & 10\end{pmatrix},
-\qquad
-\hat\beta = \tfrac{1}{64}\begin{pmatrix} 8(26) - 4(20) \cr -4(26) + 10(20)\end{pmatrix}
-= \tfrac{1}{64}\begin{pmatrix}128 \cr 96\end{pmatrix}
-= \begin{pmatrix} \mathbf{2.00} \cr \mathbf{1.50}\end{pmatrix}$$
-
-**(b)** $X^\top X + 2I = \begin{pmatrix}12 & 4\cr 4 & 10\end{pmatrix}$, $\det = 120 - 16 = 104$.
-
-$$\hat\beta^{\text{ridge}} = \tfrac{1}{104}\begin{pmatrix}10(26) - 4(20) \cr -4(26) + 12(20)\end{pmatrix}
-= \tfrac{1}{104}\begin{pmatrix}180 \cr 136\end{pmatrix}
-= \begin{pmatrix}\mathbf{1.7308} \cr \mathbf{1.3077}\end{pmatrix}$$
-
-**(c)** Shrinkage **13.5%** and **12.8%** respectively. Ridge remains well-defined under singularity
-because $X^\top X + \lambda I \succ 0$ for any $\lambda > 0$ — regularisation is not only a
-bias–variance device, it makes the problem well-posed, including when $p > n$.
-
-> *Marking: (a) 2 — 1 for the determinant, 1 for the coefficients. (b) 2, follow-through from a
-> wrong (a). (c) 2 — 1 for the percentages, 1 for the positive-definiteness point.*
-
-## B3 *(6)*
-
-**(a)** $S_{0.20}(\rho)$:
-
-| $\rho_j$ | $\Vert\rho_j\Vert - 0.20$ | $\hat\beta_j$ |
-|---|---|---|
-| 0.42 | 0.22 | **0.22** |
-| −0.18 | −0.02 → 0 | **0** |
-| 0.09 | −0.11 → 0 | **0** |
-| 0.31 | 0.11 | **0.11** |
-
-Variables **1 and 4** are selected.
-
-**(b)** $\lambda\alpha = 0.10$; denominator $1 + 0.20(0.5) = 1.10$.
-
-| $\rho_j$ | $S_{0.10}(\rho_j)$ | $\div 1.10$ |
-|---|---|---|
-| 0.42 | 0.32 | **0.2909** |
-| −0.18 | −0.08 | **−0.0727** |
-| 0.09 | 0 | **0** |
-| 0.31 | 0.21 | **0.1909** |
-
-**(c)** The elastic net retains **three** variables rather than two; variable 2 survives. The
-relevant property is the **grouping effect** — the strictly convex $\ell_2$ component means
-correlated predictors receive similar coefficients rather than the lasso's arbitrary choice of one.
-
-> *Marking: (a) 2, all four values needed. (b) 3 — 1 for the halved threshold, 1 for the
-> denominator, 1 for the values. (c) 1.*
->
-> *Common error: applying $\lambda = 0.20$ rather than $\lambda\alpha = 0.10$ as the threshold.
-> Deduct 1, follow through.*
-
-## B4 *(6)*
-
-**(a)** $g_1 = \dfrac{1}{30}\cdot\dfrac{62,208}{12.0^3}
-= \dfrac{2,073.6}{1,728} = \mathbf{1.20}$.
-
-Threshold: $2\sqrt{6/30} = 0.894$. Since $1.20 > 0.894$, the variable is
-**substantially skewed**, and $g_1 > 0$ means a **long right tail**.
-
-**(b)** $g_2 = \dfrac{1}{30}\cdot\dfrac{1,140,480}{12.0^4} - 3
-= \dfrac{38,016}{20,736} - 3 = \mathbf{-1.167}$.
-
-Threshold: $4\sqrt{6/30} = 1.789$. Since $|-1.167| < 1.789$, it is **not** substantially
-kurtic.
-
-**(c)** A long right tail pulls the **mean** away from the bulk of the data while leaving the
-**median** where most observations sit — so mean $>$ median is exactly what (a) predicts. The gap
-here is 4.0, about a third of a standard deviation, which is large enough to matter.
-
-Report the **median** as the measure of centre — or report all three (mean, trimmed mean, median)
-and let the disagreement be the finding. What you must not do is report the mean alone and call it
-"the average", having just established the distribution is skewed.
-
-> *Marking: (a) 2 — 1 for the value, 1 for the comparison **and** the direction. (b) 2 — 1 for the
-> value, 1 for the comparison. (c) 2 — 1 for linking the gap to the right tail, 1 for a defended
-> choice of summary.*
->
-> *A common error is comparing $|g_2|$ against the skewness threshold. Deduct 1, follow through.*
->
-> *Note the pattern: **substantially skewed, ordinary tails**. Asymmetry and heavy tails are
-> different defects, and a student who says "it is skewed, therefore non-normal, therefore
-> heavy-tailed" has conflated them.*
-
-## B5 *(6)*
-
-**(a)** $\mathbb{E}[\hat\beta_1^{\text{short}}] = \beta_1 + \delta_1\beta_2$.
-
-**(b)** Both $\delta_1 = 0.6 > 0$ and $\beta_2 = 0.08 > 0$, so the bias is **positive (upward)**,
-of magnitude $0.6 \times 0.08 = \mathbf{0.048}$.
-
-**(c)** $\beta_1 \approx 0.112 - 0.048 = \mathbf{0.064}$.
-
-**(d)** **Not necessarily.** Classical measurement error in the proxy attenuates its own coefficient
-and leaves part of the confounding uncontrolled, so the bias on $\hat\beta_1$ is reduced but not
-eliminated; with a poor proxy the improvement can be negligible. In some configurations — a proxy
-correlated with the regressor but weakly with the true confounder — adding it can make matters
-worse.
-
-> *(d) 1 mark, for "not necessarily" **with** a mechanism — attenuation, or partial control.
-> Either mechanism earns it; "not necessarily" alone does not.*
-
-## B6 *(6)*
-
-**(a)** $x^\top\hat\beta = -3.2 + 0.045(40) + 0.8(1) = -3.2 + 1.8 + 0.8 = \mathbf{-0.60}$.
-
-$$p(x) = \frac{1}{1 + e^{0.60}} = \frac{1}{1 + 1.8221} = \mathbf{0.3543}$$
-
-**(b)** $e^{0.8} = \mathbf{2.2255}$ — holding collateral multiplies the odds of default by about
-2.23. *(A student may reasonably remark that this sign is economically odd; note it, do not
-penalise. The point is the arithmetic.)*
-
-**(c)** $0.045 \times p(1-p) = 0.045 \times 0.3543 \times 0.6457 = \mathbf{0.0103}$, i.e. about
-**1.03 percentage points** per additional thousand of income.
-
-**(d)** $\tau^\star = \dfrac{c_{FP}}{c_{FP} + c_{FN}} = \dfrac{1}{1+4} = \mathbf{0.20}$. Since
-$p = 0.354 > 0.20$, **classify as default**. At the default threshold of 0.5 this applicant would
-have been passed — which is the point.
-
-> *Marking: (a) 2, (b) 1, (c) 1 — the formula and the value together. (d) 2 — 1 for $\tau^\star$,
-> 1 for the decision. Award the final mark only if they state the decision, not just the threshold.*
+**II(d)** *(2)* — The **lasso** or the **elastic net** (session 5) on all the routine lab
+measurements, standardised, with $\lambda$ chosen by cross-validation *(1)*. It would select the
+measurements that help prediction, shrink the others, and report its **out-of-sample error** —
+comparable with the random forests' on the same held-out data *(1)*. (A regression with a squared
+term, to capture curvature, is also accepted if justified.)
 
 ---
 
-# Part C — Diagnosis *(24)*
+# Part A — Multiple choice *(30)*
 
-## C1 *(8)*
+1.5 points per correct answer.
 
-**(a) and (b)** — three problems, three corrections:
-
-| Problem | Correction |
-|---|---|
-| **Heteroskedasticity** — residuals fan out, so classical SEs are inconsistent | HC1 robust standard errors |
-| **Within-country dependence** — 27 countries × 14 years, errors almost certainly correlated within country | Cluster at the country level. Note 27 clusters is near the lower limit for reliable cluster inference; wild bootstrap advisable |
-| **Near-collinearity** — VIF 18.3 on `ict_investment` inflates $\mathrm{Var}(\hat\beta_j)$ by that factor | Not automatically a "fix": the estimator is unbiased. Options are to accept wide intervals, combine the collinear regressors, or regularise — while noting that penalised coefficients do not carry valid classical SEs |
-
-**(c)** A large standard error is not evidence of a small coefficient. With VIF 18.3, the estimate
-0.164 is compatible with a wide range of economically meaningful values; the confidence interval
-almost certainly includes both zero and substantial effects. *Failure to reject is not acceptance* —
-the correct statement is that the data are uninformative about this coefficient.
-
-> *Marking: (a) 3, one per problem. (b) 3, one per correction. (c) 2 — 1 for the failure-to-reject
-> logic, 1 for tying it to the VIF. Saying collinearity has no "fix" and explaining why also earns
-> the mark in (b); that is the better answer.*
-
-## C2 *(8)*
-
-**(a)** Four sources of optimism:
-
-1. **Imputation on the full dataset** — test-fold rows influence the means used to fill training rows.
-2. **Standardisation on the full dataset** — same leakage, through the mean and standard deviation.
-3. **Feature selection using $y$ on the full dataset** — the most serious. The top-20 correlation
-   filter has already seen every outcome, including those in every test fold.
-4. **Random $K$-fold on time-series panel data** — shuffled folds train on the future to predict the
-   past, and with a four-quarter horizon adjacent observations overlap.
-
-*A fifth, awarded as a bonus if noticed:* countries are not split as groups, so the same country
-appears in train and test.
-
-**(b)** Put imputation, standardisation and feature selection **inside** a pipeline fitted
-separately on each training fold. Replace shuffled $K$-fold with a **rolling-origin** split that
-never trains on data later than the forecast origin, with a **purge and embargo** of at least
-$h - 1 = 3$ quarters between train and test. If country-level generalisation is the target, group
-by country as well.
-
-**(c)** **Feature selection leakage.** A paper reports "we selected the 20 most predictive features
-and then cross-validated"; nothing in that sentence looks wrong, and the fold-level detail is almost
-never published. Meanwhile it is the largest single source of optimism, because the selection step
-has consumed the outcome information the CV is supposed to hold out.
-
-> *Marking: (a) 4, one each, cap at 4. (b) 3 — 1 pipeline, 1 rolling origin, 1 purge/embargo or
-> grouping. (c) 1.*
-
-## C3 *(8)*
-
-**(a)** With a 2% base rate, the trivial "never fails" classifier attains **98% accuracy** — better
-than the model's 97.8%. Accuracy is dominated by the majority class and carries almost no
-information under imbalance.
-
-**(b)** **Not contradictory.** AUC is threshold-free and measures *ranking*: the probability that a
-randomly chosen failing firm scores above a randomly chosen surviving one. Recall is measured at one
-specific threshold — 0.5 — which under a 2% base rate almost no observation exceeds. The model ranks
-well and is being *used* badly.
-
-**(c)** $\tau^\star = \dfrac{1}{1 + 20} = \mathbf{0.0476}$. Lowering the threshold from 0.5 to about
-0.048 will **raise recall substantially and lower precision**; many more firms are flagged, a larger
-share of them are false alarms, and expected cost falls because false alarms are cheap relative to
-missed failures.
-
-**(d)** A **calibration check** — a reliability diagram, or a Brier score decomposition. AUC is
-invariant to any strictly increasing transformation of the scores, so a model can rank perfectly and
-still have $\hat p$ values that are systematically wrong. Since $\tau^\star$ is a statement about
-*probabilities*, applying it to uncalibrated scores does not deliver the cost-minimising decision.
-
-> *(d) is the discriminating part of C3. 2 marks: 1 for naming calibration, 1 for the invariance
-> argument. "Check performance on a holdout" earns 1.*
+| Q | Answer | Session | Why |
+|---|---|---|---|
+| 1 | **B** | S2 | The SD is in the units of the variable; the variance is in squared units. |
+| 2 | **C** | S2 | The deviations from $\bar x$ sum to zero; dividing by $n$ would underestimate the variance. |
+| 3 | **D** | S2 | Symmetric is not normal; heavy tails put more mass far from the mean. |
+| 4 | **A** | S2 | The middle of the sorted values; the 40 moves the mean (14), not the median. |
+| 5 | **A** | S3 | OLS minimises $\sum_i (y_i - \hat y_i)^2$. |
+| 6 | **C** | S3 | The intercept is the prediction at $x = 0$, a value no observation is near. |
+| 7 | **D** | S3 | A large sample makes the estimate precise; it does nothing about causality. |
+| 8 | **B** | S3 | Multicollinearity: the coefficient is hard to pin down and its sign can be unstable. |
+| 9 | **B** | S3 | BIC's penalty per parameter, $\ln n$, exceeds AIC's 2 as soon as $n > 7$. |
+| 10 | **A** | S3 | A log compresses the long right tail; slopes then read as proportional changes. |
+| 11 | **C** | S4 | Odds = $p/(1-p) = 3$ gives $p = 3/4$. |
+| 12 | **D** | S4 | It chooses the coefficients that make the observed 0s and 1s most probable. |
+| 13 | **B** | S4 | The S-curve is steepest at 0.5: the slope is $p(1-p)\beta$. |
+| 14 | **A** | S4 | When misses are costly, flag at lower probabilities: $\tau^\star = c_{FP}/(c_{FP}+c_{FN})$. |
+| 15 | **C** | S4 | AUC is discrimination (ranking), not calibration and not accuracy. |
+| 16 | **D** | S4 | Precision $= TP/(TP + FP)$; recall is the share of failures that were flagged. |
+| 17 | **A** | S5 | More shrinkage: further from the truth on average, but more stable. |
+| 18 | **C** | S5 | $X^\top X + \lambda I$ is invertible for any $\lambda > 0$, even when $p > n$. |
+| 19 | **B** | S5 | Without it, a variable in euros and one in thousands of euros would be penalised differently. |
+| 20 | **D** | S5 | Each fold is held out once; each observation sits in one fold. |
 
 ---
 
-# Part D — Judgement *(16)*
+# Part B — Short answers *(18)*
 
-## D1 *(8)*
+**B1** *(3)* — The description shows what a model will have to cope with: skew, outliers,
+implausible values, missing data *(1)*. It can change the analysis by leading you to report the
+median rather than the mean, to model the logarithm of a skewed variable, to investigate or
+correct an error, or to treat extreme observations with care *(2, any two)*.
 
-A full-credit answer contains, in substance:
+**B2** *(3)* — It plots each residual (what the model missed) against its fitted value *(1)*. When
+the model is adequate, the points scatter at random around zero, with the same spread everywhere
+*(1)*. Problems: a **curve** (the relationship is not linear — try a squared term or a
+transformation) and a **fan** (the spread grows with the fitted values) *(1)*.
 
-- **What the seven variables are.** Predictors retained by a penalised fit at one value of a tuning
-  parameter, on one sample. Nothing more. They are not "the drivers"; they are the variables whose
-  partial correlation with the residual exceeded the threshold on this draw.
-- **Why the causal language is unsupported.** Selection is a predictive operation. Nothing in the
-  elastic net addresses confounding, reverse causation, or the possibility that a selected variable
-  proxies an unmeasured one. Reallocating a budget is a causal act and requires a causal design.
-- **The diagnostic to run first: selection stability.** Refit on several hundred subsamples of size
-  $n/2$ and record the proportion of fits retaining each variable. Expected output: one or two
-  variables selected in 80%+ of replicates and several selected in 30–50%, particularly where
-  indicators are correlated — the lasso component picks one member of a correlated group more or
-  less arbitrarily.
-- **What to do meanwhile.** Publish the model as a *predictive* instrument with its stability
-  frequencies attached; do not name drivers; and, if the causal question is the one that matters,
-  commission a design that can answer it.
+**B3** *(3)* — When a variable that affects $y$ and is correlated with $x$ is left out, the
+coefficient on $x$ absorbs part of its effect *(1)*. Example: regressing firms' exports on
+productivity without management quality *(1)*. Good management raises both exports and
+productivity, so the productivity coefficient is pushed **upward** — it takes credit for management
+*(1)*. (The direction is the sign of the omitted effect times the sign of its correlation with $x$.)
 
-> *Marking, 2 marks each. A well-argued refusal earns full marks even if the recommended action
-> differs, provided stability is raised. An answer that accepts the causal framing scores at most
-> 3, however fluent.*
->
-> *Bonus remark for anyone noting that post-selection standard errors are invalid — that is a
-> Session 5 point and shows genuine attention.*
+**B4** *(3)* — The cutpoints are the thresholds that separate the ordered categories, one between
+each pair of neighbouring categories; they play the role of intercepts *(1.5)*. Proportional odds:
+each predictor has **one** coefficient, the same at every cut — a predictor shifts the whole
+distribution up or down the scale by the same amount in log-odds *(1.5)*.
 
-## D2 *(8)*
+**B5** *(3)* — Leakage is when information from the held-out fold reaches the model during training
+*(1)*. Example: standardising, imputing or selecting variables on **all** the rows before splitting
+into folds; or shuffling time-series data so the model trains on the future *(1)*. It makes the
+cross-validation error **optimistic**: the model looks better than it will on genuinely new data *(1)*.
 
-**(a)** *(3)* The question is whether a number built from word counts measures investor sentiment.
-Two threats that are genuinely distinct — the mark is for the *distinctness*, not the vocabulary:
+**B6** *(3)* — To let the effect of $x$ change with its level — to accelerate, level off or reverse —
+when the residual plot shows a curve *(1)*. With $y = \beta_0 + \beta_1 x + \beta_2 x^2$, the effect
+of one more unit of $x$ is $\beta_1 + 2\beta_2 x$: it depends on $x$, so $\beta_1$ alone must not be
+read *(1)*. The turning point is the value of $x$ where that effect is zero, $x^\star =
+-\beta_1/(2\beta_2)$, where the curve peaks (if $\beta_2 < 0$) or bottoms out *(1)*.
 
-- **Construct validity.** The scoring rule may be picking up something adjacent: news *volume*
-  rather than tone, or the tone of the *reporting outlet* rather than of investors. Coverage rises
-  in turbulent months, so an index that averages over articles can move with attention alone.
-  *Evidence that would reduce the concern:* the index still predicts returns after conditioning on
-  article count; the result survives an alternative scoring dictionary.
-- **Measurement error and its direction.** A noisy regressor attenuates its own coefficient toward
-  zero (classical error), so 0.4 may understate the true relation — but if the noise is correlated
-  with the outcome, through outlets reacting to prices, the bias runs the other way and the
-  coefficient is partly the outcome predicting itself. *Evidence:* a strict publication timestamp
-  showing the text precedes the return window; an instrument or a second independent index.
-- Also creditable: **coverage/selection** — countries and periods with thin English-language press
-  are measured worse than others, so the panel's measurement quality is correlated with the units;
-  **aggregation** — one mean per country-month discards disagreement, and a wide distribution and a
-  narrow one give the same number.
+---
 
-> *1 mark per genuine threat with its evidence, to a maximum of 2; the third mark is for the two
-> being distinct in kind. Two restatements of "the index might be inaccurate" earn 1 in total.*
+# Part C — Reading output *(15)*
 
-**(b)** *(3)* What it licenses: a **conditional association**, within country and within month, of
-the sign and rough size stated. What it does **not** license: a tradeable strategy. The specification
-detail required is the **timing of the index relative to the return window** — whether the text is
-available before the return it is being related to, in real time and not merely in the dataset.
+## C1 *(5)*
 
-The reason it decides the question, and the $p$-value does not, is that significance describes how
-unlikely the coefficient is under a null, and says nothing about whether the information existed
-when the trade would have had to be placed. An index built from a revised, back-filled or
-same-window text corpus can be strongly significant and entirely untradeable — this is Session 4's
-leakage, arriving in a new costume.
+**C1(a)** *(2)* — "Comparing firms of the same size, a one-point higher productivity index is
+associated with an export share 0.29 percentage points higher." Units *(1)*; "holding size fixed"
+and "associated with" *(1)*.
 
-Also full marks for naming the **fixed effects** as the detail, provided the reason is right: with
-country and month effects the estimate uses only within-country deviation from the month's common
-movement, so it is not a claim about which countries return more, and a strategy that trades across
-countries is not the thing that was estimated.
+**C1(b)** *(1.5)* — Larger firms are both more productive and more export-oriented. In Model 1,
+productivity took part of the credit for size (omitted-variable bias); Model 2 compares firms of the
+same size, so the coefficient answers a different, narrower question.
 
-> *1 for what it licenses, 1 for the refusal, 1 for the detail with a correct reason. Naming a
-> detail without saying why it beats the p-value earns 2.*
+**C1(c)** *(1.5)* — No. It is the predicted export share of a firm with productivity 0 and log
+employees 0 (one employee) — far outside the data, and a negative share is impossible. It anchors
+the line; it is not a finding.
 
-**(c)** *(2)* Acceptable answers show the coefficient surviving while the interpretation fails:
+## C2 *(5)*
 
-- The index correlates as strongly with **article count** as with tone, and the coefficient
-  disappears once count is included — sentiment was proxying attention.
-- Shuffling the sentiment *scores* while keeping the article-selection pattern reproduces a similar
-  coefficient — the signal is in which countries get covered when, not in what is said.
-- The index predicts returns equally well when computed from articles published **after** the return
-  window, which no measure of prior sentiment should do.
+**C2(a)** *(2)* — "A large firm has three times the **odds** of adopting AI of a small firm with the
+same R&D status."
 
-**Also full marks:** observing that (c) as posed is the general problem with any named latent
-quantity — the name is not identified by the fit, which is the rotation problem of factor analysis
-(session 13) in another setting — provided the student gives one concrete observation as well.
+**C2(b)** *(2)* — An odds ratio multiplies the **odds**, not the probability *(1)*. The same
+multiplier moves the probability more where it is closer to 0.5: from 0.25 a large firm has more
+room to move than a small firm starting from 0.10 *(1)*.
 
-> *This is the best answer available on the paper. If you found it unprompted, you are ready for the
-> final paper.*
+**C2(c)** *(1)* — No. Without R&D, 0.25 against 0.10 is 2.5 times as likely; "three times" is the
+**odds** ratio, read as if it were a ratio of probabilities.
+
+## C3 *(5)*
+
+**C3(a)** *(2)* — $\lambda = 0.1$: it has the lowest **cross-validation** error (1.05), the error on
+data the model did not see *(1)*. The training error must not be used to choose: it always prefers
+the least penalised model *(1)*.
+
+**C3(b)** *(2)* — A larger penalty restrains the model, so it fits the training rows less closely:
+training error rises *(1)*. On new data, a small $\lambda$ overfits (low bias, high variance) and a
+large one underfits (high bias): the cross-validation error is lowest in between — the bias–variance
+trade-off *(1)*.
+
+**C3(c)** *(1)* — With no predictor kept, it predicts the **mean** R&D intensity for every country.
+
+---
+
+# Part D — Judgement *(12)*
+
+- **What the numbers are (3):** an AUC of 0.93 says that, on past data, the model ranks risky markets
+  above safe ones well. The feature ranking says which indicators the model leans on for those
+  predictions.
+- **What they do not license (3):** AUC is not calibration — it does not say the predicted
+  probabilities are right, nor which threshold to use; it says nothing about costs or about how the
+  model performs on future markets. And an important **predictive** feature is not a **cause**:
+  political instability may stand in for income, conflict or currency risk, and the model was never
+  designed to identify causes.
+- **Evidence needed (3):** a calibration check and a validation on later years (out-of-time); a
+  threshold set from the costs of a missed failure and of a refused contract; for any causal claim,
+  a design that isolates the effect of instability — not a feature ranking.
+- **Meanwhile (3):** use the model as a **screening tool** with human review, not an automatic
+  ban; set the threshold from the costs; report the predictive performance without "causes"; and
+  monitor how the flagged markets actually perform.
+
+*Full marks for a well-argued refusal that covers the four elements.*
 
 ---
 
 ## Score yourself by part, not in total
 
-The four parts diagnose four different failures, and the total hides which one is yours. Add up each
-part separately and read the row that applies:
+The parts diagnose different failures, and the total hides which one is yours. Add up each part
+separately and read the row that applies:
 
 | Weak in | What it means | What to do next |
 |---|---|---|
-| **A** | You are working from impressions, not definitions | Re-do the pre-session self-checks in writing |
-| **A1, A2 or B1** | Session 02–04 foundations: partialling out, and what cross-validation estimates | Re-derive FWL on paper, then re-run one of your own CV scripts and say what each fold is estimating |
-| **B** | You can describe methods but not derive them | Re-derive B1, B2 and B3 from scratch, without notes |
-| **C** | You accept output as given | Re-run your own Session 4 leakage practice and read the diagnostics |
+| **I** | You repeat the scenario instead of reasoning about it | Re-read the Session 1 brief and the "What AI actually is" questions |
+| **II** | You read papers for their results, not their design | Take any paper and write its question, model, two critiques and an alternative in ten lines |
+| **A or B** | You are working from impressions, not definitions | Re-do the pre-session self-checks in writing |
+| **C** | You accept output as given | Interpret one of your own practice outputs in words, sentence by sentence |
 | **D** | You over-claim | Re-read your Session 1 memo. This is the row that matters most for the final paper |
+
+---
+
+*The paper: [`EXAM.md`](EXAM.md) · more practice: [`PRACTICE.md`](PRACTICE.md) and its
+[answer key](PRACTICE-ANSWERS.md) · the
+[midterm summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)*

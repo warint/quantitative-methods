@@ -57,26 +57,31 @@ Details: [`GROUP-ASSESSMENT.md`](../GROUP-ASSESSMENT.md#the-participation-grade)
 
 ## 4. Midterm exam — 30%
 
-**Wednesday 28 October 2026 · 3 hours · on paper, in pen · a simple calculator · no notes, no
-computer, no internet · Sessions 1 to 6.**
+**Wednesday 28 October 2026 · 2 hours 30 minutes · on paper, in pen · a simple calculator · no
+notes, no computer, no internet · Sessions 1 to 6.**
+
+The paper tests **understanding**, not arithmetic: what a method does, what a number means, and what
+it does not license.
 
 | Part | Points | What it tests |
 |---|---|---|
-| **A** · Definitions | 24 | stating a concept precisely — 8 questions × 3 |
-| **B** · Calculations | 36 | deriving and computing, working shown — 6 problems × 6 |
-| **C** · Diagnosis | 24 | reading an output and finding the planted fault — 3 items × 8 |
-| **D** · Judgement | 16 | what a number does and does not license — 2 questions × 8 |
+| **I** · *Europe 2031* | 15 | the scenario and what AI is, answered in words |
+| **II** · The reading | 10 | one of the readings: its question, its model, two critiques, another model |
+| **A** · Multiple choice | 30 | 20 questions × 1.5, one answer each, no penalty for a wrong answer |
+| **B** · Short answers | 18 | stating a concept precisely — 6 questions × 3 |
+| **C** · Reading output | 15 | interpreting three outputs in words — 3 items × 5 |
+| **D** · Judgement | 12 | what a result does and does not license — one paragraph |
 | | **100** | |
 
-- **Working is marked.** A correct answer with no derivation earns part marks; a correct derivation
-  with an arithmetic slip earns most of them.
-- **A well-argued refusal earns full marks** in Part D.
+- **Precision beats length.** Two exact sentences earn full marks.
+- **A well-argued refusal earns full marks** in Parts I, II, C and D.
 - Practise on the [sample paper](midterm/EXAM.md) under exam conditions, then check it against the
   [worked solutions](midterm/SOLUTIONS.md). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
-- **Train with the [practice questions](midterm/PRACTICE.md)**: 77 questions in the exam's four
-  parts, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
-  answering on paper.
+- **Train with the [practice questions](midterm/PRACTICE.md)**: 86 questions in the exam's six
+  parts, 40 of them multiple choice, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
+  answering on paper. Printable: [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf)
+  · [answers](https://warint.github.io/quantitative-methods/midterm-practice-answers.pdf) (PDF).
 
 ---
 

@@ -208,30 +208,30 @@ SESSIONS = {
     ),
     "07": dict(
         dir="07-replication-workshop",   # the path the book's chapter 7 is built from
-        title="Replication Workshop: Five Papers, One Toolkit",
-        short="Replication workshop",
-        question="Can you reproduce what the papers claim, with only what you have learned?",
-        methods="the readings of sessions 2–6, replicated in Python with the code seen in class",
-        theme="Which of the five published results survives your own replication?",
+        title="Four Papers, One Toolkit",
+        short="Four papers, one toolkit",
+        question="What do the course's models say on the papers' data?",
+        methods="the data of four readings, plugged into OLS, the logits, ridge, the lasso and the elastic net with the code seen in class",
+        theme="What does each model say, read in words?",
         generated=False,          # a hand-written workshop, not a lecture-plus-practice
         objectives=[
-            "State each paper's **research question**, and the result it rests on, in one sentence",
-            "Rebuild a published result from the authors' own files, with **only the Python seen in class**",
-            "Say how close the replication came, and **where** and **why** it differs",
-            "Re-read each result through the course's diagnostics — thresholds, residuals, odds ratios, penalties, fixed effects",
-            "Say what each published result does **not** license",
+            "Choose which of the course's models fits a new outcome — a number, a yes/no, ordered or unordered categories",
+            "Run OLS, the three logits, ridge, the lasso and the elastic net on the papers' data, with **exactly the code seen in class**",
+            "Read every result as a sentence, in units — slopes, odds ratios, probabilities, what a penalty kept",
+            "Compare OLS with the penalised models on data they did not see",
+            "Say what each result does **not** license",
         ],
-        reading="the five readings of sessions 2–6, one per replication",
+        reading="the data of four readings: sessions 2, 4, 5 and 6",
         reading_url="https://github.com/warint/quantitative-methods/blob/main/REPLICATIONS.md",
-        dataverse=None,           # four packages already downloaded in sessions 2, 3, 4 and 6
+        dataverse=None,           # three packages already downloaded in sessions 2, 4 and 6
         dataset="fdi",            # the only one that needs no download
-        dataset_note="the four Dataverse packages of sessions 2, 3, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
-        deliverable=("a replication log: for each paper attempted, the published number, yours, "
-                     "the gap and its explanation, and one sentence on what the result does not license"),
+        dataset_note="the three Dataverse packages of sessions 2, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
+        deliverable=("a log: for each paper attempted, the models you ran, each result as a sentence "
+                     "with units, and one sentence on what the results do not license"),
         loses_marks=[
-            "Reporting a replicated number without the published one beside it",
-            "Calling a replication failed without saying where it breaks",
-            "Reaching for a method the course has not taught to force a match",
+            "A coefficient with no sentence, no units, or no \"holding the others fixed\"",
+            "An odds ratio read as a probability, or a lasso zero read as \"no effect\"",
+            "Presenting a number from a simple model as the paper's finding",
             "Pasting output with no sentence saying what it means",
         ],
     ),

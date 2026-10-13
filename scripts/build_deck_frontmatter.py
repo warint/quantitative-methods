@@ -146,6 +146,13 @@ TOOLKIT = {
     ".compare_f_test": ("06", "Choose and validate", "an F-test, for nested models only"),
     "np.linalg.pinv": ("06", "Choose and validate", "pseudo-inverse, for the Hausman statistic"),
 
+    # ---- Session 07 · four papers, one toolkit ---------------------------
+    "pd.read_stata": ("07", "Load and shape", "an author's Stata file, straight into pandas"),
+    "np.log": ("07", "Load and shape", "a skewed outcome, on a log scale"),
+    "pd.Categorical(ordered=True)": ("07", "Load and shape", "categories with an order, for the ordinal logit"),
+    "pd.qcut": ("07", "Load and shape", "cut a variable into equal-sized groups, for an ordered outcome"),
+    ".loc": ("07", "Load and shape", "set a value on the rows that meet a condition"),
+
     # ---- Session 13 · PCA and factor analysis (was session 07) ----------
     "PCA": ("13", "Fit", "components, on standardised columns"),
     ".explained_variance_ratio_": ("13", "Read the fit", "what the scree plot is drawn from"),

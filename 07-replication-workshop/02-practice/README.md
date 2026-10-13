@@ -1,6 +1,6 @@
-# Session 07 — The replication workshop (3 hours, in autonomy)
+# Session 07 — The workshop (3 hours, in autonomy)
 
-# Five papers, one toolkit
+# Four papers, one toolkit
 
 > **[Open the workshop slides](https://warint.github.io/quantitative-methods/session-07-practice.html)** ·
 > source: [`MATH60033A-S07-Practice.qmd`](MATH60033A-S07-Practice.qmd)
@@ -9,15 +9,15 @@
 
 ## What this afternoon is
 
-No new method. For three hours you go back to the five papers you read before sessions 2 to 6,
-open the authors' own data, and rebuild a published result **with only the Python you typed in
-class** — `pandas`, `smf.ols`, `smf.logit`, `sm.MNLogit`, `LassoCV`, `PanelOLS` and friends.
+No new method. For three hours you take the data of four papers you read before sessions 2 to 6
+and plug it into the course's models, **with exactly the Python you typed in class** — `smf.ols`,
+`smf.logit`, `OrderedModel`, `sm.MNLogit`, `RidgeCV`, `LassoCV`, `ElasticNetCV`. Only the variable
+names change.
 
-Each replication is a script in [`starter/`](starter/) and a step-by-step guide in
+Each paper is a script in [`starter/`](starter/) and a step-by-step guide in
 [`replications/`](replications/). The guide tells you, for every step, what to run, why, and the
-exact numbers **you should see**. Three of the five land on the published number; one lands on it
-partly by luck; one has no published number to land on. Finding out which is which, and why, is
-the point.
+numbers **you should see**. You are **not** following the papers: each step is a code cell you
+already know, run on new data, and the work is to read its output in words, with units.
 
 > This is the best revision you can do for the midterm on **28 October**: every idea from
 > sessions 2 to 6 comes back once, on real data, in the order it was taught.
@@ -29,30 +29,30 @@ the point.
 | When | What | |
 |---|---|---|
 | **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run the check script | below |
-| **0:15 – 0:45** | **Replication 1** · Session 02 · news sentiment and stock returns | [guide](replications/R1-fraiberger-2021.md) · [script](starter/r1_fraiberger_2021.py) |
-| **0:45 – 1:15** | **Replication 2** · Session 03 · a soil regression, diagnosed | [guide](replications/R2-amsili-2024.md) · [script](starter/r2_amsili_2024.py) |
-| **1:15 – 1:45** | **Replication 3** · Session 04 · what happens next to a social group | [guide](replications/R3-saganowski-2019.md) · [script](starter/r3_saganowski_2019.py) |
-| 1:45 – 1:55 | Break | |
-| **1:55 – 2:25** | **Replication 4** · Session 05 · 56 candidate determinants of FDI | [guide](replications/R4-blonigen-piger-2014.md) · [script](starter/r4_blonigen_piger_2014.py) |
-| **2:25 – 2:50** | **Replication 5** · Session 06 · India's tariff cuts and firm productivity | [guide](replications/R5-topalova-khandelwal-2011.md) · [script](starter/r5_topalova_khandelwal_2011.py) |
+| **0:15 – 0:55** | **Paper 1** · Session 02 data · news sentiment and stock returns — OLS, binary logit | [guide](replications/R1-fraiberger-2021.md) · [script](starter/r1_fraiberger_2021.py) |
+| **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits | [guide](replications/R2-saganowski-2019.md) · [script](starter/r2_saganowski_2019.py) |
+| 1:35 – 1:45 | Break | |
+| **1:45 – 2:15** | **Paper 3** · Session 05 data · foreign direct investment — OLS, ridge, lasso, elastic net | [guide](replications/R3-blonigen-piger-2014.md) · [script](starter/r3_blonigen_piger_2014.py) |
+| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net | [guide](replications/R4-topalova-khandelwal-2011.md) · [script](starter/r4_topalova_khandelwal_2011.py) |
 | **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push | [`replication-log.md`](replication-log.md) |
 
 **If you fall behind,** move on at the half-hour mark anyway and come back later: a finished log for
-three papers beats a half-finished one for five. **If you finish early,** each guide ends with
-*Pitfalls* — try the variation it suggests (another cut-off, another cluster, another network).
+three papers beats a half-finished one for four. **If you finish early,** each guide ends with
+*Pitfalls* — try the variation it suggests (another predictor, another penalty, another threshold).
 
 ---
 
 ## Alone or in a team — both work
 
-**Alone.** Do the replications in order. Keep the guide open on one side of the screen and the
+**Alone.** Do the papers in order. Keep the guide open on one side of the screen and the
 script on the other.
 
 **As a team (2 to 5).** Two ways, pick one at the start:
 
-- **Split and teach.** Each person takes one or two papers. At **2:25**, stop and take five minutes
-  each to walk the others through *your* result: the target, your number, the gap, the catch.
-  Everyone's log then covers all five.
+- **Split and teach.** Each person takes one or two papers. At **2:15**, stop and take five minutes
+  each to walk the others through *your* paper: the question, the model, the result in words, and
+  how it differs from the paper.
+  Everyone's log then covers all four.
 - **Pair at one screen.** One types, one reads the guide aloud and checks the numbers; swap at
   every paper.
 
@@ -119,25 +119,23 @@ Run the steps **in order**: step 5 needs what step 4 made.
 
 ---
 
-## Part 1 · The five replications
+## Part 1 · The four papers
 
 Each guide has the same shape, so you always know where you are:
 
-1. **The paper in brief** and **the research question** — read these first, two minutes.
-2. **The published target** — the number you are aiming at, and where it is printed.
-3. **Data** — the file, what one row is, the variables that matter.
-4. **Steps** — seven to ten, each with its code and **You should see**.
-5. **Compare with the paper** — how close you came, and why.
-6. **What this does not license** — the part the midterm's Part D asks about.
-7. **Pitfalls** — what tripped us, so it does not trip you.
+1. **The data** — one line on the paper, what one row is, the variables used.
+2. **The models, and where the code comes from** — which session's slide each step copies.
+3. **Steps** — each with its code and **You should see**.
+4. **Interpretation** — each result as a sentence, in units.
+5. **What this does not license** — the part the midterm's Part D asks about.
+6. **Pitfalls** — what tripped us, so it does not trip you.
 
-| # | Paper | Reuses | The punchline |
+| # | Paper | The simple models | With the code of |
 |---|---|---|---|
-| **1** | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | Session 02 · centre, spread, shape; the first regression | You land on the published 0.049 — but only after rebuilding a variable the package lacks, and the match is partly luck. |
-| **2** | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions for field capacity, wilting point and available water* | Session 03 · residuals, leverage, Cook's distance, AIC/BIC | The paper's regression reproduces to three decimals — and **one soil sample** out of 7,232 decides whether an interaction is significant. |
-| **3** | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | Session 04 · logit, odds ratios, LR test, multinomial logit | The paper publishes no number for this data, so you replicate its **design**: the logit's coefficients are significant, yet it does not beat the base rate. |
-| **4** | Blonigen & Piger (2014), *Determinants of foreign direct investment* | Session 05 · ridge, lasso, cross-validation, stability | The lasso keeps all nine survivors the course names from the paper — and keeps a tax-haven dummy the paper all but discarded. |
-| **5** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | Session 06 · pooled OLS, clustering, fixed and random effects | Table 5 reproduces to every printed digit; the random-effects estimate shows why the paper reports fixed effects. |
+| **1** | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | today's return on yesterday's news sentiment (OLS); an up day or a down day (binary logit) | sessions 03–04 |
+| **2** | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | does a group dissolve (binary logit); shrink, continue or grow (ordinal logit); which event (multinomial logit) | session 04 |
+| **3** | Blonigen & Piger (2014), *Determinants of foreign direct investment* | log FDI on a few gravity variables (OLS), then 56 candidates in ridge, the lasso and the elastic net, scored on held-out pairs | sessions 03 and 05 |
+| **4** | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | productivity on output and input tariffs (OLS); above the median (binary), in thirds (ordinal), who owns the firm (multinomial); then all the firm variables in ridge, the lasso and the elastic net | sessions 03, 04 and 05 |
 
 ---
 
@@ -163,7 +161,7 @@ Then commit and push, the same on every platform:
 
 ```bash
 git add groups/A2026/group-XX/session-07
-git commit -m "Session 07 replication log"
+git commit -m "Session 07 log"
 git push -u origin group-XX
 ```
 
@@ -173,9 +171,9 @@ Replace `XX` with your group number — group 07 uses `group-07`.
 
 ## What loses marks
 
-- Reporting a replicated number without the published one beside it
-- Calling a replication failed without saying where it breaks
-- Reaching for a method the course has not taught to force a match
+- A coefficient with no sentence, no units, or no "holding the others fixed"
+- An odds ratio read as a probability, or a lasso zero read as "no effect"
+- Presenting a number from a simple model as the paper's finding
 - Pasting output with no sentence saying what it means
 
 ---

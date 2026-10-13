@@ -1,6 +1,6 @@
-# Session 07 — Replication Workshop: Five Papers, One Toolkit
+# Session 07 — Four Papers, One Toolkit
 
-> **Can you reproduce what the papers claim, with only what you have learned?**
+> **What do the course's models say on the papers' data?**
 
 > **[Open the workshop slides](https://warint.github.io/quantitative-methods/session-07-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S07-Lecture.qmd`](01-lecture/MATH60033A-S07-Lecture.qmd).
@@ -13,20 +13,21 @@ Quantitative Methods in International Business · duration 3h00 · **in autonomy
 
 ## What this session is
 
-No new method. You go back to the five papers you read before sessions 2 to 6, open the authors'
-own replication data, and rebuild a published result in Python, in VS Codium, **using only the code
-you saw in class**. Every paper has a script cut into numbered steps and a guide that says, for every
-step, what to run, why, and the numbers you should see.
+No new method. You take the data of four papers you read before sessions 2 to 6 and plug it into
+the models of the course, in Python, in VS Codium, **with exactly the code you typed in class** —
+only the variable names change: OLS, the binary, ordinal and multinomial logits, ridge, the lasso
+and the elastic net. You do not follow the papers; you read each output precisely, in words. Every
+paper has a script cut into numbered steps and a guide that says, for every step, which session's
+cell it copies and the numbers you should see.
 
 It is also the revision session for the **midterm on 28 October**, which covers sessions 1 to 6.
 
-| # | Paper | Reuses | Guide |
+| # | Paper | The simple models, with the code of | Guide |
 |---|---|---|---|
-| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | Session 02 · describing a variable, the first regression | [R1](02-practice/replications/R1-fraiberger-2021.md) |
-| 2 | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions …* | Session 03 · regression diagnostics | [R2](02-practice/replications/R2-amsili-2024.md) |
-| 3 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | Session 04 · logistic and multinomial regression | [R3](02-practice/replications/R3-saganowski-2019.md) |
-| 4 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | Session 05 · ridge, lasso, elastic net | [R4](02-practice/replications/R4-blonigen-piger-2014.md) |
-| 5 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | Session 06 · panel data, fixed and random effects | [R5](02-practice/replications/R5-topalova-khandelwal-2011.md) |
+| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS, binary logit · sessions 03–04 | [Paper 1](02-practice/replications/R1-fraiberger-2021.md) |
+| 2 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | binary, ordinal and multinomial logits · session 04 | [Paper 2](02-practice/replications/R2-saganowski-2019.md) |
+| 3 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | OLS, ridge, lasso, elastic net · sessions 03 and 05 | [Paper 3](02-practice/replications/R3-blonigen-piger-2014.md) |
+| 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS, the three logits, ridge, lasso, elastic net · sessions 03, 04 and 05 | [Paper 4](02-practice/replications/R4-topalova-khandelwal-2011.md) |
 
 ---
 
@@ -34,37 +35,37 @@ It is also the revision session for the **midterm on 28 October**, which covers 
 
 | | Where | What |
 |---|---|---|
-| **Before** | [`00-pre-session/`](00-pre-session/README.md) | 30 minutes: check the four data packages are on your machine, re-read five tables |
+| **Before** | [`00-pre-session/`](00-pre-session/README.md) | 30 minutes: check the three data packages are on your machine, re-read four abstracts |
 | **0:00 – 0:15** | [`02-practice/`](02-practice/README.md), Part 0 | Set up in VS Codium, run `check_setup.py` |
-| **0:15 – 2:50** | [`02-practice/replications/`](02-practice/replications/) | The five replications, about 30 minutes each, with a break |
+| **0:15 – 2:50** | [`02-practice/replications/`](02-practice/replications/) | The four papers, 30 to 40 minutes each, with a break |
 | **2:50 – 3:00** | [`02-practice/replication-log.md`](02-practice/replication-log.md) | The log: fill it in, commit, push |
 
 The opening slides ([`01-lecture/`](01-lecture/README.md)) show how the afternoon works and what
-each replication should find; the step-by-step work is in [`02-practice/`](02-practice/README.md).
+each paper's models should find; the step-by-step work is in [`02-practice/`](02-practice/README.md).
 
 ---
 
 ## By the end of the session you should be able to
 
-- State each paper's **research question**, and the result it rests on, in one sentence
-- Rebuild a published result from the authors' own files, with **only the Python seen in class**
-- Say how close the replication came, and **where** and **why** it differs
-- Re-read each result through the course's diagnostics — thresholds, residuals, odds ratios, penalties, fixed effects
-- Say what each published result does **not** license
+- Choose which of the course's models fits a new outcome — a number, a yes/no, ordered or unordered categories
+- Run OLS, the three logits, ridge, the lasso and the elastic net on the papers' data, with **exactly the code seen in class**
+- Read every result as a sentence, in units — slopes, odds ratios, probabilities, what a penalty kept
+- Compare OLS with the penalised models on data they did not see
+- Say what each result does **not** license
 
 ---
 
 ## Deliverable
 
-In `groups/A2026/group-XX/session-07/`: a replication log — for each paper attempted, the published
-number, yours, the gap and its explanation, and one sentence on what the result does not license.
+In `groups/A2026/group-XX/session-07/`: a log — for each paper attempted, the models you ran, each
+result as a sentence with units, and one sentence on what the results do not license.
 The template is [`02-practice/replication-log.md`](02-practice/replication-log.md).
 
 ## What loses marks
 
-- Reporting a replicated number without the published one beside it
-- Calling a replication failed without saying where it breaks
-- Reaching for a method the course has not taught to force a match
+- A coefficient with no sentence, no units, or no "holding the others fixed"
+- An odds ratio read as a probability, or a lasso zero read as "no effect"
+- Presenting a number from a simple model as the paper's finding
 - Pasting output with no sentence saying what it means
 
 ---

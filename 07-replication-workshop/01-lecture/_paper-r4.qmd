@@ -1,0 +1,59 @@
+## Paper 4 · Session 06 · Tariffs and firm productivity {.center .scrollable}
+
+## The data, and the models {.scrollable}
+
+**Topalova & Khandelwal (2011)**, *Trade liberalization and firm productivity* — the authors' data:
+**one row = one Indian manufacturing firm in one year**, 1989–1996: 14,648 firm-years, 3,077 firms.
+Outcome: log productivity `tfp1000`.
+
+::::: columns
+:::: {.column width="30%"}
+**OLS** — session 03
+
+1. Load the firms
+2. Productivity on the output tariff
+3. How much did it explain?
+4. + the input tariff
+5. Residuals versus fitted
+::::
+
+:::: {.column width="36%"}
+**Logits** — session 04
+
+- **6–8 · Binary:** above the median? log-odds → odds → probabilities
+- **9–11 · Ordinal:** productivity in thirds, low < middle < high
+- **12–14 · Multinomial:** who owns the firm — stand-alone, group, state, foreign
+::::
+
+:::: {.column width="34%"}
+**Penalties** — session 05
+
+- **15 ·** 16 candidates: tariffs, ownership, size, age, years
+- **16–18 ·** Ridge, lasso, elastic net
+- **19 ·** The four, on rows they never saw
+::::
+:::::
+
+{{< include _solutions-r4.qmd >}}
+
+## What you should find {.scrollable}
+
+| Model | In words |
+|---|---|
+| **OLS** | a tariff 10 points lower goes with productivity about 0.8% higher; R² 0.004 |
+| **Binary logit** | odds ratio 0.48 per unit of tariff; P(above the median) 0.45 → 0.55 as the tariff falls from 1.0 to 0.4 |
+| **Ordinal logit** | the same cut moves P(top third) from 0.30 to 0.37 |
+| **Multinomial logit** | among large firms, the more productive are more often foreign-owned (RRR 1.32) and less often state-owned (0.21), *relative to stand-alone* |
+| **Ridge, lasso, elastic net** | λ near zero, all 16 kept, test RMSE 0.296 for all four |
+
+::: {.warn}
+**The penalty buys nothing here:** with 14,648 rows for 16 candidates, OLS does not overfit.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** The slopes compare different firms in different years; ownership is described, not explained.
+- **No "every variable matters".** Keeping all 16 means none hurts prediction, not that each matters.
+- **No claim beyond these firms:** listed manufacturers that survived, 1989–1996.
+:::

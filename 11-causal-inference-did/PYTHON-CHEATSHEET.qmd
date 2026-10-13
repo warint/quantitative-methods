@@ -283,9 +283,16 @@ big.compare_f_test(small)         # nested models only
 np.linalg.pinv(v_fe - v_re)       # for the Hausman statistic
 ```
 
-### Session 7 · Replication workshop
+### Session 7 · Four papers, one toolkit
 
-No new Python: session 7 reuses what you already have.
+```python
+# -- Load and shape ------------------------------------------------
+firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %
+pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)
+d["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])
+d.loc[d["foreign"] == 1, "owner"] = "foreign"   # only those rows change
+```
 
 ### Session 8 · KNN and bias–variance
 

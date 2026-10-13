@@ -5,7 +5,7 @@ Run this first, from the repository root (the folder that contains qmib.py):
 
     python 07-replication-workshop/02-practice/starter/check_setup.py
 
-It checks the Python packages the five replications use, and that each paper's
+It checks the Python packages the four papers' scripts use, and that each paper's
 data is where the scripts expect it. Every line should say OK. Anything that
 says MISSING tells you what to fix before you start.
 """
@@ -38,8 +38,6 @@ for name in ["pandas", "numpy", "matplotlib", "scipy", "statsmodels",
 print("\nThe papers' data")
 FILES = {
     "02 · Fraiberger et al.": "02-exploratory-data-analysis/data/replication",
-    "03 · Amsili et al.": "03-regression-adequacy-and-validity/data/replication/"
-                          "2015-2019_CompleteAWC_w.1and15bar_dataset_toshare.xlsx",
     "04 · Saganowski et al.": "04-logistic-ordinal-multinomial/data/replication",
     "06 · Topalova & Khandelwal": "06-advanced-regression/data/replication/"
                                   "prod_dataregression.dta",
