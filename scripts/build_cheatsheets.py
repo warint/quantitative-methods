@@ -146,6 +146,14 @@ SNIPPETS = {
     "np.linalg.pinv": "np.linalg.pinv(v_fe - v_re)       # for the Hausman statistic",
 
     # ---- Session 07 -------------------------------------------------------
+    "pd.read_stata": 'firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")',
+    "pd.read_excel": "soils = pd.read_excel(path, sheet_name=1)   # 0 is the first sheet",
+    "np.log": "y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %",
+    ".groupby": 'd.groupby("yr")[["lagtariff", "laginputariff"]].mean()',
+    "pd.Categorical(ordered=True)": 'pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)',
+    "C(x)": 'smf.ols("tfp ~ lagtariff + C(yr)", data=d).fit()   # one intercept per year',
+
+    # ---- Session 13 (taught in session 07 until A2026) ----------------------
     "PCA": "from sklearn.decomposition import PCA\n"
            "p = PCA().fit(Z)                  # on standardised columns",
     ".explained_variance_ratio_": "p.explained_variance_ratio_       # what the scree plot is drawn from",
