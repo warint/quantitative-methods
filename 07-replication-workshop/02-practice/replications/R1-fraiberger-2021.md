@@ -1,6 +1,7 @@
-# Replication 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
+# Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
 
-> **Reuses:** exploratory data analysis (session 02) · **Time:** about 30 minutes ·
+> **Reuses:** describing a variable (session 02), OLS and "controlling for" (session 03), the
+> binary logit (session 04) · **Time:** about 30 minutes ·
 > **Script:** [`starter/r1_fraiberger_2021.py`](../starter/r1_fraiberger_2021.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
@@ -21,256 +22,185 @@ The authors turn millions of Reuters news articles about 25 countries (9 advance
 
 Does a one-standard-deviation rise in a country's news sentiment go with higher stock-market returns in that country over the following days, once past returns, volume, volatility and global risk are held fixed?
 
-## The published target
-
-- **Target:** the coefficient on **yesterday's sentiment (`L1_sent1_best`)** at horizon 0 in the panel regression for all 25 countries: **0.049 (s.e. 0.007), N = 102,665**.
-- **Where it is:** `public/results/figure_2b.csv`, column (1) `F0_index`, row `L1_sent1_best`. The file is written by `code/6_figure_2.do` (the `xtscc ... , fe pooled` loop). This coefficient is the first point (h = 0) of the impulse response in Figure 2, panel B.
-- For comparison, the US-only version (Figure 2A, `figure_2a.csv`, column 1) is 0.064 (0.019), N = 6,016.
-- **Caveat:** these numbers come from the package's CSV output, not from the printed article. The readme says the package's sentiment index is "an updated version" (Reuters 1991 to 2019), while the article used 1991 to 2015. So the printed Figure 2 may differ slightly from the CSV.
-
 ## Data
 
-- **File:** `02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta` (Stata, 119 columns; we load 57 of them). The package also has `news_sentiment.csv` (the three sentiment indices only, 259,002 rows). We don't use it because it has no returns.
+- **File:** `02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta` (Stata, 119 columns; we load 7 of them).
 - **Unit of observation:** one country-**calendar day**, weekends included. 25 countries × 9,862 days (1 Jan 1991 to 31 Dec 2017) = 246,550 rows.
-- **Key variables:** `sent1_best` is the news sentiment index, a z-score within each country. `L1_sent1_best` is its value the previous calendar day. `F0_index` is today's stock-index return in %, identical to `returns`. `L1..L8_` are lags of sentiment, article counts (`art1_best`), returns, detrended volume (`vlm_ma60_adj`), volatility (`vol_ma60`) and the VIX. `dow2`–`dow5` are weekday dummies.
-- **Rows after cleaning:** 172,690 non-missing sentiment values (profile). 138,913 rows for the simple regression. 104,073 rows for the full regression, i.e. rows where the return and all 48 lags are present.
+- **Variables we use:**
+  - `F0_index`: today's stock-index return, in %.
+  - `L1_sent1_best`: yesterday's news sentiment, a z-score within each country (in standard deviations).
+  - `L1_returns`: the previous trading day's return, in %.
+  - `L1_vix`: yesterday's VIX, the US "fear index", in index points.
+- **Rows for the models:** 135,082 country-days with a return and all three predictors.
+
+## The simple model and why
+
+We do not try to reproduce the paper's number. We fit the models you typed in class, on the authors'
+data, and read them:
+
+| Step | Model | Session |
+|---|---|---|
+| 3 | describe the return and the sentiment index | 02 |
+| 4 | OLS: today's return on yesterday's sentiment | 03 |
+| 5 | the same, **controlling for** yesterday's return and the VIX | 03 |
+| 6–7 | binary logit: does the market go **up** today? | 04 |
+
+The paper's own regression is much richer: eight lags of sentiment, article counts, returns, volume,
+volatility and the VIX, country effects, weekday dummies and dummies for extreme days, with standard
+errors built for a panel. Step 8 sets our slopes next to its headline number, **0.049**, to talk
+about the difference, not to match it.
 
 ## Steps
 
-### Step 1 · Load the columns you need
+### Step 1 · Load the few columns the simple models need
 
-Reading only 57 of the 119 columns makes the 100 MB file load in well under a second. This is the first habit of EDA: know what is in the file before you compute anything.
+Asking `read_stata` for a list of columns keeps the load fast.
 
 ```python
 path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-lags = range(1, 9)                                   # the paper uses 8 lags
-controls = ["sent1_best", "art1_best", "returns", "vlm_ma60_adj", "vol_ma60", "vix"]
-lag_cols = [f"L{i}_{v}" for v in controls for i in lags]
-cols = ["iso", "DATE", "sent1_best", "returns", "F0_index", "dow2", "dow3", "dow4", "dow5"] + lag_cols
+cols = ["iso", "DATE", "F0_index", "sent1_best", "L1_sent1_best", "L1_returns", "L1_vix"]
 d = pd.read_stata(path, columns=cols)
-print("rows, columns:", d.shape)
-print("countries:", d["iso"].nunique(), "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+print("rows:", len(d), "| countries:", d["iso"].nunique(),
+      "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+```
+
+**You should see:** `rows: 246550 | countries: 25 | dates: 1991-01-01 to 2017-12-31`.
+
+### Step 2 · One row is a country-day, weekends included: keep days with a return
+
+News exists every day; markets trade on weekdays. So most weekend rows have no return.
+
+```python
+d["weekend"] = d["DATE"].dt.dayofweek >= 5
+print(pd.crosstab(d["weekend"], d["F0_index"].notna(), rownames=["weekend"], colnames=["has return"]))
+m = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_returns", "L1_vix"]).copy()
+m["up"] = (m["F0_index"] > 0).astype(int)            # 1 on a day the market rose
+print("rows for the models:", len(m))
+```
+
+**You should see:** 163,830 weekdays with a return and 12,270 without (holidays, early years);
+70,115 weekend days without a return and 335 with one (mostly Korean Saturday sessions in the 1990s).
+Then `rows for the models: 135082`.
+
+### Step 3 · Describe the outcome and the predictor before modelling (session 02)
+
+```python
+r = m["F0_index"]
+print(f"return  : mean {r.mean():.3f}  median {r.median():.3f}  sd {r.std():.2f}  "
+      f"skew {stats.skew(r):.2f}  excess kurtosis {stats.kurtosis(r):.0f}")
+s = m["L1_sent1_best"]
+print(f"sentiment (yesterday): mean {s.mean():.2f}  sd {s.std():.2f}  median {s.median():.2f}")
+print(f"share of up days: {m['up'].mean():.3f}")
 ```
 
 **You should see:**
+
 ```
-rows, columns: (246550, 57)
-countries: 25 | dates: 1991-01-01 to 2017-12-31
+return  : mean 0.057  median 0.049  sd 1.94  skew 3.59  excess kurtosis 151
+sentiment (yesterday): mean 0.01  sd 0.95  median 0.07
+share of up days: 0.519
 ```
 
-### Step 2 · What is one row, and what is missing?
+A typical day moves the market by about 0.05%, but the spread is 1.94 points: a few extreme days
+(+105% in China on 21 May 1992) give the returns enormous tails. The market rises on 52% of days.
 
-Session 02 insists that you know the window and the missingness before you profile anything. News appears every day, but markets trade only on weekdays. So sentiment and returns are missing on different rows.
+### Step 4 · OLS: today's return on yesterday's sentiment (session 03)
 
 ```python
-d["weekday"] = d["DATE"].dt.dayofweek               # 0 = Monday ... 6 = Sunday
-d["weekend"] = d["weekday"] >= 5
-print(d[["sent1_best", "returns"]].notna().sum())
-print(pd.crosstab(d["weekend"], d["returns"].notna(), rownames=["weekend"], colnames=["has return"]))
-s = d["sent1_best"].dropna()                         # the sentiment index we profile
-n = len(s)
+ols1 = smf.ols("F0_index ~ L1_sent1_best", data=m).fit()
+print(ols1.params.round(4))
+print(f"p-value on sentiment: {ols1.pvalues['L1_sent1_best']:.1e}   R2 = {ols1.rsquared:.4f}")
 ```
 
-**You should see:**
-```
-sent1_best    172690
-returns       164179
-has return  False   True
-weekend
-False       12256  163844
-True        70115     335
-```
-(The 335 weekend returns are real. 252 of them are Korean Saturday sessions from the 1990s.)
+**You should see:** intercept 0.0563, slope **0.0719**, p-value about 1e-38, R² = **0.0012**.
 
-### Step 3 · Centre: mean, trimmed mean, median
-
-These three answer different questions. Here the mean is zero **by construction**, because the authors z-scored the index. The informative comparison is therefore the median against the mean.
+### Step 5 · OLS with two controls: yesterday's return and yesterday's VIX
 
 ```python
-print(f"n = {n:,}")
-print(f"mean     {s.mean():+.3f}")
-print(f"trim 5%  {stats.trim_mean(s, 0.05):+.3f}")
-print(f"median   {s.median():+.3f}")
+ols2 = smf.ols("F0_index ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit()
+print(ols2.params.round(4))
+print(f"p-value on sentiment: {ols2.pvalues['L1_sent1_best']:.1e}   R2 = {ols2.rsquared:.4f}")
 ```
 
-**You should see:**
-```
-n = 172,690
-mean     -0.000
-trim 5%  +0.019
-median   +0.066
-```
-The median sits above the mean, so the typical day is slightly positive and a long tail of very bad news days drags the mean down. The gap is small, 0.066 sd.
+**You should see:** sentiment **0.0668**, yesterday's return 0.0061, VIX −0.0049, R² = 0.0017.
+The sentiment slope falls a little once yesterday's market and global fear are held fixed.
 
-### Step 4 · Spread, and the empirical rule
-
-The standard deviation is 1 by construction. So check the IQR, the extremes and the 68/95/99.7 rule, and confirm the z-scoring country by country.
+### Step 6 · Binary logit: does the market go up today? (session 04)
 
 ```python
-print(f"sd  {s.std(ddof=1):.3f}   IQR  {s.quantile(0.75) - s.quantile(0.25):.3f}"
-      f"   min {s.min():.2f}   max {s.max():.2f}")
-for k, normal in ((1, 0.68), (2, 0.95), (3, 0.997)):
-    share = ((s - s.mean()).abs() <= k * s.std()).mean()
-    print(f"within {k} sd: {share:.1%}   (normal: {normal:.1%})")
-print(d.groupby("iso")["sent1_best"].agg(["mean", "std"]).round(3).head(5))   # z-scored by country
+logit = smf.logit("up ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit(disp=0)
+print(pd.DataFrame({"log-odds": logit.params, "odds ratio": np.exp(logit.params)}).round(4))
+print(f"p-value on sentiment: {logit.pvalues['L1_sent1_best']:.1e}")
 ```
 
-**You should see:**
-```
-sd  1.000   IQR  1.049   min -11.56   max 12.49
-within 1 sd: 76.4%   (normal: 68.0%)
-within 2 sd: 94.8%   (normal: 95.0%)
-within 3 sd: 98.6%   (normal: 99.7%)
-     mean  std
-iso
-AR    0.0  1.0
-BR   -0.0  1.0
-CL    0.0  1.0
-CN    0.0  1.0
-DE   -0.0  1.0
-```
-The rule passes at 2 sd, as the chapter warns it can. It fails in the centre (too many days within 1 sd) and in the tails (1.4% beyond 3 sd against 0.3%). Days 11 to 12 sd from the mean exist.
+**You should see:** sentiment log-odds **0.0666**, odds ratio **1.0688**; yesterday's return 1.0234;
+VIX 0.9938.
 
-### Step 5 · Shape, tested against the thresholds
+### Step 7 · Predicted probability of an up day, at three levels of yesterday's sentiment
 
-This is the session's shape function, with $g_1$ tested against $2\sqrt{6/n}$ and $g_2$ against $4\sqrt{6/n}$. Returns are tested alongside for comparison.
+The other two predictors are held at their averages.
 
 ```python
-def shape(x):
-    x = pd.Series(x).dropna().to_numpy(float)
-    n, xbar, sd = len(x), x.mean(), x.std(ddof=1)
-    g1 = ((x - xbar) ** 3).mean() / sd ** 3
-    g2 = ((x - xbar) ** 4).mean() / sd ** 4 - 3
-    print(f"n = {n:,}   g1 = {g1:+.3f} (threshold ±{2 * np.sqrt(6 / n):.3f})"
-          f"   g2 = {g2:+.3f} (threshold ±{4 * np.sqrt(6 / n):.3f})")
-shape(s)            # the sentiment index
-shape(d["returns"])  # daily returns, for comparison
+grid = pd.DataFrame({"L1_sent1_best": [-1.0, 0.0, 1.0],
+                     "L1_returns": m["L1_returns"].mean(), "L1_vix": m["L1_vix"].mean()})
+grid["P(up day)"] = logit.predict(grid)
+print(grid[["L1_sent1_best", "P(up day)"]].round(4).to_string(index=False))
 ```
 
-**You should see:**
-```
-n = 172,690   g1 = -0.413 (threshold ±0.012)   g2 = +4.836 (threshold ±0.024)
-n = 164,179   g1 = +3.784 (threshold ±0.012)   g2 = +161.069 (threshold ±0.024)
-```
-Sentiment is significantly left-skewed and strongly heavy-tailed. Returns are far worse: $g_2 = 161$ comes from a handful of extreme days, such as China on 21 May 1992 (+105%) and Turkey in 1991 (−39% to +77%). With $n$ this large, the thresholds are tiny, so everything "fails". The size of $g$ matters more than the test.
+**You should see:** 0.5021 after a bad news day (−1 sd), 0.5187 after an ordinary one, **0.5353**
+after a good one (+1 sd).
 
-### Step 6 · Look at it
-
-The session rule is to trust the picture, and check that it agrees with $g_1$ and $g_2$.
+### Step 8 · Our simple slopes next to the paper's, in words not in a match
 
 ```python
-fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-ax[0].hist(s, bins=100)
-ax[0].axvline(s.mean(), color="black"); ax[0].axvline(s.median(), color="red", linestyle="--")
-ax[0].set_xlabel("News sentiment (z-score within country)")
-ax[1].hist(d["returns"].dropna(), bins=100, range=(-10, 10))
-ax[1].set_xlabel("Daily stock-index return (%), shown from -10 to +10")
-plt.savefig(OUTPUT / "fig_s02_distributions.png", dpi=120)
-plt.close()
+print(pd.Series({"Step 4 · sentiment only": ols1.params["L1_sent1_best"],
+                 "Step 5 · + yesterday's return and VIX": ols2.params["L1_sent1_best"],
+                 "Paper · 8 lags of everything, country effects, extreme days": 0.049}).round(3))
 ```
 
-**You should see:** `fig_s02_distributions.png`. Both histograms are single-peaked and much more pointed than a normal curve, with long thin tails. Sentiment's left tail is visibly longer. Mean and median lines almost overlap, because the gap is 0.07 sd.
+**You should see:** 0.072, 0.067, 0.049.
 
-### Step 7 · The simplest return regression, and the slope in units
+## Interpretation
 
-This is the course's simple regression. Today's return (%) is regressed on yesterday's sentiment (sd units), with HC1 standard errors.
+- **The OLS slope, in units.** Comparing two country-days, the one that follows a news day one
+  standard deviation better has a stock return about **0.07 percentage points higher**, on average
+  (0.067 holding yesterday's return and the VIX fixed).
+- **The logit, in odds.** One standard deviation better news multiplies the odds of an up day by
+  **1.07** — about 7% higher odds, not a 7% higher probability.
+- **The logit, in probabilities.** The chance of an up day goes from about **50% to 54%** between a
+  bad and a good news day. Real, but small.
+- **The fit.** R² is about **0.001**: yesterday's news explains a tenth of a percent of the variation
+  in today's returns. With 135,082 rows, a tiny effect is still very significant.
 
-```python
-m1 = smf.ols("F0_index ~ L1_sent1_best", data=d).fit(cov_type="HC1")
-print(f"slope {m1.params['L1_sent1_best']:.4f}  (se {m1.bse['L1_sent1_best']:.4f})"
-      f"  n = {int(m1.nobs):,}  R2 = {m1.rsquared:.4f}")
-```
+## How it differs from the paper
 
-**You should see:**
-```
-slope 0.0738  (se 0.0058)  n = 138,913  R2 = 0.0013
-```
-**In units:** a day after news sentiment one standard deviation above its country average, the stock index return is on average 0.074 **percentage points** higher. Sentiment explains 0.13% of the day-to-day variance in returns.
-
-### Step 8 · Add what the paper controls for
-
-This step reuses "controlling for" from the chapter. It adds country fixed effects (`C(iso)`), eight lags each of sentiment, article counts, returns, volume, volatility and the VIX, and weekday dummies, which is everything in `6_figure_2.do` that the package ships. Standard errors are clustered by date.
-
-```python
-dd = d.dropna(subset=["F0_index"] + lag_cols).copy()
-rhs = " + ".join(lag_cols) + " + dow2 + dow3 + dow4 + dow5 + C(iso)"
-m2 = smf.ols("F0_index ~ " + rhs, data=dd).fit(cov_type="cluster",
-                                               cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m2.params['L1_sent1_best']:.4f}  (se {m2.bse['L1_sent1_best']:.4f})  n = {int(m2.nobs):,}")
-```
-
-**You should see:**
-```
-slope 0.0697  (se 0.0087)  n = 104,073
-```
-
-### Step 9 · Add dummies for extreme-return days
-
-The do-file also includes `F0_d_returns_h` and `F0_d_returns_l`, which are dummies for days with extreme returns. They are **not in the package**. We rebuild them using the only "large move" definition the package gives: `5_figure_1.do` flags returns more than 3 country standard deviations from the country mean.
-
-```python
-by_country = dd.groupby("iso")["F0_index"].agg(["mean", "std"])      # one row per country
-dd = dd.merge(by_country, left_on="iso", right_index=True)          # adds columns mean, std
-dd["big_up"] = (dd["F0_index"] > dd["mean"] + 3 * dd["std"]).astype(int)
-dd["big_down"] = (dd["F0_index"] < dd["mean"] - 3 * dd["std"]).astype(int)
-m3 = smf.ols("F0_index ~ " + rhs + " + big_up + big_down", data=dd).fit(
-    cov_type="cluster", cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m3.params['L1_sent1_best']:.4f}  (se {m3.bse['L1_sent1_best']:.4f})"
-      f"  big_up {m3.params['big_up']:.2f}  big_down {m3.params['big_down']:.2f}")
-print("days flagged:", dd["big_up"].sum(), "up,", dd["big_down"].sum(), "down")
-```
-
-**You should see:**
-```
-slope 0.0491  (se 0.0068)  big_up 8.35  big_down -6.98
-days flagged: 804 up, 820 down
-```
-
-### Step 10 · Compare with the published number
-
-```python
-print(pd.DataFrame({
-    "slope on L1 sentiment": [m1.params["L1_sent1_best"], m2.params["L1_sent1_best"],
-                              m3.params["L1_sent1_best"], 0.049],
-    "n": [int(m1.nobs), int(m2.nobs), int(m3.nobs), 102665]},
-    index=["(7) simple", "(8) + FE and lags", "(9) + extreme-day dummies", "paper, Fig. 2B h=0"]).round(3))
-```
-
-**You should see:**
-```
-                           slope on L1 sentiment       n
-(7) simple                                 0.074  138913
-(8) + FE and lags                          0.070  104073
-(9) + extreme-day dummies                  0.049  104073
-paper, Fig. 2B h=0                         0.049  102665
-```
-
-## Compare with the paper
-
-- **The simple regression (0.074) does not match the paper's number, and was not expected to.** It is a different regression. It shares the sign and order of magnitude, and a positive, highly significant slope of a few hundredths of a percentage point per sd.
-- **Adding the controls the package ships (0.070)** barely moves it. The lags of returns, volume, volatility and the VIX are not what separates us from 0.049.
-- **Adding the extreme-day dummies** brings the slope to **0.049 (s.e. 0.0068)**, against the package's **0.049 (0.007)**. That match is partly luck and should not be oversold:
-  - Our dummy coefficients (8.35 and −6.98) are not the paper's (12.607 and −11.024), so our dummies are **not** the authors' variable.
-  - The slope depends on the cut-off we chose. With the same code, a 2-sd cut-off gives 0.043, 2.5 sd gives 0.047, 3.5 sd gives 0.053 and 4 sd gives 0.055.
-  - What is robust: most of the gap between 0.07 and 0.05 comes from controlling for a few hundred extreme days. This is Step 5's kurtosis showing up in the regression.
-- **Remaining differences:**
-  - Sample size: 104,073 rows against 102,665. The authors also control for eight lags of commodity returns (S&P GSCI) and world equity returns (Dow Jones World). Both are proprietary and commented out of the do-file, and their missing values plausibly account for the 1,408 rows we keep that the authors do not. I have not verified this, because the series are not in the package.
-  - Standard errors: the authors use Driscoll–Kraay errors (`xtscc`), which are not taught in the course. We cluster by date instead. This changes the standard error but not the coefficient.
+- The paper controls for **eight days** of past sentiment, article counts, returns, volume,
+  volatility and the VIX, plus **country effects**, weekdays and **extreme-return days**. We use
+  yesterday's return and the VIX only.
+- That richer set of controls brings the slope down from our 0.07 to their **0.049**: much of the
+  gap comes from a few hundred extreme days, which our simple model leaves in.
+- The paper also traces the effect over the following days (an impulse response) and compares local
+  with global news; we look at one day only.
+- The logit is ours: the paper models the size of the return, not whether it is positive.
 
 ## What this does not license
 
-- **No causal claim.** The slope says that returns are higher on days after good news, holding the listed controls fixed. It does not say news *causes* the move. The same economic event can drive both the news and prices, and a one-day lag does not rule that out.
-- **No trading rule.** 0.05 percentage points a day, with an R² of about 0.001, is far below the day-to-day noise (return sd ≈ 1.9 pp). It is also before transaction costs.
-- **No claim that our 3-sd dummies are the authors' dummies.** Step 9 matches the headline number but not the dummy coefficients. Report it as an approximation, not a replication of their exact specification.
+- **No causal claim.** Returns are higher on days after good news. That does not say the news
+  *causes* the move: the same economic event can drive both, and a one-day lag does not rule it out.
+- **No trading rule.** 0.07 points a day, with R² ≈ 0.001, is far below the daily noise (sd ≈ 1.9
+  points), and before transaction costs.
+- **No claim to have reproduced the paper.** Our model is deliberately simpler; its slope is not the
+  paper's estimate.
 
 ## Pitfalls
 
-- **File names in the readme.** The sentiment file is `news_sentiment.csv`, not `.tab`. The readme also points to `./indicator/`, but the file is in `public/data/`.
-- **Calendar days, not trading days.** The panel has weekend rows. `L1_sent1_best` is the previous *calendar* day, so Monday's regressor is Sunday's news, but `L1_returns` is the previous *trading* day's return. Don't rebuild lags yourself with a one-row shift, or you will mix these up.
-- **Mean 0 and sd 1 are not findings.** The index is z-scored within country on all calendar days. Reporting "mean ≈ 0, sd = 1" as a profile is the `describe()`-and-move-on error the practice warns against. Profile the median, the tails and the shape.
-- **The thresholds are tiny at n = 172,690** (0.012 and 0.024). Every variable "fails", so report the size of $g_1$ and $g_2$, not only the verdict.
-- **Extreme returns** (China 21 May 1992: +105%; Turkey 1991: +77% / −39%) dominate the return kurtosis. Clip the histogram's range, or the plot is one spike.
-- **Missing columns.** `AE`, `F*_d_returns_h/l`, `commo` and `R_DJ_global` are referenced in the do-files but absent from `regression_sample.dta`. `pd.read_stata(..., columns=[...])` raises a `ValueError` naming them if you ask for them.
-- **Clustering on dates:** statsmodels wants numbers for `groups`, hence `dd["DATE"].astype("int64")`.
-- **Figures** are saved in `07-replication-workshop/02-practice/output/`, which git ignores.
-- Runtime is about 2–3 seconds end to end.
+- **Calendar days, not trading days.** The panel has weekend rows. `L1_sent1_best` is the previous
+  *calendar* day, so Monday's regressor is Sunday's news, but `L1_returns` is the previous *trading*
+  day's return. Use the authors' lag columns; don't rebuild lags with a one-row shift.
+- **Mean 0 and sd 1 are not findings.** The index is a z-score by construction. Describe its median
+  and tails instead.
+- **Extreme returns** (China 21 May 1992: +105%; Turkey 1991: +77% / −39%) dominate the return's
+  spread and kurtosis. They are why the median is a safer "typical day" than the mean.
+- **Significant is not large.** With over 100,000 rows, almost any slope has a tiny p-value. Read the
+  size in units, and the R².
+- Runtime is about one second end to end.

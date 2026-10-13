@@ -18,7 +18,7 @@ parts in the next tabs **in order**, one under the other. **Save it inside the
 
 ```python
 """
-Replication 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
+Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
 *Media sentiment and international asset prices*
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
@@ -37,7 +37,7 @@ import os
 import sys
 ```
 
-### Lines 20–35
+### Lines 20–34
 
 ```python
 # Work from the repository root — the folder that holds qmib.py — wherever this
@@ -54,125 +54,71 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 import numpy as np
 import pandas as pd
 from scipy import stats
-import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 ```
 
-### Lines 37–46
+### Lines 36–48
 
 ```python
-# Step 1 · Load only the columns we need from the authors' regression file
-# The .dta has 119 columns; asking for a subset keeps it fast.
+# Step 1 · Load the few columns the simple models need
 path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-lags = range(1, 9)                                   # the paper uses 8 lags
-controls = ["sent1_best", "art1_best", "returns", "vlm_ma60_adj", "vol_ma60", "vix"]
-lag_cols = [f"L{i}_{v}" for v in controls for i in lags]
-cols = ["iso", "DATE", "sent1_best", "returns", "F0_index", "dow2", "dow3", "dow4", "dow5"] + lag_cols
+cols = ["iso", "DATE", "F0_index", "sent1_best", "L1_sent1_best", "L1_returns", "L1_vix"]
 d = pd.read_stata(path, columns=cols)
-print("rows, columns:", d.shape)
-print("countries:", d["iso"].nunique(), "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+print("rows:", len(d), "| countries:", d["iso"].nunique(),
+      "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+
+# Step 2 · One row is a country-day, weekends included: keep days with a return
+d["weekend"] = d["DATE"].dt.dayofweek >= 5
+print(pd.crosstab(d["weekend"], d["F0_index"].notna(), rownames=["weekend"], colnames=["has return"]))
+m = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_returns", "L1_vix"]).copy()
+m["up"] = (m["F0_index"] > 0).astype(int)            # 1 on a day the market rose
+print("rows for the models:", len(m))
 ```
 
-### Lines 48–60
+### Lines 50–61
 
 ```python
-# Step 2 · What is one row? A country-day, including weekends. Count what is missing.
-d["weekday"] = d["DATE"].dt.dayofweek               # 0 = Monday ... 6 = Sunday
-d["weekend"] = d["weekday"] >= 5
-print(d[["sent1_best", "returns"]].notna().sum())
-print(pd.crosstab(d["weekend"], d["returns"].notna(), rownames=["weekend"], colnames=["has return"]))
-s = d["sent1_best"].dropna()                         # the sentiment index we profile
-n = len(s)
+# Step 3 · Describe the outcome and the predictor before modelling (session 02)
+r = m["F0_index"]
+print(f"return  : mean {r.mean():.3f}  median {r.median():.3f}  sd {r.std():.2f}  "
+      f"skew {stats.skew(r):.2f}  excess kurtosis {stats.kurtosis(r):.0f}")
+s = m["L1_sent1_best"]
+print(f"sentiment (yesterday): mean {s.mean():.2f}  sd {s.std():.2f}  median {s.median():.2f}")
+print(f"share of up days: {m['up'].mean():.3f}")
 
-# Step 3 · Centre: mean, 5% trimmed mean, median
-print(f"n = {n:,}")
-print(f"mean     {s.mean():+.3f}")
-print(f"trim 5%  {stats.trim_mean(s, 0.05):+.3f}")
-print(f"median   {s.median():+.3f}")
+# Step 4 · OLS: today's return on yesterday's sentiment (session 03)
+ols1 = smf.ols("F0_index ~ L1_sent1_best", data=m).fit()
+print(ols1.params.round(4))
+print(f"p-value on sentiment: {ols1.pvalues['L1_sent1_best']:.1e}   R2 = {ols1.rsquared:.4f}")
 ```
 
-### Lines 62–79
+### Lines 63–71
 
 ```python
-# Step 4 · Spread: standard deviation, IQR, and the empirical rule
-print(f"sd  {s.std(ddof=1):.3f}   IQR  {s.quantile(0.75) - s.quantile(0.25):.3f}"
-      f"   min {s.min():.2f}   max {s.max():.2f}")
-for k, normal in ((1, 0.68), (2, 0.95), (3, 0.997)):
-    share = ((s - s.mean()).abs() <= k * s.std()).mean()
-    print(f"within {k} sd: {share:.1%}   (normal: {normal:.1%})")
-print(d.groupby("iso")["sent1_best"].agg(["mean", "std"]).round(3).head(5))   # z-scored by country
+# Step 5 · OLS with two controls: yesterday's return and yesterday's VIX
+ols2 = smf.ols("F0_index ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit()
+print(ols2.params.round(4))
+print(f"p-value on sentiment: {ols2.pvalues['L1_sent1_best']:.1e}   R2 = {ols2.rsquared:.4f}")
 
-# Step 5 · Shape: skewness g1 and excess kurtosis g2, tested against the course thresholds
-def shape(x):
-    x = pd.Series(x).dropna().to_numpy(float)
-    n, xbar, sd = len(x), x.mean(), x.std(ddof=1)
-    g1 = ((x - xbar) ** 3).mean() / sd ** 3
-    g2 = ((x - xbar) ** 4).mean() / sd ** 4 - 3
-    print(f"n = {n:,}   g1 = {g1:+.3f} (threshold ±{2 * np.sqrt(6 / n):.3f})"
-          f"   g2 = {g2:+.3f} (threshold ±{4 * np.sqrt(6 / n):.3f})")
-shape(s)            # the sentiment index
-shape(d["returns"])  # daily returns, for comparison
+# Step 6 · Binary logit: does the market go up today? (session 04)
+logit = smf.logit("up ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit(disp=0)
+print(pd.DataFrame({"log-odds": logit.params, "odds ratio": np.exp(logit.params)}).round(4))
+print(f"p-value on sentiment: {logit.pvalues['L1_sent1_best']:.1e}")
 ```
 
-### Lines 81–89
+### Lines 73–82
 
 ```python
-# Step 6 · Look at it: histograms of sentiment and of daily returns
-fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-ax[0].hist(s, bins=100)
-ax[0].axvline(s.mean(), color="black"); ax[0].axvline(s.median(), color="red", linestyle="--")
-ax[0].set_xlabel("News sentiment (z-score within country)")
-ax[1].hist(d["returns"].dropna(), bins=100, range=(-10, 10))
-ax[1].set_xlabel("Daily stock-index return (%), shown from -10 to +10")
-plt.savefig(OUTPUT / "fig_s02_distributions.png", dpi=120)
-plt.close()
-```
+# Step 7 · Predicted probability of an up day, at three levels of yesterday's sentiment
+grid = pd.DataFrame({"L1_sent1_best": [-1.0, 0.0, 1.0],
+                     "L1_returns": m["L1_returns"].mean(), "L1_vix": m["L1_vix"].mean()})
+grid["P(up day)"] = logit.predict(grid)
+print(grid[["L1_sent1_best", "P(up day)"]].round(4).to_string(index=False))
 
-### Lines 91–104
-
-```python
-# Step 7 · The simplest return regression: today's return on yesterday's sentiment
-# F0_index is today's return in %; L1_sent1_best is the previous day's sentiment z-score.
-m1 = smf.ols("F0_index ~ L1_sent1_best", data=d).fit(cov_type="HC1")
-print(f"slope {m1.params['L1_sent1_best']:.4f}  (se {m1.bse['L1_sent1_best']:.4f})"
-      f"  n = {int(m1.nobs):,}  R2 = {m1.rsquared:.4f}")
-
-# Step 8 · The paper's regression, with the controls the package makes available
-# Country fixed effects + 8 lags of sentiment, articles, returns, volume, volatility, VIX + weekday dummies.
-# Standard errors clustered by date (days are shared shocks across countries).
-dd = d.dropna(subset=["F0_index"] + lag_cols).copy()
-rhs = " + ".join(lag_cols) + " + dow2 + dow3 + dow4 + dow5 + C(iso)"
-m2 = smf.ols("F0_index ~ " + rhs, data=dd).fit(cov_type="cluster",
-                                               cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m2.params['L1_sent1_best']:.4f}  (se {m2.bse['L1_sent1_best']:.4f})  n = {int(m2.nobs):,}")
-```
-
-### Lines 106–117
-
-```python
-# Step 9 · Add dummies for extreme return days, as the paper does
-# The package does not ship the paper's dummies, so we build them the way 5_figure_1.do defines
-# a "large" move: more than 3 country standard deviations above / below the country mean.
-by_country = dd.groupby("iso")["F0_index"].agg(["mean", "std"])      # one row per country
-dd = dd.merge(by_country, left_on="iso", right_index=True)          # adds columns mean, std
-dd["big_up"] = (dd["F0_index"] > dd["mean"] + 3 * dd["std"]).astype(int)
-dd["big_down"] = (dd["F0_index"] < dd["mean"] - 3 * dd["std"]).astype(int)
-m3 = smf.ols("F0_index ~ " + rhs + " + big_up + big_down", data=dd).fit(
-    cov_type="cluster", cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m3.params['L1_sent1_best']:.4f}  (se {m3.bse['L1_sent1_best']:.4f})"
-      f"  big_up {m3.params['big_up']:.2f}  big_down {m3.params['big_down']:.2f}")
-print("days flagged:", dd["big_up"].sum(), "up,", dd["big_down"].sum(), "down")
-```
-
-### Lines 119–124
-
-```python
-# Step 10 · Compare with the number the authors published (results/figure_2b.csv, column 1)
-print(pd.DataFrame({
-    "slope on L1 sentiment": [m1.params["L1_sent1_best"], m2.params["L1_sent1_best"],
-                              m3.params["L1_sent1_best"], 0.049],
-    "n": [int(m1.nobs), int(m2.nobs), int(m3.nobs), 102665]},
-    index=["(7) simple", "(8) + FE and lags", "(9) + extreme-day dummies", "paper, Fig. 2B h=0"]).round(3))
+# Step 8 · Our simple slopes next to the paper's, in words not in a match
+print(pd.Series({"Step 4 · sentiment only": ols1.params["L1_sent1_best"],
+                 "Step 5 · + yesterday's return and VIX": ols2.params["L1_sent1_best"],
+                 "Paper · 8 lags of everything, country effects, extreme days": 0.049}).round(3))
 ```
 :::::::
 
@@ -206,166 +152,110 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 import numpy as np
 import pandas as pd
 from scipy import stats
-import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 ```
 
 ### 1
 
-**Step 1 · Load only the columns we need from the authors' regression file**
+**Step 1 · Load the few columns the simple models need**
 
 ```{python}
 #| echo: true
-# Step 1 · Load only the columns we need from the authors' regression file
-# The .dta has 119 columns; asking for a subset keeps it fast.
+# Step 1 · Load the few columns the simple models need
 path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-lags = range(1, 9)                                   # the paper uses 8 lags
-controls = ["sent1_best", "art1_best", "returns", "vlm_ma60_adj", "vol_ma60", "vix"]
-lag_cols = [f"L{i}_{v}" for v in controls for i in lags]
-cols = ["iso", "DATE", "sent1_best", "returns", "F0_index", "dow2", "dow3", "dow4", "dow5"] + lag_cols
+cols = ["iso", "DATE", "F0_index", "sent1_best", "L1_sent1_best", "L1_returns", "L1_vix"]
 d = pd.read_stata(path, columns=cols)
-print("rows, columns:", d.shape)
-print("countries:", d["iso"].nunique(), "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
+print("rows:", len(d), "| countries:", d["iso"].nunique(),
+      "| dates:", d["DATE"].min().date(), "to", d["DATE"].max().date())
 ```
 
 ### 2
 
-**Step 2 · What is one row? A country-day, including weekends. Count what is missing.**
+**Step 2 · One row is a country-day, weekends included: keep days with a return**
 
 ```{python}
 #| echo: true
-# Step 2 · What is one row? A country-day, including weekends. Count what is missing.
-d["weekday"] = d["DATE"].dt.dayofweek               # 0 = Monday ... 6 = Sunday
-d["weekend"] = d["weekday"] >= 5
-print(d[["sent1_best", "returns"]].notna().sum())
-print(pd.crosstab(d["weekend"], d["returns"].notna(), rownames=["weekend"], colnames=["has return"]))
-s = d["sent1_best"].dropna()                         # the sentiment index we profile
-n = len(s)
+# Step 2 · One row is a country-day, weekends included: keep days with a return
+d["weekend"] = d["DATE"].dt.dayofweek >= 5
+print(pd.crosstab(d["weekend"], d["F0_index"].notna(), rownames=["weekend"], colnames=["has return"]))
+m = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_returns", "L1_vix"]).copy()
+m["up"] = (m["F0_index"] > 0).astype(int)            # 1 on a day the market rose
+print("rows for the models:", len(m))
 ```
 
 ### 3
 
-**Step 3 · Centre: mean, 5% trimmed mean, median**
+**Step 3 · Describe the outcome and the predictor before modelling (session 02)**
 
 ```{python}
 #| echo: true
-# Step 3 · Centre: mean, 5% trimmed mean, median
-print(f"n = {n:,}")
-print(f"mean     {s.mean():+.3f}")
-print(f"trim 5%  {stats.trim_mean(s, 0.05):+.3f}")
-print(f"median   {s.median():+.3f}")
+# Step 3 · Describe the outcome and the predictor before modelling (session 02)
+r = m["F0_index"]
+print(f"return  : mean {r.mean():.3f}  median {r.median():.3f}  sd {r.std():.2f}  "
+      f"skew {stats.skew(r):.2f}  excess kurtosis {stats.kurtosis(r):.0f}")
+s = m["L1_sent1_best"]
+print(f"sentiment (yesterday): mean {s.mean():.2f}  sd {s.std():.2f}  median {s.median():.2f}")
+print(f"share of up days: {m['up'].mean():.3f}")
 ```
 
 ### 4
 
-**Step 4 · Spread: standard deviation, IQR, and the empirical rule**
+**Step 4 · OLS: today's return on yesterday's sentiment (session 03)**
 
 ```{python}
 #| echo: true
-# Step 4 · Spread: standard deviation, IQR, and the empirical rule
-print(f"sd  {s.std(ddof=1):.3f}   IQR  {s.quantile(0.75) - s.quantile(0.25):.3f}"
-      f"   min {s.min():.2f}   max {s.max():.2f}")
-for k, normal in ((1, 0.68), (2, 0.95), (3, 0.997)):
-    share = ((s - s.mean()).abs() <= k * s.std()).mean()
-    print(f"within {k} sd: {share:.1%}   (normal: {normal:.1%})")
-print(d.groupby("iso")["sent1_best"].agg(["mean", "std"]).round(3).head(5))   # z-scored by country
+# Step 4 · OLS: today's return on yesterday's sentiment (session 03)
+ols1 = smf.ols("F0_index ~ L1_sent1_best", data=m).fit()
+print(ols1.params.round(4))
+print(f"p-value on sentiment: {ols1.pvalues['L1_sent1_best']:.1e}   R2 = {ols1.rsquared:.4f}")
 ```
 
 ### 5
 
-**Step 5 · Shape: skewness g1 and excess kurtosis g2, tested against the course thresholds**
+**Step 5 · OLS with two controls: yesterday's return and yesterday's VIX**
 
 ```{python}
 #| echo: true
-# Step 5 · Shape: skewness g1 and excess kurtosis g2, tested against the course thresholds
-def shape(x):
-    x = pd.Series(x).dropna().to_numpy(float)
-    n, xbar, sd = len(x), x.mean(), x.std(ddof=1)
-    g1 = ((x - xbar) ** 3).mean() / sd ** 3
-    g2 = ((x - xbar) ** 4).mean() / sd ** 4 - 3
-    print(f"n = {n:,}   g1 = {g1:+.3f} (threshold ±{2 * np.sqrt(6 / n):.3f})"
-          f"   g2 = {g2:+.3f} (threshold ±{4 * np.sqrt(6 / n):.3f})")
-shape(s)            # the sentiment index
-shape(d["returns"])  # daily returns, for comparison
+# Step 5 · OLS with two controls: yesterday's return and yesterday's VIX
+ols2 = smf.ols("F0_index ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit()
+print(ols2.params.round(4))
+print(f"p-value on sentiment: {ols2.pvalues['L1_sent1_best']:.1e}   R2 = {ols2.rsquared:.4f}")
 ```
 
 ### 6
 
-**Step 6 · Look at it: histograms of sentiment and of daily returns**
+**Step 6 · Binary logit: does the market go up today? (session 04)**
 
 ```{python}
 #| echo: true
-# Step 6 · Look at it: histograms of sentiment and of daily returns
-fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-ax[0].hist(s, bins=100)
-ax[0].axvline(s.mean(), color="black"); ax[0].axvline(s.median(), color="red", linestyle="--")
-ax[0].set_xlabel("News sentiment (z-score within country)")
-ax[1].hist(d["returns"].dropna(), bins=100, range=(-10, 10))
-ax[1].set_xlabel("Daily stock-index return (%), shown from -10 to +10")
-plt.savefig(OUTPUT / "fig_s02_distributions.png", dpi=120)
-plt.close()
+# Step 6 · Binary logit: does the market go up today? (session 04)
+logit = smf.logit("up ~ L1_sent1_best + L1_returns + L1_vix", data=m).fit(disp=0)
+print(pd.DataFrame({"log-odds": logit.params, "odds ratio": np.exp(logit.params)}).round(4))
+print(f"p-value on sentiment: {logit.pvalues['L1_sent1_best']:.1e}")
 ```
 
 ### 7
 
-**Step 7 · The simplest return regression: today's return on yesterday's sentiment**
+**Step 7 · Predicted probability of an up day, at three levels of yesterday's sentiment**
 
 ```{python}
 #| echo: true
-# Step 7 · The simplest return regression: today's return on yesterday's sentiment
-# F0_index is today's return in %; L1_sent1_best is the previous day's sentiment z-score.
-m1 = smf.ols("F0_index ~ L1_sent1_best", data=d).fit(cov_type="HC1")
-print(f"slope {m1.params['L1_sent1_best']:.4f}  (se {m1.bse['L1_sent1_best']:.4f})"
-      f"  n = {int(m1.nobs):,}  R2 = {m1.rsquared:.4f}")
+# Step 7 · Predicted probability of an up day, at three levels of yesterday's sentiment
+grid = pd.DataFrame({"L1_sent1_best": [-1.0, 0.0, 1.0],
+                     "L1_returns": m["L1_returns"].mean(), "L1_vix": m["L1_vix"].mean()})
+grid["P(up day)"] = logit.predict(grid)
+print(grid[["L1_sent1_best", "P(up day)"]].round(4).to_string(index=False))
 ```
 
 ### 8
 
-**Step 8 · The paper's regression, with the controls the package makes available**
+**Step 8 · Our simple slopes next to the paper's, in words not in a match**
 
 ```{python}
 #| echo: true
-# Step 8 · The paper's regression, with the controls the package makes available
-# Country fixed effects + 8 lags of sentiment, articles, returns, volume, volatility, VIX + weekday dummies.
-# Standard errors clustered by date (days are shared shocks across countries).
-dd = d.dropna(subset=["F0_index"] + lag_cols).copy()
-rhs = " + ".join(lag_cols) + " + dow2 + dow3 + dow4 + dow5 + C(iso)"
-m2 = smf.ols("F0_index ~ " + rhs, data=dd).fit(cov_type="cluster",
-                                               cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m2.params['L1_sent1_best']:.4f}  (se {m2.bse['L1_sent1_best']:.4f})  n = {int(m2.nobs):,}")
-```
-
-### 9
-
-**Step 9 · Add dummies for extreme return days, as the paper does**
-
-```{python}
-#| echo: true
-# Step 9 · Add dummies for extreme return days, as the paper does
-# The package does not ship the paper's dummies, so we build them the way 5_figure_1.do defines
-# a "large" move: more than 3 country standard deviations above / below the country mean.
-by_country = dd.groupby("iso")["F0_index"].agg(["mean", "std"])      # one row per country
-dd = dd.merge(by_country, left_on="iso", right_index=True)          # adds columns mean, std
-dd["big_up"] = (dd["F0_index"] > dd["mean"] + 3 * dd["std"]).astype(int)
-dd["big_down"] = (dd["F0_index"] < dd["mean"] - 3 * dd["std"]).astype(int)
-m3 = smf.ols("F0_index ~ " + rhs + " + big_up + big_down", data=dd).fit(
-    cov_type="cluster", cov_kwds={"groups": dd["DATE"].astype("int64")})
-print(f"slope {m3.params['L1_sent1_best']:.4f}  (se {m3.bse['L1_sent1_best']:.4f})"
-      f"  big_up {m3.params['big_up']:.2f}  big_down {m3.params['big_down']:.2f}")
-print("days flagged:", dd["big_up"].sum(), "up,", dd["big_down"].sum(), "down")
-```
-
-### 10
-
-**Step 10 · Compare with the number the authors published (results/figure_2b.csv, column 1)**
-
-```{python}
-#| echo: true
-# Step 10 · Compare with the number the authors published (results/figure_2b.csv, column 1)
-print(pd.DataFrame({
-    "slope on L1 sentiment": [m1.params["L1_sent1_best"], m2.params["L1_sent1_best"],
-                              m3.params["L1_sent1_best"], 0.049],
-    "n": [int(m1.nobs), int(m2.nobs), int(m3.nobs), 102665]},
-    index=["(7) simple", "(8) + FE and lags", "(9) + extreme-day dummies", "paper, Fig. 2B h=0"]).round(3))
+# Step 8 · Our simple slopes next to the paper's, in words not in a match
+print(pd.Series({"Step 4 · sentiment only": ols1.params["L1_sent1_best"],
+                 "Step 5 · + yesterday's return and VIX": ols2.params["L1_sent1_best"],
+                 "Paper · 8 lags of everything, country effects, extreme days": 0.049}).round(3))
 ```
 ::::::::

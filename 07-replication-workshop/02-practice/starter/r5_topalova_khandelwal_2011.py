@@ -1,5 +1,5 @@
 """
-Replication 5 · Session 06 · Topalova & Khandelwal (2011)
+Paper 5 · Session 06 · Topalova & Khandelwal (2011)
 *Trade liberalization and firm productivity: the case of India*
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R5-topalova-khandelwal-2011.md
@@ -30,87 +30,54 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from linearmodels.panel import PanelOLS, RandomEffects
 
 
-# Step 1 · Load the firm-year panel and look at it
-# read_stata keeps Stata's types: industrycode and companyname arrive as text.
+# Step 1 · Load the firms, keep the paper's years, and see the reform
 firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
-print(firms.shape)
-print(firms[["companyname", "industrycode", "yr", "tfp1000",
-             "lagtariff", "laginputariff"]].head())
-print(firms[["id", "industrycode", "yr"]].dtypes)
-
-# Step 2 · Keep the paper's sample: years before 1997, no missing values
-# The do-file runs "keep if yr<1997" (line 281); Stata then silently drops
-# any row with a missing regressor, so we do the same explicitly.
 cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
-        "foreign", "medium", "small", "age", "age2"]
-sample = firms[firms["yr"] < 1997].dropna(subset=cols)
-print(sample.shape)                        # rows and columns
-print(sample["id"].nunique(), "firms")
-print(sample["yr"].value_counts().sort_index())
-
-# Step 3 · See the reform: average tariffs by year
-# The variation we exploit: tariffs fell a lot, and by different amounts
-# in different industries.
-by_year = sample.groupby("yr")[["lagtariff", "laginputariff"]].mean()
-print(by_year.round(3))
-by_year.plot(marker="o")
-plt.ylabel("average lagged tariff (1 = 100%)")
-plt.title("India's tariff cuts, estimation sample")
+        "foreign", "medium", "small", "age"]
+d = firms[firms["yr"] < 1997].dropna(subset=cols)       # 1989-1996, no gaps
+print(d.shape[0], "firm-years,", d["id"].nunique(), "firms")
+by_year = d.groupby("yr")[["lagtariff", "laginputariff"]].mean()
+print(by_year.round(2))                                  # 1 = a 100% tariff
+by_year.plot(marker="o", ylabel="average lagged tariff (1 = 100%)")
 plt.savefig(OUTPUT / "tariffs_by_year.png", dpi=150, bbox_inches="tight")
+plt.show()
 
-# Step 4 · Pooled OLS with year dummies, classical standard errors
-# One regression on all firm-years, as if every row were independent.
-formula = ("tfp1000 ~ lagtariff + laginputariff + prgroup + govown + foreign"
-           " + medium + small + age + age2 + C(yr)")
-pooled = smf.ols(formula, data=sample).fit()
-print(pooled.params[["lagtariff", "laginputariff"]].round(4))
-print(pooled.bse[["lagtariff", "laginputariff"]].round(4))
+# Step 2 · The simplest regression: productivity on the output tariff
+# tfp1000 is log productivity, so 100 x slope = % change per unit of tariff.
+m1 = smf.ols("tfp1000 ~ lagtariff", data=d).fit()
+b = m1.params["lagtariff"]
+print(f"slope = {b:.4f}   p = {m1.pvalues['lagtariff']:.3f}   R2 = {m1.rsquared:.4f}")
+print(f"a 10-point tariff cut goes with {-b * 0.10 * 100:.2f}% higher productivity")
 
-# Step 5 · The same pooled OLS, standard errors clustered by firm
-# A firm appears up to 8 times, so its errors are not independent.
-# Same coefficients, honest standard errors. This is the paper's column 1.
-pooled_cl = smf.ols(formula, data=sample).fit(
-    cov_type="cluster", cov_kwds={"groups": sample["id"]})
-print(pooled_cl.params[["lagtariff", "laginputariff"]].round(4))
-print(pooled_cl.bse[["lagtariff", "laginputariff"]].round(4))
+# Step 3 · Add the input tariff: each slope now holds the other tariff fixed
+m2 = smf.ols("tfp1000 ~ lagtariff + laginputariff", data=d).fit()
+print(m2.params.round(4))
+print(m2.pvalues.round(3))
 
-# Step 6 · Give the data a panel index: entity first, then time
-# linearmodels reads the firm and the year from a two-level index.
-panel = sample.set_index(["id", "yr"])
-y = panel["tfp1000"]
-X = panel[["lagtariff", "laginputariff", "age", "age2"]]
-print(panel.index.names, panel.shape)
-
-# Step 7 · Firm and year fixed effects, clustered by firm (column 3)
-# Firm effects absorb everything a firm never changes (ownership, size class),
-# so those dummies are left out. Only within-firm changes identify the slopes.
-fe = PanelOLS(y, X, entity_effects=True, time_effects=True).fit(
-    cov_type="clustered", cluster_entity=True)
-print(fe)
-
-# Step 8 · Random effects, with year dummies and the firm characteristics
-# RE can keep time-invariant variables, but only by assuming the firm effect
-# is unrelated to the tariffs.
-years = ["yeardum2", "yeardum3", "yeardum4", "yeardum5",
-         "yeardum6", "yeardum7", "yeardum8"]                # 1989 is the base
-X_re = sm.add_constant(panel[cols[1:] + years])
-re = RandomEffects(y, X_re).fit(cov_type="clustered", cluster_entity=True)
-print(re.params[["lagtariff", "laginputariff"]].round(4))
-print(re.std_errors[["lagtariff", "laginputariff"]].round(4))
-
-# Step 9 · Put the four estimates side by side
-# One row per estimator: the two coefficients, then their standard errors.
+# Step 4 · Add ownership, size, age and year dummies
+# C(yr) gives each year its own intercept: what all firms shared in a year
+# (the reform itself, the 1991 crisis) no longer counts as a tariff effect.
+f4 = ("tfp1000 ~ lagtariff + laginputariff + prgroup + govown + foreign"
+      " + medium + small + age + C(yr)")
+m4 = smf.ols(f4, data=d).fit()
 keys = ["lagtariff", "laginputariff"]
+print(pd.DataFrame({"coef": m4.params[keys], "p": m4.pvalues[keys]}).round(3))
+
+# Step 5 · Is the effect of age a curve? Add age squared
+m5 = smf.ols(f4 + " + I(age**2)", data=d).fit()
+a, a2 = m5.params["age"], m5.params["I(age ** 2)"]
+for age in (5, 16, 40):                                  # inside the data: 0 to 171
+    print(f"one more year at age {age:>2}: {100 * (a + 2 * a2 * age):+.2f}% productivity")
+print(f"adjusted R2: {m4.rsquared_adj:.4f} without the square, {m5.rsquared_adj:.4f} with it")
+
+# Step 6 · Side by side with the paper's own estimate
+# The paper compares each firm with itself before and after its tariffs fell.
 table = pd.DataFrame({
-    "pooled, classical SE": list(pooled.params[keys]) + list(pooled.bse[keys]),
-    "pooled, firm-clustered": list(pooled_cl.params[keys]) + list(pooled_cl.bse[keys]),
-    "firm + year FE (col. 3)": list(fe.params[keys]) + list(fe.std_errors[keys]),
-    "random effects": list(re.params[keys]) + list(re.std_errors[keys])},
-    index=["b output tariff", "b input tariff", "se output tariff", "se input tariff"])
+    "step 2": [m1.params["lagtariff"], None],
+    "step 3": m2.params[keys].values,
+    "step 5 (paper's col. 1)": m5.params[keys].values,
+    "paper col. 3, same firm over time": [-0.032, -0.480]}, index=keys)
 print(table.T.round(3).to_string())
-print("observations:", int(pooled.nobs), fe.nobs, re.nobs)

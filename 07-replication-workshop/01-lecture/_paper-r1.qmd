@@ -1,0 +1,68 @@
+## Paper 1 · Session 02 · News sentiment and stock returns {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Fraiberger, Lee, Puy & Ranciere (2021)**, *Media sentiment and international asset prices*,
+Journal of International Economics · [article](https://doi.org/10.1016/j.jinteco.2021.103526)
+
+The authors turn millions of Reuters articles about 25 countries into a **daily news-sentiment
+index**: the share of positive words minus the share of negative ones, standardised within each
+country. They ask whether a better-than-usual news day predicts higher stock returns.
+
+> **Does a one-standard-deviation rise in a country's news sentiment go with higher stock returns
+> there the next day, once past returns, volume, volatility and global risk are held fixed?**
+
+## The data, and the simple model {.scrollable}
+
+**One row = one country-day**, weekends included: 246,550 rows; **135,082** have a return and the
+three predictors.
+
+::::: columns
+:::: {.column width="50%"}
+**Describe** — session 02
+
+1. Load seven columns
+2. One row, and what is missing
+3. The return and the sentiment index: centre, spread, shape
+::::
+
+:::: {.column width="50%"}
+**Model** — sessions 03 and 04
+
+4. OLS: today's return on yesterday's sentiment
+5. … controlling for yesterday's return and the VIX
+6. Binary logit: does the market go **up** today?
+7. P(up day) at sentiment −1, 0, +1 sd
+8. Our slopes next to the paper's
+::::
+:::::
+
+{{< include _solutions-r1.qmd >}}
+
+## What you should find {.scrollable}
+
+| | sentiment coefficient | in words |
+|---|---|---|
+| Step 4 · OLS, sentiment only | 0.072 | +0.07 points of return per sd |
+| Step 5 · OLS, + return and VIX | 0.067 | the same, holding them fixed |
+| Step 6 · logit, odds ratio | 1.069 | odds of an up day 7% higher per sd |
+| Step 7 · P(up day) | 0.502 → 0.535 | from a bad to a good news day |
+| **Paper**, 8 lags of everything | **0.049** | with country effects and extreme days |
+
+::: {.check}
+Very significant, very small: with 135,082 rows the p-value is near zero, but $R^2 \approx 0.001$.
+The paper's richer controls bring the slope from 0.07 down to 0.05.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** The same event can move both the news and the market; a one-day lag does not
+  rule that out.
+- **No trading rule.** 0.07 points a day is far below a daily return spread of 1.9 points — before costs.
+- **No claim to have reproduced the paper.** Our model is deliberately simpler; its slope is not theirs.
+:::
+
+::: {.muted}
+Pitfall: the panel has **calendar** days. Sentiment exists on Sundays; returns do not.
+:::

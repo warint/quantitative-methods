@@ -11,16 +11,16 @@
 ## 1. Re-read the five abstracts — 10 min
 
 You read these papers before sessions 2 to 6. You do not need to re-read them in full: re-read the
-**abstract and the one table or figure** each replication aims at, so you know what you are looking
-for.
+**abstract and the description of the data** — what one observation is, and what is measured — so
+you know what the models will be fitted on.
 
-| # | Paper | Re-read |
+| # | Paper | What you will fit |
 |---|---|---|
-| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* · [article](https://doi.org/10.1016/j.jinteco.2021.103526) | Figure 2, panel B |
-| 2 | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions …* · [article](https://doi.org/10.1080/00103624.2024.2336573) | Equation 6 and Figure 2, p. 8 |
-| 3 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* · [article](https://doi.org/10.1371/journal.pone.0224194) | the six events, and Table F of the S1 File |
-| 4 | Blonigen & Piger (2014), *Determinants of foreign direct investment* · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704) | Table 3, the inclusion probabilities |
-| 5 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* · [article](https://doi.org/10.1162/REST_a_00095) | Table 5, columns 1 and 3 |
+| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* · [article](https://doi.org/10.1016/j.jinteco.2021.103526) | OLS and a binary logit |
+| 2 | Amsili, van Es & Schindelbeck (2024), *Pedotransfer functions …* · [article](https://doi.org/10.1080/00103624.2024.2336573) | OLS, its diagnostics, a squared term |
+| 3 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* · [article](https://doi.org/10.1371/journal.pone.0224194) | binary, ordinal and multinomial logits |
+| 4 | Blonigen & Piger (2014), *Determinants of foreign direct investment* · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704) | ridge, lasso, elastic net |
+| 5 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* · [article](https://doi.org/10.1162/REST_a_00095) | OLS with controls, a squared term |
 
 ---
 
@@ -94,16 +94,15 @@ Then run `check_setup.py` again. Every line should now say `OK`.
 For each paper, write one line on paper, from memory:
 
 1. What is the research question?
-2. What is the one number the paper's argument rests on?
+2. What is the simplest model from sessions 3 to 6 that could answer it?
 
-You will check both against the guides in the first minutes of each replication.
+You will check both against the guides in the first minutes of each paper.
 
 ---
 
 ## Arrive with
 
 - [ ] `check_setup.py` all `OK`
-- [ ] The five target tables or figures located
 - [ ] Your two lines per paper, on paper
 - [ ] Your group decided: alone, split-and-teach, or pairs ([how](../02-practice/README.md#alone-or-in-a-team--both-work))
 

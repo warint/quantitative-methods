@@ -84,8 +84,8 @@ def parts(script):
 
 # Steps whose code and output together are taller than a slide, measured on the
 # rendered deck. Re-measure after editing a script; add the step here if it spills.
-LONG = {"r2": {"5", "6", "8"}, "r3": {"10"}, "r4": {"10"}, "r5": {"3", "7"}}
-WIDE = {("r5", "7")}     # a model summary too long for one column
+LONG = {"r3": {"7"}, "r4": {"7"}, "r5": {"1"}}   # measured on the rendered deck
+WIDE = set()             # a printout too long for one column
 
 
 def long_step(key, n, code):

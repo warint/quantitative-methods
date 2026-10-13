@@ -1,8 +1,8 @@
 # Session 07 — The opening slides
 
-# Replication Workshop: Five Papers, One Toolkit
+# Five Papers, One Toolkit
 
-> **Can you reproduce what the papers claim, with only what you have learned?**
+> **What do the course's models say on the papers' own data?**
 
 ---
 
@@ -27,20 +27,20 @@ itself is in [`02-practice/`](../02-practice/README.md).
 | Part | Slides |
 |---|---|
 | How the afternoon works | the three hours · alone or as a team · setting up · running one step at a time · the shape of every guide |
-| Replication 1 · Session 02 | Fraiberger et al. (2021): the question, the ten steps, what you should find, what it does not license |
-| Replication 2 · Session 03 | Amsili et al. (2024): the same four slides |
-| Replication 3 · Session 04 | Saganowski et al. (2019) |
-| Replication 4 · Session 05 | Blonigen & Piger (2014) |
-| Replication 5 · Session 06 | Topalova & Khandelwal (2011) |
+| Paper 1 · Session 02 | Fraiberger et al. (2021): the question, the data and the simple models, the script and its solutions, what you should find, what it does not license |
+| Paper 2 · Session 03 | Amsili et al. (2024): the same slides |
+| Paper 3 · Session 04 | Saganowski et al. (2019) |
+| Paper 4 · Session 05 | Blonigen & Piger (2014) |
+| Paper 5 · Session 06 | Topalova & Khandelwal (2011) |
 | Closing | the log · what loses marks · before the midterm |
 
 ---
 
 ## What loses marks
 
-- Reporting a replicated number without the published one beside it
-- Calling a replication failed without saying where it breaks
-- Reaching for a method the course has not taught to force a match
+- A coefficient with no sentence, no units, or no "holding the others fixed"
+- An odds ratio read as a probability, or a lasso zero read as "no effect"
+- Treating your simple model's number as the paper's result — or the paper's as yours
 - Pasting output with no sentence saying what it means
 
 ---

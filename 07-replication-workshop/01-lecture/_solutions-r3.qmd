@@ -18,10 +18,14 @@ parts in the next tabs **in order**, one under the other. **Save it inside the
 
 ```python
 """
-Replication 3 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
+Paper 3 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
 *Analysis of group evolution prediction in complex networks*
 
 Step-by-step guide: 07-replication-workshop/02-practice/replications/R3-saganowski-2019.md
+
+The session-04 code on the paper's data: a binary, an ordinal and a multinomial
+logit, each on three readable features. Not the paper's 15 classifiers — the
+three models you typed in class.
 
 Run it in VS Codium with the Run button (the triangle, top right), or from the
 repository root in the terminal:
@@ -31,15 +35,15 @@ repository root in the terminal:
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
 """
-
-from pathlib import Path
-import os
-import sys
 ```
 
 ### Lines 20–36
 
 ```python
+from pathlib import Path
+import os
+import sys
+
 # Work from the repository root — the folder that holds qmib.py — wherever this
 # file is saved and however it is run (Run button, terminal, or Shift+Enter).
 starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
@@ -51,136 +55,108 @@ sys.path.insert(0, str(ROOT))
 OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-from scipy import stats
+import warnings
+warnings.filterwarnings("ignore")            # convergence notes are not part of the answer
 ```
 
 ### Lines 38–46
 
 ```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+
 FOLDER = "04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
 FILE = FOLDER + "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.{}.csv"
-
-# Step 1 · Load the two halves of partition 1: fold 1 to fit, fold 2 to test
-train = pd.read_csv(FILE.format(1))
-test = pd.read_csv(FILE.format(2))
-print("train", train.shape, "| test", test.shape)
-print(pd.concat([train["event_type"].value_counts(), test["event_type"].value_counts()],
-                axis=1, keys=["train", "test"]))
 ```
 
-### Lines 48–59
+### Lines 48–62
 
 ```python
-# Step 2 · Five features in units a person can read, and a 0/1 outcome
+# Step 1 · Load the two halves: fit on one, test on the other
+train, test = pd.read_csv(FILE.format(1)), pd.read_csv(FILE.format(2))
+print("train", train.shape, "| test", test.shape)
+print(train["event_type"].value_counts(normalize=True).round(3))   # the base rates
+
+# Step 2 · Three features a person can read
 def features(df):
     return pd.DataFrame({
-        "dissolve": (df["event_type"] == "dissolving").astype(int),
         "event": df["event_type"],
-        "log2_size": np.log2(df["g1_size"]),              # +1 = the group is twice as big
-        "avg_degree": df["g1_avg_group_degree_total"],    # ties per member, inside the group
-        "aging": df["g1_IlhanAging"],                     # how long members have been around (windows)
-        "net_density": df["g1_network_density"] * 1000,   # whole-network density, per thousand
-        "net_leadership": df["g1_network_leadership"] * 100})  # network centralisation, in points
+        "log2_size": np.log2(df["g1_size"]),            # +1 = the group is twice as big
+        "avg_degree": df["g1_avg_group_degree_total"],  # ties per member, inside the group
+        "aging": df["g1_IlhanAging"]})                  # how long its members have been around
 tr, te = features(train), features(test)
-print(tr.groupby("event")[["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]].median().round(2))
+X = ["log2_size", "avg_degree", "aging"]
+print(tr.groupby("event")[X].median().round(2))
 ```
 
-### Lines 61–73
+### Lines 64–74
 
 ```python
-# Step 3 · Binary logit: does the group dissolve in the next week?
-full = smf.logit("dissolve ~ log2_size + avg_degree + aging + net_density + net_leadership", data=tr).fit(disp=0)
-print(full.summary().tables[1])
-print("odds ratios:")
-print(np.exp(full.params).round(3))
+# Step 3 · Binary logit: does the group dissolve next week?
+tr["dissolve"] = (tr["event"] == "dissolving").astype(int)
+bi = smf.logit("dissolve ~ log2_size + avg_degree + aging", data=tr).fit(disp=0)
+print(pd.DataFrame({"log-odds": bi.params, "odds ratio": np.exp(bi.params),
+                    "p-value": bi.pvalues}).round(3))
 
-# Step 4 · Predicted probabilities for a 4-member and a 16-member group, other features at the median
-typical = tr.drop(columns=["dissolve", "event"]).median()
-cases = pd.DataFrame([typical, typical])
-cases["log2_size"] = [2, 4]                            # 2**2 = 4 members, 2**4 = 16 members
-pred = full.get_prediction(cases).summary_frame()
-pred.index = ["4 members", "16 members"]
-print(pred.round(3))
+# Step 4 · From odds to probabilities: a 4-member and a 16-member group
+typical = tr[X].median()
+cases = pd.DataFrame([typical, typical], index=["4 members", "16 members"])
+cases["log2_size"] = [2, 4]                         # 2**2 = 4, 2**4 = 16
+print("P(dissolve):", bi.predict(cases).round(3).to_dict())
 ```
 
-### Lines 75–85
+### Lines 76–84
 
 ```python
-# Step 5 · Likelihood-ratio test: do the paper's three top-ranked features (Table F) add anything?
-small = smf.logit("dissolve ~ log2_size + avg_degree", data=tr).fit(disp=0)
-lr = 2 * (full.llf - small.llf)
-print(f"LR = {lr:.2f}, df = 3, p = {stats.chi2.sf(lr, df=3):.4f}")
-print(f"McFadden pseudo-R2: small {small.prsquared:.4f}   full {full.prsquared:.4f}")
-
-# Step 6 · Out of sample: accuracy on fold 2 against the base rate
-p_test = full.predict(te)
-acc = ((p_test > 0.5).astype(int) == te["dissolve"]).mean()
-base = 1 - te["dissolve"].mean()                       # always say "does not dissolve"
-print(f"logit accuracy {acc:.3f} | base rate {base:.3f} | groups flagged as dissolving: {(p_test > 0.5).sum()} of {len(te)}")
+# Step 5 · Ordinal logit: shrinks < continues < grows
+levels = ["shrinking", "continuing", "growing"]
+sub = tr[tr["event"].isin(levels)].copy()
+sub["size_change"] = pd.Categorical(sub["event"], categories=levels, ordered=True)
+om = OrderedModel(sub["size_change"], sub[X], distr="logit").fit(method="bfgs", disp=0)
+print(pd.DataFrame({"log-odds": om.params[X], "odds ratio": np.exp(om.params[X]),
+                    "p-value": om.pvalues[X]}).round(3))
+print("P(shrink, continue, grow):")
+print(pd.DataFrame(np.asarray(om.predict(cases[X])), index=cases.index, columns=levels).round(3))
 ```
 
-### Lines 87–96
+### Lines 86–94
 
 ```python
-# Step 7 · Multinomial logit over all six events, baseline = dissolving
-order = ["dissolving", "shrinking", "growing", "continuing", "merging", "splitting"]
-X_cols = ["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]
-y_tr = pd.Categorical(tr["event"], categories=order).codes
-mn = sm.MNLogit(y_tr, sm.add_constant(tr[X_cols])).fit(disp=0, maxiter=200)
-print("converged:", mn.mle_retvals["converged"], "| McFadden pseudo-R2:", round(mn.prsquared, 4))
-odds = np.exp(mn.params)
-odds.columns = order[1:]
-print("odds ratios, each event versus dissolving:")
-print(odds.round(3))
+# Step 6 · Multinomial logit: four events, baseline = dissolving
+four = ["dissolving", "shrinking", "growing", "continuing"]   # merging and splitting: 17 groups
+m4 = tr[tr["event"].isin(four)]
+mn = sm.MNLogit(pd.Categorical(m4["event"], categories=four).codes,
+                sm.add_constant(m4[X])).fit(disp=0, maxiter=200)
+rrr = np.exp(mn.params)
+rrr.columns = four[1:]                              # each column: that event against dissolving
+print("relative risk ratios, against dissolving:")
+print(rrr.round(3))
 ```
 
-### Lines 98–116
+### Lines 96–112
 
 ```python
-# Step 8 · LR test for the same three features, now in the multinomial (3 features x 5 equations)
-mn_small = sm.MNLogit(y_tr, sm.add_constant(tr[["log2_size", "avg_degree"]])).fit(disp=0, maxiter=200)
-lr_mn = 2 * (mn.llf - mn_small.llf)
-print(f"LR = {lr_mn:.2f}, df = 15, p = {stats.chi2.sf(lr_mn, df=15):.4f}")
-print(f"McFadden pseudo-R2: small {mn_small.prsquared:.4f}   full {mn.prsquared:.4f}")
+# Step 7 · Predicted probabilities across group size, other features at the median
+grid = pd.DataFrame({"log2_size": np.linspace(1.6, 6, 40), "avg_degree": typical["avg_degree"],
+                     "aging": typical["aging"]})
+probs = pd.DataFrame(np.asarray(mn.predict(sm.add_constant(grid, has_constant="add"))), columns=four)
+for e in four:
+    plt.plot(2 ** grid["log2_size"], probs[e], label=e)
+plt.xscale("log"); plt.xlabel("group size (members)"); plt.ylabel("predicted probability")
+plt.legend(); plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150, bbox_inches="tight"); plt.show()
 
-# Step 9 · Out of sample: accuracy and the paper's measure, the plain average F-measure
-probs = np.asarray(mn.predict(sm.add_constant(te[X_cols])))
-guess = pd.Categorical.from_codes(probs.argmax(axis=1), categories=order)
-truth = pd.Categorical(te["event"], categories=order)
-print(pd.crosstab(pd.Series(truth, name="true"), pd.Series(guess, name="predicted"), dropna=False))
-f = {}
-for k in order:
-    tp = ((guess == k) & (truth == k)).sum()
-    prec = tp / (guess == k).sum() if (guess == k).sum() > 0 else 0
-    rec = tp / (truth == k).sum()
-    f[k] = float(2 * prec * rec / (prec + rec)) if prec + rec > 0 else 0.0
-print("F-measure by event:", {k: round(v, 3) for k, v in f.items()})
-print(f"accuracy {(guess == truth).mean():.3f} | base rate {(truth == 'dissolving').mean():.3f} | average F {np.mean(list(f.values())):.3f}")
-```
-
-### Lines 118–132
-
-```python
-# Step 10 · Picture: predicted probability of each event as the group grows
-grid = pd.DataFrame([typical] * 50)
-grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
-curves = np.asarray(mn.predict(sm.add_constant(grid[X_cols], has_constant="add")))
-fig, ax = plt.subplots(figsize=(7, 4))
-for j, name in enumerate(order):
-    ax.plot(2 ** grid["log2_size"], curves[:, j], label=name)
-ax.set_xscale("log", base=2)
-ax.set_xlabel("group size (members, log scale)")
-ax.set_ylabel("predicted probability")
-ax.set_title("IrvineMessages, weekly windows: what happens next, by group size")
-ax.legend(fontsize=8)
-plt.tight_layout()
-plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150)
-print("saved", OUTPUT / "s04_event_probabilities.png")
+# Step 8 · Out of sample: accuracy on the test half against the base rate
+t4 = te[te["event"].isin(four)]
+guess = np.asarray(mn.predict(sm.add_constant(t4[X]))).argmax(axis=1)
+truth = pd.Categorical(t4["event"], categories=four).codes
+print(f"multinomial accuracy {(guess == truth).mean():.3f} | always 'dissolving' "
+      f"{(t4['event'] == 'dissolving').mean():.3f}")
+print(pd.crosstab(pd.Series(np.array(four)[truth], name="true"),
+                  pd.Series(np.array(four)[guess], name="predicted")))
 ```
 :::::::
 
@@ -211,12 +187,15 @@ sys.path.insert(0, str(ROOT))
 OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
+import warnings
+warnings.filterwarnings("ignore")            # convergence notes are not part of the answer
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from scipy import stats
+from statsmodels.miscmodels.ordinal_model import OrderedModel
 
 FOLDER = "04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
 FILE = FOLDER + "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.{}.csv"
@@ -224,186 +203,138 @@ FILE = FOLDER + "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.{}.csv"
 
 ### 1
 
-**Step 1 · Load the two halves of partition 1: fold 1 to fit, fold 2 to test**
+**Step 1 · Load the two halves: fit on one, test on the other**
 
 ```{python}
 #| echo: true
-# Step 1 · Load the two halves of partition 1: fold 1 to fit, fold 2 to test
-train = pd.read_csv(FILE.format(1))
-test = pd.read_csv(FILE.format(2))
+# Step 1 · Load the two halves: fit on one, test on the other
+train, test = pd.read_csv(FILE.format(1)), pd.read_csv(FILE.format(2))
 print("train", train.shape, "| test", test.shape)
-print(pd.concat([train["event_type"].value_counts(), test["event_type"].value_counts()],
-                axis=1, keys=["train", "test"]))
+print(train["event_type"].value_counts(normalize=True).round(3))   # the base rates
 ```
 
 ### 2
 
-**Step 2 · Five features in units a person can read, and a 0/1 outcome**
+**Step 2 · Three features a person can read**
 
 ```{python}
 #| echo: true
-# Step 2 · Five features in units a person can read, and a 0/1 outcome
+# Step 2 · Three features a person can read
 def features(df):
     return pd.DataFrame({
-        "dissolve": (df["event_type"] == "dissolving").astype(int),
         "event": df["event_type"],
-        "log2_size": np.log2(df["g1_size"]),              # +1 = the group is twice as big
-        "avg_degree": df["g1_avg_group_degree_total"],    # ties per member, inside the group
-        "aging": df["g1_IlhanAging"],                     # how long members have been around (windows)
-        "net_density": df["g1_network_density"] * 1000,   # whole-network density, per thousand
-        "net_leadership": df["g1_network_leadership"] * 100})  # network centralisation, in points
+        "log2_size": np.log2(df["g1_size"]),            # +1 = the group is twice as big
+        "avg_degree": df["g1_avg_group_degree_total"],  # ties per member, inside the group
+        "aging": df["g1_IlhanAging"]})                  # how long its members have been around
 tr, te = features(train), features(test)
-print(tr.groupby("event")[["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]].median().round(2))
+X = ["log2_size", "avg_degree", "aging"]
+print(tr.groupby("event")[X].median().round(2))
 ```
 
 ### 3
 
-**Step 3 · Binary logit: does the group dissolve in the next week?**
+**Step 3 · Binary logit: does the group dissolve next week?**
 
 ```{python}
 #| echo: true
-# Step 3 · Binary logit: does the group dissolve in the next week?
-full = smf.logit("dissolve ~ log2_size + avg_degree + aging + net_density + net_leadership", data=tr).fit(disp=0)
-print(full.summary().tables[1])
-print("odds ratios:")
-print(np.exp(full.params).round(3))
+# Step 3 · Binary logit: does the group dissolve next week?
+tr["dissolve"] = (tr["event"] == "dissolving").astype(int)
+bi = smf.logit("dissolve ~ log2_size + avg_degree + aging", data=tr).fit(disp=0)
+print(pd.DataFrame({"log-odds": bi.params, "odds ratio": np.exp(bi.params),
+                    "p-value": bi.pvalues}).round(3))
 ```
 
 ### 4
 
-**Step 4 · Predicted probabilities for a 4-member and a 16-member group, other features at the median**
+**Step 4 · From odds to probabilities: a 4-member and a 16-member group**
 
 ```{python}
 #| echo: true
-# Step 4 · Predicted probabilities for a 4-member and a 16-member group, other features at the median
-typical = tr.drop(columns=["dissolve", "event"]).median()
-cases = pd.DataFrame([typical, typical])
-cases["log2_size"] = [2, 4]                            # 2**2 = 4 members, 2**4 = 16 members
-pred = full.get_prediction(cases).summary_frame()
-pred.index = ["4 members", "16 members"]
-print(pred.round(3))
+# Step 4 · From odds to probabilities: a 4-member and a 16-member group
+typical = tr[X].median()
+cases = pd.DataFrame([typical, typical], index=["4 members", "16 members"])
+cases["log2_size"] = [2, 4]                         # 2**2 = 4, 2**4 = 16
+print("P(dissolve):", bi.predict(cases).round(3).to_dict())
 ```
 
 ### 5
 
-**Step 5 · Likelihood-ratio test: do the paper's three top-ranked features (Table F) add anything?**
+**Step 5 · Ordinal logit: shrinks < continues < grows**
 
 ```{python}
 #| echo: true
-# Step 5 · Likelihood-ratio test: do the paper's three top-ranked features (Table F) add anything?
-small = smf.logit("dissolve ~ log2_size + avg_degree", data=tr).fit(disp=0)
-lr = 2 * (full.llf - small.llf)
-print(f"LR = {lr:.2f}, df = 3, p = {stats.chi2.sf(lr, df=3):.4f}")
-print(f"McFadden pseudo-R2: small {small.prsquared:.4f}   full {full.prsquared:.4f}")
+# Step 5 · Ordinal logit: shrinks < continues < grows
+levels = ["shrinking", "continuing", "growing"]
+sub = tr[tr["event"].isin(levels)].copy()
+sub["size_change"] = pd.Categorical(sub["event"], categories=levels, ordered=True)
+om = OrderedModel(sub["size_change"], sub[X], distr="logit").fit(method="bfgs", disp=0)
+print(pd.DataFrame({"log-odds": om.params[X], "odds ratio": np.exp(om.params[X]),
+                    "p-value": om.pvalues[X]}).round(3))
+print("P(shrink, continue, grow):")
+print(pd.DataFrame(np.asarray(om.predict(cases[X])), index=cases.index, columns=levels).round(3))
 ```
 
 ### 6
 
-**Step 6 · Out of sample: accuracy on fold 2 against the base rate**
+**Step 6 · Multinomial logit: four events, baseline = dissolving**
 
 ```{python}
 #| echo: true
-# Step 6 · Out of sample: accuracy on fold 2 against the base rate
-p_test = full.predict(te)
-acc = ((p_test > 0.5).astype(int) == te["dissolve"]).mean()
-base = 1 - te["dissolve"].mean()                       # always say "does not dissolve"
-print(f"logit accuracy {acc:.3f} | base rate {base:.3f} | groups flagged as dissolving: {(p_test > 0.5).sum()} of {len(te)}")
+# Step 6 · Multinomial logit: four events, baseline = dissolving
+four = ["dissolving", "shrinking", "growing", "continuing"]   # merging and splitting: 17 groups
+m4 = tr[tr["event"].isin(four)]
+mn = sm.MNLogit(pd.Categorical(m4["event"], categories=four).codes,
+                sm.add_constant(m4[X])).fit(disp=0, maxiter=200)
+rrr = np.exp(mn.params)
+rrr.columns = four[1:]                              # each column: that event against dissolving
+print("relative risk ratios, against dissolving:")
+print(rrr.round(3))
 ```
 
-### 7
+### 7 · code
 
-**Step 7 · Multinomial logit over all six events, baseline = dissolving**
+**Step 7 · Predicted probabilities across group size, other features at the median**
+
+```python
+# Step 7 · Predicted probabilities across group size, other features at the median
+grid = pd.DataFrame({"log2_size": np.linspace(1.6, 6, 40), "avg_degree": typical["avg_degree"],
+                     "aging": typical["aging"]})
+probs = pd.DataFrame(np.asarray(mn.predict(sm.add_constant(grid, has_constant="add"))), columns=four)
+for e in four:
+    plt.plot(2 ** grid["log2_size"], probs[e], label=e)
+plt.xscale("log"); plt.xlabel("group size (members)"); plt.ylabel("predicted probability")
+plt.legend(); plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150, bbox_inches="tight"); plt.show()
+```
+
+### 7 · result
+
+**Step 7 · Predicted probabilities across group size, other features at the median** — what it prints
 
 ```{python}
-#| echo: true
-# Step 7 · Multinomial logit over all six events, baseline = dissolving
-order = ["dissolving", "shrinking", "growing", "continuing", "merging", "splitting"]
-X_cols = ["log2_size", "avg_degree", "aging", "net_density", "net_leadership"]
-y_tr = pd.Categorical(tr["event"], categories=order).codes
-mn = sm.MNLogit(y_tr, sm.add_constant(tr[X_cols])).fit(disp=0, maxiter=200)
-print("converged:", mn.mle_retvals["converged"], "| McFadden pseudo-R2:", round(mn.prsquared, 4))
-odds = np.exp(mn.params)
-odds.columns = order[1:]
-print("odds ratios, each event versus dissolving:")
-print(odds.round(3))
+#| echo: false
+# Step 7 · Predicted probabilities across group size, other features at the median
+grid = pd.DataFrame({"log2_size": np.linspace(1.6, 6, 40), "avg_degree": typical["avg_degree"],
+                     "aging": typical["aging"]})
+probs = pd.DataFrame(np.asarray(mn.predict(sm.add_constant(grid, has_constant="add"))), columns=four)
+for e in four:
+    plt.plot(2 ** grid["log2_size"], probs[e], label=e)
+plt.xscale("log"); plt.xlabel("group size (members)"); plt.ylabel("predicted probability")
+plt.legend(); plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150, bbox_inches="tight"); plt.show()
 ```
 
 ### 8
 
-**Step 8 · LR test for the same three features, now in the multinomial (3 features x 5 equations)**
+**Step 8 · Out of sample: accuracy on the test half against the base rate**
 
 ```{python}
 #| echo: true
-# Step 8 · LR test for the same three features, now in the multinomial (3 features x 5 equations)
-mn_small = sm.MNLogit(y_tr, sm.add_constant(tr[["log2_size", "avg_degree"]])).fit(disp=0, maxiter=200)
-lr_mn = 2 * (mn.llf - mn_small.llf)
-print(f"LR = {lr_mn:.2f}, df = 15, p = {stats.chi2.sf(lr_mn, df=15):.4f}")
-print(f"McFadden pseudo-R2: small {mn_small.prsquared:.4f}   full {mn.prsquared:.4f}")
-```
-
-### 9
-
-**Step 9 · Out of sample: accuracy and the paper's measure, the plain average F-measure**
-
-```{python}
-#| echo: true
-# Step 9 · Out of sample: accuracy and the paper's measure, the plain average F-measure
-probs = np.asarray(mn.predict(sm.add_constant(te[X_cols])))
-guess = pd.Categorical.from_codes(probs.argmax(axis=1), categories=order)
-truth = pd.Categorical(te["event"], categories=order)
-print(pd.crosstab(pd.Series(truth, name="true"), pd.Series(guess, name="predicted"), dropna=False))
-f = {}
-for k in order:
-    tp = ((guess == k) & (truth == k)).sum()
-    prec = tp / (guess == k).sum() if (guess == k).sum() > 0 else 0
-    rec = tp / (truth == k).sum()
-    f[k] = float(2 * prec * rec / (prec + rec)) if prec + rec > 0 else 0.0
-print("F-measure by event:", {k: round(v, 3) for k, v in f.items()})
-print(f"accuracy {(guess == truth).mean():.3f} | base rate {(truth == 'dissolving').mean():.3f} | average F {np.mean(list(f.values())):.3f}")
-```
-
-### 10 · code
-
-**Step 10 · Picture: predicted probability of each event as the group grows**
-
-```python
-# Step 10 · Picture: predicted probability of each event as the group grows
-grid = pd.DataFrame([typical] * 50)
-grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
-curves = np.asarray(mn.predict(sm.add_constant(grid[X_cols], has_constant="add")))
-fig, ax = plt.subplots(figsize=(7, 4))
-for j, name in enumerate(order):
-    ax.plot(2 ** grid["log2_size"], curves[:, j], label=name)
-ax.set_xscale("log", base=2)
-ax.set_xlabel("group size (members, log scale)")
-ax.set_ylabel("predicted probability")
-ax.set_title("IrvineMessages, weekly windows: what happens next, by group size")
-ax.legend(fontsize=8)
-plt.tight_layout()
-plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150)
-print("saved", OUTPUT / "s04_event_probabilities.png")
-```
-
-### 10 · result
-
-**Step 10 · Picture: predicted probability of each event as the group grows** — what it prints
-
-```{python}
-#| echo: false
-# Step 10 · Picture: predicted probability of each event as the group grows
-grid = pd.DataFrame([typical] * 50)
-grid["log2_size"] = np.linspace(np.log2(3), np.log2(64), 50)
-curves = np.asarray(mn.predict(sm.add_constant(grid[X_cols], has_constant="add")))
-fig, ax = plt.subplots(figsize=(7, 4))
-for j, name in enumerate(order):
-    ax.plot(2 ** grid["log2_size"], curves[:, j], label=name)
-ax.set_xscale("log", base=2)
-ax.set_xlabel("group size (members, log scale)")
-ax.set_ylabel("predicted probability")
-ax.set_title("IrvineMessages, weekly windows: what happens next, by group size")
-ax.legend(fontsize=8)
-plt.tight_layout()
-plt.savefig(OUTPUT / "s04_event_probabilities.png", dpi=150)
-print("saved", OUTPUT / "s04_event_probabilities.png")
+# Step 8 · Out of sample: accuracy on the test half against the base rate
+t4 = te[te["event"].isin(four)]
+guess = np.asarray(mn.predict(sm.add_constant(t4[X]))).argmax(axis=1)
+truth = pd.Categorical(t4["event"], categories=four).codes
+print(f"multinomial accuracy {(guess == truth).mean():.3f} | always 'dissolving' "
+      f"{(t4['event'] == 'dissolving').mean():.3f}")
+print(pd.crosstab(pd.Series(np.array(four)[truth], name="true"),
+                  pd.Series(np.array(four)[guess], name="predicted")))
 ```
 ::::::::

@@ -1,7 +1,7 @@
-# Replication log · Session 07
+# Session 07 log · Five papers, one toolkit
 
 Copy this file to `groups/A2026/group-XX/session-07/replication-log.md` (or, if you work alone,
-`.../session-07/<your-name>-replication-log.md`) and fill in one block per paper you attempted.
+`.../session-07/<your-name>-replication-log.md`) and fill in one block per paper you worked on.
 Three well-argued blocks are worth more than five rushed ones.
 
 **Who:** _names_ · **Worked:** alone / as a team of _n_
@@ -13,16 +13,16 @@ Three well-argued blocks are worth more than five rushed ones.
 | | |
 |---|---|
 | **Research question** (one sentence, your words) | |
-| **Published target** (table, column, number) | |
-| **Our number** (same quantity, with its standard error) | |
-| **Gap** (ours − theirs) | |
-| **Why the gap** (or why there is none) | |
+| **The model I fitted** (outcome, predictors, which session's code) | |
+| **The result, as a sentence** (with units, "holding … fixed" where it applies) | |
+| **What the paper did instead** (its design, in one sentence) | |
+| **Why its number is not mine** | |
 
-**The diagnostic from class that changed how I read the result**, in two sentences:
+**The check from class that changed how I read the result**, in two sentences:
 
 >
 
-**What the published result does *not* license**, in one sentence:
+**What the result does *not* license**, in one sentence:
 
 >
 

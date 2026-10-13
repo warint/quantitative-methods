@@ -1,0 +1,62 @@
+## Paper 4 · Session 05 · 56 candidate determinants of FDI {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Blonigen & Piger (2014)**, *Determinants of foreign direct investment*, Canadian Journal of
+Economics · [article](https://doi.org/10.1111/caje.12091) · [free preprint](https://www.nber.org/papers/w16704)
+
+Empirical FDI studies disagree about which variables belong in the regression. The authors put 56
+candidates into one Bayesian model average and let the data say which carry the signal: about
+sixteen survive — gravity, cultural distance, trade agreements, parent income — while many
+favourites of the literature do not.
+
+> **Of 56 candidate determinants of bilateral FDI, which few actually carry the signal?**
+
+## The data, and the simple models {.scrollable}
+
+`qmib.load("fdi")` — **no download**: 765 country pairs complete on all 56 candidates, for **2019**
+(the paper used 2000). Outcome: the log of the FDI stock.
+
+| Steps | Session 05's code, unchanged |
+|---|---|
+| 1–2 | load, log FDI, hold out 30% of the pairs |
+| 3 | **OLS** on all 56 — the benchmark |
+| 4 | **Ridge**, λ by cross-validation |
+| 5 | **Lasso** — how many kept, which dropped |
+| 6 | **Elastic net**, `l1_ratio = 0.5` |
+| 7–8 | the four side by side; compare with the paper's survivors |
+
+{{< include _solutions-r4.qmd >}}
+
+## What you should find {.scrollable}
+
+| | OLS | ridge | lasso | elastic net |
+|---|---|---|---|---|
+| predictors kept | 56 | 56 | 48 | 51 |
+| test RMSE (log FDI) | 1.753 | 1.749 | **1.737** | 1.739 |
+
+::: {.check}
+**The core agrees with the paper.** Lasso and elastic net keep all nine of the paper's named
+survivors, with the expected signs: bigger economies and closer pairs hold more FDI. Political
+rights and civil liberties drop out, as in the paper.
+:::
+
+::: {.warn}
+**The penalty buys little here**: about 1% of test error. With 535 training rows for 56 candidates,
+OLS is not badly overfitted — and at this λ the lasso drops only 8 of 56.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No "the drivers of FDI".** One penalised model at one λ on one sample — not the paper's
+  average over many models, and not a causal list.
+- **No "institutions do not matter".** A dropped variable is not a zero effect; it may be correlated
+  with one that was kept.
+- **No claim about all countries.** 36 OECD parents and 32 hosts survive listwise deletion.
+:::
+
+::: {.muted}
+A tax-haven dummy is among the largest lasso coefficients, unlike in the paper: pass-through FDI via
+offshore centres grew a great deal between 2000 and 2019.
+:::

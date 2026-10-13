@@ -1,0 +1,71 @@
+## Paper 3 · Session 04 · What happens next to a social group {.center .scrollable}
+
+## The paper, and its question {.scrollable}
+
+**Saganowski, Bródka, Koziarski & Kazienko (2019)**, *Analysis of group evolution prediction in
+complex networks*, PLOS ONE · [article](https://doi.org/10.1371/journal.pone.0224194)
+
+The authors cut a social network into weekly windows, find its groups, and record what happened to
+each group next: it **dissolved, shrank, grew, continued, merged or split**. They describe each group
+with about 90 network measures and train fifteen classifiers; tree-based ones predict best.
+
+> **Can a group's current structure predict which of six events will happen to it next?**
+
+::: {.muted}
+**Today:** not their fifteen classifiers — the three logits you typed in session 04, on three
+features you can read.
+:::
+
+## The data, and the simple models {.scrollable}
+
+**One row** = one group of students messaging each other at UC Irvine, in one weekly window. Fit on
+one half (498 groups), test on the other (497). Features: `log2_size` (+1 = twice as big),
+`avg_degree` (ties per member), `aging` (how long its members have been around).
+
+::::: columns
+:::: {.column width="50%"}
+**Binary** — steps 1–4
+
+1. Load both halves; the base rates
+2. Three readable features
+3. Does it dissolve? Log-odds → **odds ratios**
+4. → **probabilities**, 4 vs 16 members
+::::
+
+:::: {.column width="50%"}
+**Ordinal and multinomial** — steps 5–8
+
+5. Shrinks < continues < grows: **ordinal**
+6. Four events vs dissolving: **multinomial**
+7. Probabilities across group size
+8. Out of sample: accuracy vs the **base rate**
+::::
+:::::
+
+{{< include _solutions-r3.qmd >}}
+
+## What you should find {.scrollable}
+
+| Model | What it says, in words |
+|---|---|
+| **Binary** | doubling the size multiplies the odds of dissolving by **0.65**; P = 0.41 at 4 members, 0.23 at 16 |
+| **Ordinal** | doubling the size multiplies the odds of a higher step by **0.26**: small groups grow (0.56), big ones shrink (0.84) |
+| **Multinomial** | against dissolving, doubling the size multiplies the shrinking ratio by **3.2**, the continuing ratio by 0.47 |
+| **Out of sample** | accuracy **0.46** against 0.37 for always "dissolving" |
+
+::: {.check}
+Size is the one clear signal in all three models. The paper's 90 features and tree-based classifiers
+predict better; the logits give a sentence you can say.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** Bigger groups dissolve less here; adding members would not by itself keep a
+  group alive.
+- **No claim about the rare events.** Merging and splitting (17 of 498 groups) are left out of the
+  multinomial: too few to estimate an equation each.
+- **No strong out-of-sample claim.** The model almost never predicts "continuing" or "growing".
+- **No claim beyond this network.** One university, weekly windows; the events come from a tracking
+  algorithm, not direct observation.
+:::
