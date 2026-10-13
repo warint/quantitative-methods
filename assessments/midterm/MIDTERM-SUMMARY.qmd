@@ -80,9 +80,7 @@ $$g_1 = \frac{1}{n}\frac{\sum_i (x_i-\bar x)^3}{s^3} \qquad\qquad g_2 = \frac{1}
 - **Empirical rule** (68–95–99.7% within 1, 2, 3 SDs) holds only for a roughly **normal** variable. Symmetric is not the same as normal, and the rule does not apply to a variable you have shown to be skewed.
 
 \begin{keybox}
-\textbf{Worked example.} $n = 24$, $\bar x = 50$, median $= 46$, $s = 10$, $\sum (x_i-\bar x)^3 = 26{,}400$, $\sum (x_i-\bar x)^4 = 1{,}020{,}000$.\\
-$g_1 = \frac{1}{24}\cdot\frac{26{,}400}{1{,}000} = 1.10$; threshold $2\sqrt{6/24} = 2(0.5) = 1.00$ → substantially \textbf{right}-skewed, consistent with mean $>$ median.\\
-$g_2 = \frac{1}{24}\cdot\frac{1{,}020{,}000}{10{,}000} - 3 = 4.25 - 3 = 1.25$; threshold $4(0.5) = 2.00$ → not substantially kurtic. Report the \textbf{median} as the centre.
+\textbf{Example, in words.} Firm size in a sample of exporters: the mean is 250 employees, the median 18. The mean sits far above the median because a few very large firms pull it up — a long \textbf{right} tail, which the skewness statistic confirms when it exceeds its threshold. So the typical exporter is small, not medium-sized: report the \textbf{median} and the IQR, say the distribution is right-skewed, and do not apply the 68–95–99.7 rule to it.
 \end{keybox}
 
 \newpage
@@ -126,8 +124,8 @@ The **residuals-versus-fitted** plot is the instrument. Look for:
 $AIC = -2\ell + 2p$ and $BIC = -2\ell + p\ln n$, where $\ell$ is the maximised log-likelihood. **Lower is better**, and only on the **same rows**. BIC penalises extra parameters more heavily, so the two can disagree. Comparing a few candidates you chose is honest; letting a search pick the model is not model selection (Session 5 shows why).
 
 \begin{keybox}
-\textbf{Worked example.} GDP per capita on productivity: $\hat y = -86{,}118 + 1{,}111 \times$ productivity, $R^2 = 0.63$. \emph{Sentence:} comparing two country-years one index point apart, the more productive has on average €1,111 more GDP per capita. \emph{Intercept:} the prediction at productivity 0, far outside the data (72 to 129) — do not interpret it. \emph{$R^2$:} productivity accounts for 63\% of the variation, which says nothing about cause.\\
-\textbf{OVB:} $\beta_z = 0.05$, $\delta_1 = 0.4$ → bias $= +0.02$. If the short slope is $0.09$, the implied $\beta_1 = 0.07$.
+\textbf{Example, in words.} GDP per capita on productivity, across European country-years. \emph{The sentence:} comparing two country-years one index point apart, the more productive one has on average about €1,100 more GDP per capita. \emph{The intercept} is the prediction at productivity zero, far outside the data — do not interpret it. \emph{$R^2 = 0.63$:} productivity accounts for about two-thirds of the variation, which says nothing about cause.\\
+\emph{Omitted variable:} if investment raises income \emph{and} goes with higher productivity, leaving it out lets productivity take credit for investment: the slope is biased \textbf{upward}. Adding investment changes the question the slope answers — and its size.
 \end{keybox}
 
 \newpage
@@ -160,11 +158,7 @@ Pick a **baseline** category. Each other category $k$ gets its own equation $\ln
 - **Discrimination** (AUC: does the model rank positives above negatives?) is not **calibration** (does $p = 0.2$ happen 20% of the time?). A high AUC does not make the probabilities usable.
 
 \begin{keybox}
-\textbf{Worked example.} $\hat\beta = (-2.0,\ 0.03,\ 0.5)$ for (intercept, income in thousands, collateral). Applicant: income 50, collateral 1.
-$x^\top\hat\beta = -2.0 + 0.03(50) + 0.5 = 0$ → $p = 1/(1+e^{0}) = 0.50$.
-Odds ratio for collateral $e^{0.5} \approx 1.65$: odds 65\% higher.
-Marginal effect of income: $0.5 \times 0.5 \times 0.03 = 0.0075$, i.e. \textbf{0.75 percentage points} per thousand.
-If a missed default costs 3 times a false alarm: $\tau^\star = 1/(1+3) = 0.25$; since $0.50 > 0.25$, flag the applicant.
+\textbf{Example, in words.} A bank models default. \emph{The coefficient} on being a first-time borrower is positive: first-time borrowers are more likely to default — the sign is readable directly. \emph{Its odds ratio,} 1.65, means their \textbf{odds} of default are 65\% higher than those of comparable repeat borrowers — not that their probability is 65\% higher. \emph{The probability} depends on the whole profile: the model may give 0.50 for one applicant and 0.10 for another, and the same odds ratio moves the first far more than the second. \emph{The decision:} if a missed default costs much more than a false alarm, the bank should flag applicants well below 50\%: the threshold follows the costs, not the default of 0.5.
 \end{keybox}
 
 \newpage
@@ -202,11 +196,7 @@ Mixes both penalties with weight $\alpha$ ($\alpha = 1$ lasso, $\alpha = 0$ ridg
 - **p-values after selection are not valid**: the same data chose the variables and then tested them.
 
 \begin{keybox}
-\textbf{Worked example — ridge.} $X^\top X = \begin{pmatrix}5&2\\2&4\end{pmatrix}$, $X^\top y = \begin{pmatrix}9\\8\end{pmatrix}$.
-OLS: $\det = 20-4 = 16$, inverse $\frac{1}{16}\begin{pmatrix}4&-2\\-2&5\end{pmatrix}$, $\hat\beta = \frac{1}{16}(20,\,22) = (1.250,\ 1.375)$.
-Ridge, $\lambda = 1$: $\begin{pmatrix}6&2\\2&5\end{pmatrix}$, $\det = 26$, $\hat\beta = \frac{1}{26}(29,\,30) = (1.115,\ 1.154)$ — shrinkage 10.8\% and 16.1\%.\\[2pt]
-\textbf{Worked example — soft-thresholding.} $\rho = (0.50,\ -0.12,\ 0.25)$, $\lambda = 0.15$.
-Lasso: $(0.35,\ 0,\ 0.10)$ — two survive. Elastic net, $\alpha = 0.5$: threshold $0.075$, divide by $1.075$ → $(0.395,\ -0.042,\ 0.163)$ — all three survive.
+\textbf{Example, in words.} Two predictors, firms' cloud use and their e-commerce sales, move almost together, and both matter. \emph{OLS} cannot tell them apart and may give one a large positive coefficient and the other a negative one. \emph{Ridge} shrinks both and lets them share the effect: stable, but it keeps every variable, useless ones included. \emph{The lasso} sets the useless predictors to exactly zero — and usually drops one of the two, almost at random. \emph{The elastic net} sets the useless ones to zero and keeps the pair together. In all three, a zero means "not needed for prediction here", never "no effect".
 \end{keybox}
 
 \newpage
@@ -220,7 +210,7 @@ Linear regression is linear in the **coefficients**, not necessarily in $x$: you
 - A curve in the residual plot (Session 3) is the usual reason to add a squared term.
 
 \begin{keybox}
-\textbf{Worked example.} $\hat y = 1.0 + 0.8x - 0.02x^2$: the effect of $x$ is $0.8 - 0.04x$ — positive and shrinking below $x = 20$, negative beyond. The coefficient 0.8 is the effect only at $x = 0$.
+\textbf{Example, in words.} Productivity rises with a firm's age, but more and more slowly, and eventually falls: a squared term with a negative sign. The effect of one more year is therefore not one number — large for young firms, smaller for mature ones, negative for the oldest. The coefficient on age alone is the effect at age zero; report the effect at a few meaningful ages instead, inside the range of the data.
 \end{keybox}
 
 \newpage
