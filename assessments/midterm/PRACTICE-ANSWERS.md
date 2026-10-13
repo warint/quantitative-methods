@@ -24,39 +24,32 @@ text from the text so far, and picks one: pattern completion learned from its tr
 competence comes from that training text; it stops where the text was thin, wrong or out of date
 (a library version released after training), and fluency is not understanding.
 
-**I3.** *(medium)* They are internal parameters of the story — the stock of AI computing capacity,
-measured by the electrical power it draws — not forecasts or measurements. Choosing gigawatts
-assumes that power (energy and data centres) is the binding constraint on AI capability; it leaves
-out data, algorithmic efficiency, talent, adoption by firms and legitimacy.
+**I3.** *(medium)* A scenario is a set of choices: a foundation with a mission, named authors and a
+moment (June 2026) decide which risks to dramatise and which to leave out. Read it as an argument
+for attention and action, not a neutral description. Possible absences: other regions (India, the
+Gulf, Africa), slower AI progress or regulation that bites, energy or climate limits, public
+resistance, open-source models, the role of small firms. A good answer names one and says how the
+story would change.
 
-**I4.** *(medium)* Compute: the chips and energy that train and run models. Data: what the models
-learn from — its quantity, quality, languages and legal access. Mathematics: the algorithms and
-model designs that turn compute and data into capability; better algorithms can substitute for
-compute. A good answer argues where Europe stands — e.g. weak on frontier compute, stronger on
-industrial and multilingual data, research and efficient models.
+**I4.** *(medium)* Any claim stated early enough to be observed: the pace of AI adoption by firms,
+the build-out of data centres and grid connections, European investment in compute, wage growth or
+job losses in exposed occupations, trade dependence on US clouds or Chinese hardware. The answer
+says what would move belief either way and names a publisher — Eurostat surveys, national
+statistics offices, the IEA, the OECD, company reports. A scenario is not proved by one
+observation; the point is to know what to watch.
 
-**I5.** *(medium)* AI built for one sector or task, trained on domain data, where value comes from
-know-how and data a firm holds rather than from frontier scale — e.g. predictive maintenance for
-machinery, quality control in manufacturing, logistics routing, medical imaging. Argued either way:
-yes, it plays to Europe's industrial strengths and needs less compute; or no, if general models keep
-improving they absorb vertical tasks and Europe still depends on them.
+**I5.** *(medium)* Flexicurity combines flexibility for employers (easier hiring and adjustment) with
+security for workers (income support, retraining, help to move to new jobs) — protecting people
+rather than particular jobs. It answers the scenario's labour shock if displaced workers can be
+retrained for jobs that exist; it does not, on its own, solve the fiscal problem — falling tax
+revenue — and it is expensive exactly when revenues fall. A good answer takes a position.
 
-**I6.** *(medium)* A compact model, able to run locally or on modest hardware. Advantages: cost, data
-kept in-house (privacy, GDPR), independence from a foreign provider, lower energy, can be adapted to
-the firm's own task. Limits: less general capability, the firm must maintain and evaluate it,
-weaker on hard reasoning, still often trained abroad.
-
-**I7.** *(medium)* Because in the scenario's logic capability comes from compute, and compute needs
-data centres, which need power, grid connections and permits — Europe's bottleneck. What could go
-wrong: energy and water use, grid strain, chips still imported (dependence moves rather than
-vanishes), and investing in a race Europe may not win while its advantage lies elsewhere.
-
-**I8.** *(difficult)* No single right answer. Sovereignty: full control, but very costly and slow,
+**I6.** *(difficult)* No single right answer. Sovereignty: full control, but very costly and slow,
 and still dependent on foreign chips and tools. Governed interdependence: faster and cheaper, keeps
 access to frontier models, but leaves leverage with US firms and governments. A strong answer
 names the trade-off, takes a side, and says what would make the chosen path fail.
 
-**I9.** *(difficult)* Sessions 2–5 are largely statistics — means, least squares, logistic
+**I7.** *(difficult)* Sessions 2–5 are largely statistics — means, least squares, logistic
 regression (decades old), penalised regression (ridge from the 1970s, the lasso from 1996); what is
 new is scale, computing power and the use of the same ideas for prediction. The distinction
 matters because the old methods come with known assumptions and diagnostics — the questions of this

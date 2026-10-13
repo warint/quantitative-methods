@@ -11,7 +11,7 @@ your ability to carry out long calculations. The practice follows the exam's six
 
 | Part | What it asks | Here |
 |---|---|---|
-| **I — Europe 2031** | answer in words: what AI the scenario is about, and Europe's options | 9 prompts |
+| **I — Europe 2031** | answer in words: the scenario, what AI is, and Europe's options | 7 prompts |
 | **II — The readings** | research question, model, critiques and an alternative model, for each paper | 5 readings |
 | **A — multiple choice** | one correct answer out of four | 40 questions |
 | **B — short answers** | state a concept precisely, in two or three sentences | 21 questions |
@@ -24,7 +24,7 @@ Each question carries its session and its difficulty in brackets, so you can tra
 time, and build up from easy to difficult:
 
 - **easy** (25 questions) — recall a definition, or recognise the right reading of a result;
-- **medium** (44) — combine two ideas, or explain why a tempting reading is wrong;
+- **medium** (42) — combine two ideas, or explain why a tempting reading is wrong;
 - **difficult** (19) — a subtle distinction, an argued position, or several faults to find at once.
 
 > **How to use it.** Answer first, on paper, without notes. Only then open the
@@ -47,29 +47,23 @@ seam matter for anyone who quotes it?
 that file, and what computation runs when it answers a question? Where does its competence come
 from, and where does it stop?
 
-**I3.** *(S1 · medium)* The scenario measures a region's AI power in **gigawatts of compute** (255.1 GW
-for the United States in 2031, 20.9 GW for Europe). What do these numbers represent, and what does
-the choice of that unit assume about what makes AI powerful?
+**I3.** *(S1 · medium)* **Whose scenario is it?** *Europe 2031* was written by a foundation, with
+named authors, at a particular moment. What does that tell you about how to read it, and what is
+conspicuously **absent** from the story — something a different author might have put at its centre?
 
-**I4.** *(S1 · medium)* Compute, data and mathematics (the algorithms) are the three ingredients of
-an AI system. Explain each in your own words, and say on which of the three Europe is best placed
-to compete.
+**I4.** *(S1 · medium)* Which of the scenario's claims could be **checked by 2027**? Name one, say in
+words what you would observe that would make you believe it more or less, and who publishes that
+information.
 
-**I5.** *(S1 · medium)* What is **vertical AI**? Give two examples in European industry, and say
-whether vertical AI is a way for Europe to escape the frontier race the scenario describes.
+**I5.** *(S1 · medium)* The scenario imagines automation weakening wages and tax revenues, and
+proposes a renewed **flexicurity**: retraining, wage insurance, mobility support and employer
+flexibility. Explain the idea, and say whether it answers the problem the scenario describes.
 
-**I6.** *(S1 · medium)* What is a **small language model**? Give two advantages and two limits for a
-European firm that chooses one over a frontier model run by a US provider.
-
-**I7.** *(S1 · medium)* Why does the scenario propose **Special Compute Zones** — faster permits,
-dedicated teams, grid connections from retired power plants? What could go wrong with a strategy
-built around data centres?
-
-**I8.** *(S1 · difficult)* The scenario contrasts **compute sovereignty** (Europe builds and controls
+**I6.** *(S1 · difficult)* The scenario contrasts **compute sovereignty** (Europe builds and controls
 its own AI stack) with **governed interdependence** (Europe works with US providers but anchors
 critical infrastructure under European law). Which do you find more realistic, and why?
 
-**I9.** *(S1 · difficult)* "What in this course is AI, and what is a hundred-year-old statistical
+**I7.** *(S1 · difficult)* "What in this course is AI, and what is a hundred-year-old statistical
 method with a new name?" Answer the question for the methods of sessions 2 to 5, and say whether
 the distinction matters.
 
