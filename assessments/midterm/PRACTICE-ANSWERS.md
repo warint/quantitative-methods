@@ -1,345 +1,332 @@
 # Midterm practice questions — answer key
 
-**Quantitative Methods in International Business · Sessions 2–6**
+**Quantitative Methods in International Business · Sessions 1–6**
 
 ---
 
 > Open this only after answering the [questions](PRACTICE.md) on paper. The answers are model
-> answers: on the exam, any precise formulation earns the marks, and **working is marked** — a
-> correct derivation with an arithmetic slip earns most of them.
+> answers: on the exam, any precise formulation in your own words earns the marks. In Parts I, II
+> and D there is no single right answer — a precise concept and an argued position are what count.
 
 ---
 
-# Part A — Definitions and short answers
+# Part I — Europe 2031
 
-**A1.** *(easy)* The mean is the sum divided by $n$, the balance point; the median is the middle value once
-sorted. The median is robust: an extreme value moves the mean (it enters the sum) but not the
-middle position.
+**I1.** *(easy)* A forecast says what will probably happen and can carry a probability; a scenario
+is a coherent, conditional story — *if* these things, *then* those — used to expose assumptions and
+prepare decisions, with no probability attached. The prologue (January 2025 – June 2026) draws on
+the observed record; from August 2026 the narrative is constructed. Anyone who quotes a post-seam
+event or number as evidence is citing a story as a fact.
 
-**A2.** *(easy)* The mean computed after dropping a fixed share (say 5% or 10%) of observations from each
-tail. Report it when a few extreme values distort the mean but you want to use more of the data than
-the median does.
+**I2.** *(medium)* The file holds the model's learned parameters (weights) — billions of numbers set
+during training. When it answers, it computes, token by token, a probability for the next piece of
+text from the text so far, and picks one: pattern completion learned from its training data. Its
+competence comes from that training text; it stops where the text was thin, wrong or out of date
+(a library version released after training), and fluency is not understanding.
 
-**A3.** *(medium)* The deviations from $\bar x$ sum to zero, because $\bar x$ was estimated from the same data:
-only $n - 1$ of them are free. Dividing by $n$ would systematically underestimate the variance.
+**I3.** *(medium)* They are internal parameters of the story — the stock of AI computing capacity,
+measured by the electrical power it draws — not forecasts or measurements. Choosing gigawatts
+assumes that power (energy and data centres) is the binding constraint on AI capability; it leaves
+out data, algorithmic efficiency, talent, adoption by firms and legitimacy.
 
-**A4.** *(medium)* The SD measures the spread of the **observations**; the SE, $s/\sqrt n$, measures the spread
-of the **mean** across repeated samples. A larger sample shrinks the SE (the mean is estimated more
-precisely) but not the SD (the observations are as spread out as before).
+**I4.** *(medium)* Compute: the chips and energy that train and run models. Data: what the models
+learn from — its quantity, quality, languages and legal access. Mathematics: the algorithms and
+model designs that turn compute and data into capability; better algorithms can substitute for
+compute. A good answer argues where Europe stands — e.g. weak on frontier compute, stronger on
+industrial and multilingual data, research and efficient models.
 
-**A5.** *(easy)* $IQR = Q_3 - Q_1$, the width of the middle 50% of the data. It ignores both tails, so a long
-tail does not inflate it the way it inflates the SD.
+**I5.** *(medium)* AI built for one sector or task, trained on domain data, where value comes from
+know-how and data a firm holds rather than from frontier scale — e.g. predictive maintenance for
+machinery, quality control in manufacturing, logistics routing, medical imaging. Argued either way:
+yes, it plays to Europe's industrial strengths and needs less compute; or no, if general models keep
+improving they absorb vertical tasks and Europe still depends on them.
 
-**A6.** *(easy)* A long **right** tail: a few large values. They pull the mean above the median.
+**I6.** *(medium)* A compact model, able to run locally or on modest hardware. Advantages: cost, data
+kept in-house (privacy, GDPR), independence from a foreign provider, lower energy, can be adapted to
+the firm's own task. Limits: less general capability, the firm must maintain and evaluate it,
+weaker on hard reasoning, still often trained abroad.
 
-**A7.** *(easy)* How heavy the tails are compared with a normal distribution: $g_2 > 0$ means more extreme
-values than a normal. A normal has excess kurtosis $0$.
+**I7.** *(medium)* Because in the scenario's logic capability comes from compute, and compute needs
+data centres, which need power, grid connections and permits — Europe's bottleneck. What could go
+wrong: energy and water use, grid strain, chips still imported (dependence moves rather than
+vanishes), and investing in a race Europe may not win while its advantage lies elsewhere.
 
-**A8.** *(medium)* Not necessarily. The rule holds for a roughly **normal** variable; a symmetric distribution
-can still have heavy or light tails (check $g_2$).
+**I8.** *(difficult)* No single right answer. Sovereignty: full control, but very costly and slow,
+and still dependent on foreign chips and tools. Governed interdependence: faster and cheaper, keeps
+access to frontier models, but leaves leverage with US firms and governments. A strong answer
+names the trade-off, takes a side, and says what would make the chosen path fail.
 
-**A9.** *(easy)* The sum of squared residuals, $\sum_i (y_i - \hat y_i)^2$. Squaring makes every miss
-positive, so misses above and below cannot cancel, punishes one large miss more than several small
-ones, and gives a closed-form solution, $(X^\top X)^{-1}X^\top y$.
-
-**A10.** *(medium)* "Comparing countries with the same investment, a one-percentage-point higher tertiary
-education share is associated with a 0.31-percentage-point higher GDP growth." Units, "holding
-investment fixed", and "associated with", not "causes".
-
-**A11.** *(difficult)* $\hat\beta_j$ equals the slope from regressing the part of $y$ not explained by the other
-regressors on the part of $x_j$ not explained by them. It is a **partial** relationship: what is left
-of the association after the other regressors have taken their share.
-
-**A12.** *(easy)* $R^2 = 1 - SSR/SST$, the share of the variance of $y$ the model accounts for. It does not
-say the relationship is causal, nor that the model's assumptions hold (a curved cloud can have a
-high $R^2$), nor that it will predict new data well.
-
-**A13.** *(medium)* $R^2$ never falls when a regressor is added, even a useless one. The adjusted $R^2$
-penalises each extra regressor and falls when the new one improves the fit by less than chance would.
-
-**A14.** *(easy)* $RSE = \sqrt{SSR/(n-k-1)}$: the typical size of a residual, in the **units of $y$** — the
-typical miss of the model.
-
-**A15.** *(difficult)* Linearity in the parameters, exogeneity $\mathbb{E}[\varepsilon \mid X] = 0$, and no
-perfect collinearity (full column rank). Constant variance (homoskedasticity) is **not** needed for
-unbiasedness — only for the classical standard errors and for efficiency.
-
-**A16.** *(medium)* The variance of the errors changes with the fitted values: the residual plot **fans out**.
-The coefficients stay unbiased, but the classical standard errors are wrong, so tests and intervals
-are wrong. Use robust (HC) standard errors.
-
-**A17.** *(medium)* An **outlier** has a large residual (unusual $y$ given $x$). A **leverage point** has an
-unusual $x$. An **influential point** changes the fit when removed — typically high leverage **and**
-a large residual.
-
-**A18.** *(medium)* How much all the fitted values move when that observation is deleted; it combines leverage
-and residual. Investigate it — find which row it is and why — and report the fit with and without
-it. Never delete it silently.
-
-**A19.** *(medium)* $VIF_j = 1/(1 - R_j^2)$, where $R_j^2$ is from regressing $x_j$ on the other regressors.
-Above about 10, $x_j$ is almost a combination of the others: its standard error is inflated and its
-sign can be unstable (multicollinearity).
-
-**A20.** *(medium)* BIC, because its penalty per parameter, $\ln n$, exceeds AIC's 2 as soon as $n > 7$. The
-models must be fitted on **the same rows**; otherwise the likelihoods are not comparable.
-
-**A21.** *(easy)* It can predict probabilities below 0 or above 1, and it forces the effect on the
-probability to be the same everywhere (a straight line), which is implausible near 0 and 1. Its
-errors are also heteroskedastic by construction.
-
-**A22.** *(easy)* $\text{odds} = p/(1-p)$. For $p = 0.20$: $0.20/0.80 = 0.25$, "one event for every four
-non-events".
-
-**A23.** *(medium)* In **log-odds**: one more unit of $x$ raises the log-odds by 0.26. $e^{0.26} = 1.30$ is the
-**odds ratio**: the odds are multiplied by 1.30, i.e. 30% higher. The wrong reading: "the
-**probability** is 30% higher".
-
-**A24.** *(medium)* The probability is an S-shaped function of $x$: its slope, $p(1-p)\beta$, depends on where
-you evaluate it, largest at $p = 0.5$ and small near 0 or 1. A constant odds ratio moves the
-probability by different amounts depending on the starting point.
-
-**A25.** *(easy)* The parameter values that make the observed data — here, the 0s and 1s actually observed —
-as probable as possible.
-
-**A26.** *(medium)* Wald: $z = \hat\beta/SE$, one coefficient at a time, from one model. Likelihood ratio:
-$LR = 2(\ell_{full} - \ell_{restricted}) \sim \chi^2_q$, comparing two nested models. Use the LR test
-for several coefficients **jointly**, such as all the dummies of one categorical variable.
-
-**A27.** *(medium)* $1 - \ell_{model}/\ell_{null}$: how far the model's log-likelihood improves on the
-intercept-only model. It is not a share of variance, and its values run lower than an OLS $R^2$;
-0.2–0.4 already indicates a good fit.
-
-**A28.** *(difficult)* The cutpoints $c_1 < c_2 < \dots$ are the thresholds between categories, one per cut; they
-act as intercepts. Proportional odds: each predictor has **one** coefficient, so the same odds ratio
-applies at every cut. Check it by fitting a binary logit at each cut and comparing the slopes.
-
-**A29.** *(difficult)* The category every other one is compared with; each equation models
-$\ln[P(k)/P(\text{baseline})]$. An RRR of 0.80: a one-unit rise in $x$ multiplies the ratio
-$P(\text{vocational})/P(\text{academic})$ by 0.80 — 20% fewer vocational students per academic one.
-It does not say the probability of vocational falls by 20%.
-
-**A30.** *(difficult)* Discrimination: does the model **rank** positives above negatives (AUC)? Calibration: when
-the model says 20%, does the event happen about 20% of the time? AUC depends only on the ranking, so
-a model can rank perfectly while every probability is, say, twice too high — useless for pricing or
-thresholds.
-
-**A31.** *(easy)* With a 2% base rate, predicting "never" is 98% accurate and finds nothing. Precision
-$= TP/(TP+FP)$: of those flagged, the share that are positive. Recall $= TP/(TP+FN)$: of the
-positives, the share flagged.
-
-**A32.** *(medium)* Test error $= \text{bias}^2 + \text{variance} + \text{noise}$. With few rows and many
-correlated predictors, OLS is unbiased but its variance is enormous; a little bias that cuts the
-variance a lot lowers the total.
-
-**A33.** *(medium)* It makes one in-or-out decision at a time, each depending on the previous ones; resampling
-the rows changes the path and the final model, and noise variables get in. The selection reflects
-this sample, not a property of the world, and the $p$-values computed afterwards are invalid.
-
-**A34.** *(medium)* It shrinks every coefficient toward zero, more where predictors are collinear, but never to
-exactly zero. $X^\top X + \lambda I$ is invertible for any $\lambda > 0$, even when $X^\top X$ is
-singular ($p > n$).
-
-**A35.** *(medium)* It sets weak coefficients to **exactly zero** (the corners of its diamond-shaped budget),
-so it selects variables. Limits: with $p > n$ it keeps at most $n$ variables; among correlated
-predictors it keeps one, almost arbitrarily; the selected set is not "the true model".
-
-**A36.** *(easy)* A ridge component: correlated predictors are kept or dropped **together** instead of one
-standing in for the group — the **grouping effect**.
-
-**A37.** *(difficult)* The penalty compares coefficient sizes, which depend on units: unstandardised, a variable
-in euros and one in thousands of euros are punished differently. Inside each fold, because
-standardising on all rows lets the held-out fold's information into the training, which makes the CV
-score optimistic (leakage).
-
-**A38.** *(medium)* $\lambda_{min}$ minimises the CV error. $\lambda_{1se}$ is the largest $\lambda$ whose error
-is within one standard error of that minimum. It gives a simpler (more shrunk) model whose error is
-indistinguishable from the best.
-
-**A39.** *(difficult)* FE remove everything constant within a country over time (geography, history,
-institutions); the cost is that the effect of any time-invariant variable cannot be estimated, and
-only within-country variation identifies the slopes. RE assume the country effects are uncorrelated
-with the regressors. The Hausman test compares the two; choose on whether the RE assumption holds,
-never on which gives the significant answer.
-
-**A40.** *(medium)* Observations of the same country are correlated over time, so the sample carries less
-independent information than $n$ suggests. Cluster the standard errors by country.
+**I9.** *(difficult)* Sessions 2–5 are largely statistics — means, least squares, logistic
+regression (decades old), penalised regression (ridge from the 1970s, the lasso from 1996); what is
+new is scale, computing power and the use of the same ideas for prediction. The distinction
+matters because the old methods come with known assumptions and diagnostics — the questions of this
+course apply to "AI" just as well.
 
 ---
 
-# Part B — Calculations
+# Part II — The readings
 
-**B1.** *(easy)* **(a)** Mean $= 35/5 = 7$; sorted $4, 6, 7, 8, 10$, median $= 7$.
-**(b)** Deviations $-3, 1, -1, 3, 0$; squares $9, 1, 1, 9, 0$, sum $20$; $s^2 = 20/4 = 5$,
-$s = 2.236$. **(c)** $SE = 2.236/\sqrt 5 = 1.00$.
+*Pointers, not full answers. Credit any precise research question, a correct description of the
+model, two distinct critiques and a coherent alternative.*
 
-**B2.** *(easy)* **(a)** $SE = 12/\sqrt{36} = 2$; interval $50 \pm 1.96 \times 2 = (46.08,\ 53.92)$.
-**(b)** $n = 144$: $SE = 12/12 = 1$, halved; $s$ stays about 12 — more data does not make the
-observations less spread out.
+**II1.** *(medium)* **Fraiberger et al. (2021).** (a) Does a better-than-usual news day for a country
+go with higher stock returns in that country over the following days, and does global news matter
+more than local news? (b) Outcome: a country's stock returns over the following days. Unit: a
+country-day, for 25 countries. Main variable: a daily news-sentiment index built from Reuters
+articles (share of positive minus negative words, standardised within each country); controls for
+past returns, volume, volatility and global risk; a linear regression. (c) The index is a
+constructed measure that assumes word counts capture sentiment; news may react to markets rather
+than the reverse; a common cause may move both. (d) A logistic regression of whether the market
+rises or falls the next day, reporting odds ratios and predicted probabilities; or a lasso on many
+text-based measures to see which predict returns out of sample.
 
-**B3.** *(medium)* **(a)** $g_1 = \frac{1}{36} \cdot \frac{1{,}166{,}400}{30^3} = \frac{1{,}166{,}400}{972{,}000} = 1.20$;
-threshold $2\sqrt{6/36} = 0.816$ → substantially **right**-skewed, consistent with mean $>$ median.
-**(b)** $g_2 = \frac{1}{36} \cdot \frac{116{,}640{,}000}{30^4} - 3 = 4.00 - 3 = 1.00$; threshold
-$4\sqrt{6/36} = 1.633$ → not substantially kurtic. **(c)** The median (105): the right tail pulls
-the mean up.
+**II2.** *(medium)* **Amsili et al. (2024).** (a) Can cheap, routinely measured soil properties
+predict a soil's water-holding capacity well enough to replace direct measurement, and does a random
+forest beat a linear regression? (b) Outcome: field capacity (also wilting point and available
+water). Unit: a soil sample — 7,232 from the Cornell Soil Health Laboratory. Predictors: sand, clay,
+soil organic matter. Methods: a multiple linear regression against random forests; the regression
+explains about 79% of the variance, about as much as the reduced random forest on the same inputs.
+(c) The fit statistics are not computed the same way for the two methods (in-sample for the
+regression, out-of-bag for the forests); the samples are US topsoils sent to one lab, so the model may
+not travel to other soils; samples above 10% organic matter are excluded. (d) Ridge, lasso or elastic
+net with the other lab measurements as candidates, chosen by cross-validation and judged on held-out
+error; or a squared term if the relation is curved.
 
-**B4.** *(medium)* **(a)** $\bar x = 3$, $\bar y = 4$; $\sum (x-\bar x)(y-\bar y) = 4 + 0 + 0 + 0 + 2 = 6$,
-$\sum (x - \bar x)^2 = 10$; $\hat\beta_1 = 0.6$, $\hat\beta_0 = 4 - 0.6 \times 3 = 2.2$.
-**(b)** Fitted $2.8, 3.4, 4.0, 4.6, 5.2$; residuals $-0.8, 0.6, 1.0, -0.6, -0.2$ (they sum to 0);
-$SSR = 0.64 + 0.36 + 1 + 0.36 + 0.04 = 2.4$. **(c)** $SST = 4 + 0 + 1 + 0 + 1 = 6$;
-$R^2 = 1 - 2.4/6 = 0.60$; $RSE = \sqrt{2.4/3} = 0.894$.
+**II3.** *(difficult)* **Saganowski et al. (2019).** (a) Can a group's current structure in a social
+network predict which of six events — dissolve, shrink, grow, continue, merge, split — happens to it
+next? (b) Outcome: the next event, six unordered categories. Unit: a group in a time window. Predictors:
+about 90 network measures (size, density, centrality…). Methods: 15 classifiers compared; tree-based
+ones (bagging, random forest) do best, scored by the average of the per-class F-measures rather than
+accuracy, because accuracy rewards predicting the common events. (c) Strong class imbalance; many
+correlated features, so the feature ranking is unstable; results vary across data sets. (d) A
+multinomial logit — six unordered categories, one baseline — reporting relative risk ratios and
+predicted probabilities; with a lasso-type penalty to handle 90 correlated features.
 
-**B5.** *(easy)* **(a)** $t = 0.85/0.34 = 2.50$; interval $0.85 \pm 0.666 = (0.184,\ 1.516)$; significant
-at 5% ($|t| > 1.96$; the interval excludes 0). **(b)** $\bar R^2 = 1 - 0.60 \times 49/45 = 0.347$.
+**II4.** *(medium)* **Blonigen and Piger (2014).** (a) Of 56 candidate determinants of bilateral FDI,
+which few actually carry the signal? Hard because earlier studies each picked their own short list
+and disagree. (b) Outcome: bilateral FDI between a parent and a host country. Unit: a country pair.
+Candidates: 56 variables (gravity, cultural distance, trade agreements, income, skills, institutions,
+costs…). Method: Bayesian model averaging, which weights every combination of variables and gives
+each an inclusion probability. Robust: gravity, cultural distance, parent income, some trade
+agreements, host skill; not robust: host business costs, infrastructure, financial depth,
+institutions. (c) Association, not causation; correlated candidates share the credit, so a low
+inclusion probability is not "no effect"; results depend on the priors and on the candidate list.
+(d) The lasso or, with correlated candidates, the elastic net, with λ chosen by cross-validation: a
+short list of shrunken coefficients and its out-of-sample error.
 
-**B6.** *(medium)* **(a)** Bias $= \beta_z \delta_1 = -0.3 \times 0.5 = -0.15$: negative, the short regression
-**understates** $\beta_1$. **(b)** $0.45 = \beta_1 - 0.15$, so $\beta_1 = 0.60$.
-
-**B7.** *(medium)* **(a)** $\sum h_{ii} = p = 3$; average $3/40 = 0.075$. **(b)** Yes: 0.21 is 2.8 times the
-average, above the usual $2p/n = 0.15$ flag. High leverage alone is not influence: check its residual
-and its Cook's distance. **(c)** $4/n = 0.10$.
-
-**B8.** *(easy)* $VIF = 1/(1 - 0.92) = 12.5$: the coefficient's variance is 12.5 times what it would be with
-uncorrelated regressors, its SE $\sqrt{12.5} \approx 3.5$ times larger. Above 10: a problem.
-
-**B9.** *(medium)* **(a)** $AIC_A = 420 + 8 = 428$, $AIC_B = 410 + 14 = 424$;
-$BIC_A = 420 + 4 \times 4.605 = 438.4$, $BIC_B = 410 + 7 \times 4.605 = 442.2$.
-**(b)** AIC prefers B (lower), BIC prefers A. BIC charges $\ln 100 = 4.6$ per parameter instead of
-2, so B's three extra parameters cost more than its gain in fit.
-
-**B10.** *(medium)* **(a)** $x^\top\hat\beta = -3.0 + 0.04 \times 50 + 0.9 = -0.1$; odds $= e^{-0.1} = 0.905$;
-$p = 0.905/1.905 = 0.475$. **(b)** $e^{0.9} = 2.46$: a foreign-owned firm has 2.46 times the odds
-of exporting of an otherwise identical domestic firm (146% higher odds). **(c)**
-$p(1-p)\beta = 0.475 \times 0.525 \times 0.04 = 0.0100$: about **1.0 percentage point** per point of
-productivity, at this firm.
-
-**B11.** *(medium)* **(a)** Odds $0.20/0.80 = 0.25$; new odds $0.25 \times 1.5 = 0.375$; new probability
-$0.375/1.375 = 0.273$. **(b)** $+7.3$ percentage points (from 20% to 27.3%), a 36% relative rise. An
-odds ratio multiplies the **odds**, not the probability.
-
-**B12.** *(medium)* **(a)** $LR = 2(-412.6 + 418.9) = 12.6 > 7.81$ ($\chi^2_3$): the three dummies jointly
-improve the model; reject the null that all three are zero. **(b)** $1 - 412.6/450 = 0.083$.
-
-**B13.** *(easy)* **(a)** $\tau^\star = c_{FP}/(c_{FP} + c_{FN}) = 1/(1 + 9) = 0.10$. **(b)** $0.15 > 0.10$:
-flag. With 0.5 the applicant would not be flagged — the default threshold ignores the costs.
-
-**B14.** *(difficult)* $P(Y \le 1) = F(1.0 - 1.5) = F(-0.5) = 0.378$; $P(Y \le 2) = F(3.0 - 1.5) = F(1.5) = 0.818$.
-So $P(1) = 0.378$, $P(2) = 0.818 - 0.378 = 0.440$, $P(3) = 1 - 0.818 = 0.182$ (they sum to 1).
-
-**B15.** *(medium)* Denominator $e^0 + e^{-0.5} + e^{0.2} = 1 + 0.607 + 1.221 = 2.828$.
-$P(\text{academic}) = 1/2.828 = 0.354$, $P(\text{general}) = 0.607/2.828 = 0.215$,
-$P(\text{vocation}) = 1.221/2.828 = 0.432$.
-
-**B16.** *(easy)* **(a)** $TP = 30$, $FP = 70$, $FN = 20$, $TN = 880$. **(b)** Accuracy $= 910/1000 = 0.91$;
-precision $= 30/100 = 0.30$; recall $= 30/50 = 0.60$. **(c)** $950/1000 = 0.95$ — higher than the
-model's accuracy, although it finds no failure at all.
-
-**B17.** *(difficult)* **(a)** $\det = 24 - 9 = 15$; $(X^\top X)^{-1} = \frac{1}{15}\begin{pmatrix} 4 & -3 \cr -3 & 6 \end{pmatrix}$;
-$\hat\beta^{OLS} = \frac{1}{15}(48 - 30,\ -36 + 60) = (1.200,\ 1.600)$.
-**(b)** $X^\top X + 2I = \begin{pmatrix} 8 & 3 \cr 3 & 6 \end{pmatrix}$, $\det = 39$;
-$\hat\beta^{ridge} = \frac{1}{39}(72 - 30,\ -36 + 80) = (1.077,\ 1.128)$.
-**(c)** $1 - 1.077/1.2 = 10.3\%$ and $1 - 1.128/1.6 = 29.5\%$.
-
-**B18.** *(medium)* **(a)** Subtract 0.25 from $|\rho_j|$, keep the sign, set to 0 if negative:
-$(0.35,\ -0.10,\ 0,\ 0,\ 0.03)$ — variables 1, 2 and 5 selected. **(b)** Threshold
-$\lambda\alpha = 0.125$, divisor $1 + 0.25 \times 0.5 = 1.125$:
-$(0.475,\ -0.225,\ 0.025,\ 0,\ 0.155)/1.125 = (0.422,\ -0.200,\ 0.022,\ 0,\ 0.138)$ — variables 1, 2,
-3 and 5. **(c)** The elastic net keeps one more (variable 3): its lower threshold lets weaker
-predictors in, and its ridge part shrinks the survivors proportionally.
-
-**B19.** *(medium)* $\lambda_{min} = 0.1$ (error 1.90). One-SE bound $1.90 + 0.11 = 2.01$. The largest $\lambda$
-with error $\le 2.01$ is $0.5$ (1.98; at 1.0 the error 2.05 is above). $\lambda_{1se} = 0.5$: more
-shrinkage, so a smaller model, with an error indistinguishable from the best.
-
-**B20.** *(easy)* **(a)** Effect $= 3.0 - 2 \times 0.05\,x = 3.0 - 0.1\,x$: $+2.0$ at 10 years, $-1.0$ at 40.
-**(b)** $x^\star = 3.0/0.1 = 30$ years (a maximum, since the square term is negative).
-**(c)** 3.0 is the effect only at $x = 0$; with a square term the effect depends on $x$.
-
-**B21.** *(medium)* **(a)** Men: 1.5 per year; women: $1.5 - 0.5 = 1.0$ per year. **(b)** Gap (women − men)
-$= 4 - 0.5\,\text{exp}$: $+4$ at 0 years, $4 - 5 = -1$ at 10. **(c)** $4 - 0.5\,\text{exp} = 0$ at
-8 years.
-
-**B22.** *(easy)* Classical: $t = 3.75$, interval $(0.143,\ 0.457)$. Clustered: $t = 1.67$, interval
-$(-0.053,\ 0.653)$. Report the clustered one: the panel's observations are not independent. The
-estimate did not change; what you may claim did — no longer significant at 5%.
-
-**B23.** *(easy)* $14.2 > 7.81$ ($\chi^2_3$): reject. FE and RE differ by more than sampling noise, so the RE
-assumption fails — use fixed effects.
-
-**B24.** *(easy)* Four dummies; the omitted level is the reference. With five plus an intercept, the dummies
-sum to the intercept column: perfect collinearity (the dummy-variable trap), and the model cannot be
-estimated.
+**II5.** *(difficult)* **Topalova and Khandelwal (2011).** (a) Did India's tariff cuts of 1991 — on a
+firm's output and on its inputs — raise its productivity? (b) Outcome: a firm's productivity. Unit:
+a firm in a year — about 3,000 listed manufacturing firms followed over several years. Main
+variables: the tariffs on the firm's industry output and on its inputs; a linear regression that
+compares each firm with itself as its tariffs change. Both cuts raise productivity, the input
+channel more. (c) Tariff cuts might have targeted industries already improving (the paper argues
+the IMF-imposed reform rules this out); productivity is estimated, not observed; listed firms are
+not all firms. (d) A logistic regression of whether a firm starts exporting or exits after the
+reform, reporting odds ratios and probabilities. *(The design that follows the same firms over time
+is not examined on the midterm.)*
 
 ---
 
-# Part C — Diagnosis
+# Part A — Multiple choice
 
-**C1.** *(medium)* The empirical rule is applied to a variable that is clearly skewed: income cannot be
-negative, and an SD of 71% of the mean signals a long right tail. Report the median and the IQR
-instead, and check $g_1$ against its threshold.
+| Q | Answer | Level | Why |
+|---|---|---|---|
+| A1 | **C** | medium | $\bar x$ is estimated from the same data, so the deviations sum to zero: only $n-1$ are free. |
+| A2 | **B** | easy | A trimmed mean drops a fixed share from each tail before averaging. |
+| A3 | **A** | easy | The median is not pulled by the long right tail. |
+| A4 | **D** | medium | The rule holds for a roughly normal variable; symmetric is not enough. |
+| A5 | **C** | medium | Negative skewness: a long left tail pulls the mean below the median. |
+| A6 | **A** | easy | OLS minimises the sum of squared residuals. |
+| A7 | **D** | easy | Residual = observed − fitted. |
+| A8 | **B** | difficult | Frisch–Waugh–Lovell: a partial relationship, net of the other regressors. |
+| A9 | **C** | difficult | Constant variance is not needed for unbiasedness. |
+| A10 | **A** | easy | Never interpret an intercept you have no data near. |
+| A11 | **D** | medium | A VIF above about 10 signals near-collinearity: an unstable coefficient. |
+| A12 | **B** | medium | Leverage depends only on how unusual the regressor values are. |
+| A13 | **C** | easy | Investigate; report with and without; never delete silently. |
+| A14 | **A** | medium | BIC's penalty per parameter ($\ln n$) exceeds AIC's 2 once $n > 7$. |
+| A15 | **D** | easy | Likelihoods are only comparable on the same rows. |
+| A16 | **B** | medium | The omitted variable raises exports and moves with investment: the short regression gives investment its credit. |
+| A17 | **C** | easy | Without a design that isolates a cause, write "associated with". |
+| A18 | **A** | easy | $0.25 / 0.75 = 1/3$: one event for every three non-events. |
+| A19 | **D** | medium | $p = \text{odds}/(1 + \text{odds}) = 4/5 = 0.80$. |
+| A20 | **B** | easy | An odds ratio multiplies the odds, not the probability. |
+| A21 | **C** | easy | Logits are fitted by maximum likelihood. |
+| A22 | **A** | medium | Several coefficients jointly: a likelihood-ratio test of the nested models. |
+| A23 | **D** | medium | McFadden's pseudo-$R^2$ compares log-likelihoods; 0.2–0.4 is already good. |
+| A24 | **B** | medium | The log compresses the tail; a coefficient on a logged outcome reads roughly as a % change. |
+| A25 | **C** | medium | $J$ ordered categories: $J - 1$ cutpoints, one slope per predictor. |
+| A26 | **A** | difficult | Proportional odds: the same odds ratio at every cut. |
+| A27 | **D** | difficult | The baseline changes what each coefficient compares, not the fitted probabilities. |
+| A28 | **B** | easy | Precision: of those flagged, the share truly positive. |
+| A29 | **C** | easy | Recall: of the true positives, the share flagged. |
+| A30 | **A** | medium | Calibration: predicted probabilities match observed frequencies. |
+| A31 | **D** | difficult | AUC measures ranking only; probabilities can be wrong while the ranking is right. |
+| A32 | **B** | medium | When misses are costly, flag at a lower probability. |
+| A33 | **C** | medium | Bias–variance trade-off: a little bias, much less variance. |
+| A34 | **A** | easy | A huge penalty shrinks every coefficient to zero: predict the mean. |
+| A35 | **D** | difficult | The penalty makes the problem solvable even with more predictors than rows. |
+| A36 | **B** | easy | The penalty is scale-dependent. |
+| A37 | **C** | medium | Leakage: the held-out folds influenced the scaling, so the error is optimistic. |
+| A38 | **A** | medium | The usual compromise between using enough data per fit and cost or instability. |
+| A39 | **D** | medium | Post-selection $p$-values are invalid. |
+| A40 | **B** | difficult | With more predictors than rows, the lasso keeps at most $n$ variables. |
 
-**C2.** *(easy)* "Not significant" is read as "no effect". With $p = 0.31$ the data cannot distinguish the
-effect from zero, but the interval almost certainly also includes large negative values. Report the
-interval and say the evidence is inconclusive.
+*Correct letters: A ×10, B ×10, C ×10, D ×10.*
 
-**C3.** *(medium)* Unbiased coefficients do not save the inference: under heteroskedasticity the classical
-standard errors, $t$-statistics and intervals are wrong. Use robust (HC) standard errors.
+---
 
-**C4.** *(medium)* AIC compared on different rows: 1,200 against 900. Likelihoods on different samples are not
-comparable, and the drop mostly reflects fewer observations. Refit both on the same 900 rows.
+# Part B — Short answers
 
-**C5.** *(medium)* An odds ratio read as a probability ratio (relative risk), and the conclusion is that
-collateral raises default risk. 1.40 means the **odds** are 40% higher; the change in probability
-depends on the baseline. (And a positive association with collateral may reflect which borrowers are
-asked to provide it — not causation.)
+**B1.** *(easy)* The mean is the sum divided by $n$, the balance point; the median is the middle
+value once sorted. The median is robust: an extreme value enters the sum and moves the mean, but
+not the middle position.
 
-**C6.** *(medium)* Accuracy on a 1% outcome: "never fraud" is 99% accurate. Report the base rate, precision and
-recall. And the threshold ignores the costs: $\tau^\star = 1/(1 + 50) \approx 0.02$, not 0.5.
+**B2.** *(easy)* $IQR = Q_3 - Q_1$, the width of the middle 50% of the data. It ignores both tails,
+so a long tail does not inflate it the way it inflates the standard deviation.
 
-**C7.** *(difficult)* Three errors. Standardising on **all** rows before cross-validation (leakage). Treating the
-lasso's selection as the true model. Reporting OLS $p$-values on the selected columns: the same data
-chose and then tested them, so the $p$-values are invalid. Fix: put the scaler inside a pipeline,
-report the selected set and its out-of-sample error, no post-selection $p$-values.
+**B3.** *(easy)* A long **right** tail: a few large values, which pull the mean above the median.
 
-**C8.** *(difficult)* The specification is chosen by which gives the significant result — specification search.
-Choose on the assumption: run the Hausman test (or argue whether the country effects can be
-correlated with the regressor). If RE is rejected, FE is the estimate, insignificant or not.
+**B4.** *(medium)* Not necessarily. The rule holds for a roughly **normal** variable; a symmetric
+distribution can still have heavy or light tails (check the excess kurtosis).
+
+**B5.** *(easy)* The sum of squared residuals. Squaring makes every miss positive, so misses above
+and below cannot cancel, and punishes one large miss more than several small ones.
+
+**B6.** *(medium)* "Comparing countries with the same investment, a one-percentage-point higher
+tertiary education share is associated with GDP growth 0.31 percentage points higher." Units,
+"holding investment fixed", and "associated with", not "causes".
+
+**B7.** *(difficult)* The coefficient equals the slope from regressing the part of $y$ not explained
+by the other regressors on the part of $x_j$ not explained by them: what is left of the association
+once the other regressors have taken their share.
+
+**B8.** *(easy)* The share of the variation in $y$ that the model accounts for. It does not say the
+relationship is causal, nor that the model has the right shape, nor that it will predict new data.
+
+**B9.** *(medium)* A **curve** (the straight line misses a non-linear relationship — try a squared
+term or a transformation); a **fan** (the spread of the errors changes with the fitted values);
+**isolated points** far from the rest (possible outliers or influential observations to
+investigate). Random scatter around zero is the model behaving.
+
+**B10.** *(medium)* BIC, because its penalty per parameter, $\ln n$, exceeds AIC's 2 once $n > 7$.
+The models must be fitted on **the same rows**.
+
+**B11.** *(easy)* It can predict probabilities below 0 or above 1, and it forces the effect on the
+probability to be the same everywhere, which is implausible near 0 and 1.
+
+**B12.** *(easy)* Odds $= p/(1-p)$. For $p = 0.75$: $0.75/0.25 = 3$, "three events for every
+non-event".
+
+**B13.** *(medium)* In **log-odds**: one more unit of $x$ raises the log-odds by 0.26. 1.30 is the
+**odds ratio**: the odds are multiplied by 1.30, 30% higher. Wrong: "the probability is 30% higher".
+
+**B14.** *(medium)* The probability is an S-shaped function of $x$: the same odds ratio moves the
+probability a lot where it is near 0.5 and little near 0 or 1, so the effect depends on where you
+start.
+
+**B15.** *(medium)* Wald: one coefficient divided by its uncertainty, within one model.
+Likelihood ratio: compares the log-likelihoods of two nested models. Use the second for several
+coefficients **jointly**, such as all the dummies of one categorical variable.
+
+**B16.** *(difficult)* The cutpoints are the thresholds between ordered categories, one per cut,
+acting as intercepts. Proportional odds: each predictor has **one** coefficient, so the same odds
+ratio applies at every cut. Check it by fitting a binary logit at each cut and comparing the slopes.
+
+**B17.** *(difficult)* Discrimination: does the model **rank** positives above negatives (AUC)?
+Calibration: when it says 20%, does the event happen about 20% of the time? A model can rank
+perfectly while every probability is twice too high — useless for pricing or setting thresholds.
+
+**B18.** *(medium)* It makes one in-or-out decision at a time, each depending on the previous ones;
+resampling the rows changes the path and the final model, and noise variables get in. The
+selection reflects this sample, not a property of the world.
+
+**B19.** *(medium)* It sets weak coefficients to **exactly zero** (its absolute-value penalty), so
+it selects variables. Limits: with more predictors than rows it keeps at most $n$; among
+correlated predictors it keeps one, almost arbitrarily; the selected set is not "the true model".
+
+**B20.** *(difficult)* Standardising on all the rows lets information from the held-out fold enter
+the training; the held-out fold is then not truly unseen, and the cross-validated error is too
+optimistic (leakage).
+
+**B21.** *(medium)* With a squared term the effect of $x$ is $b_1 + 2 b_2 x$: it depends on $x$, and
+$b_1$ is the effect only at $x = 0$. A negative $b_2$ means the effect weakens as $x$ grows, and can
+turn negative past a turning point.
+
+---
+
+# Part C — Reading output
+
+**C1.** *(medium)* The empirical rule is applied to a variable that is clearly skewed: income cannot
+be negative, and a standard deviation of 71% of the mean signals a long right tail. Report the
+median and the IQR instead.
+
+**C2.** *(easy)* "Not significant" is read as "no effect". With $p = 0.31$ the data cannot
+distinguish the effect from zero, but large negative effects are not ruled out. Say the evidence is
+inconclusive.
+
+**C3.** *(medium)* AIC compared on different rows, 1,200 against 900: the likelihoods are not
+comparable, and most of the drop comes from having fewer observations. Refit both on the same 900
+rows.
+
+**C4.** *(medium)* An odds ratio read as a ratio of probabilities. 1.40 means the **odds** are 40%
+higher; the change in probability depends on the starting point. (And collateral may reflect which
+borrowers are asked for it — not a cause.)
+
+**C5.** *(medium)* Accuracy on a 1% outcome: predicting "never fraud" is 99% accurate and catches
+nothing. Report the base rate, precision and recall. And with misses fifty times as costly, the
+threshold should be far below 0.5.
+
+**C6.** *(difficult)* Three errors. Standardising on **all** rows before cross-validation (leakage).
+Treating the lasso's selection as the true model. Reporting OLS $p$-values on the selected columns:
+the same data chose and then tested them. Fix: put the scaler inside a pipeline, report the selected
+set and its out-of-sample error, no post-selection $p$-values.
+
+**C7.** *(medium)* A high $R^2$ does not show the shape is right: the U-shaped residuals say the
+straight line misses a curvature. Add a squared term (or transform the variables) and check the
+residuals again.
+
+**C8.** *(difficult)* A multinomial coefficient compares *general* with the **baseline** (academic),
+not the probability of general itself. Every equation moves at once: here better writers leave the
+vocational programme faster than the general one, so $P(\text{general})$ first rises. Report the
+predicted probabilities, and say "relative to academic".
 
 ---
 
 # Part D — Judgement (what a strong answer contains)
 
-**D1.** *(medium)* **What it is:** a cross-country association, €410 per index point, holding nothing else
-fixed that we know of. **Not licensed:** "will raise": richer countries can afford digital
-government (reverse causality), and institutions or education can drive both (omitted variables);
-$R^2 = 0.58$ says nothing about cause. **Evidence needed:** a design that isolates the change —
-within-country change over time with fixed effects, a staggered rollout compared with
-non-adopters, controls for the obvious confounders. **Meanwhile:** report the association with its
-interval, and do not attach a euro figure to the policy.
+**D1.** *(medium)* **What it is:** a cross-country association: countries with more schooling
+export more high-technology goods. **Not licensed:** "will raise" — richer countries both school
+longer and export more technology (reverse causality and common causes: income, institutions,
+foreign investment); $R^2$ says nothing about cause; and the effect of *compulsory* schooling on
+those who would otherwise leave school may differ from the average difference between countries.
+**Evidence needed:** a design that isolates the change — countries that extended schooling compared
+with similar ones that did not, before and after, with the delay it takes for pupils to reach the
+labour market. **Meanwhile:** report the association with its uncertainty, attach no export figure
+to the policy, and plan an evaluation.
 
-**D2.** *(difficult)* **What it is:** a predictive association in this bank's data. **Not licensed:** region may
-stand in for income, sector or collateral; refusing a whole region also raises fairness and legal
-issues. **Evidence:** does the odds ratio survive controls for the borrower's own risk factors? Is
-the model calibrated for that region? **Meanwhile:** price risk on the borrower's characteristics, use
-a cost-based threshold, and review the variable's legitimacy before using it.
+**D2.** *(difficult)* **What it is:** a predictive association in this bank's data. **Not
+licensed:** region may stand in for income, sector or collateral; refusing a whole region also
+raises fairness and legal issues. **Evidence:** does the odds ratio survive the borrower's own risk
+factors? Is the model calibrated for that region? **Meanwhile:** price risk on the borrower's own
+characteristics, use a cost-based threshold, and review whether region is a legitimate variable.
 
-**D3.** *(medium)* **What it is:** six variables that jointly predict well at one $\lambda$, on this sample.
-**Not licensed:** a dropped variable is not "no effect" — the lasso keeps one of a correlated group
-almost arbitrarily, and with $p > n$ it can keep at most $n$. **Evidence:** selection stability
-across resamples, an elastic net to see whether groups enter together, a causal design for any
-variable whose effect matters. **Meanwhile:** report the predictive performance, not a list of
-"drivers".
+**D3.** *(medium)* **What it is:** six variables that jointly predict well at one $\lambda$, on this
+sample. **Not licensed:** a dropped variable is not "no effect" — the lasso keeps one of a correlated
+group almost arbitrarily. **Evidence:** how often each variable is kept across resamples; an elastic
+net to see whether groups enter together; a causal design for any variable whose effect matters.
+**Meanwhile:** report predictive performance, not a list of "drivers".
 
-**D4.** *(difficult)* Fixed effects use only **within-firm** variation: the estimate answers "when **this** firm
-raises its training budget, does **its** productivity rise?" It removes everything constant about
-each firm, including whatever makes some firms both train more and be more productive. The question
-"are high-training firms more productive than others?" is a **between-firm** comparison that FE
-deliberately throws away; answering it needs the cross-sectional variation, with its own
-confounding problems.
+**D4.** *(difficult)* **What it is:** an AUC of 0.95 says the model **ranks** borrowers well.
+**Not licensed:** pricing needs the probabilities themselves to be right, and AUC says nothing about
+calibration — the probabilities could all be twice too high or too low. **Evidence:** a calibration
+check on recent loans (predicted against observed default rates by group), on data the vendor did
+not train on. **Meanwhile:** use the score to rank or screen, not to price, until it is calibrated.
 
-**D5.** *(easy)* The mean is pulled up by a few very large firms: $g_1 = 6.4$ is far above any threshold, and
-the median (18) is a fourteenth of the mean. The typical firm has about 18 employees — small, not
-medium. Report the median and the IQR, say the distribution is strongly right-skewed, and model the
-log of employment if it enters a regression.
+**D5.** *(easy)* The mean is pulled up by a few very large firms: a skewness of 6.4 is far beyond
+any threshold, and the median (18) is a fourteenth of the mean. The typical firm has about 18
+employees — small, not medium. Report the median and the IQR, and say the distribution is strongly
+right-skewed.
 
 ---
 

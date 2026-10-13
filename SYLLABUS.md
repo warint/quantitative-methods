@@ -285,29 +285,26 @@ instructor's attention is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
-Written **Wednesday 28 October**. Covers **Sessions 1–6**: exploratory data analysis and the first
-regression, regression diagnostics and validity, logistic regression, regularisation, and panel
-data and interactions. Session 7, the replication workshop, reviews all five on real data and adds
-no new material.
+Written **Wednesday 28 October**, **2 hours 30 minutes**. Covers **Sessions 1–6**: *Europe 2031*
+and what AI is, exploratory data analysis and the first regression, regression diagnostics and
+validity, logistic regression, regularisation, and transformations such as squared terms. Session 7,
+the replication workshop, reviews all of it on real data and adds no new material.
 
-Four parts: **definitions** (state it precisely), **calculations** (derive and compute),
-**diagnostics** (read an output and find the fault), **interpretation** (say what may and may not
-be claimed).
+Six parts, all about **understanding**, with very little arithmetic: *Europe 2031* in your own words,
+one of the readings (its question, its model, its limits, an alternative), **multiple choice**,
+**short answers** (state a concept precisely), **reading output** (interpret a table in words) and
+**judgement** (say what may and may not be claimed).
 
 > **Why an exam, when the real work is the project.** Because a group project cannot tell me what
 > *you* know. Three people and a language model produce a good notebook without any one of them
-> being able to derive the estimator inside it. The midterm is the only instrument in this course
-> that isolates your individual understanding of the mathematics.
+> being able to explain what the estimator inside it does. The midterm is the only instrument in
+> this course that isolates your individual understanding of the methods.
 >
-> **Why no documents.** Not to test memory for its own sake. The formulas that matter — the normal
-> equations, the bias–variance decomposition, the soft-thresholding operator, $\tau^\star =
-> c_{FP}/(c_{FP}+c_{FN})$ — are few, and having them *in your head* is what lets you notice, in the
-> middle of a meeting, that a proposed analysis cannot be right. Expertise you must look up is
-> expertise you will not deploy under pressure.
->
-> **Why a calculator.** Because the point is not arithmetic. You will compute a ridge estimate, a
-> soft-threshold, a marginal effect, a cost-optimal threshold. Doing these by hand once makes the
-> formulas concrete in a way that reading them never will.
+> **Why no documents.** Not to test memory for its own sake. The ideas that matter — what a
+> coefficient means and in what units, odds against probabilities, why a little bias can predict
+> better, what a selected variable list does and does not show — are few, and having them *in your
+> head* is what lets you notice, in the middle of a meeting, that a proposed analysis cannot be
+> right. Expertise you must look up is expertise you will not deploy under pressure.
 
 Example paper with full solutions: [`assessments/midterm/`](assessments/midterm/).
 
