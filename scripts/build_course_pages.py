@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import (COHORT, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E402
+from course_spec import (COHORT, package_sheet_links, LAB_URL, lab_url, SESSIONS, ordered,  # noqa: E402
                          generated, MIDTERM_AFTER, MIDTERM_COVERS, DATES, ASYNCHRONOUS,
                          UNSCHEDULED, WHEN, ROOM)
 
@@ -85,6 +85,13 @@ def link(num):
     return f"[Session {num}: {s['title']}](../{s['dir']}/README.md)" if s else ""
 
 
+def _package_sheets(num):
+    """The package cheatsheets this session uses, one link each, or nothing."""
+    links = package_sheet_links(num)
+    return (f"\n> **Python cheatsheets for this session**, one per package, functions explained with\n"
+            f"> pictures: {links}\n") if links else ""
+
+
 def session_readme(num, s):
     prev, nxt = PREV_NEXT[num]
     objectives = "\n".join(f"- {o}" for o in s["objectives"])
@@ -103,7 +110,7 @@ def session_readme(num, s):
 
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-{num}-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S{num}-Lecture.qmd`](01-lecture/MATH60033A-S{num}-Lecture.qmd).
-
+{_package_sheets(num)}
 {_when(num)}
 
 Quantitative Methods in International Business · duration 3h00

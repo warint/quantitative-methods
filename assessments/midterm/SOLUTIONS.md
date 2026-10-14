@@ -6,6 +6,8 @@
 > a non-programmable calculator — and only then open this file. Marks are shown per sub-part so you
 > can see exactly where credit is earned.
 
+**Printable:** [the paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) · [this answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF).
+
 ---
 
 ## How the marks are awarded
@@ -237,6 +239,6 @@ separately and read the row that applies:
 
 ---
 
-*The paper: [`EXAM.md`](EXAM.md) · more practice: [`PRACTICE.md`](PRACTICE.md) and its
+*The paper: [the sample paper](EXAM.md) · more practice: [the practice questions](PRACTICE.md) and its
 [answer key](PRACTICE-ANSWERS.md) · the
 [midterm summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)*

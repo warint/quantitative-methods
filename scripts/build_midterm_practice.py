@@ -1,15 +1,15 @@
-"""Render the midterm practice questions and their answer key to PDF.
+"""Render the midterm practice questions, the sample paper, and their answer keys to PDF.
 
     python scripts/build_midterm_practice.py
 
-The questions live as Markdown (assessments/midterm/PRACTICE.md and
-PRACTICE-ANSWERS.md), which GitHub renders and which is easy to edit. Students
+The questions live as Markdown (assessments/midterm/PRACTICE.md, EXAM.md and
+their answer keys), which GitHub renders and which is easy to edit. Students
 sit the midterm on paper, though, so they practise from a printout: this
 script turns each file into a PDF in the house style of MIDTERM-SUMMARY.pdf,
-and scripts/build_docs.py publishes both next to the summary.
+and scripts/build_docs.py publishes them next to the summary.
 
 The page style is read from MIDTERM-SUMMARY.qmd rather than copied, so the
-three documents cannot drift apart. Relative links become absolute ones: a
+documents cannot drift apart. Relative links become absolute ones: a
 printed PDF opened from the site has no repository beside it.
 """
 
@@ -27,6 +27,8 @@ REPO = "https://github.com/warint/quantitative-methods/blob/main/assessments/mid
 DOCS = {
     "PRACTICE.md": "Midterm Practice Questions · Sessions 2 to 6",
     "PRACTICE-ANSWERS.md": "Midterm Practice Questions · Answer Key",
+    "EXAM.md": "Midterm Sample Paper · 2 hours 30 minutes",
+    "SOLUTIONS.md": "Midterm Sample Paper · Answer Key",
 }
 
 # Where each relative link should point once the file is a PDF on the site.
@@ -34,6 +36,8 @@ LINKS = {
     "PRACTICE.md": SITE + "midterm-practice.pdf",
     "PRACTICE-ANSWERS.md": SITE + "midterm-practice-answers.pdf",
     "MIDTERM-SUMMARY.pdf": SITE + "midterm-summary.pdf",
+    "EXAM.md": SITE + "midterm-sample.pdf",
+    "SOLUTIONS.md": SITE + "midterm-sample-answers.pdf",
 }
 
 

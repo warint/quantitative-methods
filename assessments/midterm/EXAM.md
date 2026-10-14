@@ -2,6 +2,8 @@
 
 **MATH60033A · Quantitative Methods in IB · Sessions 1–6**
 
+**Printable:** [this paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) · [the answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). Sit it first, on paper, in 2 hours 30 minutes; open the key only afterwards.
+
 ---
 
 |  |  |
@@ -394,9 +396,9 @@ meantime** (3).
 
 **End of examination.**
 
-*Worked solutions, with the marks shown per sub-part: [`SOLUTIONS.md`](SOLUTIONS.md)*
+*Worked solutions, with the marks shown per sub-part: [the answer key](SOLUTIONS.md)*
 
-*More to train on: [`PRACTICE.md`](PRACTICE.md), questions by session and by part, with an
+*More to train on: [the practice questions](PRACTICE.md), questions by session and by part, with an
 [answer key](PRACTICE-ANSWERS.md) · the
 [midterm summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf).*
 

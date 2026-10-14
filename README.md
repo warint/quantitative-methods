@@ -60,6 +60,15 @@ rebuild the site with `scripts/render_session_lectures.sh` and `scripts/build_do
 
 ---
 
+## Python cheatsheets
+
+**[One sheet per package](https://warint.github.io/quantitative-methods/python-cheatsheets/)** —
+pandas, NumPy, matplotlib, statsmodels, scikit-learn, SciPy, linearmodels, semopy, prince — in the
+style of the RStudio cheatsheets: each function the course uses, explained in a sentence, with a line
+of code and a picture of what it does. Source and build instructions:
+[`python-cheatsheets/`](python-cheatsheets/README.md). Each session folder also has its own
+`PYTHON-CHEATSHEET.pdf`: every name taught so far, one line each.
+
 ## How every session works
 
 **Sessions 1–11** have the same four-step rhythm, with a different first-session focus.

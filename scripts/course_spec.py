@@ -453,3 +453,34 @@ def ordered():
 
 def generated():
     return [(k, v) for k, v in ordered() if v.get("generated", True)]
+
+
+# ---------------------------------------------------------------------------
+# Package cheatsheets (python-cheatsheets/, built by build_package_cheatsheets.py):
+# which packages each session's decks and scripts import. The session READMEs and
+# the "Your Python so far" slide link to these sheets.
+PACKAGE_NAMES = {
+    "pandas": "pandas", "numpy": "NumPy", "matplotlib": "matplotlib",
+    "statsmodels": "statsmodels", "sklearn": "scikit-learn", "scipy": "SciPy",
+    "linearmodels": "linearmodels", "semopy": "semopy", "prince": "prince",
+}
+PACKAGES_BY_SESSION = {
+    "02": ["pandas", "numpy", "scipy", "statsmodels"],
+    "03": ["pandas", "numpy", "matplotlib", "statsmodels"],
+    "04": ["pandas", "numpy", "matplotlib", "statsmodels", "scipy"],
+    "05": ["pandas", "numpy", "matplotlib", "sklearn", "statsmodels", "scipy"],
+    "06": ["pandas", "numpy", "matplotlib", "statsmodels", "linearmodels", "sklearn", "scipy"],
+    "07": ["pandas", "numpy", "matplotlib", "statsmodels", "sklearn"],
+    "08": ["pandas", "numpy", "matplotlib", "sklearn"],
+    "09": ["pandas", "numpy", "matplotlib", "semopy", "scipy"],
+    "10": ["numpy", "matplotlib", "statsmodels", "sklearn", "scipy"],
+    "11": ["pandas", "numpy", "matplotlib", "statsmodels"],
+    "13": ["pandas", "numpy", "matplotlib", "prince", "sklearn", "statsmodels"],
+}
+PACKAGE_SHEETS_URL = "https://warint.github.io/quantitative-methods/python-cheatsheets/"
+
+
+def package_sheet_links(num):
+    """'pandas · statsmodels · …' as Markdown links to this session's package sheets."""
+    pkgs = PACKAGES_BY_SESSION.get(num, [])
+    return " · ".join(f"[{PACKAGE_NAMES[p]}]({PACKAGE_SHEETS_URL}{p}.pdf)" for p in pkgs)

@@ -20,6 +20,7 @@ import html
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -149,6 +150,36 @@ def main():
         n_sheets += 1
     print(f"published {n_sheets} python cheatsheets to docs/")
 
+    # The package cheatsheets — one PDF per Python package, with pictures — built
+    # by scripts/build_package_cheatsheets.py, and a page listing them.
+    sheets_dir = ROOT / "python-cheatsheets"
+    pkg_pdfs = sorted(sheets_dir.glob("*.pdf"))
+    if pkg_pdfs:
+        out = DOCS / "python-cheatsheets"
+        out.mkdir(exist_ok=True)
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from course_spec import PACKAGE_NAMES, PACKAGES_BY_SESSION
+        rows = []
+        for pdf in pkg_pdfs:
+            shutil.copy2(pdf, out / pdf.name)
+            used = [str(int(s)) for s, pk in PACKAGES_BY_SESSION.items() if pdf.stem in pk]
+            name = PACKAGE_NAMES.get(pdf.stem, pdf.stem)
+            rows.append(f'<li><a href="{pdf.name}"><b>{html.escape(name)}</b></a>'
+                        f'<span> · sessions {", ".join(used) or "—"}</span></li>')
+        (out / "index.html").write_text(
+            '<!doctype html><html><head><meta charset="utf-8"><title>Python cheatsheets · MATH60033A</title>'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            '<style>body{font-family:Helvetica,Arial,sans-serif;max-width:720px;margin:40px auto;'
+            'padding:0 16px;color:#222;background:#f7f4ed} h1{border-bottom:3px solid #e3120b;'
+            'padding-bottom:6px} li{margin:8px 0;font-size:17px} span{color:#6b6b67;font-size:14px}'
+            'a{color:#0b4f8a;text-decoration:none}</style></head><body>'
+            '<h1>Python cheatsheets</h1><p>One sheet per package: the functions this course uses, '
+            'each explained in a sentence, with a line of code and a picture of what it does. '
+            'Print them, or keep them open beside the editor.</p><ul>'
+            + "".join(rows) + '</ul><p><a href="../index.html">← back to the course</a></p></body></html>',
+            encoding="utf-8")
+        print(f"published {len(pkg_pdfs)} package cheatsheets to docs/python-cheatsheets/")
+
     # The six-page midterm summary. Rendered from its .qmd by hand:
     #   quarto render assessments/midterm/MIDTERM-SUMMARY.qmd --to pdf
     summary = ROOT / "assessments" / "midterm" / "MIDTERM-SUMMARY.pdf"
@@ -159,7 +190,9 @@ def main():
     # The practice questions and their answer key, rendered to PDF by
     # scripts/build_midterm_practice.py in the summary's house style.
     for stem, dest in [("PRACTICE", "midterm-practice.pdf"),
-                       ("PRACTICE-ANSWERS", "midterm-practice-answers.pdf")]:
+                       ("PRACTICE-ANSWERS", "midterm-practice-answers.pdf"),
+                       ("EXAM", "midterm-sample.pdf"),
+                       ("SOLUTIONS", "midterm-sample-answers.pdf")]:
         src = ROOT / "assessments" / "midterm" / f"{stem}.pdf"
         if src.exists():
             shutil.copy2(src, DOCS / dest)
@@ -234,6 +267,16 @@ def main():
         run in Python on real data. Searchable across the whole course.</span>
       </span>
       <span class="go">Read &rarr;</span>
+    </a>
+
+    <a class="card book" href="python-cheatsheets/">
+      <span class="num">&#9638;</span>
+      <span class="body">
+        <strong>Python cheatsheets</strong>
+        <span class="blurb">One sheet per package — pandas, NumPy, matplotlib, statsmodels,
+        scikit-learn and more — each function explained, with a picture of what it does.</span>
+      </span>
+      <span class="go">Open &rarr;</span>
     </a>
 
 {cards}

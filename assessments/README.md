@@ -76,7 +76,8 @@ it does not license.
 - **Precision beats length.** Two exact sentences earn full marks.
 - **A well-argued refusal earns full marks** in Parts I, II, C and D.
 - Practise on the [sample paper](midterm/EXAM.md) under exam conditions, then check it against the
-  [worked solutions](midterm/SOLUTIONS.md). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
+  [worked solutions](midterm/SOLUTIONS.md). Printable: [paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf)
+  · [answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
 - **Train with the [practice questions](midterm/PRACTICE.md)**: 86 questions in the exam's six
   parts, 40 of them multiple choice, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
