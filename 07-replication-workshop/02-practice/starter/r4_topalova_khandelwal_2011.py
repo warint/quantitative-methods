@@ -2,35 +2,24 @@
 Paper 4 · Session 06 · Topalova & Khandelwal (2011)
 *Trade liberalization and firm productivity: the case of India*
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R4-topalova-khandelwal-2011.md
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R4-topalova-khandelwal-2011.md
 
 The authors' data, and the course's models: the OLS cells of session 3 and the
 ridge, lasso and elastic-net cells of session 5, line for line — only the data
 and the variable names change.
 
-Run it in VS Codium with the Run button (the triangle, top right), or from the
-repository root in the terminal:
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r4_topalova_khandelwal_2011.py
+    python r4_topalova_khandelwal_2011.py
+
+The data comes from the course site, so you need the internet, and nothing else.
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
 """
-
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import numpy as np
 import pandas as pd
@@ -44,10 +33,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
 
 
 # Step 1 · Load the firms: one row is one firm in one year, 1989-1996
-firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")
 cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
         "foreign", "medium", "small", "age"]
 d = firms[firms["yr"] < 1997].dropna(subset=cols)       # no gaps in what we use
@@ -78,7 +69,7 @@ fit = model2
 plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
 plt.axhline(0, color="black", lw=1)
 plt.xlabel("Fitted values"); plt.ylabel("Residuals")
-plt.savefig(OUTPUT / "s06_resid_vs_fitted.png", dpi=110, bbox_inches="tight")
+plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in your folder
 plt.show()
 
 # Step 6 · Binary logit: log-odds (session 4, LR 6) — is the firm more productive than the median firm?

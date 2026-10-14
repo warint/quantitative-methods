@@ -1,57 +1,44 @@
 """
-Session 07 · Step 0 — is everything in place?
+Session 07 · Part 0 — is everything in place?
 
-Run this first, from the repository root (the folder that contains qmib.py):
+Run this first, in your own session-07 folder (not the course repository), with
+its environment active:
 
-    python 07-replication-workshop/02-practice/starter/check_setup.py
+    python check_setup.py
 
-It checks the Python packages the four papers' scripts use, and that each paper's
-data is where the scripts expect it. Every line should say OK. Anything that
-says MISSING tells you what to fix before you start.
+It checks three things: Python itself, the four packages the scripts use, and
+that the four data files on the course site can be reached. Every line should
+say OK. It changes nothing on your machine.
 """
 
-from pathlib import Path
-import importlib
-import os
 import sys
+import urllib.request
+from importlib import import_module
 
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
+print(f"Python {sys.version.split()[0]}  ({sys.executable})")
+if sys.version_info < (3, 10):
+    print("  MISSING  Python 3.10 or newer   ->  install it from python.org")
 
-print("Python packages")
-for name in ["pandas", "numpy", "matplotlib", "scipy", "statsmodels",
-             "sklearn", "linearmodels", "openpyxl", "qmib"]:
+# The four packages, installed by name: pip install pandas statsmodels scikit-learn matplotlib
+print("\nPackages")
+for module, package in [("pandas", "pandas"), ("statsmodels", "statsmodels"),
+                        ("sklearn", "scikit-learn"), ("matplotlib", "matplotlib")]:
     try:
-        importlib.import_module(name)
-        print(f"  OK       {name}")
+        version = getattr(import_module(module), "__version__", "")
+        print(f"  OK       {package:14} {version}")
     except ImportError:
-        print(f"  MISSING  {name}   ->  pip install -r requirements.txt"
-              if name != "qmib" else
-              f"  MISSING  {name}   ->  run this from the repository root")
+        print(f"  MISSING  {package:14} ->  pip install {package}")
 
-print("\nThe papers' data")
-FILES = {
-    "02 · Fraiberger et al.": "02-exploratory-data-analysis/data/replication",
-    "04 · Saganowski et al.": "04-logistic-ordinal-multinomial/data/replication",
-    "06 · Topalova & Khandelwal": "06-advanced-regression/data/replication/"
-                                  "prod_dataregression.dta",
-}
-for paper, path in FILES.items():
-    p = Path(path)
-    found = p.exists() and (p.is_file() or any(p.iterdir()))
-    print(f"  {'OK     ' if found else 'MISSING'}  {paper:28} {path}")
-
-try:
-    import qmib
-    fdi = qmib.load("fdi")
-    print(f"  OK       {'05 · Blonigen & Piger':28} qmib.load('fdi') -> {fdi.shape}")
-except Exception as e:                      # noqa: BLE001 — report, don't crash
-    print(f"  MISSING  {'05 · Blonigen & Piger':28} qmib.load('fdi') failed: {e}")
-
-print("\nA MISSING package or file: see the pre-session page, section 2.")
+# The four data files, one per paper, on the course site
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+print("\nData")
+for paper, name in [("1 · Fraiberger et al.", "paper1_fraiberger_2021.csv"),
+                    ("2 · Saganowski et al.", "paper2_saganowski_2019.csv"),
+                    ("3 · Blonigen & Piger", "paper3_blonigen_piger_2014.csv"),
+                    ("4 · Topalova & Khandelwal", "paper4_topalova_khandelwal_2011.csv")]:
+    try:
+        with urllib.request.urlopen(urllib.request.Request(DATA + name, method="HEAD"), timeout=15) as r:
+            size = int(r.headers.get("Content-Length", 0)) / 1e6
+        print(f"  OK       {paper:26} {size:.1f} MB")
+    except Exception as e:
+        print(f"  MISSING  {paper:26} ->  no connection to the course site? ({e})")

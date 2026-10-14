@@ -1,0 +1,118 @@
+"""
+Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
+*Media sentiment and international asset prices* — the data, with the course's code
+
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
+
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
+
+    python r1_fraiberger_2021.py
+
+The data comes from the course site, so you need the internet, and nothing else.
+
+Work one step at a time: select a step's lines and press Shift+Enter to run only
+those, read the output, and compare it with "You should see" in the guide.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+
+
+# Step 1 · Load the data: one row is a country-day
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
+d = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_vix"])
+d["up"] = (d["F0_index"] > 0).astype(int)            # 1 if the market rose that day
+print(f"{len(d):,} country-days, {d['iso'].nunique()} countries, share of up days {d['up'].mean():.3f}")
+
+# Step 2 · Three lines of Python (session 03): today's return on yesterday's news
+# The formula reads "F0_index explained by L1_sent1_best". statsmodels
+# adds the intercept for you; write ~ 0 + x if you ever want it suppressed,
+# and know that R-squared stops being interpretable when you do.
+model = smf.ols("F0_index ~ L1_sent1_best", data=d).fit()
+
+# .params holds the two coefficients. The slope is in percentage points of
+# return per one standard deviation of sentiment — always say the units.
+print(model.params)
+
+# Step 3 · How much did the line explain? (session 03)
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape. The rest of this hour is that difference.
+print(f"R-squared = {model.rsquared:.3f}")
+
+# Step 4 · Two predictors: what "controlling for" means (session 03)
+# Adding a second predictor changes what the first coefficient means: it is now
+# the association holding global risk (yesterday's VIX) fixed, not the raw
+# association. The two answer different questions, and the number will move.
+model2 = smf.ols("F0_index ~ L1_sent1_best + L1_vix", data=d).fit()
+print(model2.params)
+
+# Step 5 · The residual plot is the instrument (session 03)
+# Residuals vs Fitted: is there structure the straight line missed?
+plt.scatter(model2.fittedvalues, model2.resid, s=12, alpha=0.6)
+plt.axhline(0, color="black", lw=1)
+plt.xlabel("Fitted values"); plt.ylabel("Residuals")
+plt.show()
+
+# Step 6 · Binary logit: log-odds (session 04, LR 6) — does the market go up today?
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("up ~ L1_sent1_best", data=d).fit(disp=0)
+print(m2.params.round(4))
+
+# Step 7 · Binary logit: odds (session 04, LR 7)
+# Log-odds -> odds ratio: take the exponential of each coefficient
+print(np.exp(m2.params["L1_sent1_best"]).round(4))
+
+# Step 8 · Binary logit: predicted probability (session 04, LR 8)
+# predict() does the same calculation for you: a bad, an ordinary and a good news day
+print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))
+
+# Step 9 · Ordinal logit (session 04, OLR 3) — the day's return in thirds: down < flat < up
+d["day"] = pd.qcut(d["F0_index"], 3, labels=["down", "flat", "up"])
+# Keep the order: down < flat < up
+order = ["down", "flat", "up"]
+d["day_c"] = pd.Categorical(d["day"], categories=order, ordered=True)
+om = OrderedModel(d["day_c"], d[["L1_sent1_best", "L1_vix"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
+
+# Step 10 · Ordinal logit: log-odds and odds (session 04, OLR 4)
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+print(om.params[["L1_sent1_best", "L1_vix"]].round(3))
+# Proportional-odds ratios
+print(np.exp(om.params[["L1_sent1_best", "L1_vix"]]).round(3))
+
+# Step 11 · Ordinal logit: probabilities (session 04, OLR 5)
+# A bad and a good news day, with the VIX at 20. Columns: down, flat, up.
+new = pd.DataFrame({"L1_sent1_best": [-1, 1], "L1_vix": [20, 20]})
+print(pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["bad news", "good news"]).round(3))
+
+# Step 12 · Multinomial logit (session 04, MLR 3) — the same three days, without their order
+# Code 0 (flat) is the baseline: every coefficient reads "relative to a flat day"
+levels = ["flat", "down", "up"]
+d["day_m"] = pd.Categorical(d["day"], categories=levels).codes
+X = d[["L1_sent1_best"]].astype(float)
+X["L1_vix"] = d["L1_vix"].astype(float)
+X = sm.add_constant(X)
+# Two sets of coefficients at once, each against the flat-day baseline
+mn = sm.MNLogit(d["day_m"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+
+# Step 13 · Multinomial logit: log-odds and relative risk ratios (session 04, MLR 4)
+# Log-odds and RRR, for down vs flat and up vs flat
+print(pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1)
+      .set_axis(["log-odds: down", "log-odds: up", "RRR: down", "RRR: up"], axis=1).round(3))
+
+# Step 14 · Multinomial logit: probabilities (session 04, MLR 5)
+# The VIX at 20, across news days from bad to good
+grid = pd.DataFrame({"const": 1.0, "L1_sent1_best": [-2, -1, 0, 1, 2], "L1_vix": 20.0})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["L1_sent1_best"])
+print(out.round(3))

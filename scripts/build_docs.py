@@ -141,6 +141,29 @@ def main():
         n_data += 1
     print(f"published {n_data} spine files to docs/data/")
 
+    # Session 07 runs in a fresh folder of the student's own, with plain Python
+    # and pip, not in a clone: its four scripts read their data from the site
+    # by URL, and the students download the scripts from the site too — one by
+    # one, or all five in one zip. The CSVs are written by
+    # scripts/build_session07_data.py.
+    s07 = ROOT / "07-replication-workshop"
+    s07_data = DOCS / "data" / "session-07"
+    s07_data.mkdir(parents=True, exist_ok=True)
+    for f in sorted((s07 / "data").glob("*.csv")):
+        shutil.copy2(f, s07_data / f.name)
+    s07_code = DOCS / "session-07"
+    s07_code.mkdir(exist_ok=True)
+    scripts = sorted((s07 / "02-practice" / "starter").glob("*.py"))
+    for f in scripts:
+        shutil.copy2(f, s07_code / f.name)
+    import zipfile
+    # Fixed timestamps, so an unchanged set of scripts rebuilds an identical zip.
+    with zipfile.ZipFile(DOCS / "session-07-scripts.zip", "w", zipfile.ZIP_DEFLATED) as z:
+        for f in scripts:
+            z.writestr(zipfile.ZipInfo(f.name, date_time=(2026, 10, 1, 0, 0, 0)), f.read_bytes())
+    print(f"published session 07: {len(list(s07_data.glob('*.csv')))} data files, "
+          f"{len(scripts)} scripts and session-07-scripts.zip")
+
     # The per-session Python cheatsheets, which every deck links to by URL.
     # Built by scripts/build_cheatsheets.py; copied here so the link resolves.
     n_sheets = 0

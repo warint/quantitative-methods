@@ -2,34 +2,23 @@
 Paper 2 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
 *Analysis of group evolution prediction in complex networks*
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R2-saganowski-2019.md
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R2-saganowski-2019.md
 
 The session-04 code, line for line, on this paper's data: a binary, an ordinal
 and a multinomial logit. Only the data and the variable names change.
 
-Run it in VS Codium with the Run button (the triangle, top right), or from the
-repository root in the terminal:
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r2_saganowski_2019.py
+    python r2_saganowski_2019.py
+
+The data comes from the course site, so you need the internet, and nothing else.
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
 """
-
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import warnings
 warnings.filterwarnings("ignore")            # convergence notes are not part of the answer
@@ -43,9 +32,12 @@ from statsmodels.miscmodels.ordinal_model import OrderedModel
 pd.set_option("display.width", 130)       # as in the session-04 slides, a little wider
 pd.set_option("display.max_columns", 10)
 
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+
+
 # Step 1 · Load the groups, and what happened to each one next week
-FILE = ("04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
-        "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv")
+FILE = DATA + "paper2_saganowski_2019.csv"     # the authors' file, unchanged
 raw = pd.read_csv(FILE)
 print(raw.shape)
 print(raw["event_type"].value_counts(normalize=True).round(3))   # the base rates

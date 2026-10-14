@@ -1,0 +1,195 @@
+"""
+Paper 4 · Session 06 · Topalova & Khandelwal (2011)
+*Trade liberalization and firm productivity: the case of India*
+
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R4-topalova-khandelwal-2011.md
+
+The authors' data, and the course's models: the OLS cells of session 3 and the
+ridge, lasso and elastic-net cells of session 5, line for line — only the data
+and the variable names change.
+
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
+
+    python r4_topalova_khandelwal_2011.py
+
+The data comes from the course site, so you need the internet, and nothing else.
+
+Work one step at a time: select a step's lines and press Shift+Enter to run only
+those, read the output, and compare it with "You should see" in the guide.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+
+
+# Step 1 · Load the firms: one row is one firm in one year, 1989-1996
+firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")
+cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
+        "foreign", "medium", "small", "age"]
+d = firms[firms["yr"] < 1997].dropna(subset=cols)       # no gaps in what we use
+print(f"{len(d):,} firm-years, {d['companyname'].nunique():,} firms")
+print(d[["tfp1000", "lagtariff", "laginputariff"]].describe().round(3))
+
+# Step 2 · Three lines of Python (session 3): productivity on the output tariff
+# The formula reads "tfp1000 explained by lagtariff". statsmodels adds the
+# intercept for you. The slope is in log points of productivity per one unit
+# of tariff (1.0 = 100 percentage points) — always say the units.
+model = smf.ols("tfp1000 ~ lagtariff", data=d).fit()
+print(model.params)
+
+# Step 3 · How much did the line explain? (session 3)
+# R-squared is the share of variance the line accounts for — and nothing about
+# whether the line is the right shape.
+print(f"R-squared = {model.rsquared:.3f}")
+
+# Step 4 · Two predictors: what "controlling for" means (session 3)
+# Adding a second predictor changes what the first coefficient means: it is now
+# the association holding the input tariff fixed, not the raw association.
+model2 = smf.ols("tfp1000 ~ lagtariff + laginputariff", data=d).fit()
+print(model2.params)
+print(f"R-squared = {model2.rsquared:.3f}")
+
+# Step 5 · Residuals vs fitted (session 3): structure the straight line missed?
+fit = model2
+plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
+plt.axhline(0, color="black", lw=1)
+plt.xlabel("Fitted values"); plt.ylabel("Residuals")
+plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in your folder
+plt.show()
+
+# Step 6 · Binary logit: log-odds (session 4, LR 6) — is the firm more productive than the median firm?
+d["high_tfp"] = (d["tfp1000"] > d["tfp1000"].median()).astype(int)   # 1 = above the median
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("high_tfp ~ lagtariff", data=d).fit(disp=0)
+print(m2.params.round(4))
+
+# Step 7 · Binary logit: odds (session 4, LR 7)
+# Log-odds -> odds ratio: take the exponential of each coefficient
+print(np.exp(m2.params["lagtariff"]).round(4))
+
+# Step 8 · Binary logit: predicted probability (session 4, LR 8)
+# predict() does the same calculation for you
+print(m2.predict(pd.DataFrame({"lagtariff": [0.4, 0.7, 1.0]})).round(3))   # inside the data: 0.1 to 3.5
+
+# Step 9 · Ordinal logit (session 4, OLR 3) — productivity in thirds: low < middle < high
+d["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])
+# Keep the order: low < middle < high
+order = ["low", "middle", "high"]
+d["tfp_c"] = pd.Categorical(d["tfp_third"], categories=order, ordered=True)
+om = OrderedModel(d["tfp_c"], d[["lagtariff", "laginputariff", "age"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
+
+# Step 10 · Ordinal logit: log-odds and odds (session 4, OLR 4)
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+print(om.params[["lagtariff", "laginputariff", "age"]].round(3))
+# Proportional-odds ratios
+print(np.exp(om.params[["lagtariff", "laginputariff", "age"]]).round(3))
+
+# Step 11 · Ordinal logit: probabilities (session 4, OLR 5)
+# The same firm (20 years old, input tariff 0.3) under a high and a low output tariff.
+# Columns: low, middle, high productivity.
+new = pd.DataFrame({"lagtariff": [1.0, 0.4], "laginputariff": [0.3, 0.3], "age": [20, 20]})
+print(pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["tariff 1.0", "tariff 0.4"]).round(3))
+
+# Step 12 · Multinomial logit (session 4, MLR 3) — who owns the firm? No natural order
+d["owner"] = "stand-alone"
+d.loc[d["prgroup"] == 1, "owner"] = "business group"
+d.loc[d["govown"] == 1, "owner"] = "state-owned"
+d.loc[d["foreign"] == 1, "owner"] = "foreign"
+# Code 0 (stand-alone) is the baseline: every coefficient reads "relative to stand-alone"
+levels = ["stand-alone", "business group", "state-owned", "foreign"]
+d["owner_c"] = pd.Categorical(d["owner"], categories=levels).codes
+# Leave large out, so large firms are the reference the other two sizes are compared with
+X = d[["medium", "small"]].astype(float)
+X["tfp1000"] = d["tfp1000"].astype(float)
+X = sm.add_constant(X)
+# Three sets of coefficients at once, each against the stand-alone baseline
+mn = sm.MNLogit(d["owner_c"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+
+# Step 13 · Multinomial logit: log-odds and relative risk ratios (session 4, MLR 4)
+pd.set_option("display.width", 130)       # six columns: print them side by side
+pd.set_option("display.max_columns", 10)
+# Log-odds and RRR, for each owner type vs stand-alone
+print(pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1)
+      .set_axis(["log-odds: group", "log-odds: state", "log-odds: foreign",
+                 "RRR: group", "RRR: state", "RRR: foreign"], axis=1).round(3))
+
+# Step 14 · Multinomial logit: probabilities (session 4, MLR 5)
+# Large firms: the median productivity, then across the range
+grid = pd.DataFrame({"const": 1.0, "medium": 0.0, "small": 0.0,
+                     "tfp1000": [d["tfp1000"].median(), -0.5, 0.0, 0.5]})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["tfp1000"].round(2))
+print(out.round(3))
+
+# Step 15 · The candidates for ridge, lasso and elastic net (session 5)
+d = d.copy()
+d["age2"] = d["age"] ** 2
+years = pd.get_dummies(d["yr"], prefix="yr", drop_first=True).astype(float)   # 1989 is the base
+d = pd.concat([d, years], axis=1)
+YCOL = "tfp1000"
+XCOLS = cols[1:] + ["age2"] + list(years.columns)
+Xc, yc = d[XCOLS].astype(float), d[YCOL].astype(float)
+print(f"{len(XCOLS)} candidates:", XCOLS)
+
+# Step 16 · Ridge (session 5)
+from sklearn.linear_model import RidgeCV
+
+ridge = make_pipeline(StandardScaler(),                        # same scale for all
+                      RidgeCV(alphas=np.logspace(-3, 3, 60))   # try 60 values of λ
+                      ).fit(Xc, yc)
+print(f"λ = {ridge[-1].alpha_:.2f}")
+print(f"ridge kept {np.sum(ridge[-1].coef_ != 0)} of {len(XCOLS)} — it never drops a predictor")
+
+# Step 17 · Lasso (session 5)
+from sklearn.linear_model import LassoCV
+
+lasso = make_pipeline(StandardScaler(),
+                      LassoCV(cv=5, random_state=0, max_iter=50_000)   # λ by 5-fold CV
+                      ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, lasso[-1].coef_) if b != 0]
+print(f"λ = {lasso[-1].alpha_:.4f}")
+print(f"lasso kept {len(kept)} of {len(XCOLS)}:", kept)
+
+# Step 18 · Elastic net (session 5)
+from sklearn.linear_model import ElasticNetCV
+
+enet = make_pipeline(StandardScaler(),
+                     ElasticNetCV(l1_ratio=0.5,            # half lasso, half ridge
+                                  cv=5, random_state=0, max_iter=50_000)
+                     ).fit(Xc, yc)
+kept = [c for c, b in zip(XCOLS, enet[-1].coef_) if b != 0]
+print(f"λ = {enet[-1].alpha_:.4f}")
+print(f"elastic net kept {len(kept)} of {len(XCOLS)}:", kept)
+
+# Step 19 · The four, on rows they never saw (session 5, as reviewed in session 6)
+Xtr, Xte, ytr, yte = train_test_split(Xc, yc, test_size=0.3, random_state=7)
+
+def test_rmse(model):                  # fit on 70% of rows, score on the other 30%
+    pipe = make_pipeline(StandardScaler(), model).fit(Xtr, ytr)   # standardise first
+    kept = int(np.sum(np.abs(pipe[-1].coef_) > 1e-8))             # non-zero coefficients
+    return kept, mean_squared_error(yte, pipe.predict(Xte)) ** 0.5
+
+results = {
+    "OLS, all predictors": test_rmse(LinearRegression()),
+    "ridge":       test_rmse(RidgeCV(alphas=np.logspace(-3, 3, 60))),   # λ by CV
+    "lasso":       test_rmse(LassoCV(cv=5, random_state=0, max_iter=50_000)),
+    "elastic net": test_rmse(ElasticNetCV(l1_ratio=0.5, cv=5, random_state=0, max_iter=50_000)),
+}
+res = pd.DataFrame(results, index=["predictors kept", "test RMSE"]).T.astype({"predictors kept": int})
+print(res.round(3))
