@@ -123,7 +123,7 @@ is not examined on the midterm.)*
 # Part A — Multiple choice
 
 | Q | Answer | Level | Why |
-|---|---|---|---|
+|:--|:--|:---|:------------------------|
 | A1 | **C** | medium | $\bar x$ is estimated from the same data, so the deviations sum to zero: only $n-1$ are free. |
 | A2 | **B** | easy | A trimmed mean drops a fixed share from each tail before averaging. |
 | A3 | **A** | easy | The median is not pulled by the long right tail. |

@@ -65,6 +65,8 @@ def body(md):
         text = answer_spaces(text)
     elif md == "PRACTICE.md":
         text = practice_spaces(text)
+    elif md == "PRACTICE-ANSWERS.md":
+        text = practice_spaces(text, KEY_LINES, note="Your notes: what you missed, in your own words")
     else:
         return text
     return KEEP_TOGETHER + text
@@ -74,14 +76,17 @@ LINES_PER_BR = 3        # each <br> in the paper is three ruled writing lines on
 
 # The practice set has no <br> markers: its space is set by part, the way the paper sets it by points.
 PRACTICE_LINES = {"I": 14, "II": 4, "B": 6, "C": 6, "D": 14}   # II: per sub-question, (a) to (d)
+KEY_LINES = {"I": 4, "II": 6, "B": 3, "C": 3, "D": 5}           # notes beside each model answer
 # Never split a question across a page: no single line left behind or carried over.
 KEEP_TOGETHER = "```{=latex}\n\\clubpenalty=10000 \\widowpenalty=10000\n```\n\n"
 NEWPAGE = "```{=latex}\n\\newpage\n```\n\n"
 
 
 def ruled(n):
-    """n ruled writing lines, kept with the question above them."""
+    """n ruled writing lines, kept with the question (or answer) above them."""
     rule = r"\par\vspace{0.56cm}\noindent\rule{\linewidth}{0.3pt}"
+    if n <= 6:                                  # a short space is never split across pages
+        rule = r"\nopagebreak[4]" + rule
     return "```{=latex}\n\\par\\nopagebreak[4]" + rule * n + "\\par\\medskip\n```"
 
 
@@ -104,12 +109,14 @@ def answer_spaces(text):
     return new_pages(text, also=r"## C[23]\.")
 
 
-def practice_spaces(text):
-    """Ruled lines after every written question of the practice set (not the multiple choice).
+def practice_spaces(text, lines=PRACTICE_LINES, note=None):
+    """Ruled lines after every written item of the practice set (not the multiple choice).
 
-    A question is a paragraph opening with its label (**B7.**); a code block that follows
-    it belongs to it, so the lines go after the code. Part II asks the same four
-    sub-questions of every reading, so each reading gets four labelled spaces, on a page of its own.
+    An item is a paragraph opening with its label (**B7.**) and runs until the next label,
+    heading or rule, so a code block or a second paragraph stays with it. For the
+    questions, Part II asks the same four sub-questions of every reading, so each
+    reading gets four labelled spaces, on a page of its own. For the answer key, the
+    space is shorter and headed by `note`: room to correct your own attempt.
     """
     blocks, fence = [], False
     for chunk in text.split("\n\n"):              # keep fenced code in one block
@@ -122,18 +129,23 @@ def practice_spaces(text):
 
     out, part, pending = [], None, None
     for b in blocks:
-        if pending and not b.startswith("```"):
+        if pending and re.match(r"\*\*[A-Z]+\d+\.\*\*|#|---", b):
             out.append(pending)
             pending = None
-        if part == "II" and re.match(r"\*\*II[2-9]\.\*\*", b):
+        if part == "II" and not note and re.match(r"\*\*II[2-9]\.\*\*", b):
             out.append(NEWPAGE.strip())         # a reading and its four spaces fill a page
         out.append(b)
         if m := re.match(r"# Part (\w+)", b):
             part = m.group(1)
-        elif part in PRACTICE_LINES and re.match(rf"\*\*{part}\d+\.\*\*", b):
-            n = PRACTICE_LINES[part]
-            pending = ("\n\n".join(f"*({s})*\n\n" + ruled(n) for s in "abcd")
-                       if part == "II" else ruled(n))
+        elif part in lines and re.match(rf"\*\*{part}\d+\.\*\*", b):
+            n = lines[part]
+            if note:
+                pending = ("```{=latex}\n\\nopagebreak[4]\n```\n\n"   # notes stay with the answer
+                           f"*{note}*\n\n" + ruled(n))
+            elif part == "II":
+                pending = "\n\n".join(f"*({s})*\n\n" + ruled(n) for s in "abcd")
+            else:
+                pending = ruled(n)
     if pending:
         out.append(pending)
     return new_pages("\n\n".join(out))
