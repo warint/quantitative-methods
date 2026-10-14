@@ -6,7 +6,7 @@
 
 ## How to work through it
 
-Open `r4_topalova_khandelwal_2011.py` in VS Codium. Each step below is one block of the script,
+Run it in **your own session-07 folder**, set up in Part 0 of the [practice README](../README.md) — not in the course repository. Open `r4_topalova_khandelwal_2011.py` in VS Codium. Each step below is one block of the script,
 marked `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the
 output, and check it against **You should see** before moving on.
 
@@ -19,8 +19,9 @@ Topalova, P. & Khandelwal, A. (2011). Trade liberalization and firm productivity
 
 ## The data
 
-- **File:** `06-advanced-regression/data/replication/prod_dataregression.dta` (the authors'
-  replication package, Harvard Dataverse doi:10.7910/DVN/8WEXYD).
+- **File:** the authors' `prod_dataregression.dta` (Harvard Dataverse doi:10.7910/DVN/8WEXYD,
+  CC0); the script reads the columns it uses from the course site,
+  [`paper4_topalova_khandelwal_2011.csv`](https://warint.github.io/quantitative-methods/data/session-07/paper4_topalova_khandelwal_2011.csv).
 - **One row:** one Indian manufacturing firm in one year. We keep 1989–1996: **14,648 firm-years,
   3,077 firms**.
 - **Outcome:** `tfp1000`, the firm's log total factor productivity (mean 0.051, sd 0.303).
@@ -46,11 +47,13 @@ Topalova, P. & Khandelwal, A. (2011). Trade liberalization and firm productivity
 ### Step 1 · Load the firms
 
 ```python
-firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")
 cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
         "foreign", "medium", "small", "age"]
 d = firms[firms["yr"] < 1997].dropna(subset=cols)
 ```
+
+`DATA`, set at the top of the script, is the address of the course site's data folder: `https://warint.github.io/quantitative-methods/data/session-07/`.
 
 **You should see:** `14,648 firm-years, 3,077 firms`. The output tariff averages 0.695 (69.5%),
 the input tariff 0.261.
@@ -82,7 +85,7 @@ model2 = smf.ols("tfp1000 ~ lagtariff + laginputariff", data=d).fit()
 
 ### Step 5 · Residuals versus fitted
 
-The session 03 cell, with `fit = model2`. The figure is saved as `output/s06_resid_vs_fitted.png`.
+The session 03 cell, with `fit = model2`. The figure opens in a window, and is saved as `p4_resid_vs_fitted.png` in your folder.
 
 **You should see:** a cloud centred on zero, with long tails on both sides (productivity runs from
 −4.2 to 3.6) — a few firms far more or far less productive than any tariff level predicts.

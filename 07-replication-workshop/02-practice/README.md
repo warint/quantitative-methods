@@ -14,8 +14,8 @@ and plug it into the course's models, **with exactly the Python you typed in cla
 `smf.logit`, `OrderedModel`, `sm.MNLogit`, `RidgeCV`, `LassoCV`, `ElasticNetCV`. Only the variable
 names change.
 
-Each paper is a script in [`starter/`](starter/) and a step-by-step guide in
-[`replications/`](replications/). The guide tells you, for every step, what to run, why, and the
+Each paper is a script in [`starter/`](starter/), which you download into a folder of your own
+(Part 0), and a step-by-step guide in [`replications/`](replications/). The guide tells you, for every step, what to run, why, and the
 numbers **you should see**. You are **not** following the papers: each step is a code cell you
 already know, run on new data, and the work is to read its output in words, with units.
 
@@ -28,7 +28,7 @@ already know, run on new data, and the work is to read its output in words, with
 
 | When | What | |
 |---|---|---|
-| **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run the check script | below |
+| **0:00 – 0:15** | **Part 0 · Set up** — a folder of your own, four packages, the scripts, the check | below |
 | **0:15 – 0:55** | **Paper 1** · Session 02 data · news sentiment and stock returns — OLS, the three logits | [guide](replications/R1-fraiberger-2021.md) · [script](starter/r1_fraiberger_2021.py) |
 | **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits | [guide](replications/R2-saganowski-2019.md) · [script](starter/r2_saganowski_2019.py) |
 | 1:35 – 1:45 | Break | |
@@ -63,57 +63,82 @@ who did what.
 
 ## Part 0 · Set up — 15 min
 
-### Step 0.1 · Open the repository in VS Codium
+Today you work **in a folder of your own, not in the course repository**, with plain Python and four
+packages installed by name. No `requirements.txt`, no `qmib`: each script reads its paper's data from
+the course site, over the internet.
 
-**File → Open Folder…** and choose `Desktop/quantitative-methods` — the folder that contains
-`qmib.py`. Not a subfolder: the scripts expect the whole repository.
+### Step 0.1 · A new folder, opened in VS Codium
 
-### Step 0.2 · Get the latest version
+Make an empty folder **outside** `quantitative-methods` — `Desktop/session-07`, say. In VS Codium:
+**File → Open Folder…** and choose it. Everything below happens inside it.
 
-Open the terminal in VS Codium (**Terminal → New Terminal**) and pull:
+### Step 0.2 · A Python environment for this folder
 
-```bash
-git checkout main
-git pull
-```
+Open the terminal (**Terminal → New Terminal**). Create the environment, then activate it:
 
-The commands are the same on macOS, Linux and Windows.
+- **macOS:** `python3 -m venv .venv` then `source .venv/bin/activate`
+- **Linux:** `python3 -m venv .venv` then `source .venv/bin/activate`
+- **Windows (PowerShell):** `py -m venv .venv` then `.venv\Scripts\Activate.ps1`
 
-### Step 0.3 · Use the course's Python
+On **macOS**, if your Python came from python.org, run its certificate installer once first, or
+the scripts cannot read the course site (`CERTIFICATE_VERIFY_FAILED`):
+`open /Applications/Python\ 3*/Install\ Certificates.command`. Python from Homebrew, Linux and
+Windows need nothing.
 
-Bottom-right of VS Codium, click the Python version and choose the one in `.venv`. Or activate it in
-the terminal:
+The prompt now starts with `(.venv)`. Then tell VS Codium to use it: `Ctrl`/`Cmd` + `Shift` + `P`,
+**Python: Select Interpreter**, and choose the one inside this folder's `.venv`.
 
-- **macOS:** `source .venv/bin/activate`
-- **Linux:** `source .venv/bin/activate`
-- **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
+### Step 0.3 · Install the four packages
 
-### Step 0.4 · Run the check
+With `(.venv)` showing, the same line on all three platforms:
 
-Open [`starter/check_setup.py`](starter/check_setup.py) and press the **Run** triangle (top right).
-Or, in the terminal:
+- **macOS:** `pip install pandas statsmodels scikit-learn matplotlib`
+- **Linux:** `pip install pandas statsmodels scikit-learn matplotlib`
+- **Windows (PowerShell):** `pip install pandas statsmodels scikit-learn matplotlib`
 
-- **macOS:** `python3 07-replication-workshop/02-practice/starter/check_setup.py`
-- **Linux:** `python3 07-replication-workshop/02-practice/starter/check_setup.py`
-- **Windows:** `python 07-replication-workshop\02-practice\starter\check_setup.py`
+NumPy and SciPy come with them. That is the whole toolkit for today.
 
-**You should see** a list in which every line says `OK`. A line that says `MISSING`:
+### Step 0.4 · Download the five scripts
 
-- a **package** — run `pip install -r requirements.txt` in the activated environment;
-- a **paper's data** — you did not download that package before its session. The
-  [pre-session page](../00-pre-session/README.md), section 2, has the one command per platform
-  that fetches it. Start with a paper whose data you do have while it downloads.
+All five in one zip — [`session-07-scripts.zip`](https://warint.github.io/quantitative-methods/session-07-scripts.zip) —
+unzipped into your folder. Or from the terminal:
 
-### Step 0.5 · How to run a script one step at a time
+- **macOS:** `curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip && unzip session-07-scripts.zip`
+- **Linux:** `curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip && unzip session-07-scripts.zip`
+- **Windows (PowerShell):** `Invoke-WebRequest https://warint.github.io/quantitative-methods/session-07-scripts.zip -OutFile session-07-scripts.zip; Expand-Archive session-07-scripts.zip -DestinationPath .`
+
+You now have `check_setup.py` and `r1_…py` to `r4_…py` side by side in the folder. (One at a time:
+[check_setup.py](https://warint.github.io/quantitative-methods/session-07/check_setup.py) ·
+[r1](https://warint.github.io/quantitative-methods/session-07/r1_fraiberger_2021.py) ·
+[r2](https://warint.github.io/quantitative-methods/session-07/r2_saganowski_2019.py) ·
+[r3](https://warint.github.io/quantitative-methods/session-07/r3_blonigen_piger_2014.py) ·
+[r4](https://warint.github.io/quantitative-methods/session-07/r4_topalova_khandelwal_2011.py) —
+open, then **Save As…** into the folder.)
+
+### Step 0.5 · Run the check
+
+Open `check_setup.py` and press the **Run** triangle (top right). Or, in the terminal:
+
+- **macOS:** `python check_setup.py`
+- **Linux:** `python check_setup.py`
+- **Windows (PowerShell):** `python check_setup.py`
+
+**You should see** your Python version, then every line `OK`: four packages, four data files. A line
+that says `MISSING`:
+
+- a **package** — the line prints the `pip install` to type, in the activated environment;
+- a **data file** — no internet connection to the course site. Check the wifi and run it again.
+
+### Step 0.6 · How to run a script one step at a time
 
 Every script is cut into blocks that start `# Step 1 · …`, `# Step 2 · …`. The guide has the same
 steps in the same order.
 
 - **Run one step:** select its lines and press **Shift+Enter**. VS Codium sends them to a Python
   terminal and prints the result. Variables stay in memory, so the next step can use them.
-- **Run the whole script:** the **Run** triangle. Every script takes a few seconds.
-- **Figures** are saved in `07-replication-workshop/02-practice/output/`. Open them from the
-  Explorer on the left.
+- **Run the whole script:** the **Run** triangle. Each script reads its data from the site, then
+  takes a few seconds.
+- **Figures** open in a window; paper 4 also saves `p4_resid_vs_fitted.png` in your folder.
 
 Run the steps **in order**: step 5 needs what step 4 made.
 
@@ -141,8 +166,11 @@ Each guide has the same shape, so you always know where you are:
 
 ## Part 2 · The log — 10 min
 
-Copy [`replication-log.md`](replication-log.md) into your group folder and fill in one block per
-paper you attempted:
+The log is the one thing today that goes back into the course repository, because that is where
+your group hands work in. Open `quantitative-methods` in a second VS Codium window
+(**File → New Window**, then **File → Open Folder…**), copy
+[`replication-log.md`](replication-log.md) into your group folder, and fill in one block per paper
+you attempted:
 
 ```bash
 git checkout -b group-XX

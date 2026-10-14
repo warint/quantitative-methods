@@ -36,6 +36,10 @@ format:
 # part of any answer, so they are kept off the slides.
 import warnings
 warnings.filterwarnings("ignore")
+# The scripts read their data from the course site and save a figure where they
+# run, as they would in a student's folder; here that is a scratch folder.
+import os, tempfile
+os.chdir(tempfile.mkdtemp())
 ```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
@@ -115,7 +119,7 @@ the models of the course — **with exactly the code you typed in class**, only 
 changed: OLS, the logits (binary, ordinal, multinomial), ridge, the lasso and the elastic net.
 
 ::: {.tight}
-- **One script per paper**, cut into numbered steps: `02-practice/starter/`
+- **One script per paper**, cut into numbered steps, run in a folder of your own: [all five in one zip](https://warint.github.io/quantitative-methods/session-07-scripts.zip)
 - **One guide per paper**, with the same steps and the numbers **you should see**: `02-practice/replications/`
 - **One log**, filled in as you go: `02-practice/replication-log.md`
 :::
@@ -134,7 +138,7 @@ on real data.
 
 | When | What |
 |---|---|
-| **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run `check_setup.py` |
+| **0:00 – 0:15** | **Part 0 · Set up** — a folder of your own, four packages, the scripts, `check_setup.py` |
 | **0:15 – 0:55** | **Paper 1** · Session 02 data · news sentiment and stock returns — OLS, the three logits |
 | **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits |
 | 1:35 – 1:45 | Break |
@@ -170,16 +174,51 @@ Either way, **every member runs at least one script on their own machine**, and 
 did what.
 :::
 
-## Part 0 · Set up, in five steps {.scrollable}
+## Part 0 · Set up, in a folder of your own {.scrollable}
 
-::: {.tight}
-1. **File → Open Folder…** → `Desktop/quantitative-methods`, the folder with `qmib.py`
-2. **Terminal → New Terminal**, then `git checkout main` and `git pull`
-3. Choose the `.venv` Python, bottom right — or activate it:
-   macOS and Linux `source .venv/bin/activate` · Windows `.venv\Scripts\Activate.ps1`
-4. Open `02-practice/starter/check_setup.py` and press **Run** ▷ — every line should say `OK`
-5. A `MISSING` data line? The pre-session page has one command per platform that fetches it.
-   Start on a paper you *do* have while it downloads.
+**Not** the course repository, and no `requirements.txt`: an empty folder — `Desktop/session-07` —
+opened in VS Codium (**File → Open Folder…**), plain Python, four packages by name. In its terminal:
+
+::::: panel-tabset
+### macOS
+
+```bash
+open /Applications/Python\ 3*/Install\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
+```
+
+### Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
+```
+
+### Windows
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+$zip = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+Invoke-WebRequest $zip -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
+```
+:::::
+
+::: {.muted}
+Every line of `check_setup.py` should say `OK`. The scripts read the papers' data from the course
+site, so all you need is the internet.
 :::
 
 ## Running a script one step at a time {.scrollable}
@@ -191,7 +230,7 @@ steps, in the same order.
 - **One step:** select its lines, press **Shift+Enter**. The result prints in the terminal, and the
   variables stay in memory for the next step.
 - **The whole script:** the **Run** triangle ▷, top right. Each takes a few seconds.
-- **Figures** land in `07-replication-workshop/02-practice/output/`.
+- **Figures** open in a window; paper 4 also saves its residual plot in your folder.
 :::
 
 ::: {.check}

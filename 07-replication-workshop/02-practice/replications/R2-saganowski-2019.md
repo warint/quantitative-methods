@@ -6,7 +6,7 @@
 
 ## How to work through it
 
-Open `r2_saganowski_2019.py` in VS Codium. Each step below is one block of the script, marked
+Run it in **your own session-07 folder**, set up in Part 0 of the [practice README](../README.md) — not in the course repository. Open `r2_saganowski_2019.py` in VS Codium. Each step below is one block of the script, marked
 `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the output, and
 check it against **You should see** before moving on. If a number differs, stop and find out why.
 
@@ -19,7 +19,8 @@ Saganowski, S., Bródka, P., Koziarski, M. & Kazienko, P. (2019), *Analysis of g
 prediction in complex networks*, PLOS ONE 14(10): e0224194 · data: Harvard Dataverse,
 doi:10.7910/DVN/ONOFS7.
 
-- **File:** `04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv`
+- **File:** the authors' `12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv` (CC0),
+  unchanged, read from the course site as [`paper2_saganowski_2019.csv`](https://warint.github.io/quantitative-methods/data/session-07/paper2_saganowski_2019.csv)
   — private messages between UC Irvine students, cut into weekly windows. 498 groups.
 - **One row:** one group of students who message each other, in one week.
 - **Outcome:** `event_type`, what happened to the group the next week: **dissolving** (35.5%),
@@ -46,12 +47,13 @@ expression the way a slide does.
 ### Step 1 · Load the groups, and what happened to each one next week
 
 ```python
-FILE = ("04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
-        "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv")
+FILE = DATA + "paper2_saganowski_2019.csv"     # the authors' file, unchanged
 raw = pd.read_csv(FILE)
 print(raw.shape)
 print(raw["event_type"].value_counts(normalize=True).round(3))   # the base rates
 ```
+
+`DATA`, set at the top of the script, is the address of the course site's data folder: `https://warint.github.io/quantitative-methods/data/session-07/`.
 
 **You should see:** `(498, 89)`, then the base rates: dissolving 0.355, shrinking 0.259, growing
 0.251, continuing 0.100, splitting 0.018, merging 0.016.
@@ -221,10 +223,8 @@ log2_size
 
 ## Pitfalls
 
-- **Folder and file names contain spaces.** In Python, a quoted string is fine. In a terminal, quote
-  the path:
-  - macOS and Linux: `ls "04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state"`
-  - Windows PowerShell: `Get-ChildItem "04-logistic-ordinal-multinomial\data\replication\12 IrvineMessages_s7o3_infomap_1state"`
+- **89 columns, 3 used.** The authors' file holds every network measure they computed; step 2
+  keeps three and gives them names a person can read. Print `raw.columns` to see the rest.
 - **The ordinal model has no intercept.** `OrderedModel` uses cutpoints instead; do not pass a
   constant, or the model cannot be estimated.
 - **The multinomial baseline is code 0.** Reorder `levels` and every coefficient changes meaning,

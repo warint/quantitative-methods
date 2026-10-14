@@ -9,25 +9,10 @@ your own output with it line by line.
 :::::::: panel-tabset
 ### Set-up
 
-The lines that open every script: find the repository, import what the steps use.
+The lines that open every script: import what the steps use, and the address of the data on the course site.
 
 ```{python}
 #| echo: true
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
-
 import warnings
 warnings.filterwarnings("ignore")            # convergence notes are not part of the answer
 
@@ -39,6 +24,9 @@ from statsmodels.miscmodels.ordinal_model import OrderedModel
 
 pd.set_option("display.width", 130)       # as in the session-04 slides, a little wider
 pd.set_option("display.max_columns", 10)
+
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
 ```
 
 ### 1
@@ -48,8 +36,7 @@ pd.set_option("display.max_columns", 10)
 ```{python}
 #| echo: true
 # Step 1 · Load the groups, and what happened to each one next week
-FILE = ("04-logistic-ordinal-multinomial/data/replication/12 IrvineMessages_s7o3_infomap_1state/"
-        "12 IrvineMessages_s7o3_infomap_1state.partition.1.fold.1.csv")
+FILE = DATA + "paper2_saganowski_2019.csv"     # the authors' file, unchanged
 raw = pd.read_csv(FILE)
 print(raw.shape)
 print(raw["event_type"].value_counts(normalize=True).round(3))   # the base rates

@@ -2,9 +2,9 @@
 
 **Wednesday 14 October 2026** · 15:30–18:30 · Décelles — Victoriaville
 
-> The workshop is three hours of work at your own keyboard. It goes well if the data is already
-> on your machine when you arrive, and badly if you spend the first hour downloading.
-> This page is **30 minutes**, most of it waiting for downloads.
+> The workshop is three hours of work at your own keyboard, in a folder of your own. It goes well
+> if that folder is ready when you arrive, and badly if you spend the first hour installing.
+> This page is **30 minutes**.
 
 ---
 
@@ -23,39 +23,32 @@ you know what the models will be fitted on.
 
 ---
 
-## 2. Make sure the data is on your machine — 15 min, mostly waiting
+## 2. Set up your session-07 folder — 15 min
 
-Three of the four papers use the authors' Dataverse package, which you were asked to download
-before its own session. Paper 4 needs no download: `qmib.load("fdi")` reads a file already in the
-repository.
-
-**First, check what you already have.** Open the repository in VS Codium and run
-[`02-practice/starter/check_setup.py`](../02-practice/starter/check_setup.py) with the **Run** triangle.
-Every line that says `OK` is done. For each line that says `MISSING`, run the matching command
-below **from the repository root**, in the VS Codium terminal.
-
-| Paper | Package | Size of the download |
-|---|---|---|
-| 1 · Fraiberger et al. | [10.7910/DVN/QNKFJF](https://doi.org/10.7910/DVN/QNKFJF) | about 35 MB |
-| 2 · Saganowski et al. | [10.7910/DVN/ONOFS7](https://doi.org/10.7910/DVN/ONOFS7) | about 160 MB |
-| 4 · Topalova & Khandelwal | [10.7910/DVN/8WEXYD](https://doi.org/10.7910/DVN/8WEXYD) | about 2 MB |
+Make an empty folder **outside** the course repository — `Desktop/session-07`, say — and open it
+in VS Codium (**File → Open Folder…**). Then, in its terminal (**Terminal → New Terminal**):
 
 ### macOS
 
 ```bash
-get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
-get QNKFJF 02-exploratory-data-analysis
-get ONOFS7 04-logistic-ordinal-multinomial
-get 8WEXYD 06-advanced-regression
+open /Applications/Python\ 3*/Install\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
 ```
 
 ### Linux
 
 ```bash
-get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
-get QNKFJF 02-exploratory-data-analysis
-get ONOFS7 04-logistic-ordinal-multinomial
-get 8WEXYD 06-advanced-regression
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
 ```
 
 If `unzip` is missing: `sudo apt install unzip` (Debian, Ubuntu) or `sudo dnf install unzip` (Fedora).
@@ -63,24 +56,21 @@ If `unzip` is missing: `sudo apt install unzip` (Debian, Ubuntu) or `sudo dnf in
 ### Windows (PowerShell)
 
 ```powershell
-function Get-Package($doi, $dir) {
-  curl.exe -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$doi" -o "$doi.zip"
-  Expand-Archive "$doi.zip" -DestinationPath "$dir\data\replication" -Force
-  Remove-Item "$doi.zip"
-}
-Get-Package QNKFJF 02-exploratory-data-analysis
-Get-Package ONOFS7 04-logistic-ordinal-multinomial
-Get-Package 8WEXYD 06-advanced-regression
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+$zip = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+Invoke-WebRequest $zip -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
 ```
 
-Type `curl.exe`, not `curl`: in PowerShell, `curl` is a different command.
+The last line checks Python, the four packages, and that the four data files on the course site
+answer. Every line should say `OK`. A `MISSING` package prints the `pip install` to type.
 
-> Run only the lines you need — each `get` line fetches one package. The folders are
-> **git-ignored**, so nothing large is ever committed. If a download is refused (Dataverse
-> sometimes asks you to accept terms first), open the DOI in a browser, click
-> **Access Dataset → Download ZIP**, and unzip it into the same folder.
-
-Then run `check_setup.py` again. Every line should now say `OK`.
+> No `requirements.txt`, no download of the papers' packages: plain Python, four packages by name,
+> and each script reads its paper's data from the course site — so on the day, you need the
+> internet. The step-by-step version is [Part 0 of the workshop](../02-practice/README.md#part-0--set-up--15-min).
 
 ---
 

@@ -38,8 +38,8 @@ It is also the revision session for the **midterm on 28 October**, which covers 
 
 | | Where | What |
 |---|---|---|
-| **Before** | [`00-pre-session/`](00-pre-session/README.md) | 30 minutes: check the three data packages are on your machine, re-read four abstracts |
-| **0:00 – 0:15** | [`02-practice/`](02-practice/README.md), Part 0 | Set up in VS Codium, run `check_setup.py` |
+| **Before** | [`00-pre-session/`](00-pre-session/README.md) | 30 minutes: set up a session-07 folder of your own, re-read four abstracts |
+| **0:00 – 0:15** | [`02-practice/`](02-practice/README.md), Part 0 | Your folder in VS Codium, run `check_setup.py` |
 | **0:15 – 2:50** | [`02-practice/replications/`](02-practice/replications/) | The four papers, 30 to 40 minutes each, with a break |
 | **2:50 – 3:00** | [`02-practice/replication-log.md`](02-practice/replication-log.md) | The log: fill it in, commit, push |
 

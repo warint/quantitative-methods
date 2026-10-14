@@ -9,31 +9,19 @@ your own output with it line by line.
 :::::::: panel-tabset
 ### Set-up
 
-The lines that open every script: find the repository, import what the steps use.
+The lines that open every script: import what the steps use, and the address of the data on the course site.
 
 ```{python}
 #| echo: true
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 from statsmodels.miscmodels.ordinal_model import OrderedModel
+
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
 ```
 
 ### 1
@@ -43,8 +31,7 @@ from statsmodels.miscmodels.ordinal_model import OrderedModel
 ```{python}
 #| echo: true
 # Step 1 · Load the data: one row is a country-day
-path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-d = pd.read_stata(path, columns=["iso", "DATE", "F0_index", "L1_sent1_best", "L1_vix"])
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
 d = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_vix"])
 d["up"] = (d["F0_index"] > 0).astype(int)            # 1 if the market rose that day
 print(f"{len(d):,} country-days, {d['iso'].nunique()} countries, share of up days {d['up'].mean():.3f}")

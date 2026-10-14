@@ -5,7 +5,7 @@
 > **Script:** [`starter/r1_fraiberger_2021.py`](../starter/r1_fraiberger_2021.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
-**How to work through it.** Open `r1_fraiberger_2021.py` in VS Codium. Each step below is one block of the
+**How to work through it.** Run it in **your own session-07 folder**, set up in Part 0 of the [practice README](../README.md) — not in the course repository. Open `r1_fraiberger_2021.py` in VS Codium. Each step below is one block of the
 script, marked `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read
 the output, and check it against **You should see** before moving on. If a number differs,
 stop and find out why — that is the exercise, not a detour from it.
@@ -14,8 +14,8 @@ stop and find out why — that is the exercise, not a detour from it.
 
 Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices*, Journal
 of International Economics — the authors' replication package (Harvard Dataverse,
-doi:10.7910/DVN/QNKFJF), file
-`02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta`.
+doi:10.7910/DVN/QNKFJF, CC0), file `regression_sample.dta`. The script reads the five columns it
+uses from the course site: [`paper1_fraiberger_2021.csv`](https://warint.github.io/quantitative-methods/data/session-07/paper1_fraiberger_2021.csv).
 
 - **One row** = one country on one **calendar** day, 25 countries, 1991–2017, weekends included.
   After dropping rows without a return or a predictor: **135,082** country-days.
@@ -53,15 +53,16 @@ variable names changed:
 
 ### Step 1 · Load the data
 
-Read only the columns the models use, drop incomplete rows, and build the 0/1 outcome for the logit.
+Read the data from the course site, drop incomplete rows, and build the 0/1 outcome for the logit.
 
 ```python
-path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-d = pd.read_stata(path, columns=["iso", "DATE", "F0_index", "L1_sent1_best", "L1_vix"])
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
 d = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_vix"])
 d["up"] = (d["F0_index"] > 0).astype(int)            # 1 if the market rose that day
 print(f"{len(d):,} country-days, {d['iso'].nunique()} countries, share of up days {d['up'].mean():.3f}")
 ```
+
+`DATA`, set at the top of the script, is the address of the course site's data folder: `https://warint.github.io/quantitative-methods/data/session-07/`.
 
 **You should see:** `135,082 country-days, 25 countries, share of up days 0.519`.
 

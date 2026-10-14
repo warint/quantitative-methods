@@ -91,13 +91,14 @@ assumed.
 
 ## Where everything is {.scrollable}
 
-Everything is in `07-replication-workshop/02-practice/`:
+The scripts run **in a folder of your own**; the guides and the log stay in
+`07-replication-workshop/02-practice/`:
 
 | | |
 |---|---|
 | `README.md` | this plan, with every command to copy |
-| `starter/check_setup.py` | Part 0: is everything in place? |
-| `starter/r1_…py` to `starter/r4_…py` | one script per paper, cut into numbered steps — each step a code cell from sessions 3 to 5 |
+| `check_setup.py` | Part 0: is everything in place? — in [the scripts' zip](https://warint.github.io/quantitative-methods/session-07-scripts.zip) |
+| `r1_…py` to `r4_…py` | one script per paper, cut into numbered steps — each step a code cell from sessions 3 to 5; each reads its data from the course site |
 | `replications/R1-…md` to `replications/R4-…md` | one guide per paper: the same steps, and what you should see |
 | `replication-log.md` | the deliverable: copy it to your group folder |
 
@@ -109,7 +110,7 @@ Keep the **guide** open on one side of the screen and the **script** on the othe
 
 | When | Part | Guide | Script |
 |---|---|---|---|
-| 0:00 – 0:15 | **0 · Set up** | `README.md`, Part 0 | `check_setup.py` |
+| 0:00 – 0:15 | **0 · Set up** — a folder of your own | `README.md`, Part 0 | `check_setup.py` |
 | 0:15 – 0:55 | **Paper 1** · news sentiment · OLS, the three logits | `R1-fraiberger-2021.md` | `r1_fraiberger_2021.py` |
 | 0:55 – 1:35 | **Paper 2** · social groups · binary, ordinal, multinomial logits | `R2-saganowski-2019.md` | `r2_saganowski_2019.py` |
 | 1:35 – 1:45 | *Break* | | |
@@ -124,19 +125,51 @@ for four.
 
 ## Part 0 · Set up {.center .scrollable}
 
-## Five steps, fifteen minutes {.scrollable}
+## A folder of your own, fifteen minutes {.scrollable}
 
-::: {.tight}
-1. **File → Open Folder…** → `Desktop/quantitative-methods`
-2. Terminal: `git checkout main` then `git pull`
-3. The `.venv` Python — macOS and Linux `source .venv/bin/activate` · Windows `.venv\Scripts\Activate.ps1`
-4. Run `starter/check_setup.py` with **Run** ▷ — every line `OK`
-5. `MISSING` data? The pre-session page, section 2. Start another paper while it downloads.
-:::
+**Not** the course repository: make an empty folder — `Desktop/session-07` — and open it in VS
+Codium (**File → Open Folder…**). Then, in its terminal:
+
+::::: panel-tabset
+### macOS
+
+```bash
+open /Applications/Python\ 3*/Install\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
+```
+
+### Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
+```
+
+### Windows
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+$zip = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+Invoke-WebRequest $zip -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
+```
+:::::
 
 ::: {.step}
-**One step at a time:** select a step's lines, **Shift+Enter**, read the output, compare with
-**You should see**. Then the next step — they build on each other.
+Every line of `check_setup.py` says `OK`? Choose this folder's `.venv` as the interpreter
+(`Ctrl`/`Cmd` + `Shift` + `P` → **Python: Select Interpreter**), then open `r1_fraiberger_2021.py`.
 :::
 
 ## Part 1 · Each paper, the same way {.center .scrollable}

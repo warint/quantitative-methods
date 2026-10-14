@@ -32,7 +32,7 @@ format:
 
 1. What to do, and how long it takes
 2. Re-read the papers
-3. Get the data
+3. Set up your folder
 4. Arrive with
 
 ## What session 7 is for {.scrollable}
@@ -74,15 +74,15 @@ format:
 
 ## What to do, and how long it takes {.center .scrollable}
 
-## Thirty minutes, most of it waiting {.scrollable}
+## Thirty minutes {.scrollable}
 
-The workshop is three hours at your own keyboard. It goes well if the data is on your machine when
-you arrive, and badly if you spend the first hour downloading.
+The workshop is three hours at your own keyboard, in a folder of your own. It goes well if that
+folder is ready when you arrive, and badly if you spend the first hour installing.
 
 | | | |
 |---|---|---|
 | **1** | Re-read the four abstracts: the question, and what the data are | 10 min |
-| **2** | Check the data is on your machine; download what is missing | 15 min, mostly waiting |
+| **2** | Set up your session-07 folder: Python, four packages, the scripts | 15 min |
 | **3** | Write two lines per paper, from memory | 5 min |
 
 ::: {.muted}
@@ -106,47 +106,35 @@ You read these before sessions 2 to 6. Re-read the **abstract** and the descript
 **data**: what one observation is, and what is measured.
 :::
 
-## Get the data {.center .scrollable}
+## Set up your folder {.center .scrollable}
 
-## First, check what you already have {.scrollable}
+## A folder of your own, not the repository {.scrollable}
 
-::: {.tight}
-1. Open the repository in VS Codium: **File → Open Folder…** → `Desktop/quantitative-methods`
-2. Open `07-replication-workshop/02-practice/starter/check_setup.py`
-3. Press **Run** ▷
-:::
-
-::: {.check}
-Every line that says `OK` is done. For each `MISSING`, run the matching line from the next slide,
-**from the repository root**, in the VS Codium terminal.
-:::
-
-| Paper | Package | Download |
-|---|---|---|
-| 1 · Fraiberger et al. | 10.7910/DVN/QNKFJF | about 35 MB |
-| 2 · Saganowski et al. | 10.7910/DVN/ONOFS7 | about 160 MB |
-| 4 · Blonigen & Piger | none — `qmib.load("fdi")` | — |
-| 4 · Topalova & Khandelwal | 10.7910/DVN/8WEXYD | about 2 MB |
-
-## Download what is missing {.scrollable}
+Make an empty folder — `Desktop/session-07` — and open it in VS Codium (**File → Open Folder…**).
+In its terminal: plain Python, four packages by name, the scripts, the check.
 
 ::::: panel-tabset
 ### macOS
 
 ```bash
-get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
-get QNKFJF 02-exploratory-data-analysis
-get ONOFS7 04-logistic-ordinal-multinomial
-get 8WEXYD 06-advanced-regression
+open /Applications/Python\ 3*/Install\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
 ```
 
 ### Linux
 
 ```bash
-get() { curl -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$1" -o "$1.zip" && mkdir -p "$2/data/replication" && unzip -o -q "$1.zip" -d "$2/data/replication" && rm "$1.zip"; }
-get QNKFJF 02-exploratory-data-analysis
-get ONOFS7 04-logistic-ordinal-multinomial
-get 8WEXYD 06-advanced-regression
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO https://warint.github.io/quantitative-methods/session-07-scripts.zip
+unzip session-07-scripts.zip
+python check_setup.py
 ```
 
 No `unzip`? `sudo apt install unzip` (Debian, Ubuntu) or `sudo dnf install unzip` (Fedora).
@@ -154,23 +142,19 @@ No `unzip`? `sudo apt install unzip` (Debian, Ubuntu) or `sudo dnf install unzip
 ### Windows
 
 ```powershell
-function Get-Package($doi, $dir) {
-  curl.exe -L "https://dataverse.harvard.edu/api/access/dataset/:persistentId/?persistentId=doi:10.7910/DVN/$doi" -o "$doi.zip"
-  Expand-Archive "$doi.zip" -DestinationPath "$dir\data\replication" -Force
-  Remove-Item "$doi.zip"
-}
-Get-Package QNKFJF 02-exploratory-data-analysis
-Get-Package ONOFS7 04-logistic-ordinal-multinomial
-Get-Package 8WEXYD 06-advanced-regression
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+$zip = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+Invoke-WebRequest $zip -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
 ```
-
-Type `curl.exe`, not `curl`: in PowerShell, `curl` is a different command.
 :::::
 
 ::: {.muted}
-Run only the lines you need. The folders are git-ignored. If a download is refused, open the DOI in
-a browser, **Access Dataset → Download ZIP**, and unzip into the same folder. Then run the check
-again.
+No `requirements.txt`, nothing to download from Dataverse: each script reads its paper's data
+from the course site. Every line of the check should say `OK`.
 :::
 
 ## Arrive with {.center .scrollable}

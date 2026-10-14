@@ -9,25 +9,10 @@ your own output with it line by line.
 :::::::: panel-tabset
 ### Set-up
 
-The lines that open every script: find the repository, import what the steps use.
+The lines that open every script: import what the steps use, and the address of the data on the course site.
 
 ```{python}
 #| echo: true
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -39,6 +24,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
 ```
 
 ### 1
@@ -48,7 +36,7 @@ from sklearn.metrics import mean_squared_error
 ```{python}
 #| echo: true
 # Step 1 · Load the firms: one row is one firm in one year, 1989-1996
-firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")
 cols = ["tfp1000", "lagtariff", "laginputariff", "prgroup", "govown",
         "foreign", "medium", "small", "age"]
 d = firms[firms["yr"] < 1997].dropna(subset=cols)       # no gaps in what we use
@@ -107,7 +95,7 @@ fit = model2
 plt.scatter(fit.fittedvalues, fit.resid, s=12, alpha=0.6)
 plt.axhline(0, color="black", lw=1)
 plt.xlabel("Fitted values"); plt.ylabel("Residuals")
-plt.savefig(OUTPUT / "s06_resid_vs_fitted.png", dpi=110, bbox_inches="tight")
+plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in your folder
 plt.show()
 ```
 

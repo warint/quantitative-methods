@@ -41,4 +41,11 @@ for paper, name in [("1 · Fraiberger et al.", "paper1_fraiberger_2021.csv"),
             size = int(r.headers.get("Content-Length", 0)) / 1e6
         print(f"  OK       {paper:26} {size:.1f} MB")
     except Exception as e:
-        print(f"  MISSING  {paper:26} ->  no connection to the course site? ({e})")
+        if "CERTIFICATE_VERIFY_FAILED" in str(e) and sys.platform == "darwin":
+            # Python from python.org on macOS ships without certificates until its
+            # one-time "Install Certificates" command has been run.
+            v = f"{sys.version_info.major}.{sys.version_info.minor}"
+            print(f"  MISSING  {paper:26} ->  certificates not installed. Once, in the terminal:\n"
+                  f'           open "/Applications/Python {v}/Install Certificates.command"')
+        else:
+            print(f"  MISSING  {paper:26} ->  no connection to the course site? ({e})")

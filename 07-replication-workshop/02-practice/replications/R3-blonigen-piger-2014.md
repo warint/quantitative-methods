@@ -6,7 +6,7 @@
 
 ## How to work through it
 
-Open `r3_blonigen_piger_2014.py` in VS Codium. Each step below is one block of the script, marked
+Run it in **your own session-07 folder**, set up in Part 0 of the [practice README](../README.md) — not in the course repository. Open `r3_blonigen_piger_2014.py` in VS Codium. Each step below is one block of the script, marked
 `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read the output, and
 check it against **You should see** before moving on. If a number differs, stop and find out why.
 
@@ -15,7 +15,7 @@ check it against **You should see** before moving on. If a number differs, stop 
 Blonigen, B. A. & Piger, J. (2014). Determinants of foreign direct investment. *Canadian Journal of
 Economics* 47(3), 775–812. https://doi.org/10.1111/caje.12091
 
-- **Source:** `qmib.load("fdi")`. Rebuilt by the course from the sources the paper names (OECD
+- **Source:** [`paper3_blonigen_piger_2014.csv`](https://warint.github.io/quantitative-methods/data/session-07/paper3_blonigen_piger_2014.csv), on the course site. Rebuilt by the course from the sources the paper names (OECD
   bilateral FDI positions, CEPII gravity, World Development Indicators, Freedom House), for **2019**
   — the paper used 2000. Every number is real.
 - **One row:** one parent → host country pair.
@@ -45,7 +45,7 @@ Keep pairs with positive FDI (the log of zero does not exist) and all 56 candida
 the outcome and the gravity variables in logs.
 
 ```python
-fdi = qmib.load("fdi")
+fdi = pd.read_csv(DATA + "paper3_blonigen_piger_2014.csv")
 YCOL = "log_fdi"
 XCOLS = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
 d = fdi[fdi.fdi_stock_musd > 0].dropna(subset=XCOLS).copy()
@@ -54,6 +54,8 @@ for v in ["parent_gdp", "host_gdp", "distance"]:
     d[v] = np.log(d[v])
 print(f"country pairs: {len(d)}   candidate predictors: {len(XCOLS)}")
 ```
+
+`DATA`, set at the top of the script, is the address of the course site's data folder: `https://warint.github.io/quantitative-methods/data/session-07/`.
 
 **You should see:** `country pairs: 765   candidate predictors: 56`.
 
