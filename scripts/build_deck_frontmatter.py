@@ -152,6 +152,10 @@ TOOLKIT = {
     "pd.Categorical(ordered=True)": ("07", "Load and shape", "categories with an order, for the ordinal logit"),
     "pd.qcut": ("07", "Load and shape", "cut a variable into equal-sized groups, for an ordered outcome"),
     ".loc": ("07", "Load and shape", "set a value on the rows that meet a condition"),
+    ".isin": ("07", "Load and shape", "keep the rows whose value is in a list"),
+    ".copy()": ("07", "Load and shape", "a subset of your own, safe to add columns to"),
+    ".nunique": ("07", "Describe", "how many distinct countries, firms, groups"),
+    "plt.savefig": ("07", "Plot", "keep the figure as a file"),
 
     # ---- Session 13 · PCA and factor analysis (was session 07) ----------
     "PCA": ("13", "Fit", "components, on standardised columns"),

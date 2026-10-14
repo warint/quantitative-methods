@@ -32,6 +32,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
+import statsmodels.api as sm
+from statsmodels.miscmodels.ordinal_model import OrderedModel
 ```
 
 ### 1
@@ -107,11 +109,11 @@ plt.show()
 
 ### 6
 
-**Step 6 · Log-odds (session 04): does the market go up today?**
+**Step 6 · Binary logit: log-odds (session 04, LR 6) — does the market go up today?**
 
 ```{python}
 #| echo: true
-# Step 6 · Log-odds (session 04): does the market go up today?
+# Step 6 · Binary logit: log-odds (session 04, LR 6) — does the market go up today?
 # Fit the logistic regression. The coefficients come out as log-odds.
 m2 = smf.logit("up ~ L1_sent1_best", data=d).fit(disp=0)
 print(m2.params.round(4))
@@ -119,23 +121,106 @@ print(m2.params.round(4))
 
 ### 7
 
-**Step 7 · Odds (session 04)**
+**Step 7 · Binary logit: odds (session 04, LR 7)**
 
 ```{python}
 #| echo: true
-# Step 7 · Odds (session 04)
+# Step 7 · Binary logit: odds (session 04, LR 7)
 # Log-odds -> odds ratio: take the exponential of each coefficient
 print(np.exp(m2.params["L1_sent1_best"]).round(4))
 ```
 
 ### 8
 
-**Step 8 · Predicted probability (session 04)**
+**Step 8 · Binary logit: predicted probability (session 04, LR 8)**
 
 ```{python}
 #| echo: true
-# Step 8 · Predicted probability (session 04)
+# Step 8 · Binary logit: predicted probability (session 04, LR 8)
 # predict() does the same calculation for you: a bad, an ordinary and a good news day
 print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))
+```
+
+### 9
+
+**Step 9 · Ordinal logit (session 04, OLR 3) — the day's return in thirds: down < flat < up**
+
+```{python}
+#| echo: true
+# Step 9 · Ordinal logit (session 04, OLR 3) — the day's return in thirds: down < flat < up
+d["day"] = pd.qcut(d["F0_index"], 3, labels=["down", "flat", "up"])
+# Keep the order: down < flat < up
+order = ["down", "flat", "up"]
+d["day_c"] = pd.Categorical(d["day"], categories=order, ordered=True)
+om = OrderedModel(d["day_c"], d[["L1_sent1_best", "L1_vix"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
+```
+
+### 10
+
+**Step 10 · Ordinal logit: log-odds and odds (session 04, OLR 4)**
+
+```{python}
+#| echo: true
+# Step 10 · Ordinal logit: log-odds and odds (session 04, OLR 4)
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+print(om.params[["L1_sent1_best", "L1_vix"]].round(3))
+# Proportional-odds ratios
+print(np.exp(om.params[["L1_sent1_best", "L1_vix"]]).round(3))
+```
+
+### 11
+
+**Step 11 · Ordinal logit: probabilities (session 04, OLR 5)**
+
+```{python}
+#| echo: true
+# Step 11 · Ordinal logit: probabilities (session 04, OLR 5)
+# A bad and a good news day, with the VIX at 20. Columns: down, flat, up.
+new = pd.DataFrame({"L1_sent1_best": [-1, 1], "L1_vix": [20, 20]})
+print(pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["bad news", "good news"]).round(3))
+```
+
+### 12
+
+**Step 12 · Multinomial logit (session 04, MLR 3) — the same three days, without their order**
+
+```{python}
+#| echo: true
+# Step 12 · Multinomial logit (session 04, MLR 3) — the same three days, without their order
+# Code 0 (flat) is the baseline: every coefficient reads "relative to a flat day"
+levels = ["flat", "down", "up"]
+d["day_m"] = pd.Categorical(d["day"], categories=levels).codes
+X = d[["L1_sent1_best"]].astype(float)
+X["L1_vix"] = d["L1_vix"].astype(float)
+X = sm.add_constant(X)
+# Two sets of coefficients at once, each against the flat-day baseline
+mn = sm.MNLogit(d["day_m"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+```
+
+### 13
+
+**Step 13 · Multinomial logit: log-odds and relative risk ratios (session 04, MLR 4)**
+
+```{python}
+#| echo: true
+# Step 13 · Multinomial logit: log-odds and relative risk ratios (session 04, MLR 4)
+# Log-odds and RRR, for down vs flat and up vs flat
+print(pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1)
+      .set_axis(["log-odds: down", "log-odds: up", "RRR: down", "RRR: up"], axis=1).round(3))
+```
+
+### 14
+
+**Step 14 · Multinomial logit: probabilities (session 04, MLR 5)**
+
+```{python}
+#| echo: true
+# Step 14 · Multinomial logit: probabilities (session 04, MLR 5)
+# The VIX at 20, across news days from bad to good
+grid = pd.DataFrame({"const": 1.0, "L1_sent1_best": [-2, -1, 0, 1, 2], "L1_vix": 20.0})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["L1_sent1_best"])
+print(out.round(3))
 ```
 ::::::::

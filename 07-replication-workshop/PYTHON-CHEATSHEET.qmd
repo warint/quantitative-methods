@@ -292,4 +292,12 @@ y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %
 pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)
 d["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])
 d.loc[d["foreign"] == 1, "owner"] = "foreign"   # only those rows change
+dat = groups[groups["event"].isin(order)]   # only the three ordered events
+dat = groups[groups["event"].isin(order)].copy()   # then add columns safely
+
+# -- Describe ------------------------------------------------------
+d["iso"].nunique()                # 25 countries
+
+# -- Plot ----------------------------------------------------------
+plt.savefig(OUTPUT / "resid_vs_fitted.png", dpi=110, bbox_inches="tight")
 ```

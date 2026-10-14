@@ -151,6 +151,10 @@ SNIPPETS = {
     "pd.Categorical(ordered=True)": 'pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)',
     "pd.qcut": 'd["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])',
     ".loc": 'd.loc[d["foreign"] == 1, "owner"] = "foreign"   # only those rows change',
+    ".isin": 'dat = groups[groups["event"].isin(order)]   # only the three ordered events',
+    ".copy()": 'dat = groups[groups["event"].isin(order)].copy()   # then add columns safely',
+    ".nunique": 'd["iso"].nunique()                # 25 countries',
+    "plt.savefig": 'plt.savefig(OUTPUT / "resid_vs_fitted.png", dpi=110, bbox_inches="tight")',
 
     # ---- Session 13 (taught in session 07 until A2026) ----------------------
     "PCA": "from sklearn.decomposition import PCA\n"
