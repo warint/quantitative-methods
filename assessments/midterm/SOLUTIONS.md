@@ -2,7 +2,7 @@
 
 **MATH60033A · Quantitative Methods in IB**
 
-> Use this to practise, not to read. Sit the paper first — closed book, 2 hours 30 minutes, pen and
+> Use this to practise, not to read. Sit the paper first — closed book, 3 hours, pen and
 > a non-programmable calculator — and only then open this file. Marks are shown per sub-part so you
 > can see exactly where credit is earned.
 

@@ -2,14 +2,14 @@
 
 **MATH60033A · Quantitative Methods in IB · Sessions 2–6**
 
-**Printable:** [this paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) · [the answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). Sit it first, on paper, in 2 hours 30 minutes; open the key only afterwards.
+**Printable:** [this paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) · [the answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). Sit it first, on paper, in 3 hours; open the key only afterwards.
 
 ---
 
 |  |  |
 |---|---|
 | **Format** | **Paper. Handwritten, in pen.** |
-| **Duration** | 2 hours 30 minutes |
+| **Duration** | 3 hours |
 | **Total** | 100 points |
 | **Permitted** | a pen, and a **non-programmable calculator** (you will barely need it) |
 | **Not permitted** | any computer, phone, tablet or smartwatch · any networked device · **no internet** · notes, textbooks, formula sheets |
@@ -41,13 +41,13 @@
 >
 > | Part | Points | Suggested time |
 > |---|---|---|
-> | I · The first reading | 15 | 20 min |
-> | II · The second reading | 10 | 15 min |
-> | A · Multiple choice | 30 | 25 min |
-> | B · Short answers | 18 | 20 min |
-> | C · Reading output | 15 | 25 min |
-> | D · Judgement | 12 | 15 min |
-> | **Total** | **100** | **120 min**, leaving 30 to check |
+> | I · The first reading | 15 | 25 min |
+> | II · The second reading | 10 | 20 min |
+> | A · Multiple choice | 30 | 30 min |
+> | B · Short answers | 18 | 25 min |
+> | C · Reading output | 15 | 30 min |
+> | D · Judgement | 12 | 20 min |
+> | **Total** | **100** | **150 min**, leaving 30 to check |
 
 ---
 
