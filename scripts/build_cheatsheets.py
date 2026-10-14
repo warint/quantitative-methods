@@ -30,6 +30,8 @@ What goes on it
    this session, one session at a time, each with a runnable line. Session 03's
    sheet covers sessions 1, 2 and 3: a student holding it is holding everything
    the course has asked them to type, not only last week's half.
+5. **Session 07 only: the four papers, in the course's code** — every step of
+   the four starter scripts, read from them at build time.
 
 Part 4 is driven by TOOLKIT in `build_deck_frontmatter.py`, which is the
 registry the deck slide used, so the two can never disagree about *what* was
@@ -221,6 +223,11 @@ PREAMBLE = r"""\usepackage{titling}
 \titlespacing*{\subsection}{0pt}{0.8em}{0.25em}
 \titleformat{\section}{\normalsize\bfseries\color{ink}}{}{0pt}{}
 \titleformat{\subsection}{\small\bfseries\color{accent}}{}{0pt}{}
+
+% A code line wider than the page wraps, with an arrow, instead of running off
+% the margin: session 07 prints whole scripts.
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakanywhere,commandchars=\\\{\}}
 """
 
 GETTING_STARTED = """## Starting Python in VS Codium
@@ -325,6 +332,78 @@ python -c "import openpyxl; print(openpyxl.__version__)"
 """
 
 
+# ---------------------------------------------------------------------------
+# Session 07 only: the four papers, in the course's code
+#
+# Session 07 teaches no new name; it plugs four papers' data into the models of
+# sessions 3 to 5. What a student wants beside the keyboard that afternoon is
+# that code, so the sheet carries it — read from the starter scripts at build
+# time, never copied, so the sheet cannot drift from what the lecture runs.
+
+STARTERS = ROOT / "07-replication-workshop" / "02-practice" / "starter"
+PAPERS = [
+    ("r1_fraiberger_2021.py", "Paper 1 · Fraiberger et al. (2021) · news sentiment and stock returns",
+     "OLS, then the binary, ordinal and multinomial logits"),
+    ("r2_saganowski_2019.py", "Paper 2 · Saganowski et al. (2019) · what happens to a group next",
+     "the binary, ordinal and multinomial logits"),
+    ("r3_blonigen_piger_2014.py", "Paper 3 · Blonigen and Piger (2014) · the determinants of FDI",
+     "OLS, then ridge, lasso and elastic net, compared on held-out rows"),
+    ("r4_topalova_khandelwal_2011.py", "Paper 4 · Topalova and Khandelwal (2011) · tariffs and productivity",
+     "OLS, the three logits, then ridge, lasso and elastic net"),
+]
+
+PAPER_IMPORTS = """import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error"""
+
+
+def paper_code(script):
+    """The steps of one starter script: every code line, and each step's title.
+
+    Comment-only lines go (the guide explains them), as do the imports (one block
+    covers all four papers, above). Inline comments stay: they say what a number
+    is in. Blank lines separate the steps. The sheet's code font has no Greek, so λ
+    is spelled out — inside a string or a comment, it changes nothing that runs.
+    """
+    lines = (STARTERS / script).read_text(encoding="utf-8").splitlines()
+    start = next(i for i, l in enumerate(lines) if l.startswith("# Step 1"))
+    out = []
+    for line in lines[start:]:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("# Step"):
+            out += ["", line]
+        elif s.startswith("#") or s.startswith(("import ", "from ")):
+            continue
+        else:
+            out.append(line.replace("λ", "lambda"))
+    return "\n".join(out).strip("\n")
+
+
+def papers_section():
+    parts = ["## The four papers, in the course's code\n",
+             "No new method today: each paper's data goes into the models of sessions 3 to 5, with "
+             "the same lines as in their lectures — only the data and the variable names change. "
+             "Below is every step of the four scripts in `07-replication-workshop/02-practice/starter/`, "
+             "run from the repository root. The guides in `replications/` explain each step and "
+             "show what you should see.\n",
+             "### The imports, once for all four\n",
+             "```python\n" + PAPER_IMPORTS + "\n```\n"]
+    for script, title, models in PAPERS:
+        parts.append(f"### {title}\n\n*{models}* · `starter/{script}`\n\n"
+                     "```python\n" + paper_code(script) + "\n```\n")
+    return "\n".join(parts)
+
+
 def snippet_for(name, sess):
     code = SNIPPETS.get(name)
     if code is None:
@@ -419,7 +498,8 @@ format:
 {lead}
 
 {GETTING_STARTED.replace('SESSIONNUM', num)}
-{recap(num)}"""
+{recap(num)}
+{papers_section() if num == "07" else ""}"""
 
 
 # LaTeX picks a random six-letter tag for every embedded font subset, seeded
