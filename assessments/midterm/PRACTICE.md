@@ -12,7 +12,7 @@ your ability to carry out long calculations. The practice follows the exam's six
 | Part | What it asks | Here |
 |---|---|---|
 | **I — Europe 2031** | answer in words: the scenario, what AI is, and Europe's options | 7 prompts |
-| **II — The readings** | research question, model, critiques and an alternative model, for each paper | 5 readings |
+| **II — The readings** | research question, model, critiques and an alternative model, for each paper | 4 readings |
 | **A — multiple choice** | one correct answer out of four | 40 questions |
 | **B — short answers** | state a concept precisely, in two or three sentences | 21 questions |
 | **C — reading output** | interpret an output in words, or find the planted error | 8 items |
@@ -24,7 +24,7 @@ Each question carries its session and its difficulty in brackets, so you can tra
 time, and build up from easy to difficult:
 
 - **easy** (25 questions) — recall a definition, or recognise the right reading of a result;
-- **medium** (42) — combine two ideas, or explain why a tempting reading is wrong;
+- **medium** (41) — combine two ideas, or explain why a tempting reading is wrong;
 - **difficult** (19) — a subtle distinction, an argued position, or several faults to find at once.
 
 > **How to use it.** Answer first, on paper, without notes. Only then open the
@@ -76,18 +76,15 @@ the model — the outcome, the unit of observation, the explanatory variables an
 two distinct critiques a referee could raise; **(d)** another model from this course that could
 answer the question, and what it would report.*
 
-**II1.** *(S2 · medium)* **Fraiberger, Lee, Puy and Sahay (2021)**, *Media sentiment and international
+**II1.** *(S2 · medium)* **Fraiberger, Lee, Puy and Ranciere (2021)**, *Media sentiment and international
 asset prices*.
 
-**II2.** *(S3 · medium)* **Amsili, van Es and Schindelbeck (2024)**, *Pedotransfer functions for field
-capacity, permanent wilting point, and available water capacity*.
-
-**II3.** *(S4 · difficult)* **Saganowski et al. (2019)**, *Analysis of group evolution prediction in
+**II2.** *(S4 · difficult)* **Saganowski et al. (2019)**, *Analysis of group evolution prediction in
 complex networks*.
 
-**II4.** *(S5 · medium)* **Blonigen and Piger (2014)**, *Determinants of foreign direct investment*.
+**II3.** *(S5 · medium)* **Blonigen and Piger (2014)**, *Determinants of foreign direct investment*.
 
-**II5.** *(S6 · difficult)* **Topalova and Khandelwal (2011)**, *Trade liberalization and firm
+**II4.** *(S6 · difficult)* **Topalova and Khandelwal (2011)**, *Trade liberalization and firm
 productivity*.
 
 ---

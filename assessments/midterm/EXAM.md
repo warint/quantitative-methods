@@ -1,6 +1,6 @@
 # Midterm examination — sample paper
 
-**MATH60033A · Quantitative Methods in IB · Sessions 1–6**
+**MATH60033A · Quantitative Methods in IB · Sessions 2–6**
 
 **Printable:** [this paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) · [the answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). Sit it first, on paper, in 2 hours 30 minutes; open the key only afterwards.
 
@@ -25,12 +25,10 @@
 > ### What this paper is testing, and why
 >
 > The paper tests your **understanding** of the methods: what a number means, and what it does not
-> license. There is very little arithmetic. The six parts test six different things:
+> license. There is very little arithmetic. The six parts test five different things:
 >
-> **Part I — Europe 2031.** Can you think clearly about what AI is, and about a scenario, in words?
->
-> **Part II — the reading.** Can you state a paper's question, describe its model, criticise it, and
-> name another way to answer it?
+> **Parts I and II — the readings.** Can you state a paper's question, describe its model, criticise
+> it, and name another way to answer it?
 >
 > **Part A — multiple choice.** Do you hold the core ideas of sessions 2 to 5 precisely?
 >
@@ -43,8 +41,8 @@
 >
 > | Part | Points | Suggested time |
 > |---|---|---|
-> | I · Europe 2031 | 15 | 20 min |
-> | II · The reading | 10 | 15 min |
+> | I · The first reading | 15 | 20 min |
+> | II · The second reading | 10 | 15 min |
 > | A · Multiple choice | 30 | 25 min |
 > | B · Short answers | 18 | 20 min |
 > | C · Reading output | 15 | 25 min |
@@ -53,57 +51,49 @@
 
 ---
 
-# Part I — Europe 2031
+# Part I — The first reading
 
-**15 points · answer in words, drawing on the scenario and on our Session 1 conversation, *what AI
-actually is* · no calculation**
+**15 points · your Session 2 reading · answer in words**
 
-*Europe 2031* (ARQ Foundation, June 2026) follows Europe through a period of rapid AI progress
-between 2026 and 2031. Its prologue (January 2025 – June 2026) is drawn from the observed record;
-its main narrative (August 2026 – March 2031) is constructed. By 2031 it gives the United States
-255.1 GW of AI compute and Europe 20.9 GW.
+Fraiberger, Lee, Puy and Ranciere (2021), *Media sentiment and international asset prices* (Journal of
+International Economics). Answer from your reading of the paper.
 
-**I(a).** *(3)* What is the difference between a **scenario** and a **forecast**? Where is the seam
-between the fact-based and the speculative parts of *Europe 2031*, and why can the figures 255.1 GW
-and 20.9 GW not be cited as predictions?
+**I(a).** *(3)* What is the **research question** of the paper? Why does it matter for an investor,
+or for a country that depends on foreign capital?
 
-<br><br><br>
+<br><br>
 
-**I(b).** *(4)* In Session 1 you downloaded a language model of about four gigabytes. **What is in
-that file**, and **what computation runs** when it answers a question? Is it fair to say that it
-"understands" the subject it writes about?
+**I(b).** *(4)* Describe the **model**: what is the outcome, what is the unit of observation, how is
+the main explanatory variable built, what does it control for, and what method do the authors use?
 
 <br><br><br>
 
-**I(c).** *(4)* Which of the methods in this course would you call **"AI"**, and which are
-statistical methods that are more than a century old? Give two examples of each. Does the
-distinction matter for how much you should trust a result? Explain.
+**I(c).** *(4)* Give **two distinct critiques** a referee could raise about what the results allow
+the authors to conclude.
 
 <br><br><br>
 
-**I(d).** *(4)* The scenario contrasts **"compute sovereignty"** — Europe building its own AI
-capacity — with **"governed interdependence"** — working with US providers while keeping critical
-infrastructure and rules under European law. Which is the better objective for Europe? Argue a
-position, with one argument against it.
+**I(d).** *(4)* Which **other model** from this course could answer a version of the same question?
+Say what its outcome would be, what it would report, and what it could tell you that the authors'
+model does not.
 
 <br><br><br>
 
 ---
 
-# Part II — The reading
+# Part II — The second reading
 
-**10 points · your Session 3 reading**
+**10 points · your Session 4 reading · answer in words**
 
-Amsili, van Es and Schindelbeck (2024), *Pedotransfer functions for field capacity, permanent
-wilting point, and available water capacity based on random forest models for routine soil health
-analysis* (Communications in Soil Science and Plant Analysis). Answer from your reading of the paper.
+Saganowski, Bródka, Koziarski and Kazienko (2019), *Analysis of group evolution prediction in
+complex networks* (PLoS ONE). Answer from your reading of the paper.
 
 **II(a).** *(2)* What is the **research question** of the paper, and why does it matter in practice?
 
 <br><br>
 
-**II(b).** *(3)* Describe the **model**: what is the outcome, what is the unit of observation, what
-are the predictors, and which models do the authors compare?
+**II(b).** *(3)* Describe the **model**: what is the outcome, and what kind of variable is it? What
+is the unit of observation, what are the predictors, and how do the authors judge their classifiers?
 
 <br><br><br>
 
@@ -112,8 +102,7 @@ the authors to conclude.
 
 <br><br><br>
 
-**II(d).** *(2)* Which **other model** from this course could answer the same question? Say what it
-would do differently and what it would report.
+**II(d).** *(2)* Which **model from Session 4** fits this outcome? Say what it would report.
 
 <br><br>
 

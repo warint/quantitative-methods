@@ -79,7 +79,7 @@ it does not license.
   [worked solutions](midterm/SOLUTIONS.md). Printable: [paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf)
   · [answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
-- **Train with the [practice questions](midterm/PRACTICE.md)**: 86 questions in the exam's six
+- **Train with the [practice questions](midterm/PRACTICE.md)**: 85 questions in the exam's six
   parts, 40 of them multiple choice, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
   answering on paper. Printable: [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf)
   · [answers](https://warint.github.io/quantitative-methods/midterm-practice-answers.pdf) (PDF).
