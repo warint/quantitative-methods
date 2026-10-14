@@ -73,19 +73,7 @@ than the reverse; a common cause may move both. (d) A logistic regression of whe
 rises or falls the next day, reporting odds ratios and predicted probabilities; or a lasso on many
 text-based measures to see which predict returns out of sample.
 
-**II2.** *(medium)* **Amsili et al. (2024).** (a) Can cheap, routinely measured soil properties
-predict a soil's water-holding capacity well enough to replace direct measurement, and does a random
-forest beat a linear regression? (b) Outcome: field capacity (also wilting point and available
-water). Unit: a soil sample — 7,232 from the Cornell Soil Health Laboratory. Predictors: sand, clay,
-soil organic matter. Methods: a multiple linear regression against random forests; the regression
-explains about 79% of the variance, about as much as the reduced random forest on the same inputs.
-(c) The fit statistics are not computed the same way for the two methods (in-sample for the
-regression, out-of-bag for the forests); the samples are US topsoils sent to one lab, so the model may
-not travel to other soils; samples above 10% organic matter are excluded. (d) Ridge, lasso or elastic
-net with the other lab measurements as candidates, chosen by cross-validation and judged on held-out
-error; or a squared term if the relation is curved.
-
-**II3.** *(difficult)* **Saganowski et al. (2019).** (a) Can a group's current structure in a social
+**II2.** *(difficult)* **Saganowski et al. (2019).** (a) Can a group's current structure in a social
 network predict which of six events — dissolve, shrink, grow, continue, merge, split — happens to it
 next? (b) Outcome: the next event, six unordered categories. Unit: a group in a time window. Predictors:
 about 90 network measures (size, density, centrality…). Methods: 15 classifiers compared; tree-based
@@ -95,7 +83,7 @@ correlated features, so the feature ranking is unstable; results vary across dat
 multinomial logit — six unordered categories, one baseline — reporting relative risk ratios and
 predicted probabilities; with a lasso-type penalty to handle 90 correlated features.
 
-**II4.** *(medium)* **Blonigen and Piger (2014).** (a) Of 56 candidate determinants of bilateral FDI,
+**II3.** *(medium)* **Blonigen and Piger (2014).** (a) Of 56 candidate determinants of bilateral FDI,
 which few actually carry the signal? Hard because earlier studies each picked their own short list
 and disagree. (b) Outcome: bilateral FDI between a parent and a host country. Unit: a country pair.
 Candidates: 56 variables (gravity, cultural distance, trade agreements, income, skills, institutions,
@@ -107,7 +95,7 @@ inclusion probability is not "no effect"; results depend on the priors and on th
 (d) The lasso or, with correlated candidates, the elastic net, with λ chosen by cross-validation: a
 short list of shrunken coefficients and its out-of-sample error.
 
-**II5.** *(difficult)* **Topalova and Khandelwal (2011).** (a) Did India's tariff cuts of 1991 — on a
+**II4.** *(difficult)* **Topalova and Khandelwal (2011).** (a) Did India's tariff cuts of 1991 — on a
 firm's output and on its inputs — raise its productivity? (b) Outcome: a firm's productivity. Unit:
 a firm in a year — about 3,000 listed manufacturing firms followed over several years. Main
 variables: the tariffs on the firm's industry output and on its inputs; a linear regression that
@@ -123,7 +111,7 @@ is not examined on the midterm.)*
 # Part A — Multiple choice
 
 | Q | Answer | Level | Why |
-|---|---|---|---|
+|:--|:--|:---|:------------------------|
 | A1 | **C** | medium | $\bar x$ is estimated from the same data, so the deviations sum to zero: only $n-1$ are free. |
 | A2 | **B** | easy | A trimmed mean drops a fixed share from each tail before averaging. |
 | A3 | **A** | easy | The median is not pulled by the long right tail. |

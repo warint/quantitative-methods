@@ -5,6 +5,9 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-08-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S08-Lecture.qmd`](01-lecture/MATH60033A-S08-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf)
+
 **Wednesday 4 November 2026** · 15:30–18:30 · Décelles — Victoriaville
 
 Quantitative Methods in International Business · duration 3h00

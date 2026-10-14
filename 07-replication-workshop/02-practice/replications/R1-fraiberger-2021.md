@@ -1,7 +1,7 @@
 # Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
 
-> **Reuses:** OLS (session 03) and the binary logit (session 04), line for line ·
-> **Time:** about 30 minutes ·
+> **Reuses:** OLS (session 03) and the binary, ordinal and multinomial logits (session 04), line for line ·
+> **Time:** about 40 minutes ·
 > **Script:** [`starter/r1_fraiberger_2021.py`](../starter/r1_fraiberger_2021.py) ·
 > **Log:** one block in your [`replication-log.md`](../replication-log.md)
 
@@ -42,6 +42,12 @@ variable names changed:
 | 6 | binary logit, log-odds | session 04 lecture, *LR 6 · Log-odds* |
 | 7 | odds ratio | session 04 lecture, *LR 7 · Odds* |
 | 8 | predicted probability | session 04 lecture, *LR 8 · Predicted probability* |
+| 9 | ordinal logit: the day in thirds, down < flat < up | session 04 lecture, *OLR 3 · The code* |
+| 10 | log-odds and proportional-odds ratios | session 04 lecture, *OLR 4* |
+| 11 | probabilities | session 04 lecture, *OLR 5* |
+| 12 | multinomial logit: the same three days, unordered | session 04 lecture, *MLR 3 · The code* |
+| 13 | log-odds and relative risk ratios | session 04 lecture, *MLR 4* |
+| 14 | probabilities | session 04 lecture, *MLR 5* |
 
 ## Steps
 
@@ -129,6 +135,49 @@ print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))
 
 **You should see:** `0.499`, `0.519`, `0.538`.
 
+### Step 9 · Ordinal logit: down < flat < up
+
+`pd.qcut` cuts the day's return into three equal-sized groups; the *OLR 3* cell keeps their order.
+
+**You should see:** in the summary, `L1_sent1_best 0.0761` and `L1_vix -0.0057` (both p < 0.001),
+and the cutpoints `down/flat` and `flat/up`.
+
+### Step 10 · Ordinal logit: log-odds and odds
+
+**You should see:** proportional-odds ratios `1.079` (sentiment) and `0.994` (VIX).
+
+### Step 11 · Ordinal logit: probabilities
+
+A bad and a good news day (−1 and +1 sd), with the VIX at 20.
+
+**You should see:**
+
+```
+            down   flat     up
+bad news   0.351  0.333  0.316
+good news  0.317  0.334  0.349
+```
+
+### Step 12 · Multinomial logit: the same three days, without their order
+
+The *MLR 3* cell, with a flat day as the baseline. The categories are the ones of step 9, but the
+multinomial does not use their order: down and up each get their own equation.
+
+**You should see:** two blocks. Down vs flat: sentiment −0.0947, VIX +0.0403. Up vs flat: sentiment
++0.0065 (p = 0.36), VIX +0.0343.
+
+### Step 13 · Multinomial logit: log-odds and relative risk ratios
+
+**You should see:** RRR for sentiment `0.910` (down) and `1.007` (up); for the VIX `1.041` (down)
+and `1.035` (up).
+
+### Step 14 · Multinomial logit: probabilities
+
+The VIX at 20, sentiment from −2 to +2 sd.
+
+**You should see:** P(down) falls from 0.379 to 0.292; P(up) rises from 0.311 to 0.360; P(flat)
+from 0.309 to 0.348.
+
 ## Interpretation
 
 - **OLS:** comparing two days one standard deviation of sentiment apart, the day after the better
@@ -140,6 +189,13 @@ print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))
 - **Logit:** one more standard deviation of sentiment raises the **log-odds** of an up day by 0.077;
   the **odds** of an up day are multiplied by **1.08** — 8% higher. In **probabilities**: from
   **50%** after a bad news day to **54%** after a good one.
+- **Ordinal logit:** one more standard deviation of sentiment multiplies the odds of being in a
+  higher third (flat or up rather than down, or up rather than the rest) by **1.08**; a higher VIX
+  pushes days slightly **down** the scale (0.994 per point).
+- **Multinomial logit:** relative to a flat day, good news mostly makes a **down** day less likely
+  (RRR 0.91); its effect on an up day is not detectable. And a higher VIX makes **both** extreme days
+  more likely than a flat one (RRR 1.04 and 1.035): global risk means big moves either way. The
+  ordinal model cannot show this — it forces every predictor to push all days in one direction.
 
 ## What this does not license
 
@@ -147,6 +203,9 @@ print(m2.predict(pd.DataFrame({"L1_sent1_best": [-1, 0, 1]})).round(3))
   rule that out.
 - **No trading rule.** A slope of 0.07 points against a daily return that varies by about 2 points,
   and a probability that moves from 50% to 54%, is small — and before transaction costs.
+- **No "the order is wrong".** The multinomial is not more correct than the ordinal: it asks a
+  different question. Choose the model by the question — the direction of the day, or how far from
+  flat it lands.
 - **Significant is not large.** With 135,082 rows, almost any slope is statistically significant.
   Read its size in units, and the R².
 

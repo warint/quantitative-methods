@@ -57,7 +57,7 @@ Details: [`GROUP-ASSESSMENT.md`](../GROUP-ASSESSMENT.md#the-participation-grade)
 
 ## 4. Midterm exam — 30%
 
-**Wednesday 28 October 2026 · 2 hours 30 minutes · on paper, in pen · a simple calculator · no
+**Wednesday 28 October 2026 · 3 hours · on paper, in pen · a simple calculator · no
 notes, no computer, no internet · Sessions 1 to 6.**
 
 The paper tests **understanding**, not arithmetic: what a method does, what a number means, and what
@@ -76,9 +76,10 @@ it does not license.
 - **Precision beats length.** Two exact sentences earn full marks.
 - **A well-argued refusal earns full marks** in Parts I, II, C and D.
 - Practise on the [sample paper](midterm/EXAM.md) under exam conditions, then check it against the
-  [worked solutions](midterm/SOLUTIONS.md). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
+  [worked solutions](midterm/SOLUTIONS.md). Printable: [paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf)
+  · [answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
-- **Train with the [practice questions](midterm/PRACTICE.md)**: 86 questions in the exam's six
+- **Train with the [practice questions](midterm/PRACTICE.md)**: 85 questions in the exam's six
   parts, 40 of them multiple choice, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
   answering on paper. Printable: [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf)
   · [answers](https://warint.github.io/quantitative-methods/midterm-practice-answers.pdf) (PDF).

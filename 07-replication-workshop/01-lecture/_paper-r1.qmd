@@ -10,22 +10,28 @@ prices* — plugged into the course's models, not the paper's design.
 yesterday's VIX · `up` = 1 if the market rose.
 
 ::::: columns
-:::: {.column width="50%"}
-**OLS** — the session 03 lecture, line for line
+:::: {.column width="30%"}
+**OLS** — session 03
 
 1. Load the data
-2. *Three lines of Python*: return on sentiment
-3. *How much did the line explain?*
-4. *Two predictors*: + yesterday's VIX
-5. *The residual plot*
+2. Return on sentiment
+3. How much did it explain?
+4. + yesterday's VIX
+5. The residual plot
 ::::
 
-:::: {.column width="50%"}
-**Binary logit** — the session 04 lecture, line for line
+:::: {.column width="36%"}
+**Logits** — session 04
 
-6. *LR 6 · Log-odds*: up day on sentiment
-7. *LR 7 · Odds*
-8. *LR 8 · Predicted probability*
+- **6–8 · Binary:** does the market go up? log-odds → odds → probabilities
+- **9–11 · Ordinal:** the day in thirds, down < flat < up
+- **12–14 · Multinomial:** the same three days, without their order
+::::
+
+:::: {.column width="34%"}
+**Each cell, line for line**
+
+The session 03 and 04 lectures' code, with only the data and the variable names changed.
 ::::
 :::::
 
@@ -33,17 +39,16 @@ yesterday's VIX · `up` = 1 if the market rose.
 
 ## What you should find {.scrollable}
 
-| | |
+| Model | In words |
 |---|---|
-| OLS slope, sentiment alone | **0.072** points of return per sd |
-| … holding yesterday's VIX fixed | **0.069** |
-| R² | **0.001** |
-| Logit: odds ratio of an up day, per sd | **1.08** |
-| P(up day) after sentiment −1 / 0 / +1 sd | **0.499 / 0.519 / 0.538** |
+| **OLS** | one sd better news → a return 0.07 points higher the next day; R² 0.001 |
+| **Binary logit** | odds of an up day × 1.08 per sd; P(up) 0.50 → 0.54 from bad to good news |
+| **Ordinal logit** | odds of a higher third × 1.08 per sd of sentiment, × 0.994 per point of VIX |
+| **Multinomial logit** | good news mostly makes a **down** day less likely (RRR 0.91); a higher VIX makes **both** down and up days more likely than a flat one |
 
 ::: {.check}
-A better news day goes with a slightly higher return the next day: 0.07 points, against a daily
-return that varies by about 2 points. In probabilities, an up day goes from 50% to 54%.
+The multinomial shows what the ordinal cannot: global risk does not push days down the scale, it
+pushes them **away from flat** — big moves either way.
 :::
 
 ## What it does not license {.scrollable}

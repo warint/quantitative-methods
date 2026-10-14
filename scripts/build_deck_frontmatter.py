@@ -49,6 +49,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "slides" / "deck-plan.yml"
+sys.path.insert(0, str(ROOT / "scripts"))
+from course_spec import package_sheet_links  # noqa: E402
 
 PAGES = "https://warint.github.io/quantitative-methods"
 CHEATSHEET = "PYTHON-CHEATSHEET"
@@ -152,6 +154,10 @@ TOOLKIT = {
     "pd.Categorical(ordered=True)": ("07", "Load and shape", "categories with an order, for the ordinal logit"),
     "pd.qcut": ("07", "Load and shape", "cut a variable into equal-sized groups, for an ordered outcome"),
     ".loc": ("07", "Load and shape", "set a value on the rows that meet a condition"),
+    ".isin": ("07", "Load and shape", "keep the rows whose value is in a list"),
+    ".copy()": ("07", "Load and shape", "a subset of your own, safe to add columns to"),
+    ".nunique": ("07", "Describe", "how many distinct countries, firms, groups"),
+    "plt.savefig": ("07", "Plot", "keep the figure as a file"),
 
     # ---- Session 13 · PCA and factor analysis (was session 07) ----------
     "PCA": ("13", "Fit", "components, on standardised columns"),
@@ -371,7 +377,9 @@ def render_toolkit(sess):
             f"your platform, how to make a file and run it, {tail}.\n\n"
             f"> **[Python Cheatsheet · Session {sess}]({url})** (PDF) ·\n"
             f"> in the repository at `{sess}-…/{CHEATSHEET}.pdf`\n\n"
-            "::: {.muted}\n"
+            + (f"**One sheet per package, functions explained with pictures:** {package_sheet_links(sess)}\n\n"
+               if package_sheet_links(sess) else "")
+            + "::: {.muted}\n"
             "Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is\n"
             "assumed.\n"
             ":::\n")

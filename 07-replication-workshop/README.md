@@ -5,6 +5,9 @@
 > **[Open the workshop slides](https://warint.github.io/quantitative-methods/session-07-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S07-Lecture.qmd`](01-lecture/MATH60033A-S07-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf)
+
 **Wednesday 14 October 2026** · 15:30–18:30 · Décelles — Victoriaville
 
 Quantitative Methods in International Business · duration 3h00 · **in autonomy, alone or in teams**
@@ -24,7 +27,7 @@ It is also the revision session for the **midterm on 28 October**, which covers 
 
 | # | Paper | The simple models, with the code of | Guide |
 |---|---|---|---|
-| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS, binary logit · sessions 03–04 | [Paper 1](02-practice/replications/R1-fraiberger-2021.md) |
+| 1 | Fraiberger, Lee, Puy & Ranciere (2021), *Media sentiment and international asset prices* | OLS, the three logits · sessions 03–04 | [Paper 1](02-practice/replications/R1-fraiberger-2021.md) |
 | 2 | Saganowski, Bródka, Koziarski & Kazienko (2019), *Analysis of group evolution prediction in complex networks* | binary, ordinal and multinomial logits · session 04 | [Paper 2](02-practice/replications/R2-saganowski-2019.md) |
 | 3 | Blonigen & Piger (2014), *Determinants of foreign direct investment* | OLS, ridge, lasso, elastic net · sessions 03 and 05 | [Paper 3](02-practice/replications/R3-blonigen-piger-2014.md) |
 | 4 | Topalova & Khandelwal (2011), *Trade liberalization and firm productivity* | OLS, the three logits, ridge, lasso, elastic net · sessions 03, 04 and 05 | [Paper 4](02-practice/replications/R4-topalova-khandelwal-2011.md) |

@@ -1118,6 +1118,7 @@ Thierry Warin, PhD
 <blockquote>
 <p><strong><a href="https://warint.github.io/quantitative-methods/python-cheatsheet-03.pdf">Python Cheatsheet · Session 03</a></strong> (PDF) · in the repository at <code>03-…/PYTHON-CHEATSHEET.pdf</code></p>
 </blockquote>
+<p><strong>One sheet per package, functions explained with pictures:</strong> <a href="https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf">pandas</a> · <a href="https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf">NumPy</a> · <a href="https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf">matplotlib</a> · <a href="https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf">statsmodels</a></p>
 <div class="muted">
 <p>Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is assumed.</p>
 </div>
@@ -1514,7 +1515,7 @@ R-squared = 0.692</code></pre>
 <li><strong>Adjusted <span class="math inline">\(R^2\)</span>:</strong> corrects for number of predictors.</li>
 <li><strong>RSE (Residual Standard Error):</strong> average deviation from regression line.</li>
 </ul>
-<div id="b7acd1ff" class="cell" data-execution_count="2">
+<div id="0c6b655b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb8-2"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-3"><a href></a></span>
@@ -1605,7 +1606,7 @@ RSE 9,376 EUR per head</code></pre>
 </li>
 <li>Checking them reveals whether assumptions of linear regression hold.</li>
 </ul>
-<div id="82e23b4f" class="cell" data-execution_count="3">
+<div id="29270c77" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href></a><span class="co"># Residuals vs Fitted: is there structure the straight line missed?</span></span>
 <span id="cb10-2"><a href></a>plt.scatter(fit.fittedvalues, fit.resid, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb10-3"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;black&quot;</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1727,7 +1728,7 @@ RSE 9,376 EUR per head</code></pre>
 <li>Violation = <em>heteroscedasticity</em> (funnel shape).</li>
 <li>Remedies: transform Y, add missing predictors, or use robust errors.</li>
 </ul>
-<div id="5768aace" class="cell" data-execution_count="4">
+<div id="0200b07a" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href></a></span>
 <span id="cb11-3"><a href></a><span class="co"># Scale-Location: is the spread of the residuals constant?</span></span>
@@ -1907,7 +1908,7 @@ RSE 9,376 EUR per head</code></pre>
 <p><span class="math display">\[D_i \;=\; \underbrace{\frac{e_i^2}{p\,s^2}}_{\text{is it badly predicted?}} \;\times\;
             \underbrace{\frac{h_i}{(1-h_i)^2}}_{\text{does it have leverage?}}\]</span></p>
 <p>Those are the two ingredients from the previous slide, multiplied rather than added — which is the point. A big residual in the middle of the X range gives a large first factor and a tiny second one, so the product stays small. It takes <strong>both</strong> to move the line, and only the product knows that.</p>
-<div id="a374d159" class="cell" data-execution_count="5">
+<div id="bc89d7b5" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href></a>influence <span class="op">=</span> fit.get_influence()</span>
 <span id="cb12-2"><a href></a>cooks_d <span class="op">=</span> influence.cooks_distance[<span class="dv">0</span>]</span>
 <span id="cb12-3"><a href></a></span>
@@ -1929,7 +1930,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <div class="tab-content">
 <div id="tabset-7-1">
 <p>One spike per row, its height the distance the fitted values would travel if that row were deleted. Read it for <strong>shape</strong>, not for threshold-crossing: a forest of similar spikes means no single country-year is carrying the result, while one tower above the rest means your finding is really a statement about one observation.</p>
-<div id="c84ced2f" class="cell" data-execution_count="6">
+<div id="42a2bee7" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href></a><span class="co"># The dashed line is the conventional 4/n screen — a prompt to go and look at</span></span>
 <span id="cb14-2"><a href></a><span class="co"># the row, not a rule for dropping it.</span></span>
 <span id="cb14-3"><a href></a>plt.stem(cooks_d)</span>
@@ -1998,7 +1999,7 @@ above 4/n (0.0093): 25 observations</code></pre>
 <section id="watching-them-disagree" class="slide level2 scrollable">
 <h2>Watching them disagree</h2>
 <p>Four nested models on the same 410 rows — because two fits estimated on different samples are not a comparison.</p>
-<div id="44c69a98" class="cell" data-execution_count="7">
+<div id="f5e842ac" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb16-2"><a href></a></span>
 <span id="cb16-3"><a href></a>cols <span class="op">=</span> [<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>, <span class="st">&quot;employment_ths&quot;</span>, <span class="st">&quot;falling_behind&quot;</span>]</span>
@@ -2051,7 +2052,7 @@ BIC prefers: + employment</code></pre>
 <section id="the-table-you-would-actually-publish" class="slide level2 scrollable">
 <h2>The table you would actually publish</h2>
 <p><code>qmib.regtable</code> is R’s <strong>stargazer</strong>, here: one column per model, stars on the coefficients, standard errors beneath, fit statistics at the foot.</p>
-<div id="a087d1bf" class="cell" data-execution_count="8">
+<div id="48fdbb61" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href></a><span class="im">import</span> qmib</span>
 <span id="cb18-2"><a href></a></span>
 <span id="cb18-3"><a href></a>d2 <span class="op">=</span> core.dropna(subset<span class="op">=</span>[<span class="st">&quot;gdp_pc_eur&quot;</span>, <span class="st">&quot;productivity_idx&quot;</span>, <span class="st">&quot;gfcf_meur&quot;</span>])</span>
