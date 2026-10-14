@@ -57,7 +57,7 @@ Details: [`GROUP-ASSESSMENT.md`](../GROUP-ASSESSMENT.md#the-participation-grade)
 
 ## 4. Midterm exam — 30%
 
-**Wednesday 28 October 2026 · 2 hours 30 minutes · on paper, in pen · a simple calculator · no
+**Wednesday 28 October 2026 · 3 hours · on paper, in pen · a simple calculator · no
 notes, no computer, no internet · Sessions 1 to 6.**
 
 The paper tests **understanding**, not arithmetic: what a method does, what a number means, and what

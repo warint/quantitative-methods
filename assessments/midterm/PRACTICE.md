@@ -4,7 +4,7 @@
 
 ---
 
-These questions train for the [midterm](EXAM.md) under its conditions: **2 hours 30 minutes, on
+These questions train for the [midterm](EXAM.md) under its conditions: **3 hours, on
 paper, in pen, with a non-programmable calculator, and nothing else**. The midterm tests your
 **understanding** — what a method does, what a number means, and what it does not license — not
 your ability to carry out long calculations. The practice follows the exam's six parts:
