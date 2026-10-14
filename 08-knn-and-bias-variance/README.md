@@ -5,6 +5,9 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-08-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S08-Lecture.qmd`](01-lecture/MATH60033A-S08-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf)
+
 **Wednesday 4 November 2026** · 15:30–18:30 · Décelles — Victoriaville
 
 Quantitative Methods in International Business · duration 3h00
@@ -66,4 +69,4 @@ In `groups/A2026/group-XX/session-08/`: a KNN classifier on a binary outcome fro
 
 ---
 
-[<- [Session 07: Principal Component and Factor Analyses](../07-pca-and-factor-analysis/README.md)](../07-pca-and-factor-analysis/README.md) | [[Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md) ->](../09-structural-equation-modelling/README.md)
+[<- [Session 07: Replication Workshop: Five Papers, One Toolkit](../07-replication-workshop/README.md)](../07-replication-workshop/README.md) | [[Session 09: Structural Equation Modelling](../09-structural-equation-modelling/README.md) ->](../09-structural-equation-modelling/README.md)

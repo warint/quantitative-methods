@@ -6,6 +6,8 @@ institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session5_cours/"
 source-session: 5
 course-session: 4
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -21,6 +23,8 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: "<style>.reveal .cell-output-display img, .reveal figure img{max-height:360px;width:auto;max-width:100%;}</style>"
     footer: "MATH60033A · Session 04 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -56,14 +60,11 @@ loans = qmib.load("loans")
 1. Introduction
 2. Let's start with an example
 3. The basics of logistic regression
-4. Let's use another example
-5. Inference and goodness of fit
-6. Let's see another example
-7. Comparing logistic models
-8. Model selection
-9. Ordinal logistic regression
-10. Multinomial logistic regression
-11. Conclusion
+4. Let's see another example
+5. Ordinal logistic regression
+6. Multinomial logistic regression
+7. Conclusion
+8. Appendices
 
 ## What session 4 is for {.scrollable}
 ::::: columns
@@ -75,7 +76,6 @@ loans = qmib.load("loans")
 - Say why the **linear probability model** fails, and where it fails worst
 - Read a coefficient as a **log-odds** and its exponential as an odds ratio
 - Compute a fitted probability by hand from $x^\top\hat\beta$
-- Compare nested models with a **likelihood-ratio test**
 - Separate a **Wald** test from a **likelihood-ratio** test, and report McFadden's pseudo-$R^2$ for what it is
 
 ::::
@@ -109,6 +109,8 @@ your platform, how to make a file and run it, the DataFrame basics, and every na
 
 > **[Python Cheatsheet · Session 04](https://warint.github.io/quantitative-methods/python-cheatsheet-04.pdf)** (PDF) ·
 > in the repository at `04-…/PYTHON-CHEATSHEET.pdf`
+
+**One sheet per package, functions explained with pictures:** [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
 
 ::: {.muted}
 Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is
@@ -222,7 +224,7 @@ import statsmodels.formula.api as smf
 
 # The linear probability model: a straight line through 0/1 outcomes
 m1 = smf.ols("default ~ fico", data=loans).fit()
-print(m1.summary())
+print(m1.summary().tables[1])          # the coefficient table
 ```
 
 ### 5
@@ -365,28 +367,59 @@ The logistic regression model can be estimated by the method of **maximum likeli
 
 -   [\\(b_1\\)]{.math .inline} is the estimate of [\\(\\beta_1\\)]{.math .inline}.
 
-### LR 6
+### LR 6 · Log-odds
 
-For our loan default data, the R output from estimating a logistic regression is as follows:
+For our loan default data, the logistic regression in Python:
 
+```{python}
+#| echo: true
 
-### LR 7
+# Fit the logistic regression. The coefficients come out as log-odds.
+m2 = smf.logit("default ~ fico", data=loans).fit(disp=0)
+m2.params.round(4)
+```
 
-Using the R output, the estimated equation for the probability of a loan default is:
+The estimated equation, on the **log-odds** scale:
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 x)}} \\\]]{.math .display}
+$$
+\ln\left(\frac{p}{1-p}\right) = 6.719 - 0.0119\,\text{fico}
+$$
 
-With this equation we can predict probability of loan default for any FICO score [\\(x\\)]{.math .inline}.
+One more FICO point lowers the log-odds of default by 0.0119. True, but hard to picture — so we convert.
 
-### LR 8
+### LR 7 · Odds
 
--   Using the estimated equation, if someone's FICO score is 600 the probability of default is:
+Exponentiate the coefficient to get the **odds ratio**:
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 \\times 600)}} = 0.38 \\\]]{.math .display}
+```{python}
+#| echo: true
 
--   If someone's FICO score is 850 the probability of default is:
+# Log-odds -> odds ratio: take the exponential of each coefficient
+np.exp(m2.params["fico"]).round(4)
+```
 
-[\\\[ p = \\frac{1}{1 + e\^{-(6.72 - 0.012 \\times 850)}} = 0.03 \\\]]{.math .display}
+-   $e^{-0.0119} = 0.988$: each extra FICO point multiplies the odds of default by 0.988 — the odds are about **1.2% lower**, ceteris paribus.
+-   Over 100 points: $e^{100 \times (-0.0119)} = 0.305$ — the odds of default are about **70% lower**.
+
+### LR 8 · Predicted probability
+
+Odds are not probabilities. For a probability, put the **whole** linear predictor $b_0 + b_1 x$ through the logistic function:
+
+$$
+p = \frac{e^{b_0 + b_1 x}}{1 + e^{b_0 + b_1 x}}
+$$
+
+-   FICO 650: $b_0 + b_1 x = 6.719 - 0.011877 \times 650 = -1.001$, so $p = \dfrac{e^{-1.001}}{1 + e^{-1.001}} = 0.27$
+-   FICO 800: $6.719 - 0.011877 \times 800 = -2.783$, so $p = \dfrac{e^{-2.783}}{1 + e^{-2.783}} = 0.06$
+
+```{python}
+#| echo: true
+
+# predict() does the same calculation for you
+m2.predict(pd.DataFrame({"fico": [650, 700, 800]})).round(3)   # inside the data: 612 to 827
+```
+
+With this equation we can predict the probability of default for any FICO score — and, unlike the linear model, it can never fall below 0 or rise above 1.
 
 ### LR 9
 
@@ -401,12 +434,356 @@ With this equation we can predict probability of loan default for any FICO score
 ::::
 :::::::::::::
 
-## Let's use another example {#imported-s04-014 .center .scrollable}
+## Let's see another example {#imported-s04-018 .center .scrollable}
 
-## FICO Score {#imported-s04-015 .scrollable}
+## Portugal's Red Wines {#imported-s04-020 .scrollable}
 
-:::::::::::::::::: panel-tabset
-### 1
+:::::::::::::::::::::::::::::::::::::: panel-tabset
+### Wine 1 · The data
+
+Can we use analytics to predict quality from the physio-chemical content of red wine?
+
+-   Data were collected on 1,599 bottles of Portuguese red wines.
+
+-   Each wine was evaluated by experts and classed "bad" ($Y = 0$) or "good" ($Y = 1$).
+
+```{python}
+#| echo: true
+
+# qmib.load() already returns good as 0/1, so no recoding is needed.
+# About one wine in seven is good: the classes are far from balanced.
+redwines = qmib.load("redwines")
+redwines["good"].value_counts()
+```
+
+### Wine 2 · The equation
+
+Eight predictors $x_1, \dots, x_8$ instead of one. The model is the same, with more terms:
+
+$$
+\ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_8 x_8,
+\qquad p = P(\text{good} = 1)
+$$
+
+-   Estimated the same way, by **maximum likelihood**: the nine coefficients are chosen jointly so that the good and bad ratings we observe are as probable as possible.
+
+-   Each $\beta_j$ is the change in the log-odds of a good rating for a one-unit increase in $x_j$, **holding the other seven constant**.
+
+### Wine 3 · The code
+
+```{python}
+#| echo: true
+
+# Eight chemical measurements; price, region and vintage are absent
+predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
+              "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
+
+w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit(disp=0)
+print(w1.summary())
+```
+
+### Wine 4 · Log-odds → odds
+
+The coefficients are **log-odds**; exponentiate them to get **odds ratios**:
+
+```{python}
+#| echo: true
+
+# Log-odds as fitted, and their exponentials. Above 1 raises the odds, below 1
+# lowers them. The intercept is left out: e^b0 is the odds when all x are zero.
+b = w1.params.drop("Intercept")
+pd.DataFrame({"log-odds": b, "odds ratio": np.exp(b)}).round(3)
+```
+
+-   Alcohol: $b = 0.782$, $e^{0.782} = 2.19$. "A one-point increase in alcohol content multiplies the odds of a good rating by 2.19 — 119% higher — ceteris paribus."
+
+-   Total sulfur dioxide: $b = -0.014$, $e^{-0.014} = 0.986$. Each extra mg/L lowers the odds of a good rating by about 1.4%, ceteris paribus.
+
+-   Density and chlorides show 0.000: a one-unit change is far outside what these variables do in the data. Rescale a predictor before reading its odds ratio.
+
+### Wine 5 · Probabilities
+
+The odds ratio is the same everywhere; the change in **probability** is not. To get probabilities, apply $p = e^{X\beta} / (1 + e^{X\beta})$ to the whole linear predictor — which is what `predict()` does:
+
+```{python}
+#| echo: true
+
+# Hold every other predictor at its mean and vary alcohol alone
+grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
+grid["alcohol"] = range(8, 16)
+
+grid["p_good"] = w1.predict(grid)
+print(grid[["alcohol", "p_good"]].round(3))
+```
+
+::: {.muted}
+Boxplots, the signs of the coefficients, significance, a confidence interval for one bottle and the pseudo-$R^2$: Appendix B.
+:::
+::::::::::::::::::::::::::::::::::::::
+
+## Ordinal logistic regression {#imported-s04-025 .center .scrollable}
+
+## Ordinal logistic regression {#imported-s04-026 .scrollable}
+
+::::::::::::::::::::::::::::::: panel-tabset
+### OLR 1 · The data
+
+A study looks at factors that influence the decision of whether to apply to graduate school. College juniors are asked if they are unlikely, somewhat likely, or very likely to apply. The outcome has three **ordered** categories, and the "distances" between them need not be equal.
+
+The predictors are `pared` (1 if at least one parent went to graduate school), `public` (1 if the undergraduate institution is public) and `gpa`.
+
+```{python}
+#| echo: true
+
+import qmib
+
+# An ordered outcome: how likely a student says they are to apply to graduate
+# school. Unlikely < somewhat likely < very likely — an ordering the data carry
+# and that a plain multinomial model would throw away.
+dat = qmib.load("ologit")
+dat.head()
+```
+
+### OLR 2 · The equation
+
+With $J = 3$ ordered categories, the ordinal logit models the **cumulative** log-odds — the chance of being *at or below* each cut:
+
+$$
+\ln\left(\frac{P(Y \le j)}{P(Y > j)}\right) = c_j - (\beta_1\,\text{pared} + \beta_2\,\text{public} + \beta_3\,\text{gpa}), \qquad j = 1, 2
+$$
+
+-   $J - 1 = 2$ **cutpoints** $c_1 < c_2$ play the role of the intercept, one per cut.
+
+-   **One** $\beta$ per predictor, shared by both cuts: the **proportional-odds** assumption.
+
+-   Because of the minus sign, a **positive** $\beta$ pushes students **up** the scale.
+
+-   Estimated by **maximum likelihood**: the cutpoints and the $\beta$s are chosen jointly so that the answers we observe are as probable as possible.
+
+### OLR 3 · The code
+
+```{python}
+#| echo: true
+
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+# Keep the order: unlikely < somewhat likely < very likely
+order = ["unlikely", "somewhat likely", "very likely"]
+dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
+om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]], distr="logit").fit(method="bfgs", disp=0)
+print(om.summary())
+```
+
+The first three rows are the $\beta$s, in log-odds. The last two are the cutpoints, on a scale explained in Appendix C.
+
+### OLR 4 · Log-odds → odds
+
+The coefficients are **log-odds** — here, of being in a higher category:
+
+```{python}
+#| echo: true
+
+# Log-odds: the slopes as fitted (the cutpoints are left out)
+om.params[["pared", "public", "gpa"]].round(3)
+```
+
+Exponentiate them to get **proportional-odds ratios**:
+
+```{python}
+#| echo: true
+
+# Proportional-odds ratios
+np.exp(om.params[["pared", "public", "gpa"]]).round(3)
+```
+
+-   `pared`: $b = 1.048$, $e^{1.048} = 2.85$. For students whose parents attended graduate school, the odds of being **more likely** to apply are 2.85 times those of other students (185% higher), ceteris paribus.
+
+-   "More likely" means **either** cut — very or somewhat likely versus unlikely, and very likely versus the rest. Proportional odds makes it the same 2.85 at both.
+
+-   `gpa`: $e^{0.616} = 1.85$. One more GPA point multiplies those odds by 1.85 (85% higher), ceteris paribus.
+
+### OLR 5 · Probabilities
+
+Odds are not probabilities. With $\eta = x^\top\beta$ and $F(z) = e^{z} / (1 + e^{z})$:
+
+$$
+P(Y \le j) = F(c_j - \eta), \qquad
+P(Y = j) = P(Y \le j) - P(Y \le j - 1)
+$$
+
+Each category's probability is a **difference** of cumulative ones. `predict()` does this for you:
+
+```{python}
+#| echo: true
+
+# The same student, and an otherwise identical one whose parents did not
+# go to graduate school. Columns: unlikely, somewhat likely, very likely.
+new = pd.DataFrame({"pared": [1, 0], "public": [0, 0], "gpa": [3.0, 3.0]})
+pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["pared=1", "pared=0"]).round(3)
+```
+
+Moving `pared` from 0 to 1 takes $P(\text{very likely})$ from 0.079 to 0.197 and $P(\text{unlikely})$ from 0.588 to 0.334. One coefficient moves the whole distribution up the scale.
+
+::: {.muted}
+The data in detail, the cutpoints, the computation by hand, `public`, and a check of proportional odds: Appendix C.
+:::
+:::::::::::::::::::::::::::::::
+
+## Multinomial logistic regression {#imported-s04-027 .center .scrollable}
+
+## Multinomial logistic regression {#imported-s04-028 .scrollable}
+
+::::::::::::::::::::::::: panel-tabset
+### MLR 1 · The data
+
+People's occupational choices might be influenced by their parents' occupations and their own education level. Here the choice is a high-school programme — academic, general or vocational — and the question is how it relates to family socio-economic status and writing ability.
+
+-   200 students. The outcome is `prog`, programme type, with **no natural order**.
+-   The predictors are `ses`, socio-economic status (low, middle, high), and `write`, a writing score.
+
+```{python}
+#| echo: true
+
+# Unordered: vocation is not "more" than general, so the model is multinomial
+ml = qmib.load("hsbdemo")
+ml.describe()
+```
+
+### MLR 2 · The equation
+
+With $J = 3$ unordered categories, pick one as the **baseline** — here academic, the most common. The model writes $J - 1 = 2$ log-odds equations, each comparing one category **with the baseline**:
+
+$$
+\ln\left(\frac{P(\text{general})}{P(\text{academic})}\right) = b_{10} + b_{11}\,\text{middle} + b_{12}\,\text{high} + b_{13}\,\text{write}
+$$
+
+$$
+\ln\left(\frac{P(\text{vocation})}{P(\text{academic})}\right) = b_{20} + b_{21}\,\text{middle} + b_{22}\,\text{high} + b_{23}\,\text{write}
+$$
+
+-   **Every predictor gets its own coefficient in every equation**: 2 equations × 4 parameters = 8 parameters.
+
+-   The two equations are estimated **together**, by **maximum likelihood**, not as two separate binary logits. That is what keeps the three probabilities summing to one.
+
+-   `middle` and `high` are indicators; `ses = low` is their reference category.
+
+### MLR 3 · The code
+
+```{python}
+#| echo: true
+
+import statsmodels.api as sm
+# Code 0 (academic) is the baseline: every coefficient reads "relative to academic"
+levels = ["academic", "general", "vocation"]
+ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
+# Leave ses_low out, so low SES is the reference the other two are compared with
+X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_middle", "ses_high"]].astype(float)
+X["write"] = ml["write"].astype(float)
+X = sm.add_constant(X)
+# Two sets of coefficients at once, each against the academic baseline
+mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
+print(mn.summary().tables[1])          # the coefficient table
+```
+
+`prog_c=1` is general vs academic; `prog_c=2` is vocation vs academic. Academic has no block: its coefficients are fixed at zero.
+
+### MLR 4 · Log-odds → relative risk ratios
+
+The coefficients are **log-odds relative to the baseline**. Exponentiated, they are **relative risk ratios** (RRR): $e^{b}$ multiplies the ratio $P(\text{category}) / P(\text{academic})$.
+
+```{python}
+#| echo: true
+
+# Log-odds and RRR, for general vs academic and vocation vs academic
+pd.concat({"log-odds": mn.params, "RRR": np.exp(mn.params)}, axis=1) \
+  .set_axis(["log-odds: general", "log-odds: vocation", "RRR: general", "RRR: vocation"], axis=1).round(3)
+```
+
+-   `write`: $b = -0.058$, $e^{-0.058} = 0.944$. Each extra point lowers the general-to-academic ratio by 5.6%, ceteris paribus.
+-   `ses` low → high: $b = -1.163$, $e^{-1.163} = 0.313$ for general vs academic — about a third.
+
+Say "relative to academic" every time.
+
+### MLR 5 · Probabilities
+
+Odds are not probabilities. Each category gets a linear index, $\eta_{\text{general}}$ and $\eta_{\text{vocation}}$, with $\eta_{\text{academic}} = 0$ for the baseline. Each probability is its exponentiated index over the sum of all three (the **softmax**):
+
+$$
+P(Y = j) = \frac{e^{\eta_j}}{e^{0} + e^{\eta_{\text{general}}} + e^{\eta_{\text{vocation}}}}
+$$
+
+```{python}
+#| echo: true
+
+# Middle-SES students: the average writer (52.8), then across the range
+grid = pd.DataFrame({"const": 1.0, "ses_middle": 1.0, "ses_high": 0.0,
+                     "write": [52.775, 35, 45, 55, 65]})
+out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["write"])
+out.round(3)
+```
+
+::: {.muted}
+A coefficient moves a category **against the baseline**, not its own probability — so report probabilities too. More in Appendix D.
+:::
+:::::::::::::::::::::::::
+
+## Conclusion {#imported-s04-029 .center .scrollable}
+
+## Conclusion {#imported-s04-030 .scrollable}
+
+-   Logistic regression extends linear regression to binary, ordinal, and multinomial outcomes.
+
+-   The logistic function constrains predicted probabilities between 0 and 1.
+
+-   Coefficients are interpreted through odds and odds ratios, rather than direct changes in means.
+
+-   Inference relies on likelihood-based methods (Wald tests, likelihood ratio tests) instead of variance decomposition.
+
+-   Model fit can be evaluated using measures such as McFadden's pseudo-R².
+
+-   A set of coefficients, such as all the levels of one categorical predictor, is tested jointly with a likelihood-ratio (χ²) test.
+
+-   Applications to credit risk and wine quality illustrated the interpretive and practical uses of logistic regression.
+
+-   Ordinal and multinomial extensions allow richer modeling of categorical outcomes in business research.
+
+-   Successful application requires attention to assumptions, data quality, and validity of interpretations.
+
+## Conclusion - Key Takeaways {#imported-s04-031 .scrollable}
+
+1.  Logistic regression provides a robust framework for modeling binary and categorical outcomes, ensuring probabilities are always between 0 and 1.
+
+2.  Inference and model fit rely on likelihood-based methods (Wald tests, likelihood-ratio χ² tests, pseudo-R²), rather than variance decomposition.
+
+3.  Extensions to ordinal and multinomial logit models allow richer analysis of categorical responses in applied business research.
+
+
+## Before the next session {.scrollable}
+
+::: {.warn}
+**Required:** the next session's article, its Dataverse package, and the
+self-check. That is the pre-session deck.
+:::
+
+::: {.step}
+**Optional:** the **QMIB Lab** for this session — a knowledge check on the hour
+you have just sat through: **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-04.html)**
+:::
+
+::: {.muted}
+Never a prerequisite, never marked for correctness. A completed report counts
+toward participation because attempting it is the engagement being measured.
+:::
+
+## Appendices {#s04-appendices .center .scrollable}
+
+::: {.muted}
+What the slides leave out, kept for reading after the session.
+:::
+
+## Appendix A · FICO score: inference and intervals {#s04-appendix-a .scrollable}
+
+::::::::::::::::::::: panel-tabset
+### A1 · Confidence interval for β₁
 
 The estimate [\\(b_1 = - 0.0119\\)]{.math .inline} is difficult to interpret exactly.
 
@@ -420,7 +797,7 @@ We could construct a confidence interval for [\\(\\beta_1\\)]{.math .inline} usi
 
 -   However, we can assess whether [\\(\\beta_1\\)]{.math .inline} is positive or negative through a confidence interval.
 
-### 2
+### A2 · The interval, computed
 
 ::::::: columns
 ::::: {.column style="width:50%;"}
@@ -437,7 +814,7 @@ We could construct a confidence interval for [\\(\\beta_1\\)]{.math .inline} usi
 :::
 :::::::
 
-### 3
+### A3 · Testing β₁ = 0
 
 we are usually interested in the following test:
 
@@ -449,7 +826,7 @@ we are usually interested in the following test:
 
 Therefore FICO score is a statistically significant predictor of the probability of a loan default.
 
-### 4
+### A4 · Estimating π
 
 Estimating [\\(\\pi\\)]{.math .inline}
 
@@ -459,13 +836,13 @@ Estimating [\\(\\pi\\)]{.math .inline}
 
 [\\\[\\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1x)}}\\\]]{.math .display}
 
-### 5
+### A5 · Interval for a probability
 
 Instead of a point estimate of [\\(\\pi\\)]{.math .inline}, [\\(p\\)]{.math .inline}, we can also compute a 95% confidence interval:
 
 [\\\[p \\pm 1.96 \\times SE(b_1)\\\]]{.math .display}
 
-The formula for SE(p) is complex, so we let R do the work:
+The formula for SE(p) is complex, so we let Python do the work:
 
 ```{python}
 #| echo: true
@@ -486,8 +863,7 @@ The 95% confidence interval for [\\(\\pi\\)]{.math .inline} is (0.161, 0.177).
 
 > We are 95% confident that the probability that a borrower with a FICO score of 700 would default is between 0.161 and 0.177.
 
-
-### 6
+### A6 · The fitted curve
 
 :::: cell
 <div>
@@ -498,80 +874,12 @@ The 95% confidence interval for [\\(\\pi\\)]{.math .inline} is (0.161, 0.177).
 
 </div>
 ::::
-::::::::::::::::::
+:::::::::::::::::::::
 
-## Inference and goodness of fit {#imported-s04-016 .center .scrollable}
+## Appendix B · Portugal's red wines: more detail {#s04-appendix-b .scrollable}
 
-## Inference and goodness of fit {#imported-s04-017 .scrollable}
-
-:::::: panel-tabset
-### IGF 1
-
-In the last segment, we learned how to estimate the coefficients of a simple logistic regression and obtain predictions.
-
-We now focus on:
-
--   **Hypothesis testing** for the coefficient of a predictor in logistic regression.
-
--   **Confidence intervals** for probabilities.
-
--   An **analogous measure** to [\\(R\^2\\)]{.math .inline} in linear regression.
-
-### IGF 2
-
-Again, the simple logistic regression model is given by:
-
-[\\\[ \\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1x)}} \\\]]{.math .display}
-
--   We usually consider both confidence intervals and hypothesis tests for [\\(\\beta_1\\)]{.math .inline} (btw, not [\\(b_1\\)]{.math .inline}).
-
--   Because the value of [\\(\\beta_1\\)]{.math .inline} is difficult to interpret, we will focus mainly on hypothesis testing for [\\(\\beta_1 = 0\\)]{.math .inline}.
-
-### IGF 3
-
--   No agreed-upon method for summarizing goodness-of-fit for logistic regression.
-
--   The difficulty is that the notion of "percent variation explained" by the predictor is not as obvious as with linear regression.
-
-### IGF 4
-
-Various suggestions have been proposed -- we will use the pseudo-R2 measure (due to McFadden).
-
--   Logistic regression models are fitted using the method of maximum likelihood - i.e. the parameter estimates are those values which maximize the likelihood of the data which have been observed. McFadden's R squared measure is defined as:
-
-[\\\[ R\^{2}\_{\\text{McFadden}} = 1- \\frac{log(L_c)}{log(L\_{\\text{null}})} \\\]]{.math .display}
-
--   where [\\(L_c\\)]{.math .inline} denotes the (maximized) likelihood value from the current fitted model, and [\\(L\_{\\text{null}}\\)]{.math .inline} denotes the corresponding value but for the null model - the model with only an intercept and no covariates.
-
-### IGF 5
-
-This calculation looks similar to that of [\\(R\^2\\)]{.math .inline} for linear regression.
-
--   Analysis of goodness-of-fit for loan default logistic regression:
-
-```{python}
-#| echo: true
-
-m2 = smf.logit("default ~ fico", data=loans).fit()
-null = smf.logit("default ~ 1", data=loans).fit()
-
-# McFadden's pseudo R-squared
-pseudo_r2 = 1 - m2.llf / null.llf
-print(f"pseudo R2 = {pseudo_r2:.4f}")
-```
-
-Value is computed to be 0.0271
-
--   Very low pseudo-R2 -- roughly 2.7% of the "variation" explained by the FICO score.
-
--   Generally do not expect high [\\(pseudo-R\^2\\)]{.math .inline} values.
-
--   Values as high as 0.4 or 0.5 indicate a very good fit for logistic regression.
-::::::
-
-## Let's see another example {#imported-s04-018 .center .scrollable}
-
-## Portugal's Red Wines {#imported-s04-019 .scrollable}
+::::::::::::::::::::: panel-tabset
+### B1 · Why several predictors
 
 -   Analogous to linear regression, logistic regression benefits from using multiple predictors simultaneously.
 
@@ -585,42 +893,19 @@ Value is computed to be 0.0271
 
     -   With large data, computing-intensive to fit
 
-## Portugal's Red Wines (cont.) {#imported-s04-020 .scrollable}
-
-:::::::::::::::::::::::::::::::::::::: panel-tabset
-### Wine 1
-
-Can we use analytics to predict quality from physio-chemical content of red wine?
-
--   Data were collected on 1599 bottles of Portuguese red wines.
-
--   Each wine was evaluated by experts; wines were dichotomized into "bad" vs "good" based on quality.
-
-### Wine 2
+### B2 · Descriptive statistics
 
 ```{python}
 #| echo: true
 
 import qmib
 
-# A second binary outcome, deliberately unlike the loans one: the classes are
-# closer to balanced here, so accuracy is a less dishonest measure than it was.
+# Every variable at a glance, before any model
 redwines = qmib.load("redwines")
 redwines.describe().round(2)
 ```
 
-### Wine 3
-
--   We will consider eight predictors listed above of good wine quality (No/Yes) for this example. We will let Y = 1 to represent "Yes" and Y = 0 to represent "No."
-
-```{python}
-#| echo: true
-
-# qmib.load() already returns good as 0/1, so no recoding is needed.
-redwines["good"].value_counts()
-```
-
-### Wine 4
+### B3 · Boxplots by outcome
 
 ::::::::: columns
 ::::: {.column style="width:50%;"}
@@ -653,43 +938,11 @@ plt.suptitle(""); plt.tight_layout(); plt.show()
 :::::
 :::::::::
 
-### Wine 5
-
-We have predictors [\\(x_1, x_2, x_3, \..., x_p\\)]{.math .inline}
-
-Our model for the binary response is:
-
-[\\\[ \\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1 x_1 + \\beta_2 x_2 + \... + \\beta_p x_p)}} \\\]]{.math .display}
-
-Same method to estimate the coefficients (i.e., the [\\(\\beta\\)]{.math .inline}s) by maximum likelihood estimation.
-
-Similar goals:
-
--   Perform statistical inference for the [\\(beta\\)]{.math .inline}s
-
--   Make probability predictions of the response based on predictor variable values
-
--   Slight difference comes in the interpretation of coefficients
-
-### Wine 6
-
-```{python}
-#| echo: true
-
-# Eight chemical measurements. Note what is absent: price, region, vintage.
-# The model can only speak about what is in this list.
-predictors = ["fixed_acidity", "volatile_acidity", "residual_sugar", "chlorides",
-              "total_sulfur_dioxide", "density", "sulphates", "alcohol"]
-
-w1 = smf.logit("good ~ " + " + ".join(predictors), data=redwines).fit()
-print(w1.summary())
-```
-
-### Wine 7
+### B4 · Signs of the coefficients
 
 The estimated multiple logistic regression is therefore:
 
-[\\\[\\pi = P(Y=1) = \\frac{1}{1+e\^{-(227 + 0.281 x_1 -0.291 x_2 + \... + 0.782 x_p)}}\\\]]{.math .display}
+[\\\[\\pi = P(Y=1) = \\frac{1}{1+e\^{-(227 + 0.281 x_1 -2.913 x_2 + \... + 0.782 x_p)}}\\\]]{.math .display}
 
 A positive value of a coefficient means:
 
@@ -697,15 +950,15 @@ A positive value of a coefficient means:
 
 A negative value of a coefficient means:
 
--   A one-unit increase in the predictor, holding the other predictors fixed, corresponds to an decrease in the probability of "success."
+-   A one-unit increase in the predictor, holding the other predictors fixed, corresponds to a decrease in the probability of "success."
 
-### Wine 8
+### B5 · Reading the signs
 
 An increase in fixed acidity, residual sugar, sulphates, and alcohol content correspond to higher wine quality, holding all other variables fixed.
 
 An increase in volatile acidity, chlorides, total sulfur dioxide and density correspond to lower wine quality, holding all other variables fixed.
 
-### Wine 9
+### B6 · The magnitudes
 
 Interpreting the magnitude of the coefficients:
 
@@ -713,53 +966,7 @@ Interpreting the magnitude of the coefficients:
 
 > It is more crucial to interpret when a coefficient is positive or negative.
 
-### Wine 10
-
-The coefficients are called the log-odds
-
-```{python}
-#| echo: true
-
-# Log-odds: the coefficients as fitted
-w1.params
-```
-
-### Wine 11
-
-To get the "odds", we just to take the exponential value of the coefficients:
-
-```{python}
-#| echo: true
-
-import numpy as np
-
-# Odds ratios: exponentiate. Above 1 raises the odds, below 1 lowers them.
-np.exp(w1.params)
-```
-
-> For one unit increase in alcohol, the odds of the wine being qualified as good increase by a factor of 2.18.
-
-### Wine 12
-
-To get the predicted probabilities:
-
-```{python}
-#| echo: true
-
-# Hold every other predictor at its mean and vary alcohol alone
-grid = pd.DataFrame({c: [redwines[c].mean()] * 8 for c in predictors})
-grid["alcohol"] = range(8, 16)
-
-grid["p_good"] = w1.predict(grid)
-print(grid[["alcohol", "p_good"]].round(3))
-```
-
-### Wine 13
-
-To get the predicted probabilities:
-
-
-### Wine 14
+### B7 · Predicted probabilities, plotted
 
 :::: cell
 <div>
@@ -771,7 +978,7 @@ To get the predicted probabilities:
 </div>
 ::::
 
-### Wine 15
+### B8 · Significance
 
 Also we might want to know whether a coefficient is [\\(0\\)]{.math .inline} (i.e., whether the predictor is important).
 
@@ -779,296 +986,50 @@ Can formally address this question using hypothesis tests:
 
 -   Interpretation: Each predictor individually is significant (at the α = 0.05 level) of wine quality relative to a model with all other predictors included.
 
-There are no simple formulas for confidence intervals for the true probability, π, for a specific set of predictor values. But they are easily computable in R.
+There are no simple formulas for confidence intervals for the true probability, π, for a specific set of predictor values. But they are easily computed in Python.
 
-### Wine 16
+### B9 · One bottle, with an interval
 
-Consider a bottle of wine with the characteristics:
+Consider a bottle of wine with these characteristics:
 
-| fixed.acidity \| volatile.acidity \| residual.sugar \| chlorides
-
-\|\|\|-\|\| \| 6.2 \| 0.36 \| 2.2 \| 0.095
-
-| total.sulfur.dioxide \| density \| sulphates \| alcohol
-
-\|-\|\|--\|-\| \| 42 \| 0.9946 \| 0.57 \| 11.7 \|
-
-We can determine that the estimated probability that this wine is of good quality is 0.141.
-
-By the way, this particular wine was rated as "not good" in the actual data set.
-
-### Wine 17
-
-For wines with the following characteristics:
-
-  fixed.acidity   volatile.acidity   residual.sugar   chlorides
-  --------------- ------------------ ---------------- -----------
-  6.2             0.36               2.2              0.095
-
-  total.sulfur.dioxide   density   sulphates   alcohol
-  ---------------------- --------- ----------- ---------
-  42                     0.9946    0.57        11.7
-
-A 95% confidence interval for [\\(\\pi\\)]{.math .inline}, the probability wine with these features would be rated good, is:
-
-(0.089, 0.195)
-
-> For wines with the listed physio-chemical composition, we are 95% confident that the probability of a "good" evaluation is between 0.089 and 0.195.
-
-The pseudo-R2 can be computed for multiple logistic regression in the same way as in simple logistic regression.
-
-> For the wine quality logistic regression, the pseudo-R2 is computed to be 0.313.
-
-This suggests that a moderate amount of variability in the binary response can be explained by the physio-chemical predictors.
-::::::::::::::::::::::::::::::::::::::
-
-## Comparing logistic models {#imported-s04-021 .center .scrollable}
-
-## Comparing logistic models {#imported-s04-022 .scrollable}
-
-:::::::::::::::::::::::: panel-tabset
-### Comparison 1
-
-Recall that the simple logistic regression model used to model Y, a Bernoulli variable with probability of success [\\(\\pi\\)]{.math .inline} is given by:
-
-[\\\[ \\pi = P(Y=1) = \\frac{1}{1+e\^{-(\\beta_0+\\beta_1 x_1 + \\beta_2 x_2 + \... + \\beta_p x_p)}} \\\]]{.math .display}
-
-The estimates for the model then become:
-
-[\\\[ p = P(Y=1) = \\frac{1}{1+e\^{-(b_0+ b_1 x_1 + b_2 x_2 + \... + b_p x_p)}} \\\]]{.math .display}
-
-### Comparison 2
-
-Residuals in logistic regression:
-
--   Residuals in logistic regression can then be calculated just like in linear regression:
-
-[\\\[e = y - p\\\]]{.math .display}
-
-Here, [\\(p\\)]{.math .inline} is the estimated probability of the response taking on the value 1, and [\\(Y\\)]{.math .inline} is either 0 or 1.
-
-This results in the estimated residuals, [\\(e\\)]{.math .inline}, only being able to take on two values for any predicted value.
-
-### Comparison 3
-
-::::::::: columns
-::::: {.column style="width:50%;"}
-Let us use our *loans* dataset.
-
-:::::
-
-::::: {.column style="width:50%;"}
-Below is the residual scatter plot for the logistic model predicting loan default from FICO score:
-
-The pattern emerges because of the discreteness in the binary response.
-
-:::: cell
-<div>
-
-<figure>
-<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-36-1.png" width="960" /></p>
-</figure>
-
-</div>
-::::
-:::::
-:::::::::
-
-### Comparison 4
-
-::::::::: columns
-::::: {.column style="width:50%;"}
-Because of this pattern (based on the response being binary), performing model diagnostics in logistic regression is not easy.
-
-Using logistic regression as a predictive model is still valid.
+| fixed acidity | volatile acidity | residual sugar | chlorides | total sulfur dioxide | density | sulphates | alcohol |
+|---|---|---|---|---|---|---|---|
+| 6.2 | 0.36 | 2.2 | 0.095 | 42 | 0.9946 | 0.57 | 11.7 |
 
 ```{python}
 #| echo: true
 
-import matplotlib.pyplot as plt
-
-# Predict across the whole FICO range rather than only where data sit, so the
-# S-shape is visible instead of implied.
-grid = pd.DataFrame({"fico": range(550, 901)})
-
-# alpha=0.2 because 9,578 points at exactly 0 and 1 would otherwise be two
-# solid bars, hiding where the mass actually is.
-plt.scatter(loans["fico"], loans["default"], s=4, alpha=0.2)
-plt.plot(grid["fico"], m2.predict(grid), color="blue", lw=3)
-plt.xlabel("FICO"); plt.ylabel("P(default)")
-plt.show()
+# One bottle: its predicted probability of a good rating, with a 95% interval
+bottle = pd.DataFrame({"fixed_acidity": [6.2], "volatile_acidity": [0.36],
+                       "residual_sugar": [2.2], "chlorides": [0.095],
+                       "total_sulfur_dioxide": [42], "density": [0.9946],
+                       "sulphates": [0.57], "alcohol": [11.7]})
+w1.get_prediction(bottle).summary_frame()[["predicted", "ci_lower", "ci_upper"]].round(3)
 ```
-:::::
 
-::::: {.column style="width:50%;"}
-:::: cell
-<div>
+The estimated probability that this wine is good is 0.142, with a 95% confidence interval of (0.097, 0.202). This particular wine was rated "not good" in the data.
 
-<figure>
-<p><img src="imported-assets/index_files/figure-revealjs/unnamed-chunk-38-1.png" width="960" /></p>
-</figure>
+> For wines with this physio-chemical composition, we are 95% confident that the probability of a "good" evaluation is between 0.097 and 0.202.
 
-</div>
-::::
-:::::
-:::::::::
+### B10 · Pseudo-R²
 
-### Comparison 5
-
-Comparing logistic models is similar to the approach we took with linear regression.
-
--   If two models are nested, a formal significance test, the chi-squared test [\\(\\chi\^2\\)]{.math .inline}, can be performed.
-
--   If two models are not nested, then Akaike Information Criterion (AIC) can be compared.
-
-> Backward stepwise regression (using AIC) can be used to select a best predictive model.
-
-### Comparison 6
-
-We've seen that FICO score is predictive of whether a borrower defaults on a loan.
-
-> Can we improve our model by using the purpose of the loan as an additional predictor?
-
-The variable 'purpose' has 7 categories, so R will create 6 binary predictors to define it in a logistic regression model.
-
--   To determine if it is important, a single test for one coefficient is not possible since there are six of them, so we need a different approach.
-
-#### Chi-squared test {#chi-squared-test .unnumbered}
-
-Formally the hypotheses being tested in a chi-squared test in logistic regression are:
-
--   [\\(H_0\\)]{.math .inline}: the [\\(\\beta\\)]{.math .inline}s associated with the extra variables are all zero
-
--   [\\(H_1\\)]{.math .inline}: at least one of the extra [\\(\\beta\\)]{.math .inline}s is not zero.
-
-> A large chi-squared statistic is in favor of the alternative hypothesis.
-
--   If the [\\(p-value\\)]{.math .inline} is small, then there is evidence to suggest that the extra variables are important.
-
--   The chi-squared test in logistic regression is the analog to the F-test in linear regression.
-
-#### Chi-squared test {#chi-squared-test-1 .unnumbered}
-
-Comparing two models to predict defaulted loans in R:
+The pseudo-$R^2$ is computed for multiple logistic regression in the same way as in simple logistic regression:
 
 ```{python}
 #| echo: true
 
-# Two nested models: m3 is m2 plus the loan purpose. C() tells the formula that
-# purpose is categorical, so it becomes a set of indicator columns rather than
-# being read as a number — the most common silent error in formula syntax.
-m2 = smf.logit("default ~ fico", data=loans).fit()
-m3 = smf.logit("default ~ fico + C(purpose)", data=loans).fit()
+# McFadden's pseudo R-squared, from the two maximised log-likelihoods
+w0 = smf.logit("good ~ 1", data=redwines).fit(disp=0)
+print(f"pseudo R2 = {1 - w1.llf / w0.llf:.3f}")
 ```
 
-```{python}
-#| echo: true
+A moderate amount of the variability in the binary response is explained by the physio-chemical predictors.
+:::::::::::::::::::::
 
-from scipy import stats
+## Appendix C · Ordinal logistic regression: more detail {#s04-appendix-c .scrollable}
 
-# Likelihood-ratio test: does purpose earn its extra parameters?
-lr = 2 * (m3.llf - m2.llf)
-df = int(m3.df_model - m2.df_model)
-print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.6f}")
-```
-
-### Comparison 7
-
-
-The chi-squared test has a very small p-value (certainly less than 0.0001).
-
-> We can conclude that the purpose for their loan is an important predictor (beyond just FICO score).
-::::::::::::::::::::::::
-
-## Model selection {#imported-s04-023 .center .scrollable}
-
-## Model selection {#imported-s04-024 .scrollable}
-
-::::::::::::: panel-tabset
-### Stepwise 1
-
-Stepwise model selection can be used in logistic regression (just like in linear regression) using AIC as the criterion to choose the best predictive model.
-
-The algorithm is the same. For backwards selection:
-
--   Start with the 'full' model
-
--   Remove the variable that would result in an model that improves AIC the most
-
--   Continue removing variables, one at a time, until AIC cannot be improved (smallest AIC).
-
-### Stepwise 2
-
-To predict whether a borrower defaults on a loan, let's start with a 'full model' that uses the following predictors:
-
--   FICO score
-
--   Debt to income ratio (dti)
-
--   Annual income (on the log scale)
-
--   Interest rate
-
--   Purpose (7 categories: credit card, educational, etc.)
-
-### Stepwise 3
-
-```{python}
-#| echo: true
-
-# Compare candidate models on AIC rather than running an automatic search:
-# it is clearer what you chose, and why.
-candidates = [
-    "default ~ fico",
-    "default ~ fico + int_rate",
-    "default ~ fico + int_rate + log_annual_inc + dti",
-]
-for formula in candidates:
-    m = smf.logit(formula, data=loans).fit(disp=0)
-    print(f"AIC {m.aic:9.1f}   {formula}")
-```
-
-### Stepwise 4
-
-AIC was calculated to be 8067.1.
-
-Looks like 'dti' is unimportant. Let's see what gets removed after performing a backward stepwise approach
-
-### Stepwise 5
-
-Removing 'dti' improved the AIC slightly (8067.1 to 8066.99).
-
-We stop after dropping 'dti' because all other models with one fewer predictor have higher AIC.
-
-Notice: 'purpose', with its six binary variables, is either entirely included or not included at all.
-:::::::::::::
-
-## Ordinal logistic regression {#imported-s04-025 .center .scrollable}
-
-## Ordinal logistic regression {#imported-s04-026 .scrollable}
-
-::::::::::::::::::::::::::::::: panel-tabset
-### OLR 1
-
-A study looks at factors that influence the decision of whether to apply to graduate school. College juniors are asked if they are unlikely, somewhat likely, or very likely to apply to graduate school. Hence, our outcome variable has three categories.
-
--   Data on parental educational status, whether the undergraduate institution is public or private, and current GPA is also collected. The researchers have reason to believe that the "distances" between these three points are not equal.
-
--   For example, the "distance" between "unlikely" and "somewhat likely" may be shorter than the distance between "somewhat likely" and "very likely".
-
-```{python}
-#| echo: true
-
-import qmib
-
-# An ordered outcome: how likely a student says they are to apply to graduate
-# school. Unlikely < somewhat likely < very likely — an ordering the data carry
-# and that a plain multinomial model would throw away.
-dat = qmib.load("ologit")
-dat.head()
-```
-
-### OLR 2
+::::::::::::::::::::: panel-tabset
+### C1 · The data, cross-tabulated
 
 ::::::::::: columns
 :::::: {.column style="width:50%;"}
@@ -1094,52 +1055,16 @@ pd.crosstab([dat["public"], dat["pared"]], dat["apply"])
 
 The predictors are `pared` (1 if at least one parent went to graduate school), `public` (1 if the undergraduate institution is public) and `gpa`.
 
-### OLR 3
+### C2 · GPA by category
 
 ```{python}
 #| echo: true
-
-# Keep the order — "unlikely" < "somewhat likely" < "very likely".
-# An ordinal model needs the ordering, not just the labels.
-order = ["unlikely", "somewhat likely", "very likely"]
-dat["apply_c"] = pd.Categorical(dat["apply"], categories=order, ordered=True)
 
 # Mean GPA rises with each category — the pattern the model will summarise.
 dat.groupby("apply_c", observed=True)["gpa"].mean().round(3)
 ```
 
-### OLR 4
-
-**The model.** With $J = 3$ ordered categories, the ordinal logit does not model each category directly. It models the **cumulative** probabilities — the chance of being *at or below* each cut:
-
-$$
-\ln\left(\frac{P(Y \le j)}{P(Y > j)}\right) = c_j - (\beta_1\,\text{pared} + \beta_2\,\text{public} + \beta_3\,\text{gpa}), \qquad j = 1, 2
-$$
-
--   There are $J - 1 = 2$ **cutpoints** (thresholds) $c_1 < c_2$: one between "unlikely" and "somewhat likely", one between "somewhat likely" and "very likely". They play the role of the intercept, one per cut.
-
--   There is **one** $\beta$ per predictor, shared by both cuts. That is the **proportional-odds** assumption: a predictor shifts every cumulative logit by the same amount.
-
--   The minus sign means a **positive** $\beta$ pushes students **up** the scale: it lowers $P(Y \le j)$, so it raises the chance of being in a higher category.
-
-Think of a latent "propensity to apply" $y^* = x^\top\beta + \varepsilon$, with a logistic error. We observe only which interval between the cutpoints $y^*$ falls in.
-
-### OLR 5
-
-```{python}
-#| echo: true
-
-from statsmodels.miscmodels.ordinal_model import OrderedModel
-
-# One slope per predictor and two cutpoints, not three separate models. The
-# single slope is the proportional-odds restriction: the effect is assumed the
-# same at every cut. It is testable, and it is usually assumed instead.
-om = OrderedModel(dat["apply_c"], dat[["pared", "public", "gpa"]],
-                  distr="logit").fit(method="bfgs", disp=0)
-print(om.summary())
-```
-
-### OLR 6
+### C3 · Reading the output: the cutpoints
 
 **Reading the output.** The first three rows are the $\beta$s, on the log-odds scale. Each `z` is `coef / std err`, and its p-value is a Wald test of $\beta = 0$:
 
@@ -1160,7 +1085,7 @@ om.model.transform_threshold_params(om.params)
 
 There is no separate intercept: $c_1$ and $c_2$ are the intercepts.
 
-### OLR 7
+### C4 · A probability by hand
 
 **Computing a probability by hand.** Take a student whose parents went to graduate school (`pared = 1`), at a private institution (`public = 0`), with a GPA of 3.0.
 
@@ -1173,35 +1098,7 @@ There is no separate intercept: $c_1$ and $c_2$ are the intercepts.
     -   $P(\text{somewhat likely}) = 0.803 - 0.334 = 0.469$
     -   $P(\text{very likely}) = 1 - 0.803 = 0.197$
 
-```{python}
-#| echo: true
-
-# The same student, and an otherwise identical one whose parents did not
-# go to graduate school. Columns: unlikely, somewhat likely, very likely.
-new = pd.DataFrame({"pared": [1, 0], "public": [0, 0], "gpa": [3.0, 3.0]})
-pd.DataFrame(np.asarray(om.predict(new)), columns=order, index=["pared=1", "pared=0"]).round(3)
-```
-
-Moving `pared` from 0 to 1 takes $P(\text{very likely})$ from 0.079 to 0.197 and $P(\text{unlikely})$ from 0.588 to 0.334. One coefficient moves the whole distribution up the scale.
-
-### OLR 8
-
-```{python}
-#| echo: true
-
-# Proportional-odds ratios
-np.exp(om.params[["pared", "public", "gpa"]])
-```
-
-Parental Education
-
--   Exponentiating gives $e^{1.048} = 2.85$. For students whose parents did attend graduate school, the **odds** of being **more likely** to apply are 2.85 times (i.e., 185% higher than) those of students whose parents did not, holding constant all other variables.
-
--   Because of proportional odds, "more likely" means **either** cut: very or somewhat likely versus unlikely, **and** very likely versus somewhat or unlikely. The same 2.85 applies to both.
-
--   Read the other way round, the odds of being **less likely** to apply are $1/2.85 = 0.35$ times as high for students whose parents did attend.
-
-### OLR 9
+### C5 · School type
 
 School Type
 
@@ -1211,7 +1108,7 @@ School Type
 
 -   But the confidence interval for $\beta_2$ is $(-0.64, 0.53)$ and $p = 0.84$: the data cannot tell a 5.7% difference from none. **Report it as no detectable effect**, not as a 5.7% effect.
 
-### OLR 10
+### C6 · GPA in detail
 
 GPA
 
@@ -1219,9 +1116,9 @@ GPA
 
 -   A full GPA point is a big move here — the standard deviation of `gpa` is 0.40. For a 0.4-point increase the odds ratio is $e^{0.616 \times 0.4} = 1.28$.
 
--   Odds ratios multiply **odds**, not probabilities. How much a probability moves depends on where the student starts, which is why the predicted probabilities in OLR 7 are the better thing to show a reader.
+-   Odds ratios multiply **odds**, not probabilities. How much a probability moves depends on where the student starts, which is why the predicted probabilities in OLR 5 are the better thing to show a reader.
 
-### OLR 11
+### C7 · Is proportional odds plausible?
 
 **Is proportional odds plausible?** Fit a separate binary logit at each cut and compare the slopes. If the assumption holds, they should be close.
 
@@ -1243,34 +1140,12 @@ cuts.assign(ordinal=om.params[["pared", "public", "gpa"]]).round(3).drop(index="
 -   `public` changes sign ($-0.20$ vs $0.54$), but neither is significant and cut 2 has only 40 students above it. The single ordinal slope averages over that.
 
 -   If a slope really differs across cuts, one number is the wrong summary. A generalized ordered logit, or a multinomial logit, lets it vary.
-:::::::::::::::::::::::::::::::
+:::::::::::::::::::::
 
-## Multinomial logistic regression {#imported-s04-027 .center .scrollable}
+## Appendix D · Multinomial logistic regression: more detail {#s04-appendix-d .scrollable}
 
-## Multinomial logistic regression {#imported-s04-028 .scrollable}
-
-::::::::::::::::::::::::: panel-tabset
-### MLR 1
-
-People's occupational choices might be influenced by their parents' occupations and their own education level. Here the choice is a high-school programme — academic, general or vocational — and the question is how it relates to family socio-economic status and writing ability.
-
-```{python}
-#| echo: true
-
-import qmib
-
-# An unordered outcome: which programme a student is in. There is no sense in
-# which vocation is "more" than general, so the ordinal machinery above does
-# not apply and the multinomial model is the right one.
-ml = qmib.load("hsbdemo")
-ml.describe()
-```
-
-### MLR 2
-
--   The data set contains variables on 200 students.
-
--   The outcome variable is `prog`, program type. The predictor variables are socio-economic status, `ses`, a three-level categorical variable (low, middle, high), and writing score, `write`, a continuous variable.
+::::::::::::::::::::: panel-tabset
+### D1 · The data, cross-tabulated
 
 ```{python}
 #| echo: true
@@ -1280,59 +1155,7 @@ ml.describe()
 pd.crosstab(ml["ses"], ml["prog"], margins=True)
 ```
 
-### MLR 3
-
-**The model.** With $J = 3$ unordered categories, pick one as the **baseline** — here academic, the most common. The model then writes $J - 1 = 2$ logit equations, each comparing one category **with the baseline**:
-
-$$
-\ln\left(\frac{P(\text{general})}{P(\text{academic})}\right) = b_{10} + b_{11}\,\text{middle} + b_{12}\,\text{high} + b_{13}\,\text{write}
-$$
-
-$$
-\ln\left(\frac{P(\text{vocation})}{P(\text{academic})}\right) = b_{20} + b_{21}\,\text{middle} + b_{22}\,\text{high} + b_{23}\,\text{write}
-$$
-
--   Unlike the ordinal model, **every predictor gets its own coefficient in every equation**: 2 equations × 4 parameters = 8 parameters.
-
--   The two equations are estimated **together**, by maximum likelihood, not as two separate binary logits. That is what keeps the three probabilities summing to one.
-
--   `middle` and `high` are indicators; `ses = low` is their reference category. So there are two baselines to keep in mind: academic for the outcome, low for SES.
-
-### MLR 4
-
-First, we need to choose the level of our outcome that we wish to use as our baseline, and the reference level of `ses`.
-
-```{python}
-#| echo: true
-
-import statsmodels.api as sm
-
-# The first level of a Categorical becomes code 0, and MNLogit uses code 0 as
-# the baseline, so every coefficient below reads "relative to academic".
-# Reorder this list and every number changes meaning, with nothing in the
-# output to warn you.
-levels = ["academic", "general", "vocation"]
-ml["prog_c"] = pd.Categorical(ml["prog"], categories=levels).codes
-
-# Leave ses_low out, so low SES is the reference the other two are compared with
-X = pd.get_dummies(ml[["ses"]].astype(str))[["ses_middle", "ses_high"]].astype(float)
-X["write"] = ml["write"].astype(float)
-X = sm.add_constant(X)
-```
-
-Then we fit the model. `MNLogit` reports a z-test (a Wald test, `coef / std err`) for every coefficient.
-
-```{python}
-#| echo: true
-
-# MNLogit estimates J-1 sets of coefficients at once — here two, each against
-# the academic baseline. Every number that follows is a comparison with that
-# baseline, which is why naming it is not optional when reporting.
-mn = sm.MNLogit(ml["prog_c"], X).fit(disp=0)
-print(mn.summary())
-```
-
-### MLR 5
+### D2 · Reading the output
 
 **Reading the output.** The summary has one block per equation. `prog_c=1` is general vs academic (the $b_{1k}$); `prog_c=2` is vocation vs academic (the $b_{2k}$). Code 0, academic, has no block: its coefficients are fixed at zero.
 
@@ -1346,9 +1169,9 @@ $$
 \ln\left(\frac{P(\text{vocation})}{P(\text{academic})}\right) = 5.218 + 0.291\,\text{middle} - 0.983\,\text{high} - 0.114\,\text{write}
 $$
 
-The header gives the fit of the model as a whole: log-likelihood $-179.98$ against $-204.10$ for the intercept-only model, McFadden's pseudo-$R^2$ = 0.118, and a likelihood-ratio p-value of $10^{-8}$ for all six slopes jointly.
+The header of `print(mn.summary())` gives the fit of the model as a whole: log-likelihood $-179.98$ against $-204.10$ for the intercept-only model, McFadden's pseudo-$R^2$ = 0.118, and a likelihood-ratio p-value of $10^{-8}$ for all six slopes jointly.
 
-### MLR 6
+### D3 · Every coefficient
 
 **Interpreting the coefficients** — each one is a change in the log odds of one programme **relative to academic**:
 
@@ -1366,9 +1189,13 @@ The header gives the fit of the model as a whole: log-likelihood $-179.98$ again
 
 Say "relative to academic" every time. Nothing here compares general with vocation directly; that is $b_{2k} - b_{1k}$.
 
-### MLR 7
+### D4 · Does SES matter at all?
 
-**Does SES matter at all?** SES has four coefficients — two indicators in two equations — so no single z-test answers that. Use the likelihood-ratio test from earlier in the session:
+**Does SES matter at all?** SES has four coefficients — two indicators in two equations — so no single z-test answers that. Use a **likelihood-ratio test**: fit the model with and without SES, and compare their maximised log-likelihoods.
+
+$$LR = 2\,(\ell_{\text{full}} - \ell_{\text{restricted}}) \sim \chi^2_{q}$$
+
+where $q$ is the number of coefficients dropped — here four. A large $LR$ means the dropped coefficients were doing work. It is the logistic analogue of the $F$-test for nested linear models.
 
 ```{python}
 #| echo: true
@@ -1384,24 +1211,7 @@ print(f"chi2 = {lr:.2f}, df = {df}, p = {stats.chi2.sf(lr, df):.4f}")
 
 With $p \approx 0.026$, SES improves the model jointly, even though three of its four coefficients are not individually significant at 5%.
 
-### MLR 8
-
-```{python}
-#| echo: true
-
-# Column 0 is general vs academic; column 1 is vocation vs academic
-np.exp(mn.params)
-```
-
-Exponentiated coefficients are called **relative risk ratios** (RRR). $e^{b}$ multiplies the ratio $P(\text{category}) / P(\text{academic})$:
-
--   The RRR for a one-unit increase in `write` is $e^{-0.058} = 0.944$ for general vs academic: each extra point multiplies the general-to-academic ratio by 0.944, i.e. lowers it by 5.6%.
-
--   The RRR for moving from `ses = low` to `high` is $e^{-1.163} = 0.313$ for general vs academic: high-SES students' ratio of general to academic is about a third of low-SES students'.
-
--   The same move gives $e^{-0.983} = 0.374$ for vocation vs academic.
-
-### MLR 9
+### D5 · Probabilities by hand
 
 **Computing probabilities by hand.** Take a middle-SES student with the average writing score, 52.8.
 
@@ -1419,17 +1229,7 @@ $$
 P(\text{general}) = \frac{0.478}{2.093} = 0.228, \qquad P(\text{vocation}) = \frac{0.615}{2.093} = 0.294
 $$
 
-```{python}
-#| echo: true
-
-# The same student, and middle-SES students across the range of writing scores
-grid = pd.DataFrame({"const": 1.0, "ses_middle": 1.0, "ses_high": 0.0,
-                     "write": [52.775, 35, 45, 55, 65]})
-out = pd.DataFrame(mn.predict(grid).values, columns=levels, index=grid["write"])
-out.round(3)
-```
-
-### MLR 10
+### D6 · Coefficients are not probability effects
 
 **Coefficients are not probability effects.** $b_{13}$ is negative, yet in the table, $P(\text{general})$ *rises* from 0.192 to 0.232 as `write` goes from 35 to 45, and only then falls.
 
@@ -1438,52 +1238,4 @@ out.round(3)
 -   A coefficient tells you how one category moves **against the baseline**. How that category's own probability moves depends on all the equations at once.
 
 > Report predicted probabilities — or their changes — alongside the coefficients. A reader who sees only $b_{13} < 0$ will conclude that better writers are always less likely to be in the general programme, and the model does not say that.
-:::::::::::::::::::::::::
-
-## Conclusion {#imported-s04-029 .center .scrollable}
-
-## Conclusion {#imported-s04-030 .scrollable}
-
--   Logistic regression extends linear regression to binary, ordinal, and multinomial outcomes.
-
--   The logistic function constrains predicted probabilities between 0 and 1.
-
--   Coefficients are interpreted through odds and odds ratios, rather than direct changes in means.
-
--   Inference relies on likelihood-based methods (Wald tests, likelihood ratio tests) instead of variance decomposition.
-
--   Model fit can be evaluated using measures such as McFadden's pseudo-R².
-
--   Competing models can be compared via χ² tests for nested models and AIC for non-nested models, with stepwise procedures as an option.
-
--   Applications to credit risk and wine quality illustrated the interpretive and practical uses of logistic regression.
-
--   Ordinal and multinomial extensions allow richer modeling of categorical outcomes in business research.
-
--   Successful application requires attention to assumptions, data quality, and validity of interpretations.
-
-## Conclusion - Key Takeaways {#imported-s04-031 .scrollable}
-
-1.  Logistic regression provides a robust framework for modeling binary and categorical outcomes, ensuring probabilities are always between 0 and 1.
-
-2.  Inference and model fit rely on likelihood-based methods (Wald tests, χ² tests, AIC, pseudo-R²), rather than variance decomposition.
-
-3.  Extensions to ordinal and multinomial logit models allow richer analysis of categorical responses in applied business research.
-
-
-## Before the next session {.scrollable}
-
-::: {.warn}
-**Required:** the next session's article, its Dataverse package, and the
-self-check. That is the pre-session deck.
-:::
-
-::: {.step}
-**Optional:** the **QMIB Lab** for this session — a knowledge check on the hour
-you have just sat through: **[warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-04.html)**
-:::
-
-::: {.muted}
-Never a prerequisite, never marked for correctness. A completed report counts
-toward participation because attempting it is the engagement being measured.
-:::
+:::::::::::::::::::::

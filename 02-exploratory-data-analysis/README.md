@@ -5,6 +5,9 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-02-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S02-Lecture.qmd`](01-lecture/MATH60033A-S02-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
+
 **Wednesday 2 September 2026** · 15:30–18:30 · Décelles — Victoriaville
 
 Quantitative Methods in International Business · duration 3h00

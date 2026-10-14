@@ -227,9 +227,10 @@ fit = sm.MNLogit(y, sm.add_constant(X)).fit()
 X = sm.add_constant(X)            # the intercept, with no formula
 
 # -- Read the fit --------------------------------------------------
-p = fit.predict(newdata)          # probabilities, not classes
+p = fit.predict(newdata)          # probability e^xb/(1+e^xb), not a class
 fit.get_prediction(newdata).summary_frame()  # with an interval
-np.exp(fit.params)                # a log-odds becomes an odds ratio
+fit.params                        # log-odds, as fitted
+np.exp(fit.params)                # odds ratios: 1.65 = odds 65% higher
 
 # -- Choose and validate -------------------------------------------
 lr = 2 * (full.llf - reduced.llf)  # the likelihood-ratio statistic
@@ -245,17 +246,20 @@ fig, axes = plt.subplots(1, 2, figsize=(7.4, 2.9))
 # -- Load and shape ------------------------------------------------
 from sklearn.preprocessing import StandardScaler
 Z = StandardScaler().fit(Xtr).transform(Xtr)   # fit on TRAIN only
-pipe = make_pipeline(StandardScaler(), Ridge(alpha=1.0))
-# so the scaler never sees the held-out fold
+pipe = make_pipeline(StandardScaler(), Lasso(alpha=0.8)).fit(X, y)
+# standardise first; the scaler never sees the held-out fold
 
 # -- Fit -----------------------------------------------------------
-Ridge(alpha=1.0).fit(Ztr, ytr)     # Lasso, ElasticNet take the same shape
+Ridge(alpha=10)                    # alpha is lambda; shrinks, keeps all
+Lasso(alpha=0.8)                   # sets weak ones to exactly 0
+ElasticNet(alpha=1.0, l1_ratio=0.5)  # l1_ratio: 1 = lasso, 0 = ridge
 
 # -- Read the fit --------------------------------------------------
 model.coef_, model.alpha_         # scikit-learn's spelling of .params
 
 # -- Choose and validate -------------------------------------------
 LassoCV(cv=5).fit(Ztr, ytr).alpha_     # lambda by cross-validation
+ElasticNetCV(l1_ratio=[.1, .5, .9, 1], cv=5)  # and the mix too
 alphas, coefs, _ = lasso_path(Z, y)    # the whole coefficient path
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=7)
 KFold(n_splits=5, shuffle=True, random_state=7)
@@ -279,24 +283,23 @@ big.compare_f_test(small)         # nested models only
 np.linalg.pinv(v_fe - v_re)       # for the Hausman statistic
 ```
 
-### Session 7 · PCA and factor analysis
+### Session 7 · Four papers, one toolkit
 
 ```python
+# -- Load and shape ------------------------------------------------
+firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")
+y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %
+pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)
+d["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])
+d.loc[d["foreign"] == 1, "owner"] = "foreign"   # only those rows change
+dat = groups[groups["event"].isin(order)]   # only the three ordered events
+dat = groups[groups["event"].isin(order)].copy()   # then add columns safely
+
 # -- Describe ------------------------------------------------------
-np.linalg.eigvalsh(np.corrcoef(Z, rowvar=False))
+d["iso"].nunique()                # 25 countries
 
-# -- Fit -----------------------------------------------------------
-from sklearn.decomposition import PCA
-p = PCA().fit(Z)                  # on standardised columns
-import prince
-famd = prince.FAMD(n_components=3).fit(mixed)   # numeric AND categorical
-from statsmodels.multivariate.factor import Factor
-f = Factor(df.to_numpy(), n_factor=2, method="ml").fit()
-
-# -- Read the fit --------------------------------------------------
-p.explained_variance_ratio_       # what the scree plot is drawn from
-p.components_                     # loadings: variables on components
-f.rotate("varimax")               # same fit, readable loadings
+# -- Plot ----------------------------------------------------------
+plt.savefig(OUTPUT / "resid_vs_fitted.png", dpi=110, bbox_inches="tight")
 ```
 
 ### Session 8 · KNN and bias–variance

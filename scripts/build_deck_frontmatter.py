@@ -49,6 +49,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "slides" / "deck-plan.yml"
+sys.path.insert(0, str(ROOT / "scripts"))
+from course_spec import package_sheet_links  # noqa: E402
 
 PAGES = "https://warint.github.io/quantitative-methods"
 CHEATSHEET = "PYTHON-CHEATSHEET"
@@ -119,7 +121,7 @@ TOOLKIT = {
     ".predict": ("04", "Read the fit", "fitted probabilities, not classes"),
     ".get_prediction": ("04", "Read the fit", "with an interval, via `.summary_frame()`"),
     ".llf": ("04", "Choose and validate", "log-likelihood, for the LR test"),
-    "np.exp": ("04", "Read the fit", "a log-odds becomes an odds ratio"),
+    "np.exp": ("04", "Read the fit", "log-odds to odds ratio; `.predict` for probabilities"),
     "stats.chi2.sf": ("04", "Choose and validate", "the $p$-value of that test"),
     "pd.get_dummies": ("04", "Load and shape", "categories to indicator columns"),
     "pd.crosstab": ("04", "Describe", "a contingency table in one call"),
@@ -129,7 +131,7 @@ TOOLKIT = {
     # ---- Session 05 · regularisation -------------------------------------
     "StandardScaler": ("05", "Load and shape", "standardise before you penalise"),
     "make_pipeline": ("05", "Load and shape", "so the scaler is fitted on train only"),
-    "Ridge / Lasso / ElasticNet": ("05", "Fit", "the three penalties"),
+    "Ridge / Lasso / ElasticNet": ("05", "Fit", "shrink all · zero the weak · keep twins together"),
     "RidgeCV / LassoCV / ElasticNetCV": ("05", "Choose and validate", "$\\lambda$ by cross-validation"),
     "lasso_path": ("05", "Choose and validate", "the whole coefficient path"),
     "train_test_split": ("05", "Choose and validate", "hold something back"),
@@ -146,14 +148,25 @@ TOOLKIT = {
     ".compare_f_test": ("06", "Choose and validate", "an F-test, for nested models only"),
     "np.linalg.pinv": ("06", "Choose and validate", "pseudo-inverse, for the Hausman statistic"),
 
-    # ---- Session 07 · PCA and factor analysis ----------------------------
-    "PCA": ("07", "Fit", "components, on standardised columns"),
-    ".explained_variance_ratio_": ("07", "Read the fit", "what the scree plot is drawn from"),
-    ".components_": ("07", "Read the fit", "the loadings — variables on components"),
-    "prince.FAMD": ("07", "Fit", "when the columns are mixed numeric and categorical"),
-    "Factor": ("07", "Fit", "statsmodels' factor analysis, by maximum likelihood"),
-    ".rotate('varimax')": ("07", "Read the fit", "same fit, readable loadings — and no new evidence"),
-    "np.linalg.eigvalsh": ("07", "Describe", "eigenvalues of a symmetric matrix"),
+    # ---- Session 07 · four papers, one toolkit ---------------------------
+    "pd.read_stata": ("07", "Load and shape", "an author's Stata file, straight into pandas"),
+    "np.log": ("07", "Load and shape", "a skewed outcome, on a log scale"),
+    "pd.Categorical(ordered=True)": ("07", "Load and shape", "categories with an order, for the ordinal logit"),
+    "pd.qcut": ("07", "Load and shape", "cut a variable into equal-sized groups, for an ordered outcome"),
+    ".loc": ("07", "Load and shape", "set a value on the rows that meet a condition"),
+    ".isin": ("07", "Load and shape", "keep the rows whose value is in a list"),
+    ".copy()": ("07", "Load and shape", "a subset of your own, safe to add columns to"),
+    ".nunique": ("07", "Describe", "how many distinct countries, firms, groups"),
+    "plt.savefig": ("07", "Plot", "keep the figure as a file"),
+
+    # ---- Session 13 · PCA and factor analysis (was session 07) ----------
+    "PCA": ("13", "Fit", "components, on standardised columns"),
+    ".explained_variance_ratio_": ("13", "Read the fit", "what the scree plot is drawn from"),
+    ".components_": ("13", "Read the fit", "the loadings — variables on components"),
+    "prince.FAMD": ("13", "Fit", "when the columns are mixed numeric and categorical"),
+    "Factor": ("13", "Fit", "statsmodels' factor analysis, by maximum likelihood"),
+    ".rotate('varimax')": ("13", "Read the fit", "same fit, readable loadings — and no new evidence"),
+    "np.linalg.eigvalsh": ("13", "Describe", "eigenvalues of a symmetric matrix"),
 
     # ---- Session 08 · nearest neighbours and the trade-off ---------------
     "KNeighborsClassifier": ("08", "Fit", "predict a class from the k closest rows"),
@@ -364,7 +377,9 @@ def render_toolkit(sess):
             f"your platform, how to make a file and run it, {tail}.\n\n"
             f"> **[Python Cheatsheet · Session {sess}]({url})** (PDF) ·\n"
             f"> in the repository at `{sess}-…/{CHEATSHEET}.pdf`\n\n"
-            "::: {.muted}\n"
+            + (f"**One sheet per package, functions explained with pictures:** {package_sheet_links(sess)}\n\n"
+               if package_sheet_links(sess) else "")
+            + "::: {.muted}\n"
             "Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is\n"
             "assumed.\n"
             ":::\n")

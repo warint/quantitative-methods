@@ -1,0 +1,58 @@
+## Paper 3 · Session 05 · What attracts foreign direct investment {.center .scrollable}
+
+## The data, and the models {.scrollable}
+
+**Blonigen & Piger (2014)**, *Determinants of foreign direct investment* · the course's rebuild of
+its data for 2019: `qmib.load("fdi")`. **One row = one parent → host country pair**; 765 pairs with
+positive FDI and all **56 candidate** predictors. Outcome: `log_fdi`.
+
+::::: columns
+:::: {.column width="50%"}
+**OLS** — the code of session 03
+
+1. Load: logs, complete rows
+2. Three lines of Python: FDI on host GDP
+3. How much did the line explain?
+4. Two predictors: + distance
+::::
+
+:::: {.column width="50%"}
+**Penalties** — the code of session 05
+
+5. Ridge, λ by cross-validation
+6. Lasso: how many kept?
+7. Elastic net, mix 0.5
+8. Which predicts best on held-out pairs?
+::::
+:::::
+
+::: {.muted}
+Same code as in class; only the data and the variable names change. We do not follow the paper.
+:::
+
+{{< include _solutions-r3.qmd >}}
+
+## What you should find {.scrollable}
+
+| | OLS, all 56 | ridge | lasso | elastic net |
+|---|---|---|---|---|
+| predictors kept (all rows) | 56 | 56 | 34 | 46 |
+| test RMSE (held-out 30%) | 1.631 | 1.606 | 1.596 | **1.595** |
+
+::: {.check}
+**OLS:** a host 1% larger holds about 0.5% more FDI, and a partner 1% farther away about 0.5% less,
+holding the other fixed. Host size alone explains 5% of the variation.
+:::
+
+::: {.warn}
+**The penalties gain little here:** 765 pairs for 56 candidates is not a square table. The elastic
+net keeps 46 where the lasso keeps 34, because it lets correlated candidates in together.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** A kept variable predicts FDI here; changing it need not attract any.
+- **No "no effect"** for a zeroed candidate: among correlated ones, the lasso keeps one almost at random.
+- **No p-values after selection**, and no claim beyond 765 data-rich, mostly OECD pairs.
+:::

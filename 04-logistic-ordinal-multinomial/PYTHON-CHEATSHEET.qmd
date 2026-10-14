@@ -227,9 +227,10 @@ fit = sm.MNLogit(y, sm.add_constant(X)).fit()
 X = sm.add_constant(X)            # the intercept, with no formula
 
 # -- Read the fit --------------------------------------------------
-p = fit.predict(newdata)          # probabilities, not classes
+p = fit.predict(newdata)          # probability e^xb/(1+e^xb), not a class
 fit.get_prediction(newdata).summary_frame()  # with an interval
-np.exp(fit.params)                # a log-odds becomes an odds ratio
+fit.params                        # log-odds, as fitted
+np.exp(fit.params)                # odds ratios: 1.65 = odds 65% higher
 
 # -- Choose and validate -------------------------------------------
 lr = 2 * (full.llf - reduced.llf)  # the likelihood-ratio statistic

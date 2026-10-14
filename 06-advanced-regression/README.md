@@ -5,6 +5,9 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-06-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S06-Lecture.qmd`](01-lecture/MATH60033A-S06-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [linearmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/linearmodels.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
+
 **Wednesday 7 October 2026** · 15:30–18:30 · Décelles — Victoriaville · **asynchronous**
 
 Quantitative Methods in International Business · duration 3h00
@@ -66,4 +69,4 @@ In `groups/A2026/group-XX/session-06/`: a panel specification of your project's 
 
 ---
 
-[<- [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md)](../05-ridge-lasso-elastic-net/README.md) | [[Session 07: Principal Component and Factor Analyses](../07-pca-and-factor-analysis/README.md) ->](../07-pca-and-factor-analysis/README.md)
+[<- [Session 05: Regularisation: Ridge, Lasso, and the Elastic Net](../05-ridge-lasso-elastic-net/README.md)](../05-ridge-lasso-elastic-net/README.md) | [[Session 07: Replication Workshop: Five Papers, One Toolkit](../07-replication-workshop/README.md) ->](../07-replication-workshop/README.md)

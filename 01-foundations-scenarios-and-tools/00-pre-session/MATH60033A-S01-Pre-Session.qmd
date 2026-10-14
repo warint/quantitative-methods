@@ -4,6 +4,8 @@ subtitle: "VS Codium, Python, Ollama, Qwen, and an agent in your terminal"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 course-session: "01"
+filters:
+  - ../../slides/drop-comments.lua
 format:
   revealjs:
     theme: [default, ../../slides/economist.scss]
@@ -1262,28 +1264,43 @@ PATH.
 
 ## When it goes wrong {#fix-table}
 
+::: panel-tabset
+### Python and the environment
+
 | What you see | Why | Fix |
 |---|---|---|
 | `Python introuvable` (Windows) | Store alias shadowing Python | Turn off the app execution aliases — earlier in this appendix |
-| `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
-| `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
-| Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — part 3 |
-| `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module: `py -3.12 -m pipx …` |
-| `No module named pipx` | It was installed for one interpreter and called from another — or `--user` was refused because `.venv` was active | Deactivate, then `py -3.12` on **both** lines |
-| An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | `ModuleNotFoundError` in VS Codium | Wrong interpreter selected | `Cmd/Ctrl + Shift + P` → *Python: Select Interpreter* → `.venv` |
 | `pip` fails | Environment not active | Check your prompt starts with `(.venv)` |
 | *l'exécution de scripts est désactivée* (Windows) | PowerShell blocks scripts by default, and activation is one | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then activate again |
 | *le répertoire n'est pas vide* deleting `.venv` | Something holds a file inside it — usually VS Codium's selected interpreter | Quit VS Codium, delete from a plain PowerShell. Last resort `cmd /c "rmdir /s /q .venv"` |
 | `deactivate` *n'est pas reconnu* | It only exists while an environment is active | Nothing to fix — you are not in one. Skip the step |
-| Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
-| The model is very slow | `ollama ps` says 100% CPU — it does not fit in graphics memory | Pull `qwen2.5-coder:3b`, change it in `config.yaml` and the aider command |
+| Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
+
+### pipx and aider
+
+| What you see | Why | Fix |
+|---|---|---|
+| `pipx` *n'est pas reconnu* | `pip install --user` put the script in a folder Windows does not have on PATH | Run it as a module: `py -3.12 -m pipx …` |
+| `No module named pipx` | It was installed for one interpreter and called from another — or `--user` was refused because `.venv` was active | Deactivate, then `py -3.12` on **both** lines |
+| `aider: command not found` | pipx's folder is new on PATH | New terminal; on Windows restart VS Codium. Or `py -m pipx run aider-chat` |
+| Resolver errors installing aider | It was installed into `.venv` | Use `pipx`, which keeps it separate — part 3 |
 | aider sits there after your first question | It is parsing 210 files to build a repo map | Start it with `--map-tokens 0` and name one file |
 | aider forgets your file | The context window is too small | `ollama ps` to read it; raise it in the **Ollama app's settings**, not with an environment variable |
-| `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
 | `connection refused` from aider | Nothing on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
+
+### Ollama, Continue and VS Codium
+
+| What you see | Why | Fix |
+|---|---|---|
+| `ollama: command not found` | Not on PATH yet | New terminal; on Windows restart VS Codium |
+| Continue answers nothing | No server on 11434 | Start Ollama: the app on macOS and Windows, `systemctl start ollama` on Linux |
+| The model is very slow | `ollama ps` says 100% CPU — it does not fit in graphics memory | Pull `qwen2.5-coder:3b`, change it in `config.yaml` and the aider command |
+| `address already in use` / *une seule utilisation … socket* | Ollama is already running — it always is | You do not need `ollama serve`. Set the variable, restart Ollama |
+| An extension does nothing | Installed but not loaded | *Developer: Reload Window* |
 | Maths shows as raw `$...$` | No preview extension | Install *Markdown Preview Enhanced*, open with `Cmd/Ctrl + K V` |
-| Slow on Apple Silicon | Rosetta build of Python | Install the arm64 build |
+
+:::
 
 ::: {.muted}
 [← back to the appendix index](#appendix-intro)

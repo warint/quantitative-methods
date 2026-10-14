@@ -5,6 +5,9 @@
 > **[Open the lecture slides](https://warint.github.io/quantitative-methods/session-04-lecture.html)** — or read the source at
 > [`01-lecture/MATH60033A-S04-Lecture.qmd`](01-lecture/MATH60033A-S04-Lecture.qmd).
 
+> **Python cheatsheets for this session**, one per package, functions explained with
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
+
 **Wednesday 16 September 2026** · 15:30–18:30 · Décelles — Victoriaville
 
 Quantitative Methods in International Business · duration 3h00
@@ -27,7 +30,6 @@ By the end of this session you should be able to:
 - Say why the **linear probability model** fails, and where it fails worst
 - Interpret a logistic coefficient as a **log-odds**, and its exponential as an odds ratio
 - Compute a fitted probability by hand from $x^\top\hat\beta$
-- Compare nested models with a **likelihood-ratio test**
 - Extend the model to **ordinal** and **multinomial** outcomes, and say what each assumes
 
 ---
@@ -62,7 +64,7 @@ See [`data/README.md`](data/README.md) and your group's
 
 ## Deliverable
 
-In `groups/A2026/group-XX/session-04/`: a logistic model of a binary outcome in your own project data, with the odds ratios interpreted in words, one nested comparison tested, and a note on what the model does not license you to say.
+In `groups/A2026/group-XX/session-04/`: a logistic model of a binary outcome in your own project data, with the odds ratios interpreted in words, and a note on what the model does not license you to say.
 
 ---
 

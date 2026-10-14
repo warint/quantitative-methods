@@ -49,7 +49,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from course_spec import (SESSIONS, ordered, DATES, ASYNCHRONOUS,  # noqa: E402
+from course_spec import (SESSIONS, ordered as _course_order, DATES, ASYNCHRONOUS,  # noqa: E402
                          WHEN, ROOM, MIDTERM_DATE, MIDTERM_AFTER)
 
 BOOK = ROOT / "book"
@@ -346,6 +346,27 @@ def normalise_brief(path, num, drop_heading_lines=0):
     text = rewrite_links(text, num)
     return text.strip()
 
+
+
+def ordered():
+    """The book's chapters, which are not the course's sessions one for one.
+
+    The book was written when session 07 taught PCA and factor analysis. That
+    material has since moved to session 13, and session 07 became a replication
+    workshop with no chapter of its own. The book keeps its twelve chapters as
+    published: chapter 7 takes its facts from session 13's spec and its prose
+    from chapter.md in the 07 folder, and session 13 is not a chapter.
+    """
+    out = []
+    for num, s in _course_order():
+        if num == "13":
+            continue
+        if num == "07":
+            s = {**SESSIONS["13"], "dir": s["dir"],
+                 "title": "Principal Component and Factor Analyses",
+                 "short": "PCA and factor analysis"}
+        out.append((num, s))
+    return out
 
 # ---------------------------------------------------------------------------
 # Chapters

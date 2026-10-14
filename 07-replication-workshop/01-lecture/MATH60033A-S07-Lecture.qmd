@@ -1,0 +1,270 @@
+---
+title: "Session 7 · Four Papers, One Toolkit"
+subtitle: "The course's models on the papers' data — three hours, in autonomy"
+author: "Thierry Warin, PhD"
+institute: "HEC Montréal"
+course-session: "07"
+filters:
+  - ../../slides/drop-comments.lua
+format:
+  revealjs:
+    theme: [default, ../../slides/economist.scss]
+    embed-resources: true
+    slide-number: c/t
+    slide-level: 2
+    history: false
+    transition: none
+    navigation-mode: linear
+    controls: true
+    progress: true
+    width: 1280
+    height: 760
+    margin: 0.06
+    smaller: true
+    code-copy: true
+    include-in-header:
+      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img{max-height:300px;width:auto;max-width:100%;} .reveal .quarto-layout-cell img{max-height:330px;width:auto;max-width:100%;} .reveal .result-wide pre code{max-height:none;column-count:2;column-gap:1.5em;font-size:1em;}</style>"
+    footer: "MATH60033A · Session 07 · Thierry Warin, PhD · HEC Montréal"
+---
+
+<!-- authored: do not regenerate -->
+
+```{python}
+#| echo: false
+# The solution tabs below run the four starter scripts, step by step, in one
+# kernel. Library warnings (convergence notes, future deprecations) are not
+# part of any answer, so they are kept off the slides.
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+<!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
+
+## Outline · The hour ahead {.center .scrollable}
+
+1. How the afternoon works
+2. Paper 1 · news sentiment and stock returns — OLS and the three logits
+3. Paper 2 · social groups — binary, ordinal and multinomial logits
+4. Paper 3 · foreign direct investment — OLS, ridge, lasso, elastic net
+5. Paper 4 · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net
+6. The log, and before the midterm
+
+## What session 7 is for {.scrollable}
+::::: columns
+
+:::: {.column width="33%"}
+
+### The mathematics
+
+- Choose which of the course's models fits a new outcome — a number, a yes/no, ordered or unordered categories
+- Read every result as a sentence, in units, and say what it does **not** license
+- Compare OLS with ridge, the lasso and the elastic net on data the models did not see
+
+::::
+
+:::: {.column width="33%"}
+
+### The Python
+
+- Load a paper's data file — `.dta`, `.csv` — into pandas
+- Run the code cells of sessions 3 to 5 on new data, changing only the variable names
+- Run a whole analysis as one script in VS Codium, step by step
+
+::::
+
+:::: {.column width="33%"}
+
+### The international business
+
+- Use international-business data from published papers
+- Explain a result to someone who will not read the code
+- Keep a log a referee could follow
+
+::::
+
+:::::
+
+## Your Python so far {.scrollable}
+
+Everything you need to type is on one sheet — how to start Python in VS Codium on
+your platform, how to make a file and run it, the DataFrame basics, and every name from sessions 1 to 7, each with a line showing it in use.
+
+> **[Python Cheatsheet · Session 07](https://warint.github.io/quantitative-methods/python-cheatsheet-07.pdf)** (PDF) ·
+> in the repository at `07-…/PYTHON-CHEATSHEET.pdf`
+
+**One sheet per package, functions explained with pictures:** [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf)
+
+::: {.muted}
+Print it, or keep it open beside the editor. Nothing on it is examinable; all of it is
+assumed.
+:::
+
+<!-- END deck-frontmatter -->
+
+<!-- The numbers on these slides are the ones the starter scripts in
+     02-practice/starter/ print, run on the authors' packages on 24 September
+     2026. If a package is updated and a script's output changes, change the
+     slide to match the script, never the other way round. -->
+
+## How the afternoon works {.center .scrollable}
+
+## No new method {.scrollable}
+
+For three hours you take the data of four papers you read before sessions 2 to 6 and plug it into
+the models of the course — **with exactly the code you typed in class**, only the variable names
+changed: OLS, the logits (binary, ordinal, multinomial), ridge, the lasso and the elastic net.
+
+::: {.tight}
+- **One script per paper**, cut into numbered steps: `02-practice/starter/`
+- **One guide per paper**, with the same steps and the numbers **you should see**: `02-practice/replications/`
+- **One log**, filled in as you go: `02-practice/replication-log.md`
+:::
+
+::: {.check}
+You are not following the papers. Each step is a code cell you already know from sessions 3 to 5,
+run on new data: the work is to **read the output in words**, with units.
+:::
+
+::: {.muted}
+It is also the best revision there is for the midterm on 28 October: every model comes back once,
+on real data.
+:::
+
+## The three hours {.scrollable}
+
+| When | What |
+|---|---|
+| **0:00 – 0:15** | **Part 0 · Set up** — open the repository, run `check_setup.py` |
+| **0:15 – 0:55** | **Paper 1** · Session 02 data · news sentiment and stock returns — OLS, the three logits |
+| **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits |
+| 1:35 – 1:45 | Break |
+| **1:45 – 2:15** | **Paper 3** · Session 05 data · foreign direct investment — OLS, ridge, lasso, elastic net |
+| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net |
+| **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push |
+
+::: {.warn}
+**Fall behind? Move on at the half-hour mark anyway.** A finished log for three papers beats a
+half-finished one for four.
+:::
+
+## Alone, or as a team {.scrollable}
+
+::::: columns
+:::: {.column width="50%"}
+### Alone
+
+Do the papers in order. Guide open on one side of the screen, script on the other.
+::::
+
+:::: {.column width="50%"}
+### As a team of 2 to 5
+
+- **Split and teach.** Each person takes one or two papers. At 2:15, five minutes each to walk
+  the others through the data, the models, and the results in words.
+- **Pair at one screen.** One types, one reads the guide and checks the numbers. Swap every paper.
+::::
+:::::
+
+::: {.step}
+Either way, **every member runs at least one script on their own machine**, and the log says who
+did what.
+:::
+
+## Part 0 · Set up, in five steps {.scrollable}
+
+::: {.tight}
+1. **File → Open Folder…** → `Desktop/quantitative-methods`, the folder with `qmib.py`
+2. **Terminal → New Terminal**, then `git checkout main` and `git pull`
+3. Choose the `.venv` Python, bottom right — or activate it:
+   macOS and Linux `source .venv/bin/activate` · Windows `.venv\Scripts\Activate.ps1`
+4. Open `02-practice/starter/check_setup.py` and press **Run** ▷ — every line should say `OK`
+5. A `MISSING` data line? The pre-session page has one command per platform that fetches it.
+   Start on a paper you *do* have while it downloads.
+:::
+
+## Running a script one step at a time {.scrollable}
+
+Every script is cut into blocks that begin `# Step 1 · …`, `# Step 2 · …` — the guide has the same
+steps, in the same order.
+
+::: {.tight}
+- **One step:** select its lines, press **Shift+Enter**. The result prints in the terminal, and the
+  variables stay in memory for the next step.
+- **The whole script:** the **Run** triangle ▷, top right. Each takes a few seconds.
+- **Figures** land in `07-replication-workshop/02-practice/output/`.
+:::
+
+::: {.check}
+After every step, compare what you got with **You should see**. If a number differs, stop and find
+out why. That is the exercise, not a detour from it.
+:::
+
+## Every guide has the same shape {.scrollable}
+
+| | | |
+|---|---|---|
+| **1** | The data | one line on the paper, what one row is, the variables |
+| **2** | The models, and where the code comes from | which session's slide each step copies |
+| **3** | Steps | each with its code and **You should see** |
+| **4** | Interpretation | the result as a sentence, in units |
+| **5** | What this does not license | the midterm's Part D |
+| **6** | Pitfalls | what tripped us, so it does not trip you |
+
+{{< include _paper-r1.qmd >}}
+
+{{< include _paper-r2.qmd >}}
+
+{{< include _paper-r3.qmd >}}
+
+{{< include _paper-r4.qmd >}}
+
+## Closing the afternoon {.center .scrollable}
+
+## Part 2 · The log {.scrollable}
+
+Copy `02-practice/replication-log.md` into `groups/A2026/group-XX/session-07/` and fill in one
+block per paper:
+
+| | |
+|---|---|
+| the research question | in one sentence, your words |
+| the models you ran | outcome, predictors, which session's code |
+| the result | as a sentence a reader understands, with units |
+| the check that changed your reading | two sentences |
+| what it does not license | one sentence |
+
+::: {.step}
+Then `git add`, `git commit -m "Session 07 log"`, `git push`. The exact commands, per platform, are
+at the end of the workshop page.
+:::
+
+## What loses marks {.scrollable}
+
+::: {.tight}
+- A coefficient with no sentence, no units, or no "holding the others fixed"
+- An odds ratio read as a probability, or a lasso zero read as "no effect"
+- Presenting a number from a simple model as the paper's finding
+- Reaching for a method the course has not taught
+:::
+
+::: {.check}
+A simple model, read precisely, in a sentence with units, earns full marks.
+:::
+
+## Before the midterm {.scrollable}
+
+::: {.warn}
+**Midterm: Wednesday 28 October**, on paper, Sessions 1 to 6. No class on 21 October.
+:::
+
+::: {.step}
+Your log is your revision sheet: every block names the session idea it used. Then read the
+[midterm summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf) and sit the
+[sample paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf) under exam conditions, then check it against the
+[answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf).
+:::
+
+::: {.muted}
+PCA and factor analysis, which this session used to teach, are now **session 13, "One more
+thing"** — after the course, for self-study, and not on the midterm.
+:::

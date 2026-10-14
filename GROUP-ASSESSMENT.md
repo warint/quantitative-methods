@@ -184,13 +184,13 @@ a group that rates strictly are treated identically. Only within-group differenc
 ### What it applies to
 
 **The multiplier scales the team work only — the 20% of the course grade covering the
-governance file, the analysis, the revised memo and the defence.**
+SDAfrique methods paper and its repository, and its defence in Session 12.**
 
 It does **not** touch:
 
 - the **midterm exam (30%)**, which is written alone under exam conditions;
 - the **final exam (40%)**, which is individual in both components — the
-  [paper is written alone](assessments/final-paper/README.md) and the oral examines each student
+  [paper is written alone](assessments/final-exam/README.md) and the oral examines each student
   directly, so there is no shared work to attribute;
 - **participation**, which is already individual.
 

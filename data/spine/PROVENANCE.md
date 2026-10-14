@@ -96,5 +96,5 @@ you lost.
 ## Adding your own series
 
 Append a row to the file table with source, dataset code, download date, licence and known
-issues. This is an ongoing obligation and part of what the Session 12 governance file is
+issues. This is an ongoing obligation and part of what the governance section of the team paper is
 assessed on.

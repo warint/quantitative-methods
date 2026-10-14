@@ -1,0 +1,63 @@
+## Paper 1 · Session 02 · News sentiment and stock returns {.center .scrollable}
+
+## The data, and the models {.scrollable}
+
+The data of **Fraiberger, Lee, Puy & Ranciere (2021)**, *Media sentiment and international asset
+prices* — plugged into the course's models, not the paper's design.
+
+**One row** = one country on one calendar day: 25 countries, 1991–2017, **135,082** complete rows.
+`F0_index` today's return (%) · `L1_sent1_best` yesterday's news sentiment (sd) · `L1_vix`
+yesterday's VIX · `up` = 1 if the market rose.
+
+::::: columns
+:::: {.column width="30%"}
+**OLS** — session 03
+
+1. Load the data
+2. Return on sentiment
+3. How much did it explain?
+4. + yesterday's VIX
+5. The residual plot
+::::
+
+:::: {.column width="36%"}
+**Logits** — session 04
+
+- **6–8 · Binary:** does the market go up? log-odds → odds → probabilities
+- **9–11 · Ordinal:** the day in thirds, down < flat < up
+- **12–14 · Multinomial:** the same three days, without their order
+::::
+
+:::: {.column width="34%"}
+**Each cell, line for line**
+
+The session 03 and 04 lectures' code, with only the data and the variable names changed.
+::::
+:::::
+
+{{< include _solutions-r1.qmd >}}
+
+## What you should find {.scrollable}
+
+| Model | In words |
+|---|---|
+| **OLS** | one sd better news → a return 0.07 points higher the next day; R² 0.001 |
+| **Binary logit** | odds of an up day × 1.08 per sd; P(up) 0.50 → 0.54 from bad to good news |
+| **Ordinal logit** | odds of a higher third × 1.08 per sd of sentiment, × 0.994 per point of VIX |
+| **Multinomial logit** | good news mostly makes a **down** day less likely (RRR 0.91); a higher VIX makes **both** down and up days more likely than a flat one |
+
+::: {.check}
+The multinomial shows what the ordinal cannot: global risk does not push days down the scale, it
+pushes them **away from flat** — big moves either way.
+:::
+
+## What it does not license {.scrollable}
+
+::: {.tight}
+- **No causal claim.** The same event can move both the news and the market; a one-day lag does not
+  rule that out.
+- **No trading rule.** 0.07 points a day, with $R^2 = 0.001$, is small next to the day-to-day noise
+  — and before costs.
+- **Significant is not large.** With 135,082 rows, almost any slope is significant: read its size
+  in units, and the R².
+:::
