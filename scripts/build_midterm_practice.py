@@ -60,7 +60,32 @@ def body(md):
             return m.group(0)
         return f"[{m.group(1)}]({LINKS.get(target, REPO + target)})"
 
-    return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", absolute, text)
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", absolute, text)
+    if md == "EXAM.md":
+        text = answer_spaces(text)
+    return text
+
+
+LINES_PER_BR = 3        # each <br> in the paper is three ruled writing lines on the printout
+
+
+def answer_spaces(text):
+    """The paper is sat on paper: give every question ruled lines to write on.
+
+    In the Markdown, a line of <br> tags marks the space after a question (GitHub shows
+    it as blank space); on the PDF each <br> becomes LINES_PER_BR ruled lines, and each
+    part, and each output of Part C, starts on a fresh page with its questions.
+    """
+    rule = r"\par\vspace{0.56cm}\noindent\rule{\linewidth}{0.3pt}"
+
+    def lines(m):
+        n = m.group(0).count("<br>") * LINES_PER_BR
+        return "```{=latex}\n\\par\\nopagebreak[4]" + rule * n + "\\par\\medskip\n```"
+
+    text = re.sub(r"^(?:<br>)+$", lines, text, flags=re.M)
+    newpage = "```{=latex}\n\\newpage\n```\n\n"
+    text = re.sub(r"^---\n\n(?=# Part)", "", text, flags=re.M)     # no rule above a page break
+    return re.sub(r"^(# Part|## C[23]\.)", lambda m: newpage + m.group(1), text, flags=re.M)
 
 
 def main():

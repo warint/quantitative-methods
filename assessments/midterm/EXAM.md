@@ -322,12 +322,16 @@ R²                       0.21          0.30
 
 **C1(a).** *(2)* Write the sentence a reader needs for the productivity coefficient in Model 2.
 
+<br><br>
+
 **C1(b).** *(1.5)* Why does the productivity coefficient fall from 0.48 to 0.29 when firm size is
 added?
 
+<br>
+
 **C1(c).** *(1.5)* Model 2's intercept is −12.4. Should you interpret it? Explain.
 
-<br><br><br>
+<br>
 
 ## C2. A logistic regression *(5 points)*
 
@@ -345,13 +349,17 @@ large firm                              0.25      0.40
 
 **C2(a).** *(2)* Write a correct sentence using the odds ratio 3.00.
 
+<br><br>
+
 **C2(b).** *(2)* Doing R&D adds 8 percentage points to the probability of adoption for a small
 firm, but 15 points for a large one, although its odds ratio is the same. Why?
+
+<br><br>
 
 **C2(c).** *(1)* A report says "large firms are three times more likely to adopt AI". Is that what the
 table shows? Explain.
 
-<br><br><br>
+<br>
 
 ## C3. Choosing the penalty *(5 points)*
 
@@ -367,12 +375,16 @@ predictors kept             40      28      12      4      0
 
 **C3(a).** *(2)* Which $\lambda$ would you choose, and why?
 
+<br><br>
+
 **C3(b).** *(2)* The training error rises steadily with $\lambda$, while the cross-validation error
 first falls and then rises. Explain both, using the bias–variance trade-off.
 
+<br><br>
+
 **C3(c).** *(1)* What does the model at $\lambda = 10$ predict?
 
-<br><br><br>
+<br>
 
 ---
 
