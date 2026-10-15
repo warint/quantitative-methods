@@ -49,10 +49,11 @@ At **2:15**, remind split-and-teach teams to stop and teach each other.
 
 ## The last ten minutes
 
-The log, committed and pushed. A block that reads each model precisely, in a sentence with units,
-earns full marks; say so again, because students will otherwise pad.
+Paper 4 runs to the end; there is nothing to hand in. Close on *What loses marks on the midterm*:
+a model read precisely, in a sentence with units, earns full marks — say so again, because students
+will otherwise pad.
 
 ## Midterm
 
-The midterm on 28 October covers sessions 1 to 6. This workshop is its revision: every block of the
-log names the session idea it reused.
+The midterm on 28 October covers sessions 1 to 6. This workshop is its revision: every model of
+sessions 3 to 5 comes back once, on real data.

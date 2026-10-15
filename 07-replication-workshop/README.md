@@ -40,8 +40,7 @@ It is also the revision session for the **midterm on 28 October**, which covers 
 |---|---|---|
 | **Before** | [`00-pre-session/`](00-pre-session/README.md) | 30 minutes: set up a session-07 folder of your own, re-read four abstracts |
 | **0:00 – 0:15** | [`02-practice/`](02-practice/README.md), Part 0 | Your folder in VS Codium, run `check_setup.py` |
-| **0:15 – 2:50** | [`02-practice/replications/`](02-practice/replications/) | The four papers, 30 to 40 minutes each, with a break |
-| **2:50 – 3:00** | [`02-practice/replication-log.md`](02-practice/replication-log.md) | The log: fill it in, commit, push |
+| **0:15 – 3:00** | [`02-practice/replications/`](02-practice/replications/) | The four papers, 30 to 45 minutes each, with a break |
 
 The opening slides ([`01-lecture/`](01-lecture/README.md)) show how the afternoon works and what
 each paper's models should find; the step-by-step work is in [`02-practice/`](02-practice/README.md).
@@ -58,13 +57,12 @@ each paper's models should find; the step-by-step work is in [`02-practice/`](02
 
 ---
 
-## Deliverable
+## Nothing to hand in
 
-In `groups/A2026/group-XX/session-07/`: a log — for each paper attempted, the models you ran, each
-result as a sentence with units, and one sentence on what the results do not license.
-The template is [`02-practice/replication-log.md`](02-practice/replication-log.md).
+The afternoon is practice, and revision for the midterm: the work is to read each output in words,
+with units, and to say what it does not license.
 
-## What loses marks
+## What loses marks on the midterm
 
 - A coefficient with no sentence, no units, or no "holding the others fixed"
 - An odds ratio read as a probability, or a lasso zero read as "no effect"

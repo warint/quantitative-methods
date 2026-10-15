@@ -1,8 +1,7 @@
 # Paper 2 · Session 04 · Saganowski, Bródka, Koziarski & Kazienko (2019)
 
 > **Reuses:** binary, ordinal and multinomial logits (session 04) · **Time:** about 30 minutes ·
-> **Script:** [`starter/r2_saganowski_2019.py`](../starter/r2_saganowski_2019.py) ·
-> **Log:** one block in your [`replication-log.md`](../replication-log.md)
+> **Script:** [`starter/r2_saganowski_2019.py`](../starter/r2_saganowski_2019.py)
 
 ## How to work through it
 

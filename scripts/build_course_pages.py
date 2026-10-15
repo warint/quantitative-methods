@@ -32,6 +32,8 @@ def _paper_data_block(s):
     on a public database instead — the KOF Globalisation Index, the Macrohistory
     database — which the course loader fetches, so there is nothing to unzip.
     """
+    if not s.get("dataverse") and not s.get("dataset"):
+        return sentence(s["dataset_note"]) + "."      # session 07: read from the site by URL
     if s.get("dataverse"):
         return (
             f"**Harvard Dataverse: [{s['dataverse']}](https://doi.org/{s['dataverse']})**\n\n"
@@ -58,6 +60,8 @@ def _paper_data_pointer(s):
             f"Its replication package ([{s['dataverse']}](https://doi.org/{s['dataverse']})) "
             f"should already be unzipped at `{s['dir']}/data/replication/`."
         )
+    if not s.get("dataset"):
+        return sentence(s["dataset_note"]) + "."
     return f"Its data needs no download: `qmib.load(\"{s['dataset']}\")`."
 
 

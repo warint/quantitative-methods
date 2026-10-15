@@ -1,8 +1,7 @@
 # Paper 3 · Session 05 · Blonigen & Piger (2014)
 
 > **Reuses:** OLS (session 03) · ridge, lasso, elastic net (session 05) · **Time:** about 30 minutes ·
-> **Script:** [`starter/r3_blonigen_piger_2014.py`](../starter/r3_blonigen_piger_2014.py) ·
-> **Log:** one block in your [`replication-log.md`](../replication-log.md)
+> **Script:** [`starter/r3_blonigen_piger_2014.py`](../starter/r3_blonigen_piger_2014.py)
 
 ## How to work through it
 

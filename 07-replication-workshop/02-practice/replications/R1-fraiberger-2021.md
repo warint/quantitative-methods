@@ -2,8 +2,7 @@
 
 > **Reuses:** OLS (session 03) and the binary, ordinal and multinomial logits (session 04), line for line ·
 > **Time:** about 40 minutes ·
-> **Script:** [`starter/r1_fraiberger_2021.py`](../starter/r1_fraiberger_2021.py) ·
-> **Log:** one block in your [`replication-log.md`](../replication-log.md)
+> **Script:** [`starter/r1_fraiberger_2021.py`](../starter/r1_fraiberger_2021.py)
 
 **How to work through it.** Run it in **your own session-07 folder**, set up in Part 0 of the [practice README](../README.md) — not in the course repository. Open `r1_fraiberger_2021.py` in VS Codium. Each step below is one block of the
 script, marked `# Step N`. Select a step's lines and press **Shift+Enter** to run only those, read

@@ -223,11 +223,11 @@ SESSIONS = {
         ],
         reading="the data of four readings: sessions 2, 4, 5 and 6",
         reading_url="https://github.com/warint/quantitative-methods/blob/main/REPLICATIONS.md",
-        dataverse=None,           # three packages already downloaded in sessions 2, 4 and 6
-        dataset="fdi",            # the only one that needs no download
-        dataset_note="the three Dataverse packages of sessions 2, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
-        deliverable=("a log: for each paper attempted, the models you ran, each result as a sentence "
-                     "with units, and one sentence on what the results do not license"),
+        dataverse=None,           # the four papers' data, read by URL from the site
+        dataset=None,             # no qmib: the scripts read the site
+        dataset_note=("one CSV per paper on the course site, data/session-07/, read by the scripts in a "
+                      "folder of the student's own (scripts/build_session07_data.py)"),
+        deliverable="nothing to hand in: the workshop is practice, and revision for the midterm",
         loses_marks=[
             "A coefficient with no sentence, no units, or no \"holding the others fixed\"",
             "An odds ratio read as a probability, or a lasso zero read as \"no effect\"",

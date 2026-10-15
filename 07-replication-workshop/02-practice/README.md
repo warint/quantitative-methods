@@ -33,11 +33,10 @@ already know, run on new data, and the work is to read its output in words, with
 | **0:55 – 1:35** | **Paper 2** · Session 04 data · social groups — binary, ordinal, multinomial logits | [guide](replications/R2-saganowski-2019.md) · [script](starter/r2_saganowski_2019.py) |
 | 1:35 – 1:45 | Break | |
 | **1:45 – 2:15** | **Paper 3** · Session 05 data · foreign direct investment — OLS, ridge, lasso, elastic net | [guide](replications/R3-blonigen-piger-2014.md) · [script](starter/r3_blonigen_piger_2014.py) |
-| **2:15 – 2:50** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net | [guide](replications/R4-topalova-khandelwal-2011.md) · [script](starter/r4_topalova_khandelwal_2011.py) |
-| **2:50 – 3:00** | **Part 2 · The log** — fill it in, commit, push | [`replication-log.md`](replication-log.md) |
+| **2:15 – 3:00** | **Paper 4** · Session 06 data · tariffs and productivity — OLS, the three logits, ridge, lasso, elastic net | [guide](replications/R4-topalova-khandelwal-2011.md) · [script](starter/r4_topalova_khandelwal_2011.py) |
 
-**If you fall behind,** move on at the half-hour mark anyway and come back later: a finished log for
-three papers beats a half-finished one for four. **If you finish early,** each guide ends with
+**If you fall behind,** move on at the half-hour mark anyway and come back later: three papers
+read well beat four rushed. **If you finish early,** each guide ends with
 *Pitfalls* — try the variation it suggests (another predictor, another penalty, another threshold).
 
 ---
@@ -52,12 +51,11 @@ script on the other.
 - **Split and teach.** Each person takes one or two papers. At **2:15**, stop and take five minutes
   each to walk the others through *your* paper: the question, the model, the result in words, and
   how it differs from the paper.
-  Everyone's log then covers all four.
+  Everyone then knows all four.
 - **Pair at one screen.** One types, one reads the guide aloud and checks the numbers; swap at
   every paper.
 
-Either way, **every member runs at least one script on their own machine**, and the log names
-who did what.
+Either way, **every member runs at least one script on their own machine**.
 
 ---
 
@@ -164,40 +162,7 @@ Each guide has the same shape, so you always know where you are:
 
 ---
 
-## Part 2 · The log — 10 min
-
-The log is the one thing today that goes back into the course repository, because that is where
-your group hands work in. Open `quantitative-methods` in a second VS Codium window
-(**File → New Window**, then **File → Open Folder…**), copy
-[`replication-log.md`](replication-log.md) into your group folder, and fill in one block per paper
-you attempted:
-
-```bash
-git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-07
-cp 07-replication-workshop/02-practice/replication-log.md groups/A2026/group-XX/session-07/
-```
-
-On **Windows (PowerShell)**, the last two lines are:
-
-```powershell
-New-Item -ItemType Directory -Force groups\A2026\group-XX\session-07
-Copy-Item 07-replication-workshop\02-practice\replication-log.md groups\A2026\group-XX\session-07\
-```
-
-Then commit and push, the same on every platform:
-
-```bash
-git add groups/A2026/group-XX/session-07
-git commit -m "Session 07 log"
-git push -u origin group-XX
-```
-
-Replace `XX` with your group number — group 07 uses `group-07`.
-
----
-
-## What loses marks
+## What loses marks on the midterm
 
 - A coefficient with no sentence, no units, or no "holding the others fixed"
 - An odds ratio read as a probability, or a lasso zero read as "no effect"

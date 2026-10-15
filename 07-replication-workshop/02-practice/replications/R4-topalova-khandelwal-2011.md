@@ -1,8 +1,7 @@
 # Paper 4 · Session 06 · Topalova & Khandelwal (2011)
 
 > **Reuses:** OLS (session 03) · binary, ordinal and multinomial logits (session 04) · ridge, lasso, elastic net (session 05) · **Time:** about 35 minutes ·
-> **Script:** [`starter/r4_topalova_khandelwal_2011.py`](../starter/r4_topalova_khandelwal_2011.py) ·
-> **Log:** one block in your [`replication-log.md`](../replication-log.md)
+> **Script:** [`starter/r4_topalova_khandelwal_2011.py`](../starter/r4_topalova_khandelwal_2011.py)
 
 ## How to work through it
 
