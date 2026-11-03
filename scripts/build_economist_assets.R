@@ -424,51 +424,11 @@ polyfit <- lm(y ~ poly(x, 10)); gridx <- seq(min(x), max(x), length.out = 500); 
 lines(x, truth, col = INK, lwd = 2, lty = 2); headline("Overfitting follows noise as though it were signal")
 dev.off()
 
-set.seed(75)
-open_svg(asset("S08", "knn-boundary.svg"))
-a <- cbind(rnorm(70, -1.1, .7), rnorm(70, .4, .8)); b <- cbind(rnorm(70, 1.1, .75), rnorm(70, -.25, .75))
-plot(a, pch = 21, bg = PALE_RED, col = RED, axes = FALSE, xlab = "Feature 1", ylab = "Feature 2", xlim = c(-3, 3), ylim = c(-2.6, 2.6)); points(b, pch = 21, bg = PALE_BLUE, col = BLUE); axis(1); axis(2)
-curve(.18 * sin(2 * x) - .2 * x, from = -3, to = 3, add = TRUE, col = INK, lwd = 3)
-headline("KNN lets nearby observations draw the boundary")
-dev.off()
-
-open_svg(asset("S08", "nearest-neighbours.svg"))
-set.seed(79); pts <- cbind(runif(18, -2.4, 2.4), runif(18, -2, 2)); cl <- rep(c(RED, BLUE), 9)
-plot(pts, pch = 21, bg = adjustcolor(cl, .22), col = cl, cex = 1.15, axes = FALSE, xlab = "Feature 1", ylab = "Feature 2", asp = 1); axis(1); axis(2)
-symbols(0, 0, circles = 1.15, inches = FALSE, add = TRUE, fg = TEAL, lwd = 2.5); points(0, 0, pch = 4, lwd = 3, cex = 1.4, col = INK)
-text(1.2, 1.15, "k-neighbourhood", col = TEAL, font = 2, pos = 4)
-headline("A query inherits the majority label in its neighbourhood")
-dev.off()
-
-open_svg(asset("S08", "complexity-compare.svg"), width = 11, height = 5.7)
-par(mfrow = c(1, 3), mar = c(3, 2.4, 3.5, .5))
-set.seed(81); px <- runif(70, -2.5, 2.5); py <- runif(70, -2, 2); cls <- px + .35 * py + rnorm(70, 0, .65) > 0
-for (i in 1:3) {
-  plot(px, py, pch = 21, bg = ifelse(cls, PALE_BLUE, PALE_RED), col = ifelse(cls, BLUE, RED), axes = FALSE, xlab = "", ylab = "")
-  if (i == 1) curve(.25 * sin(5 * x), add = TRUE, col = INK, lwd = 2.3)
-  if (i == 2) curve(.12 * sin(1.4 * x), add = TRUE, col = INK, lwd = 2.3)
-  if (i == 3) abline(v = 0, col = INK, lwd = 2.3)
-  title(c("k = 1: jagged", "k = 10: balanced", "k = 100: blunt")[i], adj = 0, font.main = 2, cex.main = .9)
-}
-dev.off()
-
-open_svg(asset("S08", "error-complexity.svg"))
-cplx <- seq(.02, 1, length.out = 220); train <- .65 * exp(-3.3 * cplx) + .08; test <- .22 + 1.05 * (cplx - .48)^2
-plot(cplx, test, type = "n", axes = FALSE, xlab = "Model flexibility", ylab = "Error", ylim = c(0, .82)); axis(1, at = c(.05, .5, .95), labels = c("simple", "balanced", "flexible")); axis(2)
-lines(cplx, train, col = BLUE, lwd = 2.7); lines(cplx, test, col = RED, lwd = 2.7); abline(v = cplx[which.min(test)], col = GOLD, lty = 2)
-direct_label(.72, train[160], "training", BLUE, 4); direct_label(.72, test[160], "test", RED, 4)
-headline("Training error keeps falling after test error turns")
-dev.off()
-
-open_svg(asset("S08", "confusion-matrix.svg"), width = 8.4, height = 6)
-plot.new(); plot.window(xlim = c(0, 100), ylim = c(0, 100)); headline("A confusion matrix separates four kinds of decision")
-rect(22, 16, 82, 76, border = INK, lwd = 2); segments(52, 16, 52, 76, col = INK); segments(22, 46, 82, 46, col = INK)
-rect(22, 46, 52, 76, col = PALE_TEAL, border = NA); rect(52, 16, 82, 46, col = PALE_TEAL, border = NA)
-rect(52, 46, 82, 76, col = PALE_RED, border = NA); rect(22, 16, 52, 46, col = PALE_RED, border = NA)
-segments(52, 16, 52, 76, col = INK); segments(22, 46, 82, 46, col = INK); rect(22, 16, 82, 76, border = INK, lwd = 2)
-text(c(37, 67, 37, 67), c(61, 61, 31, 31), c("TRUE\nPOSITIVE", "FALSE\nPOSITIVE", "FALSE\nNEGATIVE", "TRUE\nNEGATIVE"), font = 2, cex = .82, col = c(TEAL, RED, RED, TEAL))
-text(52, 83, "PREDICTED", font = 2); text(14, 46, "ACTUAL", srt = 90, font = 2)
-dev.off()
+# The KNN figures (bayes-classifier, nearest-neighbours, knn-boundary,
+# complexity-compare, error-complexity) and the confusion matrix are computed
+# from a simulation by
+# 08-knn-and-bias-variance/01-lecture/economist-assets/build_knn_figures.py,
+# so every boundary on the slides is the one KNN actually draws.
 
 # Session 09: SEM ------------------------------------------------------------
 

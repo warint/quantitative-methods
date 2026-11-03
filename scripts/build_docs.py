@@ -164,6 +164,14 @@ def main():
     print(f"published session 07: {len(list(s07_data.glob('*.csv')))} data files, "
           f"{len(scripts)} scripts and session-07-scripts.zip")
 
+    # Session 08's lecture code, every block in order, as one script students
+    # download and run in a folder of their own; the deck links to it by URL.
+    s08_code = DOCS / "session-08"
+    s08_code.mkdir(exist_ok=True)
+    shutil.copy2(ROOT / "08-knn-and-bias-variance" / "01-lecture" / "session08_knn.py",
+                 s08_code / "session08_knn.py")
+    print("published session 08: session08_knn.py")
+
     # The per-session Python cheatsheets, which every deck links to by URL.
     # Built by scripts/build_cheatsheets.py; copied here so the link resolves.
     n_sheets = 0
