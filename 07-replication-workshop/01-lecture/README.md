@@ -31,7 +31,7 @@ itself is in [`02-practice/`](../02-practice/README.md).
 | Paper 2 · Session 04 data | Saganowski et al. (2019): the same slides |
 | Paper 3 · Session 05 data | Blonigen & Piger (2014) |
 | Paper 4 · Session 06 data | Topalova & Khandelwal (2011) |
-| Closing | the log · what loses marks · before the midterm |
+| Closing | what loses marks on the midterm · before the midterm |
 
 ---
 

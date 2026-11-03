@@ -2,31 +2,20 @@
 Paper 1 · Session 02 · Fraiberger, Lee, Puy & Ranciere (2021)
 *Media sentiment and international asset prices* — the data, with the course's code
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R1-fraiberger-2021.md
 
-Run it in VS Codium with the Run button (the triangle, top right), or from the
-repository root in the terminal:
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py
+    python r1_fraiberger_2021.py
+
+The data comes from the course site, so you need the internet, and nothing else.
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
 """
-
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
 
 import numpy as np
 import pandas as pd
@@ -35,9 +24,12 @@ import statsmodels.formula.api as smf
 import statsmodels.api as sm
 from statsmodels.miscmodels.ordinal_model import OrderedModel
 
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+
+
 # Step 1 · Load the data: one row is a country-day
-path = "02-exploratory-data-analysis/data/replication/public/data/regression_sample.dta"
-d = pd.read_stata(path, columns=["iso", "DATE", "F0_index", "L1_sent1_best", "L1_vix"])
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
 d = d.dropna(subset=["F0_index", "L1_sent1_best", "L1_vix"])
 d["up"] = (d["F0_index"] > 0).astype(int)            # 1 if the market rose that day
 print(f"{len(d):,} country-days, {d['iso'].nunique()} countries, share of up days {d['up'].mean():.3f}")

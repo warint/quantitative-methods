@@ -27,7 +27,7 @@ REPO = "https://github.com/warint/quantitative-methods/blob/main/assessments/mid
 DOCS = {
     "PRACTICE.md": "Midterm Practice Questions · Sessions 2 to 6",
     "PRACTICE-ANSWERS.md": "Midterm Practice Questions · Answer Key",
-    "EXAM.md": "Midterm Sample Paper · 2 hours 30 minutes",
+    "EXAM.md": "Midterm Sample Paper · 3 hours",
     "SOLUTIONS.md": "Midterm Sample Paper · Answer Key",
 }
 

@@ -30,6 +30,8 @@ What goes on it
    this session, one session at a time, each with a runnable line. Session 03's
    sheet covers sessions 1, 2 and 3: a student holding it is holding everything
    the course has asked them to type, not only last week's half.
+5. **Session 07 only: the four papers, in the course's code** — every step of
+   the four starter scripts, read from them at build time.
 
 Part 4 is driven by TOOLKIT in `build_deck_frontmatter.py`, which is the
 registry the deck slide used, so the two can never disagree about *what* was
@@ -146,7 +148,8 @@ SNIPPETS = {
     "np.linalg.pinv": "np.linalg.pinv(v_fe - v_re)       # for the Hausman statistic",
 
     # ---- Session 07 -------------------------------------------------------
-    "pd.read_stata": 'firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")',
+    "pd.read_csv(URL)": 'DATA = "https://warint.github.io/quantitative-methods/data/session-07/"\n'
+                        'firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")',
     "np.log": "y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %",
     "pd.Categorical(ordered=True)": 'pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)',
     "pd.qcut": 'd["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])',
@@ -154,7 +157,7 @@ SNIPPETS = {
     ".isin": 'dat = groups[groups["event"].isin(order)]   # only the three ordered events',
     ".copy()": 'dat = groups[groups["event"].isin(order)].copy()   # then add columns safely',
     ".nunique": 'd["iso"].nunique()                # 25 countries',
-    "plt.savefig": 'plt.savefig(OUTPUT / "resid_vs_fitted.png", dpi=110, bbox_inches="tight")',
+    "plt.savefig": 'plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in your folder',
 
     # ---- Session 13 (taught in session 07 until A2026) ----------------------
     "PCA": "from sklearn.decomposition import PCA\n"
@@ -221,6 +224,11 @@ PREAMBLE = r"""\usepackage{titling}
 \titlespacing*{\subsection}{0pt}{0.8em}{0.25em}
 \titleformat{\section}{\normalsize\bfseries\color{ink}}{}{0pt}{}
 \titleformat{\subsection}{\small\bfseries\color{accent}}{}{0pt}{}
+
+% A code line wider than the page wraps, with an arrow, instead of running off
+% the margin: session 07 prints whole scripts.
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakanywhere,commandchars=\\\{\}}
 """
 
 GETTING_STARTED = """## Starting Python in VS Codium
@@ -325,6 +333,148 @@ python -c "import openpyxl; print(openpyxl.__version__)"
 """
 
 
+# ---------------------------------------------------------------------------
+# Session 07 only: the four papers, in the course's code
+#
+# Session 07 teaches no new name; it plugs four papers' data into the models of
+# sessions 3 to 5. What a student wants beside the keyboard that afternoon is
+# that code, so the sheet carries it — read from the starter scripts at build
+# time, never copied, so the sheet cannot drift from what the lecture runs.
+
+STARTERS = ROOT / "07-replication-workshop" / "02-practice" / "starter"
+PAPERS = [
+    ("r1_fraiberger_2021.py", "Paper 1 · Fraiberger et al. (2021) · news sentiment and stock returns",
+     "OLS, then the binary, ordinal and multinomial logits"),
+    ("r2_saganowski_2019.py", "Paper 2 · Saganowski et al. (2019) · what happens to a group next",
+     "the binary, ordinal and multinomial logits"),
+    ("r3_blonigen_piger_2014.py", "Paper 3 · Blonigen and Piger (2014) · the determinants of FDI",
+     "OLS, then ridge, lasso and elastic net, compared on held-out rows"),
+    ("r4_topalova_khandelwal_2011.py", "Paper 4 · Topalova and Khandelwal (2011) · tariffs and productivity",
+     "OLS, the three logits, then ridge, lasso and elastic net"),
+]
+
+PAPER_IMPORTS = """# each script opens with the imports it needs; all of them:
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error"""
+
+
+def paper_code(script):
+    """The steps of one starter script: every code line, and each step's title.
+
+    Comment-only lines go (the guide explains them), as do the imports (one block
+    covers all four papers, above). Inline comments stay: they say what a number
+    is in. Blank lines separate the steps. The sheet's code font has no Greek, so λ
+    is spelled out — inside a string or a comment, it changes nothing that runs.
+    """
+    lines = (STARTERS / script).read_text(encoding="utf-8").splitlines()
+    start = next(i for i, l in enumerate(lines) if l.startswith("# Step 1"))
+    out = []
+    for line in lines[start:]:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("# Step"):
+            out += ["", line]
+        elif s.startswith("#") or s.startswith(("import ", "from ")):
+            continue
+        else:
+            out.append(line.replace("λ", "lambda"))
+    return "\n".join(out).strip("\n")
+
+
+def papers_section():
+    parts = ["## The four papers, in the course's code\n",
+             "No new method today: each paper's data goes into the models of sessions 3 to 5, with "
+             "the same lines as in their lectures — only the data and the variable names change. "
+             "Below is every step of the four scripts in the zip, run in your session-07 folder. "
+             "The guides in `07-replication-workshop/02-practice/replications/` explain each step "
+             "and show what you should see.\n",
+             "### The imports, once for all four\n",
+             "```python\n" + PAPER_IMPORTS + "\n```\n"]
+    for script, title, models in PAPERS:
+        parts.append(f"### {title}\n\n*{models}* · `starter/{script}`\n\n"
+                     "```python\n" + paper_code(script) + "\n```\n")
+    return "\n".join(parts)
+
+
+# Session 07 is worked in a fresh folder of the student's own, with plain Python
+# and four packages installed by name — no clone, no requirements.txt, no qmib —
+# so its sheet opens with that set-up instead of GETTING_STARTED.
+ZIP_07 = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+GETTING_STARTED_07 = f"""## Session 07: a folder of your own
+
+Today is not worked in the course repository. Make an empty folder — `Desktop/session-07` — and
+open it in VS Codium (**File > Open Folder**). Then, in its terminal (**View > Terminal**):
+
+```bash
+# macOS
+open /Applications/Python\\ 3*/Install\\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO {ZIP_07}
+unzip session-07-scripts.zip
+python check_setup.py
+
+# Linux
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO {ZIP_07}
+unzip session-07-scripts.zip
+python check_setup.py
+
+# Windows (PowerShell)
+py -m venv .venv
+.venv\\Scripts\\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+Invoke-WebRequest {ZIP_07} -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
+```
+
+Every line of the check should say `OK`. Then **Python: Select Interpreter** (`Ctrl`/`Cmd` +
+`Shift` + `P`) and choose this folder's `.venv`. Run a script with the **Run** triangle, or
+`python r1_fraiberger_2021.py`; one step at a time, select its lines and press `Shift` + `Enter`.
+
+No `requirements.txt` and no `qmib` today: the four packages above are the whole toolkit, and each
+script reads its paper's data from the course site — you need the internet.
+
+## The four things you always do
+
+```python
+import pandas as pd
+
+# 1 - build a DataFrame
+df = pd.DataFrame({{"country": ["FR", "DE", "IT"],
+                   "gdp_pc_eur": [37_000, 46_000, 32_000]}})
+
+# 2 - look at what is in it
+df.head(); df.shape; df.dtypes; df.info(); df.describe()
+
+# 3 - read a file in: from your folder, or straight from a web address
+df = pd.read_csv("data.csv")
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
+
+# 4 - write a CSV out
+df.to_csv("out.csv", index=False)   # index=False, or you get a stray column
+```
+
+A package missing? With `(.venv)` showing: `pip install` and its name — `pip install openpyxl`,
+say. Never `sudo`, never outside the environment.
+"""
+
+
 def snippet_for(name, sess):
     code = SNIPPETS.get(name)
     if code is None:
@@ -395,6 +545,9 @@ def sheet(num, s):
     lead = (f"Everything you need to type, in one place. The first four sections are the same "
             f"every week; the last one is every name from sessions 1 to {n}."
             if n > 1 else "Everything you need to type, in one place.")
+    if num == "07":
+        lead = ("Everything you need to type, in one place: today's set-up in a folder of your own, "
+                "every name from sessions 1 to 7, and every step of the four papers' scripts.")
     return f"""---
 title: "Python Cheatsheet"
 subtitle: "MATH60033A · Session {num} · {s['short']}"
@@ -418,8 +571,9 @@ format:
 
 {lead}
 
-{GETTING_STARTED.replace('SESSIONNUM', num)}
-{recap(num)}"""
+{GETTING_STARTED_07 if num == '07' else GETTING_STARTED.replace('SESSIONNUM', num)}
+{recap(num)}
+{papers_section() if num == "07" else ""}"""
 
 
 # LaTeX picks a random six-letter tag for every embedded font subset, seeded

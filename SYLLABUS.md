@@ -286,7 +286,7 @@ instructor's attention is the measuring instrument, and it is imperfect.
 
 ### Midterm exam — 30%, individual, on paper, closed book
 
-Written **Wednesday 28 October**, **2 hours 30 minutes**. Covers **Sessions 1–6**: *Europe 2031*
+Written **Wednesday 28 October**, **3 hours**. Covers **Sessions 1–6**: *Europe 2031*
 and what AI is, exploratory data analysis and the first regression, regression diagnostics and
 validity, logistic regression, regularisation, and transformations such as squared terms. Session 7,
 the replication workshop, reviews all of it on real data and adds no new material.

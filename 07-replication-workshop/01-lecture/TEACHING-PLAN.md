@@ -13,13 +13,16 @@ workshop 180 min · no lecture · students work alone or in teams
 
 ## Before the day
 
-- Run every script once on your own machine, from the repository root:
-  `python 07-replication-workshop/02-practice/starter/r1_fraiberger_2021.py`, then `r2`, `r3` and `r4`.
-  Each takes two seconds. If a Dataverse package has been updated since 24 September 2026 and a
-  number moves, correct the guide and the slide to match the script.
-- Remind the class two days ahead that the four packages must be downloaded **before** they
-  arrive (the pre-session page). The Saganowski package is 160 MB; a room
-  of forty laptops downloading them at 15:30 is the one way this afternoon fails.
+- Do Part 0 yourself, as a student would: an empty folder outside the repository, a fresh
+  `.venv`, `pip install pandas statsmodels scikit-learn matplotlib`, the scripts' zip from the site,
+  then `python check_setup.py` and `python r1_fraiberger_2021.py`, `r2`, `r3`, `r4`. Each takes a
+  few seconds. If a package update moves a number, correct the guide and the slide to match the
+  script.
+- After editing a script or the data: `python scripts/build_session07_data.py` (the CSVs), then
+  `python scripts/build_docs.py` and push — the students' scripts read the site, not the repo.
+- Remind the class two days ahead to set up the folder **before** they arrive (the pre-session
+  page). Forty laptops installing pandas and statsmodels at 15:30 is the one way this afternoon
+  fails. On the day they need the internet: the data is read from the site.
 
 ## The first fifteen minutes — the only time you talk
 
@@ -46,10 +49,11 @@ At **2:15**, remind split-and-teach teams to stop and teach each other.
 
 ## The last ten minutes
 
-The log, committed and pushed. A block that reads each model precisely, in a sentence with units,
-earns full marks; say so again, because students will otherwise pad.
+Paper 4 runs to the end; there is nothing to hand in. Close on *What loses marks on the midterm*:
+a model read precisely, in a sentence with units, earns full marks — say so again, because students
+will otherwise pad.
 
 ## Midterm
 
-The midterm on 28 October covers sessions 1 to 6. This workshop is its revision: every block of the
-log names the session idea it reused.
+The midterm on 28 October covers sessions 1 to 6. This workshop is its revision: every model of
+sessions 3 to 5 comes back once, on real data.
