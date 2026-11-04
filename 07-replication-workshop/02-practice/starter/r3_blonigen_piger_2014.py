@@ -2,40 +2,28 @@
 Paper 3 · Session 05 · Blonigen & Piger (2014)
 *Determinants of foreign direct investment*
 
-Step-by-step guide: 07-replication-workshop/02-practice/replications/R3-blonigen-piger-2014.md
+Step-by-step guide: https://github.com/warint/quantitative-methods/blob/main/07-replication-workshop/02-practice/replications/R3-blonigen-piger-2014.md
 
 The data of the paper, the code of sessions 3 and 5: OLS, then ridge, the lasso
 and the elastic net, line for line as in class, with this data's variable names.
 
-Run it in VS Codium with the Run button (the triangle, top right), or from the
-repository root in the terminal:
+Run it in your own session-07 folder, opened in VS Codium (File > Open Folder),
+with its environment active and pandas, statsmodels, scikit-learn and
+matplotlib installed (the guide's Part 0). Then press the Run button (the
+triangle, top right), or type in the terminal:
 
-    python 07-replication-workshop/02-practice/starter/r3_blonigen_piger_2014.py
+    python r3_blonigen_piger_2014.py
+
+The data comes from the course site, so you need the internet, and nothing else.
 
 Work one step at a time: select a step's lines and press Shift+Enter to run only
 those, read the output, and compare it with "You should see" in the guide.
 """
 
-from pathlib import Path
-import os
-import sys
-
-# Work from the repository root — the folder that holds qmib.py — wherever this
-# file is saved and however it is run (Run button, terminal, or Shift+Enter).
-starts = [Path.cwd()] + ([Path(__file__).resolve().parent] if "__file__" in globals() else [])
-ROOT = next((p for s in starts for p in [s, *s.parents] if (p / "qmib.py").exists()), None)
-if ROOT is None:
-    sys.exit("Open the quantitative-methods folder in VS Codium (File > Open Folder) and run again.")
-os.chdir(ROOT)
-sys.path.insert(0, str(ROOT))
-OUTPUT = Path("07-replication-workshop/02-practice/output")   # figures land here
-OUTPUT.mkdir(parents=True, exist_ok=True)
-
 import warnings
 warnings.filterwarnings("ignore")       # convergence notes are not part of the answer
 import numpy as np
 import pandas as pd
-import qmib
 import statsmodels.formula.api as smf
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -43,9 +31,12 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
+# The data: one CSV per paper on the course site, read over the internet
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+
 
 # Step 1 · Load the data: one row per country pair, log FDI, 56 candidates
-fdi = qmib.load("fdi")
+fdi = pd.read_csv(DATA + "paper3_blonigen_piger_2014.csv")
 YCOL = "log_fdi"
 XCOLS = [c for c in fdi.columns if c not in ("parent", "host", "year", "fdi_stock_musd")]
 d = fdi[fdi.fdi_stock_musd > 0].dropna(subset=XCOLS).copy()   # positive FDI, complete rows

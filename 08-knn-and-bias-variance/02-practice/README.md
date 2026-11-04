@@ -22,63 +22,50 @@ The lecture showed the method on the session's dataset. You now apply it to **yo
 to the question your group is actually trying to answer
 ([`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md)).
 
-The deliverable is not a printout. It is a **decision**, with the reason written down.
+The point is not a printout. It is a **decision**, with the reason written down. There is nothing
+to hand in: this is practice, and everything stays in your own folder.
 
 ---
 
-## Before you start
+## The starter script
 
-Everyone in the group pushes at least once this session. Replace `XX` with your group number —
-group 07 uses `group-07`.
-
-```bash
-git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-08
-```
+Work in a folder of your own, with `pandas numpy matplotlib scikit-learn` installed. Download
+[`session08_practice.py`](https://warint.github.io/quantitative-methods/session-08/session08_practice.py)
+(source: [`starter/session08_practice.py`](starter/session08_practice.py)), set
+`MY_ANGLE` to your group's angle, and run it one part at a time. It reads both datasets from the
+course site.
 
 ---
 
 ## 1 · Reproduce one result from the paper — 20 min
 
 Take the result the pre-session reading rests on, and reproduce it — or establish that you cannot,
-and say precisely where it breaks. A failed reproduction that is diagnosed earns full marks; one
-that is not attempted earns none.
+and say precisely where it breaks. A failed reproduction that is diagnosed teaches as much as one that works; one
+that is not attempted teaches nothing.
 
-The paper is **Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach*, Journal of International Economics 145**. Its data needs no download: `qmib.load("jst")`.
-
-The session's own dataset, for comparison:
-
-```python
-import qmib
-data = qmib.load("jst")
-```
+The paper is **Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach*, Journal of International Economics 145**. Part 1 of the script fits a logit, KNN and a random forest to predict a crisis within two years (train 1870–1979, test 1980–2020), scores them by AUC, and ranks the predictors.
 
 ---
 
 ## 2 · Apply the method to your own angle — 35 min
 
-```python
-core = qmib.load("core")
-mine = qmib.load("angle_c_country")     # your angle — see your dictionary
-df   = core.merge(mine, on=["geo", "time"], how="inner")
-```
-
-Fit the session's method on your own data. Report what the lecture said to report, in the units of
-your own variables.
+Part 2 of the script merges `core.csv` with your angle (averaged to one row per country-year),
+predicts `falling_behind_next`, and compares the logit with KNN on the last two years. Replace the
+default predictor list with the ones your question needs, and report in the units of your own variables.
 
 ---
 
 ## 3 · Break one assumption — 15 min
 
 Every method in this course rests on something. Find the assumption this one rests on hardest, break
-it deliberately, and record what happened to your answer. **This is the part that carries the
-marks.**
+it deliberately, and record what happened to your answer. **This is the part that matters
+most.** Part 3 of the script has three ready to run: no standardising, fewer predictors, a random split.
 
 ---
 
 ## 4 · Write it down — 20 min
 
-A 250-word note in your submissions folder:
+A 250-word note, in your own folder — it is what you report from:
 
 - What you found, in units
 - Which assumption you broke, and what it did
@@ -86,19 +73,7 @@ A 250-word note in your submissions folder:
 
 ---
 
-## Submitting
-
-```bash
-git add groups/A2026/group-XX/session-08
-git commit -m "Session 08 practice — group XX"
-git push -u origin group-XX
-```
-
-Everyone pushes at least once. The log is the record of participation.
-
----
-
-## What loses marks
+## The usual mistakes
 
 - Running KNN on unstandardised predictors
 - Choosing $k$ on the test set

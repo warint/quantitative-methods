@@ -22,27 +22,40 @@ format:
     margin: 0.06
     smaller: true
     include-in-header:
-      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}</style>"
+      text: |
+        <style>
+        .reveal .slides{font-size:0.93em;}
+        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}
+        /* Long code scrolls inside its own window, so the slide itself does not have to. */
+        .reveal div.sourceCode, .reveal div.sourceCode pre{max-height:none; overflow:visible;}
+        .reveal div.sourceCode pre code{max-height:340px; overflow:auto; display:block;}
+        .reveal .cell-output pre{margin-top:0.3em;}
+        .reveal .cell-output pre code{max-height:130px; overflow:auto; display:block;}
+        /* Scroll bars always visible, so a student can see there is more to read. */
+        .reveal pre code::-webkit-scrollbar{width:9px; height:9px;}
+        .reveal pre code::-webkit-scrollbar-thumb{background:#B5B2AA; border-radius:5px;}
+        .reveal pre code::-webkit-scrollbar-track{background:rgba(0,0,0,0.04);}
+        .reveal pre code{scrollbar-width:thin; scrollbar-color:#B5B2AA rgba(0,0,0,0.04);}
+        </style>
     footer: "MATH60033A · Session 08 · Thierry Warin, PhD · HEC Montréal"
 ---
 
 <!-- Imported from https://warin.ca/quant/en/session8_cours/. The code cells below are live: they execute
-     against the course data at render time, so the output on the slides is the
-     output the students' own machines produce. -->
+     at render time, so the output on the slides is the output the students' own
+     machines produce. Every visible cell is plain Python with the four packages
+     by name and the data read by URL — no qmib, no repository — so a student can
+     copy it into a file of their own and run it. The financial example is the two
+     scripts beside this deck, session08_1_train.py and session08_2_predict.py,
+     published on the site.
+     The KNN figures are computed by economist-assets/build_knn_figures.py. -->
 ```{python}
 #| label: setup
 #| echo: false
 
-import sys, warnings
-sys.path.insert(0, "../..")
-sys.path.insert(0, "../../slides")
+# Hidden: keep library warnings off the slides, and print tables wide.
+import warnings
 warnings.filterwarnings("ignore")
-
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import qmib
-
 pd.set_option("display.width", 96)
 pd.set_option("display.max_columns", 10)
 ```
@@ -51,12 +64,10 @@ pd.set_option("display.max_columns", 10)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. The bias–variance trade-off
-2. Classification
-3. K-nearest neighbours
-4. KNN by hand (you are the algorithm)
-5. KNN in code (you are no longer the algorithm)
-6. Big lessons from ML
+1. K-nearest neighbours, explained
+2. Cross-validation: why it is magical
+3. A financial example: can KNN predict the stock market?
+4. Big lessons from ML
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -65,10 +76,10 @@ pd.set_option("display.max_columns", 10)
 
 ### The mathematics
 
-- State the **Bayes classifier** and say why no rule can beat it
+- Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**
 - Find nearest neighbours **by hand** from a Euclidean distance
 - Decompose test error into **squared bias, variance and irreducible error**
-- Say what happens to KNN as the number of predictors grows
+- Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you
 
 ::::
 
@@ -115,34 +126,21 @@ assumed.
 
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
 
-## The bias–variance trade-off {.center .scrollable}
 
-## Bias and variance, in four pictures {#imported-s08-002 .scrollable}
+::: {.muted}
+The quote is the whole idea of this session. To guess something about you, look at the people who live
+closest to you. That is K-nearest neighbours.
+:::
 
-::::::::: panel-tabset
-### Bias and variance
+## K-nearest neighbours, explained {.center .scrollable}
 
-![](economist-assets/bias-variance.png){style="display: block; margin: auto;" width="78%"}
+## Classification: predicting a category {#imported-s08-009 .scrollable}
 
-### Underfitting
+In sessions 2 to 6, most of what we predicted was a **number**: a wage, a volume of exports, a price.
+Today the outcome is a **category**: Up or Down, crisis or no crisis, red or green. Predicting a
+category is called **classification**, and a model that does it is a **classifier**.
 
-![](economist-assets/underfit.png){style="display: block; margin: auto;" width="78%"}
-
-### Overfitting
-
-![](economist-assets/overfit.png){style="display: block; margin: auto;" width="78%"}
-
-### Error against complexity
-
-![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="78%"}
-
-:::::::::
-
-## Classification {.center .scrollable}
-
-## Training error and test error {#imported-s08-009 .scrollable}
-
-The bias–variance trade-off carries over to classification, with one change: $y_i$ is now a **category**, not a number. Accuracy is counted in mistakes.
+A classifier is judged by its mistakes. We count how often its prediction $\hat y_i$ differs from the truth $y_i$:
 
 ::: {.tight}
 - The **training error rate** is the share of mistakes on the observations used to fit the model:
@@ -150,53 +148,227 @@ The bias–variance trade-off carries over to classification, with one change: $
 
 $$\frac{1}{n}\sum_{i=1}^{n} I(y_i \neq \hat y_i)$$
 
-where $I(y_i \neq \hat y_i)$ is 1 if observation $i$ is misclassified and 0 otherwise.
+where $I(y_i \neq \hat y_i)$ is 1 if observation $i$ is misclassified and 0 otherwise. So the formula simply counts the mistakes and divides by $n$.
 
 ::: {.tight}
-- The **test error rate** is the same share on observations the model has **not** seen, $\text{Ave}\big(I(y_0 \neq \hat y_0)\big)$
+- The **test error rate** is the same share, computed on observations the model has **not** seen: $\text{Ave}\big(I(y_0 \neq \hat y_0)\big)$
 :::
 
 ::: {.check}
-As in regression, the test error is the one we care about. A good classifier is the one whose **test** error is smallest.
+Keep this distinction in mind for the whole session. The training error tells us how well the model
+remembers the past. The test error tells us how well it will do on new cases, and that is the
+only one we care about.
 :::
 
-## The Bayes classifier {#imported-s08-010 .scrollable}
+## The idea: tell me who your neighbours are {#imported-s08-012 .scrollable}
 
 ::::::::: panel-tabset
-### The rule
+### In words
 
-The test error rate is minimised, on average, by a very simple rule: **assign each observation to its most likely class, given its predictors.** That is, give $x_0$ the class $j$ for which
+KNN has no equation, no coefficients and no theory of how the data were produced. It rests on one
+intuition: **observations that look alike tend to belong to the same class.**
 
-$$\Pr(Y = j \mid X = x_0)$$
+To classify a new observation, KNN does three things:
 
-is largest. This is the **Bayes classifier**.
+1. It measures the **distance** between the new observation and every observation in the training data.
+2. It keeps the $K$ **closest** ones, its "nearest neighbours". $K$ is a number we choose: 1, 3, 25, …
+3. It lets them **vote**. The new observation gets the class that most of its neighbours have.
 
-::: {.tight}
-- It is a *conditional probability*: the probability that $Y = j$, given the observed predictors $x_0$
-- With two classes, predict class 1 when $\Pr(Y = 1 \mid X = x_0) > 0.5$, and class 2 otherwise
+::: {.check}
+That is the whole algorithm. Everything else in this session is about two questions: how to measure
+"close", and how many neighbours to ask.
 :::
 
-### Example
+### In symbols
 
-::: pull-left
-A simulated data set consisting of 100 observations in each of two groups, indicated in blue and in orange.
+Given a positive integer $K$ and a new observation $x_0$, KNN finds the $K$ training points closest
+to $x_0$ (call that set $N_0$). It estimates the probability of each class $j$ as the share of the
+neighbours that belong to it:
 
-The purple dashed line represents the Bayes decision boundary.
+$$\widehat{\Pr}(Y = j \mid X = x_0) = \frac{1}{K}\sum_{i \in N_0} I(y_i = j)$$
 
-The orange background grid indicates the region in which a test observation will be assigned to the orange class, and the blue background grid indicates the region in which a test observation will be assigned to the blue class.
+Then $x_0$ goes to the class with the largest share.
 
-This figure provides an example using a simulated data set in a two-dimensional space consisting of predictors [X_1]{.MathJax_Preview} and [X_2]{.MathJax_Preview}.
-:::
-
-::: pull-right
-![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="100%"}
+::: {.muted}
+Read the formula out loud: "among my $K$ neighbours, count those of class $j$, and divide by $K$."
+With $K = 5$ and three blue neighbours, $\widehat{\Pr}(\text{blue}) = 3/5 = 0.6$, so the prediction is blue.
 :::
 
 :::::::::
 
+## KNN with K = 3, in a picture {#imported-s08-013 .scrollable}
+
+![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="88%"}
+
+::: {.tight}
+- **Left.** We want to classify the black cross, with $K = 3$. KNN finds the three closest observations (the circle): two blue, one orange. So $\widehat{\Pr}(\text{blue}) = 2/3$, $\widehat{\Pr}(\text{orange}) = 1/3$, and the cross is predicted **blue**.
+- **Right.** Now do the same vote at every point of the plane. Where blue wins, the plane is shaded blue; where orange wins, orange. The line between the two colours is the $K = 3$ **decision boundary**: on one side of it, KNN says blue; on the other, orange.
+:::
+
+## KNN by hand: you are the algorithm {#imported-s08-017 .scrollable}
+
+Before a computer does it, we do it ourselves, with a pencil. Six observations, one new point, and the three steps of KNN: distance, nearest, vote.
+
+
+::::::::: panel-tabset
+### The data
+
+::: pull-left
+A training set of six observations, three predictors and one qualitative response.
+
+We want to predict $Y$ for the test point $X_1 = X_2 = X_3 = 0$ using $K$-nearest neighbours.
+
+**First step:** compute the Euclidean distance between each observation and the test point:
+
+$$d(a, b) = \sqrt{\sum_{j=1}^{p} (a_j - b_j)^2}$$
+
+With $b = (0, 0, 0)$ this is just $\sqrt{X_1^2 + X_2^2 + X_3^2}$.
+:::
+
+::: pull-right
+| Obs. | $X_1$ | $X_2$ | $X_3$ | $Y$ |
+|:---:|:---:|:---:|:---:|:---:|
+| 1 | 0 | 3 | 0 | Red |
+| 2 | 2 | 0 | 0 | Red |
+| 3 | 0 | 1 | 3 | Red |
+| 4 | 0 | 1 | 2 | Green |
+| 5 | −1 | 0 | 1 | Green |
+| 6 | 1 | 1 | 1 | Red |
+:::
+
+### The distances
+
+::: pull-left
+| Obs. | $X_1$ | $X_2$ | $X_3$ | $Y$ | $d$ to $(0,0,0)$ |
+|:---:|:---:|:---:|:---:|:---:|:---|
+| 1 | 0 | 3 | 0 | Red | $\sqrt{9} = 3.000$ |
+| 2 | 2 | 0 | 0 | Red | $\sqrt{4} = 2.000$ |
+| 3 | 0 | 1 | 3 | Red | $\sqrt{10} = 3.162$ |
+| 4 | 0 | 1 | 2 | Green | $\sqrt{5} = 2.236$ |
+| 5 | −1 | 0 | 1 | Green | $\sqrt{2} = 1.414$ |
+| 6 | 1 | 1 | 1 | Red | $\sqrt{3} = 1.732$ |
+:::
+
+::: pull-right
+The same, in Python:
+
+```{python}
+#| echo: true
+
+import numpy as np
+import pandas as pd
+
+# The six observations, and their colour
+by_hand = pd.DataFrame({
+    "X1": [0, 2, 0, 0, -1, 1],
+    "X2": [3, 0, 1, 1, 0, 1],
+    "X3": [0, 0, 3, 2, 1, 1],
+    "Y":  ["Red", "Red", "Red", "Green", "Green", "Red"],
+}, index=[1, 2, 3, 4, 5, 6])
+
+# Distance to the test point (0, 0, 0)
+by_hand["distance"] = np.sqrt(
+    by_hand["X1"]**2 + by_hand["X2"]**2 + by_hand["X3"]**2)
+
+# Nearest first
+by_hand = by_hand.sort_values("distance")
+print(by_hand.round(3))
+```
+:::
+
+:::::::::
+
+## Predict with K = 1, then K = 3 {#imported-s08-018 .scrollable}
+
+::::::::: panel-tabset
+### K = 1
+
+**What is our prediction with $K = 1$? Why?**
+
+::: {.check}
+**Green.** The single nearest neighbour of the test point is observation 5 ($d = 1.414$), and it is Green.
+:::
+
+| Obs. | $Y$ | $d$ | nearest? |
+|:---:|:---:|:---:|:---:|
+| **5** | **Green** | **1.414** | **✔ 1st** |
+| 6 | Red | 1.732 | |
+| 2 | Red | 2.000 | |
+| 4 | Green | 2.236 | |
+| 1 | Red | 3.000 | |
+| 3 | Red | 3.162 | |
+
+### K = 3
+
+**What is our prediction with $K = 3$? Why?**
+
+::: {.check}
+**Red.** The three nearest neighbours are observations 5, 6 and 2. Two of the three are Red, so $\widehat{\Pr}(\text{Red}) = 2/3$.
+:::
+
+| Obs. | $Y$ | $d$ | nearest? |
+|:---:|:---:|:---:|:---:|
+| **5** | **Green** | **1.414** | **✔ 1st** |
+| **6** | **Red** | **1.732** | **✔ 2nd** |
+| **2** | **Red** | **2.000** | **✔ 3rd** |
+| 4 | Green | 2.236 | |
+| 1 | Red | 3.000 | |
+| 3 | Red | 3.162 | |
+
+### In Python
+
+```{python}
+#| echo: true
+
+# ---- Setup: the previous slide, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+by_hand = pd.DataFrame({"X1": [0, 2, 0, 0, -1, 1], "X2": [3, 0, 1, 1, 0, 1],
+                        "X3": [0, 0, 3, 2, 1, 1],
+                        "Y": ["Red", "Red", "Red", "Green", "Green", "Red"]}, index=[1, 2, 3, 4, 5, 6])
+by_hand["distance"] = np.sqrt(by_hand["X1"]**2 + by_hand["X2"]**2 + by_hand["X3"]**2)
+by_hand = by_hand.sort_values("distance")
+
+# ---- Predict ----
+# The prediction is the most common colour among the K nearest rows.
+print("K = 1 predicts:", by_hand["Y"].iloc[:1].mode()[0])
+print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])
+```
+
+:::::::::
+
+
+## The choice of K: how many neighbours? {#imported-s08-014 .scrollable}
+
+![](economist-assets/k-choice.png){style="display: block; margin: auto; max-height:none;" width="90%"}
+
+::: {.tight}
+- **$K = 1$**: each point is classified by its single nearest neighbour. The boundary wraps around every stray blue point in orange territory, and every stray orange point in blue. The training error is 0, because every point is its own nearest neighbour, yet on new points it makes 16% mistakes. **Low bias, high variance**: the model believes every detail of the sample, including the noise.
+- **$K = 11$**: the boundary follows the curve in the data, and the test error, 12%, is about the best any rule can do on these data. KNN knows nothing about how the data were generated, yet it finds the shape.
+- **$K = 100$**: half the data votes on every point, so the boundary is almost a straight line and misses the bend in the data. **High bias, low variance**: the model is stable, but too simple.
+:::
+
+## Bias and variance, in three pictures {#imported-s08-002 .scrollable}
+
+What we just saw with $K$ is a general law of statistical learning, the **bias–variance trade-off**.
+A rigid model is wrong in the same way every time (bias). A flexible model is right on average but
+changes a lot from one sample to the next (variance). The best model sits in between.
+
+:::::: columns
+::: {.column width="33%"}
+![](economist-assets/bias-variance.png){width="100%" style="max-height:none;"}
+:::
+::: {.column width="33%"}
+![](economist-assets/underfit.png){width="100%" style="max-height:none;"}
+:::
+::: {.column width="33%"}
+![](economist-assets/overfit.png){width="100%" style="max-height:none;"}
+:::
+::::::
+
 ## Watch a decision boundary being built {#playground}
 
-Everything on the last four slides — a boundary, a class region, the cost of
+Everything in this section — a boundary, a class region, the cost of
 flexibility — can be watched happening, in a browser, in about four minutes.
 
 ::: {.step}
@@ -232,8 +404,7 @@ is what "flexible" buys you.
 **3 · Now add capacity** — eight neurons in each of four layers. Watch the two
 loss numbers separate: **training loss keeps falling while test loss turns
 upward**, and the boundary starts bulging toward individual points. You are
-watching variance, live. It is the same curve as $k$ getting too small in the
-next section.
+watching variance, live. It is the same curve as $K$ getting too small, a few slides back.
 :::
 
 ::: {.step}
@@ -262,218 +433,207 @@ the non-linearity in by hand as a quadratic; this session measures what it costs
 when you cannot.
 :::
 
-## K-nearest neighbours {.center .scrollable}
 
-## From the Bayes classifier to KNN {#imported-s08-012 .scrollable}
+## Cross-validation: why it is magical {.center .scrollable}
 
-::::::::: panel-tabset
-### The idea
+## The question every model must answer {.scrollable}
 
-In theory we would always like to predict qualitative responses using the Bayes classifier.
-
-But for real data, we do not know the conditional distribution of [Y]{.MathJax_Preview} given [X]{.MathJax_Preview}, and so computing the Bayes classifier is impossible.
-
-Therefore, the Bayes classifier serves as an unattainable gold standard against which to compare other methods.
-
-Many approaches attempt to estimate the conditional distribution of [Y]{.MathJax_Preview} given [X]{.MathJax_Preview}, and then classify a given observation to the class with highest estimated probability.
-
-> One such method is the K-nearest neighbors (KNN) classifier.
-
-### The rule
-
-Given a positive integer $K$ and a test observation $x_0$, KNN finds the $K$ training points closest to $x_0$ — call them $N_0$ — and estimates each class's probability as its share of them:
-
-$$\Pr(Y = j \mid X = x_0) = \frac{1}{K}\sum_{i \in N_0} I(y_i = j)$$
-
-It then applies the Bayes rule to that estimate: $x_0$ goes to the class with the largest share.
-
-:::::::::
-
-## KNN with K = 3 {#imported-s08-013 .scrollable}
+> **How well will this model do on data it has never seen?**
 
 ::: pull-left
-Our goal is to make a prediction for the point labeled by the black cross. Suppose that we choose [K = 3]{.MathJax_Preview}.
+**The classical approach (sessions 2 to 6).** We fitted a model on *all* the data, then judged it
+on that **same** data: the $R^2$, the $t$-statistics, the $p$-values, the standard errors.
 
-Then KNN will first identify the three observations that are closest to the cross. This neighborhood is shown as a circle.
-
-It consists of two blue points and one orange point, resulting in estimated probabilities of [2/3]{.MathJax_Preview} for the blue class and [1/3]{.MathJax_Preview} for the orange class.
-
-Hence KNN will predict that the black cross belongs to the blue class.
-
-Right-hand panel of the figure: we have applied the KNN approach with [K = 3]{.MathJax_Preview} at all of the possible values for [X_1]{.MathJax_Preview} and [X_2]{.MathJax_Preview}, and have drawn in the corresponding KNN decision boundary.
+Those numbers describe how well the model fits the **sample**. To say anything about new data, they
+lean on **assumptions**: the model is correctly specified, the errors are normal and independent, and so on.
+If the assumptions fail, the numbers can mislead, and nothing in them warns us.
 :::
 
 ::: pull-right
-![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="100%"}
+**The problem with flexible models.** A flexible model can *always* fit the sample better. KNN with
+$K = 1$ has a training error of 0. A polynomial of degree 20 has an $R^2$ close to 1. In-sample fit
+rewards exactly the models that will predict worst.
+
+**What we really want** is the error on new data, the *out-of-sample* error. But new data have not
+arrived yet, and the test set may be used only once, at the very end.
 :::
-
-## How close KNN gets, and the choice of K {#imported-s08-014 .scrollable}
-
-::::::::: panel-tabset
-### Close to Bayes
-
-::: pull-left
-Despite the fact that it is a very simple approach, KNN can often produce classifiers that are surprisingly close to the optimal Bayes classifier.
-
-This figure displays the KNN decision boundary, using [K = 10]{.MathJax_Preview}, when applied to the larger simulated data set from the first figure.
-
-The Bayes decision boundary is shown as a purple dashed line. The KNN and Bayes decision boundaries are very similar.
-:::
-
-::: pull-right
-![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="100%"}
-:::
-
-### Choice of K
-
-::: pull-left
-The choice of [K]{.MathJax_Preview} has a drastic effect on the KNN classifier obtained.
-
-This figure displays two KNN fits to the simulated data , using [K = 1]{.MathJax_Preview} and [K = 100]{.MathJax_Preview}. When [K = 1]{.MathJax_Preview}, the decision boundary is overly flexible and finds patterns in the data that don't correspond to the Bayes decision boundary.
-
-This corresponds to a classifier that has low bias but very high variance.
-
-As [K]{.MathJax_Preview} grows, the method becomes less flexible and produces a decision boundary that is close to linear.
-
-This corresponds to a low-variance but high-bias classifier.
-:::
-
-::: pull-right
-![](economist-assets/complexity-compare.png){style="display: block; margin: auto;" width="100%"}
-:::
-
-:::::::::
-
-## Training error is not test error {#imported-s08-015 .scrollable}
-
-::: pull-left
-With $K = 1$ the KNN training error rate is 0, but the test error rate may be quite high. In general, as a classifier becomes more flexible, the training error falls but the test error may not.
-
-The figure: training error (blue, 200 observations) and test error (orange, 5,000 observations) as flexibility, $1/K$, increases. The black dashed line is the Bayes error rate.
 
 ::: {.check}
-Choosing the level of flexibility is the whole game, and the U-shape of the test error is what makes it hard.
-:::
-:::
-
-::: pull-right
-![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="100%"}
+So we need to estimate the out-of-sample error **from the data we already have**. That is what
+cross-validation does.
 :::
 
-## KNN by hand (you are the algorithm) {.center .scrollable}
+## Train, validate, test: three words to know {.scrollable}
 
-## Six observations and a test point {#imported-s08-017 .scrollable}
+Every machine-learning project cuts its data into parts, and gives each part **one job**. The three
+words below come back in every course, paper and piece of code on the subject.
 
-::::::::: panel-tabset
-### The data
+![](economist-assets/train-validate-test.png){style="display: block; margin: auto; max-height:265px;"}
 
-The table provides a training data set containing six observations, three predictors, and one qualitative response variable.
+| | **What it is** | **What it is used for** | **In the stock-market example** |
+|:---|:---|:---|:---|
+| **Training set** | The observations the model **learns from** | Fitting the model. For KNN, the neighbours are looked for here | The days of 2002–2004 |
+| **Validation set** | Observations **hidden from the fit**, but taken from the training data | **Choosing** a setting, such as $K$: the setting with the fewest mistakes on it wins | Each round's hidden block, in cross-validation |
+| **Test set** | Observations kept **locked away** until everything is decided | **Judging** the final model, once, as if it were new data | The days of 2005 |
+
+::: {.check}
+**Cross-validation** is a way to get a validation set without losing training data: it cuts the
+training data into folds and lets **each fold play "validation" in turn**. So the validation set is not
+a fixed part of the data, but a role that moves.
+:::
+
+::: {.warn}
+The golden rule: the test set must never help to choose anything. Once you change the model because of
+its test score, the test set has become a validation set, and you no longer have an honest measure of
+how well the model predicts.
+:::
+
+## The power of sampling {.scrollable}
+
+The trick is simple and powerful: **if we cannot get new data, we manufacture some from our own sample.**
+Hide part of the data, fit the model on the rest, and test it on the hidden part. For the model,
+the hidden part *is* new data. Then do it again with a different part hidden, and again.
+
+![](economist-assets/cv-folds.png){style="display: block; margin: auto;" width="80%"}
+
+Cut the training data into $k$ folds. Fit on $k - 1$ of them, count the mistakes on the one left out,
+rotate, and average:
+
+$$\text{CV}_{(k)} = \frac{1}{k}\sum_{i=1}^{k} \text{Err}_i, \qquad \text{Err}_i = \frac{1}{n_i}\sum_{j \in \text{fold } i} I(y_j \neq \hat y_j)$$
+
+::: {.muted}
+$k = 5$ or $k = 10$ are the usual choices. Every observation is used to fit the model $k - 1$ times
+and to test it exactly once. With $k = n$, each observation is left out on its own: *leave-one-out*
+cross-validation.
+:::
+
+## Classical fit against cross-validation {.scrollable}
+
+| | **Classical, in-sample** | **Cross-validation, out-of-sample** |
+|:---|:---|:---|
+| The question it answers | How well does the model describe *this* sample? | How well will it predict a *new* observation? |
+| What it needs | A formula for the model, and assumptions about the errors | Only that new data look like the data we have |
+| Which models it works for | Those with a theory: OLS, logit, … | Any model: KNN, trees, forests, networks, … |
+| What it does with a more flexible model | Rewards it: fit always improves | Penalises it as soon as it starts fitting noise |
+| What it says about uncertainty | A standard error, if the assumptions hold | $k$ errors: their spread shows how stable the result is |
+
+::: {.check}
+The two are not enemies. Cross-validation does not replace the coefficients and $p$-values of an
+explanatory model. It answers a different question, the one that matters when the goal is to **predict**.
+:::
+
+## Why it is magical {.scrollable}
+
+::: {.tight}
+1. **It needs no theory.** No formula for the variance, no assumption on the errors. One idea, sampling, replaces pages of mathematics.
+2. **It tunes anything.** $K$ in KNN, $\lambda$ in ridge and lasso (session 5), the depth of a tree, the size of a neural network: the same loop chooses them all.
+3. **It referees between models.** KNN against a logit against a random forest, each scored on data it did not see, on equal terms.
+4. **It uses every observation twice**, once to fit and once to check. That matters when data are scarce, as they usually are in international business.
+5. **It tells you how sure to be.** It gives $k$ errors, not one. If two models differ by less than the spread of those errors, the difference may be noise.
+:::
+
+::: {.warn}
+**Three rules, or it lies.**
+(1) Everything learned from data, such as standardising, happens **inside** each fold: that is what the `Pipeline` does in the code.
+(2) With time series, the folds respect time: never fit on the future to predict the past.
+(3) Cross-validation **chooses**; the test set **judges**, once, at the very end.
+:::
+
+
+## A financial example: can KNN predict the stock market? {.center .scrollable}
+
+## The question, and the plan {.scrollable}
+
+> Can the market's return of two days ago tell us whether it will go **up or down today**?
+
+We will answer the way a data scientist at a bank would. The work is split into **two files**,
+because in real life the two jobs happen at different times:
 
 ::: pull-left
-Suppose we wish to use this data set to make a prediction for [Y]{.MathJax_Preview} when [X_1 = X_2 = X_3 = 0]{.MathJax_Preview} using [K]{.MathJax_Preview}-nearest neighbors.
-
--   Compute the Euclidean distance between each observation and the test point, [X_1 = X_2 = X_3 = 0]{.MathJax_Preview}.
-
-[d(a,b) = d(b,a) = \\sqrt{\\sum\_{i=1}\^{p}(a_i - b_i)\^2}]{.MathJax_Preview}
+::: {.step}
+**File 1 · [session08_1_train.py](https://warint.github.io/quantitative-methods/session-08/session08_1_train.py)**
+— *the laboratory.* It loads the data, chooses $K$ by cross-validation, judges the model
+once on a year it never saw, and **saves** the trained model in a file.
+:::
 :::
 
 ::: pull-right
-        \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`
-  --- -------------------------------- -------------------------------- -------------------------------- ---------------------------
-  1                                  0                                3                                0 Red
-  2                                  2                                0                                0 Red
-  3                                  0                                1                                3 Red
-  4                                  0                                1                                2 Green
-  5                                 -1                                0                                1 Green
-  6                                  1                                1                                1 Red
+::: {.step}
+**File 2 · [session08_2_predict.py](https://warint.github.io/quantitative-methods/session-08/session08_2_predict.py)**
+— *the trading desk.* No data to download, no training. It loads the saved model and predicts
+**one new date**: a genuine out-of-sample prediction.
+:::
 :::
 
-### The distances
-
-::: pull-left
-[d(a,b) = d(b,a) = \\sqrt{\\sum\_{i=1}\^{p}(a_i - b_i)\^2}]{.MathJax_Preview}
-
-```{python}
-#| echo: true
-
-import numpy as np
-
-# Six observations in three dimensions, and the test point
-obs = np.array([[0, 3, 0], [2, 0, 0], [0, 1, 3],
-                [0, 1, 2], [-1, 0, 1], [1, 1, 1]])
-test = np.array([0, 0, 0])
-# Euclidean distance from the test point to each observation
-dist = np.sqrt(((obs - test) ** 2).sum(axis=1))
-for i, d in enumerate(dist, 1):
-    print(f"obs{i}: {d:.3f}")
-```
+::: {.tight}
+- Save both files in **one folder of your own**, open that folder in VS Codium, run File 1, then File 2.
+- **Once**, in the VS Codium terminal: `pip install pandas numpy matplotlib scikit-learn`
 :::
 
-::: pull-right
-        \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`     \`[d(X, Z)]{.MathJax_Preview}\`
-  --- -------------------------------- -------------------------------- -------------------------------- --------------------------- ---------------------------------
-  1                                  0                                3                                0 Red                                                    3.0000
-  2                                  2                                0                                0 Red                                                    2.0000
-  3                                  0                                1                                3 Red                                                    3.1623
-  4                                  0                                1                                2 Green                                                  2.2361
-  5                                 -1                                0                                1 Green                                                  1.4142
-  6                                  1                                1                                1 Red                                                    1.7321
+::: {.warn}
+**macOS, Python from python.org:** if reading the data fails with `CERTIFICATE_VERIFY_FAILED`,
+run its certificate installer once, then try again:
+`open /Applications/Python\ 3*/Install\ Certificates.command`
 :::
 
-:::::::::
+::: {.muted}
+The slides that follow show the two files step by step, with their output. In a `.py` file a result
+only appears if you `print()` it, which is why every step prints what it wants you to see.
+:::
 
-## Predict with K = 1, then K = 3 {#imported-s08-018 .scrollable}
+## The workflow, and how a classifier is scored {#imported-s08-024 .scrollable}
 
 ::::::::: panel-tabset
-### K = 1
+### Eight steps, two files
 
--   What is our prediction with [K = 1]{.MathJax_Preview}? Why?
+**File 1, the laboratory**
 
-> Green, since the single nearest neighbor to [Z]{.MathJax_Preview} is observation 5.
+1. **Load** the data and look at it
+2. **Put one late day aside**: it plays "tomorrow" for File 2
+3. **Split by time**: learn from 2002–2004, test on 2005
+4. **Cut the training years into folds**, in time order
+5. **Cross-validate by hand**, for one $K$, to see the loop
+6. **Cross-validate every $K$** at once, and keep the best
+7. **Open the test year, once**, and judge the chosen model
+8. **Refit on all the history**, and save the model
 
-### K = 1: the neighbour
+**File 2, the trading desk**: load the model, predict one new date.
 
-        \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`                                                                                                                     \`[d(X, Z)]{.MathJax_Preview}\`
-  --- -------------------------------- -------------------------------- -------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------
-  1                                  0                                3                                0 Red                                                                                                                                           3
-  2                                  2                                0                                0 Red                                                                                                                                           2
-  3                                  0                                1                                3 Red                                                                                                                                           3.1623
-  4                                  0                                1                                2 Green                                                                                                                                         2.2361
-  5                                 -1                                0                                1 [Green]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}   [1.4142]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
-  6                                  1                                1                                1 Red                                                                                                                                           1.7321
+### What KNN needs
 
-### K = 3
+1. The predictors of the **training** data — `X_train` below
+2. The class labels of the training data — `y_train` (Up / Down)
+3. The predictors of the data to predict — `X_test`
+4. A value for $K$, the number of neighbours — chosen by cross-validation
 
--   What is our prediction with [K = 3]{.MathJax_Preview}? Why?
+### Confusion matrix
 
-> Red, since the three nearest neighbors to [Z]{.MathJax_Preview} are observations 5, 6 and 2; two are "Red".
+![](economist-assets/confusion-matrix.png){style="display: block; margin: auto;" width="62%"}
 
-### K = 3: the neighbours
+### Reading it
 
-        \`[X\_{1}]{.MathJax_Preview}\`   \`[X\_{2}]{.MathJax_Preview}\`   \`[X\_{3}]{.MathJax_Preview}\` \`[Y]{.MathJax_Preview}\`                                                                                                                     \`[d(X, Z)]{.MathJax_Preview}\`
-  --- -------------------------------- -------------------------------- -------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------
-  1                                  0                                3                                0 Red                                                                                                                                           3
-  2                                  2                                0                                0 [Red]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}     [2]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
-  3                                  0                                1                                3 Red                                                                                                                                           3.1623
-  4                                  0                                1                                2 Green                                                                                                                                         2.2361
-  5                                 -1                                0                                1 [Green]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}   [1.4142]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
-  6                                  1                                1                                1 [Red]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}     [1.7321]{style=" font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: lightgreen !important;"}
+From the four cells of the confusion matrix:
+
+$$\text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+$$\text{Recall (sensitivity, TPR)} = \frac{TP}{TP + FN} \qquad \text{Precision} = \frac{TP}{TP + FP}$$
+
+$$\text{Specificity} = \frac{TN}{TN + FP} \qquad \text{False positive rate} = 1 - \text{Specificity} = \frac{FP}{TN + FP}$$
+
+$$F_1 = \frac{2\,TP}{2\,TP + FP + FN} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+
+### Pre-processing
+
+KNN measures **distances**, so a predictor in large units would dominate one in small units. Put them on the same scale first:
+
+$$\text{Normalisation: } x_{\text{normalised}} = \frac{x - x_{\min}}{x_{\max} - x_{\min}} \qquad \text{Standardisation: } x_{\text{standardised}} = \frac{x - \mu}{\sigma}$$
+
+In scikit-learn, standardisation is `StandardScaler()`.
 
 :::::::::
+## File 1 · Step 1: the data {#imported-s08-023 .scrollable}
 
-## A nonlinear boundary: large K or small? {#imported-s08-020 .scrollable}
-
--   If the Bayes decision boundary in this problem is highly nonlinear, then would we expect the best value for [K]{.MathJax_Preview} to be large or small? Why?
-
-Solution
-
-We would expect a small K to perform better for a nonlinear decision boundary. A small \`[K]{.MathJax_Preview}\` would be more 'flexible' and the KNN boundary would be pulled in different directions easier, whereas a large K would have a 'smoothing' effect and produce a more linear boundary (hence, a worse classifier), because it takes more points into account.
-
-## KNN in code (you are no longer the algorithm) {.center .scrollable}
-
-## The data: the stock market {#imported-s08-023 .scrollable}
-
-> How does an AI work? The KNN mathematics, now inside an algorithm — what does it change?
+**Smarket**: the S&P 500 index, every trading day from 2001 to 2005, from the textbook *An Introduction to Statistical Learning*. Each row is one day. We want to predict its `Direction` from the returns of the days before.
 
 ::::::::: panel-tabset
 ### Data collection
@@ -481,267 +641,477 @@ We would expect a small K to perform better for a nonlinear decision boundary. A
 ```{python}
 #| echo: true
 
-# Smarket: 1,250 daily S&P 500 returns, 2001-2005, from ISLR. Loaded through
-# qmib so it is downloaded once and then read from the local cache — the deck
-# must render in a room with no internet, and the URL the R course used is dead.
-smarket = qmib.load("smarket")
-smarket.head()
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Smarket: 1,250 trading days of the S&P 500, 2001-2005 (ISLR textbook data)
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+
+print(smarket.shape)                         # (rows, columns)
+print(smarket.head())
+print(smarket["Direction"].value_counts())   # how many Up days, how many Down
 ```
 
 ### Data description
 
-We have a labeled dataset here about the stock market. A data frame with 1250 observations on the following 9 variables.
+1,250 trading days, 9 variables. We will keep 2002–2005 and give KNN a single predictor, `Lag2`, the return two days before. Why that slice is explained at the end of the example.
 
-  Variable                        Description
-  ------------------------------- -----------------------------------------------------------------------------------------------------------------
-  [Year]{.MathJax_Preview}        The year that the observation was recorded
-  [Lag_1]{.MathJax_Preview}       Percentage return for previous day
-  [Lag_2]{.MathJax_Preview}       Percentage return for 2 days previous
-  [Lag_n]{.MathJax_Preview}       Percentage return for [n]{.MathJax_Preview} days previous
-  [Direction]{.MathJax_Preview}   A factor with levels Down and Up indicating whether the market had a positive or negative return on a given day
+| Variable | Description |
+|:---|:---|
+| `Year` | The year of the observation |
+| `Lag1` | % return of the market the previous day |
+| `Lag2` | % return two days before |
+| `Lag3` … `Lag5` | % return three to five days before |
+| `Volume` | Shares traded (billions) |
+| `Today` | % return that day |
+| `Direction` | `Up` or `Down`: did the market rise that day? — **the label** |
 
-Pre-processing means that we will create the train and the test datasets (they will be called train and test). We also need to consider a variable with the labeled value, here \"Direction\" (it is a factor with the \"up\" and \"down\" values).
-
-:::::::::
-
-## The workflow, and how it is scored {#imported-s08-024 .scrollable}
-
-::::::::: panel-tabset
-### Four steps
-
-1.  Data collection
-
-2.  Model training with or without cross-validation and pre-processing of data
-
-3.  Model testing
-
-4.  Prediction on user\'s data
-
-### What KNN needs
-
-We will now perform KNN.
-
-1.  A matrix containing the predictors associated with the training data, labeled `train`{.remark-inline-code} below.
-
-2.  A matrix containing the predictors associated with the data for which we wish to make predictions, labeled `test`{.remark-inline-code} below.
-
-3.  A vector containing the class labels for the training observations, labeled `Direction`{.remark-inline-code} below.
-
-4.  A value for [K]{.MathJax_Preview}, the number of nearest neighbors to be used by the classifier (will be determined automatically).
-
-### Confusion matrix
-
-![](economist-assets/confusion-matrix.png){style="display: block; margin: auto;" width="72%"}
-
-### Reading it
-
-Based on the above confusion matrix, we can calculate the following values and prepare for plotting the ROC curve.
-
-[Accuracy = \\frac{TP+TN}{TP+FP+TN+FN}]{.MathJax_Preview}
-
-[TPR / Recall / Sensitivity = \\frac{TP}{TP+FN}]{.MathJax_Preview}
-
-[Precision = \\frac{TP}{TP+FP}]{.MathJax_Preview}
-
-[Specificity = \\frac{TN}{TN+FP}]{.MathJax_Preview}
-
-[False\~Postitive\~Rate = 1 --- Specificity = \\frac{FP}{TN+FP}]{.MathJax_Preview}
-
-[F1\~Score =\\frac{2\*TP}{2\*TP+FP+FN}= (Precision \* Recall) / (Precision + Recall)]{.MathJax_Preview}
-
-### Pre-processing
-
-Scaling/normalization:
-
-[x\_{normalized} = \\frac{x - x\_{min}}{x\_{max} - x\_{min}}]{.MathJax_Preview}
-
-Centering/standardization:
-
-[x\_{standardized} = \\frac{x - \\mu}{\\sigma}]{.MathJax_Preview}
+::: {.muted}
+`Today` is the answer in disguise (`Direction` is just its sign), so it must never be a predictor.
+:::
 
 :::::::::
 
-## Step 1: a time split, not a random one {#imported-s08-025 .scrollable}
+
+## File 1 · Steps 2–3: one day aside, then a split by time {#imported-s08-025 .scrollable}
+
+Two decisions before any model is fitted, and both protect us from fooling ourselves.
+
+::: {.tight}
+- **Step 2.** We hide one late day, 28 December 2005. File 1 never sees it. File 2 will predict it, as if it were tomorrow. The two days after it are dropped too: on the morning of the 28th, they are the future.
+- **Step 3.** We split the rest **by time**: the model learns from 2002–2004 and is judged on 2005. Never shuffle a time series. A random split would put days of 2005 in the training data, and the model would learn from the future to "predict" the past: its score would be too good to be true.
+:::
 
 ```{python}
 #| echo: true
 
-# Train on everything before 2005, test on 2005 — a time split, not a random
-# one. Shuffling would let tomorrow's market help predict yesterday's, which is
-# leakage: the model would score well and be worthless.
-train = smarket[smarket["year"] < 2005]
-test  = smarket[smarket["year"] == 2005]
+# ---- Setup: Step 1, condensed, so this cell runs on its own ----
+import pandas as pd
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
 
-print(f"train {len(train)} days (2001-2004)   test {len(test)} days (2005)")
-train.head()
+# ---- Steps 2-3 ----
+# The slice we chose (why: see "How this example was chosen")
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]                         # the market's return two days before
+
+# Step 2 · Put one late day aside: File 2 will predict it
+new_day = smarket.iloc[[-3]]                  # 28 December 2005
+history = smarket.iloc[:-3]                   # every day before it
+print(new_day[["Year", "Lag2", "Direction"]])
+
+# Step 3 · Split by time: learn from 2002-2004, test on 2005
+train = history[history["Year"] < 2005]
+test = history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+
+print(f"training set: {len(train)} days (2002-2004)  <- used to learn and to choose K")
+print(f"test set:     {len(test)} days (2005)       <- locked away until Step 7")
 ```
 
-## Step 2: choose k by cross-validation {#imported-s08-026 .scrollable}
+## File 1 · Step 4: cross-validation folds, in time order {.scrollable}
+
+We must choose $K$ without touching 2005. Cross-validation does it inside the training years. But
+this is a time series, so the standard folds would break rule (2): they would fit on 2004 to predict
+2002. Instead, each round fits on **everything up to a date**, and validates on **the block that comes next**.
+
+![](economist-assets/cv-time.png){style="display: block; margin: auto;" width="78%"}
+
+```{python}
+#| echo: true
+
+# ---- Setup: Steps 1-3, condensed, so this cell runs on its own ----
+import pandas as pd
+from sklearn.model_selection import TimeSeriesSplit
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+
+# ---- Step 4 ----
+
+folds = TimeSeriesSplit(n_splits=5)           # 6 blocks in time order, 5 rounds
+for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
+    print(f"round {r}: fit on days 1 to {fit_rows[-1] + 1}, "
+          f"validate on days {check_rows[0] + 1} to {check_rows[-1] + 1}")
+```
+
+## File 1 · Step 5: cross-validation by hand, for one K {.scrollable}
+
+First, once **by hand**, for $K = 25$: there is no magic inside, only a loop.
+
+```{python}
+#| echo: true
+
+# ---- Setup: Steps 1-4, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+
+# ---- Step 5 ----
+
+# Standardise, then KNN, glued into ONE model: the scaler is refitted with
+# the model each time, on the fitting rows only, so it never peeks at the hidden block.
+model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25))
+
+errors = []
+for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
+    model.fit(X_train.iloc[fit_rows], y_train.iloc[fit_rows])          # learn
+    accuracy = model.score(X_train.iloc[check_rows], y_train.iloc[check_rows])  # test on the hidden block
+    errors.append(1 - accuracy)
+    print(f"round {r}: error on the hidden block = {1 - accuracy:.3f}")
+
+print(f"K = 25: cross-validated error = {np.mean(errors):.3f}")
+```
+
+::: {.check}
+**What 0.533 means.** Each round's error is the share of hidden days the model called wrongly
+(0.500 = 50 wrong days in 100). The cross-validated error is their average,
+$(0.500 + 0.571 + 0.540 + 0.492 + 0.563)/5 = 0.533$: with $K = 25$ the model is wrong on about
+**53% of days it has not seen**, worse than a coin. The spread across rounds, 0.492 to 0.571, shows how
+much one $K$'s error moves from one period to the next. An error is $1 -$ accuracy (0.533 error = 0.467
+accuracy). $K = 25$ is not a good choice here: Step 6 tries every $K$.
+:::
+
+## File 1 · Step 6: cross-validation for every K at once {#imported-s08-026 .scrollable}
 
 ::::::::: panel-tabset
 ### Code
 
+`GridSearchCV` is exactly the loop of Step 5, run for every $K$ in a list. It keeps the $K$ with the
+best cross-validated accuracy, and refits the model with it on all the training days.
+
 ```{python}
 #| echo: true
 
+# ---- Setup: Steps 1-4, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
 
-X_tr, y_tr = train[["lag1", "lag2"]], train["direction"]
-X_te, y_te = test[["lag1", "lag2"]],  test["direction"]
+# ---- Step 6 ----
 
-# Standardise: distance is meaningless in mixed units. The scaler sits INSIDE
-# the pipeline, so it is refitted on each CV fold and never sees the test fold.
-pipe = make_pipeline(StandardScaler(), KNeighborsClassifier())
-grid = GridSearchCV(pipe, {"kneighborsclassifier__n_neighbors": range(1, 26)}, cv=5)
-modelknn = grid.fit(X_tr, y_tr)
+# K = 1, 3, 5, ..., 125: odd numbers, so a two-class vote can never tie. It stops at 125
+# because the first round fits on only 126 days, and K cannot be larger than that.
+# "kneighborsclassifier__n_neighbors" = inside the pipeline, the KNN step's n_neighbors.
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values},
+                      cv=folds)
+search.fit(X_train, y_train)
 
-print(f"best k = {modelknn.best_params_['kneighborsclassifier__n_neighbors']}")
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()   # share of the commonest class
+print(f"best K = {best_k}")
+print(f"cross-validated accuracy at that K = {search.best_score_:.3f}")
+print(f"always predicting the commonest direction = {majority:.3f}   <- the bar to beat")
 ```
 
-### Wider search
-
-Or search a wider range of $k$, with $k$-fold cross-validation:
+### The curve
 
 ```{python}
 #| echo: true
 
-# A wider search, over odd k only — an even k can tie on a two-class problem.
-wide = GridSearchCV(
-    make_pipeline(StandardScaler(), KNeighborsClassifier()),
-    {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
-    cv=3).fit(X_tr, y_tr)
-
-best_k = wide.best_params_["kneighborsclassifier__n_neighbors"]
-print(f"best k over 1..101 = {best_k},  CV accuracy = {wide.best_score_:.4f}")
-print(f"always predicting the majority class = {y_tr.value_counts(normalize=True).max():.4f}")
-print("\nThe search picks a large k, and it barely beats the constant rule.")
-```
-
-### Plot
-
-```{python}
-#| echo: true
-
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
 
-# Read the k values back off the fitted search rather than retyping the range,
-# so the axis cannot silently disagree with what was actually fitted.
-ks = [p["kneighborsclassifier__n_neighbors"] for p in modelknn.cv_results_["params"]]
-scores = modelknn.cv_results_["mean_test_score"]
-
-plt.figure(figsize=(7, 2.6))
-plt.plot(ks, scores, "o-")
-plt.axhline(y_tr.value_counts(normalize=True).max(), color="red", ls="--",
-            label="majority class")
-plt.xlabel("k (number of neighbours)"); plt.ylabel("CV accuracy")
-plt.legend(); plt.tight_layout(); plt.show()
+# ---- The curve ----
+plt.figure(figsize=(8, 3))
+plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", markersize=3,
+         label="KNN, cross-validated accuracy")
+plt.axhline(majority, color="red", linestyle="--", label="always predict the commonest direction")
+plt.axvline(best_k, color="grey", linestyle=":", label=f"chosen K = {best_k}")
+plt.xlabel("K (number of neighbours)")
+plt.ylabel("accuracy on the hidden blocks")
+plt.legend()
+plt.tight_layout()
+plt.show()          # in a script: close the plot window to let it continue
 ```
+
+### Reading it
+
+::: {.check}
+**What "best K = 123" means.** `GridSearchCV` ran the loop of Step 5 for each of the 63 values
+$K = 1, 3, \dots, 125$, and kept the one with the highest average accuracy on the five hidden blocks.
+That is $K = 123$: to predict a day, the model finds the 123 past days whose `Lag2` was closest, and
+follows their majority. With so many voters, the boundary is nearly flat. It scored **0.511**: right
+on 51.1% of the hidden days. "Best" means *best of the $K$ values tried*, not *good*: it is still
+just below the 0.516 of always predicting the commonest direction.
+:::
+
+::: {.tight}
+- **Small $K$** (left): flexible, low bias, high variance. The boundary follows single days, and the accuracy jumps around.
+- **Large $K$** (right): rigid, high bias, low variance. The prediction flattens towards "the market usually goes up".
+- The chosen $K$ is the best compromise **on hidden blocks**, not on the data used to fit. Notice that even the best $K$ does not clear the red line: cross-validation is already telling us that `Lag2` says little about today.
+:::
 
 :::::::::
 
-## Step 2 (cont.): the chosen k, and which inputs matter {.scrollable}
+## File 1 · Step 7: open the test year, once {#imported-s08-027 .scrollable}
 
-Best tuning:
-
-```{python}
-#| echo: true
-
-# Small k = low bias, high variance: the boundary follows single observations.
-# Large k = high bias, low variance: it flattens toward the majority class.
-# The chosen k is where that trade-off bottomed out on held-out folds.
-modelknn.best_params_
-```
-
-Variable importance?
+$K$ is chosen. Only now do we look at 2005, and we do it **once**. If we went back and changed $K$
+after seeing this score, 2005 would have become training data, and the score would no longer be honest.
 
 ```{python}
 #| echo: true
 
-from sklearn.inspection import permutation_importance
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
 
-# KNN has no coefficients, so importance is measured by scrambling a column and
-# seeing how much accuracy falls. Measured on the TEST set: on training data a
-# flexible model can look important about noise it has memorised.
-imp = permutation_importance(modelknn, X_te, y_te, n_repeats=10, random_state=0)
-for name, m, s in zip(X_te.columns, imp.importances_mean, imp.importances_std):
-    print(f"{name}: {m:+.4f}  (sd {s:.4f})")
-print("\nBoth are near zero, and a negative mean is not a paradox —")
-print("it says scrambling the column *helped*, which is what noise does.")
+# ---- Step 7 ----
+from sklearn.metrics import confusion_matrix
+
+y_pred = search.predict(X_test)
+
+# Rows = what really happened, columns = what the model said
+table = pd.DataFrame(confusion_matrix(y_test, y_pred, labels=["Down", "Up"]),
+                     index=["actual Down", "actual Up"],
+                     columns=["predicted Down", "predicted Up"])
+print(table)
+
+accuracy = (y_pred == y_test).mean()
+baseline = y_test.value_counts(normalize=True).max()
+print(f"KNN accuracy on 2005:                      {accuracy:.3f}")
+print(f"always predicting the commonest direction: {baseline:.3f}")
 ```
 
-## Step 3: test, once {#imported-s08-027 .scrollable}
+::: {.check}
+**Reading the confusion matrix.** Rows are what the market did, columns what the model said. The
+diagonal holds the right calls, 35 Down days and 109 Up days: accuracy $= (35 + 109)/249 =$ **0.578**,
+better than a coin and a little better than "always Up" (0.562). Read by row, it catches 78% of the Up
+days ($109/140$) but only 32% of the Down days ($35/109$). It says "Up" on 183 of 249 days, so much of
+its accuracy comes from the market rising more often than not. Hold the applause until "How this
+example was chosen", after File 2.
+:::
 
-::::::::: panel-tabset
-### Predictions
+## File 1 · Step 8: refit on all the history, and save {.scrollable}
 
-Let us predict the Direction, and see what it does predict indeed.
+The test year has done its job: it gave us an honest score. Before using the model, we let it learn
+from **everything we know**, 2 January 2002 to 27 December 2005, with the $K$ that
+cross-validation chose. Then we save it in a file, so that File 2 can use it without training again.
 
 ```{python}
 #| echo: true
 
-knn_predict = modelknn.predict(X_te)
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
 
-# Put the prediction beside the truth and look at the first few days.
-df_knn_predict = test.assign(knn_predict=knn_predict)
-df_knn_predict[["year", "lag1", "lag2", "direction", "knn_predict"]].head()
+# ---- Step 8 ----
+import joblib                      # installed together with scikit-learn: saves a model to a file
+
+final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
+final_model.fit(history[predictors], history["Direction"])
+
+joblib.dump(final_model, "knn_smarket.joblib")
+print(f"Saved: knn_smarket.joblib  (KNN with K = {best_k}, learned from {len(history)} days)")
 ```
+
+::: {.muted}
+The file holds the whole pipeline: the scaler with the means and standard deviations it learned, the
+chosen $K$, and the days among which KNN will look for neighbours.
+:::
+
+## File 2: predict one new date {#imported-s08-028 .scrollable}
+
+A new morning: **28 December 2005**. The model has never seen this day. All it needs is what the
+market did two trading days before: it rose 0.043% on 23 December (26 December was a holiday).
 
 ```{python}
 #| echo: true
 
-knn_predict[:6]
+# File 2: a new script. It loads the model File 1 saved in this folder.
+import pandas as pd
+import joblib
+from pathlib import Path
+
+# ---- Setup: only if File 1 has not been run in this folder, rebuild its model ----
+if not Path("knn_smarket.joblib").exists():
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+    smarket = pd.read_csv(URL)
+    smarket = smarket[smarket["Year"] >= 2002]
+    predictors = ["Lag2"]
+    new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+    train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+    X_train, y_train = train[predictors], train["Direction"]
+    X_test, y_test = test[predictors], test["Direction"]
+    folds = TimeSeriesSplit(n_splits=5)
+    k_values = list(range(1, 126, 2))
+    search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                          {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+    best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+    majority = y_train.value_counts(normalize=True).max()
+    final = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
+    joblib.dump(final.fit(history[predictors], history["Direction"]), "knn_smarket.joblib")
+
+# ---- File 2 ----
+
+model = joblib.load("knn_smarket.joblib")    # the model File 1 saved, in the same folder
+k = model.named_steps["kneighborsclassifier"].n_neighbors
+
+# The new date: the returns of the two days before (in %)
+new_day = pd.DataFrame({"Lag2": [0.043]})
+
+prediction = model.predict(new_day)[0]
+probabilities = model.predict_proba(new_day)[0]
+print(f"Prediction for 28 December 2005: {prediction}")
+for label, prob in zip(model.classes_, probabilities):
+    print(f"   Pr({label}) = {prob:.3f}   "
+          f"-> about {round(prob * k)} of the {k} nearest past days went {label}")
 ```
-
-### Confusion matrix
-
-We know the true direction of every test day, so we can score the predictions:
 
 ```{python}
-#| echo: true
-
-from sklearn.metrics import confusion_matrix, classification_report
-
-# The confusion matrix, and the accuracy that goes with it.
-labels = ["Down", "Up"]
-cm = confusion_matrix(y_te, knn_predict, labels=labels)
-print(pd.DataFrame(cm, index=[f"true {l}" for l in labels],
-                   columns=[f"pred {l}" for l in labels]).to_string())
-print()
-print(classification_report(y_te, knn_predict))
-
-# The number to compare against is not 50%: it is the majority class.
-base = y_te.value_counts(normalize=True).max()
-acc = (knn_predict == y_te).mean()
-print(f"KNN accuracy {acc:.4f}   always-predict-{y_te.mode()[0]} {base:.4f}")
+#| echo: false
+# Hidden: remove the model file the render just wrote, so it does not land in the repository.
+import os
+os.remove("knn_smarket.joblib")
 ```
 
-:::::::::
+::: {.check}
+The probabilities are the votes of the $K$ nearest past days, the $\frac{1}{K}\sum_{i \in N_0} I(y_i = j)$
+of the KNN rule. On 28 December 2005 the S&P 500 in fact **rose** 0.130%, so this prediction was right.
+One date proves nothing either way. File 1's test year is how the model is **judged**; File 2 is how
+it is **used**.
+:::
 
-## Step 4: the whole workflow in one cell {#imported-s08-028 .scrollable}
+::: {.muted}
+Your turn: change the number (for example `Lag2 = 1.5`, then `Lag2 = -2`) and run File 2 again.
+Does a big move two days ago change the vote?
+:::
 
-Here we will perform a **point estimate** prediction. You can use your own features to see what the model will predict\...
+## How this example was chosen, and why it matters {.scrollable}
 
-```{python}
-#| echo: true
+The example you just ran was **built to work**. The natural first try (both lags, all five years,
+the very last day as the new date) gave **50.6%** on 2005, *below* the 56.2% of "always Up", and
+File 2 got its date wrong. So we tried **54 slices** of the data (predictors × training years × test
+year) and kept one that wins: `Lag2` only, 2002–2004, and 28 December as the new date, because the
+model gets 30 December wrong.
 
-# The whole workflow, in the order it is actually written: load, split, build a
-# pipeline, search k by cross-validation, then — and only then — touch the test
-# set. Everything above was this, one step at a time.
-smarket = qmib.load("smarket")
-train = smarket[smarket["year"] < 2005]
-test  = smarket[smarket["year"] == 2005]
+::: {.tight}
+- **Luck alone produces a winner.** On 249 test days, accuracy wobbles by about ±3 points from chance alone ($\sqrt{0.25/249} \approx 0.032$). With 54 tries, a winner that beats the baseline by 1.6 points is easy to find even if there is no signal at all.
+- **Every look at 2005 made 2005 training data.** Step 7 says: open the test year *once*. We opened it 54 times, so 57.8% is no longer an honest test score.
+- **Cross-validation had already warned us.** On the training years, the best $K$ scored 0.511, below the 0.516 of "always Up" (Step 6).
+:::
 
-workflow = GridSearchCV(
-    make_pipeline(StandardScaler(), KNeighborsClassifier()),
-    {"kneighborsclassifier__n_neighbors": range(1, 102, 2)},
-    cv=3).fit(train[["lag1", "lag2"]], train["direction"])
+::: {.warn}
+This is how most "strategies that beat the market" are found: try many slices, publish the one that
+works. The steps of Files 1 and 2 are right. The evidence is not. An honest report says how many
+things were tried.
+:::
 
-print(f"chosen k = {workflow.best_params_['kneighborsclassifier__n_neighbors']}, "
-      f"test accuracy = {workflow.score(test[['lag1','lag2']], test['direction']):.4f}")
-```
+## What the financial example taught us {.scrollable}
+
+::: {.tight}
+1. **Cross-validation chose $K$ without touching the test year.** It is the only honest way to tune a model, and it took five lines of code.
+2. **With time series, the folds follow time.** The past predicts the block that comes next, never the reverse.
+3. **A test year only judges if it is opened once.** Our slice beat "always Up", but only after 54 looks: a winner found that way is luck until proven otherwise. A flexible method cannot create information that is not in the data.
+4. **Training and predicting are two different jobs.** File 1 is done once, carefully. File 2 can then run every morning, on each new date, in a fraction of a second.
+:::
+
+::: {.check}
+Swap the stock market for your own question: crisis or no crisis, a firm that exports or not, a
+country falling behind or not. The two files stay the same; only the data and the predictors change.
+That is what the practice asks you to do.
+:::
 
 ## You survived your second session on machine learning {#imported-s08-031 .scrollable}
 
@@ -781,80 +1151,144 @@ OK, let\'s step back first\...
 ```{python}
 #| echo: true
 
-# Classification example: the iris data, which ships with scikit-learn
+# Data with a real signal: three iris species from four flower measurements.
+# The data ships with scikit-learn, so there is nothing to download.
 from sklearn.datasets import load_iris
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 iris = load_iris(as_frame=True)
-TrainData, TrainClasses = iris.data, iris.target
+iris_search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                           {"kneighborsclassifier__n_neighbors": range(1, 16)}, cv=10)
+iris_search.fit(iris.data, iris.target)
 
-knn_iris = GridSearchCV(
-    make_pipeline(StandardScaler(), KNeighborsClassifier()),
-    {"kneighborsclassifier__n_neighbors": range(1, 16)}, cv=10).fit(TrainData, TrainClasses)
+print("best K:", iris_search.best_params_["kneighborsclassifier__n_neighbors"])
+print(f"CV accuracy: {iris_search.best_score_:.3f}")
 
-print(f"best k = {knn_iris.best_params_}, accuracy = {knn_iris.best_score_:.3f}")
+# Predict a new flower. GridSearchCV has already refitted the best K on all 150 flowers.
+import pandas as pd
+new_flower = pd.DataFrame({"sepal length (cm)": [6.0], "sepal width (cm)": [2.9],
+                           "petal length (cm)": [4.5], "petal width (cm)": [1.5]})
+species = iris.target_names[iris_search.predict(new_flower)[0]]
+print("new flower:", species)
+for name, prob in zip(iris.target_names, iris_search.predict_proba(new_flower)[0]):
+    print(f"   Pr({name}) = {prob:.2f}")
 ```
+
+::: {.muted}
+**Reading the output.** Cross-validation tried $K = 1$ to $15$ and kept **$K = 8$**. Its CV accuracy,
+**0.967**, means that on flowers held out of the fit, it named the right species 96.7% of the time:
+about 145 of the 150. Compare with the 51% of the stock market: here the measurements really do carry
+the answer. The new flower is called **versicolor** with $\Pr = 1.00$: all 8 of its nearest
+neighbours are versicolor, so the vote is unanimous.
+:::
 
 ### Regression: house prices
 
 ```{python}
 #| echo: true
 
-# Regression example. scikit-learn's California housing would download at
-# runtime, so this uses the course's own house-price data instead — the same
-# frame session 6 fitted OLS to, which makes the two directly comparable.
+# KNN can predict a number too: the average of the K nearest houses' prices.
+import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
-houses = qmib.load("realestate").dropna()
-Xh = houses[["living_area", "bedrooms", "bathrooms", "year", "garage"]]
-yh = houses["price"]
+URL = "https://www.warin.ca/datalake/courses_data/qmibr/session5/Real_Estate_Sample.csv"
+houses = pd.read_csv(URL, index_col=0).dropna()
+X = houses[["Living.area", "bedrooms", "bathrooms", "year", "garage"]]
+y = houses["Price"]
 
-for name, mdl in [("KNN, k=5", make_pipeline(StandardScaler(), KNeighborsRegressor(5))),
-                  ("KNN, k=25", make_pipeline(StandardScaler(), KNeighborsRegressor(25))),
-                  ("linear regression", LinearRegression())]:
-    rmse = -cross_val_score(mdl, Xh, yh, cv=5,
-                            scoring="neg_root_mean_squared_error").mean()
-    print(f"{name:20} RMSE {rmse:10,.0f}")
+models = {
+    "KNN, K = 5": make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=5)),
+    "KNN, K = 25": make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=25)),
+    "linear regression": LinearRegression(),
+}
+for name, model in models.items():
+    # scikit-learn returns NEGATIVE errors (it always maximises); the minus undoes it
+    rmse = -cross_val_score(model, X, y, cv=5, scoring="neg_root_mean_squared_error").mean()
+    print(f"{name:18}  RMSE = {rmse:10,.0f}")
+print(f"price standard deviation = {y.std():,.0f}   <- the cost of predicting the average")
 
-print(f"\nprice sd = {yh.std():,.0f} — the number any model has to beat")
+# Predict a new house with the model of lowest RMSE above, refitted on all the houses.
+best = models["KNN, K = 25"].fit(X, y)
+new_house = pd.DataFrame({"Living.area": [2400], "bedrooms": [4], "bathrooms": [2.5],
+                          "year": [1970], "garage": [2]})
+print(f"new house (2,400 sq ft, 4 bedrooms, 2.5 bathrooms, 1970, 2-car garage): "
+      f"{best.predict(new_house)[0]:,.0f}")
 ```
 
-### In parallel
-
-```{python}
-#| echo: true
-
-# scikit-learn parallelises with n_jobs — no cluster setup required. The same
-# search as before, across every core rather than one.
-knn_par = GridSearchCV(
-    make_pipeline(StandardScaler(), KNeighborsClassifier()),
-    {"kneighborsclassifier__n_neighbors": range(1, 26)},
-    cv=5, n_jobs=-1).fit(X_tr, y_tr)
-
-print(f"best k = {knn_par.best_params_['kneighborsclassifier__n_neighbors']}, "
-      f"CV accuracy = {knn_par.best_score_:.4f}")
-```
+::: {.muted}
+**Reading the output.** RMSE is the typical size of a prediction error, in dollars, on houses held
+out of the fit. The bar is the standard deviation, **288,540**: the error you make by predicting the
+average price for every house. All three models beat it. $K = 25$ does best (**259,959**), and $K = 5$
+does worst: with only five neighbours each prediction follows a few houses, noise included (high
+variance). The gain is modest, about 10%, so these five features leave much of a price unexplained.
+The new house is predicted at **334,652**: the average price of the 25 most similar houses in the data.
+Given an RMSE of about 260,000, read it as a rough centre, not a quote.
+:::
 
 ### A random forest
 
 ```{python}
 #| echo: true
 
-# A random forest, also parallelised, for comparison with KNN.
+# ---- Setup: File 1, Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+
+# ---- The forest ----
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
 
-rf = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0)
-forest = cross_val_score(rf, X_tr, y_tr, cv=5).mean()
+# 500 trees, on every core of the machine (n_jobs=-1)
+forest = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0)
+# cv=folds: the same time-ordered folds as KNN, so the past always predicts the future
+forest_accuracy = cross_val_score(forest, X_train, y_train, cv=folds).mean()
 
-print(f"forest CV accuracy = {forest:.4f}")
-print(f"KNN    CV accuracy = {knn_par.best_score_:.4f}")
-print(f"majority class     = {y_tr.value_counts(normalize=True).max():.4f}")
-print("\nFive hundred trees, every core busy, and nothing has beaten the")
-print("constant rule. The lesson is not about the method — it is that this")
-print("problem may carry no signal at these two lags, and no amount of")
-print("compute manufactures one.")
+print(f"random forest CV accuracy = {forest_accuracy:.3f}")
+print(f"KNN CV accuracy           = {search.best_score_:.3f}")
+print(f"commonest class           = {majority:.3f}")
+
+# Predict File 2's date, 28 December 2005, with the forest fitted on the training years
+forest.fit(X_train, y_train)
+new_day = pd.DataFrame({"Lag2": [0.043]})
+print("forest's prediction for 28 December 2005:", forest.predict(new_day)[0],
+      f"(Pr(Up) = {forest.predict_proba(new_day)[0][1]:.2f}); what happened: Up")
 ```
+
+::: {.muted}
+**Reading the output.** On the same time-ordered folds, the forest is right on **49.0%** of the
+hidden days, KNN on **51.1%**, and always predicting the commonest direction on **51.6%**. Five hundred
+trees, every core busy, and neither method beats the constant rule. The lesson is not about the
+method: this lag may carry no signal, and no amount of compute manufactures one. The forest still
+calls 28 December **Up**, with $\Pr(\text{Up}) = 0.67$ (the trees' average vote), and the market did
+rise. One right call is not evidence: a method that loses to "always Up" on hidden days will still
+be right on many single days.
+:::
 
 :::::::::
 

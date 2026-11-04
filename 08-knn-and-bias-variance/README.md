@@ -27,10 +27,11 @@ See [`RESEARCH-MANDATES.md`](../RESEARCH-MANDATES.md) for your project, unit of 
 
 By the end of this session you should be able to:
 
-- State the **Bayes classifier** and say why no rule can beat it
+- Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**
 - Compute a Euclidean distance and find nearest neighbours **by hand**
 - Explain why KNN requires **standardised** predictors
 - Choose $k$ by cross-validation, and read the trade-off the curve shows
+- Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you
 - Say what happens to KNN as the number of predictors grows
 
 ---
@@ -40,7 +41,7 @@ By the end of this session you should be able to:
 | Phase | When | What | Where |
 |---|---|---|---|
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: the Bayes classifier, distance, choosing $k$ by cross-validation | [`01-lecture/`](01-lecture/README.md) |
+| **First half** (~90 min) | In class | Lecture: nearest neighbours, cross-validation, and a financial example in two files | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 | **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-08.html) |
 
@@ -51,21 +52,27 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — one line to load it:
+**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — read by URL, in a folder of your own, with nothing but pandas:
 
 ```python
-import qmib
-data = qmib.load("jst")
+import pandas as pd
+
+SITE = "https://warint.github.io/quantitative-methods/data/"
+jst  = pd.read_csv(SITE + "session-08/jst_crises.csv")   # the paper's data
+core = pd.read_csv(SITE + "core.csv")                    # shared by every group
+mine = pd.read_csv(SITE + "angle_c_country.csv")         # YOUR angle — see your dictionary
 ```
+
+The practice starter, [`02-practice/starter/session08_practice.py`](02-practice/starter/session08_practice.py), does this and the rest.
 
 See [`data/README.md`](data/README.md) and your group's
 [data dictionary](../data/spine/dictionaries/).
 
 ---
 
-## Deliverable
+## What you leave with
 
-In `groups/A2026/group-XX/session-08/`: a KNN classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
+Nothing to hand in — this is practice. In your own folder: a KNN classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
 
 ---
 

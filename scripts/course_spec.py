@@ -223,11 +223,11 @@ SESSIONS = {
         ],
         reading="the data of four readings: sessions 2, 4, 5 and 6",
         reading_url="https://github.com/warint/quantitative-methods/blob/main/REPLICATIONS.md",
-        dataverse=None,           # three packages already downloaded in sessions 2, 4 and 6
-        dataset="fdi",            # the only one that needs no download
-        dataset_note="the three Dataverse packages of sessions 2, 4 and 6, and `qmib.load(\"fdi\")` for session 5",
-        deliverable=("a log: for each paper attempted, the models you ran, each result as a sentence "
-                     "with units, and one sentence on what the results do not license"),
+        dataverse=None,           # the four papers' data, read by URL from the site
+        dataset=None,             # no qmib: the scripts read the site
+        dataset_note=("one CSV per paper on the course site, data/session-07/, read by the scripts in a "
+                      "folder of the student's own (scripts/build_session07_data.py)"),
+        deliverable="nothing to hand in: the workshop is practice, and revision for the midterm",
         loses_marks=[
             "A coefficient with no sentence, no units, or no \"holding the others fixed\"",
             "An odds ratio read as a probability, or a lasso zero read as \"no effect\"",
@@ -240,13 +240,14 @@ SESSIONS = {
         title="K-Nearest Neighbours and the Bias–Variance Trade-off",
         short="KNN and bias–variance",
         question="Flexible, or just unstable?",
-        methods="the Bayes classifier, distance, choosing $k$ by cross-validation",
+        methods="nearest neighbours, distance, choosing $k$ by cross-validation",
         theme="Does flexibility buy you anything on your own data?",
         objectives=[
-            "State the **Bayes classifier** and say why no rule can beat it",
+            "Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**",
             "Compute a Euclidean distance and find nearest neighbours **by hand**",
             "Explain why KNN requires **standardised** predictors",
             "Choose $k$ by cross-validation, and read the trade-off the curve shows",
+            "Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you",
             "Say what happens to KNN as the number of predictors grows",
         ],
         reading=("Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield "
@@ -257,9 +258,7 @@ SESSIONS = {
         dataset="jst",
         dataset_note=("the Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, "
                       "88 financial crises, with the paper's predictors already derived"),
-        deliverable=("a KNN classifier on a binary outcome from your angle, with $k$ chosen by "
-                     "cross-validation, compared against a sensible benchmark, and a note on "
-                     "whether the flexibility earned its keep"),
+        deliverable="nothing to hand in: the practice is practice",
         loses_marks=[
             "Running KNN on unstandardised predictors",
             "Choosing $k$ on the test set",

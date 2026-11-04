@@ -1071,13 +1071,12 @@ Thierry Warin, PhD
 <h2>Outline · The workshop</h2>
 <ol type="1">
 <li>Ninety minutes</li>
-<li>Before you start</li>
+<li>The script: one file, four parts</li>
 <li>Reproduce — 20 min</li>
 <li>Apply to your own angle — 35 min</li>
 <li>Break one assumption — 15 min</li>
 <li>Write it down — 20 min</li>
-<li>Submitting</li>
-<li>What loses marks</li>
+<li>The usual mistakes</li>
 <li>Two-minute report</li>
 <li>After class, if you want it</li>
 </ol>
@@ -1088,10 +1087,10 @@ Thierry Warin, PhD
 <div class="column" style="width:33%;">
 <h3 id="the-mathematics">The mathematics</h3>
 <ul>
-<li>State the <strong>Bayes classifier</strong> and say why no rule can beat it</li>
+<li>Explain how KNN classifies, by <strong>the vote of the <span class="math inline">\(K\)</span> nearest neighbours</strong></li>
 <li>Find nearest neighbours <strong>by hand</strong> from a Euclidean distance</li>
 <li>Decompose test error into <strong>squared bias, variance and irreducible error</strong></li>
-<li>Say what happens to KNN as the number of predictors grows</li>
+<li>Say why <strong>cross-validation</strong> estimates out-of-sample error, and what classical in-sample fit cannot tell you</li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-python">The Python</h3>
@@ -1163,56 +1162,66 @@ Thierry Warin, PhD
 <p>The presenter is drawn <strong>at random</strong> when your group is called. All three of you prepare.</p>
 </div>
 </section>
-<section id="before-you-start" class="slide level2">
-<h2>Before you start</h2>
-<p>Everyone pushes at least once. Replace <code>XX</code> with your group number — group 07 uses <code>group-07</code>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href></a><span class="fu">git</span> checkout <span class="at">-b</span> group-XX</span>
-<span id="cb1-2"><a href></a><span class="fu">mkdir</span> <span class="at">-p</span> groups/A2026/group-XX/session-08      <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href></a>git checkout <span class="op">-</span>b group-XX</span>
-<span id="cb2-2"><a href></a>mkdir groups<span class="op">/</span>A2026<span class="op">/</span>group-XX<span class="op">/</span>session-08         <span class="co"># Windows — no -p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="the-script-one-file-four-parts" class="slide level2 scrollable">
+<h2>The script: one file, four parts</h2>
+<p>Work in <strong>your own session-08 folder</strong> (the pre-session’s last slide set it up). Download the starter into it:</p>
+<div class="step">
+<p><strong><a href="https://warint.github.io/quantitative-methods/session-08/session08_practice.py">session08_practice.py</a></strong> — reads both datasets from the course site, and is cut into the four parts of this workshop.</p>
+</div>
+<div class="tight">
+<ul>
+<li><strong>Change one line</strong> before you run it: <code>MY_ANGLE = &quot;angle_c_country&quot;</code> → your group’s angle.</li>
+<li>Run one part at a time: select its lines, <code>Shift</code> + <code>Enter</code>, read the output.</li>
+<li><code>CERTIFICATE_VERIFY_FAILED</code> on a Mac: <code>open /Applications/Python\ 3*/Install\ Certificates.command</code>, once.</li>
+</ul>
+</div>
 <div class="muted">
-<p>PowerShell’s <code>mkdir</code> creates the intermediate folders already, and rejects <code>-p</code>. The git log is the participation record. It is not a formality.</p>
+<p>Needs only <code>pip install pandas numpy matplotlib scikit-learn</code>. Nothing to hand in: this is practice, and the script and your note stay in your folder.</p>
 </div>
 </section>
-<section id="reproduce-20-min" class="slide level2">
+<section id="reproduce-20-min" class="slide level2 scrollable">
 <h2>1 · Reproduce — 20 min</h2>
-<p>Take the result the paper rests on, and put it to the test on the database the paper itself uses. There is nothing to unzip — the loader has it.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb3-2"><a href></a></span>
-<span id="cb3-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;jst&quot;</span>)     <span class="co"># the session&#39;s own data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="muted">
-<p>Paper: Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023), <em>Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach</em>, Journal of International Economics 145 · data: <code>qmib.load(&quot;jst&quot;)</code></p>
-</div>
+<p><strong>Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023)</strong>: can credit growth and the yield curve predict a banking crisis — and does a flexible model beat a logit? Part 1 of the script:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href></a></span>
+<span id="cb1-3"><a href></a>SITE <span class="op">=</span> <span class="st">&quot;https://warint.github.io/quantitative-methods/data/&quot;</span></span>
+<span id="cb1-4"><a href></a>jst <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> <span class="st">&quot;session-08/jst_crises.csv&quot;</span>)   <span class="co"># 18 economies, 1870-2020</span></span>
+<span id="cb1-5"><a href></a></span>
+<span id="cb1-6"><a href></a><span class="co"># outcome: a crisis starts within two years · train 1870-1979, test 1980-2020</span></span>
+<span id="cb1-7"><a href></a><span class="co"># -&gt; logit, KNN (K by cross-validation) and a random forest, scored by test AUC</span></span>
+<span id="cb1-8"><a href></a><span class="co"># -&gt; which predictors matter: permutation importance</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="check">
-<p>A failed reproduction that you <strong>diagnose</strong> earns full marks. One you do not attempt earns none.</p>
+<p>A failed reproduction that you <strong>diagnose</strong> teaches as much as one that works. One you do not attempt teaches nothing. Does your ranking of predictors match the paper’s? Does the flexible model win, as it does there?</p>
 </div>
 <div class="muted">
 <p>“It did not work” is not a diagnosis. Where did it stop, and what did you check?</p>
 </div>
 </section>
-<section id="apply-to-your-own-angle-35-min" class="slide level2">
+<section id="apply-to-your-own-angle-35-min" class="slide level2 scrollable">
 <h2>2 · Apply to your own angle — 35 min</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)</span>
-<span id="cb4-2"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># your angle — see your dictionary</span></span>
-<span id="cb4-3"><a href></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>], how<span class="op">=</span><span class="st">&quot;inner&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Fit the session’s method on <strong>your</strong> data, and report what the lecture said to report — in the units of your own variables.</p>
+<p>Part 2 of the script — after you set <code>MY_ANGLE</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a>core <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> <span class="st">&quot;core.csv&quot;</span>)            <span class="co"># shared: falling_behind_next is the outcome</span></span>
+<span id="cb2-2"><a href></a>mine <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> MY_ANGLE <span class="op">+</span> <span class="st">&quot;.csv&quot;</span>)     <span class="co"># your angle</span></span>
+<span id="cb2-3"><a href></a>mine <span class="op">=</span> mine.groupby([<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>]).mean(numeric_only<span class="op">=</span><span class="va">True</span>).reset_index()  <span class="co"># one row per country-year</span></span>
+<span id="cb2-4"><a href></a>df   <span class="op">=</span> core.merge(mine, on<span class="op">=</span>[<span class="st">&quot;geo&quot;</span>, <span class="st">&quot;time&quot;</span>], how<span class="op">=</span><span class="st">&quot;inner&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then the same comparison — logit against KNN, <span class="math inline">\(K\)</span> by cross-validation, AUC on the last two years. Replace the default predictor list with the ones <strong>your question</strong> needs.</p>
 <div class="warn">
-<p>A coefficient without units is not a finding.</p>
+<p>A number without units is not a finding — and an AUC without its benchmark (0.5, and the logit) is not one either.</p>
 </div>
 </section>
 <section id="break-one-assumption-15-min" class="slide level2">
 <h2>3 · Break one assumption — 15 min</h2>
 <p>Every method in this course rests on something.</p>
 <div class="step">
-<p>Find the assumption this one leans on hardest. Break it <strong>deliberately</strong>. Record what happened to your answer.</p>
+<p>Find the assumption this one leans on hardest. Break it <strong>deliberately</strong>. Record what happened to your answer. Part 3 of the script has three ready to run: <strong>(a)</strong> no standardising, <strong>(b)</strong> fewer predictors, <strong>(c)</strong> a random split instead of a time split.</p>
 </div>
 <div class="check">
-<p>This is the part that carries the marks. A group that shows how its result falls apart understands it; a group that only shows it holding does not yet know.</p>
+<p>This is the part that matters most. A group that shows how its result falls apart understands it; a group that only shows it holding does not yet know.</p>
 </div>
 </section>
 <section id="write-it-down-20-min" class="slide level2">
 <h2>4 · Write it down — 20 min</h2>
-<p>250 words in your submissions folder:</p>
+<p>250 words, in a file in your own folder — it is what you report from:</p>
 <div class="tight">
 <ul>
 <li>What you found, <strong>in units</strong></li>
@@ -1224,17 +1233,8 @@ Thierry Warin, PhD
 <p>And the standing rule: one LLM output you identified as wrong, and how you established that.</p>
 </div>
 </section>
-<section id="submitting" class="slide level2">
-<h2>Submitting</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href></a><span class="fu">git</span> add groups/A2026/group-XX/session-08</span>
-<span id="cb5-2"><a href></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Session 08 practice — group XX&quot;</span></span>
-<span id="cb5-3"><a href></a><span class="fu">git</span> push <span class="at">-u</span> origin group-XX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="get">
-<p><strong>Deliverable.</strong> A knn classifier on a binary outcome from your angle, with <span class="math inline">\(k\)</span> chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.</p>
-</div>
-</section>
-<section id="what-loses-marks" class="slide level2">
-<h2>What loses marks</h2>
+<section id="the-usual-mistakes" class="slide level2">
+<h2>The usual mistakes</h2>
 <div class="tight">
 <ul>
 <li>Running KNN on unstandardised predictors</li>

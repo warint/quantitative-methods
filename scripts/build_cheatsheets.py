@@ -148,7 +148,8 @@ SNIPPETS = {
     "np.linalg.pinv": "np.linalg.pinv(v_fe - v_re)       # for the Hausman statistic",
 
     # ---- Session 07 -------------------------------------------------------
-    "pd.read_stata": 'firms = pd.read_stata("06-advanced-regression/data/replication/prod_dataregression.dta")',
+    "pd.read_csv(URL)": 'DATA = "https://warint.github.io/quantitative-methods/data/session-07/"\n'
+                        'firms = pd.read_csv(DATA + "paper4_topalova_khandelwal_2011.csv")',
     "np.log": "y = np.log(d.fdi_stock_musd)      # log FDI: a skewed outcome, read in %",
     "pd.Categorical(ordered=True)": 'pd.Categorical(d.event, categories=["shrinking", "continuing", "growing"], ordered=True)',
     "pd.qcut": 'd["tfp_third"] = pd.qcut(d["tfp1000"], 3, labels=["low", "middle", "high"])',
@@ -156,7 +157,7 @@ SNIPPETS = {
     ".isin": 'dat = groups[groups["event"].isin(order)]   # only the three ordered events',
     ".copy()": 'dat = groups[groups["event"].isin(order)].copy()   # then add columns safely',
     ".nunique": 'd["iso"].nunique()                # 25 countries',
-    "plt.savefig": 'plt.savefig(OUTPUT / "resid_vs_fitted.png", dpi=110, bbox_inches="tight")',
+    "plt.savefig": 'plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in your folder',
 
     # ---- Session 13 (taught in session 07 until A2026) ----------------------
     "PCA": "from sklearn.decomposition import PCA\n"
@@ -171,13 +172,28 @@ SNIPPETS = {
     "np.linalg.eigvalsh": "np.linalg.eigvalsh(np.corrcoef(Z, rowvar=False))",
 
     # ---- Session 08 -------------------------------------------------------
-    "KNeighborsClassifier": "KNeighborsClassifier(n_neighbors=15).fit(Xtr, ytr)",
+    "KNeighborsClassifier": "from sklearn.neighbors import KNeighborsClassifier\n"
+                            "knn = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25))\n"
+                            "knn.fit(X_train, y_train)          # scale, then KNN: distances need one scale",
     "KNeighborsRegressor": "KNeighborsRegressor(n_neighbors=15).fit(Xtr, ytr)",
-    "GridSearchCV": 'gs = GridSearchCV(knn, {"n_neighbors": range(1, 40)}, cv=5).fit(Xtr, ytr)',
-    ".best_params_ / .best_score_": "gs.best_params_, gs.best_score_   # what it chose, and how it scored",
+    "GridSearchCV": "from sklearn.model_selection import GridSearchCV\n"
+                    "search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),\n"
+                    '                      {"kneighborsclassifier__n_neighbors": list(range(1, 126, 2))},\n'
+                    "                      cv=folds).fit(X_train, y_train)\n"
+                    "# inside a pipeline the name is <step>__<setting>, two underscores",
+    ".best_params_ / .best_score_": 'search.best_params_["kneighborsclassifier__n_neighbors"], search.best_score_',
+    "TimeSeriesSplit": "from sklearn.model_selection import TimeSeriesSplit\n"
+                       "folds = TimeSeriesSplit(n_splits=5)   # fit on the past, validate on what comes next",
+    ".cv_results_": 'search.cv_results_["mean_test_score"]   # one CV score per K: plot it against K',
+    ".predict_proba": "model.predict_proba(new_day)      # one column per class, in model.classes_ order",
+    "joblib.dump / joblib.load": "import joblib\n"
+                                 'joblib.dump(final_model, "knn_smarket.joblib")   # File 1 saves\n'
+                                 'model = joblib.load("knn_smarket.joblib")         # File 2 loads',
+
     "cross_val_score": 'cross_val_score(model, X, y, cv=5, scoring="accuracy").mean()',
     "permutation_importance": "permutation_importance(model, Xte, yte, n_repeats=10).importances_mean",
-    "confusion_matrix": "confusion_matrix(yte, model.predict(Xte))   # the four cells accuracy hides",
+    "confusion_matrix": "from sklearn.metrics import confusion_matrix\n"
+                        'confusion_matrix(y_test, y_pred, labels=["Down", "Up"])   # rows = truth, columns = prediction',
     "classification_report": "print(classification_report(yte, model.predict(Xte)))",
     "RandomForestClassifier": "RandomForestClassifier(n_estimators=500, random_state=7).fit(Xtr, ytr)",
 
@@ -352,7 +368,8 @@ PAPERS = [
      "OLS, the three logits, then ridge, lasso and elastic net"),
 ]
 
-PAPER_IMPORTS = """import numpy as np
+PAPER_IMPORTS = """# each script opens with the imports it needs; all of them:
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
@@ -393,15 +410,84 @@ def papers_section():
     parts = ["## The four papers, in the course's code\n",
              "No new method today: each paper's data goes into the models of sessions 3 to 5, with "
              "the same lines as in their lectures — only the data and the variable names change. "
-             "Below is every step of the four scripts in `07-replication-workshop/02-practice/starter/`, "
-             "run from the repository root. The guides in `replications/` explain each step and "
-             "show what you should see.\n",
+             "Below is every step of the four scripts in the zip, run in your session-07 folder. "
+             "The guides in `07-replication-workshop/02-practice/replications/` explain each step "
+             "and show what you should see.\n",
              "### The imports, once for all four\n",
              "```python\n" + PAPER_IMPORTS + "\n```\n"]
     for script, title, models in PAPERS:
         parts.append(f"### {title}\n\n*{models}* · `starter/{script}`\n\n"
                      "```python\n" + paper_code(script) + "\n```\n")
     return "\n".join(parts)
+
+
+# Session 07 is worked in a fresh folder of the student's own, with plain Python
+# and four packages installed by name — no clone, no requirements.txt, no qmib —
+# so its sheet opens with that set-up instead of GETTING_STARTED.
+ZIP_07 = "https://warint.github.io/quantitative-methods/session-07-scripts.zip"
+GETTING_STARTED_07 = f"""## Session 07: a folder of your own
+
+Today is not worked in the course repository. Make an empty folder — `Desktop/session-07` — and
+open it in VS Codium (**File > Open Folder**). Then, in its terminal (**View > Terminal**):
+
+```bash
+# macOS
+open /Applications/Python\\ 3*/Install\\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO {ZIP_07}
+unzip session-07-scripts.zip
+python check_setup.py
+
+# Linux
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas statsmodels scikit-learn matplotlib
+curl -LO {ZIP_07}
+unzip session-07-scripts.zip
+python check_setup.py
+
+# Windows (PowerShell)
+py -m venv .venv
+.venv\\Scripts\\Activate.ps1
+pip install pandas statsmodels scikit-learn matplotlib
+Invoke-WebRequest {ZIP_07} -OutFile session-07-scripts.zip
+Expand-Archive session-07-scripts.zip -DestinationPath .
+python check_setup.py
+```
+
+Every line of the check should say `OK`. Then **Python: Select Interpreter** (`Ctrl`/`Cmd` +
+`Shift` + `P`) and choose this folder's `.venv`. Run a script with the **Run** triangle, or
+`python r1_fraiberger_2021.py`; one step at a time, select its lines and press `Shift` + `Enter`.
+
+No `requirements.txt` and no `qmib` today: the four packages above are the whole toolkit, and each
+script reads its paper's data from the course site — you need the internet.
+
+## The four things you always do
+
+```python
+import pandas as pd
+
+# 1 - build a DataFrame
+df = pd.DataFrame({{"country": ["FR", "DE", "IT"],
+                   "gdp_pc_eur": [37_000, 46_000, 32_000]}})
+
+# 2 - look at what is in it
+df.head(); df.shape; df.dtypes; df.info(); df.describe()
+
+# 3 - read a file in: from your folder, or straight from a web address
+df = pd.read_csv("data.csv")
+DATA = "https://warint.github.io/quantitative-methods/data/session-07/"
+d = pd.read_csv(DATA + "paper1_fraiberger_2021.csv")
+
+# 4 - write a CSV out
+df.to_csv("out.csv", index=False)   # index=False, or you get a stray column
+```
+
+A package missing? With `(.venv)` showing: `pip install` and its name — `pip install openpyxl`,
+say. Never `sudo`, never outside the environment.
+"""
 
 
 def snippet_for(name, sess):
@@ -474,6 +560,9 @@ def sheet(num, s):
     lead = (f"Everything you need to type, in one place. The first four sections are the same "
             f"every week; the last one is every name from sessions 1 to {n}."
             if n > 1 else "Everything you need to type, in one place.")
+    if num == "07":
+        lead = ("Everything you need to type, in one place: today's set-up in a folder of your own, "
+                "every name from sessions 1 to 7, and every step of the four papers' scripts.")
     return f"""---
 title: "Python Cheatsheet"
 subtitle: "MATH60033A · Session {num} · {s['short']}"
@@ -497,7 +586,7 @@ format:
 
 {lead}
 
-{GETTING_STARTED.replace('SESSIONNUM', num)}
+{GETTING_STARTED_07 if num == '07' else GETTING_STARTED.replace('SESSIONNUM', num)}
 {recap(num)}
 {papers_section() if num == "07" else ""}"""
 

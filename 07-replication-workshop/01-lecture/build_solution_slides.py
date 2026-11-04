@@ -58,8 +58,8 @@ def cell(code):
 def slides(key, fn):
     script = (STARTER / fn).read_text(encoding="utf-8")
     setup, steps = split(script)
-    tabs = [f"### Set-up\n\nThe lines that open every script: find the repository, import what the "
-            f"steps use.\n\n{cell(setup)}"]
+    tabs = [f"### Set-up\n\nThe lines that open every script: import what the steps use, and the "
+            f"address of the data on the course site.\n\n{cell(setup)}"]
     for n, title, code in steps:
         if long_step(key, n, code):
             # Code and result side by side would not fit: show the code (not run),

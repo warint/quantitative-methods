@@ -149,7 +149,7 @@ TOOLKIT = {
     "np.linalg.pinv": ("06", "Choose and validate", "pseudo-inverse, for the Hausman statistic"),
 
     # ---- Session 07 · four papers, one toolkit ---------------------------
-    "pd.read_stata": ("07", "Load and shape", "an author's Stata file, straight into pandas"),
+    "pd.read_csv(URL)": ("07", "Load and shape", "a CSV straight from a web address, no download"),
     "np.log": ("07", "Load and shape", "a skewed outcome, on a log scale"),
     "pd.Categorical(ordered=True)": ("07", "Load and shape", "categories with an order, for the ordinal logit"),
     "pd.qcut": ("07", "Load and shape", "cut a variable into equal-sized groups, for an ordered outcome"),
@@ -178,6 +178,10 @@ TOOLKIT = {
     "confusion_matrix": ("08", "Diagnose", "the four cells accuracy hides"),
     "classification_report": ("08", "Diagnose", "precision and recall, per class"),
     "RandomForestClassifier": ("08", "Fit", "the comparison that complexity has to beat"),
+    "TimeSeriesSplit": ("08", "Choose and validate", "folds in time order: the past predicts the next block"),
+    ".cv_results_": ("08", "Choose and validate", "the score of every value tried, for the curve"),
+    ".predict_proba": ("08", "Read the fit", "the vote shares behind the predicted class"),
+    "joblib.dump / joblib.load": ("08", "Load and shape", "save a trained model to a file, and load it back"),
 
     # ---- Session 09 · structural equation modelling ----------------------
     "semopy.Model": ("09", "Fit", "from a model description string"),

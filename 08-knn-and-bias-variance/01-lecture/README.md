@@ -21,23 +21,26 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S08-Lecture.qmd`](MATH60033A-S08-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**, and every dataset loads with one
-call — `qmib.load("core")`.
+what loses marks. Every code example in the deck is plain **Python** with four packages
+(`pandas numpy matplotlib scikit-learn`), and reads its data by URL: copy the blocks in order into a
+file of your own and run it. The financial example is two files, to download into the same folder:
+
+- [`session08_1_train.py`](https://warint.github.io/quantitative-methods/session-08/session08_1_train.py) —
+  chooses $K$ by cross-validation, judges the model once on 2005, and saves it
+- [`session08_2_predict.py`](https://warint.github.io/quantitative-methods/session-08/session08_2_predict.py) —
+  loads the saved model and predicts one new date, out of sample
 
 ---
 
 ## What the lecture covers
 
-1. **Bias--Variance Trade-off**
-2. **Classification**
-3. **The Bayes Classifier**
-4. **K-Nearest Neighbors**
-5. **KNN by hand (you are the algorithm)**
-6. **KNN by hand**
-7. **KNN in R code (you are not longer the algorithm)**
-8. **Machine Learning: using KNN as an example**
-9. **Big lessons from ML**
-10. **Big lessons**
+1. **K-nearest neighbours, explained** — classification, the vote of the neighbours, KNN by hand,
+   the choice of $K$ and the bias–variance trade-off
+2. **Cross-validation: why it is magical** — the power of sampling, out-of-sample prediction, and
+   how it compares with the classical, in-sample way of judging a model
+3. **A financial example** — can KNN predict the stock market? Two files: one trains with
+   cross-validation, one predicts a new date
+4. **Big lessons from ML**
 
 ---
 
@@ -45,37 +48,39 @@ call — `qmib.load("core")`.
 
 By the end of the session you should be able to:
 
-- State the **Bayes classifier** and say why no rule can beat it
+- Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**
 - Compute a Euclidean distance and find nearest neighbours **by hand**
 - Explain why KNN requires **standardised** predictors
 - Choose $k$ by cross-validation, and read the trade-off the curve shows
+- Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you
 - Say what happens to KNN as the number of predictors grows
 
 ---
 
 ## The data
 
-**The course spine, plus the smarket returns used in the lecture**
+**Smarket: 1,250 days of S&P 500 returns, 2001–2005 (ISLR)**, read by URL:
 
 ```python
-import qmib
-data = qmib.load("core")
+import pandas as pd
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
 ```
-
-Run it once before class; it caches locally and then works offline.
 
 ---
 
 ## Running the code
 
-Everything in the deck runs in the **VS Codium terminal** with the project environment active:
+In a folder of your own, opened in VS Codium, once:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-python
+pip install pandas numpy matplotlib scikit-learn
+python session08_1_train.py      # trains, and writes knn_smarket.joblib next to it
+python session08_2_predict.py    # loads it, and predicts one new date
 ```
 
-If a package is missing, `pip install -r requirements.txt` from the repository root.
+On macOS with Python from python.org, if reading the data fails with `CERTIFICATE_VERIFY_FAILED`,
+run `open /Applications/Python\ 3*/Install\ Certificates.command` once.
 
 ---
 

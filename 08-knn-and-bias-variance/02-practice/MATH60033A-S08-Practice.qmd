@@ -29,15 +29,14 @@ format:
 ## Outline · The workshop {.center .scrollable}
 
 1. Ninety minutes
-2. Before you start
+2. The script: one file, four parts
 3. Reproduce — 20 min
 4. Apply to your own angle — 35 min
 5. Break one assumption — 15 min
 6. Write it down — 20 min
-7. Submitting
-8. What loses marks
-9. Two-minute report
-10. After class, if you want it
+7. The usual mistakes
+8. Two-minute report
+9. After class, if you want it
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -46,10 +45,10 @@ format:
 
 ### The mathematics
 
-- State the **Bayes classifier** and say why no rule can beat it
+- Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**
 - Find nearest neighbours **by hand** from a Euclidean distance
 - Decompose test error into **squared bias, variance and irreducible error**
-- Say what happens to KNN as the number of predictors grows
+- Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you
 
 ::::
 
@@ -111,60 +110,67 @@ assumed.
 The presenter is drawn **at random** when your group is called. All three of you prepare.
 :::
 
-## Before you start
+## The script: one file, four parts {.scrollable}
 
-Everyone pushes at least once. Replace `XX` with your group number — group 07 uses `group-07`.
+Work in **your own session-08 folder** (the pre-session's last slide set it up). Download the starter into it:
 
-```bash
-git checkout -b group-XX
-mkdir -p groups/A2026/group-XX/session-08      # macOS and Linux
-```
-
-```powershell
-git checkout -b group-XX
-mkdir groups/A2026/group-XX/session-08         # Windows — no -p
-```
-
-::: {.muted}
-PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
-The git log is the participation record. It is not a formality.
+::: {.step}
+**[session08_practice.py](https://warint.github.io/quantitative-methods/session-08/session08_practice.py)** —
+reads both datasets from the course site, and is cut into the four parts of this workshop.
 :::
 
-## 1 · Reproduce — 20 min
+::: {.tight}
+- **Change one line** before you run it: `MY_ANGLE = "angle_c_country"` → your group's angle.
+- Run one part at a time: select its lines, `Shift` + `Enter`, read the output.
+- `CERTIFICATE_VERIFY_FAILED` on a Mac: `open /Applications/Python\ 3*/Install\ Certificates.command`, once.
+:::
 
-Take the result the paper rests on, and put it to the test on the database the paper itself uses. There is nothing to unzip — the loader has it.
+::: {.muted}
+Needs only `pip install pandas numpy matplotlib scikit-learn`. Nothing to hand in: this is practice,
+and the script and your note stay in your folder.
+:::
+
+## 1 · Reproduce — 20 min {.scrollable}
+
+**Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023)**: can credit growth and the yield curve
+predict a banking crisis — and does a flexible model beat a logit? Part 1 of the script:
 
 ```python
-import qmib
+import pandas as pd
 
-data = qmib.load("jst")     # the session's own data
+SITE = "https://warint.github.io/quantitative-methods/data/"
+jst = pd.read_csv(SITE + "session-08/jst_crises.csv")   # 18 economies, 1870-2020
+
+# outcome: a crisis starts within two years · train 1870-1979, test 1980-2020
+# -> logit, KNN (K by cross-validation) and a random forest, scored by test AUC
+# -> which predictors matter: permutation importance
 ```
 
-::: {.muted}
-Paper: Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield curve and financial crisis prediction: evidence from a machine learning approach*, Journal of International Economics 145 · data: `qmib.load("jst")`
-:::
-
 ::: {.check}
-A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.
+A failed reproduction that you **diagnose** teaches as much as one that works. One you do not attempt teaches nothing.
+Does your ranking of predictors match the paper's? Does the flexible model win, as it does there?
 :::
 
 ::: {.muted}
 "It did not work" is not a diagnosis. Where did it stop, and what did you check?
 :::
 
-## 2 · Apply to your own angle — 35 min
+## 2 · Apply to your own angle — 35 min {.scrollable}
+
+Part 2 of the script — after you set `MY_ANGLE`:
 
 ```python
-core = qmib.load("core")
-mine = qmib.load("angle_c_country")     # your angle — see your dictionary
+core = pd.read_csv(SITE + "core.csv")            # shared: falling_behind_next is the outcome
+mine = pd.read_csv(SITE + MY_ANGLE + ".csv")     # your angle
+mine = mine.groupby(["geo", "time"]).mean(numeric_only=True).reset_index()  # one row per country-year
 df   = core.merge(mine, on=["geo", "time"], how="inner")
 ```
 
-Fit the session's method on **your** data, and report what the lecture said to report — in the
-units of your own variables.
+Then the same comparison — logit against KNN, $K$ by cross-validation, AUC on the last two years.
+Replace the default predictor list with the ones **your question** needs.
 
 ::: {.warn}
-A coefficient without units is not a finding.
+A number without units is not a finding — and an AUC without its benchmark (0.5, and the logit) is not one either.
 :::
 
 ## 3 · Break one assumption — 15 min
@@ -173,17 +179,18 @@ Every method in this course rests on something.
 
 ::: {.step}
 Find the assumption this one leans on hardest. Break it **deliberately**. Record what happened to
-your answer.
+your answer. Part 3 of the script has three ready to run: **(a)** no standardising, **(b)** fewer
+predictors, **(c)** a random split instead of a time split.
 :::
 
 ::: {.check}
-This is the part that carries the marks. A group that shows how its result falls apart understands
+This is the part that matters most. A group that shows how its result falls apart understands
 it; a group that only shows it holding does not yet know.
 :::
 
 ## 4 · Write it down — 20 min
 
-250 words in your submissions folder:
+250 words, in a file in your own folder — it is what you report from:
 
 ::: {.tight}
 - What you found, **in units**
@@ -195,19 +202,7 @@ it; a group that only shows it holding does not yet know.
 And the standing rule: one LLM output you identified as wrong, and how you established that.
 :::
 
-## Submitting
-
-```bash
-git add groups/A2026/group-XX/session-08
-git commit -m "Session 08 practice — group XX"
-git push -u origin group-XX
-```
-
-::: {.get}
-**Deliverable.** A knn classifier on a binary outcome from your angle, with $k$ chosen by cross-validation, compared against a sensible benchmark, and a note on whether the flexibility earned its keep.
-:::
-
-## What loses marks
+## The usual mistakes
 
 ::: {.tight}
 - Running KNN on unstandardised predictors
