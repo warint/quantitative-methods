@@ -20,7 +20,7 @@ Writes, next to this file:
     cv-curve.png             one validation split against 10-fold cross-validation
     cv-time.png              cross-validation on a time series: the past predicts the next block
     bias-variance.png, underfit.png, overfit.png   near-square, shown side by side
-    k-choice.png             K = 1, 11 and 100 side by side
+    k-choice.png             K = 1, 11 and 100 side by side (no true boundary drawn)
     train-validate-test.png  the three roles a data set plays
 
 scripts/build_economist_assets.R no longer writes these files.
@@ -118,11 +118,12 @@ def panel(ax, region=None, bayes=True, boundary=None, points=True, title=None):
         ax.set_title(title, loc="left", fontsize=13, fontweight="bold", color=INK)
 
 
-def legend(fig, extra=()):
+def legend(fig, extra=(), bayes=True):
     from matplotlib.lines import Line2D
     handles = [Line2D([], [], marker="o", ls="", mfc="white", mec=BLUE, mew=1.6, label="blue class"),
                Line2D([], [], marker="o", ls="", mfc="white", mec=ORANGE, mew=1.6, label="orange class"),
-               Line2D([], [], color=PURPLE, ls="--", lw=2, label="true boundary (known: we simulated the data)"),
+               *([Line2D([], [], color=PURPLE, ls="--", lw=2,
+                         label="true boundary (known: we simulated the data)")] if bayes else []),
                *extra]
     fig.legend(handles=handles, loc="lower center", ncol=len(handles), frameon=False, fontsize=11)
 
@@ -431,12 +432,12 @@ for ax, k, label in [(axes[0], 1, "too flexible"), (axes[1], 11, "about right"),
                      (axes[2], 100, "too rigid")]:
     pk = prob_map(k)
     tr, te = errors(k)
-    panel(ax, region=(pk > 0.5).astype(float), boundary=pk,
+    panel(ax, region=(pk > 0.5).astype(float), boundary=pk, bayes=False,
           title=f"K = {k}: {label}\ntraining error {tr:.0%} · test error {te:.0%}")
 headline(fig, "K = 1 chases every point, K = 100 ignores the curve, K = 11 follows it",
          f"The same 200 points, three values of K. The best any rule can do on these data is "
          f"{bayes_error:.0%} error: the classes overlap.")
-legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary")])
+legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary")], bayes=False)
 save(fig, "k-choice.png")
 
 
