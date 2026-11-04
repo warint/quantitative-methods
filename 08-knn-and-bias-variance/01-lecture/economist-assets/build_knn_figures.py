@@ -19,10 +19,12 @@ Writes, next to this file:
     cv-folds.png             5-fold cross-validation, round by round
     cv-curve.png             one validation split against 10-fold cross-validation
     cv-time.png              cross-validation on a time series: the past predicts the next block
+    bias-variance.png, underfit.png, overfit.png   near-square, shown side by side
 
 scripts/build_economist_assets.R no longer writes these files.
 """
 
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -354,3 +356,67 @@ ax.text(x0_ + 6 * w + 9, 2.5, "opened once,\nat the very end", ha="center", font
 headline(fig, "Cross-validation on a time series: the past predicts the block that comes next",
          "Never fit on the future to predict the past. The test year stays locked until K is chosen.")
 save(fig, "cv-time.png")
+
+
+warnings.simplefilter("ignore", np.exceptions.RankWarning if hasattr(np, 'exceptions') else Warning)
+
+# 10 · Bias and variance, three near-square panels shown side by side --------
+# (moved here from scripts/build_economist_assets.R, so the three share a shape)
+GOLD, PALE_BLUE = "#D49A00", "#C9DCE8"
+
+
+def square(name, title, subtitle, draw_fn):
+    fig, ax = plt.subplots(figsize=(6, 6.3))
+    fig.subplots_adjust(top=0.80, bottom=0.15, left=0.13, right=0.96)
+    draw_fn(ax)
+    headline(fig, title, subtitle)
+    save(fig, name)
+
+
+def draw_bias_variance(ax):
+    c = np.linspace(0.03, 1, 300)
+    bias2 = 1.05 * np.exp(-3.2 * c) + 0.05
+    variance = 0.08 + 0.82 * c**2
+    total = bias2 + variance + 0.13
+    ax.plot(c, bias2, color=BLUE, lw=2.5)
+    ax.plot(c, variance, color=RED, lw=2.5)
+    ax.plot(c, total, color=INK, lw=3)
+    b = np.argmin(total)
+    ax.axvline(c[b], color=GOLD, ls="--", lw=2)
+    ax.text(0.10, bias2[20] + 0.06, "bias²", color=BLUE, fontsize=13, fontweight="bold")
+    ax.text(0.80, variance[240] - 0.16, "variance", color=RED, fontsize=13, fontweight="bold")
+    ax.text(0.52, 1.12, "total error", color=INK, fontsize=13, fontweight="bold")
+    ax.text(c[b] + 0.03, 0.04, "lowest\ntotal error", color=GOLD, fontsize=12, fontweight="bold")
+    ax.set_ylim(0, 1.25)
+    ax.set_xticks([0.05, 0.5, 0.95]); ax.set_xticklabels(["simple", "balanced", "very\nflexible"])
+    ax.set_xlabel("model flexibility"); ax.set_ylabel("expected test error")
+
+
+rng_bv = np.random.default_rng(72)
+xs = np.sort(rng_bv.uniform(-3, 3, 14))      # few points, so a flexible fit can chase each one
+truth = np.sin(xs) + 0.15 * xs
+ys = truth + rng_bv.normal(0, 0.25, 14)
+gridx = np.linspace(xs.min(), xs.max(), 500)
+
+
+def draw_fit(degree, label):
+    def fn(ax):
+        ax.scatter(xs, ys, s=40, facecolor=PALE_BLUE, edgecolor=BLUE, zorder=3)
+        coef = np.polyfit(xs, ys, degree)            # may warn: the fit is deliberately extreme
+        ax.plot(gridx, np.polyval(coef, gridx), color=RED, lw=2.6, label=label)
+        ax.plot(gridx, np.sin(gridx) + 0.15 * gridx, color=INK, lw=2, ls="--", label="true signal")
+        ax.set_ylim(-2.3, 2.6)
+        ax.set_xlabel("x"); ax.set_ylabel("y", rotation=0, labelpad=10)
+        ax.legend(frameon=False, loc="upper left", fontsize=11)
+    return fn
+
+
+square("bias-variance.png", "Balance bias against variance",
+       "Too simple: high bias. Too flexible: high variance.\nThe best model sits in between.",
+       draw_bias_variance)
+square("underfit.png", "Underfitting: too simple",
+       "A straight line misses the curve that is\nreally there. High bias, low variance.",
+       draw_fit(1, "straight-line fit"))
+square("overfit.png", "Overfitting: follows the noise",
+       "A degree-12 polynomial bends to every point,\nnoise included. Low bias, high variance.",
+       draw_fit(12, "degree-12 fit"))

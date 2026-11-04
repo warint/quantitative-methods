@@ -401,30 +401,10 @@ dev.off()
 
 # Session 08: KNN and bias-variance -----------------------------------------
 
-open_svg(asset("S08", "bias-variance.svg"))
-cplx <- seq(0.03, 1, length.out = 300); bias2 <- 1.05 * exp(-3.2 * cplx) + .05; variance <- .08 + .82 * cplx^2; total <- bias2 + variance + .13
-plot(cplx, total, type = "n", axes = FALSE, xlab = "Model flexibility", ylab = "Expected test error", ylim = c(0, 1.25)); axis(1, at = c(.05, .5, .95), labels = c("simple", "balanced", "very flexible")); axis(2)
-lines(cplx, bias2, col = BLUE, lwd = 2.5); lines(cplx, variance, col = RED, lwd = 2.5); lines(cplx, total, col = INK, lwd = 3)
-best <- which.min(total); abline(v = cplx[best], col = GOLD, lty = 2, lwd = 2)
-direct_label(.18, bias2[45], "bias²", BLUE, 4); direct_label(.82, variance[245], "variance", RED, 4); direct_label(cplx[best], total[best], "lowest total error", GOLD, 4)
-headline("Good prediction balances bias against variance")
-dev.off()
+# bias-variance, underfit and overfit are drawn, near-square so the slide can show the
+# three side by side, by 08-knn-and-bias-variance/01-lecture/economist-assets/build_knn_figures.py.
 
-set.seed(72); x <- sort(runif(35, -3, 3)); truth <- sin(x) + .15 * x; y <- truth + rnorm(35, 0, .22)
-open_svg(asset("S08", "underfit.svg"))
-plot(x, y, pch = 21, bg = PALE_BLUE, col = BLUE, axes = FALSE, xlab = "x", ylab = "y"); axis(1); axis(2)
-abline(lm(y ~ x), col = RED, lwd = 3); lines(x, truth, col = INK, lwd = 2, lty = 2)
-headline("Underfitting leaves stable structure unexplained")
-legend("topleft", c("linear fit", "signal"), col = c(RED, INK), lwd = c(3, 2), lty = c(1, 2), bty = "n")
-dev.off()
-
-open_svg(asset("S08", "overfit.svg"))
-plot(x, y, pch = 21, bg = PALE_BLUE, col = BLUE, axes = FALSE, xlab = "x", ylab = "y"); axis(1); axis(2)
-polyfit <- lm(y ~ poly(x, 10)); gridx <- seq(min(x), max(x), length.out = 500); lines(gridx, predict(polyfit, newdata = data.frame(x = gridx)), col = RED, lwd = 2.5)
-lines(x, truth, col = INK, lwd = 2, lty = 2); headline("Overfitting follows noise as though it were signal")
-dev.off()
-
-# The KNN figures (bayes-classifier, nearest-neighbours, knn-boundary,
+# The KNN figures (nearest-neighbours, knn-boundary,
 # complexity-compare, error-complexity) and the confusion matrix are computed
 # from a simulation by
 # 08-knn-and-bias-variance/01-lecture/economist-assets/build_knn_figures.py,
