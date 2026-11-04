@@ -22,7 +22,21 @@ format:
     margin: 0.06
     smaller: true
     include-in-header:
-      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}</style>"
+      text: |
+        <style>
+        .reveal .slides{font-size:0.93em;}
+        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}
+        /* Long code scrolls inside its own window, so the slide itself does not have to. */
+        .reveal div.sourceCode, .reveal div.sourceCode pre{max-height:none; overflow:visible;}
+        .reveal div.sourceCode pre code{max-height:340px; overflow:auto; display:block;}
+        .reveal .cell-output pre{margin-top:0.3em;}
+        .reveal .cell-output pre code{max-height:130px; overflow:auto; display:block;}
+        /* Scroll bars always visible, so a student can see there is more to read. */
+        .reveal pre code::-webkit-scrollbar{width:9px; height:9px;}
+        .reveal pre code::-webkit-scrollbar-thumb{background:#B5B2AA; border-radius:5px;}
+        .reveal pre code::-webkit-scrollbar-track{background:rgba(0,0,0,0.04);}
+        .reveal pre code{scrollbar-width:thin; scrollbar-color:#B5B2AA rgba(0,0,0,0.04);}
+        </style>
     footer: "MATH60033A · Session 08 · Thierry Warin, PhD · HEC Montréal"
 ---
 
@@ -731,8 +745,7 @@ for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
 
 ## File 1 · Step 5: cross-validation by hand, for one K {.scrollable}
 
-Before letting scikit-learn do it for us, we do it once **by hand**, for $K = 25$, to see that there
-is no magic inside, only a loop.
+First, once **by hand**, for $K = 25$: there is no magic inside, only a loop.
 
 ```{python}
 #| echo: true
@@ -772,18 +785,12 @@ print(f"K = 25: cross-validated error = {np.mean(errors):.3f}")
 ```
 
 ::: {.check}
-**What 0.533 means.** Each round's error is the share of days in the hidden block that the model
-called wrongly: 0.500 is 50 wrong days out of 100. The cross-validated error is the average of the
-five rounds, $(0.500 + 0.571 + 0.540 + 0.492 + 0.563)/5 = 0.533$. So with $K = 25$ the model is
-wrong on about **53% of days it has not seen**: worse than flipping a coin (50%). $K = 25$ is not a
-good choice here; Step 6 tries every $K$. An error is $1 -$ accuracy, so 0.533 error is 0.467 accuracy.
-:::
-
-::: {.muted}
-The five rounds do not agree exactly, and that spread is information: it says how much the error
-of one $K$ moves from one period to the next. The average is our estimate of how $K = 25$ would do
-on days it has not seen. Why the scaler? KNN measures distances, so a predictor in large units
-would outvote one in small units. `StandardScaler` puts every column on the same scale, $(x - \mu)/\sigma$.
+**What 0.533 means.** Each round's error is the share of hidden days the model called wrongly
+(0.500 = 50 wrong days in 100). The cross-validated error is their average,
+$(0.500 + 0.571 + 0.540 + 0.492 + 0.563)/5 = 0.533$: with $K = 25$ the model is wrong on about
+**53% of days it has not seen**, worse than a coin. The spread across rounds, 0.492 to 0.571, shows how
+much one $K$'s error moves from one period to the next. An error is $1 -$ accuracy (0.533 error = 0.467
+accuracy). $K = 25$ is not a good choice here: Step 6 tries every $K$.
 :::
 
 ## File 1 · Step 6: cross-validation for every K at once {#imported-s08-026 .scrollable}
@@ -833,15 +840,6 @@ print(f"cross-validated accuracy at that K = {search.best_score_:.3f}")
 print(f"always predicting the commonest direction = {majority:.3f}   <- the bar to beat")
 ```
 
-::: {.check}
-**What "best K = 123" means.** `GridSearchCV` ran the loop of Step 5 for each of the 63 values
-$K = 1, 3, \dots, 125$, and kept the one with the highest average accuracy on the five hidden blocks.
-That is $K = 123$: to predict a day, the model finds the 123 past days whose `Lag2` was closest, and
-follows their majority. With so many voters, the boundary is nearly flat. It scored **0.511**: right
-on 51.1% of the hidden days. "Best" means *best of the $K$ values tried*, not *good*: it is still
-just below the 0.516 of always predicting the commonest direction.
-:::
-
 ### The curve
 
 ```{python}
@@ -884,6 +882,15 @@ plt.show()          # in a script: close the plot window to let it continue
 ```
 
 ### Reading it
+
+::: {.check}
+**What "best K = 123" means.** `GridSearchCV` ran the loop of Step 5 for each of the 63 values
+$K = 1, 3, \dots, 125$, and kept the one with the highest average accuracy on the five hidden blocks.
+That is $K = 123$: to predict a day, the model finds the 123 past days whose `Lag2` was closest, and
+follows their majority. With so many voters, the boundary is nearly flat. It scored **0.511**: right
+on 51.1% of the hidden days. "Best" means *best of the $K$ values tried*, not *good*: it is still
+just below the 0.516 of always predicting the commonest direction.
+:::
 
 ::: {.tight}
 - **Small $K$** (left): flexible, low bias, high variance. The boundary follows single days, and the accuracy jumps around.
@@ -941,20 +948,13 @@ print(f"KNN accuracy on 2005:                      {accuracy:.3f}")
 print(f"always predicting the commonest direction: {baseline:.3f}")
 ```
 
-::: {.muted}
-**Reading the confusion matrix.** Each of the 249 days of 2005 lands in one cell: its row is what the
-market did, its column is what the model said. The diagonal holds the right calls: 35 Down days called
-Down, and 109 Up days called Up, so accuracy $= (35 + 109)/249 = 0.578$. Off the diagonal are the
-mistakes: 74 Down days the model called Up, and 31 Up days it called Down. Read by row, the model
-catches **78%** of the Up days ($109/140$) but only **32%** of the Down days ($35/109$). It says "Up"
-on 183 days out of 249, so much of its accuracy comes from the market rising more often than not
-(140 Up days: the 0.562 of "always Up").
-:::
-
 ::: {.check}
-KNN is right on **57.8%** of the days of 2005: better than a coin (50%), and a little better than the
-simple rule "the market goes up" (56.2%). A positive result, but hold the applause until
-"How this example was chosen", after File 2.
+**Reading the confusion matrix.** Rows are what the market did, columns what the model said. The
+diagonal holds the right calls, 35 Down days and 109 Up days: accuracy $= (35 + 109)/249 =$ **0.578**,
+better than a coin and a little better than "always Up" (0.562). Read by row, it catches 78% of the Up
+days ($109/140$) but only 32% of the Down days ($35/109$). It says "Up" on 183 of 249 days, so much of
+its accuracy comes from the market rising more often than not. Hold the applause until "How this
+example was chosen", after File 2.
 :::
 
 ## File 1 · Step 8: refit on all the history, and save {.scrollable}
