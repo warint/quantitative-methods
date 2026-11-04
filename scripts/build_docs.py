@@ -138,8 +138,13 @@ def main():
     n_data = 0
     for f in sorted((ROOT / "data" / "spine").glob("*.parquet")):
         shutil.copy2(f, data_out / f.name)
+        # And as CSV: pandas reads a CSV by URL with nothing else installed,
+        # whereas parquet needs pyarrow — a fifth package for students working
+        # in a folder of their own (session 08 onwards).
+        import pandas as pd
+        pd.read_parquet(f).to_csv(data_out / f"{f.stem}.csv", index=False)
         n_data += 1
-    print(f"published {n_data} spine files to docs/data/")
+    print(f"published {n_data} spine files to docs/data/, as parquet and CSV")
 
     # Session 07 runs in a fresh folder of the student's own, with plain Python
     # and pip, not in a clone: its four scripts read their data from the site
@@ -164,13 +169,20 @@ def main():
     print(f"published session 07: {len(list(s07_data.glob('*.csv')))} data files, "
           f"{len(scripts)} scripts and session-07-scripts.zip")
 
-    # Session 08's lecture code, every block in order, as one script students
-    # download and run in a folder of their own; the deck links to it by URL.
+    # Session 08 runs in a folder of the student's own, like session 07: the
+    # lecture's code and the practice's starter as scripts to download, and the
+    # paper's data (written by scripts/build_session08_data.py) read by URL.
+    s08 = ROOT / "08-knn-and-bias-variance"
+    s08_data = DOCS / "data" / "session-08"
+    s08_data.mkdir(parents=True, exist_ok=True)
+    for f in sorted((s08 / "data").glob("*.csv")):
+        shutil.copy2(f, s08_data / f.name)
     s08_code = DOCS / "session-08"
     s08_code.mkdir(exist_ok=True)
-    shutil.copy2(ROOT / "08-knn-and-bias-variance" / "01-lecture" / "session08_knn.py",
-                 s08_code / "session08_knn.py")
-    print("published session 08: session08_knn.py")
+    for f in [s08 / "01-lecture" / "session08_knn.py",
+              s08 / "02-practice" / "starter" / "session08_practice.py"]:
+        shutil.copy2(f, s08_code / f.name)
+    print("published session 08: jst_crises.csv, session08_knn.py, session08_practice.py")
 
     # The per-session Python cheatsheets, which every deck links to by URL.
     # Built by scripts/build_cheatsheets.py; copied here so the link resolves.

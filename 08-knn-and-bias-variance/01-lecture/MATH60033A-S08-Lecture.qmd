@@ -53,8 +53,9 @@ pd.set_option("display.max_columns", 10)
 2. Classification
 3. K-nearest neighbours
 4. KNN by hand (you are the algorithm)
-5. KNN in code (you are no longer the algorithm)
-6. Big lessons from ML
+5. Cross-validation
+6. KNN in code (you are no longer the algorithm)
+7. Big lessons from ML
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -461,6 +462,119 @@ print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])
 ::: {.check}
 **Small.** A small $K$ is flexible: the boundary is drawn by a few nearby points, so it can bend wherever the true boundary bends. A large $K$ averages over many points, which smooths the boundary towards a straight line — exactly what a highly nonlinear problem cannot afford. (Too small, though, and it bends around noise: that is the $K = 1$ picture.)
 :::
+
+## Cross-validation {.center .scrollable}
+
+## The problem: choosing K needs a test error we are not allowed to use {.scrollable}
+
+::: {.tight}
+- **Training error** cannot choose $K$: it is always lowest at $K = 1$ (zero — every point is its own nearest neighbour).
+- **Test error** is what we want, but the test set may be used **once**, at the very end. Choose $K$ on it, and it has become training data: the score it gives is no longer honest.
+- So we need an estimate of the test error **from the training data alone**.
+:::
+
+::: {.step}
+**The idea:** pretend part of the training data is new. Hide it, fit on the rest, and measure the error on what was hidden. That hidden part is a **validation set**.
+:::
+
+::: {.check}
+**Cross-validation** does this several times, hiding a different part each time — so that every observation is used both to fit and to check, and no single unlucky split decides.
+:::
+
+## k-fold cross-validation, in one picture {.scrollable}
+
+![](economist-assets/cv-folds.png){style="display: block; margin: auto;" width="86%"}
+
+Cut the training data into $k$ folds. Fit on $k - 1$ of them, measure the error rate on the one left out, rotate, and average:
+
+$$\text{CV}_{(k)} = \frac{1}{k}\sum_{i=1}^{k} \text{Err}_i, \qquad \text{Err}_i = \frac{1}{n_i}\sum_{j \in \text{fold } i} I(y_j \neq \hat y_j)$$
+
+::: {.muted}
+$k = 5$ or $k = 10$ are the usual choices. $k = n$ — every observation left out on its own — is *leave-one-out* cross-validation.
+:::
+
+## Why not just one validation set? {.scrollable}
+
+![](economist-assets/cv-curve.png){style="display: block; margin: auto;" width="92%"}
+
+::: {.tight}
+- **Left.** Hide half the data once, and the answer depends on *which* half: ten splits, ten different "best" $K$. And each fit uses only half the data.
+- **Right.** 10-fold CV uses 90% of the data in every fit and averages ten errors: the estimates agree with one another and stay close to the true test error (orange) — which, in real life, you never get to see.
+:::
+
+## Why cross-validation is a superpower for machine learning {.scrollable}
+
+::: {.tight}
+1. **It needs no theory.** No formula for the variance, no distributional assumption. The one assumption: the data you have look like the data you will predict.
+2. **It tunes anything.** $K$ in KNN, $\lambda$ in ridge and lasso (session 5), the depth of a tree, the size of a network — the same loop chooses them all.
+3. **It referees between models.** KNN against a logit against a random forest, each scored on data it did not see, on equal footing.
+4. **It uses every observation twice** — once to fit, once to check — which matters when data are scarce.
+5. **It tells you how sure to be.** $k$ errors, not one: their spread says whether a difference between two models is real or noise.
+:::
+
+::: {.warn}
+**Three rules, or it lies.** (1) Everything learned from data — standardising, choosing variables — happens **inside** each fold: that is what the `Pipeline` is for. (2) With time series, folds respect time: never fit on the future to predict the past. (3) CV **chooses**; the test set **judges**, once.
+:::
+
+## Cross-validation in code {.scrollable}
+
+::::::::: panel-tabset
+### By hand
+
+```{python}
+#| echo: true
+
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+# 569 tumours, 30 measurements each: malignant or benign? (ships with scikit-learn)
+X, y = load_breast_cancer(return_X_y=True)
+model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5))
+
+# Five rounds, each holding out a different fifth of the data
+folds = KFold(n_splits=5, shuffle=True, random_state=0)
+errors = []
+for r, (fit_rows, check_rows) in enumerate(folds.split(X), start=1):
+    model.fit(X[fit_rows], y[fit_rows])                     # fit on four fifths
+    error = 1 - model.score(X[check_rows], y[check_rows])   # error on the fifth left out
+    errors.append(error)
+    print(f"round {r}: fit on {len(fit_rows)} rows, error on the other {len(check_rows)} = {error:.3f}")
+
+print(f"CV error = {np.mean(errors):.3f}   (spread across folds: sd {np.std(errors):.3f})")
+```
+
+### In one line
+
+```{python}
+#| echo: true
+
+# Continues from "By hand": cross_val_score runs the same five rounds.
+# It returns accuracies, so 1 - accuracy gives the same five errors as the loop.
+scores = cross_val_score(model, X, y, cv=folds)
+print("the five errors:", (1 - scores).round(3))
+print(f"CV error = {1 - scores.mean():.3f}")
+```
+
+### Choosing K
+
+```{python}
+#| echo: true
+
+# Continues from "By hand". One CV error per K: the lowest wins.
+for k in [1, 5, 15, 51, 151]:
+    model_k = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
+    cv_error = 1 - cross_val_score(model_k, X, y, cv=folds).mean()
+    print(f"K = {k:3}:  CV error {cv_error:.3f}")
+
+# GridSearchCV, in the next section, is exactly this loop —
+# plus refitting the winning K on all the training data.
+```
+
+:::::::::
 
 ## KNN in code (you are no longer the algorithm) {.center .scrollable}
 

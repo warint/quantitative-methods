@@ -267,3 +267,65 @@ headline(fig, "A confusion matrix: rows are the truth, columns the prediction")
 save(fig, "confusion-matrix.png")
 
 print(f"Bayes error {bayes_error:.3f}; K=11 test error {te10:.3f}")
+
+
+# 7 · How 5-fold cross-validation works ---------------------------------------
+fig, ax = plt.subplots(figsize=(11.5, 4.9))
+fig.subplots_adjust(top=0.84, bottom=0.02, left=0.02, right=0.98)
+ax.set_xlim(0, 106); ax.set_ylim(5, 62); ax.axis("off")
+x0_, w = 14, 13.2                      # left edge and width of one fold
+for r in range(5):                     # round r: fold r is held out
+    y = 50 - r * 10.5
+    ax.text(x0_ - 1.5, y + 3.5, f"round {r + 1}", ha="right", va="center", fontsize=12, color=INK)
+    for f in range(5):
+        held = f == r
+        ax.add_patch(plt.Rectangle((x0_ + f * w, y), w - 0.6, 7,
+                                   color=ORANGE if held else "#CFE0EC", ec=INK, lw=0.8))
+        ax.text(x0_ + f * w + (w - 0.6) / 2, y + 3.5, "validate" if held else "train",
+                ha="center", va="center", fontsize=11,
+                color="white" if held else BLUE, fontweight="bold" if held else None)
+    ax.annotate("", (85, y + 3.5), (x0_ + 5 * w + 0.5, y + 3.5),
+                arrowprops=dict(arrowstyle="->", color=MUTED))
+    ax.text(86, y + 3.5, f"error$_{r + 1}$", va="center", fontsize=13, color=INK)
+ax.plot([92.5, 93.5, 93.5, 92.5], [57, 57, 6, 6], color=RED, lw=1.5)
+ax.text(99.5, 31.5, "average\nof the 5\n= CV error", ha="center", va="center", fontsize=12,
+        fontweight="bold", color=RED)
+ax.text(x0_ + 2.5 * w, 59.5, "the training data, cut into 5 folds", ha="center",
+        fontsize=12, color=MUTED)
+headline(fig, "5-fold cross-validation: every observation is held out exactly once",
+         "Fit on four folds, measure the error on the fifth, rotate, and average the five errors.")
+save(fig, "cv-folds.png")
+
+# 8 · One validation split is noisy; cross-validation is not ------------------
+from sklearn.model_selection import cross_val_score, train_test_split  # noqa: E402
+
+ks_cv = np.array([1, 3, 5, 7, 9, 13, 17, 21, 29, 39, 51, 71])
+true_test = np.array([errors(k)[1] for k in ks_cv])
+fig, axes = plt.subplots(1, 2, figsize=(12, 5.6), sharey=True)
+fig.subplots_adjust(top=0.74, bottom=0.14, left=0.07, right=0.99, wspace=0.06)
+for seed in range(10):                 # ten different random 50/50 validation splits
+    Xa_, Xb_, ya_, yb_ = train_test_split(X_train, y_train, test_size=0.5, random_state=seed)
+    err = [1 - KNeighborsClassifier(n_neighbors=min(k, len(Xa_))).fit(Xa_, ya_).score(Xb_, yb_)
+           for k in ks_cv]
+    axes[0].plot(1 / ks_cv, err, color=MUTED, lw=1.1, alpha=0.8)
+for seed in range(10):                 # ten different random 10-fold cross-validations
+    from sklearn.model_selection import KFold  # noqa: E402
+    folds_ = KFold(10, shuffle=True, random_state=seed)
+    err = [1 - cross_val_score(KNeighborsClassifier(n_neighbors=k), X_train, y_train,
+                               cv=folds_).mean() for k in ks_cv]
+    axes[1].plot(1 / ks_cv, err, color=BLUE, lw=1.1, alpha=0.8)
+for ax, t in [(axes[0], "One validation set (half the data), 10 random splits:\n"
+                        "the curves disagree on which K is best"),
+              (axes[1], "10-fold cross-validation, 10 random shuffles:\n"
+                        "the curves agree with each other, and stay close to the truth")]:
+    ax.plot(1 / ks_cv, true_test, color=ORANGE, lw=3, label="true test error (5,000 new points)")
+    ax.set_xscale("log")
+    ax.set_xticks(1 / np.array([70, 30, 10, 3, 1]))
+    ax.set_xticklabels(["1/70", "1/30", "1/10", "1/3", "1"])
+    ax.set_xlabel("flexibility, 1/K")
+    ax.set_title(t, loc="left", fontsize=12, color=INK)
+axes[0].set_ylabel("error rate")
+axes[1].legend(frameon=False, loc="upper left", fontsize=11)
+headline(fig, "Why cross-validation: the same 200 points, two ways to estimate test error",
+         "Grey/blue: estimates from the training data alone. Orange: the truth, known only because we simulated it.")
+save(fig, "cv-curve.png")

@@ -41,37 +41,35 @@ You need **two** datasets in the practice, and both should be on your machine be
 
 This is what you work against in the first twenty minutes of the practice.
 
-The paper has **no replication deposit**, but it rests on a database its publisher puts online for anyone. The course loader fetches it once and caches it, so there is nothing to download by hand:
+The paper has **no replication deposit**, but it rests on the Jordà–Schularick–Taylor
+Macrohistory Database — 18 economies, 1870–2020, 88 financial crises. The course site serves it
+with the paper's predictors already derived. In a folder of your own (set up as on the last
+pre-session slide: a `.venv` and `pip install pandas numpy matplotlib scikit-learn`):
 
 ```python
-import qmib
+import pandas as pd
 
-data = qmib.load("jst")
+SITE = "https://warint.github.io/quantitative-methods/data/"
+jst = pd.read_csv(SITE + "session-08/jst_crises.csv")
+print(jst.shape)                              # (2718, 12)
 ```
-
-Run it **before** class: it is a single download, and thirty people fetching it at once in the room is not a download.
 
 ### b) The course data, for your own angle
 
 This is what you apply the method to in the second half.
 
 ```python
-import qmib
-
-data = qmib.load("jst")      # what the lecture uses
-core = qmib.load("core")                 # shared by every group
-mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
-
-print(data.shape, core.shape, mine.shape)
+core = pd.read_csv(SITE + "core.csv")                  # shared by every group
+mine = pd.read_csv(SITE + "angle_c_country.csv")       # YOUR angle — see your dictionary
+print(core.shape, mine.shape)
 ```
 
-The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived.
-
-> Run this **before** class. It downloads once and caches as parquet, so the practice works
-> whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
-
 Your group's file, columns, units and traps are in your
-[data dictionary](../../data/spine/dictionaries/).
+[data dictionary](../../data/spine/dictionaries/). Then download the practice script into the same
+folder: [`session08_practice.py`](https://warint.github.io/quantitative-methods/session-08/session08_practice.py).
+
+> **macOS, Python from python.org:** if reading fails with `CERTIFICATE_VERIFY_FAILED`, run
+> `open /Applications/Python\ 3*/Install\ Certificates.command` once.
 
 ---
 
@@ -88,8 +86,8 @@ Answer on paper. If you cannot, that is what the lecture is for.
 ## Arrive with
 
 - [ ] The paper read and annotated
-- [ ] The replication package downloaded and unzipped
-- [ ] `qmib.load()` run at least once, so the cache exists
+- [ ] Both datasets read once on your machine
+- [ ] `session08_practice.py` saved in your session-08 folder
 - [ ] Your self-check answers, on paper
 
 ---

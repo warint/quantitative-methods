@@ -21,8 +21,10 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S08-Lecture.qmd`](MATH60033A-S08-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**, and every dataset loads with one
-call — `qmib.load("core")`.
+what loses marks. Every code example in the deck is plain **Python** with four packages
+(`pandas numpy matplotlib scikit-learn`), and reads its data by URL: copy the blocks in order into a
+file of your own and run it, or download them all as
+[`session08_knn.py`](https://warint.github.io/quantitative-methods/session-08/session08_knn.py).
 
 ---
 
@@ -33,11 +35,9 @@ call — `qmib.load("core")`.
 3. **The Bayes Classifier**
 4. **K-Nearest Neighbors**
 5. **KNN by hand (you are the algorithm)**
-6. **KNN by hand**
-7. **KNN in R code (you are not longer the algorithm)**
-8. **Machine Learning: using KNN as an example**
-9. **Big lessons from ML**
-10. **Big lessons**
+6. **Cross-validation: choosing K without touching the test set**
+7. **KNN in code (you are no longer the algorithm)**
+8. **Big lessons from ML**
 
 ---
 
@@ -55,27 +55,27 @@ By the end of the session you should be able to:
 
 ## The data
 
-**The course spine, plus the smarket returns used in the lecture**
+**Smarket: 1,250 days of S&P 500 returns, 2001–2005 (ISLR)**, read by URL:
 
 ```python
-import qmib
-data = qmib.load("core")
+import pandas as pd
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
 ```
-
-Run it once before class; it caches locally and then works offline.
 
 ---
 
 ## Running the code
 
-Everything in the deck runs in the **VS Codium terminal** with the project environment active:
+In a folder of your own, opened in VS Codium, once:
 
 ```bash
-source .venv/bin/activate        # macOS / Linux
-python
+pip install pandas numpy matplotlib scikit-learn
+python session08_knn.py
 ```
 
-If a package is missing, `pip install -r requirements.txt` from the repository root.
+On macOS with Python from python.org, if reading the data fails with `CERTIFICATE_VERIFY_FAILED`,
+run `open /Applications/Python\ 3*/Install\ Certificates.command` once.
 
 ---
 

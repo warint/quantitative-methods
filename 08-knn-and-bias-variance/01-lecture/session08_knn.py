@@ -21,6 +21,7 @@ HOW TO RUN IT
 
 WHAT IT DOES
     Step 1  KNN by hand: six observations, one test point, Euclidean distances
+    Step 1b Cross-validation by hand, in one line, and to choose K
     Step 2  Load the stock-market data (S&P 500, 2001-2005)
     Step 3  Split by time: train on 2001-2004, test on 2005
     Step 4  Choose K by cross-validation, and plot the result
@@ -61,6 +62,38 @@ by_hand = by_hand.sort_values("distance")
 print(by_hand.round(3))
 print("K = 1 predicts:", by_hand["Y"].iloc[:1].mode()[0])   # the single nearest
 print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])   # majority of the 3 nearest
+
+
+# =============================================================================
+# Step 1b · Cross-validation: estimate the test error from the training data alone
+# =============================================================================
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import KFold
+
+# 569 tumours, 30 measurements each: malignant or benign? (ships with scikit-learn)
+X, y = load_breast_cancer(return_X_y=True)
+model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5))
+
+# By hand: five rounds, each holding out a different fifth of the data
+folds = KFold(n_splits=5, shuffle=True, random_state=0)
+errors = []
+for r, (fit_rows, check_rows) in enumerate(folds.split(X), start=1):
+    model.fit(X[fit_rows], y[fit_rows])                     # fit on four fifths
+    error = 1 - model.score(X[check_rows], y[check_rows])   # error on the fifth left out
+    errors.append(error)
+    print(f"round {r}: fit on {len(fit_rows)} rows, error on the other {len(check_rows)} = {error:.3f}")
+print(f"CV error = {np.mean(errors):.3f}   (spread across folds: sd {np.std(errors):.3f})")
+
+# In one line: cross_val_score runs the same five rounds (it returns accuracies)
+scores = cross_val_score(model, X, y, cv=folds)
+print("the five errors:", (1 - scores).round(3))
+
+# Choosing K: one CV error per K, the lowest wins.
+# GridSearchCV (Step 4) is exactly this loop, plus refitting the winning K on all the data.
+for k in [1, 5, 15, 51, 151]:
+    model_k = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
+    cv_error = 1 - cross_val_score(model_k, X, y, cv=folds).mean()
+    print(f"K = {k:3}:  CV error {cv_error:.3f}")
 
 
 # =============================================================================

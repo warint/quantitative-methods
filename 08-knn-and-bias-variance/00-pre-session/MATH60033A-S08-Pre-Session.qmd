@@ -88,8 +88,8 @@ format:
 | **3** | Attempt the self-check | 15 min |
 
 ::: {.warn}
-The lecture assumes all three are done. The practice assumes the data is already cached on your
-machine.
+The lecture assumes all three are done. The practice assumes you have already read both datasets
+once on your own machine.
 :::
 
 ## 1 · Read the paper
@@ -109,59 +109,56 @@ Read for the **argument**, not for coverage. Annotate four things:
 | **3** | The strongest single piece of evidence |
 | **4** | One limitation you would raise as a referee |
 
-## 2 · Get BOTH datasets
+## 2 · Get BOTH datasets {.scrollable}
 
 ::: {.warn}
 The practice uses two: the **paper's data**, to reproduce one of its results, and **your own
-angle**, to apply the method. Have both before you arrive.
+angle**, to apply the method. Read both once before you arrive.
 :::
 
-**a) The paper's data** — published, and fetched for you
+**a) The paper's data** — the Jordà–Schularick–Taylor Macrohistory Database, on the course site
 
-::: {.step}
-`qmib.load("jst")`
-:::
-
-The paper has no replication deposit, but it rests on a database its publisher puts online for
-anyone. The course loader downloads it once and caches it as parquet, so run this before you
-arrive and the practice works with the wifi off:
+18 advanced economies, 1870–2020, 88 banking crises, with the paper's predictors already
+derived (credit growth, the yield-curve slope, …). Copy this into a file in a folder of your own, and run it:
 
 ```python
-import qmib
+import pandas as pd
 
-data = qmib.load("jst")
-print(data.shape)
+SITE = "https://warint.github.io/quantitative-methods/data/"
+
+# One row per country-year. crisis_next2 = 1 if a banking crisis starts within two years.
+jst = pd.read_csv(SITE + "session-08/jst_crises.csv")
+print(jst.shape)                              # (2718, 12)
+print(jst["crisis_next2"].value_counts())     # how many country-years have a crisis ahead
 ```
 
-::: {.warn}
-Run it **before** class. It is a single download, and a room of thirty people fetching it at
-once is not a download.
+::: {.muted}
+Jordà, Schularick & Taylor (2017), *Macrofinancial History and the New Business Cycle Facts*,
+NBER Macroeconomics Annual 2016 · shared under CC BY-NC-SA 4.0, as the publisher's licence requires.
 :::
 
-
-## 2b · The course data
+## 2b · The course data {.scrollable}
 
 ```python
-import qmib
+import pandas as pd
 
-core = qmib.load("core")                # the spine, shared by every group
-mine = qmib.load("angle_c_country")     # REPLACE with your own angle
+SITE = "https://warint.github.io/quantitative-methods/data/"
+
+core = pd.read_csv(SITE + "core.csv")              # shared by every group
+mine = pd.read_csv(SITE + "angle_c_country.csv")   # REPLACE with your own angle
 
 print(core.shape, mine.shape)
 ```
-
-::: {.check}
-Run this **before** you arrive. It downloads once and caches as parquet, so the practice works
-whatever the room's wifi is doing.
-:::
 
 ::: {.warn}
 `angle_c_country` is an example, not your angle. Yours is named in
 [`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md).
 :::
 
-::: {.muted}
-The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived · everything available: `qmib.catalog()`
+::: {.check}
+Both blocks printed a shape? Then download the practice script, which does the rest:
+**[session08_practice.py](https://warint.github.io/quantitative-methods/session-08/session08_practice.py)** —
+save it in the same folder. You will run it in class; you may read it now.
 :::
 
 ## 3 · Self-check, and what the session will ask of you
@@ -185,32 +182,51 @@ By the end of the session you should be able to:
 :::
 
 ::: {.get}
-**Arrive with:** the paper read and annotated · the replication package unzipped ·
-`qmib.load()` run at least once · your self-check answers on paper.
+**Arrive with:** the paper read and annotated · both datasets read once on your machine ·
+`session08_practice.py` in your folder · your self-check answers on paper.
 :::
 
-## Before you run anything
+## Before you run anything {.scrollable}
 
-Everything runs in the **VS Codium terminal**, from the repository root, with the project
-environment active. Activate it in **every new terminal**, not only the first:
+Session 08 runs in **a folder of your own** — `Desktop/session-08`, say — not in the course
+repository. Open it in VS Codium (**File → Open Folder…**), then, once, in its terminal:
+
+::::: panel-tabset
+### macOS
 
 ```bash
-source .venv/bin/activate        # macOS and Linux
+open /Applications/Python\ 3*/Install\ Certificates.command   # python.org Python only, once
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas numpy matplotlib scikit-learn
 ```
+
+### Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas numpy matplotlib scikit-learn
+```
+
+### Windows
 
 ```powershell
-.venv\Scripts\activate           # Windows (PowerShell)
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas numpy matplotlib scikit-learn
 ```
+:::::
 
 ::: {.check}
-Your prompt must begin with **`(.venv)`**. Without it `python` and `pip` are your system's, and
-nothing the course installed is visible to them.
+Your prompt begins with **`(.venv)`**, and in VS Codium this folder's `.venv` is the interpreter
+(`Ctrl`/`Cmd` + `Shift` + `P` → **Python: Select Interpreter**). Every new terminal needs the
+`activate` line again.
 :::
 
 ::: {.muted}
-`ModuleNotFoundError` means the packages went somewhere else, or were never installed. Check the
-prompt first, then `pip install -r requirements.txt` — **from the repository root, with the
-environment active**. Building the environment from scratch is Session 01, step 1.4.
+`CERTIFICATE_VERIFY_FAILED` on a Mac: run the first macOS line. `ModuleNotFoundError`: the prompt
+has no `(.venv)` — activate, then `pip install` again.
 :::
 
 ::: {.muted}

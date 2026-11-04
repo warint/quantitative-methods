@@ -51,12 +51,18 @@ practice assumes you arrive with the data loaded.
 
 ## Data for this session
 
-**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — one line to load it:
+**The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper's predictors already derived** — read by URL, in a folder of your own, with nothing but pandas:
 
 ```python
-import qmib
-data = qmib.load("jst")
+import pandas as pd
+
+SITE = "https://warint.github.io/quantitative-methods/data/"
+jst  = pd.read_csv(SITE + "session-08/jst_crises.csv")   # the paper's data
+core = pd.read_csv(SITE + "core.csv")                    # shared by every group
+mine = pd.read_csv(SITE + "angle_c_country.csv")         # YOUR angle — see your dictionary
 ```
+
+The practice starter, [`02-practice/starter/session08_practice.py`](02-practice/starter/session08_practice.py), does this and the rest.
 
 See [`data/README.md`](data/README.md) and your group's
 [data dictionary](../data/spine/dictionaries/).

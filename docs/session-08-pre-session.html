@@ -1140,7 +1140,7 @@ Thierry Warin, PhD
 </tbody>
 </table>
 <div class="warn">
-<p>The lecture assumes all three are done. The practice assumes the data is already cached on your machine.</p>
+<p>The lecture assumes all three are done. The practice assumes you have already read both datasets once on your own machine.</p>
 </div>
 </section>
 <section id="read-the-paper" class="slide level2">
@@ -1171,40 +1171,40 @@ Thierry Warin, PhD
 </tbody>
 </table>
 </section>
-<section id="get-both-datasets" class="slide level2">
+<section id="get-both-datasets" class="slide level2 scrollable">
 <h2>2 · Get BOTH datasets</h2>
 <div class="warn">
-<p>The practice uses two: the <strong>paper’s data</strong>, to reproduce one of its results, and <strong>your own angle</strong>, to apply the method. Have both before you arrive.</p>
+<p>The practice uses two: the <strong>paper’s data</strong>, to reproduce one of its results, and <strong>your own angle</strong>, to apply the method. Read both once before you arrive.</p>
 </div>
-<p><strong>a) The paper’s data</strong> — published, and fetched for you</p>
-<div class="step">
-<p><code>qmib.load(&quot;jst&quot;)</code></p>
-</div>
-<p>The paper has no replication deposit, but it rests on a database its publisher puts online for anyone. The course loader downloads it once and caches it as parquet, so run this before you arrive and the practice works with the wifi off:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> qmib</span>
+<p><strong>a) The paper’s data</strong> — the Jordà–Schularick–Taylor Macrohistory Database, on the course site</p>
+<p>18 advanced economies, 1870–2020, 88 banking crises, with the paper’s predictors already derived (credit growth, the yield-curve slope, …). Copy this into a file in a folder of your own, and run it:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href></a></span>
-<span id="cb1-3"><a href></a>data <span class="op">=</span> qmib.load(<span class="st">&quot;jst&quot;</span>)</span>
-<span id="cb1-4"><a href></a><span class="bu">print</span>(data.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="warn">
-<p>Run it <strong>before</strong> class. It is a single download, and a room of thirty people fetching it at once is not a download.</p>
+<span id="cb1-3"><a href></a>SITE <span class="op">=</span> <span class="st">&quot;https://warint.github.io/quantitative-methods/data/&quot;</span></span>
+<span id="cb1-4"><a href></a></span>
+<span id="cb1-5"><a href></a><span class="co"># One row per country-year. crisis_next2 = 1 if a banking crisis starts within two years.</span></span>
+<span id="cb1-6"><a href></a>jst <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> <span class="st">&quot;session-08/jst_crises.csv&quot;</span>)</span>
+<span id="cb1-7"><a href></a><span class="bu">print</span>(jst.shape)                              <span class="co"># (2718, 12)</span></span>
+<span id="cb1-8"><a href></a><span class="bu">print</span>(jst[<span class="st">&quot;crisis_next2&quot;</span>].value_counts())     <span class="co"># how many country-years have a crisis ahead</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="muted">
+<p>Jordà, Schularick &amp; Taylor (2017), <em>Macrofinancial History and the New Business Cycle Facts</em>, NBER Macroeconomics Annual 2016 · shared under CC BY-NC-SA 4.0, as the publisher’s licence requires.</p>
 </div>
 </section>
-<section id="b-the-course-data" class="slide level2">
+<section id="b-the-course-data" class="slide level2 scrollable">
 <h2>2b · The course data</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="im">import</span> qmib</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href></a></span>
-<span id="cb2-3"><a href></a>core <span class="op">=</span> qmib.load(<span class="st">&quot;core&quot;</span>)                <span class="co"># the spine, shared by every group</span></span>
-<span id="cb2-4"><a href></a>mine <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)     <span class="co"># REPLACE with your own angle</span></span>
-<span id="cb2-5"><a href></a></span>
-<span id="cb2-6"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="check">
-<p>Run this <strong>before</strong> you arrive. It downloads once and caches as parquet, so the practice works whatever the room’s wifi is doing.</p>
-</div>
+<span id="cb2-3"><a href></a>SITE <span class="op">=</span> <span class="st">&quot;https://warint.github.io/quantitative-methods/data/&quot;</span></span>
+<span id="cb2-4"><a href></a></span>
+<span id="cb2-5"><a href></a>core <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> <span class="st">&quot;core.csv&quot;</span>)              <span class="co"># shared by every group</span></span>
+<span id="cb2-6"><a href></a>mine <span class="op">=</span> pd.read_csv(SITE <span class="op">+</span> <span class="st">&quot;angle_c_country.csv&quot;</span>)   <span class="co"># REPLACE with your own angle</span></span>
+<span id="cb2-7"><a href></a></span>
+<span id="cb2-8"><a href></a><span class="bu">print</span>(core.shape, mine.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="warn">
 <p><code>angle_c_country</code> is an example, not your angle. Yours is named in <a href="https://github.com/warint/quantitative-methods/blob/main/RESEARCH-MANDATES.md"><code>RESEARCH-MANDATES.md</code></a>.</p>
 </div>
-<div class="muted">
-<p>The Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, 88 financial crises, with the paper’s predictors already derived · everything available: <code>qmib.catalog()</code></p>
+<div class="check">
+<p>Both blocks printed a shape? Then download the practice script, which does the rest: <strong><a href="https://warint.github.io/quantitative-methods/session-08/session08_practice.py">session08_practice.py</a></strong> — save it in the same folder. You will run it in class; you may read it now.</p>
 </div>
 </section>
 <section id="self-check-and-what-the-session-will-ask-of-you" class="slide level2">
@@ -1228,19 +1228,38 @@ Thierry Warin, PhD
 </ul>
 </div>
 <div class="get">
-<p><strong>Arrive with:</strong> the paper read and annotated · the replication package unzipped · <code>qmib.load()</code> run at least once · your self-check answers on paper.</p>
+<p><strong>Arrive with:</strong> the paper read and annotated · both datasets read once on your machine · <code>session08_practice.py</code> in your folder · your self-check answers on paper.</p>
 </div>
 </section>
-<section id="before-you-run-anything" class="slide level2">
+<section id="before-you-run-anything" class="slide level2 scrollable">
 <h2>Before you run anything</h2>
-<p>Everything runs in the <strong>VS Codium terminal</strong>, from the repository root, with the project environment active. Activate it in <strong>every new terminal</strong>, not only the first:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="bu">source</span> .venv/bin/activate        <span class="co"># macOS and Linux</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb4-1"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\activate           <span class="co"># Windows (PowerShell)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Session 08 runs in <strong>a folder of your own</strong> — <code>Desktop/session-08</code>, say — not in the course repository. Open it in VS Codium (<strong>File → Open Folder…</strong>), then, once, in its terminal:</p>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">macOS</a></li><li><a href="#tabset-1-2">Linux</a></li><li><a href="#tabset-1-3">Windows</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href></a><span class="ex">open</span> /Applications/Python\ 3<span class="pp">*</span>/Install\ Certificates.command   <span class="co"># python.org Python only, once</span></span>
+<span id="cb3-2"><a href></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span>
+<span id="cb3-3"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
+<span id="cb3-4"><a href></a><span class="ex">pip</span> install pandas numpy matplotlib scikit-learn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-1-2">
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span>
+<span id="cb4-2"><a href></a><span class="bu">source</span> .venv/bin/activate</span>
+<span id="cb4-3"><a href></a><span class="ex">pip</span> install pandas numpy matplotlib scikit-learn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-1-3">
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource powershell number-lines code-with-copy"><code class="sourceCode powershell"><span id="cb5-1"><a href></a>py <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb5-2"><a href></a><span class="op">.</span><span class="fu">venv</span>\Scripts\Activate<span class="op">.</span><span class="fu">ps1</span></span>
+<span id="cb5-3"><a href></a>pip install pandas numpy matplotlib scikit-learn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
 <div class="check">
-<p>Your prompt must begin with <strong><code>(.venv)</code></strong>. Without it <code>python</code> and <code>pip</code> are your system’s, and nothing the course installed is visible to them.</p>
+<p>Your prompt begins with <strong><code>(.venv)</code></strong>, and in VS Codium this folder’s <code>.venv</code> is the interpreter (<code>Ctrl</code>/<code>Cmd</code> + <code>Shift</code> + <code>P</code> → <strong>Python: Select Interpreter</strong>). Every new terminal needs the <code>activate</code> line again.</p>
 </div>
 <div class="muted">
-<p><code>ModuleNotFoundError</code> means the packages went somewhere else, or were never installed. Check the prompt first, then <code>pip install -r requirements.txt</code> — <strong>from the repository root, with the environment active</strong>. Building the environment from scratch is Session 01, step 1.4.</p>
+<p><code>CERTIFICATE_VERIFY_FAILED</code> on a Mac: run the first macOS line. <code>ModuleNotFoundError</code>: the prompt has no <code>(.venv)</code> — activate, then <code>pip install</code> again.</p>
 </div>
 <div class="muted">
 <p>Session 08: <a href="https://github.com/warint/quantitative-methods/blob/main/08-knn-and-bias-variance/README.md"><code>README.md</code></a> · the lecture: <a href="https://github.com/warint/quantitative-methods/blob/main/08-knn-and-bias-variance/01-lecture/README.md"><code>01-lecture/</code></a></p>
