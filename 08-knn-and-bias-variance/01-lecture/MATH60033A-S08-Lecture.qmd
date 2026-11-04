@@ -306,7 +306,16 @@ print(by_hand.round(3))
 ```{python}
 #| echo: true
 
-# Continues from the previous slide: by_hand is sorted, nearest first.
+# ---- Setup: the previous slide, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+by_hand = pd.DataFrame({"X1": [0, 2, 0, 0, -1, 1], "X2": [3, 0, 1, 1, 0, 1],
+                        "X3": [0, 0, 3, 2, 1, 1],
+                        "Y": ["Red", "Red", "Red", "Green", "Green", "Red"]}, index=[1, 2, 3, 4, 5, 6])
+by_hand["distance"] = np.sqrt(by_hand["X1"]**2 + by_hand["X2"]**2 + by_hand["X3"]**2)
+by_hand = by_hand.sort_values("distance")
+
+# ---- Predict ----
 # The prediction is the most common colour among the K nearest rows.
 print("K = 1 predicts:", by_hand["Y"].iloc[:1].mode()[0])
 print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])
@@ -664,7 +673,12 @@ Two decisions before any model is fitted, and both protect us from fooling ourse
 ```{python}
 #| echo: true
 
-# Continues from Step 1 (paste the steps into one script, in order): smarket is loaded.
+# ---- Setup: Step 1, condensed, so this cell runs on its own ----
+import pandas as pd
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+
+# ---- Steps 2-3 ----
 # The slice we chose (why: see "How this example was chosen")
 smarket = smarket[smarket["Year"] >= 2002]
 predictors = ["Lag2"]                         # the market's return two days before
@@ -695,8 +709,19 @@ this is a time series, so the standard folds would break rule (2): they would fi
 ```{python}
 #| echo: true
 
-# Continues from Steps 2-3: X_train and y_train exist.
+# ---- Setup: Steps 1-3, condensed, so this cell runs on its own ----
+import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+
+# ---- Step 4 ----
 
 folds = TimeSeriesSplit(n_splits=5)           # 6 blocks in time order, 5 rounds
 for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
@@ -712,11 +737,25 @@ is no magic inside, only a loop.
 ```{python}
 #| echo: true
 
-# Continues from Step 4: folds exists.
+# ---- Setup: Steps 1-4, condensed, so this cell runs on its own ----
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+
+# ---- Step 5 ----
 
 # Standardise, then KNN, glued into ONE model: the scaler is refitted with
 # the model each time, on the fitting rows only, so it never peeks at the hidden block.
@@ -758,8 +797,25 @@ best cross-validated accuracy, and refits the model with it on all the training 
 ```{python}
 #| echo: true
 
-# Continues from Step 5: make_pipeline, StandardScaler, KNeighborsClassifier are imported.
-from sklearn.model_selection import GridSearchCV
+# ---- Setup: Steps 1-4, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+
+# ---- Step 6 ----
 
 # K = 1, 3, 5, ..., 125: odd numbers, so a two-class vote can never tie. It stops at 125
 # because the first round fits on only 126 days, and K cannot be larger than that.
@@ -791,7 +847,30 @@ just below the 0.516 of always predicting the commonest direction.
 ```{python}
 #| echo: true
 
-# Continues from the Code tab: k_values, search, best_k, majority exist.
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+
+# ---- The curve ----
 plt.figure(figsize=(8, 3))
 plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", markersize=3,
          label="KNN, cross-validated accuracy")
@@ -822,7 +901,30 @@ after seeing this score, 2005 would have become training data, and the score wou
 ```{python}
 #| echo: true
 
-# Continues from Step 6: search, X_test, y_test exist.
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+
+# ---- Step 7 ----
 from sklearn.metrics import confusion_matrix
 
 y_pred = search.predict(X_test)
@@ -864,7 +966,30 @@ cross-validation chose. Then we save it in a file, so that File 2 can use it wit
 ```{python}
 #| echo: true
 
-# Continues from Steps 2-6: history, predictors, best_k exist.
+# ---- Setup: Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+
+# ---- Step 8 ----
 import joblib                      # installed together with scikit-learn: saves a model to a file
 
 final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
@@ -887,9 +1012,38 @@ market did two trading days before: it rose 0.043% on 23 December (26 December w
 ```{python}
 #| echo: true
 
-# File 2: a new script. Run it in the folder where File 1 saved knn_smarket.joblib.
+# File 2: a new script. It loads the model File 1 saved in this folder.
 import pandas as pd
 import joblib
+from pathlib import Path
+
+# ---- Setup: only if File 1 has not been run in this folder, rebuild its model ----
+if not Path("knn_smarket.joblib").exists():
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+    smarket = pd.read_csv(URL)
+    smarket = smarket[smarket["Year"] >= 2002]
+    predictors = ["Lag2"]
+    new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+    train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+    X_train, y_train = train[predictors], train["Direction"]
+    X_test, y_test = test[predictors], test["Direction"]
+    folds = TimeSeriesSplit(n_splits=5)
+    k_values = list(range(1, 126, 2))
+    search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                          {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+    best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+    majority = y_train.value_counts(normalize=True).max()
+    final = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
+    joblib.dump(final.fit(history[predictors], history["Direction"]), "knn_smarket.joblib")
+
+# ---- File 2 ----
 
 model = joblib.load("knn_smarket.joblib")    # the model File 1 saved, in the same folder
 k = model.named_steps["kneighborsclassifier"].n_neighbors
@@ -1065,7 +1219,30 @@ print(f"new house (2,400 sq ft, 4 bedrooms, 2.5 bathrooms, 1970, 2-car garage): 
 ```{python}
 #| echo: true
 
-# Continues from File 1 (session08_1_train.py): X_train, y_train, search, majority.
+# ---- Setup: File 1, Steps 1-6, condensed, so this cell runs on its own ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]   # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+folds = TimeSeriesSplit(n_splits=5)
+k_values = list(range(1, 126, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values}, cv=folds).fit(X_train, y_train)
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+
+# ---- The forest ----
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 
