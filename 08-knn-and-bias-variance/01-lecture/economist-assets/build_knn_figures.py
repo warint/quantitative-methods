@@ -20,6 +20,7 @@ Writes, next to this file:
     cv-curve.png             one validation split against 10-fold cross-validation
     cv-time.png              cross-validation on a time series: the past predicts the next block
     bias-variance.png, underfit.png, overfit.png   near-square, shown side by side
+    k-choice.png             K = 1, 11 and 100 side by side
 
 scripts/build_economist_assets.R no longer writes these files.
 """
@@ -420,3 +421,19 @@ square("underfit.png", "Underfitting: too simple",
 square("overfit.png", "Overfitting: follows the noise",
        "A degree-12 polynomial bends to every point,\nnoise included. Low bias, high variance.",
        draw_fit(12, "degree-12 fit"))
+
+
+# 11 · K = 1, K = 11, K = 100 in one row: the choice-of-K slide, without tabs ----
+fig, axes = plt.subplots(1, 3, figsize=(15, 6.0))
+fig.subplots_adjust(top=0.76, bottom=0.13, left=0.03, right=0.99, wspace=0.08)
+for ax, k, label in [(axes[0], 1, "too flexible"), (axes[1], 11, "about right"),
+                     (axes[2], 100, "too rigid")]:
+    pk = prob_map(k)
+    tr, te = errors(k)
+    panel(ax, region=(pk > 0.5).astype(float), boundary=pk,
+          title=f"K = {k}: {label}\ntraining error {tr:.0%} · test error {te:.0%}")
+headline(fig, "K = 1 chases every point, K = 100 ignores the curve, K = 11 follows it",
+         f"The same 200 points, three values of K. The best any rule can do on these data is "
+         f"{bayes_error:.0%} error: the classes overlap.")
+legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary")])
+save(fig, "k-choice.png")

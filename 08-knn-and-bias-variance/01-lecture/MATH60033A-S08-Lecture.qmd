@@ -317,30 +317,12 @@ print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])
 
 ## The choice of K: how many neighbours? {#imported-s08-014 .scrollable}
 
-::::::::: panel-tabset
-### Too few, too many
-
-![](economist-assets/complexity-compare.png){style="display: block; margin: auto;" width="92%"}
+![](economist-assets/k-choice.png){style="display: block; margin: auto; max-height:none;" width="90%"}
 
 ::: {.tight}
 - **$K = 1$**: each point is classified by its single nearest neighbour. The boundary wraps around every stray blue point in orange territory, and every stray orange point in blue. The training error is 0, because every point is its own nearest neighbour, yet on new points it makes 16% mistakes. **Low bias, high variance**: the model believes every detail of the sample, including the noise.
+- **$K = 11$**: the boundary follows the true one (purple, dashed) closely, and the test error, 12%, is about the best any rule can do on these data. KNN knows nothing about how the data were generated, yet it finds the shape.
 - **$K = 100$**: half the data votes on every point, so the boundary is almost a straight line and misses the bend of the true boundary. **High bias, low variance**: the model is stable, but too simple.
-:::
-
-### A K in between
-
-![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="78%"}
-
-::: {.muted}
-KNN with $K = 11$ on the same 200 simulated points. It knows nothing about how the data were
-generated. Yet its boundary (solid black) follows the true one (purple, dashed) closely, and its
-test error is only a little above the lowest error any rule could reach on these data.
-:::
-
-:::::::::
-
-::: {.check}
-$K$ is the dial between "too flexible" and "too rigid". The next section shows how to set it without cheating.
 :::
 
 ## Bias and variance, in three pictures {#imported-s08-002 .scrollable}
@@ -504,15 +486,6 @@ $$\text{CV}_{(k)} = \frac{1}{k}\sum_{i=1}^{k} \text{Err}_i, \qquad \text{Err}_i 
 $k = 5$ or $k = 10$ are the usual choices. Every observation is used to fit the model $k - 1$ times
 and to test it exactly once. With $k = n$, each observation is left out on its own: *leave-one-out*
 cross-validation.
-:::
-
-## Why several rounds, and not one hidden part? {.scrollable}
-
-![](economist-assets/cv-curve.png){style="display: block; margin: auto;" width="92%"}
-
-::: {.tight}
-- **Left.** Hide half the data once, and the answer depends on *which* half you hid. Ten random splits give ten different curves, and ten different "best" $K$. And each fit uses only half the data.
-- **Right.** 10-fold cross-validation fits on 90% of the data each time and averages ten errors. The ten estimates agree with one another, and they stay close to the true test error (orange). In real life you never see that orange line: cross-validation is how you get close to it.
 :::
 
 ## Classical fit against cross-validation {.scrollable}
