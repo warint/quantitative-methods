@@ -172,13 +172,28 @@ SNIPPETS = {
     "np.linalg.eigvalsh": "np.linalg.eigvalsh(np.corrcoef(Z, rowvar=False))",
 
     # ---- Session 08 -------------------------------------------------------
-    "KNeighborsClassifier": "KNeighborsClassifier(n_neighbors=15).fit(Xtr, ytr)",
+    "KNeighborsClassifier": "from sklearn.neighbors import KNeighborsClassifier\n"
+                            "knn = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25))\n"
+                            "knn.fit(X_train, y_train)          # scale, then KNN: distances need one scale",
     "KNeighborsRegressor": "KNeighborsRegressor(n_neighbors=15).fit(Xtr, ytr)",
-    "GridSearchCV": 'gs = GridSearchCV(knn, {"n_neighbors": range(1, 40)}, cv=5).fit(Xtr, ytr)',
-    ".best_params_ / .best_score_": "gs.best_params_, gs.best_score_   # what it chose, and how it scored",
+    "GridSearchCV": "from sklearn.model_selection import GridSearchCV\n"
+                    "search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),\n"
+                    '                      {"kneighborsclassifier__n_neighbors": list(range(1, 126, 2))},\n'
+                    "                      cv=folds).fit(X_train, y_train)\n"
+                    "# inside a pipeline the name is <step>__<setting>, two underscores",
+    ".best_params_ / .best_score_": 'search.best_params_["kneighborsclassifier__n_neighbors"], search.best_score_',
+    "TimeSeriesSplit": "from sklearn.model_selection import TimeSeriesSplit\n"
+                       "folds = TimeSeriesSplit(n_splits=5)   # fit on the past, validate on what comes next",
+    ".cv_results_": 'search.cv_results_["mean_test_score"]   # one CV score per K: plot it against K',
+    ".predict_proba": "model.predict_proba(new_day)      # one column per class, in model.classes_ order",
+    "joblib.dump / joblib.load": "import joblib\n"
+                                 'joblib.dump(final_model, "knn_smarket.joblib")   # File 1 saves\n'
+                                 'model = joblib.load("knn_smarket.joblib")         # File 2 loads',
+
     "cross_val_score": 'cross_val_score(model, X, y, cv=5, scoring="accuracy").mean()',
     "permutation_importance": "permutation_importance(model, Xte, yte, n_repeats=10).importances_mean",
-    "confusion_matrix": "confusion_matrix(yte, model.predict(Xte))   # the four cells accuracy hides",
+    "confusion_matrix": "from sklearn.metrics import confusion_matrix\n"
+                        'confusion_matrix(y_test, y_pred, labels=["Down", "Up"])   # rows = truth, columns = prediction',
     "classification_report": "print(classification_report(yte, model.predict(Xte)))",
     "RandomForestClassifier": "RandomForestClassifier(n_estimators=500, random_state=7).fit(Xtr, ytr)",
 

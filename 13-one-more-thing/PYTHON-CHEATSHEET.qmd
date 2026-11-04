@@ -311,20 +311,38 @@ plt.savefig("p4_resid_vs_fitted.png", dpi=110, bbox_inches="tight")   # saved in
 ### Session 8 · KNN and bias–variance
 
 ```python
+# -- Load and shape ------------------------------------------------
+import joblib
+joblib.dump(final_model, "knn_smarket.joblib")   # File 1 saves
+model = joblib.load("knn_smarket.joblib")         # File 2 loads
+
 # -- Fit -----------------------------------------------------------
-KNeighborsClassifier(n_neighbors=15).fit(Xtr, ytr)
+from sklearn.neighbors import KNeighborsClassifier
+knn = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25))
+knn.fit(X_train, y_train)          # scale, then KNN: distances need one scale
 KNeighborsRegressor(n_neighbors=15).fit(Xtr, ytr)
 RandomForestClassifier(n_estimators=500, random_state=7).fit(Xtr, ytr)
 
+# -- Read the fit --------------------------------------------------
+model.predict_proba(new_day)      # one column per class, in model.classes_ order
+
 # -- Diagnose ------------------------------------------------------
 permutation_importance(model, Xte, yte, n_repeats=10).importances_mean
-confusion_matrix(yte, model.predict(Xte))   # the four cells accuracy hides
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_test, y_pred, labels=["Down", "Up"])   # rows = truth, columns = prediction
 print(classification_report(yte, model.predict(Xte)))
 
 # -- Choose and validate -------------------------------------------
-gs = GridSearchCV(knn, {"n_neighbors": range(1, 40)}, cv=5).fit(Xtr, ytr)
-gs.best_params_, gs.best_score_   # what it chose, and how it scored
+from sklearn.model_selection import GridSearchCV
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": list(range(1, 126, 2))},
+                      cv=folds).fit(X_train, y_train)
+# inside a pipeline the name is <step>__<setting>, two underscores
+search.best_params_["kneighborsclassifier__n_neighbors"], search.best_score_
 cross_val_score(model, X, y, cv=5, scoring="accuracy").mean()
+from sklearn.model_selection import TimeSeriesSplit
+folds = TimeSeriesSplit(n_splits=5)   # fit on the past, validate on what comes next
+search.cv_results_["mean_test_score"]   # one CV score per K: plot it against K
 ```
 
 ### Session 9 · Structural equation modelling

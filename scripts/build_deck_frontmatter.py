@@ -178,6 +178,10 @@ TOOLKIT = {
     "confusion_matrix": ("08", "Diagnose", "the four cells accuracy hides"),
     "classification_report": ("08", "Diagnose", "precision and recall, per class"),
     "RandomForestClassifier": ("08", "Fit", "the comparison that complexity has to beat"),
+    "TimeSeriesSplit": ("08", "Choose and validate", "folds in time order: the past predicts the next block"),
+    ".cv_results_": ("08", "Choose and validate", "the score of every value tried, for the curve"),
+    ".predict_proba": ("08", "Read the fit", "the vote shares behind the predicted class"),
+    "joblib.dump / joblib.load": ("08", "Load and shape", "save a trained model to a file, and load it back"),
 
     # ---- Session 09 · structural equation modelling ----------------------
     "semopy.Model": ("09", "Fit", "from a model description string"),

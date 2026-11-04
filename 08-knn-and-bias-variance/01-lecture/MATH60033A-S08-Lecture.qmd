@@ -664,6 +664,7 @@ Two decisions before any model is fitted, and both protect us from fooling ourse
 ```{python}
 #| echo: true
 
+# Continues from Step 1 (paste the steps into one script, in order): smarket is loaded.
 # The slice we chose (why: see "How this example was chosen")
 smarket = smarket[smarket["Year"] >= 2002]
 predictors = ["Lag2"]                         # the market's return two days before
@@ -694,6 +695,7 @@ this is a time series, so the standard folds would break rule (2): they would fi
 ```{python}
 #| echo: true
 
+# Continues from Steps 2-3: X_train and y_train exist.
 from sklearn.model_selection import TimeSeriesSplit
 
 folds = TimeSeriesSplit(n_splits=5)           # 6 blocks in time order, 5 rounds
@@ -710,6 +712,7 @@ is no magic inside, only a loop.
 ```{python}
 #| echo: true
 
+# Continues from Step 4: folds exists.
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import make_pipeline
@@ -755,6 +758,7 @@ best cross-validated accuracy, and refits the model with it on all the training 
 ```{python}
 #| echo: true
 
+# Continues from Step 5: make_pipeline, StandardScaler, KNeighborsClassifier are imported.
 from sklearn.model_selection import GridSearchCV
 
 # K = 1, 3, 5, ..., 125: odd numbers, so a two-class vote can never tie. It stops at 125
@@ -787,6 +791,7 @@ just below the 0.516 of always predicting the commonest direction.
 ```{python}
 #| echo: true
 
+# Continues from the Code tab: k_values, search, best_k, majority exist.
 plt.figure(figsize=(8, 3))
 plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", markersize=3,
          label="KNN, cross-validated accuracy")
@@ -796,7 +801,7 @@ plt.xlabel("K (number of neighbours)")
 plt.ylabel("accuracy on the hidden blocks")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.show()          # in a script: close the plot window to let it continue
 ```
 
 ### Reading it
@@ -817,6 +822,7 @@ after seeing this score, 2005 would have become training data, and the score wou
 ```{python}
 #| echo: true
 
+# Continues from Step 6: search, X_test, y_test exist.
 from sklearn.metrics import confusion_matrix
 
 y_pred = search.predict(X_test)
@@ -833,6 +839,16 @@ print(f"KNN accuracy on 2005:                      {accuracy:.3f}")
 print(f"always predicting the commonest direction: {baseline:.3f}")
 ```
 
+::: {.muted}
+**Reading the confusion matrix.** Each of the 249 days of 2005 lands in one cell: its row is what the
+market did, its column is what the model said. The diagonal holds the right calls: 35 Down days called
+Down, and 109 Up days called Up, so accuracy $= (35 + 109)/249 = 0.578$. Off the diagonal are the
+mistakes: 74 Down days the model called Up, and 31 Up days it called Down. Read by row, the model
+catches **78%** of the Up days ($109/140$) but only **32%** of the Down days ($35/109$). It says "Up"
+on 183 days out of 249, so much of its accuracy comes from the market rising more often than not
+(140 Up days: the 0.562 of "always Up").
+:::
+
 ::: {.check}
 KNN is right on **57.8%** of the days of 2005: better than a coin (50%), and a little better than the
 simple rule "the market goes up" (56.2%). A positive result, but hold the applause until
@@ -848,6 +864,7 @@ cross-validation chose. Then we save it in a file, so that File 2 can use it wit
 ```{python}
 #| echo: true
 
+# Continues from Steps 2-6: history, predictors, best_k exist.
 import joblib                      # installed together with scikit-learn: saves a model to a file
 
 final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
@@ -870,6 +887,7 @@ market did two trading days before: it rose 0.043% on 23 December (26 December w
 ```{python}
 #| echo: true
 
+# File 2: a new script. Run it in the folder where File 1 saved knn_smarket.joblib.
 import pandas as pd
 import joblib
 
@@ -994,6 +1012,15 @@ iris_search.fit(iris.data, iris.target)
 
 print("best K:", iris_search.best_params_["kneighborsclassifier__n_neighbors"])
 print(f"CV accuracy: {iris_search.best_score_:.3f}")
+
+# Predict a new flower. GridSearchCV has already refitted the best K on all 150 flowers.
+import pandas as pd
+new_flower = pd.DataFrame({"sepal length (cm)": [6.0], "sepal width (cm)": [2.9],
+                           "petal length (cm)": [4.5], "petal width (cm)": [1.5]})
+species = iris.target_names[iris_search.predict(new_flower)[0]]
+print("new flower:", species)
+for name, prob in zip(iris.target_names, iris_search.predict_proba(new_flower)[0]):
+    print(f"   Pr({name}) = {prob:.2f}")
 ```
 
 ### Regression: house prices
@@ -1024,6 +1051,13 @@ for name, model in models.items():
     rmse = -cross_val_score(model, X, y, cv=5, scoring="neg_root_mean_squared_error").mean()
     print(f"{name:18}  RMSE = {rmse:10,.0f}")
 print(f"price standard deviation = {y.std():,.0f}   <- the cost of predicting the average")
+
+# Predict a new house with the model of lowest RMSE above, refitted on all the houses.
+best = models["KNN, K = 25"].fit(X, y)
+new_house = pd.DataFrame({"Living.area": [2400], "bedrooms": [4], "bathrooms": [2.5],
+                          "year": [1970], "garage": [2]})
+print(f"new house (2,400 sq ft, 4 bedrooms, 2.5 bathrooms, 1970, 2-car garage): "
+      f"{best.predict(new_house)[0]:,.0f}")
 ```
 
 ### A random forest
@@ -1037,11 +1071,18 @@ from sklearn.model_selection import cross_val_score
 
 # 500 trees, on every core of the machine (n_jobs=-1)
 forest = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0)
-forest_accuracy = cross_val_score(forest, X_train, y_train, cv=5).mean()
+# cv=folds: the same time-ordered folds as KNN, so the past always predicts the future
+forest_accuracy = cross_val_score(forest, X_train, y_train, cv=folds).mean()
 
 print(f"random forest CV accuracy = {forest_accuracy:.3f}")
 print(f"KNN CV accuracy           = {search.best_score_:.3f}")
 print(f"commonest class           = {majority:.3f}")
+
+# Predict File 2's date, 28 December 2005, with the forest fitted on the training years
+forest.fit(X_train, y_train)
+new_day = pd.DataFrame({"Lag2": [0.043]})
+print("forest's prediction for 28 December 2005:", forest.predict(new_day)[0],
+      f"(Pr(Up) = {forest.predict_proba(new_day)[0][1]:.2f}); what happened: Up")
 ```
 
 ::: {.muted}
