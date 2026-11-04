@@ -21,6 +21,7 @@ Writes, next to this file:
     cv-time.png              cross-validation on a time series: the past predicts the next block
     bias-variance.png, underfit.png, overfit.png   near-square, shown side by side
     k-choice.png             K = 1, 11 and 100 side by side
+    train-validate-test.png  the three roles a data set plays
 
 scripts/build_economist_assets.R no longer writes these files.
 """
@@ -437,3 +438,28 @@ headline(fig, "K = 1 chases every point, K = 100 ignores the curve, K = 11 follo
          f"{bayes_error:.0%} error: the classes overlap.")
 legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary")])
 save(fig, "k-choice.png")
+
+
+# 12 · Train, validate, test: three roles for one data set ---------------------
+fig, ax = plt.subplots(figsize=(12, 3.9))
+fig.subplots_adjust(top=0.78, bottom=0.02, left=0.02, right=0.98)
+ax.set_xlim(0, 100); ax.set_ylim(18, 38); ax.axis("off")
+# the whole data set, one bar
+ax.add_patch(plt.Rectangle((2, 20), 60, 10, color="#CFE0EC", ec=INK, lw=1))
+ax.add_patch(plt.Rectangle((62, 20), 16, 10, color=ORANGE, ec=INK, lw=1))
+ax.add_patch(plt.Rectangle((78, 20), 20, 10, color="#E4E1D9", ec=INK, lw=1))
+ax.text(32, 25, "TRAIN\nthe model learns from it", ha="center", va="center", fontsize=12.5,
+        color=BLUE, fontweight="bold")
+ax.text(70, 25, "VALIDATE\nchoose K", ha="center", va="center", fontsize=12.5,
+        color="white", fontweight="bold")
+ax.text(88, 25, "TEST\njudge, once", ha="center", va="center", fontsize=12.5,
+        color=INK, fontweight="bold")
+# brace over train + validate: the training data, which cross-validation re-cuts
+ax.plot([2, 2, 78, 78], [32, 34, 34, 32], color=BLUE, lw=1.5)
+ax.text(40, 35.5, "the training data: cross-validation rotates which part plays \"validate\"",
+        ha="center", fontsize=11.5, color=BLUE)
+ax.plot([78, 78, 98, 98], [32, 34, 34, 32], color=MUTED, lw=1.5)
+ax.text(88, 35.5, "locked until the end", ha="center", fontsize=11.5, color=MUTED)
+headline(fig, "Train, validate, test: one data set, three jobs",
+         "Each observation has one job at a time. The test set never helps to choose anything.")
+save(fig, "train-validate-test.png")

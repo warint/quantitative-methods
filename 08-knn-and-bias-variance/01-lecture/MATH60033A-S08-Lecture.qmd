@@ -469,6 +469,31 @@ So we need to estimate the out-of-sample error **from the data we already have**
 cross-validation does.
 :::
 
+## Train, validate, test: three words to know {.scrollable}
+
+Every machine-learning project cuts its data into parts, and gives each part **one job**. The three
+words below come back in every course, paper and piece of code on the subject.
+
+![](economist-assets/train-validate-test.png){style="display: block; margin: auto; max-height:265px;"}
+
+| | **What it is** | **What it is used for** | **In the stock-market example** |
+|:---|:---|:---|:---|
+| **Training set** | The observations the model **learns from** | Fitting the model. For KNN, the neighbours are looked for here | The days of 2001–2004 |
+| **Validation set** | Observations **hidden from the fit**, but taken from the training data | **Choosing** a setting, such as $K$: the setting with the fewest mistakes on it wins | Each round's hidden block, in cross-validation |
+| **Test set** | Observations kept **locked away** until everything is decided | **Judging** the final model, once, as if it were new data | The days of 2005 |
+
+::: {.check}
+**Cross-validation** is a way to get a validation set without losing training data: it cuts the
+training data into folds and lets **each fold play "validation" in turn**. So the validation set is not
+a fixed part of the data, but a role that moves.
+:::
+
+::: {.warn}
+The golden rule: the test set must never help to choose anything. Once you change the model because of
+its test score, the test set has become a validation set, and you no longer have an honest measure of
+how well the model predicts.
+:::
+
 ## The power of sampling {.scrollable}
 
 The trick is simple and powerful: **if we cannot get new data, we manufacture some from our own sample.**
