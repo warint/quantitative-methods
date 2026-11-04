@@ -6,17 +6,19 @@ simulated data set, so what a slide says about a figure is true of the figure.
 The simulation is the two-class Gaussian mixture of Hastie, Tibshirani &
 Friedman (ESL, section 2.3.3), which is also the one behind ISLR's figures: the
 two classes overlap, so some blue points sit among the orange and the reverse,
-and the true (Bayes) boundary is a curve.
+and the true boundary between them is a curve.
 
     .venv/bin/python 08-knn-and-bias-variance/01-lecture/economist-assets/build_knn_figures.py
 
 Writes, next to this file:
-    bayes-classifier.png     the Bayes boundary and the regions it defines
     nearest-neighbours.png   K = 3 at one point, then K = 3 everywhere
-    knn-boundary.png         K = 11 against the Bayes boundary
+    knn-boundary.png         K = 11 against the true boundary
     complexity-compare.png   K = 1 against K = 100, with their error rates
     error-complexity.png     training and test error as 1/K grows
     confusion-matrix.png     the four cells, rows = actual, columns = predicted
+    cv-folds.png             5-fold cross-validation, round by round
+    cv-curve.png             one validation split against 10-fold cross-validation
+    cv-time.png              cross-validation on a time series: the past predicts the next block
 
 scripts/build_economist_assets.R no longer writes these files.
 """
@@ -93,7 +95,7 @@ def headline(fig, title, subtitle=None):
 
 
 def panel(ax, region=None, bayes=True, boundary=None, points=True, title=None):
-    """One map: shaded regions, the Bayes line, a method's boundary, the data."""
+    """One map: shaded regions, the true boundary, a method's boundary, the data."""
     if region is not None:
         ax.pcolormesh(gx, gy, region, cmap=REGION, shading="auto", vmin=0, vmax=1)
     if bayes:
@@ -116,7 +118,7 @@ def legend(fig, extra=()):
     from matplotlib.lines import Line2D
     handles = [Line2D([], [], marker="o", ls="", mfc="white", mec=BLUE, mew=1.6, label="blue class"),
                Line2D([], [], marker="o", ls="", mfc="white", mec=ORANGE, mew=1.6, label="orange class"),
-               Line2D([], [], color=PURPLE, ls="--", lw=2, label="Bayes boundary (the truth)"),
+               Line2D([], [], color=PURPLE, ls="--", lw=2, label="true boundary (known: we simulated the data)"),
                *extra]
     fig.legend(handles=handles, loc="lower center", ncol=len(handles), frameon=False, fontsize=11)
 
@@ -126,16 +128,6 @@ def save(fig, name):
     plt.close(fig)
     print("wrote", name)
 
-
-# 1 · The Bayes classifier ----------------------------------------------------
-fig, ax = plt.subplots(figsize=(10, 5.9))
-fig.subplots_adjust(top=0.80, bottom=0.14, left=0.06, right=0.98)
-panel(ax, region=(BAYES > 0.5).astype(float))
-headline(fig, "The Bayes classifier: each point goes to its most likely class",
-         f"200 simulated observations. Shading = the class the Bayes rule assigns.\n"
-         f"Even this rule errs on {bayes_error:.0%} of new points, because the classes overlap.")
-legend(fig)
-save(fig, "bayes-classifier.png")
 
 # 2 · K = 3 at one point, then everywhere -------------------------------------
 # A small, readable training set of 12 points, and a test point (the cross).
@@ -183,7 +175,7 @@ headline(fig, "KNN with K = 3: a point takes the majority class of its three nea
 save(fig, "nearest-neighbours.png")
 
 
-# 3 · K = 11 against Bayes (odd, so the vote cannot tie) ----------------------------------------------------
+# 3 · K = 11 against the true boundary (odd, so the vote cannot tie) ----------------------------------------------------
 def prob_map(k):
     """1 where KNN predicts blue, 0 where orange. Taken from the predicted class,
     not the probability: with an even K a 5-5 tie is exactly 0.5, and a contour
@@ -203,9 +195,9 @@ tr10, te10 = errors(11)
 fig, ax = plt.subplots(figsize=(10, 5.9))
 fig.subplots_adjust(top=0.84, bottom=0.14, left=0.06, right=0.98)
 panel(ax, region=(p10 > 0.5).astype(float), boundary=p10)
-headline(fig, "KNN with K = 11 lands close to the Bayes boundary",
-         f"Solid black = KNN boundary, dashed purple = Bayes. "
-         f"Test error: KNN {te10:.1%}, Bayes {bayes_error:.1%}.")
+headline(fig, "KNN with K = 11 lands close to the true boundary",
+         f"Solid black = KNN boundary, dashed purple = the truth. "
+         f"Test error: KNN {te10:.1%}; the best any rule can do here: {bayes_error:.1%}.")
 legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary, K = 11")])
 save(fig, "knn-boundary.png")
 
@@ -219,7 +211,7 @@ for ax, k, label in [(axes[0], 1, "too flexible"), (axes[1], 100, "too rigid")]:
           title=f"K = {k}: {label}\ntraining error {tr:.0%} · test error {te:.0%}")
 headline(fig, "K = 1 chases every point; K = 100 ignores the curve",
          f"The same 200 points. Low K: low bias, high variance. High K: high bias, low variance.\n"
-         f"For comparison, the Bayes error rate is {bayes_error:.0%}.")
+         f"For comparison, the best any rule can do on these data is {bayes_error:.0%} error: the classes overlap.")
 legend(fig, [Line2D([], [], color=INK, lw=1.8, label="KNN boundary")])
 save(fig, "complexity-compare.png")
 
@@ -230,7 +222,7 @@ fig, ax = plt.subplots(figsize=(10, 5.6))
 fig.subplots_adjust(top=0.84, bottom=0.13, left=0.08, right=0.97)
 ax.plot(1 / ks, tr_err, "o-", color=BLUE, lw=2.2, label="training error (200 obs.)")
 ax.plot(1 / ks, te_err, "o-", color=ORANGE, lw=2.2, label="test error (5,000 obs.)")
-ax.axhline(bayes_error, color=INK, ls="--", lw=1.4, label="Bayes error rate")
+ax.axhline(bayes_error, color=INK, ls="--", lw=1.4, label="lowest possible error (the classes overlap)")
 best = ks[np.argmin(te_err)]
 ax.axvline(1 / best, color=MUTED, ls=":", lw=1.2)
 ax.annotate(f"lowest test error\nat K = {best}", (1 / best, te_err.min()), xytext=(12, 30),
@@ -266,7 +258,7 @@ ax.text(26, 62.5, "positive", ha="right", va="center"); ax.text(26, 27.5, "negat
 headline(fig, "A confusion matrix: rows are the truth, columns the prediction")
 save(fig, "confusion-matrix.png")
 
-print(f"Bayes error {bayes_error:.3f}; K=11 test error {te10:.3f}")
+print(f"lowest possible error {bayes_error:.3f}; K=11 test error {te10:.3f}")
 
 
 # 7 · How 5-fold cross-validation works ---------------------------------------
@@ -329,3 +321,36 @@ axes[1].legend(frameon=False, loc="upper left", fontsize=11)
 headline(fig, "Why cross-validation: the same 200 points, two ways to estimate test error",
          "Grey/blue: estimates from the training data alone. Orange: the truth, known only because we simulated it.")
 save(fig, "cv-curve.png")
+
+
+# 9 · Cross-validation on a time series ---------------------------------------
+# What the finance example does: the folds respect time. Each round fits on
+# everything up to a date and validates on the block that comes right after.
+fig, ax = plt.subplots(figsize=(11.5, 5.2))
+fig.subplots_adjust(top=0.82, bottom=0.02, left=0.02, right=0.98)
+ax.set_xlim(0, 106); ax.set_ylim(0, 66); ax.axis("off")
+x0_, w = 16, 11.0                      # six blocks of training data, then the test year
+for r in range(5):                     # round r: fit on blocks 0..r, validate on block r+1
+    y = 50 - r * 10
+    ax.text(x0_ - 1.5, y + 3.5, f"round {r + 1}", ha="right", va="center", fontsize=12, color=INK)
+    for f in range(6):
+        if f <= r:
+            col, lab, tc = "#CFE0EC", "fit", BLUE
+        elif f == r + 1:
+            col, lab, tc = ORANGE, "validate", "white"
+        else:
+            col, lab, tc = "white", "not yet", "#B5B2AA"
+        ax.add_patch(plt.Rectangle((x0_ + f * w, y), w - 0.6, 7, color=col, ec=INK, lw=0.8))
+        ax.text(x0_ + f * w + (w - 0.6) / 2, y + 3.5, lab, ha="center", va="center",
+                fontsize=10.5, color=tc, fontweight="bold" if lab == "validate" else None)
+    ax.add_patch(plt.Rectangle((x0_ + 6 * w + 2, y), 14, 7, color="#E4E1D9", ec=INK, lw=0.8))
+    ax.text(x0_ + 6 * w + 9, y + 3.5, "locked", ha="center", va="center", fontsize=10.5, color=MUTED)
+ax.annotate("", (x0_ + 6 * w - 0.6, 61), (x0_, 61), arrowprops=dict(arrowstyle="->", color=MUTED))
+ax.text(x0_ + 3 * w, 63, "training years, 2001 → 2004, cut into 6 blocks in time order",
+        ha="center", fontsize=11.5, color=MUTED)
+ax.text(x0_ + 6 * w + 9, 63, "test: 2005", ha="center", fontsize=11.5, color=MUTED)
+ax.text(x0_ + 6 * w + 9, 2.5, "opened once,\nat the very end", ha="center", fontsize=11,
+        color=RED, fontweight="bold")
+headline(fig, "Cross-validation on a time series: the past predicts the block that comes next",
+         "Never fit on the future to predict the past. The test year stays locked until K is chosen.")
+save(fig, "cv-time.png")

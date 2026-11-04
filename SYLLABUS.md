@@ -174,7 +174,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 06 | Regression: Advanced Considerations | panel data, fixed and random effects, non-linearity, interactions | Does your finding survive the structure of your data? |
 | 07 | Four Papers, One Toolkit | the data of four readings, plugged into OLS, the logits, ridge, the lasso and the elastic net with the code seen in class | Which of the five published results survives your own replication? |
 | — | **MIDTERM** *(in class, covering Sessions 1–6)* | | |
-| 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | the Bayes classifier, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
+| 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | nearest neighbours, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | 10 | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
 | 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |

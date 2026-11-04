@@ -240,13 +240,14 @@ SESSIONS = {
         title="K-Nearest Neighbours and the Bias–Variance Trade-off",
         short="KNN and bias–variance",
         question="Flexible, or just unstable?",
-        methods="the Bayes classifier, distance, choosing $k$ by cross-validation",
+        methods="nearest neighbours, distance, choosing $k$ by cross-validation",
         theme="Does flexibility buy you anything on your own data?",
         objectives=[
-            "State the **Bayes classifier** and say why no rule can beat it",
+            "Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**",
             "Compute a Euclidean distance and find nearest neighbours **by hand**",
             "Explain why KNN requires **standardised** predictors",
             "Choose $k$ by cross-validation, and read the trade-off the curve shows",
+            "Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you",
             "Say what happens to KNN as the number of predictors grows",
         ],
         reading=("Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), *Credit growth, the yield "
@@ -257,9 +258,7 @@ SESSIONS = {
         dataset="jst",
         dataset_note=("the Jordà–Schularick–Taylor Macrohistory Database — 18 economies, 1870–2020, "
                       "88 financial crises, with the paper's predictors already derived"),
-        deliverable=("a KNN classifier on a binary outcome from your angle, with $k$ chosen by "
-                     "cross-validation, compared against a sensible benchmark, and a note on "
-                     "whether the flexibility earned its keep"),
+        deliverable="nothing to hand in: the practice is practice",
         loses_marks=[
             "Running KNN on unstandardised predictors",
             "Choosing $k$ on the test set",

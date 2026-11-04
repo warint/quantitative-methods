@@ -30,8 +30,9 @@ format:
      at render time, so the output on the slides is the output the students' own
      machines produce. Every visible cell is plain Python with the four packages
      by name and the data read by URL — no qmib, no repository — so a student can
-     copy it into a file of their own and run it. The same code, in order, is
-     session08_knn.py beside this deck, published on the site.
+     copy it into a file of their own and run it. The financial example is the two
+     scripts beside this deck, session08_1_train.py and session08_2_predict.py,
+     published on the site.
      The KNN figures are computed by economist-assets/build_knn_figures.py. -->
 ```{python}
 #| label: setup
@@ -49,13 +50,10 @@ pd.set_option("display.max_columns", 10)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. The bias–variance trade-off
-2. Classification
-3. K-nearest neighbours
-4. KNN by hand (you are the algorithm)
-5. Cross-validation
-6. KNN in code (you are no longer the algorithm)
-7. Big lessons from ML
+1. K-nearest neighbours, explained
+2. Cross-validation: why it is magical
+3. A financial example: can KNN predict the stock market?
+4. Big lessons from ML
 
 ## What session 8 is for {.scrollable}
 ::::: columns
@@ -64,10 +62,10 @@ pd.set_option("display.max_columns", 10)
 
 ### The mathematics
 
-- State the **Bayes classifier** and say why no rule can beat it
+- Explain how KNN classifies, by **the vote of the $K$ nearest neighbours**
 - Find nearest neighbours **by hand** from a Euclidean distance
 - Decompose test error into **squared bias, variance and irreducible error**
-- Say what happens to KNN as the number of predictors grows
+- Say why **cross-validation** estimates out-of-sample error, and what classical in-sample fit cannot tell you
 
 ::::
 
@@ -114,34 +112,21 @@ assumed.
 
 > \"If you live 5 minutes away from Bill Gates, I bet you are rich.\"
 
-## The bias–variance trade-off {.center .scrollable}
 
-## Bias and variance, in four pictures {#imported-s08-002 .scrollable}
+::: {.muted}
+The quote is the whole idea of this session. To guess something about you, look at the people who live
+closest to you. That is K-nearest neighbours.
+:::
 
-::::::::: panel-tabset
-### Bias and variance
+## K-nearest neighbours, explained {.center .scrollable}
 
-![](economist-assets/bias-variance.png){style="display: block; margin: auto;" width="78%"}
+## Classification: predicting a category {#imported-s08-009 .scrollable}
 
-### Underfitting
+In sessions 2 to 6, most of what we predicted was a **number**: a wage, a volume of exports, a price.
+Today the outcome is a **category**: Up or Down, crisis or no crisis, red or green. Predicting a
+category is called **classification**, and a model that does it is a **classifier**.
 
-![](economist-assets/underfit.png){style="display: block; margin: auto;" width="78%"}
-
-### Overfitting
-
-![](economist-assets/overfit.png){style="display: block; margin: auto;" width="78%"}
-
-### Error against complexity
-
-![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="78%"}
-
-:::::::::
-
-## Classification {.center .scrollable}
-
-## Training error and test error {#imported-s08-009 .scrollable}
-
-The bias–variance trade-off carries over to classification, with one change: $y_i$ is now a **category**, not a number. Accuracy is counted in mistakes.
+A classifier is judged by its mistakes. We count how often its prediction $\hat y_i$ differs from the truth $y_i$:
 
 ::: {.tight}
 - The **training error rate** is the share of mistakes on the observations used to fit the model:
@@ -149,193 +134,67 @@ The bias–variance trade-off carries over to classification, with one change: $
 
 $$\frac{1}{n}\sum_{i=1}^{n} I(y_i \neq \hat y_i)$$
 
-where $I(y_i \neq \hat y_i)$ is 1 if observation $i$ is misclassified and 0 otherwise.
+where $I(y_i \neq \hat y_i)$ is 1 if observation $i$ is misclassified and 0 otherwise. So the formula simply counts the mistakes and divides by $n$.
 
 ::: {.tight}
-- The **test error rate** is the same share on observations the model has **not** seen, $\text{Ave}\big(I(y_0 \neq \hat y_0)\big)$
+- The **test error rate** is the same share, computed on observations the model has **not** seen: $\text{Ave}\big(I(y_0 \neq \hat y_0)\big)$
 :::
 
 ::: {.check}
-As in regression, the test error is the one we care about. A good classifier is the one whose **test** error is smallest.
+Keep this distinction in mind for the whole session. The training error tells us how well the model
+remembers the past. The test error tells us how well it will do on new cases, and that is the
+only one we care about.
 :::
 
-## The Bayes classifier {#imported-s08-010 .scrollable}
+## The idea: tell me who your neighbours are {#imported-s08-012 .scrollable}
 
 ::::::::: panel-tabset
-### The rule
+### In words
 
-The test error rate is minimised, on average, by a very simple rule: **assign each observation to its most likely class, given its predictors.** That is, give $x_0$ the class $j$ for which
+KNN has no equation, no coefficients and no theory of how the data were produced. It rests on one
+intuition: **observations that look alike tend to belong to the same class.**
 
-$$\Pr(Y = j \mid X = x_0)$$
+To classify a new observation, KNN does three things:
 
-is largest. This is the **Bayes classifier**.
+1. It measures the **distance** between the new observation and every observation in the training data.
+2. It keeps the $K$ **closest** ones, its "nearest neighbours". $K$ is a number we choose: 1, 3, 25, …
+3. It lets them **vote**. The new observation gets the class that most of its neighbours have.
 
-::: {.tight}
-- It is a *conditional probability*: the probability that $Y = j$, given the observed predictors $x_0$
-- With two classes, predict class 1 when $\Pr(Y = 1 \mid X = x_0) > 0.5$, and class 2 otherwise
+::: {.check}
+That is the whole algorithm. Everything else in this session is about two questions: how to measure
+"close", and how many neighbours to ask.
 :::
 
-### Example
+### In symbols
 
-![](economist-assets/bayes-classifier.png){style="display: block; margin: auto;" width="80%"}
+Given a positive integer $K$ and a new observation $x_0$, KNN finds the $K$ training points closest
+to $x_0$ (call that set $N_0$). It estimates the probability of each class $j$ as the share of the
+neighbours that belong to it:
+
+$$\widehat{\Pr}(Y = j \mid X = x_0) = \frac{1}{K}\sum_{i \in N_0} I(y_i = j)$$
+
+Then $x_0$ goes to the class with the largest share.
 
 ::: {.muted}
-Simulated data: 100 observations in each of two classes, two predictors $X_1$ and $X_2$.
-Because we wrote the simulation, we know $\Pr(Y = \text{blue} \mid X = x)$ everywhere,
-so we can draw the Bayes boundary (purple, dashed): the curve where that probability is
-exactly $0.5$. The shading is the class the rule assigns. Some points still sit on the wrong side:
-the classes overlap, so even the best possible rule makes mistakes — the **Bayes error rate**.
+Read the formula out loud: "among my $K$ neighbours, count those of class $j$, and divide by $K$."
+With $K = 5$ and three blue neighbours, $\widehat{\Pr}(\text{blue}) = 3/5 = 0.6$, so the prediction is blue.
 :::
 
 :::::::::
 
-## Watch a decision boundary being built {#playground}
-
-Everything on the last four slides — a boundary, a class region, the cost of
-flexibility — can be watched happening, in a browser, in about four minutes.
-
-::: {.step}
-**[playground.tensorflow.org](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape=4,2&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false)** — the link is pre-set to the exercise
-below. Press the play button.
-:::
-
-The problem is two concentric rings, and the inputs are only $X_1$ and $X_2$ —
-the raw coordinates, nothing engineered.
-
-::: {.muted}
-It is a neural network rather than anything this course fits, and that does not
-matter here. What is on screen is a decision boundary and a test error, which
-are the two objects of this session.
-:::
-
-## Four things to try, and what each one shows {.scrollable}
-
-::: {.step}
-**1 · Remove both hidden layers**, leaving the inputs wired straight to the
-output. Run it. The boundary is a **straight line**, and it cannot separate a
-ring from its centre — the error stalls near 0.5. This is the limit that made
-session 4's logistic regression a line, and it is why we need something else.
-:::
-
-::: {.step}
-**2 · Put the layers back and run it again.** A closed curve forms. Nothing told
-it to draw a circle; the hidden units composed one out of straight pieces. That
-is what "flexible" buys you.
-:::
-
-::: {.step}
-**3 · Now add capacity** — eight neurons in each of four layers. Watch the two
-loss numbers separate: **training loss keeps falling while test loss turns
-upward**, and the boundary starts bulging toward individual points. You are
-watching variance, live. It is the same curve as $k$ getting too small in the
-next section.
-:::
-
-::: {.step}
-**4 · Reset, and instead tick the $X_1^2$ and $X_2^2$ input features.** Now even
-*no* hidden layer separates the rings almost perfectly — because $X_1^2 + X_2^2$
-is the radius, and in that coordinate the problem was always linear.
-:::
-
-## What step 4 was really about {.scrollable}
-
-::: {.tight}
-You can buy the non-linearity with **model flexibility**, or with **a feature you
-thought of yourself**. They are substitutes.
-:::
-
-::: {.check}
-The second is cheaper, more stable and easier to defend — when you can think of
-the feature. Knowing that $X_1^2 + X_2^2$ is a radius is subject knowledge, not
-statistics, and it is the part a model cannot supply for you.
-:::
-
-::: {.warn}
-Which is the session's argument in one sentence: **complexity is what you spend
-when understanding runs out.** Session 5 penalised that spending; session 6 wrote
-the non-linearity in by hand as a quadratic; this session measures what it costs
-when you cannot.
-:::
-
-## K-nearest neighbours {.center .scrollable}
-
-## From the Bayes classifier to KNN {#imported-s08-012 .scrollable}
-
-::::::::: panel-tabset
-### The idea
-
-In theory we would always like to predict qualitative responses using the Bayes classifier.
-
-But for real data, we do not know the conditional distribution of $Y$ given $X$, and so computing the Bayes classifier is impossible.
-
-Therefore, the Bayes classifier serves as an unattainable gold standard against which to compare other methods.
-
-Many approaches attempt to estimate the conditional distribution of $Y$ given $X$, and then classify a given observation to the class with highest estimated probability.
-
-> One such method is the K-nearest neighbors (KNN) classifier.
-
-### The rule
-
-Given a positive integer $K$ and a test observation $x_0$, KNN finds the $K$ training points closest to $x_0$ — call them $N_0$ — and estimates each class's probability as its share of them:
-
-$$\Pr(Y = j \mid X = x_0) = \frac{1}{K}\sum_{i \in N_0} I(y_i = j)$$
-
-It then applies the Bayes rule to that estimate: $x_0$ goes to the class with the largest share.
-
-:::::::::
-
-## KNN with K = 3 {#imported-s08-013 .scrollable}
+## KNN with K = 3, in a picture {#imported-s08-013 .scrollable}
 
 ![](economist-assets/nearest-neighbours.png){style="display: block; margin: auto;" width="88%"}
 
 ::: {.tight}
 - **Left.** We want to classify the black cross, with $K = 3$. KNN finds the three closest observations (the circle): two blue, one orange. So $\widehat{\Pr}(\text{blue}) = 2/3$, $\widehat{\Pr}(\text{orange}) = 1/3$, and the cross is predicted **blue**.
-- **Right.** Do the same vote at every point of the plane: where blue wins is shaded blue, where orange wins is shaded orange. The line between them is the $K = 3$ **decision boundary**.
+- **Right.** Now do the same vote at every point of the plane. Where blue wins, the plane is shaded blue; where orange wins, orange. The line between the two colours is the $K = 3$ **decision boundary**: on one side of it, KNN says blue; on the other, orange.
 :::
 
-## How close KNN gets, and the choice of K {#imported-s08-014 .scrollable}
+## KNN by hand: you are the algorithm {#imported-s08-017 .scrollable}
 
-::::::::: panel-tabset
-### Close to Bayes
+Before a computer does it, we do it ourselves, with a pencil. Six observations, one new point, and the three steps of KNN: distance, nearest, vote.
 
-![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="78%"}
-
-::: {.muted}
-KNN with $K = 11$ on the same 200 simulated points as the Bayes slide. It knows nothing about how
-the data were generated, yet its boundary (solid black) follows the Bayes boundary (purple, dashed)
-closely, and its test error is only a little above the Bayes error rate.
-:::
-
-### Choice of K
-
-![](economist-assets/complexity-compare.png){style="display: block; margin: auto;" width="92%"}
-
-::: {.tight}
-- **$K = 1$**: each point is classified by its single nearest neighbour, so the boundary wraps around every stray blue point in orange territory, and every stray orange point in blue. Training error is 0, yet test error is higher than with $K = 11$. **Low bias, high variance.**
-- **$K = 100$**: half the data votes on every point, so the boundary is nearly a straight line and misses the curve of the Bayes boundary. **High bias, low variance.**
-:::
-
-:::::::::
-
-## Training error is not test error {#imported-s08-015 .scrollable}
-
-::: pull-left
-With $K = 1$ the KNN training error rate is 0, but the test error rate may be quite high. In general, as a classifier becomes more flexible, the training error falls but the test error may not.
-
-The figure: training error (blue, 200 observations) and test error (orange, 5,000 observations) as flexibility, $1/K$, increases. The black dashed line is the Bayes error rate.
-
-::: {.check}
-Choosing the level of flexibility is the whole game, and the U-shape of the test error is what makes it hard.
-:::
-:::
-
-::: pull-right
-![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="100%"}
-:::
-
-## KNN by hand (you are the algorithm) {.center .scrollable}
-
-## Six observations and a test point {#imported-s08-017 .scrollable}
 
 ::::::::: panel-tabset
 ### The data
@@ -455,136 +314,271 @@ print("K = 3 predicts:", by_hand["Y"].iloc[:3].mode()[0])
 
 :::::::::
 
+
+## The choice of K: how many neighbours? {#imported-s08-014 .scrollable}
+
+::::::::: panel-tabset
+### Too few, too many
+
+![](economist-assets/complexity-compare.png){style="display: block; margin: auto;" width="92%"}
+
+::: {.tight}
+- **$K = 1$**: each point is classified by its single nearest neighbour. The boundary wraps around every stray blue point in orange territory, and every stray orange point in blue. The training error is 0, because every point is its own nearest neighbour, yet on new points it makes 16% mistakes. **Low bias, high variance**: the model believes every detail of the sample, including the noise.
+- **$K = 100$**: half the data votes on every point, so the boundary is almost a straight line and misses the bend of the true boundary. **High bias, low variance**: the model is stable, but too simple.
+:::
+
+### A K in between
+
+![](economist-assets/knn-boundary.png){style="display: block; margin: auto;" width="78%"}
+
+::: {.muted}
+KNN with $K = 11$ on the same 200 simulated points. It knows nothing about how the data were
+generated. Yet its boundary (solid black) follows the true one (purple, dashed) closely, and its
+test error is only a little above the lowest error any rule could reach on these data.
+:::
+
+:::::::::
+
+::: {.check}
+$K$ is the dial between "too flexible" and "too rigid". The next section shows how to set it without cheating.
+:::
+
+## Bias and variance, in four pictures {#imported-s08-002 .scrollable}
+
+What we just saw with $K$ is a general law of statistical learning, the **bias–variance trade-off**.
+A rigid model is wrong in the same way every time (bias). A flexible model is right on average but
+changes a lot from one sample to the next (variance). The best model sits in between.
+
+::::::::: panel-tabset
+### Bias and variance
+
+![](economist-assets/bias-variance.png){style="display: block; margin: auto;" width="78%"}
+
+### Underfitting
+
+![](economist-assets/underfit.png){style="display: block; margin: auto;" width="78%"}
+
+### Overfitting
+
+![](economist-assets/overfit.png){style="display: block; margin: auto;" width="78%"}
+
+:::::::::
+
+## Training error is not test error {#imported-s08-015 .scrollable}
+
+::: pull-left
+With $K = 1$ the training error is 0, but the test error is not. In general, as a classifier becomes
+more flexible, its training error keeps falling, while its test error first falls and then rises again.
+
+The figure plots both as flexibility, $1/K$, increases: training error in blue (on the 200 observations
+used to fit), test error in orange (on 5,000 new observations). The dashed line is the lowest
+error any rule could reach, because the two classes overlap.
+
+::: {.check}
+Choosing the level of flexibility is the whole game. The U-shape of the test error is what makes
+it hard: the training error always says "more flexible", and it is wrong.
+:::
+:::
+
+::: pull-right
+![](economist-assets/error-complexity.png){style="display: block; margin: auto;" width="100%"}
+:::
+
 ## A nonlinear boundary: large K or small? {#imported-s08-020 .scrollable}
 
-**If the Bayes decision boundary in this problem is highly nonlinear, would we expect the best value for $K$ to be large or small? Why?**
+**If the true decision boundary in this problem is highly nonlinear, would we expect the best value for $K$ to be large or small? Why?**
 
 ::: {.check}
 **Small.** A small $K$ is flexible: the boundary is drawn by a few nearby points, so it can bend wherever the true boundary bends. A large $K$ averages over many points, which smooths the boundary towards a straight line — exactly what a highly nonlinear problem cannot afford. (Too small, though, and it bends around noise: that is the $K = 1$ picture.)
 :::
 
-## Cross-validation {.center .scrollable}
 
-## The problem: choosing K needs a test error we are not allowed to use {.scrollable}
+## Watch a decision boundary being built {#playground}
 
-::: {.tight}
-- **Training error** cannot choose $K$: it is always lowest at $K = 1$ (zero — every point is its own nearest neighbour).
-- **Test error** is what we want, but the test set may be used **once**, at the very end. Choose $K$ on it, and it has become training data: the score it gives is no longer honest.
-- So we need an estimate of the test error **from the training data alone**.
+Everything in this section — a boundary, a class region, the cost of
+flexibility — can be watched happening, in a browser, in about four minutes.
+
+::: {.step}
+**[playground.tensorflow.org](https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape=4,2&seed=0.69510&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false)** — the link is pre-set to the exercise
+below. Press the play button.
+:::
+
+The problem is two concentric rings, and the inputs are only $X_1$ and $X_2$ —
+the raw coordinates, nothing engineered.
+
+::: {.muted}
+It is a neural network rather than anything this course fits, and that does not
+matter here. What is on screen is a decision boundary and a test error, which
+are the two objects of this session.
+:::
+
+## Four things to try, and what each one shows {.scrollable}
+
+::: {.step}
+**1 · Remove both hidden layers**, leaving the inputs wired straight to the
+output. Run it. The boundary is a **straight line**, and it cannot separate a
+ring from its centre — the error stalls near 0.5. This is the limit that made
+session 4's logistic regression a line, and it is why we need something else.
 :::
 
 ::: {.step}
-**The idea:** pretend part of the training data is new. Hide it, fit on the rest, and measure the error on what was hidden. That hidden part is a **validation set**.
+**2 · Put the layers back and run it again.** A closed curve forms. Nothing told
+it to draw a circle; the hidden units composed one out of straight pieces. That
+is what "flexible" buys you.
+:::
+
+::: {.step}
+**3 · Now add capacity** — eight neurons in each of four layers. Watch the two
+loss numbers separate: **training loss keeps falling while test loss turns
+upward**, and the boundary starts bulging toward individual points. You are
+watching variance, live. It is the same curve as $K$ getting too small, a few slides back.
+:::
+
+::: {.step}
+**4 · Reset, and instead tick the $X_1^2$ and $X_2^2$ input features.** Now even
+*no* hidden layer separates the rings almost perfectly — because $X_1^2 + X_2^2$
+is the radius, and in that coordinate the problem was always linear.
+:::
+
+## What step 4 was really about {.scrollable}
+
+::: {.tight}
+You can buy the non-linearity with **model flexibility**, or with **a feature you
+thought of yourself**. They are substitutes.
 :::
 
 ::: {.check}
-**Cross-validation** does this several times, hiding a different part each time — so that every observation is used both to fit and to check, and no single unlucky split decides.
+The second is cheaper, more stable and easier to defend — when you can think of
+the feature. Knowing that $X_1^2 + X_2^2$ is a radius is subject knowledge, not
+statistics, and it is the part a model cannot supply for you.
 :::
 
-## k-fold cross-validation, in one picture {.scrollable}
+::: {.warn}
+Which is the session's argument in one sentence: **complexity is what you spend
+when understanding runs out.** Session 5 penalised that spending; session 6 wrote
+the non-linearity in by hand as a quadratic; this session measures what it costs
+when you cannot.
+:::
 
-![](economist-assets/cv-folds.png){style="display: block; margin: auto;" width="86%"}
 
-Cut the training data into $k$ folds. Fit on $k - 1$ of them, measure the error rate on the one left out, rotate, and average:
+## Cross-validation: why it is magical {.center .scrollable}
+
+## The question every model must answer {.scrollable}
+
+> **How well will this model do on data it has never seen?**
+
+::: pull-left
+**The classical approach (sessions 2 to 6).** We fitted a model on *all* the data, then judged it
+on that **same** data: the $R^2$, the $t$-statistics, the $p$-values, the standard errors.
+
+Those numbers describe how well the model fits the **sample**. To say anything about new data, they
+lean on **assumptions**: the model is correctly specified, the errors are normal and independent, and so on.
+If the assumptions fail, the numbers can mislead, and nothing in them warns us.
+:::
+
+::: pull-right
+**The problem with flexible models.** A flexible model can *always* fit the sample better. KNN with
+$K = 1$ has a training error of 0. A polynomial of degree 20 has an $R^2$ close to 1. In-sample fit
+rewards exactly the models that will predict worst.
+
+**What we really want** is the error on new data, the *out-of-sample* error. But new data have not
+arrived yet, and the test set may be used only once, at the very end.
+:::
+
+::: {.check}
+So we need to estimate the out-of-sample error **from the data we already have**. That is what
+cross-validation does.
+:::
+
+## The power of sampling {.scrollable}
+
+The trick is simple and powerful: **if we cannot get new data, we manufacture some from our own sample.**
+Hide part of the data, fit the model on the rest, and test it on the hidden part. For the model,
+the hidden part *is* new data. Then do it again with a different part hidden, and again.
+
+![](economist-assets/cv-folds.png){style="display: block; margin: auto;" width="80%"}
+
+Cut the training data into $k$ folds. Fit on $k - 1$ of them, count the mistakes on the one left out,
+rotate, and average:
 
 $$\text{CV}_{(k)} = \frac{1}{k}\sum_{i=1}^{k} \text{Err}_i, \qquad \text{Err}_i = \frac{1}{n_i}\sum_{j \in \text{fold } i} I(y_j \neq \hat y_j)$$
 
 ::: {.muted}
-$k = 5$ or $k = 10$ are the usual choices. $k = n$ — every observation left out on its own — is *leave-one-out* cross-validation.
+$k = 5$ or $k = 10$ are the usual choices. Every observation is used to fit the model $k - 1$ times
+and to test it exactly once. With $k = n$, each observation is left out on its own: *leave-one-out*
+cross-validation.
 :::
 
-## Why not just one validation set? {.scrollable}
+## Why several rounds, and not one hidden part? {.scrollable}
 
 ![](economist-assets/cv-curve.png){style="display: block; margin: auto;" width="92%"}
 
 ::: {.tight}
-- **Left.** Hide half the data once, and the answer depends on *which* half: ten splits, ten different "best" $K$. And each fit uses only half the data.
-- **Right.** 10-fold CV uses 90% of the data in every fit and averages ten errors: the estimates agree with one another and stay close to the true test error (orange) — which, in real life, you never get to see.
+- **Left.** Hide half the data once, and the answer depends on *which* half you hid. Ten random splits give ten different curves, and ten different "best" $K$. And each fit uses only half the data.
+- **Right.** 10-fold cross-validation fits on 90% of the data each time and averages ten errors. The ten estimates agree with one another, and they stay close to the true test error (orange). In real life you never see that orange line: cross-validation is how you get close to it.
 :::
 
-## Why cross-validation is a superpower for machine learning {.scrollable}
+## Classical fit against cross-validation {.scrollable}
+
+| | **Classical, in-sample** | **Cross-validation, out-of-sample** |
+|:---|:---|:---|
+| The question it answers | How well does the model describe *this* sample? | How well will it predict a *new* observation? |
+| What it needs | A formula for the model, and assumptions about the errors | Only that new data look like the data we have |
+| Which models it works for | Those with a theory: OLS, logit, … | Any model: KNN, trees, forests, networks, … |
+| What it does with a more flexible model | Rewards it: fit always improves | Penalises it as soon as it starts fitting noise |
+| What it says about uncertainty | A standard error, if the assumptions hold | $k$ errors: their spread shows how stable the result is |
+
+::: {.check}
+The two are not enemies. Cross-validation does not replace the coefficients and $p$-values of an
+explanatory model. It answers a different question, the one that matters when the goal is to **predict**.
+:::
+
+## Why it is magical {.scrollable}
 
 ::: {.tight}
-1. **It needs no theory.** No formula for the variance, no distributional assumption. The one assumption: the data you have look like the data you will predict.
-2. **It tunes anything.** $K$ in KNN, $\lambda$ in ridge and lasso (session 5), the depth of a tree, the size of a network — the same loop chooses them all.
-3. **It referees between models.** KNN against a logit against a random forest, each scored on data it did not see, on equal footing.
-4. **It uses every observation twice** — once to fit, once to check — which matters when data are scarce.
-5. **It tells you how sure to be.** $k$ errors, not one: their spread says whether a difference between two models is real or noise.
+1. **It needs no theory.** No formula for the variance, no assumption on the errors. One idea, sampling, replaces pages of mathematics.
+2. **It tunes anything.** $K$ in KNN, $\lambda$ in ridge and lasso (session 5), the depth of a tree, the size of a neural network: the same loop chooses them all.
+3. **It referees between models.** KNN against a logit against a random forest, each scored on data it did not see, on equal terms.
+4. **It uses every observation twice**, once to fit and once to check. That matters when data are scarce, as they usually are in international business.
+5. **It tells you how sure to be.** It gives $k$ errors, not one. If two models differ by less than the spread of those errors, the difference may be noise.
 :::
 
 ::: {.warn}
-**Three rules, or it lies.** (1) Everything learned from data — standardising, choosing variables — happens **inside** each fold: that is what the `Pipeline` is for. (2) With time series, folds respect time: never fit on the future to predict the past. (3) CV **chooses**; the test set **judges**, once.
+**Three rules, or it lies.**
+(1) Everything learned from data, such as standardising, happens **inside** each fold: that is what the `Pipeline` does in the code.
+(2) With time series, the folds respect time: never fit on the future to predict the past.
+(3) Cross-validation **chooses**; the test set **judges**, once, at the very end.
 :::
 
-## Cross-validation in code {.scrollable}
 
-::::::::: panel-tabset
-### By hand
+## A financial example: can KNN predict the stock market? {.center .scrollable}
 
-```{python}
-#| echo: true
+## The question, and the plan {.scrollable}
 
-import numpy as np
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import KFold, cross_val_score
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+> Can the market's returns of the last two days tell us whether it will go **up or down today**?
 
-# 569 tumours, 30 measurements each: malignant or benign? (ships with scikit-learn)
-X, y = load_breast_cancer(return_X_y=True)
-model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5))
+We will answer the way a data scientist at a bank would. The work is split into **two files**,
+because in real life the two jobs happen at different times:
 
-# Five rounds, each holding out a different fifth of the data
-folds = KFold(n_splits=5, shuffle=True, random_state=0)
-errors = []
-for r, (fit_rows, check_rows) in enumerate(folds.split(X), start=1):
-    model.fit(X[fit_rows], y[fit_rows])                     # fit on four fifths
-    error = 1 - model.score(X[check_rows], y[check_rows])   # error on the fifth left out
-    errors.append(error)
-    print(f"round {r}: fit on {len(fit_rows)} rows, error on the other {len(check_rows)} = {error:.3f}")
-
-print(f"CV error = {np.mean(errors):.3f}   (spread across folds: sd {np.std(errors):.3f})")
-```
-
-### In one line
-
-```{python}
-#| echo: true
-
-# Continues from "By hand": cross_val_score runs the same five rounds.
-# It returns accuracies, so 1 - accuracy gives the same five errors as the loop.
-scores = cross_val_score(model, X, y, cv=folds)
-print("the five errors:", (1 - scores).round(3))
-print(f"CV error = {1 - scores.mean():.3f}")
-```
-
-### Choosing K
-
-```{python}
-#| echo: true
-
-# Continues from "By hand". One CV error per K: the lowest wins.
-for k in [1, 5, 15, 51, 151]:
-    model_k = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
-    cv_error = 1 - cross_val_score(model_k, X, y, cv=folds).mean()
-    print(f"K = {k:3}:  CV error {cv_error:.3f}")
-
-# GridSearchCV, in the next section, is exactly this loop —
-# plus refitting the winning K on all the training data.
-```
-
-:::::::::
-
-## KNN in code (you are no longer the algorithm) {.center .scrollable}
-
-## Copy, paste, run {.scrollable}
-
-Every code block from here on is plain Python with four packages. Copy them **in order**
-into one file of your own and run it: each block uses what the earlier blocks created.
-
+::: pull-left
 ::: {.step}
-**Once**, in the VS Codium terminal: `pip install pandas numpy matplotlib scikit-learn`
+**File 1 · [session08_1_train.py](https://warint.github.io/quantitative-methods/session-08/session08_1_train.py)**
+— *the laboratory.* It loads five years of data, chooses $K$ by cross-validation, judges the model
+once on a year it never saw, and **saves** the trained model in a file.
+:::
+:::
+
+::: pull-right
+::: {.step}
+**File 2 · [session08_2_predict.py](https://warint.github.io/quantitative-methods/session-08/session08_2_predict.py)**
+— *the trading desk.* No data to download, no training. It loads the saved model and predicts
+**one new date**: a genuine out-of-sample prediction.
+:::
+:::
+
+::: {.tight}
+- Save both files in **one folder of your own**, open that folder in VS Codium, run File 1, then File 2.
+- **Once**, in the VS Codium terminal: `pip install pandas numpy matplotlib scikit-learn`
 :::
 
 ::: {.warn}
@@ -593,68 +587,28 @@ run its certificate installer once, then try again:
 `open /Applications/Python\ 3*/Install\ Certificates.command`
 :::
 
-::: {.step}
-**Or download the whole thing:** [session08_knn.py](https://warint.github.io/quantitative-methods/session-08/session08_knn.py) —
-every block of this lecture, in order, with comments. Save it in a folder of your own and press Run.
-:::
-
 ::: {.muted}
-The data is read from the internet, so you need a connection — nothing else. In a `.py` file, a
-result only appears if you `print()` it, which is why every block prints what it wants you to see.
+The slides that follow show the two files step by step, with their output. In a `.py` file a result
+only appears if you `print()` it, which is why every step prints what it wants you to see.
 :::
 
-## The data: the stock market {#imported-s08-023 .scrollable}
-
-> How does an AI work? The KNN mathematics, now inside an algorithm — what does it change?
+## The workflow, and how a classifier is scored {#imported-s08-024 .scrollable}
 
 ::::::::: panel-tabset
-### Data collection
+### Eight steps, two files
 
-```{python}
-#| echo: true
+**File 1, the laboratory**
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+1. **Load** the data and look at it
+2. **Put the newest day aside**: it plays "tomorrow" for File 2
+3. **Split by time**: learn from 2001–2004, test on 2005
+4. **Cut the training years into folds**, in time order
+5. **Cross-validate by hand**, for one $K$, to see the loop
+6. **Cross-validate every $K$** at once, and keep the best
+7. **Open the test year, once**, and judge the chosen model
+8. **Refit on all the history**, and save the model
 
-# Smarket: 1,250 trading days of the S&P 500, 2001-2005 (ISLR textbook data)
-URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
-smarket = pd.read_csv(URL)
-
-print(smarket.shape)                         # (rows, columns)
-print(smarket.head())
-print(smarket["Direction"].value_counts())   # how many Up days, how many Down
-```
-
-### Data description
-
-1,250 trading days, 9 variables. We predict `Direction` from the returns of the days before.
-
-| Variable | Description |
-|:---|:---|
-| `Year` | The year of the observation |
-| `Lag1` | % return of the market the previous day |
-| `Lag2` | % return two days before |
-| `Lag3` … `Lag5` | % return three to five days before |
-| `Volume` | Shares traded (billions) |
-| `Today` | % return that day |
-| `Direction` | `Up` or `Down`: did the market rise that day? — **the label** |
-
-::: {.muted}
-`Today` is the answer in disguise (`Direction` is just its sign), so it must never be a predictor.
-:::
-
-:::::::::
-
-## The workflow, and how it is scored {#imported-s08-024 .scrollable}
-
-::::::::: panel-tabset
-### Four steps
-
-1. **Data**: load it, and split it into a training set and a test set
-2. **Training**: choose $K$ by cross-validation on the training set only, with the pre-processing inside
-3. **Testing**: score the chosen model on the test set — once
-4. **Prediction**: use it on a new observation of your own
+**File 2, the trading desk**: load the model, predict one new date.
 
 ### What KNN needs
 
@@ -688,67 +642,171 @@ $$\text{Normalisation: } x_{\text{normalised}} = \frac{x - x_{\min}}{x_{\max} - 
 In scikit-learn, standardisation is `StandardScaler()`.
 
 :::::::::
+## File 1 · Step 1: the data {#imported-s08-023 .scrollable}
 
-## Step 1: a time split, not a random one {#imported-s08-025 .scrollable}
+**Smarket**: the S&P 500 index, every trading day from 2001 to 2005, from the textbook *An Introduction to Statistical Learning*. Each row is one day. We want to predict its `Direction` from the returns of the days before.
+
+::::::::: panel-tabset
+### Data collection
 
 ```{python}
 #| echo: true
 
-# Continues from "Data collection": smarket is loaded.
-# Train on 2001-2004, test on 2005. Never shuffle a time series: a random split
-# would let tomorrow's market help "predict" yesterday's (leakage).
-train = smarket[smarket["Year"] < 2005]
-test  = smarket[smarket["Year"] == 2005]
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-predictors = ["Lag1", "Lag2"]          # the two previous days' returns
-X_train, y_train = train[predictors], train["Direction"]
-X_test,  y_test  = test[predictors],  test["Direction"]
+# Smarket: 1,250 trading days of the S&P 500, 2001-2005 (ISLR textbook data)
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
 
-print(f"training set: {len(train)} days (2001-2004)")
-print(f"test set:     {len(test)} days (2005)")
+print(smarket.shape)                         # (rows, columns)
+print(smarket.head())
+print(smarket["Direction"].value_counts())   # how many Up days, how many Down
 ```
 
-## Step 2: choose K by cross-validation {#imported-s08-026 .scrollable}
+### Data description
+
+1,250 trading days, 9 variables. We give KNN only `Lag1` and `Lag2`, the returns of the last two days.
+
+| Variable | Description |
+|:---|:---|
+| `Year` | The year of the observation |
+| `Lag1` | % return of the market the previous day |
+| `Lag2` | % return two days before |
+| `Lag3` … `Lag5` | % return three to five days before |
+| `Volume` | Shares traded (billions) |
+| `Today` | % return that day |
+| `Direction` | `Up` or `Down`: did the market rise that day? — **the label** |
+
+::: {.muted}
+`Today` is the answer in disguise (`Direction` is just its sign), so it must never be a predictor.
+:::
+
+:::::::::
+
+
+## File 1 · Steps 2–3: one day aside, then a split by time {#imported-s08-025 .scrollable}
+
+Two decisions before any model is fitted, and both protect us from fooling ourselves.
+
+::: {.tight}
+- **Step 2.** We hide the very last day in the data, 30 December 2005. File 1 never sees it. File 2 will predict it, as if it were tomorrow.
+- **Step 3.** We split the rest **by time**: the model learns from 2001–2004 and is judged on 2005. Never shuffle a time series. A random split would put days of 2005 in the training data, and the model would learn from the future to "predict" the past: its score would be too good to be true.
+:::
+
+```{python}
+#| echo: true
+
+# Step 2 · Put the newest day aside: File 2 will predict it
+new_day = smarket.tail(1)                     # 30 December 2005
+history = smarket.iloc[:-1]                   # every day except the last one
+print(new_day[["Year", "Lag1", "Lag2", "Direction"]])
+
+# Step 3 · Split by time: learn from 2001-2004, test on 2005
+predictors = ["Lag1", "Lag2"]                 # the returns of the last two days
+train = history[history["Year"] < 2005]
+test = history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+
+print(f"training set: {len(train)} days (2001-2004)  <- used to learn and to choose K")
+print(f"test set:     {len(test)} days (2005)       <- locked away until Step 7")
+```
+
+## File 1 · Step 4: cross-validation folds, in time order {.scrollable}
+
+We must choose $K$ without touching 2005. Cross-validation does it inside the training years. But
+this is a time series, so the standard folds would break rule (2): they would fit on 2004 to predict
+2002. Instead, each round fits on **everything up to a date**, and validates on **the block that comes next**.
+
+![](economist-assets/cv-time.png){style="display: block; margin: auto;" width="78%"}
+
+```{python}
+#| echo: true
+
+from sklearn.model_selection import TimeSeriesSplit
+
+folds = TimeSeriesSplit(n_splits=5)           # 6 blocks in time order, 5 rounds
+for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
+    print(f"round {r}: fit on days 1 to {fit_rows[-1] + 1}, "
+          f"validate on days {check_rows[0] + 1} to {check_rows[-1] + 1}")
+```
+
+## File 1 · Step 5: cross-validation by hand, for one K {.scrollable}
+
+Before letting scikit-learn do it for us, we do it once **by hand**, for $K = 25$, to see that there
+is no magic inside, only a loop.
+
+```{python}
+#| echo: true
+
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+# Standardise, then KNN, glued into ONE model: the scaler is refitted with
+# the model each time, on the fitting rows only, so it never peeks at the hidden block.
+model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25))
+
+errors = []
+for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
+    model.fit(X_train.iloc[fit_rows], y_train.iloc[fit_rows])          # learn
+    accuracy = model.score(X_train.iloc[check_rows], y_train.iloc[check_rows])  # test on the hidden block
+    errors.append(1 - accuracy)
+    print(f"round {r}: error on the hidden block = {1 - accuracy:.3f}")
+
+print(f"K = 25: cross-validated error = {np.mean(errors):.3f}")
+```
+
+::: {.muted}
+The five rounds do not agree exactly, and that spread is information: it says how much the error
+of one $K$ moves from one period to the next. The average is our estimate of how $K = 25$ would do
+on days it has not seen. Why the scaler? KNN measures distances, so a predictor in large units
+would outvote one in small units. `StandardScaler` puts every column on the same scale, $(x - \mu)/\sigma$.
+:::
+
+## File 1 · Step 6: cross-validation for every K at once {#imported-s08-026 .scrollable}
 
 ::::::::: panel-tabset
 ### Code
 
+`GridSearchCV` is exactly the loop of Step 5, run for every $K$ in a list. It keeps the $K$ with the
+best cross-validated accuracy, and refits the model with it on all the training days.
+
 ```{python}
 #| echo: true
 
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 
-# Standardise, then KNN. The scaler sits INSIDE the pipeline, so it is refitted
-# on each cross-validation fold and never sees the fold it is scored on.
-pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier())
-
-# Try K = 1, 3, 5, ..., 101 (odd: no ties in a two-class vote), 5-fold CV.
-# "kneighborsclassifier__n_neighbors" = the n_neighbors setting of the KNN step.
-k_values = list(range(1, 102, 2))
-search = GridSearchCV(pipeline, {"kneighborsclassifier__n_neighbors": k_values}, cv=5)
+# K = 1, 3, 5, ..., 151: odd numbers, so a two-class vote can never tie.
+# "kneighborsclassifier__n_neighbors" = inside the pipeline, the KNN step's n_neighbors.
+k_values = list(range(1, 152, 2))
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values},
+                      cv=folds)
 search.fit(X_train, y_train)
 
 best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
-majority = y_train.value_counts(normalize=True).max()
+majority = y_train.value_counts(normalize=True).max()   # share of the commonest class
 print(f"best K = {best_k}")
 print(f"cross-validated accuracy at that K = {search.best_score_:.3f}")
-print(f"always predicting the commonest class = {majority:.3f}   <- the bar to beat")
+print(f"always predicting the commonest direction = {majority:.3f}   <- the bar to beat")
 ```
 
-### Plot
+### The curve
 
 ```{python}
 #| echo: true
 
-# Continues from "Code": the cross-validated accuracy for every K tried.
 plt.figure(figsize=(8, 3))
-plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", label="KNN, 5-fold CV")
-plt.axhline(majority, color="red", linestyle="--", label="always predict the commonest class")
+plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", markersize=3,
+         label="KNN, cross-validated accuracy")
+plt.axhline(majority, color="red", linestyle="--", label="always predict the commonest direction")
+plt.axvline(best_k, color="grey", linestyle=":", label=f"chosen K = {best_k}")
 plt.xlabel("K (number of neighbours)")
-plt.ylabel("cross-validated accuracy")
+plt.ylabel("accuracy on the hidden blocks")
 plt.legend()
 plt.tight_layout()
 plt.show()
@@ -757,117 +815,125 @@ plt.show()
 ### Reading it
 
 ::: {.tight}
-- **Small $K$** (left): low bias, high variance — the boundary follows single days, and the accuracy is noisy.
-- **Large $K$** (right): high bias, low variance — the prediction flattens towards the majority class.
-- The chosen $K$ is where that trade-off is best **on held-out folds**. Here even the best $K$ barely clears the red line: yesterday's returns carry almost no signal about today's direction.
+- **Small $K$** (left): flexible, low bias, high variance. The boundary follows single days, and the accuracy jumps around.
+- **Large $K$** (right): rigid, high bias, low variance. The prediction flattens towards "the market usually goes up".
+- The chosen $K$ is the best compromise **on hidden blocks**, not on the data used to fit. Notice how small the gain over the red line is: we already suspect that the last two days say little about today.
 :::
 
 :::::::::
 
-## Step 2 (cont.): which inputs matter? {.scrollable}
+## File 1 · Step 7: open the test year, once {#imported-s08-027 .scrollable}
+
+$K$ is chosen. Only now do we look at 2005, and we do it **once**. If we went back and changed $K$
+after seeing this score, 2005 would have become training data, and the score would no longer be honest.
 
 ```{python}
 #| echo: true
 
-from sklearn.inspection import permutation_importance
+from sklearn.metrics import confusion_matrix
 
-# KNN has no coefficients. Instead: shuffle one column and see how much the
-# test accuracy drops. Big drop = the model relied on it. Near zero = no signal.
-importance = permutation_importance(search, X_test, y_test, n_repeats=10, random_state=0)
-for name, mean, sd in zip(predictors, importance.importances_mean, importance.importances_std):
-    print(f"{name}: accuracy drop {mean:+.4f}  (sd {sd:.4f})")
-```
-
-::: {.muted}
-Both are close to zero. A negative value is not a paradox: it means shuffling the column *helped*, which is what removing noise does.
-:::
-
-## Step 3: test, once {#imported-s08-027 .scrollable}
-
-::::::::: panel-tabset
-### Predictions
-
-```{python}
-#| echo: true
-
-# search.predict uses the best K, refitted on all of 2001-2004.
 y_pred = search.predict(X_test)
 
-# The prediction next to the truth, first five days of 2005
-print(test.assign(predicted=y_pred)[["Year", "Lag1", "Lag2", "Direction", "predicted"]].head())
-```
-
-### Confusion matrix
-
-```{python}
-#| echo: true
-
-from sklearn.metrics import confusion_matrix, classification_report
-
-# Rows = what really happened, columns = what we predicted
+# Rows = what really happened, columns = what the model said
 table = pd.DataFrame(confusion_matrix(y_test, y_pred, labels=["Down", "Up"]),
                      index=["actual Down", "actual Up"],
                      columns=["predicted Down", "predicted Up"])
 print(table)
-print(classification_report(y_test, y_pred))
 
-# Compare with the majority class, not with 50%
 accuracy = (y_pred == y_test).mean()
 baseline = y_test.value_counts(normalize=True).max()
-print(f"KNN test accuracy:                   {accuracy:.3f}")
-print(f"always predicting the commonest day: {baseline:.3f}")
+print(f"KNN accuracy on 2005:                      {accuracy:.3f}")
+print(f"always predicting the commonest direction: {baseline:.3f}")
 ```
 
-:::::::::
+::: {.check}
+Read this honestly. KNN does **not** beat the simple rule "the market goes up". The last two days'
+returns carry almost no usable signal about today. That is a finding, not a failure: if markets were
+easy to predict from yesterday, traders would exploit it until they were not. Cross-validation and
+the test year told us the truth *before* we bet any money.
+:::
 
-## Step 4: predict a day of your own {#imported-s08-028 .scrollable}
+## File 1 · Step 8: refit on all the history, and save {.scrollable}
+
+The test year has done its job: it gave us an honest score. Before using the model, we let it learn
+from **everything we know**, 2001 to 2005 except the day kept aside, with the $K$ that
+cross-validation chose. Then we save it in a file, so that File 2 can use it without training again.
 
 ```{python}
 #| echo: true
 
-# Change these two numbers: yesterday's return and the day before's, in %.
-my_day = pd.DataFrame({"Lag1": [1.5], "Lag2": [-0.8]})
+import joblib                      # installed together with scikit-learn: saves a model to a file
 
-print("prediction:", search.predict(my_day)[0])
-for label, prob in zip(search.classes_, search.predict_proba(my_day)[0]):
-    print(f"Pr({label}) = {prob:.3f}")
+final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
+final_model.fit(history[predictors], history["Direction"])
+
+joblib.dump(final_model, "knn_smarket.joblib")
+print(f"Saved: knn_smarket.joblib  (KNN with K = {best_k}, learned from {len(history)} days)")
 ```
 
 ::: {.muted}
-The probabilities are the shares of Up and Down days among the $K$ nearest days in the training set — the $\frac{1}{K}\sum_{i \in N_0} I(y_i = j)$ of the KNN rule.
+The file holds the whole pipeline: the scaler with the means and standard deviations it learned, the
+chosen $K$, and the days among which KNN will look for neighbours.
 :::
 
-## The whole workflow in one block {.scrollable}
+## File 2: predict one new date {#imported-s08-028 .scrollable}
 
-Everything above, from an empty file: copy this block alone and it runs.
+A new morning: **30 December 2005**. The model has never seen this day. All we know is what the
+market did on the two days before: it fell 0.298% on 29 December, and rose 0.130% on 28 December.
 
 ```{python}
 #| echo: true
 
 import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+import joblib
 
-# 1 · Data, split by time
-URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
-smarket = pd.read_csv(URL)
-train = smarket[smarket["Year"] < 2005]
-test  = smarket[smarket["Year"] == 2005]
+model = joblib.load("knn_smarket.joblib")    # the model File 1 saved, in the same folder
+k = model.named_steps["kneighborsclassifier"].n_neighbors
 
-# 2 · Training: choose K by 5-fold CV, scaler inside the pipeline
-search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
-                      {"kneighborsclassifier__n_neighbors": range(1, 102, 2)}, cv=5)
-search.fit(train[["Lag1", "Lag2"]], train["Direction"])
+# The new date: the returns of the two days before (in %)
+new_day = pd.DataFrame({"Lag1": [-0.298], "Lag2": [0.130]})
 
-# 3 · Testing, once
-print("chosen K:", search.best_params_["kneighborsclassifier__n_neighbors"])
-print(f"test accuracy: {search.score(test[['Lag1', 'Lag2']], test['Direction']):.3f}")
-
-# 4 · Prediction for a new day
-print("new day:", search.predict(pd.DataFrame({"Lag1": [1.5], "Lag2": [-0.8]}))[0])
+prediction = model.predict(new_day)[0]
+probabilities = model.predict_proba(new_day)[0]
+print(f"Prediction for 30 December 2005: {prediction}")
+for label, prob in zip(model.classes_, probabilities):
+    print(f"   Pr({label}) = {prob:.3f}   "
+          f"-> about {round(prob * k)} of the {k} nearest past days went {label}")
 ```
+
+```{python}
+#| echo: false
+# Hidden: remove the model file the render just wrote, so it does not land in the repository.
+import os
+os.remove("knn_smarket.joblib")
+```
+
+::: {.check}
+The probabilities are the votes of the $K$ nearest past days, the $\frac{1}{K}\sum_{i \in N_0} I(y_i = j)$
+of the KNN rule. On 30 December 2005 the S&P 500 in fact **fell** 0.489%, so this prediction was wrong.
+One date proves nothing either way. File 1's test year is how the model is **judged**; File 2 is how
+it is **used**.
+:::
+
+::: {.muted}
+Your turn: change the two numbers (for example `Lag1 = 1.5`, `Lag2 = -0.8`) and run File 2 again.
+Does a big rise yesterday change the vote?
+:::
+
+## What the financial example taught us {.scrollable}
+
+::: {.tight}
+1. **Cross-validation chose $K$ without touching the test year.** It is the only honest way to tune a model, and it took five lines of code.
+2. **With time series, the folds follow time.** The past predicts the block that comes next, never the reverse.
+3. **The test year judged once, and the verdict was "no signal".** A flexible method cannot create information that is not in the data. Knowing this *before* trading is worth a lot.
+4. **Training and predicting are two different jobs.** File 1 is done once, carefully. File 2 can then run every morning, on each new date, in a fraction of a second.
+:::
+
+::: {.check}
+Swap the stock market for your own question: crisis or no crisis, a firm that exports or not, a
+country falling behind or not. The two files stay the same; only the data and the predictors change.
+That is what the practice asks you to do.
+:::
 
 ## You survived your second session on machine learning {#imported-s08-031 .scrollable}
 
@@ -959,7 +1025,7 @@ print(f"price standard deviation = {y.std():,.0f}   <- the cost of predicting th
 ```{python}
 #| echo: true
 
-# Continues from the stock-market steps: X_train, y_train, search, majority.
+# Continues from File 1 (session08_1_train.py): X_train, y_train, search, majority.
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 

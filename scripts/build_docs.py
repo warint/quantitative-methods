@@ -179,10 +179,11 @@ def main():
         shutil.copy2(f, s08_data / f.name)
     s08_code = DOCS / "session-08"
     s08_code.mkdir(exist_ok=True)
-    for f in [s08 / "01-lecture" / "session08_knn.py",
+    for f in [s08 / "01-lecture" / "session08_1_train.py",
+              s08 / "01-lecture" / "session08_2_predict.py",
               s08 / "02-practice" / "starter" / "session08_practice.py"]:
         shutil.copy2(f, s08_code / f.name)
-    print("published session 08: jst_crises.csv, session08_knn.py, session08_practice.py")
+    print("published session 08: jst_crises.csv, session08_1_train.py, session08_2_predict.py, session08_practice.py")
 
     # The per-session Python cheatsheets, which every deck links to by URL.
     # Built by scripts/build_cheatsheets.py; copied here so the link resolves.
