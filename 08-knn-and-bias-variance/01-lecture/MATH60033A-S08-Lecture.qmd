@@ -449,7 +449,7 @@ words below come back in every course, paper and piece of code on the subject.
 
 | | **What it is** | **What it is used for** | **In the stock-market example** |
 |:---|:---|:---|:---|
-| **Training set** | The observations the model **learns from** | Fitting the model. For KNN, the neighbours are looked for here | The days of 2001–2004 |
+| **Training set** | The observations the model **learns from** | Fitting the model. For KNN, the neighbours are looked for here | The days of 2002–2004 |
 | **Validation set** | Observations **hidden from the fit**, but taken from the training data | **Choosing** a setting, such as $K$: the setting with the fewest mistakes on it wins | Each round's hidden block, in cross-validation |
 | **Test set** | Observations kept **locked away** until everything is decided | **Judging** the final model, once, as if it were new data | The days of 2005 |
 
@@ -521,7 +521,7 @@ explanatory model. It answers a different question, the one that matters when th
 
 ## The question, and the plan {.scrollable}
 
-> Can the market's returns of the last two days tell us whether it will go **up or down today**?
+> Can the market's return of two days ago tell us whether it will go **up or down today**?
 
 We will answer the way a data scientist at a bank would. The work is split into **two files**,
 because in real life the two jobs happen at different times:
@@ -529,7 +529,7 @@ because in real life the two jobs happen at different times:
 ::: pull-left
 ::: {.step}
 **File 1 · [session08_1_train.py](https://warint.github.io/quantitative-methods/session-08/session08_1_train.py)**
-— *the laboratory.* It loads five years of data, chooses $K$ by cross-validation, judges the model
+— *the laboratory.* It loads the data, chooses $K$ by cross-validation, judges the model
 once on a year it never saw, and **saves** the trained model in a file.
 :::
 :::
@@ -566,8 +566,8 @@ only appears if you `print()` it, which is why every step prints what it wants y
 **File 1, the laboratory**
 
 1. **Load** the data and look at it
-2. **Put the newest day aside**: it plays "tomorrow" for File 2
-3. **Split by time**: learn from 2001–2004, test on 2005
+2. **Put one late day aside**: it plays "tomorrow" for File 2
+3. **Split by time**: learn from 2002–2004, test on 2005
 4. **Cut the training years into folds**, in time order
 5. **Cross-validate by hand**, for one $K$, to see the loop
 6. **Cross-validate every $K$** at once, and keep the best
@@ -633,7 +633,7 @@ print(smarket["Direction"].value_counts())   # how many Up days, how many Down
 
 ### Data description
 
-1,250 trading days, 9 variables. We give KNN only `Lag1` and `Lag2`, the returns of the last two days.
+1,250 trading days, 9 variables. We will keep 2002–2005 and give KNN a single predictor, `Lag2`, the return two days before. Why that slice is explained at the end of the example.
 
 | Variable | Description |
 |:---|:---|
@@ -657,26 +657,29 @@ print(smarket["Direction"].value_counts())   # how many Up days, how many Down
 Two decisions before any model is fitted, and both protect us from fooling ourselves.
 
 ::: {.tight}
-- **Step 2.** We hide the very last day in the data, 30 December 2005. File 1 never sees it. File 2 will predict it, as if it were tomorrow.
-- **Step 3.** We split the rest **by time**: the model learns from 2001–2004 and is judged on 2005. Never shuffle a time series. A random split would put days of 2005 in the training data, and the model would learn from the future to "predict" the past: its score would be too good to be true.
+- **Step 2.** We hide one late day, 28 December 2005. File 1 never sees it. File 2 will predict it, as if it were tomorrow. The two days after it are dropped too: on the morning of the 28th, they are the future.
+- **Step 3.** We split the rest **by time**: the model learns from 2002–2004 and is judged on 2005. Never shuffle a time series. A random split would put days of 2005 in the training data, and the model would learn from the future to "predict" the past: its score would be too good to be true.
 :::
 
 ```{python}
 #| echo: true
 
-# Step 2 · Put the newest day aside: File 2 will predict it
-new_day = smarket.tail(1)                     # 30 December 2005
-history = smarket.iloc[:-1]                   # every day except the last one
-print(new_day[["Year", "Lag1", "Lag2", "Direction"]])
+# The slice we chose (why: see "How this example was chosen")
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]                         # the market's return two days before
 
-# Step 3 · Split by time: learn from 2001-2004, test on 2005
-predictors = ["Lag1", "Lag2"]                 # the returns of the last two days
+# Step 2 · Put one late day aside: File 2 will predict it
+new_day = smarket.iloc[[-3]]                  # 28 December 2005
+history = smarket.iloc[:-3]                   # every day before it
+print(new_day[["Year", "Lag2", "Direction"]])
+
+# Step 3 · Split by time: learn from 2002-2004, test on 2005
 train = history[history["Year"] < 2005]
 test = history[history["Year"] == 2005]
 X_train, y_train = train[predictors], train["Direction"]
 X_test, y_test = test[predictors], test["Direction"]
 
-print(f"training set: {len(train)} days (2001-2004)  <- used to learn and to choose K")
+print(f"training set: {len(train)} days (2002-2004)  <- used to learn and to choose K")
 print(f"test set:     {len(test)} days (2005)       <- locked away until Step 7")
 ```
 
@@ -726,6 +729,14 @@ for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
 print(f"K = 25: cross-validated error = {np.mean(errors):.3f}")
 ```
 
+::: {.check}
+**What 0.533 means.** Each round's error is the share of days in the hidden block that the model
+called wrongly: 0.500 is 50 wrong days out of 100. The cross-validated error is the average of the
+five rounds, $(0.500 + 0.571 + 0.540 + 0.492 + 0.563)/5 = 0.533$. So with $K = 25$ the model is
+wrong on about **53% of days it has not seen**: worse than flipping a coin (50%). $K = 25$ is not a
+good choice here; Step 6 tries every $K$. An error is $1 -$ accuracy, so 0.533 error is 0.467 accuracy.
+:::
+
 ::: {.muted}
 The five rounds do not agree exactly, and that spread is information: it says how much the error
 of one $K$ moves from one period to the next. The average is our estimate of how $K = 25$ would do
@@ -746,9 +757,10 @@ best cross-validated accuracy, and refits the model with it on all the training 
 
 from sklearn.model_selection import GridSearchCV
 
-# K = 1, 3, 5, ..., 151: odd numbers, so a two-class vote can never tie.
+# K = 1, 3, 5, ..., 125: odd numbers, so a two-class vote can never tie. It stops at 125
+# because the first round fits on only 126 days, and K cannot be larger than that.
 # "kneighborsclassifier__n_neighbors" = inside the pipeline, the KNN step's n_neighbors.
-k_values = list(range(1, 152, 2))
+k_values = list(range(1, 126, 2))
 search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
                       {"kneighborsclassifier__n_neighbors": k_values},
                       cv=folds)
@@ -783,7 +795,7 @@ plt.show()
 ::: {.tight}
 - **Small $K$** (left): flexible, low bias, high variance. The boundary follows single days, and the accuracy jumps around.
 - **Large $K$** (right): rigid, high bias, low variance. The prediction flattens towards "the market usually goes up".
-- The chosen $K$ is the best compromise **on hidden blocks**, not on the data used to fit. Notice how small the gain over the red line is: we already suspect that the last two days say little about today.
+- The chosen $K$ is the best compromise **on hidden blocks**, not on the data used to fit. Notice that even the best $K$ does not clear the red line: cross-validation is already telling us that `Lag2` says little about today.
 :::
 
 :::::::::
@@ -813,16 +825,15 @@ print(f"always predicting the commonest direction: {baseline:.3f}")
 ```
 
 ::: {.check}
-Read this honestly. KNN does **not** beat the simple rule "the market goes up". The last two days'
-returns carry almost no usable signal about today. That is a finding, not a failure: if markets were
-easy to predict from yesterday, traders would exploit it until they were not. Cross-validation and
-the test year told us the truth *before* we bet any money.
+KNN is right on **57.8%** of the days of 2005: better than a coin (50%), and a little better than the
+simple rule "the market goes up" (56.2%). A positive result, but hold the applause until
+"How this example was chosen", after File 2.
 :::
 
 ## File 1 · Step 8: refit on all the history, and save {.scrollable}
 
 The test year has done its job: it gave us an honest score. Before using the model, we let it learn
-from **everything we know**, 2001 to 2005 except the day kept aside, with the $K$ that
+from **everything we know**, 2 January 2002 to 27 December 2005, with the $K$ that
 cross-validation chose. Then we save it in a file, so that File 2 can use it without training again.
 
 ```{python}
@@ -844,8 +855,8 @@ chosen $K$, and the days among which KNN will look for neighbours.
 
 ## File 2: predict one new date {#imported-s08-028 .scrollable}
 
-A new morning: **30 December 2005**. The model has never seen this day. All we know is what the
-market did on the two days before: it fell 0.298% on 29 December, and rose 0.130% on 28 December.
+A new morning: **28 December 2005**. The model has never seen this day. All it needs is what the
+market did two trading days before: it rose 0.043% on 23 December (26 December was a holiday).
 
 ```{python}
 #| echo: true
@@ -857,11 +868,11 @@ model = joblib.load("knn_smarket.joblib")    # the model File 1 saved, in the sa
 k = model.named_steps["kneighborsclassifier"].n_neighbors
 
 # The new date: the returns of the two days before (in %)
-new_day = pd.DataFrame({"Lag1": [-0.298], "Lag2": [0.130]})
+new_day = pd.DataFrame({"Lag2": [0.043]})
 
 prediction = model.predict(new_day)[0]
 probabilities = model.predict_proba(new_day)[0]
-print(f"Prediction for 30 December 2005: {prediction}")
+print(f"Prediction for 28 December 2005: {prediction}")
 for label, prob in zip(model.classes_, probabilities):
     print(f"   Pr({label}) = {prob:.3f}   "
           f"-> about {round(prob * k)} of the {k} nearest past days went {label}")
@@ -876,14 +887,34 @@ os.remove("knn_smarket.joblib")
 
 ::: {.check}
 The probabilities are the votes of the $K$ nearest past days, the $\frac{1}{K}\sum_{i \in N_0} I(y_i = j)$
-of the KNN rule. On 30 December 2005 the S&P 500 in fact **fell** 0.489%, so this prediction was wrong.
+of the KNN rule. On 28 December 2005 the S&P 500 in fact **rose** 0.130%, so this prediction was right.
 One date proves nothing either way. File 1's test year is how the model is **judged**; File 2 is how
 it is **used**.
 :::
 
 ::: {.muted}
-Your turn: change the two numbers (for example `Lag1 = 1.5`, `Lag2 = -0.8`) and run File 2 again.
-Does a big rise yesterday change the vote?
+Your turn: change the number (for example `Lag2 = 1.5`, then `Lag2 = -2`) and run File 2 again.
+Does a big move two days ago change the vote?
+:::
+
+## How this example was chosen, and why it matters {.scrollable}
+
+The example you just ran was **built to work**. The natural first try (both lags, all five years,
+the very last day as the new date) gave **50.6%** on 2005, *below* the 56.2% of "always Up", and
+File 2 got its date wrong. So we tried **54 slices** of the data (predictors × training years × test
+year) and kept one that wins: `Lag2` only, 2002–2004, and 28 December as the new date, because the
+model gets 30 December wrong.
+
+::: {.tight}
+- **Luck alone produces a winner.** On 249 test days, accuracy wobbles by about ±3 points from chance alone ($\sqrt{0.25/249} \approx 0.032$). With 54 tries, a winner that beats the baseline by 1.6 points is easy to find even if there is no signal at all.
+- **Every look at 2005 made 2005 training data.** Step 7 says: open the test year *once*. We opened it 54 times, so 57.8% is no longer an honest test score.
+- **Cross-validation had already warned us.** On the training years, the best $K$ scored 0.511, below the 0.516 of "always Up" (Step 6).
+:::
+
+::: {.warn}
+This is how most "strategies that beat the market" are found: try many slices, publish the one that
+works. The steps of Files 1 and 2 are right. The evidence is not. An honest report says how many
+things were tried.
 :::
 
 ## What the financial example taught us {.scrollable}
@@ -891,7 +922,7 @@ Does a big rise yesterday change the vote?
 ::: {.tight}
 1. **Cross-validation chose $K$ without touching the test year.** It is the only honest way to tune a model, and it took five lines of code.
 2. **With time series, the folds follow time.** The past predicts the block that comes next, never the reverse.
-3. **The test year judged once, and the verdict was "no signal".** A flexible method cannot create information that is not in the data. Knowing this *before* trading is worth a lot.
+3. **A test year only judges if it is opened once.** Our slice beat "always Up", but only after 54 looks: a winner found that way is luck until proven otherwise. A flexible method cannot create information that is not in the data.
 4. **Training and predicting are two different jobs.** File 1 is done once, carefully. File 2 can then run every morning, on each new date, in a fraction of a second.
 :::
 
@@ -1006,7 +1037,7 @@ print(f"commonest class           = {majority:.3f}")
 
 ::: {.muted}
 Five hundred trees, every core busy, and nothing beats the constant rule by much. The lesson is
-not about the method: these two lags may carry no signal, and no amount of compute manufactures one.
+not about the method: this lag may carry no signal, and no amount of compute manufactures one.
 :::
 
 :::::::::

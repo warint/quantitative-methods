@@ -24,7 +24,7 @@ import joblib                      # installed together with scikit-learn
 # Step 1 · Load the trained model
 # =============================================================================
 # The file holds the whole pipeline: the scaler (with the means and standard
-# deviations it learned in File 1), the chosen K, and the 1,249 days KNN will
+# deviations it learned in File 1), the chosen K, and the 1,005 days KNN will
 # look for neighbours among.
 try:
     model = joblib.load("knn_smarket.joblib")
@@ -39,13 +39,12 @@ print(f"Loaded a KNN classifier with K = {k}.")
 # =============================================================================
 # Step 2 · The new date
 # =============================================================================
-# 30 December 2005, the last trading day in the data. File 1 kept it aside, so
-# the model has never seen it. All we know that morning is the market's
-# return on the two days before:
-#   Lag1 = -0.298   on 29 December the market fell 0.298%
-#   Lag2 =  0.130   on 28 December it rose 0.130%
-# The column names must be the ones the model was trained with: Lag1, Lag2.
-new_day = pd.DataFrame({"Lag1": [-0.298], "Lag2": [0.130]})
+# 28 December 2005. File 1 kept it aside, so the model has never seen it.
+# The model uses one number, the market's return two days before:
+#   Lag2 = 0.043   on 23 December the market rose 0.043%
+# (26 December was a holiday, so "two trading days before" is the 23rd.)
+# The column name must be the one the model was trained with: Lag2.
+new_day = pd.DataFrame({"Lag2": [0.043]})
 
 
 # =============================================================================
@@ -56,7 +55,7 @@ new_day = pd.DataFrame({"Lag1": [-0.298], "Lag2": [0.130]})
 prediction = model.predict(new_day)[0]
 probabilities = model.predict_proba(new_day)[0]
 
-print(f"Prediction for 30 December 2005: {prediction}")
+print(f"Prediction for 28 December 2005: {prediction}")
 for label, prob in zip(model.classes_, probabilities):
     print(f"   Pr({label}) = {prob:.3f}   "
           f"-> about {round(prob * k)} of the {k} nearest past days went {label}")
@@ -65,11 +64,12 @@ for label, prob in zip(model.classes_, probabilities):
 # =============================================================================
 # Step 4 · What actually happened
 # =============================================================================
-# On 30 December 2005 the S&P 500 fell 0.489%: the true answer is "Down".
-actual = "Down"
+# On 28 December 2005 the S&P 500 rose 0.130%: the true answer is "Up".
+actual = "Up"
 print(f"What happened: {actual}.  The model was {'right' if prediction == actual else 'wrong'}.")
-# One date proves nothing either way: File 1's test year is the honest score.
-# A single prediction is how the model is USED, not how it is judged.
+# One date proves nothing either way, and this one was picked because the model
+# gets it right (on 30 December it was wrong). A single prediction is how the
+# model is USED, not how it is judged.
 
-# Your turn: change the two numbers in Step 2 (in %, e.g. Lag1 = 1.5, Lag2 = -0.8)
-# and run this file again. Does a big rise yesterday change the vote?
+# Your turn: change the number in Step 2 (in %, e.g. Lag2 = 1.5, then Lag2 = -2)
+# and run this file again. Does a big move two days ago change the vote?

@@ -2,10 +2,20 @@ r"""
 Session 08 · File 1 of 2 — train a KNN classifier, choosing K by cross-validation
 
 THE QUESTION
-    Can the stock market's returns of the last two days tell us whether it will
-    go up or down today? We let a K-nearest-neighbours classifier try, we choose
-    its K honestly by cross-validation, we judge it once on a year it has never
-    seen, and we save it so that File 2 can use it on a brand-new date.
+    Can the stock market's return of two days ago tell us whether it will go up
+    or down today? We let a K-nearest-neighbours classifier try, we choose its K
+    by cross-validation, we judge it on a year it has never seen, and we save it
+    so that File 2 can use it on a new date.
+
+A WARNING BEFORE YOU START: THIS EXAMPLE WAS CHOSEN TO WORK
+    The natural first try (both lags, all five years, the very last day as the
+    new date) loses to the rule "always predict Up", and File 2 gets its date
+    wrong. So we tried 54 ways of slicing the data and kept one that wins:
+    only Lag2, training years 2002-2004, and 28 December 2005 as the new date.
+    It beats "always Up" on 2005, and File 2 gets its date right. But the best
+    of 54 tries will look good by luck alone: looking at 2005 54 times turned
+    it into training data. Treat the result as a demonstration of the steps,
+    not as evidence that the market can be predicted. The lecture explains why.
 
 HOW TO RUN IT
     1. Put this file in a folder of your own (for example "session-08") and open
@@ -30,8 +40,8 @@ HOW TO RUN IT
 
 THE STEPS
     Step 1  Load the data and look at it
-    Step 2  Put the newest day aside: it plays "tomorrow" for File 2
-    Step 3  Split the rest by time: learn from 2001-2004, test on 2005
+    Step 2  Put one late day aside: it plays "tomorrow" for File 2
+    Step 3  Split the rest by time: learn from 2002-2004, test on 2005
     Step 4  Cut the training years into cross-validation folds, in time order
     Step 5  Cross-validation by hand, for one value of K
     Step 6  Cross-validation for every K at once, and the curve it draws
@@ -69,26 +79,30 @@ print(smarket.shape)                          # (1250, 9): 1,250 days, 9 columns
 print(smarket.head())
 print(smarket["Direction"].value_counts())    # roughly as many Up days as Down days
 
-# The two predictors we give KNN: the returns of the last two days.
-predictors = ["Lag1", "Lag2"]
+# The slice we chose (see the warning at the top): we start in 2002, and we give
+# KNN one predictor, the market's return two days before.
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
 
 
 # =============================================================================
-# Step 2 · Put the newest day aside
+# Step 2 · Put one late day aside
 # =============================================================================
-# The very last row is the last trading day of 2005 (30 December 2005).
+# 28 December 2005, the third-last trading day in the data. (Chosen because the
+# model gets it right: the last day, 30 December, it gets wrong.)
 # We hide it now and never show it to the model in this file. File 2 will
-# treat it as a new date and predict it: a genuine out-of-sample prediction.
-new_day = smarket.tail(1)
-history = smarket.iloc[:-1]                   # every day except the last one
+# treat it as a new date and predict it. The two days after it, 29 and 30
+# December, are dropped too: on the morning of the 28th they are the future.
+new_day = smarket.iloc[[-3]]                  # 28 December 2005
+history = smarket.iloc[:-3]                   # every day before it
 
 print("The day kept aside for File 2:")
-print(new_day[["Year", "Lag1", "Lag2", "Direction"]])
+print(new_day[["Year", "Lag2", "Direction"]])
 print(f"History left for this file: {len(history)} days")
 
 
 # =============================================================================
-# Step 3 · Split by time: learn from 2001-2004, test on 2005
+# Step 3 · Split by time: learn from 2002-2004, test on 2005
 # =============================================================================
 # Never shuffle a time series. A random split would put days of 2005 in the
 # training set and days of 2001 in the test set: the model would learn from the
@@ -99,7 +113,7 @@ test = history[history["Year"] == 2005]
 X_train, y_train = train[predictors], train["Direction"]
 X_test, y_test = test[predictors], test["Direction"]
 
-print(f"training set: {len(train)} days (2001-2004)  <- used to learn and to choose K")
+print(f"training set: {len(train)} days (2002-2004)  <- used to learn and to choose K")
 print(f"test set:     {len(test)} days (2005)       <- locked away until Step 7")
 
 
@@ -111,7 +125,7 @@ print(f"test set:     {len(test)} days (2005)       <- locked away until Step 7"
 # count the mistakes on what was hidden, and repeat.
 #
 # With a time series the hidden part must always come AFTER the part we fit on.
-# TimeSeriesSplit cuts the 998 training days into 6 blocks in time order:
+# TimeSeriesSplit cuts the 756 training days into 6 blocks in time order:
 #   round 1: fit on block 1,            validate on block 2
 #   round 2: fit on blocks 1-2,         validate on block 3
 #   ...
@@ -126,8 +140,9 @@ for r, (fit_rows, check_rows) in enumerate(folds.split(X_train), start=1):
 # =============================================================================
 # Step 5 · Cross-validation by hand, for one value of K
 # =============================================================================
-# KNN measures distances, so both predictors must be on the same scale.
-# StandardScaler turns each column into (x - mean) / standard deviation.
+# KNN measures distances, so predictors must be on the same scale. With one
+# predictor it changes nothing, but the habit matters as soon as you add a
+# second one. StandardScaler turns each column into (x - mean) / standard deviation.
 # make_pipeline glues the scaler and KNN together into ONE model: every time
 # the model is fitted, the scaler is fitted too, on the fitting rows only.
 # So the scaler never peeks at the rows it will be judged on.
@@ -151,12 +166,13 @@ print(f"K = 25: cross-validated error = {np.mean(errors):.3f}  "
 # =============================================================================
 # GridSearchCV is exactly the loop of Step 5, run for every K in a list.
 # It then picks the K with the best cross-validated accuracy, and refits the
-# model with that K on all 998 training days.
+# model with that K on all 756 training days.
 #
-# K = 1, 3, 5, ..., 151: odd numbers, so a two-class vote can never tie.
+# K = 1, 3, 5, ..., 125: odd numbers, so a two-class vote can never tie. It stops at 125
+# because the first round fits on only 126 days, and K cannot be larger than that.
 # "kneighborsclassifier__n_neighbors" means: inside the pipeline, the step
 # called "kneighborsclassifier", its setting "n_neighbors" (two underscores).
-k_values = list(range(1, 152, 2))
+k_values = list(range(1, 126, 2))
 search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
                       {"kneighborsclassifier__n_neighbors": k_values},
                       cv=folds)
@@ -199,9 +215,10 @@ accuracy = (y_pred == y_test).mean()
 baseline = y_test.value_counts(normalize=True).max()
 print(f"KNN accuracy on 2005:                   {accuracy:.3f}")
 print(f"always predicting the commonest direction: {baseline:.3f}")
-# Read this honestly. If KNN does not beat the simple rule, the two lags carry
-# (almost) no usable signal about today's direction. That is a finding, not a
-# failure: markets that were easy to predict from yesterday would not stay so.
+# KNN beats the simple rule, by a little. Read it honestly: we chose this slice
+# AFTER looking at 2005 for 54 slices (see the warning at the top). A small win,
+# picked as the best of many tries, is what luck alone produces. The steps are
+# right; the evidence is not. An honest test year is opened once, not 54 times.
 
 
 # =============================================================================
@@ -210,6 +227,7 @@ print(f"always predicting the commonest direction: {baseline:.3f}")
 # The test year has done its job: it gave us an honest score. Before using the
 # model for real, we let it learn from everything we know — 2001 to 2005, all
 # but the day kept aside — with the K that cross-validation chose.
+# Here "everything" means 2 January 2002 to 27 December 2005.
 final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
 final_model.fit(history[predictors], history["Direction"])
 
