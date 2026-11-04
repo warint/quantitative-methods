@@ -1177,6 +1177,14 @@ for name, prob in zip(iris.target_names, iris_search.predict_proba(new_flower)[0
     print(f"   Pr({name}) = {prob:.2f}")
 ```
 
+::: {.muted}
+**Reading the output.** Cross-validation tried $K = 1$ to $15$ and kept **$K = 8$**. Its CV accuracy,
+**0.967**, means that on flowers held out of the fit, it named the right species 96.7% of the time:
+about 145 of the 150. Compare with the 51% of the stock market: here the measurements really do carry
+the answer. The new flower is called **versicolor** with $\Pr = 1.00$: all 8 of its nearest
+neighbours are versicolor, so the vote is unanimous.
+:::
+
 ### Regression: house prices
 
 ```{python}
@@ -1213,6 +1221,16 @@ new_house = pd.DataFrame({"Living.area": [2400], "bedrooms": [4], "bathrooms": [
 print(f"new house (2,400 sq ft, 4 bedrooms, 2.5 bathrooms, 1970, 2-car garage): "
       f"{best.predict(new_house)[0]:,.0f}")
 ```
+
+::: {.muted}
+**Reading the output.** RMSE is the typical size of a prediction error, in dollars, on houses held
+out of the fit. The bar is the standard deviation, **288,540**: the error you make by predicting the
+average price for every house. All three models beat it. $K = 25$ does best (**259,959**), and $K = 5$
+does worst: with only five neighbours each prediction follows a few houses, noise included (high
+variance). The gain is modest, about 10%, so these five features leave much of a price unexplained.
+The new house is predicted at **334,652**: the average price of the 25 most similar houses in the data.
+Given an RMSE of about 260,000, read it as a rough centre, not a quote.
+:::
 
 ### A random forest
 
@@ -1263,8 +1281,13 @@ print("forest's prediction for 28 December 2005:", forest.predict(new_day)[0],
 ```
 
 ::: {.muted}
-Five hundred trees, every core busy, and nothing beats the constant rule by much. The lesson is
-not about the method: this lag may carry no signal, and no amount of compute manufactures one.
+**Reading the output.** On the same time-ordered folds, the forest is right on **49.0%** of the
+hidden days, KNN on **51.1%**, and always predicting the commonest direction on **51.6%**. Five hundred
+trees, every core busy, and neither method beats the constant rule. The lesson is not about the
+method: this lag may carry no signal, and no amount of compute manufactures one. The forest still
+calls 28 December **Up**, with $\Pr(\text{Up}) = 0.67$ (the trees' average vote), and the market did
+rise. One right call is not evidence: a method that loses to "always Up" on hidden days will still
+be right on many single days.
 :::
 
 :::::::::
