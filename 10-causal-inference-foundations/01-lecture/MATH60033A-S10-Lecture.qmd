@@ -1,9 +1,10 @@
 ---
-title: "Session 10: Causal Inference: Establishing Cause and Effect in Data"
+title: "Session 10: Causal Inference, Built Step by Step"
 subtitle: "Published course presentation · repository edition"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session10_cours/"
+jupyter: python3
 filters:
   - ../../slides/drop-comments.lua
 format:
@@ -22,24 +23,49 @@ format:
     margin: 0.06
     smaller: true
     include-in-header:
-      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;} .reveal .r-stretch{max-height:480px !important;margin-bottom:80px !important;object-fit:contain;}</style>"
+      text: |
+        <style>
+        .reveal .slides{font-size:0.93em;}
+        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}
+        .reveal section img.big{max-height:470px;}
+        .reveal section img.mid{max-height:400px;}
+        .reveal section img.wide{max-height:250px;}
+        .reveal section img.short{max-height:190px;}
+        </style>
     footer: "MATH60033A · Session 10 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Imported from https://warin.ca/quant/en/session10_cours/. Content is static so the deck renders without R or Python. -->
+<!-- The code cells below are live: they execute at render time, so the output
+     on the slides is the output the students' own machines produce. Every
+     visible cell is plain Python — numpy, pandas, statsmodels, scikit-learn,
+     matplotlib — and either simulates its data or reads it straight from
+     Rajeev Dehejia's NBER page with pd.read_stata, so a student can copy any
+     one cell into a file of their own and run it, with nothing to download by
+     hand and no function of the instructor's to import.
+     The diagrams are drawn by economist-assets/build_causal_figures.py, from
+     the same simulation and the same data, so every number on a picture is
+     the number the matching cell prints. -->
+```{python}
+#| label: setup
+#| echo: false
+
+# Hidden: keep library warnings off the slides, and print tables wide.
+import warnings
+warnings.filterwarnings("ignore")
+import pandas as pd
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Causal Inference: Logic and Tools
-2. Counterfactual Framework
-3. Randomized Controlled Trials (RCTs)
-4. Observational Data: Challenges
-5. Matching Methods
-6. Exercise: Propensity Score Matching and Post-Matching Estimation
-7. Solution
-8. Your turn
+1. Part 1 · The question, in pictures
+2. Part 2 · A world where we know the truth
+3. Part 3 · Matching, tested on real data
+4. Part 4 · What matching does not fix
+5. Part 5 · Your recipe
 
 ## What session 10 is for {.scrollable}
 ::::: columns
@@ -48,7 +74,7 @@ format:
 
 ### The mathematics
 
-- State the **fundamental problem of causal inference**
+- State the **fundamental problem of causal inference**, and write the naive difference as effect plus **selection bias**
 - Explain why **randomisation** solves it, and what it costs
 - Estimate a **propensity score** and match treated to control units
 - Report an **ATT**, and state the assumption it rests on
@@ -59,9 +85,10 @@ format:
 
 ### The Python
 
-- Fit a propensity model and match with `NearestNeighbors`
-- Check **overlap** and **balance** before reading any estimate
-- Compare the naive difference with the matched one, and quantify the gap
+- Simulate both potential outcomes and watch a coin flip recover the effect
+- Fit a propensity score with `smf.logit` and match with `NearestNeighbors`
+- Check **overlap** and **balance** (standardised differences) before reading any estimate
+- Score the naive, regression and matched estimates against an experimental benchmark
 
 ::::
 
@@ -69,8 +96,8 @@ format:
 
 ### The international business
 
-- Estimate the effect of a policy that countries chose rather than drew
-- Say why the countries that adopted were already different
+- Estimate the effect of a programme that firms chose rather than drew
+- Say why the firms that joined were already different
 - Report how far the naive comparison would have been wrong
 
 ::::
@@ -94,646 +121,769 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-## Causal Inference: Logic and Tools {#imported-s10-001 .center .scrollable}
+## Part 1 · The question, in pictures {.center}
 
-## Session Overview {#imported-s10-002 .scrollable}
+## Did the programme work? {.scrollable}
 
--   Motivation: Why regression isn't enough
--   Key Concepts: Counterfactuals, potential outcomes, Rubin Causal Model
--   Core Methods: RCTs, Matching, IV, DiD
--   Assumptions & Validity: Parallel trends, exclusion restriction, internal vs. external validity
--   Applications in Policy and Management
+A government runs an **export-promotion programme**: advice, trade missions, a subsidy for the first
+foreign trade fair. Two years later, the firms that joined have grown their export sales **5.3 points
+faster** than the firms that did not.
 
-## Objectives {#imported-s10-003 .scrollable}
+::: columns
+::: {.column width="50%"}
+::: {.step}
+**The tempting reading:** the programme added 5.3 points of growth. Fund it again, and bigger.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**The question to ask first:** which firms *chose* to join? If the better firms joined, they would
+have grown faster anyway, and the 5.3 points is partly the programme and partly the firms.
+:::
+:::
+:::
 
--   Distinguish correlation from causation
--   Explain potential outcomes and counterfactuals
--   Apply causal inference techniques in R
--   Evaluate assumptions and threats to identification
--   Interpret empirical strategies in applied research
+::: {.check}
+**Today's question:** *did the policy do anything, or were the groups different to begin with?* By
+the end of the hour you can separate the two, and say when you cannot.
+:::
 
-## Objectives (cont.) {#imported-s10-004 .scrollable}
+## Every firm has two outcomes; you see one {.scrollable}
 
-![](economist-assets/potential-outcomes.png){.r-stretch}
+![](economist-assets/po-table.png){.mid fig-alt="Six firms, each with sales growth with and without the programme. For each firm only one of the two is observed; the other, and the effect, are question marks."}
 
-## Counterfactual Framework {#imported-s10-005 .center .scrollable}
+For firm $i$: $Y_i(1)$ is its sales growth **with** the programme, $Y_i(0)$ **without**. The effect
+for that firm is $\tau_i = Y_i(1) - Y_i(0)$. A firm either joins or does not, so one of the two is
+**always missing**, and so is $\tau_i$.
 
-## The Rubin Causal Model {#imported-s10-006 .scrollable}
+## The fundamental problem, and what we estimate instead {.scrollable}
 
-Causal inference is fundamentally about comparison---understanding what would have happened to the same unit had it experienced a different condition.
+::: {.warn}
+**No individual effect is ever observed** (Holland, 1986). Causal inference is a **missing-data
+problem**: we fill in the missing column with *other firms* who look like this one, and the whole
+method is in choosing those other firms well.
+:::
 
-In the potential outcomes framework, each unit [\\(i\\)]{.math .inline} has two potential outcomes:
+What we can hope to estimate is an **average**:
 
--   [\\(Y_i(1)\\)]{.math .inline}: the outcome if treated
--   [\\(Y_i(0)\\)]{.math .inline}: the outcome if untreated
+| Name | Formula | In words | When you want it |
+|---|---|---|---|
+| **ATE** | $\mathrm{E}[Y(1) - Y(0)]$ | the effect if **every** firm joined | rolling the programme out to all |
+| **ATT** | $\mathrm{E}[Y(1) - Y(0) \mid T = 1]$ | the effect on the firms **that joined** | was it worth it for those who used it? |
 
-The causal effect for unit [\\(i\\)]{.math .inline} is defined as [\\(Y_i(1) - Y_i(0)\\)]{.math .inline}.
+::: {.muted}
+$T$ is the treatment: 1 if the firm joined, 0 if not. Matching, today's method, estimates the **ATT**.
+:::
 
-> However, only one of these outcomes is ever observed; the other remains a counterfactual. This is the core problem that causal inference aims to address.
+## Why the naive comparison fails, in one line {.scrollable}
 
-## Why It Matters {#imported-s10-007 .scrollable}
+$$
+\underbrace{\mathrm{E}[Y \mid T{=}1] - \mathrm{E}[Y \mid T{=}0]}_{\text{what you compute}}
+=
+\underbrace{\mathrm{E}[Y(1) - Y(0) \mid T{=}1]}_{\text{ATT: what you want}}
++
+\underbrace{\mathrm{E}[Y(0) \mid T{=}1] - \mathrm{E}[Y(0) \mid T{=}0]}_{\text{selection bias}}
+$$
 
-Without this framework, we cannot articulate what it means for a treatment to have an effect. Understanding causal effects requires us to think explicitly about what did *not* happen.
+![](economist-assets/po-decomposition.png){.wide fig-alt="A bar of 5.33 split into the effect, 2.00, and selection bias, 3.33."}
 
-## Why It Matters (cont.) {#imported-s10-008 .scrollable}
+::: {.check}
+**Selection bias** is how differently the two groups would have done **without** the programme. Here
+(from the simulation in Part 2) the firms that joined would have grown 3.33 points faster anyway.
+:::
 
-## Real Example of Observed and Counterfactual Outcomes {#imported-s10-009 .scrollable}
+## The picture behind the bias: a back door {.scrollable}
 
-Consider a public policy intervention such as a **subsidy for electric-vehicle (EV) purchases**. Suppose the government introduces a financial incentive intended to increase EV adoption among households. For each household (i), we can define two potential outcomes:
+![](economist-assets/dag-selection.png){.mid fig-alt="Left: productivity causes both joining the programme and sales growth. Right: a coin decides who joins, and productivity no longer reaches the programme."}
 
-[\\\[ Y_i(1) = \\text{EV adoption if the household receives the subsidy}, \\\]]{.math .display}
+::: {.check}
+**Left:** productive firms join more *and* grow more, so the comparison picks up both paths.
+**Right:** a coin cannot know which firms are productive, so the back door is shut, and the
+difference in means measures the programme alone. That is the whole case for **randomisation**.
+:::
 
-[\\\[ Y_i(0) = \\text{EV adoption if the household does not receive the subsidy}. \\\]]{.math .display}
+## Part 2 · A world where we know the truth {.center}
 
-## Observed vs. Counterfactual {#imported-s10-010 .scrollable}
+## Step 1 · Simulate 1,000 firms, with both outcomes {.scrollable}
 
-Imagine a specific household, say **Household 27**. After the policy is implemented, Household 27 *does* receive the subsidy and purchases an electric vehicle. Therefore, we observe:
+In a simulation we can do what real data never allows: write down **both** columns.
 
-[\\\[ Y\_{27}(1) = 1. \\\]]{.math .display}
+```{python}
+#| echo: true
 
-But we never observe the counterfactual outcome:
+# Step 1 · 1,000 firms; the programme adds exactly +2 points to every one
+import numpy as np
+import pandas as pd
 
-[\\\[ Y\_{27}(0) = ? \\\]]{.math .display}
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)                        # nobody in the ministry sees this
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2                            # the true effect: +2
 
-## The Missing Counterfactual {#imported-s10-011 .scrollable}
-
-This non-observed outcome represents what would have happened *to the same household* had it **not** received the subsidy. It is fundamentally unobservable, because the household cannot simultaneously be treated and untreated. Yet this is precisely the comparison needed to identify the causal effect for that household:
-
-[\\\[ \\text{Causal Effect}\*{27} = Y\*{27}(1) - Y\_{27}(0). \\\]]{.math .display}
-
-Since [\\(Y\_{27}(0)\\)]{.math .inline} is missing by design---not due to lack of data but because of the logic of causality---researchers must rely on techniques such as randomized controlled trials, matching, instrumental variables, or difference-in-differences to recover credible approximations of this unobserved counterfactual.
-
-This tension between **observed reality** and **missing counterfactuals** encapsulates the fundamental problem of causal inference articulated by Rubin (1974) and formalized in the potential-outcomes framework.
-
-## How to Proceed {#imported-s10-012 .scrollable}
-
-> We aim to estimate the average causal effect (ATE) by constructing designs or assumptions that allow us to approximate the missing counterfactuals.
-
-How? By creating comparable groups through randomization, matching, or leveraging natural experiments.
-
-## Randomized Controlled Trials (RCTs) {#imported-s10-013 .center .scrollable}
-
-## Why Randomize? {#imported-s10-014 .scrollable}
-
-Randomization is the most reliable method for ensuring that treated and control groups are comparable.
-
-> It removes systematic differences between groups, which means that any observed difference in outcomes can be attributed to the treatment.
-
-## What For? {#imported-s10-015 .scrollable}
-
-RCTs allow us to isolate the effect of a single intervention, making them the gold standard for internal validity.
-
-They are widely used in medicine, economics, and the social sciences.
-
-## How It Works {#imported-s10-016 .scrollable}
-
-Units are assigned to treatment or control groups purely by chance.
-
-> This ensures balance on both observed and unobserved confounders.
-
-## Example in R {#imported-s10-017 .scrollable}
-
-Suppose an employer offers an intensive data-analytics training course aimed at improving employees' performance in tasks that rely on quantitative analysis and digital tools. The variable `treat` indicates whether an employee participated in the training (1) or not (0). The variables `age`, `education`, and `experience` describe each employee's profile: `age` in years, `education` as years of schooling, and `experience` as years of labour-market experience, approximately measured as age minus 18 with some noise, which is standard in labour economics.
-
-## Data Generation Process {#imported-s10-018 .scrollable}
-
-In this organization, employees who are slightly older and more educated are more likely to be selected or to self-select into the training programme. This is reflected in the way `treat` is generated: the probability of being treated increases with age and education through the propensity score `ps`. This captures realistic selection mechanisms, such as managers prioritizing "high-potential" workers or those already in more skilled positions.
-
-The outcome variable, `outcome`, can be interpreted as an index of job performance or productivity, for example a standardized annual performance score used in internal evaluations, or an objective productivity measure (such as the number of correctly processed files, resolved cases, or successfully completed projects). The data-generating process assumes that performance increases with age, education, and experience, which is consistent with human capital theory. On top of these effects, the training programme has a true causal effect of +3 units on the performance index for those who participate. This models the idea that, after controlling for their characteristics, employees who receive the training perform systematically better than similar employees who do not.
-
-## Data Simulation {#imported-s10-019 .scrollable}
-
-::::: cell
-::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
-import numpy as np, pandas as pd
-from scipy.special import expit
-
-rng = np.random.default_rng(123)
-n = 800
-
-# Covariates
-age        = np.round(rng.normal(40, 10, n))
-education  = np.round(rng.normal(14, 2, n))
-experience = np.maximum(0, age - 18 + rng.normal(0, 3, n))
-
-# Treatment is NOT random: older, more educated people take it up more often.
-ps_true = expit(-5 + 0.05 * age + 0.15 * education)
-treat   = rng.binomial(1, ps_true)
-
-# The true effect we are trying to recover is +2.5
-outcome = 20 + 2.5 * treat + 0.3 * age + 0.8 * education + rng.normal(0, 5, n)
-
-df = pd.DataFrame(dict(age=age, education=education, experience=experience,
-                       treat=treat, outcome=outcome))
+firms = pd.DataFrame({"productivity": productivity,
+                      "sales_without": sales_without, "sales_with": sales_with})
+print(firms.head().round(2))
+print("true effect, every firm:", (firms["sales_with"] - firms["sales_without"]).mean())
 ```
+
+::: {.check}
+**Reading it:** each row is a firm with its two potential outcomes. More productive firms grow
+faster with or without the programme (the `3 * productivity`). Every effect is exactly **+2**:
+that is the number each method must recover.
 :::
 
-::: {.cell-output .cell-output-stdout}
-      treat age education experience  outcome
-    1     0  34        15   15.13293 51.35139
-    2     0  38        13   21.96954 47.27609
-    3     1  56        16   36.63801 63.76421
-    4     0  41        16   21.21841 65.16926
-    5     0  41        15   17.86886 55.22382
-    6     0  57        14   38.37165 65.50069
-:::
-:::::
+## Step 2 · Let a coin decide who joins {.scrollable}
 
-## Estimating the Treatment Effect {#imported-s10-020 .scrollable}
+```{python}
+#| echo: true
 
-::::: cell
-::: {#cb3 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-rng = np.random.default_rng(42)
-n = 100
-treatment = rng.binomial(1, 0.5, n)          # randomised: no confounding
-y = 50 + 5 * treatment + rng.normal(0, 10, n)
+# Step 2 · Randomise: a coin flip decides; we then see only one outcome per firm
+import numpy as np
+import pandas as pd
 
-y[treatment == 1].mean() - y[treatment == 0].mean()
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2
+
+coin = rng.integers(0, 2, n)                                    # 1 = joins, 0 = does not
+observed = np.where(coin == 1, sales_with, sales_without)       # the column you would get
+
+print("difference in means:", round(observed[coin == 1].mean() - observed[coin == 0].mean(), 2))
+print("mean productivity, joined vs not:",
+      round(productivity[coin == 1].mean(), 2), round(productivity[coin == 0].mean(), 2))
 ```
+
+::: {.check}
+**Reading it:** the plain difference in means gives **2.15**, close to the true +2. The two groups
+have nearly the same productivity: the coin balanced it **without anyone measuring it**. The 0.15
+is luck, not bias, which the next step shows.
 :::
 
-::: {.cell-output .cell-output-stdout}
-    [1] 6.975967
-:::
-:::::
-
-## Interpretation {#imported-s10-021 .scrollable}
-
-Here, the difference in means provides an unbiased estimate of the Average Treatment Effect (ATE).
-
-## Observational Data: Challenges {#imported-s10-022 .center .scrollable}
-
-## Why Not Always Use RCTs? {#imported-s10-023 .scrollable}
-
-RCTs are not always feasible due to ethical, financial, or logistical constraints. In many real-world settings, we rely on observational data.
-
-## What's the Risk? {#imported-s10-024 .scrollable}
-
-In observational studies, treatment assignment is not random. This introduces selection bias: treated and control units may differ systematically in ways that affect the outcome.
-
-## What We Need {#imported-s10-025 .scrollable}
-
-To estimate causal effects from observational data, we need methods that adjust for these differences or mimic randomization.
-
-## Matching Methods {#imported-s10-026 .center .scrollable}
-
-## Why Use Matching? {#imported-s10-027 .scrollable}
-
-Matching is a technique designed to reduce selection bias in observational studies by creating a control group that is comparable to the treated group on observed characteristics.
-
-## What For? {#imported-s10-028 .scrollable}
-
-It aims to emulate the balance achieved in RCTs, making the treatment and control groups as similar as possible in terms of observable covariates.
-
-## How It Works {#imported-s10-029 .scrollable}
-
-We calculate a propensity score---the probability of receiving treatment given observed covariates---and match each treated unit to one or more control units with a similar score.
-
-## R Example {#imported-s10-030 .scrollable}
-
-Imagine that a large public-sector organization has implemented an advanced **data-analytics training programme** for its employees. Participation is voluntary but encouraged for individuals working in analytically demanding units. As a result, the employees who choose to enrol tend to be somewhat older, more educated, and more experienced---characteristics that are also associated with better job performance. This creates a **confounding problem**: treated and untreated employees differ in systematic ways that also predict outcomes.
-
-## Objective {#imported-s10-031 .scrollable}
-
-The HR analytics team wants to estimate whether the training actually **improves job performance**, measured by a standardized annual performance index. They cannot rely on simple mean comparisons, because employees who enrolled in the training differ on observable dimensions that are associated with performance. To obtain a more credible estimate of the causal effect, they apply **nearest-neighbour propensity score matching**.
-
-## The model {#imported-s10-032 .scrollable}
-
-::::: cell
-::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-from sklearn.neighbors import NearestNeighbors
-import statsmodels.formula.api as smf
-
-# 1:1 nearest-neighbour matching on the propensity score
-treated, control = df[df.treat == 1], df[df.treat == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-_, idx = nn.kneighbors(treated[["pscore"]])
-matched = pd.concat([treated, control.iloc[idx.ravel()]])
-
-smf.ols("outcome ~ treat", data=matched).fit().summary()
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-        Welch Two Sample t-test
-
-    data:  outcome by treat
-    t = -3.0569, df = 463.82, p-value = 0.002366
-    alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
-    95 percent confidence interval:
-     -4.4337743 -0.9638923
-    sample estimates:
-    mean in group 0 mean in group 1 
-           57.18446        59.88329 
-:::
-:::::
-
-implements the following reasoning. The `matchit()` function constructs a matched sample in which treated and untreated employees are paired with others who have similar values of age, education, and experience. This aims to approximate the conditions of a randomized experiment by balancing key covariates. After matching, the organization compares the performance outcomes between the two groups using a t-test. The goal is to estimate how much of the performance difference can plausibly be attributed to the training rather than to pre-existing differences in employee characteristics.
-
-## Interpretation {#imported-s10-033 .scrollable}
-
-In this scenario, the matching procedure is understood as a method for approximating the unobserved counterfactual---what treated employees' performance would have been had they not participated.
-
-> The resulting matched estimate provides a substantively meaningful measure of the programme's effectiveness under the assumption of conditional independence.
-
-## Limitations {#imported-s10-034 .scrollable}
-
-> Matching only accounts for observed variables. Any unmeasured confounder can still bias the results.
-
-## Exercise: Propensity Score Matching and Post-Matching Estimation {#imported-s10-035 .center .scrollable}
-
-## Problem Statement {#imported-s10-036 .scrollable}
-
-You are given a dataframe named `df` with the following variables:
-
--   `treat`: a binary treatment indicator equal to 1 for treated units and 0 for control units.
--   `outcome`: a continuous outcome.
--   `age`, `education`, `experience`: pre-treatment covariates that may jointly influence both treatment assignment and the outcome.
-
-Your task is to estimate the causal effect of the treatment on the outcome using propensity score matching. Use the **MatchIt** package to implement nearest-neighbor matching without replacement, and evaluate the quality of the matching using **PSAgraphics**. Then, run a linear regression of the outcome on the treatment in the matched sample.
-
-## Steps to Follow {#imported-s10-037 .scrollable}
-
-Perform the following steps:
-
-1.  Estimate a propensity score using a logit model with covariates `x1`, `x2`, and `x3`.
-2.  Perform nearest-neighbor matching (one-to-one) using the estimated propensity score.
-3.  Assess covariate balance before and after matching using graphical diagnostics.
-4.  Extract the matched dataset and estimate the average treatment effect on the treated (ATT) using a linear regression of `y` on `treat`.
-5.  Interpret the results substantively.
-
-## **Solution** {#imported-s10-038 .center .scrollable}
-
-## **Step 1. Estimating the propensity score** {#imported-s10-039 .scrollable}
-
-Propensity scores summarize the probability of receiving treatment conditional on observable covariates. Here, the probability is modeled via a logistic regression. This corresponds to the classical Rosenbaum and Rubin (1983) framework in which identification requires unconfoundedness and overlap.
-
-::::: cell
-::: {#cb7 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-import statsmodels.formula.api as smf
-
-# Estimate the propensity score: the probability of treatment given covariates
-ps_model = smf.logit("treat ~ age + education + experience", data=df).fit()
-df["pscore"] = ps_model.predict(df)
-
-print(ps_model.summary())
-```
-:::
-
-::: {.cell-output .cell-output-stdout}
-    Call:
-    glm(formula = treat ~ age + education + experience, family = binomial(), 
-        data = df)
-
-    Coefficients:
-                Estimate Std. Error z value Pr(>|z|)    
-    (Intercept) -4.47646    0.85261  -5.250 1.52e-07 ***
-    age          0.02815    0.02818   0.999 0.317732    
-    education    0.13609    0.04076   3.339 0.000841 ***
-    experience   0.02170    0.02669   0.813 0.416268    
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    (Dispersion parameter for binomial family taken to be 1)
-
-        Null deviance: 965.23  on 799  degrees of freedom
-    Residual deviance: 918.46  on 796  degrees of freedom
-    AIC: 926.46
-
-    Number of Fisher Scoring iterations: 4
-:::
-:::::
-
-This output provides the estimated influence of each covariate on the likelihood of receiving the treatment. Covariates should be selected based on theoretical arguments regarding confounding, rather than any predictive purpose.
-
-## **Step 2. Performing nearest-neighbor matching** {#imported-s10-040 .scrollable}
-
-Using the estimated scores, nearest-neighbor matching without replacement is implemented. This aligns each treated unit with a similar untreated unit based on the estimated propensity score.
-
-::::::: panel-tabset
-### The code
-
-::::: cell
-::: {#cb9 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-from sklearn.neighbors import NearestNeighbors
-
-treated, control = df[df.treat == 1], df[df.treat == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-_, idx = nn.kneighbors(treated[["pscore"]])
-matched = pd.concat([treated, control.iloc[idx.ravel()]])
-
-print(f"{len(treated)} treated matched to {len(set(idx.ravel()))} distinct controls")
-```
-:::
-:::::
-
-### Before matching
-
-::: {.cell-output .cell-output-stdout}
-    Call:
-    matchit(formula = treat ~ age + education + experience, data = df, 
-        method = "nearest", distance = "logit", replace = FALSE)
-
-    Summary of Balance for All Data:
-               Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
-    distance          0.3319        0.2745          0.5083     1.1864    0.1450
-    age              43.2661       38.8025          0.4570     1.0457    0.0792
-    education        14.4206       13.9436          0.2416     0.9749    0.0370
-    experience       25.4287       20.7730          0.4478     1.0897    0.1282
-               eCDF Max
-    distance     0.2264
-    age          0.1986
-    education    0.1070
-    experience   0.2060
-:::
-
-### After matching
-
-::: {.cell-output .cell-output-stdout}
-    Summary of Balance for Matched Data:
-               Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
-    distance          0.3319        0.3288          0.0277     1.0908    0.0035
-    age              43.2661       43.2661          0.0000     1.1483    0.0136
-    education        14.4206       14.3648          0.0283     1.0448    0.0109
-    experience       25.4287       25.1901          0.0230     1.1726    0.0188
-               eCDF Max Std. Pair Dist.
-    distance     0.0429          0.0295
-    age          0.0472          5.6738
-    education    0.0258          0.9932
-    experience   0.0515          0.5554
-
-    Sample Sizes:
-              Control Treated
-    All           567     233
-    Matched       233     233
-    Unmatched     334       0
-    Discarded       0       0
-:::
-
-:::::::
-
-## **Interpreting the Balance Table Before Matching** {#imported-s10-041 .scrollable}
-
-You have the following results:
-
-  ------------------------------------------------------------------------------------------------
-  Variable     Treated Mean   Control Mean   Std. Mean Diff.   Var. Ratio   eCDF Mean   eCDF Max
-  ------------ -------------- -------------- ----------------- ------------ ----------- ----------
-  distance     0.3319         0.2745         0.5083            1.1864       0.1450      0.2264
-
-  age          43.2661        38.8025        0.4570            1.0457       0.0792      0.1986
-
-  education    14.4206        13.9436        0.2416            0.9749       0.0370      0.1070
-
-  experience   25.4287        20.7730        0.4478            1.0897       0.1282      0.2060
-  ------------------------------------------------------------------------------------------------
-
-These numbers reflect the **balance before matching**, meaning how different the treated and control groups are in the raw data.
-
-## **Means (Treated vs. Control)** {#imported-s10-042 .scrollable}
-
-These columns simply report the average value of each variable in the treated and control groups.
-
-For example:
-
--   **Age**: Treated = 43.27, Control = 38.80 On average, treated individuals are **older**.
-
--   **Experience**: Treated = 25.43, Control = 20.77 Treated individuals have **more prior experience**.
-
-These raw differences suggest **selection into treatment**: people with higher age and experience are more likely to be treated.
-
-## **Standardized Mean Difference (SMD)** {#imported-s10-043 .scrollable}
-
-This is the most important measure. It shows the difference in means in units of standard deviations. The rule of thumb:
-
--   \|SMD\| \< **0.10** → excellent balance
--   \|SMD\| \< **0.20** → acceptable
--   \|SMD\| \> **0.25** → problematic imbalance
--   \|SMD\| \> **0.40** → severe imbalance
-
-our values:
-
--   **distance**: 0.5083 → severe imbalance
--   **age**: 0.4570 → severe imbalance
--   **experience**: 0.4478 → severe imbalance
--   **education**: 0.2416 → moderate imbalance
-
-## **Interpretation** {#imported-s10-044 .scrollable}
-
-Before matching, the treated and control groups differ substantially on the covariates and on the propensity score. The matching procedure has a lot of work to do.
-
-## **Variance Ratio** {#imported-s10-045 .scrollable}
-
-Variance ratio = Var(treated) / Var(control)
-
-Guidelines:
-
--   Between **0.80 and 1.25** → good
--   Below 0.60 or above 1.40 → problematic
-
-our values:
-
--   **age**: 1.0457 → good
--   **education**: 0.9749 → excellent
--   **experience**: 1.0897 → acceptable
--   **distance**: 1.1864 → acceptable
-
-## **Interpretation** {#imported-s10-046 .scrollable}
-
-Variances are fairly similar across groups. The main problem is **mean differences**, not dispersion.
-
-## **eCDF Mean and eCDF Max** {#imported-s10-047 .scrollable}
-
-These measure differences between the treated and control **entire distributions**:
-
--   **eCDF Mean**: average difference in cumulative distribution functions
--   **eCDF Max**: maximum difference between distributions (Kolmogorov--Smirnov distance)
-
-Interpretation thresholds are less formal, but:
-
--   Values \< **0.10** → good
--   Values between **0.10 and 0.20** → moderate imbalance
--   Values \> **0.20** → problematic imbalance
-
-our values:
-
--   **distance eCDF Max = 0.2264** → problematic
--   **experience eCDF Max = 0.2060** → problematic
--   **age eCDF Max = 0.1986** → moderate-to-high
--   **education eCDF Max = 0.1070** → acceptable
-
-## **Interpretation** {#imported-s10-048 .scrollable}
-
-Age, experience, and the propensity score distributions differ notably between groups.
-
-## **Overall Interpretation** {#imported-s10-049 .scrollable}
-
-our pre-matching table shows **substantial imbalance** between treated and control units:
-
-1.  **Age** and **experience** show large standardized mean differences (\> 0.45).
-2.  The **propensity score (distance)** also shows a very large SMD (\> 0.50).
-3.  Distributional metrics (eCDF Max) confirm these differences.
-4.  Variance ratios are acceptable, so the issue is not variance but **mean shifts**.
-
-## **Overall Interpretation** (cont.) {#imported-s10-050 .scrollable}
-
-Before matching, treated and untreated groups are **not comparable**.
-
-Matching is therefore **necessary** to construct a credible counterfactual.
-
-This table is exactly what we expect in observational data: the treatment is not randomized, so individuals self-select into treatment based on characteristics like age and experience.
-
-## **Step 3. Covariate balance assessment** {#imported-s10-051 .scrollable}
-
-Diagnosing the quality of matching is essential. Graphical tools from **PSAgraphics** are particularly useful for evaluating whether the pre-treatment covariates are better aligned post-matching.
-
-:::: cell
-::: {#cb11 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+## Step 3 · Flip the coin 1,000 times {.scrollable}
+
+```{python}
+#| echo: true
+#| output-location: column
+#| fig-width: 5.4
+#| fig-height: 4.0
+
+# Step 3 · Rerun the experiment: is the coin right on average?
+import numpy as np
 import matplotlib.pyplot as plt
 
-# Before matching: do the two groups even overlap?
-df[df.treat == 1]["pscore"].plot.density(label="Treated")
-df[df.treat == 0]["pscore"].plot.density(label="Control")
-plt.xlabel("Propensity score"); plt.title("Before matching"); plt.legend()
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2
+
+estimates = []
+for draw in range(1000):
+    coin = rng.integers(0, 2, n)
+    observed = np.where(coin == 1, sales_with, sales_without)
+    estimates.append(observed[coin == 1].mean() - observed[coin == 0].mean())
+
+print("mean of the estimates:", round(np.mean(estimates), 2))
+print("their spread (sd):    ", round(np.std(estimates), 2))
+plt.hist(estimates, bins=30)
+plt.axvline(2, color="red")
+plt.xlabel("difference in means, one coin each")
 plt.show()
 ```
+
+::: {.check}
+**Reading it:** centred on **2** (the red line): randomisation is **unbiased**. Any one experiment
+misses by about 0.23 (the spread). That spread is what a **standard error** measures: randomisation
+turns bias into noise, and noise is what confidence intervals are for.
 :::
-::::
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-6-1.png){.r-stretch width="960"}
+## Step 4 · Now let the firms choose {.scrollable}
 
-## **Step 4. Covariate balance assessment (continued)** {#imported-s10-052 .scrollable}
+```{python}
+#| echo: true
 
-:::: cell
-::: {#cb12 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# After matching: the two distributions should sit on top of each other
-matched[matched.treat == 1]["pscore"].plot.density(label="Treated")
-matched[matched.treat == 0]["pscore"].plot.density(label="Control")
-plt.xlabel("Propensity score"); plt.title("After matching"); plt.legend()
+# Step 4 · Self-selection: productive firms are more likely to join
+import numpy as np
+
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2
+
+applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
+observed = np.where(applies == 1, sales_with, sales_without)
+
+naive = observed[applies == 1].mean() - observed[applies == 0].mean()
+bias = sales_without[applies == 1].mean() - sales_without[applies == 0].mean()
+print(f"share that joined:     {applies.mean():.2f}")
+print(f"naive difference:      {naive:.2f}")
+print(f"selection bias:        {bias:.2f}   (needs the column you never see)")
+print(f"naive minus bias:      {naive - bias:.2f}")
+```
+
+::: {.check}
+**Reading it:** same firms, same true effect of +2, but the naive comparison now says **5.33**. The
+gap, **3.33**, is exactly the selection bias of the formula: firms that joined would have grown 3.33
+points faster without the programme. In real data that line cannot be computed.
+:::
+
+## Step 5 · You *can* see that the groups differ {.scrollable}
+
+```{python}
+#| echo: true
+#| output-location: column
+#| fig-width: 5.0
+#| fig-height: 4.0
+
+# Step 5 · Compare the groups BEFORE treatment
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
+
+firms = pd.DataFrame({"productivity": productivity, "applies": applies})
+print(firms.groupby("applies")["productivity"].mean().round(2))
+
+firms.boxplot(column="productivity", by="applies")
+plt.suptitle("")
+plt.title("Productivity, before the programme")
 plt.show()
 ```
+
+::: {.check}
+**Reading it:** the firms that joined were about **one standard deviation more productive** before
+the programme existed. This is the **balance check**: compare the groups on what was fixed
+*before* treatment. In real data you cannot see the bias, but you can see this.
 :::
-::::
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-7-1.png){.r-stretch width="960"}
+## What randomisation buys, and what it costs {.scrollable}
 
-## **Step 5. Covariate balance assessment (continued)** {#imported-s10-053 .scrollable}
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Buys:**
 
-:::: cell
-::: {#cb13 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-df.boxplot(column="age", by="treat")
-plt.suptitle(""); plt.title("Before matching: age"); plt.show()
+- balance on **everything**, measured or not (Step 2)
+- an unbiased estimate from a **difference in means** (Step 3)
+- a standard error that means what it says
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Costs:**
+
+- often impossible: you cannot randomise which **countries** sign a trade agreement
+- sometimes unethical, often expensive
+- tells you about the people in the trial: **external validity** is argued, not estimated
+:::
+:::
+:::
+
+::: {.step}
+**So the rest of the session asks:** without a coin, can we *build* a control group that looks like
+the treated group, and does it give the right answer? We test it where the right answer is known.
+:::
+
+## Part 3 · Matching, tested on real data {.center}
+
+## LaLonde's test {.scrollable}
+
+![](economist-assets/nsw-design.png){.mid fig-alt="Left: the experiment, 185 trained and 260 untrained by lottery. Right: the same 185 trained compared with 15,992 people from a survey."}
+
+The **National Supported Work** programme (US, 1976–77) gave disadvantaged workers a job-training
+placement **by lottery**. LaLonde (1986) kept the trainees, threw away the lottery's controls, and
+asked whether the methods economists use on survey data would recover the experiment's answer.
+
+| Column | Meaning | Column | Meaning |
+|---|---|---|---|
+| `treat` | 1 = trained | `married`, `nodegree` | 1 = married; 1 = no high-school diploma |
+| `age`, `education` | years | `re74`, `re75` | earnings in 1974 and 1975, **before** training, in dollars |
+| `black`, `hispanic` | 1 = yes | `re78` | earnings in 1978, **after**: the outcome, in dollars |
+
+## Step 1 · The experiment gives the answer {.scrollable}
+
+```{python}
+#| echo: true
+
+# Step 1 · The lottery's estimate: our benchmark
+import pandas as pd
+import statsmodels.formula.api as smf
+
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")            # Dehejia & Wahba's version of the experiment
+
+print(nsw["treat"].value_counts())
+experiment = smf.ols("re78 ~ treat", data=nsw).fit()
+print(experiment.summary().tables[1])
 ```
+
+::: {.check}
+**Reading it:** with a lottery, the regression on `treat` alone is the difference in means. Training
+raised 1978 earnings by **\$1,794** (standard error \$633, p = 0.005). This is the number every method
+on the next slides is trying to hit.
 :::
-::::
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-8-1.png){.r-stretch width="960"}
+## Step 2 · Swap in survey controls: the naive estimate {.scrollable}
 
-## **Step 6. Covariate balance assessment (continued)** {#imported-s10-054 .scrollable}
+```{python}
+#| echo: true
 
-Other diagnostic visuals include mirrored histograms or the "love plot" from the cobalt package, though the exercise here focuses on PSAgraphics.
+# Step 2 · The 185 trainees against 15,992 people from the Current Population Survey
+import pandas as pd
 
-:::: cell
-::: {#cb14 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-matched.boxplot(column="age", by="treat")
-plt.suptitle(""); plt.title("After matching: age"); plt.show()
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+
+print(data["treat"].value_counts())
+print(data.groupby("treat")["re78"].mean().round(0))
+naive = data.loc[data["treat"] == 1, "re78"].mean() - data.loc[data["treat"] == 0, "re78"].mean()
+print(f"naive estimate: {naive:,.0f} dollars")
 ```
+
+::: {.warn}
+**Reading it:** the naive comparison says training **cut** earnings by **\$8,498**: the wrong sign and
+five times too large. Nothing is wrong with the arithmetic. The survey's average worker earned far
+more than these trainees ever would have; that is selection bias, \$10,000 of it.
 :::
-::::
 
-![](imported-assets/index_files/figure-revealjs/unnamed-chunk-9-1.png){.r-stretch width="960"}
+## Step 3 · Check balance: how different are the groups? {.scrollable}
 
-## **Step 4. Estimating the treatment effect on the matched sample** {#imported-s10-055 .scrollable}
+```{python}
+#| echo: true
 
-After matching, the dataset contains reweighted or selected observations reflecting similarity in covariate distributions. The linear model now approximates the average treatment effect on the treated (ATT). The regression does not have a causal interpretation unless matching succeeded in balancing confounders.
+# Step 3 · Means and standardised differences, before matching
+import numpy as np
+import pandas as pd
 
-::::: cell
-::: {#cb15 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# The ATT: the treatment effect on the matched sample
-att = smf.ols("outcome ~ treat", data=matched).fit()
-print(att.summary())
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
 
-print(f"\nATT = {att.params['treat']:+.3f}   (the truth we simulated is +2.5)")
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
+balance = pd.DataFrame({"treated": treated[X].mean(), "control": control[X].mean()})
+balance["std. diff."] = (treated[X].mean() - control[X].mean()) / sd
+print(balance.astype(float).round(2))
 ```
+
+::: {.check}
+**Reading it:** the **standardised difference** is the gap in means in standard deviations, so years
+and dollars compare. Below **0.1** is balanced; most here are out by **0.7 to 2.4**. Trainees are younger,
+mostly Black, unmarried, without a diploma, and earned under \$2,100 a year before, against \$14,000.
 :::
 
-::: {.cell-output .cell-output-stdout}
-    Call:
-    lm(formula = outcome ~ treat, data = matched_df, weights = weights)
+## The idea of matching: one number to compare on {.scrollable}
 
-    Residuals:
-        Min      1Q  Median      3Q     Max 
-    -24.486  -6.996   0.210   6.624  33.139 
+![](economist-assets/matching-idea.png){.wide fig-alt="Treated people on top, controls below, on a propensity-score axis. Each treated person is joined by a line to the control with the closest score; controls far from every treated person are grey and unused."}
 
-    Coefficients:
-                Estimate Std. Error t value Pr(>|t|)    
-    (Intercept)  57.1845     0.6243  91.599  < 2e-16 ***
-    treat         2.6988     0.8829   3.057  0.00237 ** 
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    Residual standard error: 9.529 on 464 degrees of freedom
-    Multiple R-squared:  0.01974,   Adjusted R-squared:  0.01763 
-    F-statistic: 9.344 on 1 and 464 DF,  p-value: 0.002366
+::: columns
+::: {.column width="50%"}
+**Propensity score** $e(x) = P(T = 1 \mid X = x)$: the probability of being trained, given the eight
+characteristics. Fit it with a **logit** (session 7).
 :::
-:::::
+::: {.column width="50%"}
+**Rosenbaum and Rubin (1983):** if the eight $X$ explain who got trained, comparing people with the
+**same score** is as good as comparing people with the same eight $X$. Eight dimensions become one.
+:::
+:::
 
-The coefficient on `treat` corresponds to the estimated ATT. Weighting is recommended because MatchIt may assign non-unit weights even under nearest-neighbor algorithms.
+::: {.check}
+**Matching:** pair each trainee with the survey person whose score is **closest**: the nearest
+neighbour of session 8, on one number. The matched controls are the "other firms" that fill in the
+missing column.
+:::
 
-High R² is not the goal in causal inference; unbiased estimation of the treatment effect is.
+## Step 4 · Estimate the propensity score {.scrollable}
 
-## **Step 5. Interpretation** {#imported-s10-056 .scrollable}
+```{python}
+#| echo: true
 
-If the coefficient on `treat` is positive and statistically significant, this indicates that, conditional on observable characteristics and after matching treated individuals with comparable untreated individuals, the treatment led to an increase in the outcome `y` for the treated group. The magnitude represents the estimated average causal effect among those who actually received the treatment.
+# Step 4 · A logit of treatment on the pre-training characteristics
+import pandas as pd
+import statsmodels.formula.api as smf
 
-Interpretation must emphasize the assumptions underlying matching: unconfoundedness cannot be tested statistically, and overlap must be verified graphically. When these assumptions are plausible, propensity score matching constitutes an effective strategy for reducing selection bias in observational studies.
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
 
-## **Additional Note on Naive Difference-in-Means** {#imported-s10-057 .scrollable}
-
-::::: cell
-::: {#cb17 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# The naive comparison, for contrast
-df.loc[df.treat == 1, "outcome"].mean() - df.loc[df.treat == 0, "outcome"].mean()
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+print(data.groupby("treat")["pscore"].describe().round(3))
 ```
+
+::: {.check}
+**Reading it:** a trainee's median score is **0.26**; a survey person's is **0.0001**. The logit's
+coefficients are *not* the result and are never reported: the score is a tool for building the
+comparison, judged only by the balance it produces.
 :::
 
-::: {.cell-output .cell-output-stdout}
-    [1] 6.471933
+## Step 5 · Check overlap: is there anyone to compare with? {.scrollable}
+
+```{python}
+#| echo: true
+#| output-location: column
+#| fig-width: 5.4
+#| fig-height: 4.0
+
+# Step 5 · The two distributions of the score
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+
+bins = np.linspace(0, 0.5, 26)
+plt.hist(data.loc[data["treat"] == 0, "pscore"], bins=bins, alpha=0.6, label="survey (control)")
+plt.hist(data.loc[data["treat"] == 1, "pscore"], bins=bins, alpha=0.6, label="trained")
+plt.yscale("log")
+plt.xlabel("propensity score")
+plt.legend()
+plt.show()
+
+print("controls with a score above 0.05:", (data.loc[data["treat"] == 0, "pscore"] > 0.05).sum())
+```
+
+::: {.check}
+**Reading it:** the vertical axis is logarithmic. Almost all 15,992 survey people sit in the first
+bar, at a score near 0: nobody like them was trained. But **every bar where trainees are also has
+survey people**, a few hundred in all: there is **overlap**, so a comparison is possible.
 :::
-:::::
 
-This does not invalidate matching.
+## Step 6 · Match each trainee to the nearest control {.scrollable}
 
-It demonstrates that:
+```{python}
+#| echo: true
 
--   although the two groups were imbalanced on age, education, and experience, these variables happened not to create a major numerical bias in the naive difference-in-means but matching greatly improves internal validity and design transparency
+# Step 6 · 1:1 nearest-neighbour matching on the score, with replacement
+import pandas as pd
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
 
-> Matching primarily improves credibility, not necessarily magnitude.
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
 
-## Your turn {#imported-s10-058 .center .scrollable}
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
 
-## Team Work {#imported-s10-059 .scrollable}
+print(f"{len(treated)} trainees matched to {matched.index.nunique()} different controls")
+print(f"largest gap in score between a pair: {distance.max():.4f}")
+```
 
-Team 1: <https://cran.r-project.org/web/packages/MatchIt/vignettes/MatchIt.html>
+::: {.check}
+**Reading it:** the same `NearestNeighbors` as session 8, now with one column. 185 trainees use **124
+distinct** controls: a good control can serve twice (**with replacement**). No pair is more than 0.004
+apart in score, so every match is close. 15,868 survey people are never used.
+:::
 
-Team 2: <https://dlab.berkeley.edu/news/introduction-propensity-score-matching-matchit>
+## Step 7 · Did matching balance the groups? {.scrollable}
 
-Team 3: <https://simonejdemyr.com/r-tutorials/statistics/tutorial8.html> [data here](imported-assets/mydata.RData)
+```{python}
+#| echo: true
 
-Team 4: <https://psa.bryer.org/effects-of-tutoring-on-course-grades.html>
+# Step 7 · Standardised differences, before and after matching
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
 
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
+balance = pd.DataFrame({"before": (treated[X].mean() - control[X].mean()) / sd,
+                        "after": (treated[X].mean() - matched[X].mean()) / sd})
+print(balance.round(2))
+```
+
+::: {.warn}
+**Reading it:** a huge improvement: earnings, race and diploma are now balanced. But **age is still off
+by 0.31**: trainees are older than their matches. The score is not good enough yet, and *this is
+decided before anyone looks at earnings in 1978*.
+:::
+
+## Step 8 · Improve the score, then check again {.scrollable}
+
+```{python}
+#| echo: true
+#| output-location: column
+#| fig-width: 5.0
+#| fig-height: 4.2
+
+# Step 8 · Add age squared and "earned nothing" indicators to the score
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
+
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree"
+                  " + re74 + re75 + I(age**2) + I(re74 == 0) + I(re75 == 0)",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
+before = (treated[X].mean() - control[X].mean()) / sd
+after = (treated[X].mean() - matched[X].mean()) / sd
+print(after.round(2))
+
+plt.scatter(before, X, label="before")
+plt.scatter(after, X, label="after")
+plt.axvline(-0.1, color="grey", linestyle="--")
+plt.axvline(0.1, color="grey", linestyle="--")
+plt.xlabel("standardised difference")
+plt.legend()
+plt.show()
+```
+
+::: {.check}
+**Reading it:** `I(age**2)` lets the probability of training rise and then fall with age; `I(re74 == 0)`
+marks people who earned nothing. Now **every difference is inside ±0.1** (the dashed lines). This
+picture, a **love plot**, is the evidence that the comparison is fair.
+:::
+
+## Step 9 · Only now, look at the outcome {.scrollable}
+
+```{python}
+#| echo: true
+
+# Step 9 · The ATT: trainees' 1978 earnings minus their matches'
+import pandas as pd
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
+
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree"
+                  " + re74 + re75 + I(age**2) + I(re74 == 0) + I(re75 == 0)",
+                  data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+att = treated["re78"].mean() - matched["re78"].mean()
+print(f"trained, 1978:          {treated['re78'].mean():8,.0f}")
+print(f"their matches, 1978:    {matched['re78'].mean():8,.0f}")
+print(f"ATT (matching):         {att:+8,.0f}   experiment: +1,794")
+```
+
+::: {.check}
+**Reading it:** the matched controls earned what the trainees would have earned without training: the
+missing column, filled in. The difference, **+\$2,001**, is within a third of a standard error of the
+experiment's **+\$1,794**. From −\$8,498 to the right answer, using only survey data.
+:::
+
+## Step 9 · Every estimate, against the truth {.scrollable}
+
+![](economist-assets/nsw-estimates.png){.mid fig-alt="Five estimates on one axis: naive −8,498, regression +699, first matching +1,831, balanced matching +2,001, and the experiment +1,794 with its 95% interval."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Both matching estimates** land inside the experiment's 95% interval. Balance moved the estimate by
+\$170; it is the balance check, not the number, that makes it defensible.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Regression with the same eight controls gives +\$699.** A linear model compares trainees with survey
+people earning \$14,000, by extrapolating along a straight line. Matching only compares like with like.
+:::
+:::
+:::
+
+## Part 4 · What matching does not fix {.center}
+
+## Matching sees only what you measured {.scrollable}
+
+```{python}
+#| echo: true
+
+# Back to the firms: suppose the ministry sees only firm size, a noisy sign of productivity
+import numpy as np
+import pandas as pd
+from sklearn.neighbors import NearestNeighbors
+
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2
+applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
+size = productivity + rng.normal(0, 1, n)                     # what the data set contains
+
+firms = pd.DataFrame({"productivity": productivity, "size": size, "applies": applies,
+                      "sales": np.where(applies == 1, sales_with, sales_without)})
+treated, control = firms[firms["applies"] == 1], firms[firms["applies"] == 0]
+for matched_on in ["size", "productivity"]:
+    nn = NearestNeighbors(n_neighbors=1).fit(control[[matched_on]])
+    distance, index = nn.kneighbors(treated[[matched_on]])
+    att = treated["sales"].mean() - control.iloc[index.ravel()]["sales"].mean()
+    print(f"matched on {matched_on:13} ATT = {att:.2f}   (truth: 2)")
+```
+
+::: {.warn}
+**Reading it:** matching on the variable that **drove** selection recovers about 2 (2.21). Matching on a
+noisy proxy for it leaves **3.94**: more than half of the bias survives, and **size would look perfectly balanced**.
+Balance can only be checked on what you measured. The assumption that nothing else matters, **conditional
+independence**, can never be tested.
+:::
+
+## Not every variable belongs in the score {.scrollable}
+
+![](economist-assets/dag-bad-control.png){.mid fig-alt="Left: firm size before the programme causes both joining and growth; control for it. Right: new export contracts are caused by the programme and cause growth; do not control for them."}
+
+::: {.check}
+**The rule:** match and control only on variables fixed **before** treatment. A variable the programme
+itself changes (new contracts, the trainee's 1978 job) is part of the effect: controlling for it removes
+some of what you are trying to measure. In LaLonde's data, `re74` and `re75` qualify; `re78` never could.
+:::
+
+## What matching does not fix {.scrollable}
+
+- **Unmeasured confounders.** Matching is regression's assumption in a different form: everything that
+  drives both treatment and outcome is in $X$. If it is not, both are biased, in the same direction.
+- **No overlap.** Treated units with no comparable control cannot be matched honestly. Drop them, and say
+  that the estimate now applies only to the rest.
+- **A lucky data set.** Smith and Todd (2005) showed the LaLonde result moves with the sample and the score.
+  One success is evidence the method *can* work, not that it did in your project.
+- **Standard errors.** The OLS standard error on a matched sample ignores that the score was estimated and
+  the controls reused; bootstrap it, or report it as approximate.
+- **The order of work.** Choose the score by balance **before** looking at the outcome. Trying scores until
+  the ATT looks good is p-hacking with extra steps.
+
+## Part 5 · Your recipe {.center}
+
+## Seven steps, and the one rule {.scrollable}
+
+![](economist-assets/ci-workflow.png){fig-alt="Seven steps from the question to the ATT, with an arrow from the balance check back to the score."}
+
+| Step | What you do | In Python |
+|---|---|---|
+| 1–2 | name the estimand; argue which pre-treatment variables drive treatment | on paper |
+| 3 | the naive difference, as the size of the problem | `.groupby("treat")["y"].mean()` |
+| 4 | the propensity score | `smf.logit(...).fit()`, `.predict()` |
+| 5 | match, and check overlap | `NearestNeighbors(n_neighbors=1)`, `.kneighbors()`, `plt.hist` |
+| 6 | balance: every standardised difference inside ±0.1 | `.mean()`, `.var()`, `plt.scatter` |
+| 7 | the ATT, **last** | `treated["y"].mean() - matched["y"].mean()` |
+
+## The whole recipe, in one cell to copy {.scrollable}
+
+```{python}
+#| echo: true
+
+# Propensity-score matching, start to finish: change the data, X and the formula for your project
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
+
+url = "https://users.nber.org/~rdehejia/data/"                    # 1 · data: treated + candidate controls
+data = pd.concat([pd.read_stata(url + "nsw_dw.dta").query("treat == 1"),
+                  pd.read_stata(url + "cps_controls.dta")], ignore_index=True)
+X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
+y = "re78"
+
+naive = data.loc[data["treat"] == 1, y].mean() - data.loc[data["treat"] == 0, y].mean()
+
+score = smf.logit("treat ~ " + " + ".join(X) +                    # 2 · the score
+                  " + I(age**2) + I(re74 == 0) + I(re75 == 0)", data=data).fit(disp=0)
+data["pscore"] = score.predict(data)
+
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])   # 3 · match
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)          # 4 · balance, before the outcome
+print(((treated[X].mean() - matched[X].mean()) / sd).round(2))
+
+att = treated[y].mean() - matched[y].mean()                       # 5 · the ATT, last
+print(f"naive {naive:,.0f}   ATT {att:,.0f}")
+```
+
+## What to report {.scrollable}
+
+1. **The estimand**, named: ATT or ATE.
+2. **The identifying assumption, in words**: which variables you claim explain who was treated, and why
+   nothing else does. An argument, not a table.
+3. **The naive estimate** beside the matched one: the distance between them is the size of the problem.
+4. **Overlap**: the score's range in both groups, and what you did with units outside it.
+5. **Balance before and after**, every covariate, as standardised differences (the love plot).
+6. **That every control is pre-treatment**, and the score was fixed before the outcome was looked at.
+
+::: {.warn}
+**A balanced match makes the comparison fair on what you measured. It says nothing about what you did not.**
+:::
+
+## Your turn {.scrollable}
+
+Apply the recipe to LaLonde's **other** survey: replace `cps_controls.dta` by **`psid_controls.dta`**
+(2,490 people from the Panel Study of Income Dynamics) in the cell above.
+
+1. What is the naive estimate? Why is it even further from \$1,794 than with the CPS?
+2. With the first score (no squares), is every standardised difference inside ±0.1? Which is not?
+3. Improve the score for balance **without printing the ATT**. If some difference stays above 0.1,
+   say which, and what it means. Then print the ATT once.
+4. How far is your ATT from the experiment? How many distinct controls did you use?
+
+::: {.muted}
+Work in pairs; one shares their screen at the end. The point is the order of work, not the number.
+:::
 
 ## Before the next session {.scrollable}
 

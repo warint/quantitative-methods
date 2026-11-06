@@ -193,11 +193,16 @@ TOOLKIT = {
     "plt.barh": ("09", "Plot", "one bar per indicator: which loadings are weak"),
 
     # ---- Session 10 · causal foundations ---------------------------------
-    "expit": ("10", "Fit", "the inverse logit, when you need it directly"),
-    "NearestNeighbors": ("10", "Choose and validate", "match treated to control"),
-    ".kneighbors": ("10", "Choose and validate", "who got matched to whom"),
-    "pd.concat": ("10", "Load and shape", "stack the matched sample back together"),
-    ".boxplot": ("10", "Plot", "balance, before and after matching"),
+    "np.random.default_rng": ("10", "Load and shape", "simulate data: `rng.normal`, `rng.integers` for a coin flip"),
+    "np.where": ("10", "Load and shape", "pick one of two columns row by row: the outcome you observe"),
+    "pd.read_stata": ("10", "Load and shape", "a Stata .dta file, straight from a URL"),
+    "pd.concat": ("10", "Load and shape", "stack treated units and candidate controls into one table"),
+    ".groupby": ("10", "Describe", "compare treated and control means: `.groupby(\"treat\")[\"y\"].mean()`"),
+    "NearestNeighbors": ("10", "Choose and validate", "match each treated unit to the closest control on the score"),
+    ".kneighbors": ("10", "Choose and validate", "who got matched to whom, and how far apart"),
+    "plt.hist": ("10", "Plot", "overlap: the score's distribution in each group"),
+    "plt.yscale": ("10", "Plot", "`\"log\"` when one group dwarfs the other"),
+    ".boxplot": ("10", "Plot", "balance at a glance: one box per group"),
 }
 
 
