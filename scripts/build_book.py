@@ -460,6 +460,10 @@ def chapter_prose(d, num):
                 declared[key.strip()] = value.strip().strip("\"'")
 
     text = strip_frontmatter(raw)
+    # A written chapter may show the deck's own figures, by their path from the
+    # session directory (`01-lecture/economist-assets/x.png`); they are copied
+    # into the book the same way the decks' are.
+    text = localise_assets(text, num, d)
     return declared, text.replace("{{portrait}}", plate(num)).strip()
 
 

@@ -348,18 +348,29 @@ search.cv_results_["mean_test_score"]   # one CV score per K: plot it against K
 ### Session 9 · Structural equation modelling
 
 ```python
+# -- Load and shape ------------------------------------------------
+from semopy.examples import holzinger39
+data = holzinger39.get_data()      # 301 children, nine tests, no download
+
 # -- Describe ------------------------------------------------------
-np.cov(df.to_numpy(), rowvar=False)   # the matrix the model reproduces
+corr = data[["x1", "x2", "x3"]].corr()   # what the model must reproduce
 
 # -- Fit -----------------------------------------------------------
 import semopy
-m = semopy.Model(desc); m.fit(df)   # desc is the model description string
+model = semopy.Model("visual =~ x1 + x2 + x3")   # =~ measured by, ~ regressed on, ~~ covaries
+model.fit(data)
 
 # -- Read the fit --------------------------------------------------
-m.inspect()                       # loadings and paths, estimated
+est = model.inspect(std_est=True)
+loadings = est[est["op"] == "~"]   # read the "Est. Std" column
 
 # -- Choose and validate -------------------------------------------
-semopy.calc_stats(m)              # CFI, TLI, RMSEA — report all three
+fit = semopy.calc_stats(model)
+fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T
+
+# -- Plot ----------------------------------------------------------
+plt.imshow(corr, cmap="Blues", vmin=0, vmax=1); plt.colorbar()
+plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance
 ```
 
 ### Session 10 · Causal inference (1/2)

@@ -198,11 +198,18 @@ SNIPPETS = {
     "RandomForestClassifier": "RandomForestClassifier(n_estimators=500, random_state=7).fit(Xtr, ytr)",
 
     # ---- Session 09 -------------------------------------------------------
+    "semopy.examples": "from semopy.examples import holzinger39\n"
+                       "data = holzinger39.get_data()      # 301 children, nine tests, no download",
+    ".corr()": 'corr = data[["x1", "x2", "x3"]].corr()   # what the model must reproduce',
+    "plt.imshow": 'plt.imshow(corr, cmap="Blues", vmin=0, vmax=1); plt.colorbar()',
     "semopy.Model": "import semopy\n"
-                    "m = semopy.Model(desc); m.fit(df)   # desc is the model description string",
-    ".inspect()": "m.inspect()                       # loadings and paths, estimated",
-    "semopy.calc_stats": "semopy.calc_stats(m)              # CFI, TLI, RMSEA — report all three",
-    "np.cov": "np.cov(df.to_numpy(), rowvar=False)   # the matrix the model reproduces",
+                    'model = semopy.Model("visual =~ x1 + x2 + x3")   # =~ measured by, ~ regressed on, ~~ covaries\n'
+                    "model.fit(data)",
+    ".inspect()": "est = model.inspect(std_est=True)\n"
+                  'loadings = est[est["op"] == "~"]   # read the "Est. Std" column',
+    "semopy.calc_stats": "fit = semopy.calc_stats(model)\n"
+                         'fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T',
+    "plt.barh": 'plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance',
 
     # ---- Session 10 -------------------------------------------------------
     "expit": "from scipy.special import expit\n"

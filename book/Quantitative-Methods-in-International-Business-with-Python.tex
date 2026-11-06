@@ -363,7 +363,7 @@
 \makeatother
 \subtitle{MATH60033A · HEC Montréal}
 \author{Thierry Warin, PhD}
-\date{17 September 2026}
+\date{6 November 2026}
 \begin{document}
 \frontmatter
 \maketitle
@@ -593,7 +593,7 @@ decision-maker act on this --- and say what would change your mind? \\
 
 Source:
 \href{https://github.com/warint/quantitative-methods}{github.com/warint/quantitative-methods}
-· 17 September 2026
+· 6 November 2026
 
 \end{qmibmuted}
 
@@ -6314,6 +6314,206 @@ comparison been made on accuracy alone, all three would have looked
 identical and the conclusion would have been that nothing works ---
 which is false, and would have been the wrong lesson.
 
+\section{A worked example: can the market's past predict
+today?}\label{a-worked-example-can-the-markets-past-predict-today}
+
+The lecture runs one complete prediction exercise, the way it would be
+done by someone whose job depended on it, and the chapter repeats it
+here because every step carries a rule. The question is whether the S\&P
+500's return two days ago says anything about whether the index rises or
+falls today. The data are \texttt{Smarket} from \emph{An Introduction to
+Statistical Learning}: 1,250 trading days, 2001 to 2005, with the five
+previous days' returns (\texttt{Lag1} to \texttt{Lag5}) and the day's
+\texttt{Direction}.
+
+The work is split into two files, because in practice the two jobs
+happen at different times. The first is the laboratory: it chooses
+\(K\), judges the model once, and saves it. The second is the trading
+desk: it loads the saved model and predicts one new date, with no data
+to download and no training. Both are published with the lecture as
+\href{https://warint.github.io/quantitative-methods/session-08/session08_1_train.py}{\texttt{session08\_1\_train.py}}
+and
+\href{https://warint.github.io/quantitative-methods/session-08/session08_2_predict.py}{\texttt{session08\_2\_predict.py}}.
+
+\textbf{Two decisions come before any model.} One late day, 28 December
+2005, is put aside to play ``tomorrow'', and the two days after it are
+dropped, because on the morning of the 28th they are the future. The
+rest is split \textbf{by time}: the model learns from 2002--2004 and is
+judged on 2005. A random split would put days of 2005 into the training
+data, and the model would learn from the future to ``predict'' the past.
+
+\textbf{Cross-validation has to respect time as well.} The ordinary
+\(k\)-fold scheme of chapter 5 would fit on 2004 to predict 2002. For a
+time series each round fits on everything up to a date and validates on
+the block that follows, which is what scikit-learn's
+\texttt{TimeSeriesSplit} does.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-08-01-lecture-economist-assets-cv-time.png}}
+
+}
+
+\caption{Cross-validation on a time series: each round fits on the past
+and validates on the next block, never the reverse.}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ matplotlib.pyplot }\ImportTok{as}\NormalTok{ plt}
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+\ImportTok{from}\NormalTok{ sklearn.model\_selection }\ImportTok{import}\NormalTok{ TimeSeriesSplit, GridSearchCV}
+\ImportTok{from}\NormalTok{ sklearn.neighbors }\ImportTok{import}\NormalTok{ KNeighborsClassifier}
+\ImportTok{from}\NormalTok{ sklearn.pipeline }\ImportTok{import}\NormalTok{ make\_pipeline}
+\ImportTok{from}\NormalTok{ sklearn.preprocessing }\ImportTok{import}\NormalTok{ StandardScaler}
+
+\NormalTok{URL }\OperatorTok{=} \StringTok{"https://raw.githubusercontent.com/intro{-}stat{-}learning/ISLP/main/ISLP/data/Smarket.csv"}
+\NormalTok{smarket }\OperatorTok{=}\NormalTok{ pd.read\_csv(URL)}
+\NormalTok{smarket }\OperatorTok{=}\NormalTok{ smarket[smarket[}\StringTok{"Year"}\NormalTok{] }\OperatorTok{\textgreater{}=} \DecValTok{2002}\NormalTok{]}
+\NormalTok{predictors }\OperatorTok{=}\NormalTok{ [}\StringTok{"Lag2"}\NormalTok{]}
+
+\NormalTok{new\_day, history }\OperatorTok{=}\NormalTok{ smarket.iloc[[}\OperatorTok{{-}}\DecValTok{3}\NormalTok{]], smarket.iloc[:}\OperatorTok{{-}}\DecValTok{3}\NormalTok{]     }\CommentTok{\# 28 Dec 2005, and every day before}
+\NormalTok{train, test }\OperatorTok{=}\NormalTok{ history[history[}\StringTok{"Year"}\NormalTok{] }\OperatorTok{\textless{}} \DecValTok{2005}\NormalTok{], history[history[}\StringTok{"Year"}\NormalTok{] }\OperatorTok{==} \DecValTok{2005}\NormalTok{]}
+\NormalTok{X\_train, y\_train }\OperatorTok{=}\NormalTok{ train[predictors], train[}\StringTok{"Direction"}\NormalTok{]}
+\NormalTok{X\_test, y\_test }\OperatorTok{=}\NormalTok{ test[predictors], test[}\StringTok{"Direction"}\NormalTok{]}
+
+\CommentTok{\# The scaler sits inside the pipeline, so each round standardises on its own fitting rows only}
+\NormalTok{k\_values }\OperatorTok{=} \BuiltInTok{list}\NormalTok{(}\BuiltInTok{range}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{126}\NormalTok{, }\DecValTok{2}\NormalTok{))          }\CommentTok{\# odd, so a two{-}class vote cannot tie}
+\NormalTok{search }\OperatorTok{=}\NormalTok{ GridSearchCV(make\_pipeline(StandardScaler(), KNeighborsClassifier()),}
+\NormalTok{                      \{}\StringTok{"kneighborsclassifier\_\_n\_neighbors"}\NormalTok{: k\_values\},}
+\NormalTok{                      cv}\OperatorTok{=}\NormalTok{TimeSeriesSplit(n\_splits}\OperatorTok{=}\DecValTok{5}\NormalTok{))}
+\NormalTok{search.fit(X\_train, y\_train)}
+
+\NormalTok{best\_k }\OperatorTok{=}\NormalTok{ search.best\_params\_[}\StringTok{"kneighborsclassifier\_\_n\_neighbors"}\NormalTok{]}
+\NormalTok{majority }\OperatorTok{=}\NormalTok{ y\_train.value\_counts(normalize}\OperatorTok{=}\VariableTok{True}\NormalTok{).}\BuiltInTok{max}\NormalTok{()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"best K = }\SpecialCharTok{\{}\NormalTok{best\_k}\SpecialCharTok{\}}\SpecialStringTok{, cross{-}validated accuracy = }\SpecialCharTok{\{}\NormalTok{search}\SpecialCharTok{.}\NormalTok{best\_score\_}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"always predicting the commonest direction = }\SpecialCharTok{\{}\NormalTok{majority}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+
+\NormalTok{plt.figure(figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{7}\NormalTok{, }\FloatTok{3.2}\NormalTok{))}
+\NormalTok{plt.plot(k\_values, search.cv\_results\_[}\StringTok{"mean\_test\_score"}\NormalTok{], }\StringTok{"o{-}"}\NormalTok{, markersize}\OperatorTok{=}\DecValTok{3}\NormalTok{,}
+\NormalTok{         label}\OperatorTok{=}\StringTok{"KNN, cross{-}validated accuracy"}\NormalTok{)}
+\NormalTok{plt.axhline(majority, color}\OperatorTok{=}\StringTok{"red"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{, label}\OperatorTok{=}\StringTok{"always the commonest direction"}\NormalTok{)}
+\NormalTok{plt.axvline(best\_k, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{":"}\NormalTok{, label}\OperatorTok{=}\SpecialStringTok{f"chosen K = }\SpecialCharTok{\{}\NormalTok{best\_k}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{plt.xlabel(}\StringTok{"K"}\NormalTok{)}\OperatorTok{;}\NormalTok{ plt.ylabel(}\StringTok{"accuracy on the hidden blocks"}\NormalTok{)}
+\NormalTok{plt.legend(frameon}\OperatorTok{=}\VariableTok{False}\NormalTok{, fontsize}\OperatorTok{=}\DecValTok{8}\NormalTok{)}
+\NormalTok{plt.tight\_layout()}
+\NormalTok{plt.show()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+best K = 123, cross-validated accuracy = 0.511
+always predicting the commonest direction = 0.516
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{session-08_files/figure-pdf/fig-smarket-k-output-2.png}}
+
+}
+
+\caption{\label{fig-smarket-k}Cross-validated accuracy of KNN on the
+2002--2004 training days, for every odd K from 1 to 125, against always
+predicting the commonest direction. No K clears the line.}
+
+\end{figure}%
+
+The search ran the cross-validation loop for each of 63 values of \(K\)
+and kept \(K = 123\), with an accuracy of 0.511 on the hidden blocks.
+``Best'' means best of the values tried, not good: it is just below the
+0.516 of always predicting the commonest direction. Cross-validation is
+already saying that \texttt{Lag2} carries little information about
+today.
+
+\textbf{The test year is opened once.} \(K\) is now fixed, and only now
+is 2005 consulted. If \(K\) were changed after seeing this score, 2005
+would have become training data and the score would stop being a test.
+
+\phantomsection\label{check-smarket-test}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ sklearn.metrics }\ImportTok{import}\NormalTok{ confusion\_matrix}
+
+\NormalTok{y\_pred }\OperatorTok{=}\NormalTok{ search.predict(X\_test)}
+\NormalTok{table }\OperatorTok{=}\NormalTok{ pd.DataFrame(confusion\_matrix(y\_test, y\_pred, labels}\OperatorTok{=}\NormalTok{[}\StringTok{"Down"}\NormalTok{, }\StringTok{"Up"}\NormalTok{]),}
+\NormalTok{                     index}\OperatorTok{=}\NormalTok{[}\StringTok{"actual Down"}\NormalTok{, }\StringTok{"actual Up"}\NormalTok{],}
+\NormalTok{                     columns}\OperatorTok{=}\NormalTok{[}\StringTok{"predicted Down"}\NormalTok{, }\StringTok{"predicted Up"}\NormalTok{])}
+\BuiltInTok{print}\NormalTok{(table, }\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"KNN accuracy on 2005:                      }\SpecialCharTok{\{}\NormalTok{(y\_pred }\OperatorTok{==}\NormalTok{ y\_test)}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"always predicting the commonest direction: }\SpecialCharTok{\{}\NormalTok{y\_test}\SpecialCharTok{.}\NormalTok{value\_counts(normalize}\OperatorTok{=}\VariableTok{True}\NormalTok{)}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             predicted Down  predicted Up
+actual Down              35            74
+actual Up                31           109 
+
+KNN accuracy on 2005:                      0.578
+always predicting the commonest direction: 0.562
+\end{verbatim}
+
+The diagonal holds the right calls, 35 down days and 109 up days, so
+accuracy is \((35 + 109)/249 = 0.578\), a little better than ``always
+up'' at 0.562. Read by row, the model catches 78\% of the up days but
+only 32\% of the down days: it says ``up'' on 183 of 249 days, and much
+of its accuracy is the market rising more often than not.
+
+\textbf{Training and predicting are different jobs.} Before it is used,
+the model is refitted on every day it is allowed to know, with the
+chosen \(K\), and saved to a file. The second script loads that file and
+predicts the new day from one number, the return two trading days
+earlier.
+
+\phantomsection\label{check-smarket-predict}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ joblib}
+
+\NormalTok{final\_model }\OperatorTok{=}\NormalTok{ make\_pipeline(StandardScaler(), KNeighborsClassifier(n\_neighbors}\OperatorTok{=}\NormalTok{best\_k))}
+\NormalTok{final\_model.fit(history[predictors], history[}\StringTok{"Direction"}\NormalTok{])}
+\NormalTok{joblib.dump(final\_model, }\StringTok{"knn\_smarket.joblib"}\NormalTok{)           }\CommentTok{\# file 1 ends here}
+
+\NormalTok{model }\OperatorTok{=}\NormalTok{ joblib.load(}\StringTok{"knn\_smarket.joblib"}\NormalTok{)                }\CommentTok{\# file 2 starts here}
+\NormalTok{new\_date }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"Lag2"}\NormalTok{: [}\FloatTok{0.043}\NormalTok{]\})               }\CommentTok{\# 23 December 2005: +0.043\%}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"prediction for 28 December 2005:"}\NormalTok{, model.predict(new\_date)[}\DecValTok{0}\NormalTok{])}
+\ControlFlowTok{for}\NormalTok{ label, prob }\KeywordTok{in} \BuiltInTok{zip}\NormalTok{(model.classes\_, model.predict\_proba(new\_date)[}\DecValTok{0}\NormalTok{]):}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"   Pr(}\SpecialCharTok{\{}\NormalTok{label}\SpecialCharTok{\}}\SpecialStringTok{) = }\SpecialCharTok{\{}\NormalTok{prob}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+prediction for 28 December 2005: Up
+   Pr(Down) = 0.423
+   Pr(Up) = 0.577
+\end{verbatim}
+
+The probabilities are the votes of the \(K\) nearest past days. The
+index did rise on 28 December 2005, so the prediction was right --- and
+one date proves nothing either way. The test year is how the model is
+judged; the second file is how it is used.
+
+\begin{qmibwarn}
+
+\textbf{How this example was chosen.} The example was built to work, and
+the lecture says so. The natural first attempt --- both lags, all five
+years, the very last day as the new date --- scored 50.6\% on 2005,
+below the 56.2\% of ``always up'', and got its date wrong. So 54 slices
+of the data were tried (predictors, training years, test year) and one
+that wins was kept. On 249 test days, accuracy moves by about three
+points from chance alone (\(\sqrt{0.25/249} \approx 0.032\)); among 54
+tries, a winner that beats the baseline by 1.6 points is easy to find
+with no signal at all. And every look at 2005 made 2005 training data:
+the test was opened 54 times, not once. This is the garden of forking
+paths (\citeproc{ref-gelman2014}{Gelman and Loken 2014}), and it is how
+most strategies that ``beat the market'' are found. The steps above are
+right. The evidence is not.
+
+\end{qmibwarn}
+
 \section{What nearest neighbours cannot
 do}\label{what-nearest-neighbours-cannot-do}
 
@@ -6383,7 +6583,12 @@ depends becomes meaningless, not merely imprecise.
 \item
   \textbf{How \(k\) was chosen}, with the cross-validation curve, and
   the training curve alongside it if you want to make the point that it
-  is uninformative.
+  is uninformative. With data in time order, say that the folds followed
+  time.
+\item
+  \textbf{That the test set was opened once}, and how many
+  specifications were tried before the one reported. A score found after
+  many looks is not a test score.
 \item
   \textbf{That the predictors were standardised}, and how many there
   are. With more than a handful, say what you did about the
@@ -6419,7 +6624,21 @@ small number of common factors behind a battery of correlated items.
 This chapter takes the same idea and makes it a model you can
 \emph{state and test} --- a set of explicit claims about which
 indicators measure which construct, and about how the constructs relate
-to one another.
+to one another. And it builds that model the way you should build your
+own: on paper first, then in one line of text per construct, then in
+four lines of Python, and only then with numbers.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-sem-anatomy.png}}
+
+}
+
+\caption{One construct, three indicators. The construct is never
+measured; it is what the three scores have in common, and the error
+circles hold everything else in each score.}
+
+\end{figure}%
 
 The apparatus divides into two parts, and keeping them apart is the
 first thing to learn.
@@ -6442,20 +6661,23 @@ between quantities that were never observed.
 
 \end{qmibdefinition}
 
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-sem-two-halves.png}}
+
+}
+
+\caption{The two halves of a structural equation model. Blue, the
+measurement models: does each set of indicators measure one thing? Red,
+the structural model: does one construct move the other? ζ stands for
+what the path leaves unexplained.}
+
+\end{figure}%
+
 A model can have both, and much of what makes SEM valuable is estimating
 them jointly: the structural relationships are corrected for the
 unreliability of the measurement, which a two-step approach of ``build a
 scale, then regress it'' does not do.
-
-\begin{qmibmuted}
-
-No portrait accompanies this chapter. The natural figure is Charles
-Spearman, whose 1904 argument for a general factor began the tradition;
-the only photograph of him on Wikimedia Commons is licensed CC BY-SA 4.0
-rather than released into the public domain, so the plate builder
-refuses it. The rule is a real portrait, freely licensed, or none.
-
-\end{qmibmuted}
 
 \section{Wright's diagrams, and what a path
 meant}\label{wrights-diagrams-and-what-a-path-meant}
@@ -6488,34 +6710,61 @@ section on equivalent models below is what happens when it is forgotten.
 
 \end{qmibarchive}
 
-\section{Reading a model description}\label{reading-a-model-description}
+\section{The language: five symbols and three
+operators}\label{the-language-five-symbols-and-three-operators}
 
-The notation, standard since \texttt{lavaan} made it so
-(\citeproc{ref-rosseel2012}{Rosseel 2012}) and used by \texttt{semopy}
-in Python, is close to readable English:
+Wright's convention is still universal. Observed variables are
+rectangles, unobserved ones ellipses, a one-headed arrow is a directed
+effect, a two-headed arrow an unanalysed covariance, and a small circle
+the error left over.
 
-\begin{longtable}[]{@{}ll@{}}
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-sem-symbols.png}}
+
+}
+
+\caption{The five symbols of a path diagram. Every SEM figure in every
+paper is made of these.}
+
+\end{figure}%
+
+Each drawing has an exact translation into text. The notation, standard
+since \texttt{lavaan} made it so (\citeproc{ref-rosseel2012}{Rosseel
+2012}) and used by \texttt{semopy} in Python, is close to readable
+English:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
 \toprule\noalign{}
-operator & means \\
+\begin{minipage}[b]{\linewidth}\raggedright
+You draw
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+You write
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+operator means
+\end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{=\textasciitilde{}} & \emph{is measured by} --- a latent
-construct and its indicators \\
-\texttt{\textasciitilde{}} & \emph{is regressed on} --- a structural
-path \\
-\texttt{\textasciitilde{}\textasciitilde{}} & \emph{covaries with} ---
-an unanalysed association \\
+ellipse → rectangles &
+\texttt{visual\ =\textasciitilde{}\ x1\ +\ x2\ +\ x3} &
+\texttt{=\textasciitilde{}} \emph{is measured by} \\
+ellipse → ellipse & \texttt{dem65\ \textasciitilde{}\ dem60} &
+\texttt{\textasciitilde{}} \emph{is regressed on} \\
+two-headed arrow & \texttt{y1\ \textasciitilde{}\textasciitilde{}\ y5} &
+\texttt{\textasciitilde{}\textasciitilde{}} \emph{covaries with} \\
+error circles & nothing & added by the software, one per indicator \\
 \end{longtable}
 
-So
-\texttt{value\ =\textasciitilde{}\ price\ +\ resale\_value\ +\ maintenance}
-asserts that a construct called \emph{value} exists, that these three
-observed items are reflections of it, and --- by what is absent --- that
-nothing else in the model measures it.
-
-The corresponding equation for indicator \(j\) of construct \(\xi\) is
+So \texttt{visual\ =\textasciitilde{}\ x1\ +\ x2\ +\ x3} asserts that a
+construct called \emph{visual} exists, that these three observed scores
+are reflections of it, and --- by what is absent --- that nothing else
+in the model measures it. The corresponding equation for indicator \(j\)
+of construct \(\xi\) is
 
 \[
 x_j \thickspace=\thickspace \lambda_j \xi + \delta_j ,
@@ -6544,8 +6793,18 @@ the data.
 Every parameter set \(\theta\) implies a covariance matrix
 \(\Sigma(\theta)\) among the observed variables, and estimation chooses
 \(\theta\) to make that as close as possible to the observed \(S\). The
-discrepancy is what all the fit statistics measure, and the \(\chi^2\)
-test is a formal test of
+simplest case shows why a diagram is a prediction. Standardise
+everything; two indicators of the same construct share nothing but the
+construct, so the model says their correlation must be
+
+\[
+\operatorname{corr}(x_i, x_j) \thickspace=\thickspace \lambda_i \lambda_j .
+\]
+
+Every arrow you draw, and every one you leave out, implies a number of
+this kind for every pair of indicators. The discrepancy between those
+numbers and the observed ones is what all the fit statistics measure,
+and the \(\chi^2\) test is a formal test of
 
 \[
 H_0: \thickspace \Sigma = \Sigma(\theta) ,
@@ -6553,190 +6812,69 @@ H_0: \thickspace \Sigma = \Sigma(\theta) ,
 
 that is, of \emph{exact} fit. Its degrees of freedom are the number of
 distinct elements in the covariance matrix minus the number of free
-parameters, which is why a model can be tested at all: it says more
-about the covariances than it has parameters to absorb.
+parameters: nine indicators have \(9 \times 10 / 2 = 45\) variances and
+covariances, the three-factor model below estimates 21 parameters, and
+the 24 left over are what make it testable. A model that says more about
+the covariances than it has parameters to absorb can be wrong, and
+therefore can be checked.
 
-\phantomsection\label{check-measurement}
+\section{Building a measurement model, step by
+step}\label{building-a-measurement-model-step-by-step}
+
+The data are the classic of the field: Holzinger and Swineford gave nine
+ability tests to 301 seventh- and eighth-graders in two Chicago schools
+in 1939. They ship with \texttt{semopy}, so every cell below runs as
+written, with nothing to download.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Column
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Test
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meant to measure
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{x1} · \texttt{x2} · \texttt{x3} & visual perception · cubes ·
+lozenges & \textbf{visual} ability \\
+\texttt{x4} · \texttt{x5} · \texttt{x6} & paragraph comprehension ·
+sentence completion · word meaning & \textbf{textual} ability \\
+\texttt{x7} · \texttt{x8} · \texttt{x9} & speeded addition · speeded dot
+counting · straight vs curved capitals & \textbf{speed} \\
+\end{longtable}
+
+\textbf{Step 1 and 2 · Load the data, and look before you model.} The
+correlation matrix is what the model will try to reproduce, so it is the
+first thing to see.
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\ImportTok{import}\NormalTok{ sys, warnings}
-\NormalTok{sys.path.insert(}\DecValTok{0}\NormalTok{, }\StringTok{"../slides"}\NormalTok{)}\OperatorTok{;}\NormalTok{ sys.path.insert(}\DecValTok{0}\NormalTok{, }\StringTok{".."}\NormalTok{)}
+\ImportTok{import}\NormalTok{ warnings}
 \NormalTok{warnings.filterwarnings(}\StringTok{"ignore"}\NormalTok{)}
-\ImportTok{from}\NormalTok{ plotstyle }\ImportTok{import}\NormalTok{ setup, CL}
-\NormalTok{plt }\OperatorTok{=}\NormalTok{ setup()}
+\ImportTok{import}\NormalTok{ matplotlib.pyplot }\ImportTok{as}\NormalTok{ plt}
+\ImportTok{import}\NormalTok{ semopy}
+\ImportTok{from}\NormalTok{ semopy.examples }\ImportTok{import}\NormalTok{ holzinger39}
 
-\ImportTok{import}\NormalTok{ numpy }\ImportTok{as}\NormalTok{ np, pandas }\ImportTok{as}\NormalTok{ pd, qmib, semopy}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ holzinger39.get\_data()}
+\NormalTok{tests }\OperatorTok{=}\NormalTok{ [}\StringTok{"x1"}\NormalTok{, }\StringTok{"x2"}\NormalTok{, }\StringTok{"x3"}\NormalTok{, }\StringTok{"x4"}\NormalTok{, }\StringTok{"x5"}\NormalTok{, }\StringTok{"x6"}\NormalTok{, }\StringTok{"x7"}\NormalTok{, }\StringTok{"x8"}\NormalTok{, }\StringTok{"x9"}\NormalTok{]}
+\NormalTok{corr }\OperatorTok{=}\NormalTok{ data[tests].corr()}
 
-\NormalTok{survey }\OperatorTok{=}\NormalTok{ qmib.load(}\StringTok{"efa"}\NormalTok{).select\_dtypes(}\StringTok{"number"}\NormalTok{).dropna()}
-\NormalTok{qmib.view(survey, n}\OperatorTok{=}\DecValTok{6}\NormalTok{)}
-
-\CommentTok{\# Two constructs, built from the varimax groupings chapter 7 found.}
-\NormalTok{description }\OperatorTok{=} \StringTok{"""}
-\StringTok{value      =\textasciitilde{} price + resale\_value + maintenance + fuel\_efficiency}
-\StringTok{experience =\textasciitilde{} safety + space\_comfort + technology + after\_sales\_service}
-\StringTok{"""}
-\NormalTok{model }\OperatorTok{=}\NormalTok{ semopy.Model(description)}
-\NormalTok{model.fit(survey)}
-
-\NormalTok{est }\OperatorTok{=}\NormalTok{ model.inspect(std\_est}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
-\NormalTok{loadings }\OperatorTok{=}\NormalTok{ est[(est[}\StringTok{"op"}\NormalTok{] }\OperatorTok{==} \StringTok{"\textasciitilde{}"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (est[}\StringTok{"rval"}\NormalTok{].isin([}\StringTok{"value"}\NormalTok{, }\StringTok{"experience"}\NormalTok{]))]}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"n = }\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(survey)}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}construct\textquotesingle{}}\SpecialCharTok{:12\}\{}\StringTok{\textquotesingle{}indicator\textquotesingle{}}\SpecialCharTok{:22\}\{}\StringTok{\textquotesingle{}loading\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}\{}\StringTok{\textquotesingle{}std\textquotesingle{}}\SpecialCharTok{:\textgreater{}8\}\{}\StringTok{\textquotesingle{}p\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}}\SpecialStringTok{"}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ loadings.iterrows():}
-\NormalTok{    p }\OperatorTok{=} \StringTok{"fixed"} \ControlFlowTok{if}\NormalTok{ r[}\StringTok{"p{-}value"}\NormalTok{] }\OperatorTok{==} \StringTok{"{-}"} \ControlFlowTok{else} \SpecialStringTok{f"}\SpecialCharTok{\{}\BuiltInTok{float}\NormalTok{(r[}\StringTok{\textquotesingle{}p{-}value\textquotesingle{}}\NormalTok{])}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{r[}\StringTok{\textquotesingle{}rval\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:12\}\{}\NormalTok{r[}\StringTok{\textquotesingle{}lval\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:22\}\{}\NormalTok{r[}\StringTok{\textquotesingle{}Estimate\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:9.3f\}\{}\NormalTok{r[}\StringTok{\textquotesingle{}Est. Std\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:8.3f\}\{}\NormalTok{p}\SpecialCharTok{:\textgreater{}10\}}\SpecialStringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-efa: 90 rows x 14 columns  (0.0% missing overall)
-\end{verbatim}
-
-\phantomsection\label{check-measurement-1}
-\begin{landscape}\thispagestyle{empty}\begingroup\scriptsize
-
-\begin{longtable}[]{@{}lllllllllllllll@{}}
-\caption{}\label{T_3d97f}\tabularnewline
-\toprule\noalign{}
-~ & price & safety & exterior\_looks & space\_comfort & technology &
-after\_sales\_service & resale\_value & fuel\_type & fuel\_efficiency &
-color & maintenance & test\_drive & product\_reviews & testimonials \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-~ & price & safety & exterior\_looks & space\_comfort & technology &
-after\_sales\_service & resale\_value & fuel\_type & fuel\_efficiency &
-color & maintenance & test\_drive & product\_reviews & testimonials \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0 & 4 & 4 & 5 & 4 & 3 & 4 & 5 & 4 & 4 & 2 & 4 & 2 & 4 & 3 \\
-1 & 3 & 5 & 3 & 3 & 4 & 4 & 3 & 4 & 3 & 4 & 3 & 2 & 2 & 2 \\
-2 & 4 & 4 & 3 & 4 & 5 & 5 & 5 & 4 & 5 & 4 & 5 & 4 & 4 & 3 \\
-3 & 4 & 4 & 4 & 3 & 3 & 4 & 5 & 5 & 4 & 4 & 4 & 2 & 5 & 3 \\
-4 & 5 & 5 & 4 & 4 & 5 & 4 & 5 & 3 & 4 & 5 & 5 & 5 & 5 & 2 \\
-5 & 4 & 4 & 5 & 3 & 4 & 5 & 3 & 4 & 3 & 2 & 3 & 2 & 2 & 3 \\
-\end{longtable}
-
-\endgroup\end{landscape}
-
-\phantomsection\label{check-measurement-2}
-\begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
-& dtype & missing & distinct \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-price & int64 & 0.0\% & 3 \\
-safety & int64 & 0.0\% & 3 \\
-exterior\_looks & int64 & 0.0\% & 5 \\
-space\_comfort & int64 & 0.0\% & 4 \\
-technology & int64 & 0.0\% & 5 \\
-after\_sales\_service & int64 & 0.0\% & 4 \\
-resale\_value & int64 & 0.0\% & 5 \\
-fuel\_type & int64 & 0.0\% & 3 \\
-fuel\_efficiency & int64 & 0.0\% & 5 \\
-color & int64 & 0.0\% & 5 \\
-maintenance & int64 & 0.0\% & 4 \\
-test\_drive & int64 & 0.0\% & 5 \\
-product\_reviews & int64 & 0.0\% & 4 \\
-testimonials & int64 & 0.0\% & 5 \\
-\end{longtable}
-
-\begin{verbatim}
-n = 90
-
-construct   indicator               loading     std         p
-value       price                     1.000   0.532     fixed
-value       resale_value              2.650   0.679    0.0005
-value       maintenance               1.535   0.620    0.0005
-value       fuel_efficiency           1.331   0.503    0.0017
-experience  safety                    1.000   0.291     fixed
-experience  space_comfort             1.941   0.553    0.0604
-experience  technology                2.054   0.437    0.0726
-experience  after_sales_service       2.215   0.632    0.0628
-\end{verbatim}
-
-The two halves are easier to see than to describe. Wright's convention,
-still universal, is that observed variables are drawn as rectangles,
-unobserved ones as ellipses, a single-headed arrow is a directed effect
-and a double-headed one an unanalysed covariance.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\ImportTok{from}\NormalTok{ matplotlib.patches }\ImportTok{import}\NormalTok{ FancyBboxPatch, Ellipse, FancyArrowPatch}
-
-\CommentTok{\# The loadings drawn below are the ones estimated above — the diagram is built}
-\CommentTok{\# from the fitted model, so it cannot drift out of step with the numbers.}
-\NormalTok{std }\OperatorTok{=}\NormalTok{ \{r[}\StringTok{"lval"}\NormalTok{]: }\BuiltInTok{float}\NormalTok{(r[}\StringTok{"Est. Std"}\NormalTok{]) }\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ loadings.iterrows()\}}
-\NormalTok{groups }\OperatorTok{=}\NormalTok{ \{c: }\BuiltInTok{list}\NormalTok{(loadings[loadings[}\StringTok{"rval"}\NormalTok{] }\OperatorTok{==}\NormalTok{ c][}\StringTok{"lval"}\NormalTok{]) }\ControlFlowTok{for}\NormalTok{ c }\KeywordTok{in}\NormalTok{ [}\StringTok{"value"}\NormalTok{, }\StringTok{"experience"}\NormalTok{]\}}
-
-\KeywordTok{def}\NormalTok{ box(ax, x, y, text, w}\OperatorTok{=}\FloatTok{1.5}\NormalTok{, h}\OperatorTok{=}\FloatTok{0.38}\NormalTok{):}
-\NormalTok{    ax.add\_patch(FancyBboxPatch((x}\OperatorTok{{-}}\NormalTok{w}\OperatorTok{/}\DecValTok{2}\NormalTok{, y}\OperatorTok{{-}}\NormalTok{h}\OperatorTok{/}\DecValTok{2}\NormalTok{), w, h, boxstyle}\OperatorTok{=}\StringTok{"round,pad=0.02"}\NormalTok{,}
-\NormalTok{                                fc}\OperatorTok{=}\StringTok{"white"}\NormalTok{, ec}\OperatorTok{=}\NormalTok{CL.ink, lw}\OperatorTok{=}\FloatTok{1.1}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{3}\NormalTok{))}
-\NormalTok{    ax.text(x, y, text, ha}\OperatorTok{=}\StringTok{"center"}\NormalTok{, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{, fontsize}\OperatorTok{=}\FloatTok{7.6}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{4}\NormalTok{)}
-
-\KeywordTok{def}\NormalTok{ oval(ax, x, y, text, w}\OperatorTok{=}\FloatTok{1.5}\NormalTok{, h}\OperatorTok{=}\FloatTok{0.62}\NormalTok{):}
-\NormalTok{    ax.add\_patch(Ellipse((x, y), w, h, fc}\OperatorTok{=}\NormalTok{CL.accent, alpha}\OperatorTok{=}\FloatTok{0.14}\NormalTok{,}
-\NormalTok{                         ec}\OperatorTok{=}\NormalTok{CL.accent, lw}\OperatorTok{=}\FloatTok{1.6}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{3}\NormalTok{))}
-\NormalTok{    ax.text(x, y, text, ha}\OperatorTok{=}\StringTok{"center"}\NormalTok{, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{, fontsize}\OperatorTok{=}\FloatTok{8.6}\NormalTok{,}
-\NormalTok{            style}\OperatorTok{=}\StringTok{"italic"}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.ink, zorder}\OperatorTok{=}\DecValTok{4}\NormalTok{)}
-
-\KeywordTok{def}\NormalTok{ arrow(ax, p0, p1, label}\OperatorTok{=}\VariableTok{None}\NormalTok{, style}\OperatorTok{=}\StringTok{"{-}|\textgreater{}"}\NormalTok{, color}\OperatorTok{=}\VariableTok{None}\NormalTok{, dash}\OperatorTok{=}\VariableTok{False}\NormalTok{):}
-\NormalTok{    color }\OperatorTok{=}\NormalTok{ color }\KeywordTok{or}\NormalTok{ CL.muted}
-\NormalTok{    ax.add\_patch(FancyArrowPatch(p0, p1, arrowstyle}\OperatorTok{=}\NormalTok{style, mutation\_scale}\OperatorTok{=}\DecValTok{11}\NormalTok{,}
-\NormalTok{                                 lw}\OperatorTok{=}\FloatTok{1.2}\NormalTok{, color}\OperatorTok{=}\NormalTok{color, zorder}\OperatorTok{=}\DecValTok{2}\NormalTok{,}
-\NormalTok{                                 linestyle}\OperatorTok{=}\StringTok{"{-}{-}"} \ControlFlowTok{if}\NormalTok{ dash }\ControlFlowTok{else} \StringTok{"{-}"}\NormalTok{,}
-\NormalTok{                                 shrinkA}\OperatorTok{=}\DecValTok{2}\NormalTok{, shrinkB}\OperatorTok{=}\DecValTok{2}\NormalTok{))}
-    \ControlFlowTok{if}\NormalTok{ label:}
-\NormalTok{        f }\OperatorTok{=} \FloatTok{0.55}
-\NormalTok{        mx }\OperatorTok{=}\NormalTok{ p0[}\DecValTok{0}\NormalTok{] }\OperatorTok{+}\NormalTok{ f}\OperatorTok{*}\NormalTok{(p1[}\DecValTok{0}\NormalTok{]}\OperatorTok{{-}}\NormalTok{p0[}\DecValTok{0}\NormalTok{])}\OperatorTok{;}\NormalTok{ my }\OperatorTok{=}\NormalTok{ p0[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\NormalTok{ f}\OperatorTok{*}\NormalTok{(p1[}\DecValTok{1}\NormalTok{]}\OperatorTok{{-}}\NormalTok{p0[}\DecValTok{1}\NormalTok{])}
-\NormalTok{        ax.text(mx, my, label, fontsize}\OperatorTok{=}\DecValTok{7}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.ink, ha}\OperatorTok{=}\StringTok{"center"}\NormalTok{,}
-\NormalTok{                va}\OperatorTok{=}\StringTok{"center"}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{5}\NormalTok{,}
-\NormalTok{                bbox}\OperatorTok{=}\BuiltInTok{dict}\NormalTok{(fc}\OperatorTok{=}\StringTok{"white"}\NormalTok{, ec}\OperatorTok{=}\StringTok{"none"}\NormalTok{, pad}\OperatorTok{=}\FloatTok{0.8}\NormalTok{))}
-
-\NormalTok{fig, (a1, a2) }\OperatorTok{=}\NormalTok{ plt.subplots(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, figsize}\OperatorTok{=}\NormalTok{(}\FloatTok{10.4}\NormalTok{, }\FloatTok{5.0}\NormalTok{))}
-
-\CommentTok{\# {-}{-}{-}{-} measurement model}
-\NormalTok{ys }\OperatorTok{=}\NormalTok{ \{}\StringTok{"value"}\NormalTok{: }\FloatTok{1.6}\NormalTok{, }\StringTok{"experience"}\NormalTok{: }\OperatorTok{{-}}\FloatTok{1.6}\NormalTok{\}}
-\ControlFlowTok{for}\NormalTok{ ci, (con, yc) }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(ys.items()):}
-\NormalTok{    oval(a1, }\DecValTok{0}\NormalTok{, yc, con)}
-\NormalTok{    items }\OperatorTok{=}\NormalTok{ groups[con]}
-    \ControlFlowTok{for}\NormalTok{ i, it }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(items):}
-\NormalTok{        yi }\OperatorTok{=}\NormalTok{ yc }\OperatorTok{+}\NormalTok{ (i }\OperatorTok{{-}}\NormalTok{ (}\BuiltInTok{len}\NormalTok{(items)}\OperatorTok{{-}}\DecValTok{1}\NormalTok{)}\OperatorTok{/}\DecValTok{2}\NormalTok{) }\OperatorTok{*} \FloatTok{0.62}
-\NormalTok{        box(a1, }\FloatTok{3.0}\NormalTok{, yi, it)}
-\NormalTok{        arrow(a1, (}\FloatTok{0.78}\NormalTok{, yc), (}\FloatTok{2.25}\NormalTok{, yi), }\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{std[it]}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
-\NormalTok{        arrow(a1, (}\FloatTok{3.9}\NormalTok{, yi), (}\FloatTok{3.78}\NormalTok{, yi), style}\OperatorTok{=}\StringTok{"{-}|\textgreater{}"}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.line)}
-\NormalTok{        a1.text(}\FloatTok{4.05}\NormalTok{, yi, }\StringTok{"δ"}\NormalTok{, fontsize}\OperatorTok{=}\FloatTok{7.5}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.muted, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{)}
-\NormalTok{arrow(a1, (}\DecValTok{0}\NormalTok{, }\FloatTok{1.28}\NormalTok{), (}\DecValTok{0}\NormalTok{, }\OperatorTok{{-}}\FloatTok{1.28}\NormalTok{), style}\OperatorTok{=}\StringTok{"\textless{}|{-}|\textgreater{}"}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.warn, dash}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
-\NormalTok{a1.text(}\OperatorTok{{-}}\FloatTok{0.16}\NormalTok{, }\DecValTok{0}\NormalTok{, }\StringTok{"covariance"}\NormalTok{, rotation}\OperatorTok{=}\DecValTok{90}\NormalTok{, fontsize}\OperatorTok{=}\DecValTok{7}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.warn,}
-\NormalTok{        ha}\OperatorTok{=}\StringTok{"right"}\NormalTok{, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{)}
-\NormalTok{a1.set\_title(}\StringTok{"measurement model — what the indicators measure"}\NormalTok{, fontsize}\OperatorTok{=}\DecValTok{10}\NormalTok{, loc}\OperatorTok{=}\StringTok{"left"}\NormalTok{)}
-
-\CommentTok{\# {-}{-}{-}{-} structural model}
-\NormalTok{LX, RX }\OperatorTok{=} \OperatorTok{{-}}\FloatTok{2.3}\NormalTok{, }\FloatTok{2.3}
-\NormalTok{oval(a2, LX, }\DecValTok{0}\NormalTok{, }\StringTok{"value"}\NormalTok{)}\OperatorTok{;}\NormalTok{ oval(a2, RX, }\DecValTok{0}\NormalTok{, }\StringTok{"experience"}\NormalTok{)}
-\NormalTok{arrow(a2, (LX}\OperatorTok{+}\FloatTok{0.8}\NormalTok{, }\DecValTok{0}\NormalTok{), (RX}\OperatorTok{{-}}\FloatTok{0.8}\NormalTok{, }\DecValTok{0}\NormalTok{), style}\OperatorTok{=}\StringTok{"{-}|\textgreater{}"}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.warn)}
-\NormalTok{a2.text(}\DecValTok{0}\NormalTok{, }\FloatTok{0.16}\NormalTok{, }\StringTok{"path coefficient"}\NormalTok{, fontsize}\OperatorTok{=}\FloatTok{7.6}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.warn,}
-\NormalTok{        ha}\OperatorTok{=}\StringTok{"center"}\NormalTok{, va}\OperatorTok{=}\StringTok{"bottom"}\NormalTok{)}
-\CommentTok{\# Generic indicator labels here: the structural panel is schematic, and the}
-\CommentTok{\# real indicator names are on the measurement panel beside it.}
-\ControlFlowTok{for}\NormalTok{ cx, con, sym }\KeywordTok{in}\NormalTok{ ((LX, }\StringTok{"value"}\NormalTok{, }\StringTok{"x"}\NormalTok{), (RX, }\StringTok{"experience"}\NormalTok{, }\StringTok{"y"}\NormalTok{)):}
-    \ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{3}\NormalTok{):}
-\NormalTok{        xi }\OperatorTok{=}\NormalTok{ cx }\OperatorTok{+}\NormalTok{ (i }\OperatorTok{{-}} \DecValTok{1}\NormalTok{) }\OperatorTok{*} \FloatTok{1.12}
-\NormalTok{        box(a2, xi, }\OperatorTok{{-}}\FloatTok{1.55}\NormalTok{, }\SpecialStringTok{f"$}\SpecialCharTok{\{}\NormalTok{sym}\SpecialCharTok{\}}\SpecialStringTok{\_}\SpecialCharTok{\{}\NormalTok{i}\OperatorTok{+}\DecValTok{1}\SpecialCharTok{\}}\SpecialStringTok{$"}\NormalTok{, w}\OperatorTok{=}\FloatTok{0.82}\NormalTok{, h}\OperatorTok{=}\FloatTok{0.34}\NormalTok{)}
-\NormalTok{        arrow(a2, (cx, }\OperatorTok{{-}}\FloatTok{0.34}\NormalTok{), (xi, }\OperatorTok{{-}}\FloatTok{1.36}\NormalTok{))}
-\NormalTok{a2.add\_patch(FancyArrowPatch((RX, }\FloatTok{1.15}\NormalTok{), (RX, }\FloatTok{0.34}\NormalTok{), arrowstyle}\OperatorTok{=}\StringTok{"{-}|\textgreater{}"}\NormalTok{,}
-\NormalTok{                             mutation\_scale}\OperatorTok{=}\DecValTok{11}\NormalTok{, lw}\OperatorTok{=}\FloatTok{1.2}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.muted, zorder}\OperatorTok{=}\DecValTok{2}\NormalTok{))}
-\NormalTok{a2.text(RX }\OperatorTok{+} \FloatTok{0.16}\NormalTok{, }\FloatTok{0.95}\NormalTok{, }\VerbatimStringTok{r"}\DecValTok{$}\ErrorTok{\textbackslash{}}\VerbatimStringTok{zeta}\DecValTok{$}\VerbatimStringTok{ — what the path leaves unexplained"}\NormalTok{,}
-\NormalTok{        fontsize}\OperatorTok{=}\FloatTok{7.2}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.muted, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{)}
-\NormalTok{a2.set\_title(}\StringTok{"structural model — how the constructs relate"}\NormalTok{, fontsize}\OperatorTok{=}\DecValTok{10}\NormalTok{, loc}\OperatorTok{=}\StringTok{"left"}\NormalTok{)}
-
-\ControlFlowTok{for}\NormalTok{ ax, xl, yl }\KeywordTok{in}\NormalTok{ ((a1, (}\OperatorTok{{-}}\FloatTok{1.0}\NormalTok{, }\FloatTok{4.6}\NormalTok{), (}\OperatorTok{{-}}\FloatTok{3.1}\NormalTok{, }\FloatTok{3.1}\NormalTok{)), (a2, (}\OperatorTok{{-}}\FloatTok{4.3}\NormalTok{, }\FloatTok{6.4}\NormalTok{), (}\OperatorTok{{-}}\FloatTok{2.3}\NormalTok{, }\FloatTok{1.7}\NormalTok{))):}
-\NormalTok{    ax.set\_xlim(}\OperatorTok{*}\NormalTok{xl)}\OperatorTok{;}\NormalTok{ ax.set\_ylim(}\OperatorTok{*}\NormalTok{yl)}\OperatorTok{;}\NormalTok{ ax.axis(}\StringTok{"off"}\NormalTok{)}
-\NormalTok{fig.tight\_layout()}
+\NormalTok{plt.figure(figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{6}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\NormalTok{plt.imshow(corr, cmap}\OperatorTok{=}\StringTok{"Blues"}\NormalTok{, vmin}\OperatorTok{=}\DecValTok{0}\NormalTok{, vmax}\OperatorTok{=}\DecValTok{1}\NormalTok{)}
+\NormalTok{plt.colorbar()}
+\NormalTok{plt.xticks(}\BuiltInTok{range}\NormalTok{(}\DecValTok{9}\NormalTok{), tests)}
+\NormalTok{plt.yticks(}\BuiltInTok{range}\NormalTok{(}\DecValTok{9}\NormalTok{), tests)}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{9}\NormalTok{):}
+    \ControlFlowTok{for}\NormalTok{ j }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{9}\NormalTok{):}
+\NormalTok{        plt.text(j, i, }\BuiltInTok{round}\NormalTok{(corr.iloc[i, j], }\DecValTok{2}\NormalTok{), ha}\OperatorTok{=}\StringTok{"center"}\NormalTok{, va}\OperatorTok{=}\StringTok{"center"}\NormalTok{, fontsize}\OperatorTok{=}\DecValTok{7}\NormalTok{)}
+\NormalTok{plt.show()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -6744,122 +6882,106 @@ and a double-headed one an unanalysed covariance.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{session-09_files/figure-pdf/fig-path-diagram-output-1.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{session-09_files/figure-pdf/fig-hs-corr-output-1.png}}
 
 }
 
-\caption{\label{fig-path-diagram}The two halves of a structural equation
-model, drawn from the fitted estimates. Left, the measurement model:
-each construct with its indicators, labelled with the standardised
-loadings estimated above, and \(\delta\) for what each indicator does
-not share with its construct. Right, the structural model schematically:
-the path between constructs, with \(\zeta\) for what the path leaves
-unexplained.}
+\caption{\label{fig-hs-corr}The correlations between the nine tests.
+Three blocks on the diagonal: the groups are visible before any model is
+fitted.}
 
 \end{figure}%
 
-Reading the left panel is the whole of measurement. Each arrow carries
-the standardised loading, so \texttt{safety} at 0.29 is visibly the weak
-indicator and \texttt{resale\_value} at 0.68 the strong one, and the
-dashed double-headed arrow between the constructs says they are allowed
-to correlate without either causing the other. Every \(\delta\) is a
-reminder that the indicator is not the construct.
+Three dark squares sit on the diagonal. The textual tests correlate at
+about 0.7 with each other and 0.1--0.4 with everything else; the visual
+and speed tests form weaker blocks. If you cannot see your constructs in
+this picture, no fit index will find them for you.
 
-The right panel is the structural half, drawn schematically. One arrow
-between the constructs replaces what would otherwise be sixteen arrows
-between indicators, which is the economy the latent-variable approach
-buys --- and the \(\zeta\) is the honest part, standing for everything
-about \emph{experience} that \emph{value} does not account for.
+\textbf{Step 3 · Draw the model on paper.} Each test measures one
+ability, and the three abilities may correlate. Every missing arrow is a
+claim: no arrow from \emph{visual} to \texttt{x9} says the capitals test
+has nothing to do with visual ability.
 
-\section{What the estimator assumes}\label{what-the-estimator-assumes}
+\begin{figure}[htbp]
 
-Nothing above said how \(\theta\) is chosen. The default, in
-\texttt{semopy} as in \texttt{lavaan}, is \textbf{maximum likelihood},
-and the likelihood it maximises is the multivariate normal one. That
-assumption is not decoration: the \(\chi^2\) statistic and every
-standard error in the output are derived from it.
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-hs-model.png}}
 
-When the data are not multivariate normal --- and survey items with
-floor or ceiling effects rarely are --- the failure runs in one
-direction, which is what makes it dangerous. The \(\chi^2\) statistic is
-inflated, so a model that fits is rejected. The standard errors are too
-small, so paths look more significant than they are. Non-normality does
-not make you cautious. It makes you confident.
+}
 
-The assumption is checked at two levels, and the second is not implied
-by the first. Univariately, a Shapiro--Wilk test on each indicator.
-Multivariately --- which is the assumption actually being made ---
-Mardia's measures of skewness and kurtosis, built from the Mahalanobis
-cross-products \(d_{ij} = (x_i - \bar x)^\top S^{-1} (x_j - \bar x)\):
+\caption{The three-factor model, before any number is estimated.}
 
-\[
-b_1 = \frac{1}{n^2}\sum_i \sum_j d_{ij}^3 ,
-\qquad
-b_2 = \frac{1}{n}\sum_i d_{ii}^2 .
-\]
+\end{figure}%
 
-Under multivariate normality \(\tfrac{n}{6} b_1\) is \(\chi^2\) with
-\(k(k+1)(k+2)/6\) degrees of freedom, and \(b_2\) has mean \(k(k+2)\)
---- every indicator can pass Shapiro--Wilk while the joint distribution
-fails both.
+\textbf{Step 4 and 5 · Write it as text, and fit it.} One line per
+ellipse. \texttt{semopy} adds the rest: one loading per construct fixed
+to 1, an error term for each indicator, and covariances among the
+constructs.
 
-\phantomsection\label{check-mardia}
+\phantomsection\label{check-hs-fit}
 \begin{Shaded}
 \begin{Highlighting}[]
-\ImportTok{from}\NormalTok{ scipy }\ImportTok{import}\NormalTok{ stats}
+\NormalTok{description }\OperatorTok{=} \StringTok{"""}
+\StringTok{visual  =\textasciitilde{} x1 + x2 + x3}
+\StringTok{textual =\textasciitilde{} x4 + x5 + x6}
+\StringTok{speed   =\textasciitilde{} x7 + x8 + x9}
+\StringTok{"""}
+\NormalTok{model }\OperatorTok{=}\NormalTok{ semopy.Model(description)}
+\NormalTok{model.fit(data)}
 
-\NormalTok{indicators }\OperatorTok{=}\NormalTok{ [}\StringTok{"price"}\NormalTok{, }\StringTok{"resale\_value"}\NormalTok{, }\StringTok{"maintenance"}\NormalTok{, }\StringTok{"fuel\_efficiency"}\NormalTok{,}
-              \StringTok{"safety"}\NormalTok{, }\StringTok{"space\_comfort"}\NormalTok{, }\StringTok{"technology"}\NormalTok{, }\StringTok{"after\_sales\_service"}\NormalTok{]}
-\NormalTok{X }\OperatorTok{=}\NormalTok{ survey[indicators].to\_numpy(}\BuiltInTok{float}\NormalTok{)}
-\NormalTok{n, k }\OperatorTok{=}\NormalTok{ X.shape}
-
-\CommentTok{\# The cross{-}product matrix. Its diagonal holds each row\textquotesingle{}s squared Mahalanobis}
-\CommentTok{\# distance from the centroid; the off{-}diagonal entries are what make b1 a}
-\CommentTok{\# measure of *joint* skewness rather than eight separate ones.}
-\NormalTok{Xc }\OperatorTok{=}\NormalTok{ X }\OperatorTok{{-}}\NormalTok{ X.mean(}\DecValTok{0}\NormalTok{)}
-\NormalTok{D }\OperatorTok{=}\NormalTok{ Xc }\OperatorTok{@}\NormalTok{ np.linalg.inv(np.cov(X, rowvar}\OperatorTok{=}\VariableTok{False}\NormalTok{, bias}\OperatorTok{=}\VariableTok{True}\NormalTok{)) }\OperatorTok{@}\NormalTok{ Xc.T}
-
-\NormalTok{b1 }\OperatorTok{=}\NormalTok{ (D }\OperatorTok{**} \DecValTok{3}\NormalTok{).}\BuiltInTok{sum}\NormalTok{() }\OperatorTok{/}\NormalTok{ n }\OperatorTok{**} \DecValTok{2}          \CommentTok{\# sum over every pair i, j}
-\NormalTok{b2 }\OperatorTok{=}\NormalTok{ (np.diag(D) }\OperatorTok{**} \DecValTok{2}\NormalTok{).}\BuiltInTok{sum}\NormalTok{() }\OperatorTok{/}\NormalTok{ n      }\CommentTok{\# diagonal only — the squared distances}
-
-\NormalTok{chi2, df }\OperatorTok{=}\NormalTok{ n }\OperatorTok{*}\NormalTok{ b1 }\OperatorTok{/} \DecValTok{6}\NormalTok{, k }\OperatorTok{*}\NormalTok{ (k }\OperatorTok{+} \DecValTok{1}\NormalTok{) }\OperatorTok{*}\NormalTok{ (k }\OperatorTok{+} \DecValTok{2}\NormalTok{) }\OperatorTok{//} \DecValTok{6}
-\NormalTok{z }\OperatorTok{=}\NormalTok{ (b2 }\OperatorTok{{-}}\NormalTok{ k }\OperatorTok{*}\NormalTok{ (k }\OperatorTok{+} \DecValTok{2}\NormalTok{)) }\OperatorTok{/}\NormalTok{ np.sqrt(}\DecValTok{8} \OperatorTok{*}\NormalTok{ k }\OperatorTok{*}\NormalTok{ (k }\OperatorTok{+} \DecValTok{2}\NormalTok{) }\OperatorTok{/}\NormalTok{ n)}
-
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"n = }\SpecialCharTok{\{}\NormalTok{n}\SpecialCharTok{\}}\SpecialStringTok{, k = }\SpecialCharTok{\{}\NormalTok{k}\SpecialCharTok{\}}\SpecialStringTok{ indicators}\CharTok{\textbackslash{}n}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"skewness  b1 = }\SpecialCharTok{\{}\NormalTok{b1}\SpecialCharTok{:6.3f\}}\SpecialStringTok{   chi2 = }\SpecialCharTok{\{}\NormalTok{chi2}\SpecialCharTok{:6.1f\}}\SpecialStringTok{  df = }\SpecialCharTok{\{}\NormalTok{df}\SpecialCharTok{\}}\SpecialStringTok{"}
-      \SpecialStringTok{f"   p = }\SpecialCharTok{\{}\NormalTok{stats}\SpecialCharTok{.}\NormalTok{chi2}\SpecialCharTok{.}\NormalTok{sf(chi2, df)}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"kurtosis  b2 = }\SpecialCharTok{\{}\NormalTok{b2}\SpecialCharTok{:6.2f\}}\SpecialStringTok{   expected }\SpecialCharTok{\{}\NormalTok{k }\OperatorTok{*}\NormalTok{ (k }\OperatorTok{+} \DecValTok{2}\NormalTok{)}\SpecialCharTok{\}}\SpecialStringTok{"}
-      \SpecialStringTok{f"          z = }\SpecialCharTok{\{}\NormalTok{z}\SpecialCharTok{:5.2f\}}\SpecialStringTok{   p = }\SpecialCharTok{\{}\DecValTok{2} \OperatorTok{*}\NormalTok{ stats}\SpecialCharTok{.}\NormalTok{norm}\SpecialCharTok{.}\NormalTok{sf(}\BuiltInTok{abs}\NormalTok{(z))}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{estimates }\OperatorTok{=}\NormalTok{ model.inspect(std\_est}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{loadings }\OperatorTok{=}\NormalTok{ estimates[estimates[}\StringTok{"op"}\NormalTok{] }\OperatorTok{==} \StringTok{"\textasciitilde{}"}\NormalTok{]}
+\BuiltInTok{print}\NormalTok{(loadings[[}\StringTok{"lval"}\NormalTok{, }\StringTok{"op"}\NormalTok{, }\StringTok{"rval"}\NormalTok{, }\StringTok{"Estimate"}\NormalTok{, }\StringTok{"Est. Std"}\NormalTok{, }\StringTok{"p{-}value"}\NormalTok{]].}\BuiltInTok{round}\NormalTok{(}\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-n = 90, k = 8 indicators
-
-skewness  b1 = 11.911   chi2 =  178.7  df = 120   p = 0.0004
-kurtosis  b2 =  85.18   expected 80          z =  1.94   p = 0.0522
+  lval op     rval  Estimate  Est. Std p-value
+0   x1  ~   visual     1.000     0.771       -
+1   x2  ~   visual     0.554     0.424     0.0
+2   x3  ~   visual     0.731     0.582     0.0
+3   x4  ~  textual     1.000     0.852       -
+4   x5  ~  textual     1.113     0.855     0.0
+5   x6  ~  textual     0.926     0.838     0.0
+6   x7  ~    speed     1.000     0.569       -
+7   x8  ~    speed     1.180     0.723     0.0
+8   x9  ~    speed     1.083     0.665     0.0
 \end{verbatim}
 
-Which is the uncomfortable part. The measurement model fitted earlier in
-this chapter was estimated by maximum likelihood on data whose joint
-skewness rejects normality at \(p < 0.001\), with kurtosis borderline.
-Everything the next section says about its fit is therefore computed
-from a statistic the data do not quite license --- and this is the
-normal situation with survey data, not a contrived one.
+\texttt{semopy} writes a loading as
+\texttt{x2\ \textasciitilde{}\ visual} --- ``x2 depends on visual'',
+which is what \texttt{=\textasciitilde{}} means read from the other
+side. \texttt{Estimate} is in the indicator's own units, and the rows
+equal to 1 with no \(p\)-value are the ones fixed in step 4.
+\texttt{Est.\ Std} is the column to read: a standardised loading is the
+correlation between the indicator and its construct, and its square is
+the share of the indicator the construct explains.
 
-The answer is not to abandon the model but to change the estimator.
-\textbf{Robust maximum likelihood} --- \texttt{MLR}, resting on the
-Satorra--Bentler scaled \(\chi^2\) --- keeps the ML point estimates
-unchanged and rescales the test statistic and the standard errors by the
-non-normality actually observed. The paths do not move; the claims made
-about them get weaker, which is the correction being asked for. For
-ordinal indicators, \textbf{WLSMV} goes further and treats a five-point
-item as a coarsened continuous variable rather than pretending its
-categories are numbers.
+\textbf{Step 6 · Put the numbers back on the drawing.}
 
-So report the estimator alongside the fit. \texttt{ML} and \texttt{MLR}
-on one model return the same coefficients and different \(p\)-values,
-and on data like these only one of the two is defensible.
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-hs-model-fitted.png}}
+
+}
+
+\caption{The fitted three-factor model, standardised. Red loadings are
+below 0.6; the circles hold the share of each test the model leaves
+unexplained, which is one minus the squared loading.}
+
+\end{figure}%
+
+Textual is measured well, each test sharing about 72\% of its variance
+with the construct. Cubes, \texttt{x2}, is the weak indicator:
+\(0.42^2 = 0.18\), so 82\% of a child's cubes score is something other
+than visual ability. Below about 0.4 an item has little to do with the
+thing it is supposed to measure, and keeping it degrades the construct
+rather than enriching it.
+
+The rule from the previous section can be checked by hand. \texttt{x4}
+and \texttt{x5} both measure \emph{textual}, so the model says their
+correlation is \(0.85 \times 0.86 = 0.73\) --- and the correlation in
+the first figure is 0.73. The three abilities correlate at 0.28 to 0.47:
+related, but distinct.
 
 \section{The fit indices, and what each would have to
 be}\label{the-fit-indices-and-what-each-would-have-to-be}
@@ -6897,8 +7019,7 @@ penalty for parameters, so adding a path that does not help can
 {\textbf{RMSEA}} --- root mean square error of approximation
 (\citeproc{ref-browne1992}{Browne and Cudeck 1992}). The misfit per
 degree of freedom, so it rewards parsimony directly. \textbf{Below about
-0.06} is good, above 0.10 poor, and it comes with a confidence interval
-that should be reported with it.
+0.06} is good, above 0.10 poor.
 
 \end{qmibdefinition}
 
@@ -6906,95 +7027,407 @@ Those thresholds come from a simulation study (\citeproc{ref-hu1999}{Hu
 and Bentler 1999}) that has been cited tens of thousands of times and
 whose authors were careful to say they were not proposing universal
 cut-offs. They are conventions, and the honest use is to report the
-numbers and let the reader apply their own judgement.
+numbers and the convention together, and let the reader apply their own
+judgement.
 
-\phantomsection\label{check-fit}
+\phantomsection\label{check-hs-indices}
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{stats }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(model)}
-\NormalTok{get }\OperatorTok{=} \KeywordTok{lambda}\NormalTok{ k: }\BuiltInTok{float}\NormalTok{(stats[k].iloc[}\DecValTok{0}\NormalTok{])}
-
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}index\textquotesingle{}}\SpecialCharTok{:10\}\{}\StringTok{\textquotesingle{}value\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}\{}\StringTok{\textquotesingle{}convention\textquotesingle{}}\SpecialCharTok{:\textgreater{}14\}}\SpecialStringTok{   verdict"}\NormalTok{)}
-\NormalTok{rows }\OperatorTok{=}\NormalTok{ [}
-\NormalTok{    (}\StringTok{"chi2"}\NormalTok{,   get(}\StringTok{"chi2"}\NormalTok{),   }\StringTok{"p \textgreater{} 0.05"}\NormalTok{,  get(}\StringTok{"chi2 p{-}value"}\NormalTok{) }\OperatorTok{\textgreater{}} \FloatTok{0.05}\NormalTok{),}
-\NormalTok{    (}\StringTok{"CFI"}\NormalTok{,    get(}\StringTok{"CFI"}\NormalTok{),    }\StringTok{"\textgreater{} 0.95"}\NormalTok{,    get(}\StringTok{"CFI"}\NormalTok{) }\OperatorTok{\textgreater{}} \FloatTok{0.95}\NormalTok{),}
-\NormalTok{    (}\StringTok{"TLI"}\NormalTok{,    get(}\StringTok{"TLI"}\NormalTok{),    }\StringTok{"\textgreater{} 0.95"}\NormalTok{,    get(}\StringTok{"TLI"}\NormalTok{) }\OperatorTok{\textgreater{}} \FloatTok{0.95}\NormalTok{),}
-\NormalTok{    (}\StringTok{"RMSEA"}\NormalTok{,  get(}\StringTok{"RMSEA"}\NormalTok{),  }\StringTok{"\textless{} 0.06"}\NormalTok{,    get(}\StringTok{"RMSEA"}\NormalTok{) }\OperatorTok{\textless{}} \FloatTok{0.06}\NormalTok{),}
-\NormalTok{]}
-\ControlFlowTok{for}\NormalTok{ name, val, rule, ok }\KeywordTok{in}\NormalTok{ rows:}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:10\}\{}\NormalTok{val}\SpecialCharTok{:10.4f\}\{}\NormalTok{rule}\SpecialCharTok{:\textgreater{}14\}}\SpecialStringTok{   }\SpecialCharTok{\{}\StringTok{\textquotesingle{}pass\textquotesingle{}} \ControlFlowTok{if}\NormalTok{ ok }\ControlFlowTok{else} \StringTok{\textquotesingle{}FAIL\textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{chi2 p{-}value }\SpecialCharTok{\{}\NormalTok{get(}\StringTok{\textquotesingle{}chi2 p{-}value\textquotesingle{}}\NormalTok{)}\SpecialCharTok{:.6f\}}\SpecialStringTok{ on }\SpecialCharTok{\{}\BuiltInTok{int}\NormalTok{(get(}\StringTok{\textquotesingle{}DoF\textquotesingle{}}\NormalTok{))}\SpecialCharTok{\}}\SpecialStringTok{ degrees of freedom"}\NormalTok{)}
+\NormalTok{fit }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(model)}
+\BuiltInTok{print}\NormalTok{(fit[[}\StringTok{"chi2"}\NormalTok{, }\StringTok{"DoF"}\NormalTok{, }\StringTok{"chi2 p{-}value"}\NormalTok{, }\StringTok{"CFI"}\NormalTok{, }\StringTok{"TLI"}\NormalTok{, }\StringTok{"RMSEA"}\NormalTok{]].T.}\BuiltInTok{round}\NormalTok{(}\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-index          value    convention   verdict
-chi2         47.0473      p > 0.05   FAIL
-CFI           0.7078        > 0.95   FAIL
-TLI           0.5694        > 0.95   FAIL
-RMSEA         0.1288        < 0.06   FAIL
-
-chi2 p-value 0.000352 on 19 degrees of freedom
+               Value
+chi2          85.306
+DoF           24.000
+chi2 p-value   0.000
+CFI            0.931
+TLI            0.896
+RMSEA          0.092
 \end{verbatim}
 
-Every index fails. That is the useful outcome, and it is worth dwelling
-on because published papers rarely show one.
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Index
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Convention
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Three-factor model
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Verdict
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\chi^2\) & \(p > 0.05\) & 85.3 on 24 df, \(p < 0.001\) & rejects exact
+fit \\
+CFI & \(> 0.95\) & 0.931 & close, not there \\
+TLI & \(> 0.95\) & 0.896 & short \\
+RMSEA & \(< 0.06\) & 0.092 & mediocre \\
+\end{longtable}
 
-The model was not invented arbitrarily --- it was taken from the varimax
-solution in chapter 7, which grouped these items in exactly this way. An
-exploratory factor analysis suggested a structure; stated as a
-confirmatory model and tested, the structure is rejected. That is
-precisely what the two methods are for, and it is why running EFA and
-CFA on the same sample and reporting the confirmation is circular: the
-second was fitted to the pattern the first found.
+A model drawn from a well-established theory of mental abilities, and it
+does not quite fit. That is a normal outcome, and the useful question is
+where it misses.
+
+\section{Where the model misses, and what you may do about
+it}\label{where-the-model-misses-and-what-you-may-do-about-it}
+
+The model implies a correlation for every pair of tests. Subtracting it
+from the observed one shows where the diagram is wrong.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-hs-reproduce.png}}
+
+}
+
+\caption{Observed correlations, the correlations the fitted model
+implies, and their difference. The textual block is reproduced almost
+exactly; the largest misses are in the last row, where x9 correlates
+with the visual tests more than the model allows.}
+
+\end{figure}%
+
+\texttt{x9} correlates with \texttt{x1} and \texttt{x3} by about 0.15
+more than the model allows. Is there a reason? The test asks children to
+tell straight from curved capital letters, quickly: a speed task that
+also needs visual discrimination. An arrow from \emph{visual} to
+\texttt{x9} can therefore be argued from what the test is, not merely
+from the numbers. Comparing it with the alternatives is one loop:
+
+\phantomsection\label{check-hs-compare}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{models }\OperatorTok{=}\NormalTok{ \{}
+    \StringTok{"one factor"}\NormalTok{:     }\StringTok{"ability =\textasciitilde{} x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9"}\NormalTok{,}
+    \StringTok{"three factors"}\NormalTok{:  }\StringTok{"visual =\textasciitilde{} x1 + x2 + x3 }\CharTok{\textbackslash{}n}\StringTok{ textual =\textasciitilde{} x4 + x5 + x6 }\CharTok{\textbackslash{}n}\StringTok{ speed =\textasciitilde{} x7 + x8 + x9"}\NormalTok{,}
+    \StringTok{"three + x9 vis"}\NormalTok{: }\StringTok{"visual =\textasciitilde{} x1 + x2 + x3 + x9 }\CharTok{\textbackslash{}n}\StringTok{ textual =\textasciitilde{} x4 + x5 + x6 }\CharTok{\textbackslash{}n}\StringTok{ speed =\textasciitilde{} x7 + x8 + x9"}\NormalTok{,}
+\NormalTok{\}}
+\ControlFlowTok{for}\NormalTok{ name, desc }\KeywordTok{in}\NormalTok{ models.items():}
+\NormalTok{    m }\OperatorTok{=}\NormalTok{ semopy.Model(desc)}
+\NormalTok{    m.fit(data)}
+\NormalTok{    s }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(m)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:15\}}\SpecialStringTok{ chi2 = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}chi2\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:6.1f\}}\SpecialStringTok{  df = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}DoF\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.0f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  CFI = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{  TLI = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}TLI\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  RMSEA = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}RMSEA\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+one factor      chi2 =  312.3  df = 27  CFI = 0.677  TLI = 0.569  RMSEA = 0.188
+three factors   chi2 =   85.3  df = 24  CFI = 0.931  TLI = 0.896  RMSEA = 0.092
+three + x9 vis  chi2 =   52.4  df = 23  CFI = 0.967  TLI = 0.948  RMSEA = 0.065
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-hs-one-vs-three.png}}
+
+}
+
+\caption{One general ability against three. The single factor is
+rejected on every index: the tests do not all measure one thing.}
+
+\end{figure}%
+
+One general ability is rejected decisively. Three abilities are far
+better, and \texttt{x9} on \emph{visual} as well brings CFI to 0.967 and
+RMSEA to 0.065.
 
 \textbf{What to do about a failing model.} Not, in the first instance,
 to modify it until it passes. Software offers modification indices ---
 the improvement in \(\chi^2\) from freeing each fixed parameter --- and
 following them is how a theoretical model becomes an atheoretical one
-that fits this sample. If you use them, say so, and treat the result as
-exploratory.
+that fits this sample. The third model above was chosen \emph{after
+looking at the misfit}, which makes it exploratory however good its
+argument. The honest check is data it has not seen. The two schools give
+a partial one:
 
-The disciplined diagnosis starts with the indicators.
-
-\phantomsection\label{check-indicators}
+\phantomsection\label{check-hs-schools}
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{std }\OperatorTok{=}\NormalTok{ loadings.assign(std}\OperatorTok{=}\NormalTok{loadings[}\StringTok{"Est. Std"}\NormalTok{].astype(}\BuiltInTok{float}\NormalTok{))}
-\NormalTok{std[}\StringTok{"communality"}\NormalTok{] }\OperatorTok{=}\NormalTok{ std[}\StringTok{"std"}\NormalTok{] }\OperatorTok{**} \DecValTok{2}
-
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}indicator\textquotesingle{}}\SpecialCharTok{:22\}\{}\StringTok{\textquotesingle{}std loading\textquotesingle{}}\SpecialCharTok{:\textgreater{}13\}\{}\StringTok{\textquotesingle{}shared var\textquotesingle{}}\SpecialCharTok{:\textgreater{}12\}}\SpecialStringTok{   assessment"}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ \_, r }\KeywordTok{in}\NormalTok{ std.sort\_values(}\StringTok{"std"}\NormalTok{).iterrows():}
-    \ControlFlowTok{if}\NormalTok{ r[}\StringTok{"std"}\NormalTok{] }\OperatorTok{\textless{}} \FloatTok{0.4}\NormalTok{:}
-\NormalTok{        verdict }\OperatorTok{=} \StringTok{"weak — consider dropping"}
-    \ControlFlowTok{elif}\NormalTok{ r[}\StringTok{"std"}\NormalTok{] }\OperatorTok{\textless{}} \FloatTok{0.7}\NormalTok{:}
-\NormalTok{        verdict }\OperatorTok{=} \StringTok{"acceptable"}
-    \ControlFlowTok{else}\NormalTok{:}
-\NormalTok{        verdict }\OperatorTok{=} \StringTok{"strong"}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{r[}\StringTok{\textquotesingle{}lval\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:22\}\{}\NormalTok{r[}\StringTok{\textquotesingle{}std\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:13.3f\}\{}\NormalTok{r[}\StringTok{\textquotesingle{}communality\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:12.3f\}}\SpecialStringTok{   }\SpecialCharTok{\{}\NormalTok{verdict}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ school }\KeywordTok{in}\NormalTok{ [}\StringTok{"Pasteur"}\NormalTok{, }\StringTok{"Grant{-}White"}\NormalTok{]:}
+\NormalTok{    one\_school }\OperatorTok{=}\NormalTok{ data[data[}\StringTok{"school"}\NormalTok{] }\OperatorTok{==}\NormalTok{ school]}
+    \ControlFlowTok{for}\NormalTok{ name }\KeywordTok{in}\NormalTok{ [}\StringTok{"three factors"}\NormalTok{, }\StringTok{"three + x9 vis"}\NormalTok{]:}
+\NormalTok{        m }\OperatorTok{=}\NormalTok{ semopy.Model(models[name])}
+\NormalTok{        m.fit(one\_school)}
+\NormalTok{        s }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(m)}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{school}\SpecialCharTok{:12\}}\SpecialStringTok{ n = }\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(one\_school)}\SpecialCharTok{\}}\SpecialStringTok{  }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:15\}}\SpecialStringTok{ CFI = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}
+              \SpecialStringTok{f"  RMSEA = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}RMSEA\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-indicator               std loading  shared var   assessment
-safety                        0.291       0.085   weak — consider dropping
-technology                    0.437       0.191   acceptable
-fuel_efficiency               0.503       0.253   acceptable
-price                         0.532       0.283   acceptable
-space_comfort                 0.553       0.305   acceptable
-maintenance                   0.620       0.384   acceptable
-after_sales_service           0.632       0.400   acceptable
-resale_value                  0.679       0.461   acceptable
+Pasteur      n = 156  three factors   CFI = 0.903  RMSEA = 0.104
+Pasteur      n = 156  three + x9 vis  CFI = 0.927  RMSEA = 0.092
+Grant-White  n = 145  three factors   CFI = 0.941  RMSEA = 0.089
+Grant-White  n = 145  three + x9 vis  CFI = 0.989  RMSEA = 0.040
 \end{verbatim}
 
-A standardised loading is the correlation between the indicator and the
-construct; its square is the share of the indicator's variance the
-construct explains. Below about 0.4 the item has little to do with the
-thing it is supposed to measure, and keeping it degrades the construct
-rather than enriching it. Here \texttt{safety} loads at 0.29 --- it
-shares under a tenth of its variance with the construct it was assigned
-to, which is a substantive finding about the questionnaire rather than a
-technical nuisance.
+In Grant-White the modified model fits well (CFI 0.989, RMSEA 0.040). In
+Pasteur it helps but still falls short (CFI 0.927, RMSEA 0.092). The
+change is real in one school and only partial in the other --- a finding
+about the tests, and the kind of result that a single pooled fit would
+have hidden.
+
+\section{Adding the structural part}\label{adding-the-structural-part}
+
+A measurement model says what the constructs are. A structural model
+says what they do to each other. Bollen's political-democracy data
+(\citeproc{ref-bollen1989}{Bollen 1989}), also bundled with
+\texttt{semopy}, are the standard example: 75 developing countries, with
+industrialisation in 1960 measured by three indicators and democracy
+measured by the same four expert ratings in 1960 and again in 1965.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Construct
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Indicators
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{ind60} · industrialisation, 1960 & \texttt{x1} GNP per capita ·
+\texttt{x2} energy per capita · \texttt{x3} share of labour in
+industry \\
+\textbf{dem60} · democracy, 1960 & \texttt{y1} press freedom ·
+\texttt{y2} freedom of opposition · \texttt{y3} fair elections ·
+\texttt{y4} effective legislature \\
+\textbf{dem65} · democracy, 1965 & \texttt{y5}--\texttt{y8}: the same
+four questions, five years later \\
+\end{longtable}
+
+The theory supplies three structural claims: industrialisation raises
+democracy, democracy persists, and industrialisation may also act on
+1965 directly. The design supplies one more. \texttt{y1} and \texttt{y5}
+are the same question, rated by the same experts, so whatever makes a
+rater generous on press freedom in 1960 plausibly does so again in 1965:
+their errors may covary. That is decided before fitting, from how the
+data were collected.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-pd-model.png}}
+
+}
+
+\caption{The democracy model before fitting. Blue arrows are
+measurement, red arrows structural, gold dashed arrows the same question
+asked twice.}
+
+\end{figure}%
+
+All three operators now appear in one description:
+
+\phantomsection\label{check-pd-fit}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ semopy.examples }\ImportTok{import}\NormalTok{ political\_democracy}
+
+\NormalTok{countries }\OperatorTok{=}\NormalTok{ political\_democracy.get\_data()}
+\NormalTok{description }\OperatorTok{=} \StringTok{"""}
+\StringTok{ind60 =\textasciitilde{} x1 + x2 + x3}
+\StringTok{dem60 =\textasciitilde{} y1 + y2 + y3 + y4}
+\StringTok{dem65 =\textasciitilde{} y5 + y6 + y7 + y8}
+\StringTok{dem60 \textasciitilde{} ind60}
+\StringTok{dem65 \textasciitilde{} ind60 + dem60}
+\StringTok{y1 \textasciitilde{}\textasciitilde{} y5}
+\StringTok{y2 \textasciitilde{}\textasciitilde{} y6}
+\StringTok{y3 \textasciitilde{}\textasciitilde{} y7}
+\StringTok{y4 \textasciitilde{}\textasciitilde{} y8}
+\StringTok{"""}
+\NormalTok{pd\_model }\OperatorTok{=}\NormalTok{ semopy.Model(description)}
+\NormalTok{pd\_model.fit(countries)}
+\NormalTok{est }\OperatorTok{=}\NormalTok{ pd\_model.inspect(std\_est}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\NormalTok{paths }\OperatorTok{=}\NormalTok{ est[(est[}\StringTok{"op"}\NormalTok{] }\OperatorTok{==} \StringTok{"\textasciitilde{}"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ est[}\StringTok{"lval"}\NormalTok{].isin([}\StringTok{"dem60"}\NormalTok{, }\StringTok{"dem65"}\NormalTok{])]}
+\BuiltInTok{print}\NormalTok{(paths[[}\StringTok{"lval"}\NormalTok{, }\StringTok{"op"}\NormalTok{, }\StringTok{"rval"}\NormalTok{, }\StringTok{"Estimate"}\NormalTok{, }\StringTok{"Est. Std"}\NormalTok{, }\StringTok{"p{-}value"}\NormalTok{]].}\BuiltInTok{round}\NormalTok{(}\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    lval op   rval  Estimate  Est. Std   p-value
+0  dem60  ~  ind60     1.435     0.448  0.000193
+1  dem65  ~  ind60     0.507     0.168  0.015297
+2  dem65  ~  dem60     0.816     0.869       0.0
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-pd-model-fitted.png}}
+
+}
+
+\caption{The fitted democracy model, standardised. The numbers in the ζ
+circles are the unexplained shares, so R² is one minus each.}
+
+\end{figure}%
+
+A country one standard deviation more industrialised in 1960 was 0.45
+standard deviations more democratic that year. Democracy is very
+persistent (0.87), and industrialisation adds a smaller direct push to
+1965 on top of that persistence (0.17, \(p = 0.015\)). Industrialisation
+explains 20\% of the variance of democracy in 1960; with 1960 democracy
+it explains 91\% of 1965. All eleven loadings exceed 0.69.
+
+\textbf{Direct and indirect effects.} Industrialisation reaches 1965 by
+two roads: straight there, and through 1960 democracy. Along a road,
+standardised paths multiply.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-pd-effects.png}}
+
+}
+
+\caption{Two routes from ind60 to dem65: the direct path c, and the
+indirect route a × b through dem60.}
+
+\end{figure}%
+
+\phantomsection\label{check-pd-effects}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{a }\OperatorTok{=}\NormalTok{ est.loc[(est[}\StringTok{"lval"}\NormalTok{] }\OperatorTok{==} \StringTok{"dem60"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (est[}\StringTok{"rval"}\NormalTok{] }\OperatorTok{==} \StringTok{"ind60"}\NormalTok{), }\StringTok{"Est. Std"}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{]}
+\NormalTok{b }\OperatorTok{=}\NormalTok{ est.loc[(est[}\StringTok{"lval"}\NormalTok{] }\OperatorTok{==} \StringTok{"dem65"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (est[}\StringTok{"rval"}\NormalTok{] }\OperatorTok{==} \StringTok{"dem60"}\NormalTok{), }\StringTok{"Est. Std"}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{]}
+\NormalTok{c }\OperatorTok{=}\NormalTok{ est.loc[(est[}\StringTok{"lval"}\NormalTok{] }\OperatorTok{==} \StringTok{"dem65"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (est[}\StringTok{"rval"}\NormalTok{] }\OperatorTok{==} \StringTok{"ind60"}\NormalTok{), }\StringTok{"Est. Std"}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{]}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"direct    c         = }\SpecialCharTok{\{}\NormalTok{c}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"indirect  a * b     = }\SpecialCharTok{\{}\NormalTok{a}\SpecialCharTok{:.2f\}}\SpecialStringTok{ * }\SpecialCharTok{\{}\NormalTok{b}\SpecialCharTok{:.2f\}}\SpecialStringTok{ = }\SpecialCharTok{\{}\NormalTok{a }\OperatorTok{*}\NormalTok{ b}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"total     c + a * b = }\SpecialCharTok{\{}\NormalTok{c }\OperatorTok{+}\NormalTok{ a }\OperatorTok{*}\NormalTok{ b}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+direct    c         = 0.17
+indirect  a * b     = 0.45 * 0.87 = 0.39
+total     c + a * b = 0.56
+\end{verbatim}
+
+Two-thirds of the total effect (0.39 of 0.56) runs through 1960
+democracy: a mediation, in which dem60 carries most of what
+industrialisation does for dem65. The arithmetic is exact within the
+model; whether it is a causal decomposition depends entirely on whether
+the arrows are, which is the subject of the next two sections.
+
+\textbf{Every extra arrow needs a reason.} The four same-question
+covariances changed the fit, and it is worth seeing by how much:
+
+\phantomsection\label{check-pd-covariances}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{base }\OperatorTok{=} \StringTok{"""}
+\StringTok{ind60 =\textasciitilde{} x1 + x2 + x3}
+\StringTok{dem60 =\textasciitilde{} y1 + y2 + y3 + y4}
+\StringTok{dem65 =\textasciitilde{} y5 + y6 + y7 + y8}
+\StringTok{dem60 \textasciitilde{} ind60}
+\StringTok{dem65 \textasciitilde{} ind60 + dem60}
+\StringTok{"""}
+\NormalTok{same\_question }\OperatorTok{=} \StringTok{"y1 \textasciitilde{}\textasciitilde{} y5 }\CharTok{\textbackslash{}n}\StringTok{ y2 \textasciitilde{}\textasciitilde{} y6 }\CharTok{\textbackslash{}n}\StringTok{ y3 \textasciitilde{}\textasciitilde{} y7 }\CharTok{\textbackslash{}n}\StringTok{ y4 \textasciitilde{}\textasciitilde{} y8"}
+\ControlFlowTok{for}\NormalTok{ name, desc }\KeywordTok{in}\NormalTok{ \{}\StringTok{"without"}\NormalTok{: base, }\StringTok{"with"}\NormalTok{: base }\OperatorTok{+}\NormalTok{ same\_question\}.items():}
+\NormalTok{    m }\OperatorTok{=}\NormalTok{ semopy.Model(desc)}
+\NormalTok{    m.fit(countries)}
+\NormalTok{    s }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(m)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:8\}}\SpecialStringTok{ chi2 = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}chi2\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:5.1f\}}\SpecialStringTok{  df = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}DoF\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.0f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  p = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}chi2 p{-}value\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{  CFI = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  RMSEA = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}RMSEA\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+without  chi2 =  72.5  df = 41  p = 0.002  CFI = 0.953  RMSEA = 0.102
+with     chi2 =  50.8  df = 37  p = 0.064  CFI = 0.980  RMSEA = 0.071
+\end{verbatim}
+
+With them, \(\chi^2\) no longer rejects (\(p = 0.064\)), CFI reaches
+0.980 and RMSEA 0.071, and the structural paths barely move. They are
+legitimate here because the design predicts them. The same four lines
+added \emph{because they raise the CFI} would be fitting noise --- and
+correlated residuals added until a model passes are the most common way
+an SEM paper overstates its evidence.
+
+\section{What the estimator assumes}\label{what-the-estimator-assumes}
+
+Nothing above said how \(\theta\) is chosen. The default, in
+\texttt{semopy} as in \texttt{lavaan}, is \textbf{maximum likelihood},
+and the likelihood it maximises is the multivariate normal one. That
+assumption is not decoration: the \(\chi^2\) statistic and every
+standard error in the output are derived from it.
+
+When the data are not multivariate normal --- and survey items with
+floor or ceiling effects rarely are --- the failure runs in one
+direction, which is what makes it dangerous. The \(\chi^2\) statistic is
+inflated, so a model that fits is rejected. The standard errors are too
+small, so paths look more significant than they are. Non-normality does
+not make you cautious. It makes you confident.
+
+The first check is one test per indicator, with functions you already
+have:
+
+\phantomsection\label{check-normality}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ scipy }\ImportTok{import}\NormalTok{ stats}
+
+\ControlFlowTok{for}\NormalTok{ t }\KeywordTok{in}\NormalTok{ tests:}
+\NormalTok{    W, p }\OperatorTok{=}\NormalTok{ stats.shapiro(data[t])}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{t}\SpecialCharTok{\}}\SpecialStringTok{  W = }\SpecialCharTok{\{}\NormalTok{W}\SpecialCharTok{:.3f\}}\SpecialStringTok{  p = }\SpecialCharTok{\{}\NormalTok{p}\SpecialCharTok{:.4f\}}\SpecialStringTok{  skew = }\SpecialCharTok{\{}\NormalTok{data[t]}\SpecialCharTok{.}\NormalTok{skew()}\SpecialCharTok{:5.2f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  excess kurtosis = }\SpecialCharTok{\{}\NormalTok{data[t]}\SpecialCharTok{.}\NormalTok{kurt()}\SpecialCharTok{:5.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+x1  W = 0.993  p = 0.1582  skew = -0.26  excess kurtosis =  0.36
+x2  W = 0.970  p = 0.0000  skew =  0.47  excess kurtosis =  0.38
+x3  W = 0.952  p = 0.0000  skew =  0.39  excess kurtosis = -0.89
+x4  W = 0.983  p = 0.0011  skew =  0.27  excess kurtosis =  0.12
+x5  W = 0.977  p = 0.0001  skew = -0.35  excess kurtosis = -0.53
+x6  W = 0.954  p = 0.0000  skew =  0.87  excess kurtosis =  0.88
+x7  W = 0.991  p = 0.0560  skew =  0.25  excess kurtosis = -0.27
+x8  W = 0.981  p = 0.0004  skew =  0.53  excess kurtosis =  1.24
+x9  W = 0.994  p = 0.3070  skew =  0.21  excess kurtosis =  0.34
+\end{verbatim}
+
+Six of the nine tests reject univariate normality at the 1\% level,
+though none is far from it: the skewness stays below 0.9 and the excess
+kurtosis below 1.3, small enough that maximum likelihood is a defensible
+default here. Passing one indicator at a time is not the assumption
+actually being made, which is joint. Mardia's measures of multivariate
+skewness and kurtosis,
+
+\[
+b_1 = \frac{1}{n^2}\sum_i \sum_j d_{ij}^3 ,
+\qquad
+b_2 = \frac{1}{n}\sum_i d_{ii}^2 ,
+\qquad
+d_{ij} = (x_i - \bar x)^\top S^{-1} (x_j - \bar x),
+\]
+
+test it directly; under normality \(b_2\) has mean \(k(k+2)\), and every
+indicator can pass Shapiro--Wilk while the joint distribution fails
+both.
+
+The answer to non-normality is not to abandon the model but to change
+the estimator. \textbf{Robust maximum likelihood} --- \texttt{MLR},
+resting on the Satorra--Bentler scaled \(\chi^2\) --- keeps the ML point
+estimates and rescales the test statistic and the standard errors by the
+non-normality actually observed. For ordinal indicators, \textbf{WLSMV}
+treats a five-point item as a coarsened continuous variable rather than
+pretending its categories are numbers. Either way, report the estimator
+alongside the fit.
 
 \section{Good fit is not evidence that the model is
 correct}\label{good-fit-is-not-evidence-that-the-model-is-correct}
@@ -7013,41 +7446,35 @@ distinguishes them.
 \phantomsection\label{check-equivalent}
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{three }\OperatorTok{=}\NormalTok{ survey[[}\StringTok{"price"}\NormalTok{, }\StringTok{"resale\_value"}\NormalTok{, }\StringTok{"maintenance"}\NormalTok{]].copy()}
-\NormalTok{three.columns }\OperatorTok{=}\NormalTok{ [}\StringTok{"x"}\NormalTok{, }\StringTok{"y"}\NormalTok{, }\StringTok{"z"}\NormalTok{]}
-
-\NormalTok{candidates }\OperatorTok{=}\NormalTok{ \{}
-    \StringTok{"x → y → z"}\NormalTok{: }\StringTok{"y \textasciitilde{} x}\CharTok{\textbackslash{}n}\StringTok{z \textasciitilde{} y"}\NormalTok{,}
-    \StringTok{"z → y → x"}\NormalTok{: }\StringTok{"y \textasciitilde{} z}\CharTok{\textbackslash{}n}\StringTok{x \textasciitilde{} y"}\NormalTok{,}
-\NormalTok{\}}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}model\textquotesingle{}}\SpecialCharTok{:14\}\{}\StringTok{\textquotesingle{}chi2\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}\{}\StringTok{\textquotesingle{}dof\textquotesingle{}}\SpecialCharTok{:\textgreater{}6\}\{}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}\{}\StringTok{\textquotesingle{}AIC\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}}\SpecialStringTok{"}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ name, desc }\KeywordTok{in}\NormalTok{ candidates.items():}
-\NormalTok{    m }\OperatorTok{=}\NormalTok{ semopy.Model(desc)}
-\NormalTok{    m.fit(three)}
+\NormalTok{measurement }\OperatorTok{=} \StringTok{"ind60 =\textasciitilde{} x1 + x2 + x3 }\CharTok{\textbackslash{}n}\StringTok{ dem60 =\textasciitilde{} y1 + y2 + y3 + y4 }\CharTok{\textbackslash{}n}\StringTok{"}
+\ControlFlowTok{for}\NormalTok{ arrow }\KeywordTok{in}\NormalTok{ [}\StringTok{"dem60 \textasciitilde{} ind60"}\NormalTok{, }\StringTok{"ind60 \textasciitilde{} dem60"}\NormalTok{]:}
+\NormalTok{    m }\OperatorTok{=}\NormalTok{ semopy.Model(measurement }\OperatorTok{+}\NormalTok{ arrow)}
+\NormalTok{    m.fit(countries)}
 \NormalTok{    s }\OperatorTok{=}\NormalTok{ semopy.calc\_stats(m)}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:14\}\{}\BuiltInTok{float}\NormalTok{(s[}\StringTok{\textquotesingle{}chi2\textquotesingle{}}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{])}\SpecialCharTok{:10.4f\}\{}\BuiltInTok{int}\NormalTok{(s[}\StringTok{\textquotesingle{}DoF\textquotesingle{}}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{])}\SpecialCharTok{:6d\}}\SpecialStringTok{"}
-          \SpecialStringTok{f"}\SpecialCharTok{\{}\BuiltInTok{float}\NormalTok{(s[}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{])}\SpecialCharTok{:9.4f\}\{}\BuiltInTok{float}\NormalTok{(s[}\StringTok{\textquotesingle{}AIC\textquotesingle{}}\NormalTok{].iloc[}\DecValTok{0}\NormalTok{])}\SpecialCharTok{:10.4f\}}\SpecialStringTok{"}\NormalTok{)}
-
-\BuiltInTok{print}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{Identical, to four decimal places, on every index including AIC."}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\StringTok{"One says price drives resale value drives maintenance cost;"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\StringTok{"the other says the causation runs the other way. The data are silent."}\NormalTok{)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{arrow}\SpecialCharTok{\}}\SpecialStringTok{:  chi2 = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}chi2\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.4f\}}\SpecialStringTok{  df = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}DoF\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.0f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"  CFI = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}CFI\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.4f\}}\SpecialStringTok{  RMSEA = }\SpecialCharTok{\{}\NormalTok{s[}\StringTok{\textquotesingle{}RMSEA\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{iloc[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-model               chi2   dof      CFI       AIC
-x → y → z         2.4889     2   0.9845    7.9447
-z → y → x         2.4889     2   0.9845    7.9447
-
-Identical, to four decimal places, on every index including AIC.
-One says price drives resale value drives maintenance cost;
-the other says the causation runs the other way. The data are silent.
+dem60 ~ ind60:  chi2 = 23.7380  df = 13  CFI = 0.9722  RMSEA = 0.1057
+ind60 ~ dem60:  chi2 = 23.7384  df = 13  CFI = 0.9722  RMSEA = 0.1057
 \end{verbatim}
 
-Identical \(\chi^2\), identical degrees of freedom, identical CFI,
-identical AIC --- for two models asserting opposite causal directions.
-No fit index can prefer one, because fit indices measure distance from
-the observed covariances and both reproduce them equally.
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-sem-equivalent.png}}
+
+}
+
+\caption{Two opposite causal stories with one fit.}
+
+\end{figure}%
+
+Identical \(\chi^2\), identical degrees of freedom, identical CFI and
+RMSEA --- for two models asserting opposite causal directions. No fit
+index can prefer one, because fit indices measure distance from the
+observed covariances and both reproduce them equally.
 
 This is the same structural fact as chapter 7's rotation indeterminacy,
 in a more dangerous costume: there, the alternatives were obviously
@@ -7058,8 +7485,9 @@ looks like a result.
 The consequence for practice is exact. \textbf{The direction of the
 arrows is an assumption you supply, and the fit statistics cannot audit
 it.} What can audit it is subject knowledge, temporal order --- a cause
-cannot follow its effect --- and design, which is what chapters 10 and
-11 are about.
+cannot follow its effect, which is why the 1960-to-1965 arrow is more
+defensible than the 1960-to-1960 one --- and design, which is what
+chapters 10 and 11 are about.
 
 \section{What SEM does not fix}\label{what-sem-does-not-fix}
 
@@ -7075,7 +7503,9 @@ not confounders.
 \textbf{It is demanding of sample size.} With a small \(n\) the
 \(\chi^2\) test has little power to reject a wrong model, and the fit
 indices are themselves unstable --- so ``good fit'' in a small sample is
-the weakest possible evidence.
+the weakest possible evidence. Bollen's 75 countries are a small sample,
+and the good fit of the democracy model should be read with that in
+mind.
 
 \textbf{Comparisons across groups require an extra assumption.}
 Comparing a construct between, say, countries presumes it is measured
@@ -7083,7 +7513,50 @@ the same way in each. That is \emph{measurement invariance}, it is
 testable by fitting the model with loadings constrained equal across
 groups, and comparing means without testing it can manufacture a
 difference out of a translation (\citeproc{ref-cheung2002}{Cheung and
-Rensvold 2002}).
+Rensvold 2002}). The two schools above, where one modification helped in
+one and not the other, are a small instance of the same problem.
+
+\section{The recipe}\label{the-recipe}
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-sem-workflow.png}}
+
+}
+
+\caption{Seven steps from theory to judging the fit. When the model does
+not fit, the arrow goes back to the theory, not to the fit indices.}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Step
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What you do
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+In Python
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1--3 & argue which indicators measure which construct, draw it, write
+one line per ellipse & a string with \texttt{=\textasciitilde{}},
+\texttt{\textasciitilde{}},
+\texttt{\textasciitilde{}\textasciitilde{}} \\
+4 & look at the correlations: can you see your groups? &
+\texttt{data{[}cols{]}.corr()}, \texttt{plt.imshow} \\
+5 & fit & \texttt{semopy.Model(description)}, \texttt{.fit(data)} \\
+6 & read loadings and paths, standardised &
+\texttt{.inspect(std\_est=True)} \\
+7 & judge the fit, all four indices &
+\texttt{semopy.calc\_stats(model)} \\
+\end{longtable}
 
 \section{A short review of the
 literature}\label{a-short-review-of-the-literature-7}
@@ -7097,9 +7570,11 @@ along paths; Spearman (\citeproc{ref-spearman1904}{1904}) and the
 factor-analytic tradition supplied latent variables measured by
 indicators. Jöreskog (\citeproc{ref-joreskog1971}{1971}) combined them
 into the general covariance-structure model that all current software
-implements, and Rosseel (\citeproc{ref-rosseel2012}{2012}) gave the
-modern open-source implementation whose syntax \texttt{semopy} follows
-in Python.
+implements, Bollen (\citeproc{ref-bollen1989}{1989}) wrote the textbook
+that taught a generation to use it --- the political-democracy model
+above is its running example --- and Rosseel
+(\citeproc{ref-rosseel2012}{2012}) gave the modern open-source
+implementation whose syntax \texttt{semopy} follows in Python.
 
 Assessment of fit is where the applied literature has moved most.
 Bentler (\citeproc{ref-bentler1990}{1990}) introduced the comparative
@@ -7140,12 +7615,13 @@ omit.
   so.
 \item
   \textbf{The chi-square with its degrees of freedom and p-value},
-  alongside CFI, TLI and RMSEA with its confidence interval. Reporting
-  only the indices that pass is the single most common failure.
+  alongside CFI, TLI and RMSEA, and the convention you judged them
+  against. Reporting only the indices that pass is the single most
+  common failure.
 \item
   \textbf{Whether the model was modified after fitting}, and on what
-  grounds. A model reached through modification indices is exploratory
-  whatever its fit.
+  grounds. A model reached through modification indices or residuals is
+  exploratory whatever its fit, until it holds on data it has not seen.
 \item
   \textbf{At least one equivalent model, named.} If you cannot think of
   one, that is a reason to look harder rather than evidence there is
@@ -9837,13 +10313,14 @@ runs with no network at all.
 
 \chapter{Replication packages}\label{replication-packages}
 
-Sessions 02--11 pair one \textbf{academic article} with the \textbf{data
-behind it} --- a Harvard Dataverse replication package where the authors
-deposited one, and otherwise the public database the paper itself is
-built on, fetched by \texttt{qmib.load()}. Before class, read and
-annotate the article, download the package, and identify the table cell,
-coefficient, or figure named in the pre-session deck. ISLR is optional
-background throughout.
+Sessions 02--06 and 08--11 (and 13, after the course) pair one
+\textbf{academic article} with the \textbf{data behind it} --- a Harvard
+Dataverse replication package where the authors deposited one, and
+otherwise the public database the paper itself is built on, fetched by
+\texttt{qmib.load()}. Before class, read and annotate the article,
+download the package, and identify the table cell, coefficient, or
+figure named in the pre-session deck. ISLR is optional background
+throughout.
 
 During the 90-minute practice, each group:
 
@@ -9926,14 +10403,14 @@ and say which of its conclusions still hold. \\
 \href{https://doi.org/10.7910/DVN/8WEXYD}{10.7910/DVN/8WEXYD} &
 Reproduce one firm-productivity regression; refit it as a panel with
 fixed and then random effects, and say which you would report. \\
-07 · PCA and factor analysis & Gygli, Haelg, Potrafke \& Sturm (2019),
-\emph{The KOF Globalisation Index --- revisited} ·
-\href{https://doi.org/10.1007/s11558-019-09344-2}{article} & No deposit
---- the index itself is public; load with \texttt{qmib.load("kof")} &
-The index asserts that globalisation has three dimensions --- economic,
-social, political --- built from six sub-dimensions. Run PCA on the
-sub-indices and ask how many the data actually supports. Defend the
-number you retain, and interpret the loadings. \\
+07 · Four papers, one toolkit & The data of four articles of sessions
+02, 04, 05 and 06 & One CSV per paper on the course site
+(\href{https://warint.github.io/quantitative-methods/data/session-07/paper1_fraiberger_2021.csv}{\texttt{data/session-07/}}),
+read by the scripts in a folder of your own & Three hours in autonomy:
+plug each paper's data into the course's models --- OLS, the logits,
+ridge, the lasso, the elastic net --- with exactly the code seen in
+class; step-by-step guides in
+\hyperref[principal-component-and-factor-analyses]{\texttt{07-…/02-practice/replications/}}. \\
 08 · KNN and bias--variance & Bluwstein, Buckmann, Joseph, Kapadia \&
 Şimşek (2023), \emph{Credit growth, the yield curve and financial crisis
 prediction} ·
@@ -9969,6 +10446,15 @@ US Trade Policy} · \href{https://doi.org/10.1257/aeri.20190536}{article}
 difference-in-differences design with a real policy as the treatment.
 Reproduce one passthrough estimate, show the parallel-trends evidence,
 and compare conventional with design-aware uncertainty. \\
+13 · One more thing --- PCA and factor analysis \emph{(self-study)} &
+Gygli, Haelg, Potrafke \& Sturm (2019), \emph{The KOF Globalisation
+Index --- revisited} ·
+\href{https://doi.org/10.1007/s11558-019-09344-2}{article} & No deposit
+--- the index itself is public; load with \texttt{qmib.load("kof")} &
+The index asserts that globalisation has three dimensions --- economic,
+social, political --- built from six sub-dimensions. Run PCA on the
+sub-indices and ask how many the data actually supports. Defend the
+number you retain, and interpret the loadings. \\
 \end{longtable}
 
 \section{Downloading a package}\label{downloading-a-package}
@@ -10198,7 +10684,7 @@ Models.''} \emph{{Psychological} {Bulletin}} 107 (2): 238--46.
 \bibitem[\citeproctext]{ref-berk2013}
 Berk, Richard, Lawrence Brown, Andreas Buja, Kai Zhang, and Linda Zhao.
 2013. {``{Valid} Post-Selection Inference.''} \emph{{The} {Annals} of
-{Statistics}} 41 (2). \url{https://doi.org/10.1214/12-AOS1077}.
+{Statistics}} 41 (2): 802--37. \url{https://doi.org/10.1214/12-AOS1077}.
 
 \bibitem[\citeproctext]{ref-berkson1944}
 Berkson, Joseph. 1944. {``{Application} of the {Logistic} {Function} to
@@ -10217,6 +10703,10 @@ Beyer, Kevin, Jonathan Goldstein, Raghu Ramakrishnan, and Uri Shaft.
 1999. {``{When} {Is} {`{Nearest} {Neighbor}'} {Meaningful}?''} In
 \emph{{Lecture} {Notes} in {Computer} {Science}}, 217--35. {Springer}
 {Berlin} {Heidelberg}. \url{https://doi.org/10.1007/3-540-49257-7_15}.
+
+\bibitem[\citeproctext]{ref-bollen1989}
+Bollen, Kenneth A. 1989. {``{Structural} {Equations} with {Latent}
+{Variables}.''} {Wiley}. \url{https://doi.org/10.1002/9781118619179}.
 
 \bibitem[\citeproctext]{ref-box1953}
 Box, G. E. P. 1953. {``{NON}-{NORMALITY} {AND} {TESTS} {ON}
@@ -10242,7 +10732,8 @@ Brant, Rollin. 1990. {``{Assessing} {Proportionality} in the
 \bibitem[\citeproctext]{ref-breiman2001}
 Breiman, Leo. 2001. {``{Statistical} {Modeling}: {The} {Two} {Cultures}
 (with Comments and a Rejoinder by the Author).''} \emph{{Statistical}
-{Science}} 16 (3). \url{https://doi.org/10.1214/ss/1009213726}.
+{Science}} 16 (3): 199--231.
+\url{https://doi.org/10.1214/ss/1009213726}.
 
 \bibitem[\citeproctext]{ref-breusch1979}
 Breusch, T. S., and A. R. Pagan. 1979. {``A {Simple} {Test} for
@@ -10342,7 +10833,8 @@ Durbin, J., and G. S. Watson. 1950. {``{Testing} for {Serial}
 \bibitem[\citeproctext]{ref-efron2004}
 Efron, Bradley, Trevor Hastie, Iain Johnstone, and Robert Tibshirani.
 2004. {``{Least} Angle Regression.''} \emph{{The} {Annals} of
-{Statistics}} 32 (2). \url{https://doi.org/10.1214/009053604000000067}.
+{Statistics}} 32 (2): 407--99.
+\url{https://doi.org/10.1214/009053604000000067}.
 
 \bibitem[\citeproctext]{ref-einav2014}
 Einav, Liran, and Jonathan Levin. 2014. {``{Economics} in the Age of Big
@@ -10489,7 +10981,7 @@ King, Gary, and Richard Nielsen. 2019. {``{Why} {Propensity} {Scores}
 \bibitem[\citeproctext]{ref-lockhart2014}
 Lockhart, Richard, Jonathan Taylor, Ryan J. Tibshirani, and Robert
 Tibshirani. 2014. {``A Significance Test for the Lasso.''} \emph{{The}
-{Annals} of {Statistics}} 42 (2).
+{Annals} of {Statistics}} 42 (2): 413--68.
 \url{https://doi.org/10.1214/13-AOS1175}.
 
 \bibitem[\citeproctext]{ref-long2000}
@@ -10608,7 +11100,7 @@ Schenker, Nathaniel, and Jane F Gentleman. 2001. {``{On} {Judging} the
 
 \bibitem[\citeproctext]{ref-schwarz1978}
 Schwarz, Gideon. 1978. {``{Estimating} the {Dimension} of a {Model}.''}
-\emph{{The} {Annals} of {Statistics}} 6 (2).
+\emph{{The} {Annals} of {Statistics}} 6 (2): 461--64.
 \url{https://doi.org/10.1214/aos/1176344136}.
 
 \bibitem[\citeproctext]{ref-shapiro1965}
@@ -10635,7 +11127,7 @@ Spearman, C. 1904. {``"{General} {Intelligence}," {Objectively}
 
 \bibitem[\citeproctext]{ref-stone1977}
 Stone, Charles J. 1977. {``{Consistent} {Nonparametric} {Regression}.''}
-\emph{{The} {Annals} of {Statistics}} 5 (4).
+\emph{{The} {Annals} of {Statistics}} 5 (4): 595--620.
 \url{https://doi.org/10.1214/aos/1176343886}.
 
 \bibitem[\citeproctext]{ref-stone1974}
@@ -10647,7 +11139,7 @@ Stone, M. 1974. {``{Cross}-{Validatory} {Choice} and {Assessment} of
 \bibitem[\citeproctext]{ref-stuart2010}
 Stuart, Elizabeth A. 2010. {``{Matching} {Methods} for {Causal}
 {Inference}: A {Review} and a {Look} {Forward}.''} \emph{{Statistical}
-{Science}} 25 (1). \url{https://doi.org/10.1214/09-STS313}.
+{Science}} 25 (1): 1--21. \url{https://doi.org/10.1214/09-STS313}.
 
 \bibitem[\citeproctext]{ref-sun2021}
 Sun, Liyang, and Sarah Abraham. 2021. {``{Estimating} Dynamic Treatment
@@ -10704,7 +11196,8 @@ Be Fit.''} {CIRANO}. \url{https://doi.org/10.54932/xqay2333}.
 
 \bibitem[\citeproctext]{ref-warin-firms}
 ---------. 2026a. {``{Countries} {Do} {Not} {Trade}, {Firms} {Do}.''}
-{WORLD} {SCIENTIFIC} ({EUROPE}). \url{https://doi.org/10.1142/q0619}.
+{World} {Scientific} {Publishing} {Co}.
+\url{https://doi.org/10.1142/q0619}.
 
 \bibitem[\citeproctext]{ref-warin-middlepowers}
 ---------. 2026b. {``{Middle} Powers in the Platform Economy: {Digital}

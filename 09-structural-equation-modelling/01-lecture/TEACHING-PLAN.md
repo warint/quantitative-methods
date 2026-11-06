@@ -26,9 +26,10 @@ establishes that the reading is load-bearing rather than decorative.
 | Minutes | |
 |---|---|
 | **0–10** | The question, and the paper they read. Establish what is at stake. |
-| **10–35** | Part I: SEM Basics — build it from intuition before notation. |
-| **35–60** | What is SEM? — derive it, then run it in Python on the session dataset. |
-| **60–80** | Why use SEM? — read the output in units, out loud. |
+| **10–25** | Part 1: the idea in pictures — one construct and its indicators, the five symbols, the two halves, corr = λᵢλⱼ. |
+| **25–55** | Part 2: a measurement model in ten steps on Holzinger–Swineford — look, draw, write, fit, read, judge, diagnose. |
+| **55–75** | Part 3: the structural part on Political Democracy — paths, R², direct and indirect effects, the same-question covariances. |
+| **75–80** | Part 4: turn an arrow around and watch the fit not change. |
 | **80–90** | What the method does **not** license. Hand off to the practice. |
 
 ---

@@ -346,6 +346,161 @@ comes back with almost nothing. Had the comparison been made on accuracy alone,
 all three would have looked identical and the conclusion would have been that
 nothing works — which is false, and would have been the wrong lesson.
 
+## A worked example: can the market's past predict today?
+
+The lecture runs one complete prediction exercise, the way it would be done by
+someone whose job depended on it, and the chapter repeats it here because every
+step carries a rule. The question is whether the S&P 500's return two days ago
+says anything about whether the index rises or falls today. The data are
+`Smarket` from *An Introduction to Statistical Learning*: 1,250 trading days,
+2001 to 2005, with the five previous days' returns (`Lag1` to `Lag5`) and the
+day's `Direction`.
+
+The work is split into two files, because in practice the two jobs happen at
+different times. The first is the laboratory: it chooses $K$, judges the model
+once, and saves it. The second is the trading desk: it loads the saved model and
+predicts one new date, with no data to download and no training. Both are
+published with the lecture as
+[`session08_1_train.py`](https://warint.github.io/quantitative-methods/session-08/session08_1_train.py)
+and
+[`session08_2_predict.py`](https://warint.github.io/quantitative-methods/session-08/session08_2_predict.py).
+
+**Two decisions come before any model.** One late day, 28 December 2005, is put
+aside to play "tomorrow", and the two days after it are dropped, because on the
+morning of the 28th they are the future. The rest is split **by time**: the model
+learns from 2002–2004 and is judged on 2005. A random split would put days of 2005
+into the training data, and the model would learn from the future to "predict" the
+past.
+
+**Cross-validation has to respect time as well.** The ordinary $k$-fold scheme of
+chapter 5 would fit on 2004 to predict 2002. For a time series each round fits on
+everything up to a date and validates on the block that follows, which is what
+scikit-learn's `TimeSeriesSplit` does.
+
+![Cross-validation on a time series: each round fits on the past and validates on the next block, never the reverse.](01-lecture/economist-assets/cv-time.png){fig-alt="Five rounds of expanding-window cross-validation."}
+
+```{python}
+#| label: fig-smarket-k
+#| code-summary: "Run it: choose K by time-ordered cross-validation"
+#| fig-cap: "Cross-validated accuracy of KNN on the 2002–2004 training days, for every odd K from 1 to 125, against always predicting the commonest direction. No K clears the line."
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+URL = "https://raw.githubusercontent.com/intro-stat-learning/ISLP/main/ISLP/data/Smarket.csv"
+smarket = pd.read_csv(URL)
+smarket = smarket[smarket["Year"] >= 2002]
+predictors = ["Lag2"]
+
+new_day, history = smarket.iloc[[-3]], smarket.iloc[:-3]     # 28 Dec 2005, and every day before
+train, test = history[history["Year"] < 2005], history[history["Year"] == 2005]
+X_train, y_train = train[predictors], train["Direction"]
+X_test, y_test = test[predictors], test["Direction"]
+
+# The scaler sits inside the pipeline, so each round standardises on its own fitting rows only
+k_values = list(range(1, 126, 2))          # odd, so a two-class vote cannot tie
+search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()),
+                      {"kneighborsclassifier__n_neighbors": k_values},
+                      cv=TimeSeriesSplit(n_splits=5))
+search.fit(X_train, y_train)
+
+best_k = search.best_params_["kneighborsclassifier__n_neighbors"]
+majority = y_train.value_counts(normalize=True).max()
+print(f"best K = {best_k}, cross-validated accuracy = {search.best_score_:.3f}")
+print(f"always predicting the commonest direction = {majority:.3f}")
+
+plt.figure(figsize=(7, 3.2))
+plt.plot(k_values, search.cv_results_["mean_test_score"], "o-", markersize=3,
+         label="KNN, cross-validated accuracy")
+plt.axhline(majority, color="red", linestyle="--", label="always the commonest direction")
+plt.axvline(best_k, color="grey", linestyle=":", label=f"chosen K = {best_k}")
+plt.xlabel("K"); plt.ylabel("accuracy on the hidden blocks")
+plt.legend(frameon=False, fontsize=8)
+plt.tight_layout()
+plt.show()
+```
+
+The search ran the cross-validation loop for each of 63 values of $K$ and kept
+$K = 123$, with an accuracy of 0.511 on the hidden blocks. "Best" means best of the
+values tried, not good: it is just below the 0.516 of always predicting the
+commonest direction. Cross-validation is already saying that `Lag2` carries
+little information about today.
+
+**The test year is opened once.** $K$ is now fixed, and only now is 2005 consulted.
+If $K$ were changed after seeing this score, 2005 would have become training data
+and the score would stop being a test.
+
+```{python}
+#| label: check-smarket-test
+#| code-summary: "Run it: judge the chosen model on 2005, once"
+
+from sklearn.metrics import confusion_matrix
+
+y_pred = search.predict(X_test)
+table = pd.DataFrame(confusion_matrix(y_test, y_pred, labels=["Down", "Up"]),
+                     index=["actual Down", "actual Up"],
+                     columns=["predicted Down", "predicted Up"])
+print(table, "\n")
+print(f"KNN accuracy on 2005:                      {(y_pred == y_test).mean():.3f}")
+print(f"always predicting the commonest direction: {y_test.value_counts(normalize=True).max():.3f}")
+```
+
+The diagonal holds the right calls, 35 down days and 109 up days, so accuracy is
+$(35 + 109)/249 = 0.578$, a little better than "always up" at 0.562. Read by row,
+the model catches 78% of the up days but only 32% of the down days: it says "up" on
+183 of 249 days, and much of its accuracy is the market rising more often than not.
+
+**Training and predicting are different jobs.** Before it is used, the model is
+refitted on every day it is allowed to know, with the chosen $K$, and saved to a
+file. The second script loads that file and predicts the new day from one number,
+the return two trading days earlier.
+
+```{python}
+#| label: check-smarket-predict
+#| code-summary: "Run it: refit on all the history, save, load, and predict one new date"
+
+import joblib
+
+final_model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=best_k))
+final_model.fit(history[predictors], history["Direction"])
+joblib.dump(final_model, "knn_smarket.joblib")           # file 1 ends here
+
+model = joblib.load("knn_smarket.joblib")                # file 2 starts here
+new_date = pd.DataFrame({"Lag2": [0.043]})               # 23 December 2005: +0.043%
+print("prediction for 28 December 2005:", model.predict(new_date)[0])
+for label, prob in zip(model.classes_, model.predict_proba(new_date)[0]):
+    print(f"   Pr({label}) = {prob:.3f}")
+```
+
+```{python}
+#| echo: false
+#| output: false
+import os
+os.remove("knn_smarket.joblib")
+```
+
+The probabilities are the votes of the $K$ nearest past days. The index did rise
+on 28 December 2005, so the prediction was right — and one date proves nothing
+either way. The test year is how the model is judged; the second file is how it is
+used.
+
+::: {.warn}
+**How this example was chosen.** The example was built to work, and the lecture
+says so. The natural first attempt — both lags, all five years, the very last day
+as the new date — scored 50.6% on 2005, below the 56.2% of "always up", and got its
+date wrong. So 54 slices of the data were tried (predictors, training years, test
+year) and one that wins was kept. On 249 test days, accuracy moves by about three
+points from chance alone ($\sqrt{0.25/249} \approx 0.032$); among 54 tries, a winner
+that beats the baseline by 1.6 points is easy to find with no signal at all. And
+every look at 2005 made 2005 training data: the test was opened 54 times, not once.
+This is the garden of forking paths [@gelman2014], and it is how most strategies
+that "beat the market" are found. The steps above are right. The evidence is not.
+:::
+
 ## What nearest neighbours cannot do
 
 **It cannot explain.** There are no coefficients, so there is nothing to
@@ -398,11 +553,14 @@ method depends becomes meaningless, not merely imprecise.
    proper scoring rule. Accuracy on a 10% outcome tells you the outcome is 10%.
 3. **How $k$ was chosen**, with the cross-validation curve, and the training
    curve alongside it if you want to make the point that it is uninformative.
-4. **That the predictors were standardised**, and how many there are. With more
+   With data in time order, say that the folds followed time.
+4. **That the test set was opened once**, and how many specifications were tried
+   before the one reported. A score found after many looks is not a test score.
+5. **That the predictors were standardised**, and how many there are. With more
    than a handful, say what you did about the dimensionality.
-5. **The comparison against a rigid model.** Flexibility is a purchase, and the
+6. **The comparison against a rigid model.** Flexibility is a purchase, and the
    report should say what it bought. If a linear model does as well or better,
    that is the finding.
-6. **What the method cannot support.** No interpretation, no extrapolation, and
+7. **What the method cannot support.** No interpretation, no extrapolation, and
    no claim about mechanism — only about prediction, within the range of the
    training data.

@@ -184,10 +184,13 @@ TOOLKIT = {
     "joblib.dump / joblib.load": ("08", "Load and shape", "save a trained model to a file, and load it back"),
 
     # ---- Session 09 · structural equation modelling ----------------------
-    "semopy.Model": ("09", "Fit", "from a model description string"),
-    ".inspect()": ("09", "Read the fit", "loadings and paths, estimated"),
-    "semopy.calc_stats": ("09", "Choose and validate", "CFI, TLI, RMSEA — report all three"),
-    "np.cov": ("09", "Describe", "the matrix the model is trying to reproduce"),
+    "semopy.examples": ("09", "Load and shape", "Holzinger-Swineford and Political Democracy, bundled: nothing to download"),
+    ".corr()": ("09", "Describe", "the correlations the model is trying to reproduce"),
+    "plt.imshow": ("09", "Plot", "a matrix as a picture: look for your constructs before fitting"),
+    "semopy.Model": ("09", "Fit", "from a model description: `=~` measured by, `~` regressed on, `~~` covaries"),
+    ".inspect()": ("09", "Read the fit", "`std_est=True` for the standardised loadings and paths"),
+    "semopy.calc_stats": ("09", "Choose and validate", "chi-square, CFI, TLI, RMSEA — report all four"),
+    "plt.barh": ("09", "Plot", "one bar per indicator: which loadings are weak"),
 
     # ---- Session 10 · causal foundations ---------------------------------
     "expit": ("10", "Fit", "the inverse logit, when you need it directly"),
