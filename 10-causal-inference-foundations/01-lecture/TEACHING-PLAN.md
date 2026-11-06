@@ -25,11 +25,12 @@ establishes that the reading is load-bearing rather than decorative.
 
 | Minutes | |
 |---|---|
-| **0–10** | The question, and the paper they read. Establish what is at stake. |
-| **10–35** | Causal Inference: Logic and Tools — build it from intuition before notation. |
-| **35–60** | Counterfactual Framework — derive it, then run it in Python on the session dataset. |
-| **60–80** | The Rubin Causal Model — read the output in units, out loud. |
-| **80–90** | What the method does **not** license. Hand off to the practice. |
+| **0–10** | The question, and the paper they read. Part 1: two outcomes per firm, one observed. |
+| **10–25** | Naive = effect + selection bias, on the board, then the back-door picture. |
+| **25–45** | Part 2, the simulation: a coin recovers +2, self-selection says 5.3, the boxplot shows why. |
+| **45–75** | Part 3, LaLonde: −\$8,498 → balance → score → overlap → match → balance fails on age → fix → +\$2,001 against +\$1,794. |
+| **75–85** | Part 4: matching on a proxy leaves most of the bias; mediators are not controls. |
+| **85–90** | The recipe, and the PSID exercise. Hand off to the practice. |
 
 ---
 
@@ -59,7 +60,8 @@ unnamed in the lecture reappear in the deliverable.
 
 ## Leave on the board for the practice
 
-The method's core expression, and the one diagnostic that tells you it has failed.
+Naive = ATT + selection bias, and the love plot: every standardised difference inside ±0.1,
+checked **before** the outcome is looked at.
 
 ---
 

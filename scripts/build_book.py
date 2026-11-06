@@ -476,7 +476,11 @@ def chapter(num, s):
     # practice brief, no session facts. Chapter 1 is written this way — it is
     # an introduction to the book, not a record of the first class.
     if declared.get("standalone") == "true":
-        return f'---\ntitle: "{title}"\n---\n\n{prose}\n'
+        # A chapter that runs code names its kernel. Left to choose, Quarto can
+        # start another project's registered kernel (whose environment lacks
+        # this course's packages); the project-level key does not prevent it.
+        kernel = "jupyter: python3\n" if "```{python}" in prose else ""
+        return f'---\ntitle: "{title}"\n{kernel}---\n\n{prose}\n'
 
     parts = [f"""---
 title: "{title}"

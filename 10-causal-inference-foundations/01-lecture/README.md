@@ -21,23 +21,23 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S10-Lecture.qmd`](MATH60033A-S10-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**, and every dataset loads with one
-call — `qmib.load("core")`.
+what loses marks. Every code example in the deck is **Python**, and every cell runs on its own when
+pasted into a file: the data is either simulated in the cell or read from a URL.
 
 ---
 
 ## What the lecture covers
 
-1. **Causal Inference: Logic and Tools**
-2. **Counterfactual Framework**
-3. **The Rubin Causal Model**
-4. **Why It Matters**
-5. **Real Example of Observed and Counterfactual Outcomes**
-6. **Observed vs. Counterfactual**
-7. **The Missing Counterfactual**
-8. **How to Proceed**
-9. **Randomized Controlled Trials (RCTs)**
-10. **Why Randomize?**
+1. **The question, in pictures** — two potential outcomes per unit, the fundamental problem, ATE and
+   ATT, and the naive difference written as effect plus selection bias
+2. **A world where we know the truth** — 1,000 simulated firms: a coin flip recovers the effect,
+   self-selection does not, and a balance check shows why
+3. **Matching, tested on real data** — LaLonde's job-training experiment, its controls swapped for a
+   survey: naive estimate, balance, propensity score, overlap, nearest-neighbour matching, a better
+   score, and the ATT against the experiment's answer
+4. **What matching does not fix** — unmeasured confounders, bad controls, overlap, standard errors
+5. **Your recipe** — seven steps, one cell to copy, what to report, and the same test with a second
+   survey
 
 ---
 
@@ -55,14 +55,16 @@ By the end of the session you should be able to:
 
 ## The data
 
-**The spine's documented treatment, with a known effect to recover**
+**A simulation, and LaLonde's job-training data (Dehejia and Wahba's version)**
 
 ```python
-import qmib
-data = qmib.load("core")
+import pandas as pd
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")            # the experiment: 185 trained, 260 controls
+cps = pd.read_stata(url + "cps_controls.dta")      # 15,992 people from a survey
 ```
 
-Run it once before class; it caches locally and then works offline.
+Nothing to download by hand; the cells read the files directly.
 
 ---
 

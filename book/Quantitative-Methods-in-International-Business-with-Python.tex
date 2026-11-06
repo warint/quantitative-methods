@@ -1027,7 +1027,7 @@ core: 450 rows x 11 columns  (2.7% missing overall)
 \begin{landscape}\thispagestyle{empty}\begingroup\scriptsize
 
 \begin{longtable}[]{@{}llllllllllll@{}}
-\caption{}\label{T_befe3}\tabularnewline
+\caption{}\label{T_1e841}\tabularnewline
 \toprule\noalign{}
 ~ & geo & time & gdp\_pc\_eur & population & employment\_ths &
 productivity\_idx & gfcf\_meur & prod\_growth & falling\_behind &
@@ -1702,7 +1702,7 @@ complete rows: 413
   multiple regression, same slope                  818.55
   residual-on-residual (Frisch-Waugh-Lovell)       818.55
 
-  |multiple - FWL| = 3.80e-09
+  |multiple - FWL| = 4.84e-09
   the slope falls by 26% once employment and population are partialled out
 \end{verbatim}
 
@@ -1980,7 +1980,7 @@ and the answer must be, to floating-point precision, whatever
 \begin{verbatim}
 by hand       [-86118.084706   1111.257354]
 statsmodels   [-86118.084706   1111.257354]
-agree to      2.49e-09
+agree to      2.26e-09
 \end{verbatim}
 
 That is an algebraic fact. It requires no assumption about the world, no
@@ -2537,7 +2537,7 @@ the design, not about the observation.
 \end{Shaded}
 
 \begin{verbatim}
-leverage    max |hand - statsmodels| = 5.62e-16
+leverage    max |hand - statsmodels| = 5.10e-16
 std. resid  max |hand - statsmodels| = 4.44e-16
 
 sum of h_ii = 2.0000, and p = 2  (they are equal by construction)
@@ -2616,7 +2616,7 @@ students conflate are genuinely different:
 \end{Shaded}
 
 \begin{verbatim}
-Cook's D    max |hand - statsmodels| = 9.78e-16
+Cook's D    max |hand - statsmodels| = 8.74e-16
 
 largest D_i = 0.0425  (DK 2010)
   its residual  r = +3.49
@@ -2828,7 +2828,7 @@ classical               41.504    26.77
 HC0 (White)             42.854    25.93
 HC3 (use this)          43.239    25.70
 
-HC0 by hand            42.854   (matches statsmodels to 4.7e-12)
+HC0 by hand            42.854   (matches statsmodels to 4.6e-12)
 \end{verbatim}
 
 Look at what that does. The classical formula assumes every observation
@@ -3439,7 +3439,7 @@ optimiser finds it. The exception matters and is covered below.
 log-likelihood by hand  -4068.055780
 statsmodels             -4068.055780
 
-score X'(y - p) at the optimum, largest element: 5.09e-11
+score X'(y - p) at the optimum, largest element: 1.04e-10
   (zero to numerical tolerance — that is what 'converged' means)
 
 null log-likelihood       -4212.0203
@@ -4038,13 +4038,13 @@ forward stepwise repeated on 200 bootstrap resamples
 
 variable                selected   kind
 rd_pct_gdp                  98%   real predictor
-ai_use_ge3                  95%   real predictor
+ai_use_ge3                  94%   real predictor
 has_ai_strategy             90%   real predictor
 aux_04                      88%   PURE NOISE
+aux_12                      86%   weak signal
+barrier_legal               86%   real predictor
 aux_10                      86%   PURE NOISE
 aux_06                      84%   weak signal
-barrier_cost                84%   real predictor
-aux_12                      84%   weak signal
 
 variables selected at least once: 29 of 29
 \end{verbatim}
@@ -4171,7 +4171,7 @@ is invertible for any \(\lambda > 0\). Ridge is defined even when
 \end{Shaded}
 
 \begin{verbatim}
-largest |difference| between the formula and sklearn: 1.67e-15
+largest |difference| between the formula and sklearn: 1.44e-15
 
   singular value    shrinkage factor
           20.890              0.9590
@@ -4271,7 +4271,7 @@ factor and therefore never reaches zero.
    -0.0507          -0.0000         -0.0000
     0.1002           0.0000          0.0000
 
-largest |difference|: 8.88e-16
+largest |difference|: 1.11e-15
 coefficients set exactly to zero: 4 of 8
 \end{verbatim}
 
@@ -5710,7 +5710,7 @@ n = 90, variables = 14, factors = 3
 ||Lambda Lambda^T||       2.79837923    2.79837923
 sum of communalities      4.56171180    4.56171180
 
-R is orthogonal: ||R'R - I|| = 3.96e-16
+R is orthogonal: ||R'R - I|| = 5.38e-16
 
 Identical fit. Now the interpretation:
   factor 1: space_comfort, fuel_type, after_sales_service
@@ -7717,6 +7717,19 @@ inference} (\citeproc{ref-holland1986}{Holland 1986}), and it means that
 no individual causal effect is ever identified. What we can hope for is
 an \emph{average}.
 
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-po-table.png}}
+
+}
+
+\caption{The table you never get to see. Each firm has two potential
+outcomes; whichever choice it made, the other is missing, and so is its
+effect. The numbers come from the simulation later in this chapter,
+where, unusually, both columns exist.}
+
+\end{figure}%
+
 \begin{qmibdefinition}
 
 {\textbf{ATE}} --- average treatment effect, \(\mathrm{E}[Y(1) - Y(0)]\)
@@ -7752,6 +7765,19 @@ policy would have differed from those that did not even without it, the
 observed difference is the effect plus that gap, and nothing in the data
 separates them.
 
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-po-decomposition.png}}
+
+}
+
+\caption{The decomposition in numbers, from the simulated firms below.
+The naive comparison says 5.33; the programme's effect is 2.00; the
+other 3.33 is how much faster the joining firms would have grown
+anyway.}
+
+\end{figure}%
+
 \section{Randomisation, and what it
 buys}\label{randomisation-and-what-it-buys}
 
@@ -7769,6 +7795,19 @@ outcome}, so the difference is noise rather than bias --- and noise is
 what standard errors are for. It also balances variables nobody measured
 or thought of, which is the property no observational method can
 replicate.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-dag-selection.png}}
+
+}
+
+\caption{Left: productivity drives both the decision to join and growth,
+so the comparison runs through a back door. Right: a coin decides,
+productivity can no longer reach the programme, and the back door is
+shut.}
+
+\end{figure}%
 
 When randomisation is unavailable, and in international business it
 usually is --- countries are not randomly assigned national strategies
@@ -7796,138 +7835,461 @@ rather than comparing. Unlike conditional independence, overlap
 
 \end{qmibdefinition}
 
-\section{A treatment with a known
-answer}\label{a-treatment-with-a-known-answer}
+\section{A world where the answer is
+known}\label{a-world-where-the-answer-is-known}
 
-Everything above is standard and abstract. What follows is not available
-in real work: an evaluation where the true effect is known, so each
-method can be marked rather than argued about.
+Everything above can be watched happening in a simulation, which is the
+one setting where both potential outcomes exist. A thousand firms; a
+programme that adds exactly two points to every firm's export growth;
+and a productivity that nobody in the ministry observes, which raises
+growth with or without the programme.
 
-The course fixture contains a national AI strategy, adopted by some
-countries in 2021, 2022 or 2023 and never by others. The generator that
-built it did three things deliberately. It assigned treatment as a
-function of two baseline country characteristics --- development and
-institutional capacity --- so the data are \emph{confounded by
-construction}. It set the true effect at \textbf{+2.4 percentage points}
-on AI use. And it kept the infrastructure indicators free of any
-treatment effect, so they are legitimate pre-treatment controls, while
-the adoption indicators are downstream of treatment and are not.
-
-\phantomsection\label{check-setup}
+\phantomsection\label{check-sim}
 \begin{Shaded}
 \begin{Highlighting}[]
-\ImportTok{import}\NormalTok{ sys, warnings}
-\NormalTok{sys.path.insert(}\DecValTok{0}\NormalTok{, }\StringTok{"../slides"}\NormalTok{)}\OperatorTok{;}\NormalTok{ sys.path.insert(}\DecValTok{0}\NormalTok{, }\StringTok{".."}\NormalTok{)}
+\ImportTok{import}\NormalTok{ warnings}
 \NormalTok{warnings.filterwarnings(}\StringTok{"ignore"}\NormalTok{)}
-\ImportTok{from}\NormalTok{ plotstyle }\ImportTok{import}\NormalTok{ setup, CL}
-\NormalTok{plt }\OperatorTok{=}\NormalTok{ setup()}
+\ImportTok{import}\NormalTok{ numpy }\ImportTok{as}\NormalTok{ np}
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+\ImportTok{import}\NormalTok{ matplotlib.pyplot }\ImportTok{as}\NormalTok{ plt}
+\ImportTok{import}\NormalTok{ statsmodels.formula.api }\ImportTok{as}\NormalTok{ smf}
+\ImportTok{from}\NormalTok{ sklearn.neighbors }\ImportTok{import}\NormalTok{ NearestNeighbors}
 
-\ImportTok{import}\NormalTok{ numpy }\ImportTok{as}\NormalTok{ np, pandas }\ImportTok{as}\NormalTok{ pd, statsmodels.api }\ImportTok{as}\NormalTok{ sm, qmib}
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{10}\NormalTok{)}
+\NormalTok{n }\OperatorTok{=} \DecValTok{1000}
+\NormalTok{productivity }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)}
+\NormalTok{sales\_without }\OperatorTok{=} \DecValTok{10} \OperatorTok{+} \DecValTok{3} \OperatorTok{*}\NormalTok{ productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, n)}
+\NormalTok{sales\_with }\OperatorTok{=}\NormalTok{ sales\_without }\OperatorTok{+} \DecValTok{2}                         \CommentTok{\# the true effect, for every firm}
+\NormalTok{applies }\OperatorTok{=}\NormalTok{ (productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n) }\OperatorTok{\textgreater{}} \FloatTok{0.5}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
 
-\NormalTok{Y, T }\OperatorTok{=} \StringTok{"ai\_use\_any"}\NormalTok{, }\StringTok{"has\_ai\_strategy"}
-\NormalTok{PRE }\OperatorTok{=}\NormalTok{ [}\StringTok{"cloud\_use"}\NormalTok{, }\StringTok{"ict\_specialists"}\NormalTok{, }\StringTok{"digital\_intensity"}\NormalTok{]}
-\NormalTok{TRUE\_EFFECT }\OperatorTok{=} \FloatTok{2.4}          \CommentTok{\# from scripts/build\_spine/make\_fixtures.py}
+\NormalTok{observed }\OperatorTok{=}\NormalTok{ np.where(applies }\OperatorTok{==} \DecValTok{1}\NormalTok{, sales\_with, sales\_without)}
+\NormalTok{naive }\OperatorTok{=}\NormalTok{ observed[applies }\OperatorTok{==} \DecValTok{1}\NormalTok{].mean() }\OperatorTok{{-}}\NormalTok{ observed[applies }\OperatorTok{==} \DecValTok{0}\NormalTok{].mean()}
+\NormalTok{bias }\OperatorTok{=}\NormalTok{ sales\_without[applies }\OperatorTok{==} \DecValTok{1}\NormalTok{].mean() }\OperatorTok{{-}}\NormalTok{ sales\_without[applies }\OperatorTok{==} \DecValTok{0}\NormalTok{].mean()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"self{-}selection   naive }\SpecialCharTok{\{}\NormalTok{naive}\SpecialCharTok{:.2f\}}\SpecialStringTok{ = effect 2.00 + selection bias }\SpecialCharTok{\{}\NormalTok{bias}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
 
-\NormalTok{panel }\OperatorTok{=}\NormalTok{ qmib.load(}\StringTok{"angle\_c\_country"}\NormalTok{).dropna(}
-\NormalTok{    subset}\OperatorTok{=}\NormalTok{[Y, T, }\StringTok{"ai\_use\_ml"}\NormalTok{] }\OperatorTok{+}\NormalTok{ PRE).copy()}
-
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"country{-}years: }\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(panel)}\SpecialCharTok{\}}\SpecialStringTok{   treated: }\SpecialCharTok{\{}\BuiltInTok{int}\NormalTok{(panel[T].}\BuiltInTok{sum}\NormalTok{())}\SpecialCharTok{\}}\SpecialStringTok{   "}
-      \SpecialStringTok{f"years }\SpecialCharTok{\{}\NormalTok{panel}\SpecialCharTok{.}\NormalTok{time}\SpecialCharTok{.}\BuiltInTok{min}\NormalTok{()}\SpecialCharTok{\}}\SpecialStringTok{–}\SpecialCharTok{\{}\NormalTok{panel}\SpecialCharTok{.}\NormalTok{time}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{adopting countries differ before treatment — standardised differences:"}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ c }\KeywordTok{in}\NormalTok{ PRE:}
-\NormalTok{    a, b }\OperatorTok{=}\NormalTok{ panel.loc[panel[T] }\OperatorTok{==} \DecValTok{1}\NormalTok{, c], panel.loc[panel[T] }\OperatorTok{==} \DecValTok{0}\NormalTok{, c]}
-\NormalTok{    smd }\OperatorTok{=}\NormalTok{ (a.mean() }\OperatorTok{{-}}\NormalTok{ b.mean()) }\OperatorTok{/}\NormalTok{ np.sqrt((a.var(ddof}\OperatorTok{=}\DecValTok{1}\NormalTok{) }\OperatorTok{+}\NormalTok{ b.var(ddof}\OperatorTok{=}\DecValTok{1}\NormalTok{)) }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"   }\SpecialCharTok{\{}\NormalTok{c}\SpecialCharTok{:22\}\{}\NormalTok{smd}\SpecialCharTok{:+7.3f\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{A standardised difference near 1 is a large imbalance. These countries"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\StringTok{"were already more digital before any strategy existed — which is exactly"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\StringTok{"the selection term in the decomposition above."}\NormalTok{)}
+\NormalTok{draws }\OperatorTok{=}\NormalTok{ []}
+\ControlFlowTok{for}\NormalTok{ \_ }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{1000}\NormalTok{):                                  }\CommentTok{\# a thousand randomised experiments}
+\NormalTok{    coin }\OperatorTok{=}\NormalTok{ rng.integers(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, n)}
+\NormalTok{    seen }\OperatorTok{=}\NormalTok{ np.where(coin }\OperatorTok{==} \DecValTok{1}\NormalTok{, sales\_with, sales\_without)}
+\NormalTok{    draws.append(seen[coin }\OperatorTok{==} \DecValTok{1}\NormalTok{].mean() }\OperatorTok{{-}}\NormalTok{ seen[coin }\OperatorTok{==} \DecValTok{0}\NormalTok{].mean())}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"coin flip        mean of 1,000 estimates }\SpecialCharTok{\{}\NormalTok{np}\SpecialCharTok{.}\NormalTok{mean(draws)}\SpecialCharTok{:.2f\}}\SpecialStringTok{, spread }\SpecialCharTok{\{}\NormalTok{np}\SpecialCharTok{.}\NormalTok{std(draws)}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-country-years: 91   treated: 49   years 2021–2024
-
-adopting countries differ before treatment — standardised differences:
-   cloud_use              +0.972
-   ict_specialists        +0.998
-   digital_intensity      +1.138
-
-A standardised difference near 1 is a large imbalance. These countries
-were already more digital before any strategy existed — which is exactly
-the selection term in the decomposition above.
+self-selection   naive 5.33 = effect 2.00 + selection bias 3.33
+coin flip        mean of 1,000 estimates 2.00, spread 0.22
 \end{verbatim}
 
-\section{Four estimates, one truth}\label{four-estimates-one-truth}
+The two lines are the chapter's argument in miniature. Self-selection
+overstates the effect by a factor of more than two and a half, and the
+excess is exactly the selection term: the joining firms would have grown
+3.33 points faster without the programme. The coin is right on average
+and wrong in any single draw by about a quarter of a point, which is
+noise, which a standard error describes. The selection term cannot be
+computed in real data, since it needs the column nobody sees; what
+\emph{can} be computed is how different the groups were before
+treatment, here about one standard deviation of productivity. That
+comparison --- balance --- is the diagnostic the rest of the chapter is
+built on.
 
-\phantomsection\label{check-estimators}
+\section{LaLonde's test}\label{lalondes-test}
+
+The simulation knows the answer because it wrote it. A real data set
+that knows the answer is rarer, and the most famous one is a
+job-training experiment.
+
+The National Supported Work demonstration, run in the United States in
+1976--77, assigned disadvantaged workers to a training placement
+\textbf{by lottery}. The lottery's estimate of the effect on 1978
+earnings is therefore credible. LaLonde (1986) then did something that
+has shaped the field since: he kept the trainees, threw away the
+lottery's controls, replaced them with people from national surveys, and
+asked whether the estimators economists applied to survey data would
+recover the experiment's answer. They did not, and the paper became the
+standard argument for experiments. Dehejia and Wahba
+(\citeproc{ref-dehejia1999}{1999}) returned to the same data with
+propensity-score matching and recovered it, and A. Smith and E. Todd
+(\citeproc{ref-smith2005}{2005}) showed how fragile that recovery is.
+The data are on Rajeev Dehejia's NBER page, and \texttt{pd.read\_stata}
+reads them directly.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-nsw-design.png}}
+
+}
+
+\caption{The design. The experiment gives the true effect; the survey
+version is the situation applied work is usually in.}
+
+\end{figure}%
+
+\phantomsection\label{check-nsw-naive}
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{def}\NormalTok{ report(label, estimate, se}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
-\NormalTok{    tail }\OperatorTok{=} \SpecialStringTok{f"   (SE }\SpecialCharTok{\{}\NormalTok{se}\SpecialCharTok{:.3f\}}\SpecialStringTok{)"} \ControlFlowTok{if}\NormalTok{ se }\KeywordTok{is} \KeywordTok{not} \VariableTok{None} \ControlFlowTok{else} \StringTok{""}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{label}\SpecialCharTok{:38\}\{}\NormalTok{estimate}\SpecialCharTok{:+8.3f\}\{}\NormalTok{estimate }\OperatorTok{{-}}\NormalTok{ TRUE\_EFFECT}\SpecialCharTok{:+10.3f\}\{}\NormalTok{tail}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{url }\OperatorTok{=} \StringTok{"https://users.nber.org/\textasciitilde{}rdehejia/data/"}
+\NormalTok{nsw }\OperatorTok{=}\NormalTok{ pd.read\_stata(url }\OperatorTok{+} \StringTok{"nsw\_dw.dta"}\NormalTok{)}
+\NormalTok{cps }\OperatorTok{=}\NormalTok{ pd.read\_stata(url }\OperatorTok{+} \StringTok{"cps\_controls.dta"}\NormalTok{)}
+\NormalTok{X }\OperatorTok{=}\NormalTok{ [}\StringTok{"age"}\NormalTok{, }\StringTok{"education"}\NormalTok{, }\StringTok{"black"}\NormalTok{, }\StringTok{"hispanic"}\NormalTok{, }\StringTok{"married"}\NormalTok{, }\StringTok{"nodegree"}\NormalTok{, }\StringTok{"re74"}\NormalTok{, }\StringTok{"re75"}\NormalTok{]}
 
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}method\textquotesingle{}}\SpecialCharTok{:38\}\{}\StringTok{\textquotesingle{}estimate\textquotesingle{}}\SpecialCharTok{:\textgreater{}8\}\{}\StringTok{\textquotesingle{}bias\textquotesingle{}}\SpecialCharTok{:\textgreater{}10\}}\SpecialStringTok{"}\NormalTok{)}
-\NormalTok{report(}\StringTok{"the truth (from the generator)"}\NormalTok{, TRUE\_EFFECT)}
+\NormalTok{experiment }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"re78 \textasciitilde{} treat"}\NormalTok{, data}\OperatorTok{=}\NormalTok{nsw).fit()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"experiment:  }\SpecialCharTok{\{}\NormalTok{experiment}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}treat\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{  (SE }\SpecialCharTok{\{}\NormalTok{experiment}\SpecialCharTok{.}\NormalTok{bse[}\StringTok{\textquotesingle{}treat\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:,.0f\}}\SpecialStringTok{)"}\NormalTok{)}
 
-\NormalTok{naive }\OperatorTok{=}\NormalTok{ panel.loc[panel[T] }\OperatorTok{==} \DecValTok{1}\NormalTok{, Y].mean() }\OperatorTok{{-}}\NormalTok{ panel.loc[panel[T] }\OperatorTok{==} \DecValTok{0}\NormalTok{, Y].mean()}
-\NormalTok{report(}\StringTok{"naive difference in means"}\NormalTok{, naive)}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ pd.concat([nsw[nsw[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], cps], ignore\_index}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{treated, control }\OperatorTok{=}\NormalTok{ data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"naive:       }\SpecialCharTok{\{}\NormalTok{treated[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ control[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{"}\NormalTok{)}
 
-\NormalTok{adj }\OperatorTok{=}\NormalTok{ sm.OLS(panel[Y], sm.add\_constant(panel[[T] }\OperatorTok{+}\NormalTok{ PRE])).fit(}
-\NormalTok{    cov\_type}\OperatorTok{=}\StringTok{"cluster"}\NormalTok{, cov\_kwds}\OperatorTok{=}\NormalTok{\{}\StringTok{"groups"}\NormalTok{: panel[}\StringTok{"geo"}\NormalTok{]\})}
-\NormalTok{report(}\StringTok{"regression on pre{-}treatment controls"}\NormalTok{, adj.params[T], adj.bse[T])}
+\NormalTok{regression }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"re78 \textasciitilde{} treat + "} \OperatorTok{+} \StringTok{" + "}\NormalTok{.join(X), data}\OperatorTok{=}\NormalTok{data).fit()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"regression:  }\SpecialCharTok{\{}\NormalTok{regression}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}treat\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{   (same eight controls, linear)"}\NormalTok{)}
 
-\CommentTok{\# 1:1 nearest{-}neighbour matching on the estimated propensity score}
-\NormalTok{ps }\OperatorTok{=}\NormalTok{ sm.Logit(panel[T], sm.add\_constant(panel[PRE])).fit(disp}\OperatorTok{=}\DecValTok{0}\NormalTok{).predict()}
-\NormalTok{panel }\OperatorTok{=}\NormalTok{ panel.assign(ps}\OperatorTok{=}\NormalTok{ps)}
-\NormalTok{tr, co }\OperatorTok{=}\NormalTok{ panel[panel[T] }\OperatorTok{==} \DecValTok{1}\NormalTok{], panel[panel[T] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
-\NormalTok{nn }\OperatorTok{=}\NormalTok{ np.}\BuiltInTok{abs}\NormalTok{(tr[}\StringTok{"ps"}\NormalTok{].values[:, }\VariableTok{None}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ co[}\StringTok{"ps"}\NormalTok{].values[}\VariableTok{None}\NormalTok{, :]).argmin(axis}\OperatorTok{=}\DecValTok{1}\NormalTok{)}
-\NormalTok{matched }\OperatorTok{=}\NormalTok{ co.iloc[nn]}
-\NormalTok{report(}\StringTok{"propensity{-}score matching (ATT)"}\NormalTok{,}
-\NormalTok{       (tr[Y].values }\OperatorTok{{-}}\NormalTok{ matched[Y].values).mean())}
-
-\NormalTok{bad }\OperatorTok{=}\NormalTok{ sm.OLS(panel[Y], sm.add\_constant(panel[[T] }\OperatorTok{+}\NormalTok{ PRE }\OperatorTok{+}\NormalTok{ [}\StringTok{"ai\_use\_ml"}\NormalTok{]])).fit(}
-\NormalTok{    cov\_type}\OperatorTok{=}\StringTok{"cluster"}\NormalTok{, cov\_kwds}\OperatorTok{=}\NormalTok{\{}\StringTok{"groups"}\NormalTok{: panel[}\StringTok{"geo"}\NormalTok{]\})}
-\NormalTok{report(}\StringTok{"+ a post{-}treatment control"}\NormalTok{, bad.params[T], bad.bse[T])}
+\NormalTok{sd }\OperatorTok{=}\NormalTok{ np.sqrt((treated[X].var() }\OperatorTok{+}\NormalTok{ control[X].var()) }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{standardised differences before matching:"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(((treated[X].mean() }\OperatorTok{{-}}\NormalTok{ control[X].mean()) }\OperatorTok{/}\NormalTok{ sd).astype(}\BuiltInTok{float}\NormalTok{).}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-method                                estimate      bias
-the truth (from the generator)          +2.400    +0.000
-naive difference in means               +6.069    +3.669
-regression on pre-treatment controls    +3.101    +0.701   (SE 0.365)
-propensity-score matching (ATT)         +2.678    +0.278
-+ a post-treatment control              +2.153    -0.247   (SE 0.433)
+experiment:  +1,794  (SE 633)
+naive:       -8,498
+regression:  +699   (same eight controls, linear)
+
+standardised differences before matching:
+age         -0.80
+education   -0.68
+black        2.43
+hispanic    -0.05
+married     -1.23
+nodegree     0.90
+re74        -1.57
+re75        -1.75
 \end{verbatim}
 
-The naive comparison overstates the effect by more than 150\%. That is
-the selection term made visible: adopting countries were already more
-digital, and the difference in outcomes is mostly the difference in
-countries.
+Training raised 1978 earnings by about \$1,800 in the experiment.
+Against the survey, the naive comparison says it \emph{cut} them by
+\$8,500: the wrong sign and five times too large, because the survey's
+average worker earned \$14,000 a year before the programme and the
+trainees under \$2,100. The standardised differences put that in common
+units --- the gap in means divided by the pooled standard deviation ---
+and most are between 0.7 and 2.4, against a convention that calls
+anything under 0.1 balanced.
 
-Adjusting for the pre-treatment indicators removes most of it but not
-all, leaving about +0.7 percentage points of bias. The reason is worth
-stating, because it is the normal situation and not a defect of this
-example: the observed indicators are \emph{noisy proxies} for the latent
-characteristics that actually drove adoption. Conditioning on a proxy
-removes the part of the confounding it captures and leaves the rest.
+Regression with all eight characteristics does much better, and is still
+off by more than half. The reason is worth understanding, because it is
+what matching fixes. A linear regression uses \emph{every} survey
+respondent, including the thousands earning \$30,000 who resemble no
+trainee, and lets a straight line carry the comparison from them to the
+trainees. The estimate depends on that line being right far outside the
+region where the trainees live.
 
-Matching does best. And the last line is the interesting one.
+\section{The propensity score, and a match that fails its
+check}\label{the-propensity-score-and-a-match-that-fails-its-check}
 
-\section{The control that improves the number and ruins the
-estimate}\label{the-control-that-improves-the-number-and-ruins-the-estimate}
+Rosenbaum and Rubin (\citeproc{ref-rosenbaum1983}{1983}) proved that if
+treatment is as good as random given \(X\), it is as good as random
+given the single number \(e(X) = P(T = 1 \mid X)\), the
+\textbf{propensity score}. Eight dimensions collapse to one, and
+matching becomes the nearest-neighbour problem of chapter 8 on one
+column.
 
-Adding a post-treatment variable moved the estimate closer to the truth.
-It is still wrong to do it, and understanding why is more valuable than
-the number.
+\begin{figure}[htbp]
 
-\texttt{ai\_use\_ml} is a \emph{consequence} of the strategy, not a
-cause of it. Conditioning on it blocks part of the causal path from
-treatment to outcome, so the coefficient on treatment no longer measures
-the total effect --- it measures whatever is left after the mediated
-portion has been removed. That it lands near the truth here is a
-coincidence: the downward bias from blocking the path happened to offset
-the residual upward bias from imperfect proxies.
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-matching-idea.png}}
+
+}
+
+\caption{Matching on the score. Each treated unit is joined to the
+control with the closest score; controls unlike every treated unit are
+never used.}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{first }\OperatorTok{=} \StringTok{"treat \textasciitilde{} "} \OperatorTok{+} \StringTok{" + "}\NormalTok{.join(X)}
+\NormalTok{data[}\StringTok{"pscore"}\NormalTok{] }\OperatorTok{=}\NormalTok{ smf.logit(first, data}\OperatorTok{=}\NormalTok{data).fit(disp}\OperatorTok{=}\DecValTok{0}\NormalTok{).predict(data)}
+\NormalTok{treated, control }\OperatorTok{=}\NormalTok{ data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+
+\NormalTok{bins }\OperatorTok{=}\NormalTok{ np.linspace(}\DecValTok{0}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\DecValTok{26}\NormalTok{)}
+\NormalTok{plt.figure(figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{7}\NormalTok{, }\FloatTok{3.4}\NormalTok{))}
+\NormalTok{plt.hist(control[}\StringTok{"pscore"}\NormalTok{], bins}\OperatorTok{=}\NormalTok{bins, alpha}\OperatorTok{=}\FloatTok{0.6}\NormalTok{, label}\OperatorTok{=}\StringTok{"survey (control)"}\NormalTok{)}
+\NormalTok{plt.hist(treated[}\StringTok{"pscore"}\NormalTok{], bins}\OperatorTok{=}\NormalTok{bins, alpha}\OperatorTok{=}\FloatTok{0.6}\NormalTok{, label}\OperatorTok{=}\StringTok{"trained"}\NormalTok{)}
+\NormalTok{plt.yscale(}\StringTok{"log"}\NormalTok{)}
+\NormalTok{plt.xlabel(}\StringTok{"propensity score"}\NormalTok{)}
+\NormalTok{plt.legend()}
+\NormalTok{plt.show()}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"score range, trained: }\SpecialCharTok{\{}\NormalTok{treated[}\StringTok{\textquotesingle{}pscore\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{min}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{ – }\SpecialCharTok{\{}\NormalTok{treated[}\StringTok{\textquotesingle{}pscore\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"survey respondents with a score above 0.05: }\SpecialCharTok{\{}\NormalTok{(control[}\StringTok{\textquotesingle{}pscore\textquotesingle{}}\NormalTok{] }\OperatorTok{\textgreater{}} \FloatTok{0.05}\NormalTok{)}\SpecialCharTok{.}\BuiltInTok{sum}\NormalTok{()}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[htbp]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{session-10_files/figure-pdf/fig-nsw-overlap-output-1.png}}
+
+}
+
+\caption{\label{fig-nsw-overlap}The propensity score in the two groups,
+on a logarithmic scale. Almost every survey respondent has a score near
+zero, but every bin that contains trainees also contains some survey
+respondents: the overlap needed for matching exists.}
+
+\end{figure}%
+
+\begin{verbatim}
+score range, trained: 0.001 – 0.487
+survey respondents with a score above 0.05: 534
+\end{verbatim}
+
+Overlap is the checkable half of the identifying assumptions, and here
+it holds, barely: of almost sixteen thousand survey respondents, a few
+hundred look anything like a trainee. That is enough, because matching
+needs only one good control per trainee.
+
+\phantomsection\label{check-nsw-match1}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nn }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(control[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{distance, index }\OperatorTok{=}\NormalTok{ nn.kneighbors(treated[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{matched }\OperatorTok{=}\NormalTok{ control.iloc[index.ravel()]}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(treated)}\SpecialCharTok{\}}\SpecialStringTok{ trainees, }\SpecialCharTok{\{}\NormalTok{matched}\SpecialCharTok{.}\NormalTok{index}\SpecialCharTok{.}\NormalTok{nunique()}\SpecialCharTok{\}}\SpecialStringTok{ distinct controls, "}
+      \SpecialStringTok{f"largest score gap }\SpecialCharTok{\{}\NormalTok{distance}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.4f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(((treated[X].mean() }\OperatorTok{{-}}\NormalTok{ matched[X].mean()) }\OperatorTok{/}\NormalTok{ sd).astype(}\BuiltInTok{float}\NormalTok{).}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+185 trainees, 124 distinct controls, largest score gap 0.0038
+age          0.31
+education    0.00
+black        0.05
+hispanic     0.07
+married      0.09
+nodegree     0.00
+re74         0.01
+re75         0.03
+\end{verbatim}
+
+Matching with replacement lets a good control serve more than once,
+which is why 185 trainees use fewer distinct controls. Balance has
+improved enormously on earnings, race and schooling, but age is still
+out by 0.31: the logit has treated the probability of training as moving
+in one direction with age, and it does not. \textbf{This is the moment
+the procedure is designed for.} The response is to change the score and
+check again, and to do it \emph{without looking at the outcome}, because
+a score chosen for the estimate it produces is a specification search
+with a respectable name.
+
+\section{A score that balances, and only then the
+outcome}\label{a-score-that-balances-and-only-then-the-outcome}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{better }\OperatorTok{=}\NormalTok{ first }\OperatorTok{+} \StringTok{" + I(age**2) + I(re74 == 0) + I(re75 == 0)"}
+\NormalTok{data[}\StringTok{"pscore"}\NormalTok{] }\OperatorTok{=}\NormalTok{ smf.logit(better, data}\OperatorTok{=}\NormalTok{data).fit(disp}\OperatorTok{=}\DecValTok{0}\NormalTok{).predict(data)}
+\NormalTok{treated, control }\OperatorTok{=}\NormalTok{ data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], data[data[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+\NormalTok{nn }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(control[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{distance, index }\OperatorTok{=}\NormalTok{ nn.kneighbors(treated[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{matched }\OperatorTok{=}\NormalTok{ control.iloc[index.ravel()]}
+
+\NormalTok{before }\OperatorTok{=}\NormalTok{ (treated[X].mean() }\OperatorTok{{-}}\NormalTok{ control[X].mean()) }\OperatorTok{/}\NormalTok{ sd}
+\NormalTok{after }\OperatorTok{=}\NormalTok{ (treated[X].mean() }\OperatorTok{{-}}\NormalTok{ matched[X].mean()) }\OperatorTok{/}\NormalTok{ sd}
+\NormalTok{plt.figure(figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{7}\NormalTok{, }\FloatTok{3.6}\NormalTok{))}
+\NormalTok{plt.scatter(before, X, label}\OperatorTok{=}\StringTok{"before"}\NormalTok{)}
+\NormalTok{plt.scatter(after, X, label}\OperatorTok{=}\StringTok{"after"}\NormalTok{)}
+\NormalTok{plt.axvline(}\OperatorTok{{-}}\FloatTok{0.1}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{plt.axvline(}\FloatTok{0.1}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{plt.xlabel(}\StringTok{"standardised difference"}\NormalTok{)}
+\NormalTok{plt.legend()}
+\NormalTok{plt.show()}
+
+\NormalTok{att }\OperatorTok{=}\NormalTok{ treated[}\StringTok{"re78"}\NormalTok{].mean() }\OperatorTok{{-}}\NormalTok{ matched[}\StringTok{"re78"}\NormalTok{].mean()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"largest |difference| after matching: }\SpecialCharTok{\{}\NormalTok{after}\SpecialCharTok{.}\BuiltInTok{abs}\NormalTok{()}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"ATT by matching: }\SpecialCharTok{\{}\NormalTok{att}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{    experiment: }\SpecialCharTok{\{}\NormalTok{experiment}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}treat\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[htbp]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{session-10_files/figure-pdf/fig-nsw-balance-output-1.png}}
+
+}
+
+\caption{\label{fig-nsw-balance}Standardised differences before matching
+(blue) and after matching on the improved score (orange). The dashed
+lines mark ±0.1. Every covariate ends inside them.}
+
+\end{figure}%
+
+\begin{verbatim}
+largest |difference| after matching: 0.09
+ATT by matching: +2,001    experiment: +1,794
+\end{verbatim}
+
+Age squared lets the probability of training rise and fall with age; the
+two indicators mark people who earned nothing in 1974 or 1975, which is
+most trainees and few survey respondents. With them, every standardised
+difference sits inside 0.1. The figure --- a \textbf{love plot} --- is
+the evidence a reader needs, and it is the evidence to report, rather
+than the logit's coefficients or fit, which are a means and not an end.
+
+Only now is the outcome looked at. The matched ATT is about \$2,000,
+within a third of a standard error of the experiment.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-nsw-estimates.png}}
+
+}
+
+\caption{Every estimate on one axis. Both matching estimates fall inside
+the experiment's 95\% interval; the naive comparison has the wrong sign,
+and the linear regression is pulled down by respondents who resemble no
+trainee.}
+
+\end{figure}%
+
+Two cautions keep this from being a triumph. The first is uncertainty.
+The standard error printed by a regression on the matched sample ignores
+that the score was estimated and that controls were reused; a bootstrap
+that redoes the whole procedure is the honest version.
+
+\phantomsection\label{check-nsw-bootstrap}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{estimates }\OperatorTok{=}\NormalTok{ []}
+\ControlFlowTok{for}\NormalTok{ b }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{200}\NormalTok{):}
+\NormalTok{    t }\OperatorTok{=}\NormalTok{ treated.sample(}\BuiltInTok{len}\NormalTok{(treated), replace}\OperatorTok{=}\VariableTok{True}\NormalTok{, random\_state}\OperatorTok{=}\NormalTok{b)}
+\NormalTok{    c }\OperatorTok{=}\NormalTok{ control.sample(}\BuiltInTok{len}\NormalTok{(control), replace}\OperatorTok{=}\VariableTok{True}\NormalTok{, random\_state}\OperatorTok{=}\DecValTok{1000} \OperatorTok{+}\NormalTok{ b)}
+\NormalTok{    nn\_b }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(c[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{    \_, idx }\OperatorTok{=}\NormalTok{ nn\_b.kneighbors(t[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{    estimates.append(t[}\StringTok{"re78"}\NormalTok{].mean() }\OperatorTok{{-}}\NormalTok{ c.iloc[idx.ravel()][}\StringTok{"re78"}\NormalTok{].mean())}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"bootstrap standard error of the ATT: }\SpecialCharTok{\{}\NormalTok{np}\SpecialCharTok{.}\NormalTok{std(estimates)}\SpecialCharTok{:,.0f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"95\% interval: }\SpecialCharTok{\{}\NormalTok{np}\SpecialCharTok{.}\NormalTok{percentile(estimates, }\FloatTok{2.5}\NormalTok{)}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{ to }\SpecialCharTok{\{}\NormalTok{np}\SpecialCharTok{.}\NormalTok{percentile(estimates, }\FloatTok{97.5}\NormalTok{)}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+bootstrap standard error of the ATT: 900
+95% interval: -42 to +3,309
+\end{verbatim}
+
+(Strictly the score should be re-estimated inside each replication too;
+holding it fixed, as here, keeps the cell short and understates the
+spread a little.) The interval is wide --- the matched estimate rests on
+185 trainees and a much smaller number of distinct controls --- and it
+comfortably contains the experimental answer. It also, worth saying
+plainly, reaches zero: on the survey data alone, matching cannot rule
+out that training did nothing, which the experiment, with its own
+controls, could.
+
+The second caution is that one success is not a guarantee. LaLonde's
+paper used a second survey, the Panel Study of Income Dynamics, and the
+same procedure there tells a less tidy story.
+
+\phantomsection\label{check-nsw-psid}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{psid }\OperatorTok{=}\NormalTok{ pd.read\_stata(url }\OperatorTok{+} \StringTok{"psid\_controls.dta"}\NormalTok{)}
+\NormalTok{data2 }\OperatorTok{=}\NormalTok{ pd.concat([nsw[nsw[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], psid], ignore\_index}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{data2[}\StringTok{"pscore"}\NormalTok{] }\OperatorTok{=}\NormalTok{ smf.logit(better, data}\OperatorTok{=}\NormalTok{data2).fit(disp}\OperatorTok{=}\DecValTok{0}\NormalTok{).predict(data2)}
+\NormalTok{t2, c2 }\OperatorTok{=}\NormalTok{ data2[data2[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], data2[data2[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+\NormalTok{nn2 }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(c2[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{\_, idx2 }\OperatorTok{=}\NormalTok{ nn2.kneighbors(t2[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{m2 }\OperatorTok{=}\NormalTok{ c2.iloc[idx2.ravel()]}
+\NormalTok{sd2 }\OperatorTok{=}\NormalTok{ np.sqrt((t2[X].var() }\OperatorTok{+}\NormalTok{ c2[X].var()) }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"naive }\SpecialCharTok{\{}\NormalTok{t2[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ c2[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{   "}
+      \SpecialStringTok{f"ATT }\SpecialCharTok{\{}\NormalTok{t2[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ m2[}\StringTok{\textquotesingle{}re78\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:+,.0f\}}\SpecialStringTok{   "}
+      \SpecialStringTok{f"distinct controls }\SpecialCharTok{\{}\NormalTok{m2}\SpecialCharTok{.}\NormalTok{index}\SpecialCharTok{.}\NormalTok{nunique()}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(((t2[X].mean() }\OperatorTok{{-}}\NormalTok{ m2[X].mean()) }\OperatorTok{/}\NormalTok{ sd2).astype(}\BuiltInTok{float}\NormalTok{).}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+naive -15,205   ATT +1,665   distinct controls 56
+age          0.11
+education   -0.17
+black        0.11
+hispanic    -0.03
+married      0.09
+nodegree     0.21
+re74         0.03
+re75         0.01
+\end{verbatim}
+
+The estimate is again close to the experiment, but balance is not
+achieved: four covariates stay outside 0.1, schooling and the no-diploma
+indicator by the most, and the whole match rests on a few dozen distinct
+controls. A careful analyst would report that, and would not present the
+closeness of the number as vindication, because in real work there is no
+experiment to compare with. A. Smith and E. Todd
+(\citeproc{ref-smith2005}{2005}) make the general point: the
+Dehejia--Wahba success depends on which subsample and which score, and
+the lesson is about the conditions under which matching works --- rich
+pre-treatment earnings, comparison groups from the same labour market
+--- rather than about matching as such.
+
+\section{The control that changes the
+question}\label{the-control-that-changes-the-question}
+
+Deciding what goes into the score is a claim about causal structure. The
+rule is to condition only on variables fixed \textbf{before} treatment,
+and the reason is clearest when it is broken.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-dag-bad-control.png}}
+
+}
+
+\caption{A confounder, measured before treatment, opens a back door and
+should be controlled for. A mediator, created by the treatment, carries
+part of the effect, and controlling for it removes that part.}
+
+\end{figure}%
+
+\phantomsection\label{check-mediator}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{10}\NormalTok{)}
+\NormalTok{size }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)                                  }\CommentTok{\# before the programme}
+\NormalTok{joins }\OperatorTok{=}\NormalTok{ (size }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n) }\OperatorTok{\textgreater{}} \FloatTok{0.5}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{contracts }\OperatorTok{=} \FloatTok{1.5} \OperatorTok{*}\NormalTok{ joins }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)               }\CommentTok{\# created by the programme}
+\NormalTok{growth }\OperatorTok{=} \DecValTok{10} \OperatorTok{+} \DecValTok{2} \OperatorTok{*}\NormalTok{ size }\OperatorTok{+} \FloatTok{0.5} \OperatorTok{*}\NormalTok{ joins }\OperatorTok{+} \FloatTok{1.0} \OperatorTok{*}\NormalTok{ contracts }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, n)}
+\NormalTok{firms }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"size"}\NormalTok{: size, }\StringTok{"joins"}\NormalTok{: joins, }\StringTok{"contracts"}\NormalTok{: contracts, }\StringTok{"growth"}\NormalTok{: growth\})}
+
+\ControlFlowTok{for}\NormalTok{ formula }\KeywordTok{in}\NormalTok{ [}\StringTok{"growth \textasciitilde{} joins"}\NormalTok{, }\StringTok{"growth \textasciitilde{} joins + size"}\NormalTok{, }\StringTok{"growth \textasciitilde{} joins + size + contracts"}\NormalTok{]:}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{formula}\SpecialCharTok{:36\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{smf}\SpecialCharTok{.}\NormalTok{ols(formula, data}\OperatorTok{=}\NormalTok{firms)}\SpecialCharTok{.}\NormalTok{fit()}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}joins\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"true total effect: 0.5 direct + 1.5 × 1.0 through contracts = 2.0"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+growth ~ joins                       4.19
+growth ~ joins + size                2.09
+growth ~ joins + size + contracts    0.31
+true total effect: 0.5 direct + 1.5 × 1.0 through contracts = 2.0
+\end{verbatim}
+
+Without controls, selection on size inflates the estimate. Controlling
+for size --- a confounder, fixed before the programme --- recovers the
+total effect of 2. Adding new export contracts, which the programme
+itself creates, drops the estimate to the direct effect alone, because
+conditioning on a mediator holds fixed the channel through which most of
+the effect travels. The regression is not wrong; it answers a different
+and usually uninteresting question. The related case of a
+\textbf{collider}, a common consequence of treatment and outcome, is
+worse: conditioning on it \emph{creates} an association that does not
+exist (\citeproc{ref-elwert2014}{Elwert and Winship 2014}). Cinelli,
+Forney, and Pearl (\citeproc{ref-cinelli2022}{2022}) is the short guide
+worth keeping beside the keyboard.
 
 \begin{qmibwarn}
 
@@ -7939,99 +8301,59 @@ the next dataset, and no diagnostic will announce it.
 
 \end{qmibwarn}
 
-This is the general problem of bad controls. The instinct that adding
-covariates is prudent is wrong in two specific cases: a
-\textbf{mediator}, which sits on the causal path and whose inclusion
-removes part of the effect you are estimating; and a \textbf{collider},
-a common consequence of treatment and outcome, whose inclusion
-\emph{creates} an association that does not exist
-(\citeproc{ref-elwert2014}{Elwert and Winship 2014}). Deciding what
-belongs in the regression is a claim about causal structure, not a
-statistical choice, and Cinelli, Forney, and Pearl
-(\citeproc{ref-cinelli2022}{2022}) is the short guide worth keeping
-beside the keyboard.
+\section{What none of this fixes}\label{what-none-of-this-fixes}
 
-\section{Balance is the diagnostic, not
-fit}\label{balance-is-the-diagnostic-not-fit}
+Matching came within \$210 of the truth on the CPS. It would be a
+mistake to conclude that it solved the problem, and the simulation shows
+why. Suppose the analyst sees only firm size, a noisy sign of the
+productivity that actually drove selection.
 
-The most important shift in this chapter is what counts as evidence that
-the estimate is any good. Chapter 3 judged a model by its residuals. A
-matching estimator is judged by whether the groups it compares are
-actually comparable.
-
+\phantomsection\label{check-proxy}
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{def}\NormalTok{ smd(a, b):}
-    \ControlFlowTok{return}\NormalTok{ (a.mean() }\OperatorTok{{-}}\NormalTok{ b.mean()) }\OperatorTok{/}\NormalTok{ np.sqrt((a.var(ddof}\OperatorTok{=}\DecValTok{1}\NormalTok{) }\OperatorTok{+}\NormalTok{ b.var(ddof}\OperatorTok{=}\DecValTok{1}\NormalTok{)) }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
-
-\NormalTok{names }\OperatorTok{=}\NormalTok{ PRE }\OperatorTok{+}\NormalTok{ [}\StringTok{"ps"}\NormalTok{]}
-\NormalTok{before }\OperatorTok{=}\NormalTok{ [smd(tr[c], co[c]) }\ControlFlowTok{for}\NormalTok{ c }\KeywordTok{in}\NormalTok{ names]}
-\NormalTok{after }\OperatorTok{=}\NormalTok{ [smd(tr[c], matched[c]) }\ControlFlowTok{for}\NormalTok{ c }\KeywordTok{in}\NormalTok{ names]}
-
-\NormalTok{fig, ax }\OperatorTok{=}\NormalTok{ plt.subplots(figsize}\OperatorTok{=}\NormalTok{(}\FloatTok{7.0}\NormalTok{, }\FloatTok{3.4}\NormalTok{))}
-\NormalTok{yy }\OperatorTok{=}\NormalTok{ np.arange(}\BuiltInTok{len}\NormalTok{(names))}
-\NormalTok{ax.axvline(}\DecValTok{0}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.line, lw}\OperatorTok{=}\DecValTok{1}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ x }\KeywordTok{in}\NormalTok{ (}\OperatorTok{{-}}\FloatTok{0.1}\NormalTok{, }\FloatTok{0.1}\NormalTok{):}
-\NormalTok{    ax.axvline(x, color}\OperatorTok{=}\NormalTok{CL.muted, lw}\OperatorTok{=}\DecValTok{1}\NormalTok{, ls}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
-\NormalTok{ax.scatter(before, yy, s}\OperatorTok{=}\DecValTok{58}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.warn, label}\OperatorTok{=}\StringTok{"before matching"}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{3}\NormalTok{)}
-\NormalTok{ax.scatter(after, yy, s}\OperatorTok{=}\DecValTok{58}\NormalTok{, color}\OperatorTok{=}\NormalTok{CL.good, label}\OperatorTok{=}\StringTok{"after matching"}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{3}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ i, (b\_, a\_) }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(}\BuiltInTok{zip}\NormalTok{(before, after)):}
-\NormalTok{    ax.plot([b\_, a\_], [i, i], color}\OperatorTok{=}\NormalTok{CL.muted, lw}\OperatorTok{=}\DecValTok{1}\NormalTok{, alpha}\OperatorTok{=}\FloatTok{0.5}\NormalTok{, zorder}\OperatorTok{=}\DecValTok{2}\NormalTok{)}
-\NormalTok{ax.set\_yticks(yy)}\OperatorTok{;}\NormalTok{ ax.set\_yticklabels(names)}
-\NormalTok{ax.set\_xlabel(}\StringTok{"standardised mean difference"}\NormalTok{)}
-\NormalTok{ax.legend(frameon}\OperatorTok{=}\VariableTok{False}\NormalTok{, fontsize}\OperatorTok{=}\FloatTok{8.5}\NormalTok{, loc}\OperatorTok{=}\StringTok{"lower right"}\NormalTok{)}
-\NormalTok{fig.tight\_layout()}
-
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}covariate\textquotesingle{}}\SpecialCharTok{:22\}\{}\StringTok{\textquotesingle{}before\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}\{}\StringTok{\textquotesingle{}after\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}}\SpecialStringTok{"}\NormalTok{)}
-\ControlFlowTok{for}\NormalTok{ n, b\_, a\_ }\KeywordTok{in} \BuiltInTok{zip}\NormalTok{(names, before, after):}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{n}\SpecialCharTok{:22\}\{}\NormalTok{b\_}\SpecialCharTok{:+9.3f\}\{}\NormalTok{a\_}\SpecialCharTok{:+9.3f\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{overlap in the propensity score:"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"   treated  }\SpecialCharTok{\{}\NormalTok{tr[}\StringTok{\textquotesingle{}ps\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{min}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{ – }\SpecialCharTok{\{}\NormalTok{tr[}\StringTok{\textquotesingle{}ps\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"   control  }\SpecialCharTok{\{}\NormalTok{co[}\StringTok{\textquotesingle{}ps\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{min}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{ – }\SpecialCharTok{\{}\NormalTok{co[}\StringTok{\textquotesingle{}ps\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\BuiltInTok{max}\NormalTok{()}\SpecialCharTok{:.3f\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{10}\NormalTok{)}
+\NormalTok{productivity }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)}
+\NormalTok{sales\_without }\OperatorTok{=} \DecValTok{10} \OperatorTok{+} \DecValTok{3} \OperatorTok{*}\NormalTok{ productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, n)}
+\NormalTok{applies }\OperatorTok{=}\NormalTok{ (productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n) }\OperatorTok{\textgreater{}} \FloatTok{0.5}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{size }\OperatorTok{=}\NormalTok{ productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)}
+\NormalTok{firms }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"productivity"}\NormalTok{: productivity, }\StringTok{"size"}\NormalTok{: size, }\StringTok{"applies"}\NormalTok{: applies,}
+                      \StringTok{"sales"}\NormalTok{: sales\_without }\OperatorTok{+} \DecValTok{2} \OperatorTok{*}\NormalTok{ applies\})}
+\NormalTok{t, c }\OperatorTok{=}\NormalTok{ firms[firms[}\StringTok{"applies"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], firms[firms[}\StringTok{"applies"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+\ControlFlowTok{for}\NormalTok{ v }\KeywordTok{in}\NormalTok{ [}\StringTok{"size"}\NormalTok{, }\StringTok{"productivity"}\NormalTok{]:}
+\NormalTok{    nn\_v }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(c[[v]])}
+\NormalTok{    \_, idx }\OperatorTok{=}\NormalTok{ nn\_v.kneighbors(t[[v]])}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"matched on }\SpecialCharTok{\{}\NormalTok{v}\SpecialCharTok{:13\}}\SpecialStringTok{ ATT }\SpecialCharTok{\{}\NormalTok{t[}\StringTok{\textquotesingle{}sales\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ c}\SpecialCharTok{.}\NormalTok{iloc[idx.ravel()][}\StringTok{\textquotesingle{}sales\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:.2f\}}\SpecialStringTok{   (truth 2)"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-covariate                before    after
-cloud_use                +0.972   +0.033
-ict_specialists          +0.998   -0.061
-digital_intensity        +1.138   +0.037
-ps                       +1.200   +0.019
-
-overlap in the propensity score:
-   treated  0.245 – 0.970
-   control  0.051 – 0.931
+matched on size          ATT 3.94   (truth 2)
+matched on productivity  ATT 2.21   (truth 2)
 \end{verbatim}
 
-\begin{figure}[htbp]
+Matching on the variable that drove selection recovers the effect.
+Matching on a proxy for it leaves more than half of the bias in place
+--- and size, the variable matched on, would look perfectly balanced.
+Balance can only be checked on what was measured; conditional
+independence is a claim about everything else, and it is untestable. On
+LaLonde's data, matching worked because the survey records two years of
+earnings before the programme, which capture most of what decided who
+enrolled. Remove them and no score recovers the experiment.
 
-\centering{
+The honest response is to ask how wrong the assumption could be.
+Sensitivity analysis asks how strong an unobserved confounder would have
+to be --- how strongly associated with both treatment and outcome --- to
+overturn the conclusion. If the answer is ``about as strong as the
+covariates already controlled for'', the finding is fragile. If it is
+``stronger than any known determinant'', it is robust. Either way the
+reader learns something a point estimate does not tell them.
 
-\pandocbounded{\includegraphics[keepaspectratio]{session-10_files/figure-pdf/fig-balance-output-2.png}}
-
-}
-
-\caption{\label{fig-balance}Covariate balance before and after matching.
-Each point is the standardised difference between treated and control
-groups; the dashed lines mark the conventional 0.1 threshold. Before
-matching every covariate is imbalanced by around one standard deviation;
-after, all lie inside the threshold.}
-
-\end{figure}%
-
-The convention is that a standardised difference below 0.1 is acceptable
-balance. Before matching, every covariate is out by around a full
-standard deviation; after, all four sit inside the threshold.
-\textbf{That is the result to report} --- not the R² of the propensity
-model, which is irrelevant, and not its coefficients, which are a means
-and not an end.
-
-The overlap figures matter too. The treated propensity scores span a
-range the controls also cover, so every treated unit has a plausible
-comparison. Had the treated run from 0.9 to 1.0 while controls stopped
-at 0.4, there would be no comparable units and the honest response is to
-restrict the sample and say the estimate applies only to the region
-where comparison was possible.
+The deeper limitation is that matching and regression adjustment are the
+\emph{same assumption} in different clothing. Both require that
+conditioning on observed covariates suffices. Matching implements it
+better --- it compares like with like instead of extrapolating along a
+line --- but neither creates identification. When the assumption fails,
+both fail, and in the same direction.
 
 One caution about the method itself. Propensity-score matching is the
 most popular approach here and not the best one: matching on a scalar
@@ -8041,33 +8363,9 @@ caliper tightens, a pathology documented at length by King and Nielsen
 weighting rather than matching, generally does better. The score remains
 a good diagnostic for overlap even where it is a poor matching device.
 
-\section{What none of this fixes}\label{what-none-of-this-fixes}
-
-The estimate above came within 0.3 percentage points of the truth. It
-would be a mistake to conclude that matching solved the problem, because
-the assumption that licensed it was true \emph{by construction} --- the
-generator used exactly those covariates to assign treatment, so
-conditioning on them is sufficient.
-
-In real work you never know that. Conditional independence is
-untestable, and the honest response is to ask how wrong it could be.
-Sensitivity analysis asks: how strong would an unobserved confounder
-have to be --- how strongly associated with both treatment and outcome
---- to overturn the conclusion? If the answer is ``about as strong as
-the covariates already controlled for'', the finding is fragile. If it
-is ``stronger than any known determinant'', it is robust. Either way the
-reader learns something a point estimate does not tell them.
-
-The deeper limitation is that matching and regression adjustment are the
-\emph{same assumption} in different clothing. Both require that
-conditioning on observed covariates suffices. Neither creates
-identification; they only implement it. When the assumption fails, both
-fail, and they fail in the same direction.
-
 Chapter 11 takes the other route: rather than assuming the confounders
 are all observed, it uses the structure of \emph{when} treatment arrived
---- the staggered adoption in this very dataset --- to difference the
-unobserved ones away.
+to difference the unobserved ones away.
 
 \section{A short review of the
 literature}\label{a-short-review-of-the-literature-8}
@@ -8080,6 +8378,14 @@ The potential-outcomes notation is Donald B. Rubin
 (\citeproc{ref-holland1986}{1986}) named the fundamental problem and
 drew the boundary the discipline still uses --- ``no causation without
 manipulation'' --- which remains contested and clarifying.
+
+LaLonde's 1986 comparison of experimental and non-experimental estimates
+of a job-training programme is the benchmark the matching literature is
+still judged against; Dehejia and Wahba
+(\citeproc{ref-dehejia1999}{1999}) showed propensity-score matching
+recovering the experimental answer, and A. Smith and E. Todd
+(\citeproc{ref-smith2005}{2005}) showed how much that depends on the
+sample and the specification.
 
 Rosenbaum and Rubin (\citeproc{ref-rosenbaum1983}{1983}) proved the
 result that made observational adjustment tractable: if treatment is
@@ -8116,8 +8422,9 @@ treatment of which controls help and which do damage.
   list is complete. This is an argument, not a table.
 \item
   \textbf{Balance before and after}, for every covariate, with
-  standardised differences. Not the propensity model's coefficients or
-  its fit.
+  standardised differences --- a love plot. Not the propensity model's
+  coefficients or its fit. And say that the score was settled before the
+  outcome was looked at.
 \item
   \textbf{Overlap}, with the range of the score in both groups, and what
   you did about units outside common support.
@@ -9021,9 +9328,9 @@ book has been arguing for throughout.
 
 \begin{verbatim}
 identity                                       discrepancy
-TSS - (ESS + RSS)                                1.526e-05
-multiple regression - FWL residual slope         3.805e-09
-sum of leverages - p                             1.465e-14
+TSS - (ESS + RSS)                               -3.052e-05
+multiple regression - FWL residual slope         4.840e-09
+sum of leverages - p                             2.265e-14
 
 These are not approximations that happened to work on this dataset.
 They are algebraic identities, and they hold for every regression.
@@ -10620,6 +10927,12 @@ insisting on: what a model does and does not license you to say.
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-smith2005}
+A. Smith, Jeffrey, and Petra E. Todd. 2005. {``{Does} Matching Overcome
+{LaLonde}'s Critique of Nonexperimental Estimators?''} \emph{{Journal}
+of {Econometrics}} 125 (1-2): 305--53.
+\url{https://doi.org/10.1016/j.jeconom.2004.04.011}.
+
 \bibitem[\citeproctext]{ref-abadie2022}
 Abadie, Alberto, Susan Athey, Guido W Imbens, and Jeffrey M Wooldridge.
 2022. {``{When} {Should} {You} {Adjust} {Standard} {Errors} for
@@ -10823,6 +11136,13 @@ Cox, D. R. 1958. {``{The} {Regression} {Analysis} of {Binary}
 {Sequences}.''} \emph{{Journal} of the {Royal} {Statistical} {Society}
 {Series} B: {Statistical} {Methodology}} 20 (2): 215--32.
 \url{https://doi.org/10.1111/j.2517-6161.1958.tb00292.x}.
+
+\bibitem[\citeproctext]{ref-dehejia1999}
+Dehejia, Rajeev H., and Sadek Wahba. 1999. {``{Causal} {Effects} in
+{Nonexperimental} {Studies}: {Reevaluating} the {Evaluation} of
+{Training} {Programs}.''} \emph{{Journal} of the {American}
+{Statistical} {Association}} 94 (448): 1053--62.
+\url{https://doi.org/10.1080/01621459.1999.10473858}.
 
 \bibitem[\citeproctext]{ref-durbin1950}
 Durbin, J., and G. S. Watson. 1950. {``{Testing} for {Serial}

@@ -212,12 +212,21 @@ SNIPPETS = {
     "plt.barh": 'plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance',
 
     # ---- Session 10 -------------------------------------------------------
-    "expit": "from scipy.special import expit\n"
-             "p = expit(X @ beta)               # the inverse logit",
-    "NearestNeighbors": "nn = NearestNeighbors(n_neighbors=1).fit(ps_control.reshape(-1, 1))",
-    ".kneighbors": "dist, idx = nn.kneighbors(ps_treated.reshape(-1, 1))   # who matched to whom",
-    "pd.concat": "matched = pd.concat([treated, control.iloc[idx.ravel()]])",
-    ".boxplot": 'matched.boxplot(column="ps", by="treated")   # balance, before and after',
+    "np.random.default_rng": "rng = np.random.default_rng(10)\n"
+                             "productivity = rng.normal(0, 1, 1000)\n"
+                             "coin = rng.integers(0, 2, 1000)          # 1 = treated, at random",
+    "np.where": "observed = np.where(coin == 1, sales_with, sales_without)   # one outcome per row",
+    "pd.read_stata": 'url = "https://users.nber.org/~rdehejia/data/"\n'
+                     'nsw = pd.read_stata(url + "nsw_dw.dta")',
+    "pd.concat": 'data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)',
+    ".groupby": 'data.groupby("treat")["re78"].mean()   # the naive comparison',
+    "NearestNeighbors": "from sklearn.neighbors import NearestNeighbors\n"
+                        'nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])',
+    ".kneighbors": 'distance, index = nn.kneighbors(treated[["pscore"]])\n'
+                   "matched = control.iloc[index.ravel()]   # one control per treated unit",
+    "plt.hist": 'plt.hist(control["pscore"], bins=25, alpha=0.6, label="control")   # overlap',
+    "plt.yscale": 'plt.yscale("log")',
+    ".boxplot": 'firms.boxplot(column="productivity", by="applies")   # balance at a glance',
 }
 
 

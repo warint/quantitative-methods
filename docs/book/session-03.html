@@ -412,7 +412,7 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>by hand       [-86118.084706   1111.257354]
 statsmodels   [-86118.084706   1111.257354]
-agree to      2.49e-09</code></pre>
+agree to      2.26e-09</code></pre>
 </div>
 </div>
 <p>That is an algebraic fact. It requires no assumption about the world, no probability, no error term. Feed it any numbers and it returns coefficients. This is exactly why diagnostics are necessary: <strong>the formula never refuses.</strong> It has no way to tell you that the relationship is curved, that one country is dragging the whole line, or that the standard errors it reports are fiction. It returns the same confident four decimal places either way.</p>
@@ -747,7 +747,7 @@ h_{ii} \thickspace=\thickspace \frac{1}{n} + \frac{(x_i - \bar x)^2}{\sum_j (x_j
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>(h_hand <span class="op">&gt;</span> <span class="dv">2</span><span class="op">*</span>p<span class="op">/</span>n)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> observations exceed the 2p/n convention"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>leverage    max |hand - statsmodels| = 5.62e-16
+<pre><code>leverage    max |hand - statsmodels| = 5.10e-16
 std. resid  max |hand - statsmodels| = 4.44e-16
 
 sum of h_ii = 2.0000, and p = 2  (they are equal by construction)
@@ -789,7 +789,7 @@ D_i \thickspace=\thickspace \frac{(\hat y - \hat y_{(i)})^{\top}(\hat y - \hat y
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"D &gt; 4/n → </span><span class="sc">{</span>(cook_hand <span class="op">&gt;</span> <span class="dv">4</span><span class="op">/</span>n)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Cook's D    max |hand - statsmodels| = 9.78e-16
+<pre><code>Cook's D    max |hand - statsmodels| = 8.74e-16
 
 largest D_i = 0.0425  (DK 2010)
   its residual  r = +3.49
@@ -926,7 +926,7 @@ classical               41.504    26.77
 HC0 (White)             42.854    25.93
 HC3 (use this)          43.239    25.70
 
-HC0 by hand            42.854   (matches statsmodels to 4.7e-12)</code></pre>
+HC0 by hand            42.854   (matches statsmodels to 4.6e-12)</code></pre>
 </div>
 </div>
 <p>Look at what that does. The classical formula assumes every observation contributes the same <span class="math inline">\(\sigma^2\)</span> to the middle; the sandwich lets each contribute its own <span class="math inline">\(e_i^2\)</span>. It is consistent whatever the pattern of the variance, without your having to know or model that pattern — which is why it is called <em>robust</em> rather than <em>efficient</em>. Its small-sample behaviour is poor, because <span class="math inline">\(e_i^2\)</span> underestimates the variance at high-leverage points, and the corrections HC1, HC2 and HC3 exist to compensate <span class="citation" data-cites="mackinnon1985">(<a href="#ref-mackinnon1985" role="doc-biblioref">MacKinnon and White 1985</a>)</span>. The practical recommendation is settled: <strong>use HC3 by default</strong>, certainly whenever <span class="math inline">\(n &lt; 250\)</span> <span class="citation" data-cites="long2000">(<a href="#ref-long2000" role="doc-biblioref">Long and Ervin 2000</a>)</span>. In <code>statsmodels</code> that is <code>fit(cov_type="HC3")</code> — one argument, no good reason to omit it.</p>

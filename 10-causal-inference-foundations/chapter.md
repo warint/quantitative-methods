@@ -63,6 +63,8 @@ construction. This is the **fundamental problem of causal inference**
 [@holland1986], and it means that no individual causal effect is ever
 identified. What we can hope for is an *average*.
 
+![The table you never get to see. Each firm has two potential outcomes; whichever choice it made, the other is missing, and so is its effect. The numbers come from the simulation later in this chapter, where, unusually, both columns exist.](01-lecture/economist-assets/po-table.png){fig-alt="Six firms, each with sales growth with and without the programme. For each firm only one of the two is observed."}
+
 ::: {.definition}
 [**ATE**]{.term} — average treatment effect, $\mathrm{E}[Y(1) - Y(0)]$
 over the whole population. What would happen if everyone were treated versus no
@@ -92,6 +94,8 @@ the absence of treatment*. If countries that adopt a policy would have differed
 from those that did not even without it, the observed difference is the effect
 plus that gap, and nothing in the data separates them.
 
+![The decomposition in numbers, from the simulated firms below. The naive comparison says 5.33; the programme's effect is 2.00; the other 3.33 is how much faster the joining firms would have grown anyway.](01-lecture/economist-assets/po-decomposition.png){fig-alt="A bar of 5.33 split into the effect, 2.00, and selection bias, 3.33."}
+
 ## Randomisation, and what it buys
 
 Randomised assignment sets the selection term to zero, and it is worth being
@@ -106,6 +110,8 @@ any finite sample they will differ, sometimes substantially. It makes them diffe
 — and noise is what standard errors are for. It also balances variables nobody
 measured or thought of, which is the property no observational method can
 replicate.
+
+![Left: productivity drives both the decision to join and growth, so the comparison runs through a back door. Right: a coin decides, productivity can no longer reach the programme, and the back door is shut.](01-lecture/economist-assets/dag-selection.png){fig-alt="Two causal diagrams: self-selection with a back door through productivity, and randomisation with a coin."}
 
 When randomisation is unavailable, and in international business it usually is —
 countries are not randomly assigned national strategies — the alternative is to
@@ -127,110 +133,309 @@ estimate that includes them is extrapolating rather than comparing. Unlike
 conditional independence, overlap **is** checkable.
 :::
 
-## A treatment with a known answer
+## A world where the answer is known
 
-Everything above is standard and abstract. What follows is not available in real
-work: an evaluation where the true effect is known, so each method can be marked
-rather than argued about.
-
-The course fixture contains a national AI strategy, adopted by some countries in
-2021, 2022 or 2023 and never by others. The generator that built it did three
-things deliberately. It assigned treatment as a function of two baseline country
-characteristics — development and institutional capacity — so the data are
-*confounded by construction*. It set the true effect at **+2.4 percentage
-points** on AI use. And it kept the infrastructure indicators free of any
-treatment effect, so they are legitimate pre-treatment controls, while the
-adoption indicators are downstream of treatment and are not.
+Everything above can be watched happening in a simulation, which is the one
+setting where both potential outcomes exist. A thousand firms; a programme that
+adds exactly two points to every firm's export growth; and a productivity that
+nobody in the ministry observes, which raises growth with or without the
+programme.
 
 ```{python}
-#| label: check-setup
-#| code-summary: "Run it: the treatment, and how it was assigned"
+#| label: check-sim
+#| code-summary: "Run it: a coin flip against self-selection, with the truth known"
 
-import sys, warnings
-sys.path.insert(0, "../slides"); sys.path.insert(0, "..")
+import warnings
 warnings.filterwarnings("ignore")
-from plotstyle import setup, CL
-plt = setup()
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+from sklearn.neighbors import NearestNeighbors
 
-import numpy as np, pandas as pd, statsmodels.api as sm, qmib
+rng = np.random.default_rng(10)
+n = 1000
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+sales_with = sales_without + 2                         # the true effect, for every firm
+applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
 
-Y, T = "ai_use_any", "has_ai_strategy"
-PRE = ["cloud_use", "ict_specialists", "digital_intensity"]
-TRUE_EFFECT = 2.4          # from scripts/build_spine/make_fixtures.py
+observed = np.where(applies == 1, sales_with, sales_without)
+naive = observed[applies == 1].mean() - observed[applies == 0].mean()
+bias = sales_without[applies == 1].mean() - sales_without[applies == 0].mean()
+print(f"self-selection   naive {naive:.2f} = effect 2.00 + selection bias {bias:.2f}")
 
-panel = qmib.load("angle_c_country").dropna(
-    subset=[Y, T, "ai_use_ml"] + PRE).copy()
-
-print(f"country-years: {len(panel)}   treated: {int(panel[T].sum())}   "
-      f"years {panel.time.min()}–{panel.time.max()}")
-print(f"\nadopting countries differ before treatment — standardised differences:")
-for c in PRE:
-    a, b = panel.loc[panel[T] == 1, c], panel.loc[panel[T] == 0, c]
-    smd = (a.mean() - b.mean()) / np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)
-    print(f"   {c:22}{smd:+7.3f}")
-print("\nA standardised difference near 1 is a large imbalance. These countries")
-print("were already more digital before any strategy existed — which is exactly")
-print("the selection term in the decomposition above.")
+draws = []
+for _ in range(1000):                                  # a thousand randomised experiments
+    coin = rng.integers(0, 2, n)
+    seen = np.where(coin == 1, sales_with, sales_without)
+    draws.append(seen[coin == 1].mean() - seen[coin == 0].mean())
+print(f"coin flip        mean of 1,000 estimates {np.mean(draws):.2f}, spread {np.std(draws):.2f}")
 ```
 
-## Four estimates, one truth
+The two lines are the chapter's argument in miniature. Self-selection
+overstates the effect by a factor of more than two and a half, and the excess is
+exactly the selection term: the joining firms would have grown 3.33 points
+faster without the programme. The coin is right on average and wrong in any
+single draw by about a quarter of a point, which is noise, which a standard
+error describes. The selection term cannot be computed in real data, since it
+needs the column nobody sees; what *can* be computed is how different the groups
+were before treatment, here about one standard deviation of productivity. That
+comparison — balance — is the diagnostic the rest of the chapter is built on.
+
+## LaLonde's test
+
+The simulation knows the answer because it wrote it. A real data set that knows
+the answer is rarer, and the most famous one is a job-training experiment.
+
+The National Supported Work demonstration, run in the United States in
+1976–77, assigned disadvantaged workers to a training placement **by lottery**.
+The lottery's estimate of the effect on 1978 earnings is therefore credible.
+LaLonde (1986) then did something that has shaped the field since: he kept the
+trainees, threw away the lottery's controls, replaced them with people from
+national surveys, and asked whether the estimators economists applied to survey
+data would recover the experiment's answer. They did not, and the paper became
+the standard argument for experiments. @dehejia1999 returned to the same data
+with propensity-score matching and recovered it, and @smith2005 showed how
+fragile that recovery is. The data are on Rajeev Dehejia's NBER page, and
+`pd.read_stata` reads them directly.
+
+![The design. The experiment gives the true effect; the survey version is the situation applied work is usually in.](01-lecture/economist-assets/nsw-design.png){fig-alt="Left: the experiment, 185 trained and 260 untrained by lottery. Right: the same 185 trained compared with 15,992 people from a survey."}
 
 ```{python}
-#| label: check-estimators
-#| code-summary: "Run it: score the estimators against the known effect"
+#| label: check-nsw-naive
+#| code-summary: "Run it: the experiment's answer, and the naive survey comparison"
 
-def report(label, estimate, se=None):
-    tail = f"   (SE {se:.3f})" if se is not None else ""
-    print(f"{label:38}{estimate:+8.3f}{estimate - TRUE_EFFECT:+10.3f}{tail}")
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+cps = pd.read_stata(url + "cps_controls.dta")
+X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
 
-print(f"{'method':38}{'estimate':>8}{'bias':>10}")
-report("the truth (from the generator)", TRUE_EFFECT)
+experiment = smf.ols("re78 ~ treat", data=nsw).fit()
+print(f"experiment:  {experiment.params['treat']:+,.0f}  (SE {experiment.bse['treat']:,.0f})")
 
-naive = panel.loc[panel[T] == 1, Y].mean() - panel.loc[panel[T] == 0, Y].mean()
-report("naive difference in means", naive)
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+print(f"naive:       {treated['re78'].mean() - control['re78'].mean():+,.0f}")
 
-adj = sm.OLS(panel[Y], sm.add_constant(panel[[T] + PRE])).fit(
-    cov_type="cluster", cov_kwds={"groups": panel["geo"]})
-report("regression on pre-treatment controls", adj.params[T], adj.bse[T])
+regression = smf.ols("re78 ~ treat + " + " + ".join(X), data=data).fit()
+print(f"regression:  {regression.params['treat']:+,.0f}   (same eight controls, linear)")
 
-# 1:1 nearest-neighbour matching on the estimated propensity score
-ps = sm.Logit(panel[T], sm.add_constant(panel[PRE])).fit(disp=0).predict()
-panel = panel.assign(ps=ps)
-tr, co = panel[panel[T] == 1], panel[panel[T] == 0]
-nn = np.abs(tr["ps"].values[:, None] - co["ps"].values[None, :]).argmin(axis=1)
-matched = co.iloc[nn]
-report("propensity-score matching (ATT)",
-       (tr[Y].values - matched[Y].values).mean())
-
-bad = sm.OLS(panel[Y], sm.add_constant(panel[[T] + PRE + ["ai_use_ml"]])).fit(
-    cov_type="cluster", cov_kwds={"groups": panel["geo"]})
-report("+ a post-treatment control", bad.params[T], bad.bse[T])
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
+print("\nstandardised differences before matching:")
+print(((treated[X].mean() - control[X].mean()) / sd).astype(float).round(2).to_string())
 ```
 
-The naive comparison overstates the effect by more than 150%. That is the
-selection term made visible: adopting countries were already more digital, and
-the difference in outcomes is mostly the difference in countries.
+Training raised 1978 earnings by about \$1,800 in the experiment. Against the
+survey, the naive comparison says it *cut* them by \$8,500: the wrong sign and
+five times too large, because the survey's average worker earned \$14,000 a year
+before the programme and the trainees under \$2,100. The standardised
+differences put that in common units — the gap in means divided by the pooled
+standard deviation — and most are between 0.7 and 2.4, against a convention
+that calls anything under 0.1 balanced.
 
-Adjusting for the pre-treatment indicators removes most of it but not all,
-leaving about +0.7 percentage points of bias. The reason is worth stating,
-because it is the normal situation and not a defect of this example: the
-observed indicators are *noisy proxies* for the latent characteristics that
-actually drove adoption. Conditioning on a proxy removes the part of the
-confounding it captures and leaves the rest.
+Regression with all eight characteristics does much better, and is still off by
+more than half. The reason is worth understanding, because it is what matching
+fixes. A linear regression uses *every* survey respondent, including the
+thousands earning \$30,000 who resemble no trainee, and lets a straight line
+carry the comparison from them to the trainees. The estimate depends on that
+line being right far outside the region where the trainees live.
 
-Matching does best. And the last line is the interesting one.
+## The propensity score, and a match that fails its check
 
-## The control that improves the number and ruins the estimate
+@rosenbaum1983 proved that if treatment is as good as random given $X$, it is
+as good as random given the single number $e(X) = P(T = 1 \mid X)$, the
+**propensity score**. Eight dimensions collapse to one, and matching becomes the
+nearest-neighbour problem of chapter 8 on one column.
 
-Adding a post-treatment variable moved the estimate closer to the truth. It is
-still wrong to do it, and understanding why is more valuable than the number.
+![Matching on the score. Each treated unit is joined to the control with the closest score; controls unlike every treated unit are never used.](01-lecture/economist-assets/matching-idea.png){fig-alt="Treated units above, controls below, on a propensity-score axis, each treated unit joined to its nearest control."}
 
-`ai_use_ml` is a *consequence* of the strategy, not a cause of it. Conditioning
-on it blocks part of the causal path from treatment to outcome, so the
-coefficient on treatment no longer measures the total effect — it measures
-whatever is left after the mediated portion has been removed. That it lands near
-the truth here is a coincidence: the downward bias from blocking the path
-happened to offset the residual upward bias from imperfect proxies.
+```{python}
+#| label: fig-nsw-overlap
+#| code-summary: "Run it: estimate the score and check overlap"
+#| fig-cap: "The propensity score in the two groups, on a logarithmic scale. Almost every survey respondent has a score near zero, but every bin that contains trainees also contains some survey respondents: the overlap needed for matching exists."
+
+first = "treat ~ " + " + ".join(X)
+data["pscore"] = smf.logit(first, data=data).fit(disp=0).predict(data)
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+
+bins = np.linspace(0, 0.5, 26)
+plt.figure(figsize=(7, 3.4))
+plt.hist(control["pscore"], bins=bins, alpha=0.6, label="survey (control)")
+plt.hist(treated["pscore"], bins=bins, alpha=0.6, label="trained")
+plt.yscale("log")
+plt.xlabel("propensity score")
+plt.legend()
+plt.show()
+
+print(f"score range, trained: {treated['pscore'].min():.3f} – {treated['pscore'].max():.3f}")
+print(f"survey respondents with a score above 0.05: {(control['pscore'] > 0.05).sum()}")
+```
+
+Overlap is the checkable half of the identifying assumptions, and here it
+holds, barely: of almost sixteen thousand survey respondents, a few hundred look
+anything like a trainee. That is enough, because matching needs only one good
+control per trainee.
+
+```{python}
+#| label: check-nsw-match1
+#| code-summary: "Run it: match on the first score, then check balance"
+
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+print(f"{len(treated)} trainees, {matched.index.nunique()} distinct controls, "
+      f"largest score gap {distance.max():.4f}")
+print(((treated[X].mean() - matched[X].mean()) / sd).astype(float).round(2).to_string())
+```
+
+Matching with replacement lets a good control serve more than once, which is
+why 185 trainees use fewer distinct controls. Balance has improved enormously
+on earnings, race and schooling, but age is still out by 0.31: the logit has
+treated the probability of training as moving in one direction with age, and it
+does not. **This is the moment the procedure is designed for.** The response is
+to change the score and check again, and to do it *without looking at the
+outcome*, because a score chosen for the estimate it produces is a specification
+search with a respectable name.
+
+## A score that balances, and only then the outcome
+
+```{python}
+#| label: fig-nsw-balance
+#| code-summary: "Run it: a better score, the balance check, and the ATT"
+#| fig-cap: "Standardised differences before matching (blue) and after matching on the improved score (orange). The dashed lines mark ±0.1. Every covariate ends inside them."
+
+better = first + " + I(age**2) + I(re74 == 0) + I(re75 == 0)"
+data["pscore"] = smf.logit(better, data=data).fit(disp=0).predict(data)
+treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]
+
+before = (treated[X].mean() - control[X].mean()) / sd
+after = (treated[X].mean() - matched[X].mean()) / sd
+plt.figure(figsize=(7, 3.6))
+plt.scatter(before, X, label="before")
+plt.scatter(after, X, label="after")
+plt.axvline(-0.1, color="grey", linestyle="--")
+plt.axvline(0.1, color="grey", linestyle="--")
+plt.xlabel("standardised difference")
+plt.legend()
+plt.show()
+
+att = treated["re78"].mean() - matched["re78"].mean()
+print(f"largest |difference| after matching: {after.abs().max():.2f}")
+print(f"ATT by matching: {att:+,.0f}    experiment: {experiment.params['treat']:+,.0f}")
+```
+
+Age squared lets the probability of training rise and fall with age; the two
+indicators mark people who earned nothing in 1974 or 1975, which is most
+trainees and few survey respondents. With them, every standardised difference
+sits inside 0.1. The figure — a **love plot** — is the evidence a reader needs,
+and it is the evidence to report, rather than the logit's coefficients or fit,
+which are a means and not an end.
+
+Only now is the outcome looked at. The matched ATT is about \$2,000, within a
+third of a standard error of the experiment.
+
+![Every estimate on one axis. Both matching estimates fall inside the experiment's 95% interval; the naive comparison has the wrong sign, and the linear regression is pulled down by respondents who resemble no trainee.](01-lecture/economist-assets/nsw-estimates.png){fig-alt="Five estimates on one axis: naive −8,498, regression +699, first matching +1,831, balanced matching +2,001, and the experiment +1,794 with its 95% interval."}
+
+Two cautions keep this from being a triumph. The first is uncertainty. The
+standard error printed by a regression on the matched sample ignores that the
+score was estimated and that controls were reused; a bootstrap that redoes the
+whole procedure is the honest version.
+
+```{python}
+#| label: check-nsw-bootstrap
+#| code-summary: "Run it: bootstrap the whole matching procedure"
+
+estimates = []
+for b in range(200):
+    t = treated.sample(len(treated), replace=True, random_state=b)
+    c = control.sample(len(control), replace=True, random_state=1000 + b)
+    nn_b = NearestNeighbors(n_neighbors=1).fit(c[["pscore"]])
+    _, idx = nn_b.kneighbors(t[["pscore"]])
+    estimates.append(t["re78"].mean() - c.iloc[idx.ravel()]["re78"].mean())
+print(f"bootstrap standard error of the ATT: {np.std(estimates):,.0f}")
+print(f"95% interval: {np.percentile(estimates, 2.5):+,.0f} to {np.percentile(estimates, 97.5):+,.0f}")
+```
+
+(Strictly the score should be re-estimated inside each replication too; holding
+it fixed, as here, keeps the cell short and understates the spread a little.)
+The interval is wide — the matched estimate rests on 185 trainees and a much
+smaller number of distinct controls — and it comfortably contains the
+experimental answer. It also, worth saying plainly, reaches zero: on the survey
+data alone, matching cannot rule out that training did nothing, which the
+experiment, with its own controls, could.
+
+The second caution is that one success is not a guarantee. LaLonde's paper used
+a second survey, the Panel Study of Income Dynamics, and the same procedure
+there tells a less tidy story.
+
+```{python}
+#| label: check-nsw-psid
+#| code-summary: "Run it: the same recipe with the other survey"
+
+psid = pd.read_stata(url + "psid_controls.dta")
+data2 = pd.concat([nsw[nsw["treat"] == 1], psid], ignore_index=True)
+data2["pscore"] = smf.logit(better, data=data2).fit(disp=0).predict(data2)
+t2, c2 = data2[data2["treat"] == 1], data2[data2["treat"] == 0]
+nn2 = NearestNeighbors(n_neighbors=1).fit(c2[["pscore"]])
+_, idx2 = nn2.kneighbors(t2[["pscore"]])
+m2 = c2.iloc[idx2.ravel()]
+sd2 = np.sqrt((t2[X].var() + c2[X].var()) / 2)
+
+print(f"naive {t2['re78'].mean() - c2['re78'].mean():+,.0f}   "
+      f"ATT {t2['re78'].mean() - m2['re78'].mean():+,.0f}   "
+      f"distinct controls {m2.index.nunique()}")
+print(((t2[X].mean() - m2[X].mean()) / sd2).astype(float).round(2).to_string())
+```
+
+The estimate is again close to the experiment, but balance is not achieved:
+four covariates stay outside 0.1, schooling and the no-diploma indicator by the
+most, and the whole match rests on a few dozen distinct controls. A careful analyst would report that, and
+would not present the closeness of the number as vindication, because in real
+work there is no experiment to compare with. @smith2005 make the general point:
+the Dehejia–Wahba success depends on which subsample and which score, and the
+lesson is about the conditions under which matching works — rich pre-treatment
+earnings, comparison groups from the same labour market — rather than about
+matching as such.
+
+## The control that changes the question
+
+Deciding what goes into the score is a claim about causal structure. The rule
+is to condition only on variables fixed **before** treatment, and the reason is
+clearest when it is broken.
+
+![A confounder, measured before treatment, opens a back door and should be controlled for. A mediator, created by the treatment, carries part of the effect, and controlling for it removes that part.](01-lecture/economist-assets/dag-bad-control.png){fig-alt="Left: firm size before the programme causes both joining and growth. Right: new export contracts are caused by the programme and cause growth."}
+
+```{python}
+#| label: check-mediator
+#| code-summary: "Run it: controlling for a mediator"
+
+rng = np.random.default_rng(10)
+size = rng.normal(0, 1, n)                                  # before the programme
+joins = (size + rng.normal(0, 1, n) > 0.5).astype(int)
+contracts = 1.5 * joins + rng.normal(0, 1, n)               # created by the programme
+growth = 10 + 2 * size + 0.5 * joins + 1.0 * contracts + rng.normal(0, 2, n)
+firms = pd.DataFrame({"size": size, "joins": joins, "contracts": contracts, "growth": growth})
+
+for formula in ["growth ~ joins", "growth ~ joins + size", "growth ~ joins + size + contracts"]:
+    print(f"{formula:36} {smf.ols(formula, data=firms).fit().params['joins']:.2f}")
+print("true total effect: 0.5 direct + 1.5 × 1.0 through contracts = 2.0")
+```
+
+Without controls, selection on size inflates the estimate. Controlling for size
+— a confounder, fixed before the programme — recovers the total effect of 2.
+Adding new export contracts, which the programme itself creates, drops the
+estimate to the direct effect alone, because conditioning on a mediator holds
+fixed the channel through which most of the effect travels. The regression is
+not wrong; it answers a different and usually uninteresting question. The
+related case of a **collider**, a common consequence of treatment and outcome,
+is worse: conditioning on it *creates* an association that does not exist
+[@elwert2014]. @cinelli2022 is the short guide worth keeping beside the
+keyboard.
 
 ::: {.warn}
 **"Closer to the right answer" is not the same as "the right method."** In real
@@ -240,66 +445,52 @@ be wrong by an unknown amount in the next dataset, and no diagnostic will
 announce it.
 :::
 
-This is the general problem of bad controls. The instinct that adding covariates
-is prudent is wrong in two specific cases: a **mediator**, which sits on the
-causal path and whose inclusion removes part of the effect you are estimating;
-and a **collider**, a common consequence of treatment and outcome, whose
-inclusion *creates* an association that does not exist [@elwert2014]. Deciding
-what belongs in the regression is a claim about causal structure, not a
-statistical choice, and @cinelli2022 is the short guide worth keeping beside the
-keyboard.
+## What none of this fixes
 
-## Balance is the diagnostic, not fit
-
-The most important shift in this chapter is what counts as evidence that the
-estimate is any good. Chapter 3 judged a model by its residuals. A matching
-estimator is judged by whether the groups it compares are actually comparable.
+Matching came within \$210 of the truth on the CPS. It would be a mistake to
+conclude that it solved the problem, and the simulation shows why. Suppose the
+analyst sees only firm size, a noisy sign of the productivity that actually
+drove selection.
 
 ```{python}
-#| label: fig-balance
-#| code-summary: "Show the code"
-#| fig-cap: "Covariate balance before and after matching. Each point is the standardised difference between treated and control groups; the dashed lines mark the conventional 0.1 threshold. Before matching every covariate is imbalanced by around one standard deviation; after, all lie inside the threshold."
+#| label: check-proxy
+#| code-summary: "Run it: matching on a proxy for the real confounder"
 
-def smd(a, b):
-    return (a.mean() - b.mean()) / np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)
-
-names = PRE + ["ps"]
-before = [smd(tr[c], co[c]) for c in names]
-after = [smd(tr[c], matched[c]) for c in names]
-
-fig, ax = plt.subplots(figsize=(7.0, 3.4))
-yy = np.arange(len(names))
-ax.axvline(0, color=CL.line, lw=1)
-for x in (-0.1, 0.1):
-    ax.axvline(x, color=CL.muted, lw=1, ls="--")
-ax.scatter(before, yy, s=58, color=CL.warn, label="before matching", zorder=3)
-ax.scatter(after, yy, s=58, color=CL.good, label="after matching", zorder=3)
-for i, (b_, a_) in enumerate(zip(before, after)):
-    ax.plot([b_, a_], [i, i], color=CL.muted, lw=1, alpha=0.5, zorder=2)
-ax.set_yticks(yy); ax.set_yticklabels(names)
-ax.set_xlabel("standardised mean difference")
-ax.legend(frameon=False, fontsize=8.5, loc="lower right")
-fig.tight_layout()
-
-print(f"{'covariate':22}{'before':>9}{'after':>9}")
-for n, b_, a_ in zip(names, before, after):
-    print(f"{n:22}{b_:+9.3f}{a_:+9.3f}")
-print(f"\noverlap in the propensity score:")
-print(f"   treated  {tr['ps'].min():.3f} – {tr['ps'].max():.3f}")
-print(f"   control  {co['ps'].min():.3f} – {co['ps'].max():.3f}")
+rng = np.random.default_rng(10)
+productivity = rng.normal(0, 1, n)
+sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
+size = productivity + rng.normal(0, 1, n)
+firms = pd.DataFrame({"productivity": productivity, "size": size, "applies": applies,
+                      "sales": sales_without + 2 * applies})
+t, c = firms[firms["applies"] == 1], firms[firms["applies"] == 0]
+for v in ["size", "productivity"]:
+    nn_v = NearestNeighbors(n_neighbors=1).fit(c[[v]])
+    _, idx = nn_v.kneighbors(t[[v]])
+    print(f"matched on {v:13} ATT {t['sales'].mean() - c.iloc[idx.ravel()]['sales'].mean():.2f}   (truth 2)")
 ```
 
-The convention is that a standardised difference below 0.1 is acceptable
-balance. Before matching, every covariate is out by around a full standard
-deviation; after, all four sit inside the threshold. **That is the result to
-report** — not the R² of the propensity model, which is irrelevant, and not its
-coefficients, which are a means and not an end.
+Matching on the variable that drove selection recovers the effect. Matching on a
+proxy for it leaves more than half of the bias in place — and size, the variable
+matched on, would look perfectly balanced. Balance can only be checked on what
+was measured; conditional independence is a claim about everything else, and
+it is untestable. On LaLonde's data, matching worked because the survey records
+two years of earnings before the programme, which capture most of what decided
+who enrolled. Remove them and no score recovers the experiment.
 
-The overlap figures matter too. The treated propensity scores span a range the
-controls also cover, so every treated unit has a plausible comparison. Had the
-treated run from 0.9 to 1.0 while controls stopped at 0.4, there would be no
-comparable units and the honest response is to restrict the sample and say the
-estimate applies only to the region where comparison was possible.
+The honest response is to ask how wrong the assumption could be. Sensitivity
+analysis asks how strong an unobserved confounder would have to be — how
+strongly associated with both treatment and outcome — to overturn the
+conclusion. If the answer is "about as strong as the covariates already
+controlled for", the finding is fragile. If it is "stronger than any known
+determinant", it is robust. Either way the reader learns something a point
+estimate does not tell them.
+
+The deeper limitation is that matching and regression adjustment are the *same
+assumption* in different clothing. Both require that conditioning on observed
+covariates suffices. Matching implements it better — it compares like with like
+instead of extrapolating along a line — but neither creates identification.
+When the assumption fails, both fail, and in the same direction.
 
 One caution about the method itself. Propensity-score matching is the most
 popular approach here and not the best one: matching on a scalar score discards
@@ -308,29 +499,9 @@ documented at length by @king2019. Matching directly on the covariates, or
 weighting rather than matching, generally does better. The score remains a good
 diagnostic for overlap even where it is a poor matching device.
 
-## What none of this fixes
-
-The estimate above came within 0.3 percentage points of the truth. It would be a
-mistake to conclude that matching solved the problem, because the assumption
-that licensed it was true *by construction* — the generator used exactly those
-covariates to assign treatment, so conditioning on them is sufficient.
-
-In real work you never know that. Conditional independence is untestable, and
-the honest response is to ask how wrong it could be. Sensitivity analysis asks:
-how strong would an unobserved confounder have to be — how strongly associated
-with both treatment and outcome — to overturn the conclusion? If the answer is
-"about as strong as the covariates already controlled for", the finding is
-fragile. If it is "stronger than any known determinant", it is robust. Either
-way the reader learns something a point estimate does not tell them.
-
-The deeper limitation is that matching and regression adjustment are the *same
-assumption* in different clothing. Both require that conditioning on observed
-covariates suffices. Neither creates identification; they only implement it.
-When the assumption fails, both fail, and they fail in the same direction.
-
 Chapter 11 takes the other route: rather than assuming the confounders are all
-observed, it uses the structure of *when* treatment arrived — the staggered
-adoption in this very dataset — to difference the unobserved ones away.
+observed, it uses the structure of *when* treatment arrived to difference the
+unobserved ones away.
 
 ## A short review of the literature
 
@@ -339,6 +510,12 @@ The potential-outcomes notation is @rubin1974, though the idea traces to Neyman'
 1923 work on agricultural experiments. @holland1986 named the fundamental problem
 and drew the boundary the discipline still uses — "no causation without
 manipulation" — which remains contested and clarifying.
+
+LaLonde's 1986 comparison of experimental and non-experimental estimates of a
+job-training programme is the benchmark the matching literature is still judged
+against; @dehejia1999 showed propensity-score matching recovering the
+experimental answer, and @smith2005 showed how much that depends on the sample
+and the specification.
 
 @rosenbaum1983 proved the result that made observational adjustment tractable:
 if treatment is unconfounded given a covariate vector, it is unconfounded given
@@ -363,7 +540,8 @@ compact treatment of which controls help and which do damage.
    close every path from treatment to outcome, and why that list is complete.
    This is an argument, not a table.
 3. **Balance before and after**, for every covariate, with standardised
-   differences. Not the propensity model's coefficients or its fit.
+   differences — a love plot. Not the propensity model's coefficients or its
+   fit. And say that the score was settled before the outcome was looked at.
 4. **Overlap**, with the range of the score in both groups, and what you did
    about units outside common support.
 5. **The naive estimate alongside the adjusted one.** The distance between them

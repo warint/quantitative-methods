@@ -377,18 +377,27 @@ plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance
 
 ```python
 # -- Load and shape ------------------------------------------------
-matched = pd.concat([treated, control.iloc[idx.ravel()]])
+rng = np.random.default_rng(10)
+productivity = rng.normal(0, 1, 1000)
+coin = rng.integers(0, 2, 1000)          # 1 = treated, at random
+observed = np.where(coin == 1, sales_with, sales_without)   # one outcome per row
+url = "https://users.nber.org/~rdehejia/data/"
+nsw = pd.read_stata(url + "nsw_dw.dta")
+data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
 
-# -- Fit -----------------------------------------------------------
-from scipy.special import expit
-p = expit(X @ beta)               # the inverse logit
+# -- Describe ------------------------------------------------------
+data.groupby("treat")["re78"].mean()   # the naive comparison
 
 # -- Choose and validate -------------------------------------------
-nn = NearestNeighbors(n_neighbors=1).fit(ps_control.reshape(-1, 1))
-dist, idx = nn.kneighbors(ps_treated.reshape(-1, 1))   # who matched to whom
+from sklearn.neighbors import NearestNeighbors
+nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
+distance, index = nn.kneighbors(treated[["pscore"]])
+matched = control.iloc[index.ravel()]   # one control per treated unit
 
 # -- Plot ----------------------------------------------------------
-matched.boxplot(column="ps", by="treated")   # balance, before and after
+plt.hist(control["pscore"], bins=25, alpha=0.6, label="control")   # overlap
+plt.yscale("log")
+firms.boxplot(column="productivity", by="applies")   # balance at a glance
 ```
 
 ### Session 11 · Causal inference (2/2)
