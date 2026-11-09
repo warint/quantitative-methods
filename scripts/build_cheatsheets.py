@@ -202,6 +202,9 @@ SNIPPETS = {
                        "data = holzinger39.get_data()      # 301 children, nine tests, no download",
     ".corr()": 'corr = data[["x1", "x2", "x3"]].corr()   # what the model must reproduce',
     "plt.imshow": 'plt.imshow(corr, cmap="Blues", vmin=0, vmax=1); plt.colorbar()',
+    "np.random.default_rng": "rng = np.random.default_rng(9)            # the same seed, the same data\n"
+                             "attitude = rng.normal(size=400)          # a construct nobody observes\n"
+                             "att1 = attitude + rng.normal(scale=0.6, size=400)   # what the survey sees",
     "semopy.Model": "import semopy\n"
                     'model = semopy.Model("visual =~ x1 + x2 + x3")   # =~ measured by, ~ regressed on, ~~ covaries\n'
                     "model.fit(data)",
@@ -212,9 +215,8 @@ SNIPPETS = {
     "plt.barh": 'plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance',
 
     # ---- Session 10 -------------------------------------------------------
-    "np.random.default_rng": "rng = np.random.default_rng(10)\n"
-                             "productivity = rng.normal(0, 1, 1000)\n"
-                             "coin = rng.integers(0, 2, 1000)          # 1 = treated, at random",
+    "rng.integers": "rng = np.random.default_rng(10)\n"
+                    "coin = rng.integers(0, 2, 1000)          # 1 = treated, at random",
     "np.where": "observed = np.where(coin == 1, sales_with, sales_without)   # one outcome per row",
     "pd.read_stata": 'url = "https://users.nber.org/~rdehejia/data/"\n'
                      'nsw = pd.read_stata(url + "nsw_dw.dta")',

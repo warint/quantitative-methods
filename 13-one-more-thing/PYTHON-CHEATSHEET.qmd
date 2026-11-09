@@ -351,6 +351,9 @@ search.cv_results_["mean_test_score"]   # one CV score per K: plot it against K
 # -- Load and shape ------------------------------------------------
 from semopy.examples import holzinger39
 data = holzinger39.get_data()      # 301 children, nine tests, no download
+rng = np.random.default_rng(9)            # the same seed, the same data
+attitude = rng.normal(size=400)          # a construct nobody observes
+att1 = attitude + rng.normal(scale=0.6, size=400)   # what the survey sees
 
 # -- Describe ------------------------------------------------------
 corr = data[["x1", "x2", "x3"]].corr()   # what the model must reproduce
@@ -378,7 +381,6 @@ plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance
 ```python
 # -- Load and shape ------------------------------------------------
 rng = np.random.default_rng(10)
-productivity = rng.normal(0, 1, 1000)
 coin = rng.integers(0, 2, 1000)          # 1 = treated, at random
 observed = np.where(coin == 1, sales_with, sales_without)   # one outcome per row
 url = "https://users.nber.org/~rdehejia/data/"

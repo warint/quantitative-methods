@@ -185,6 +185,7 @@ TOOLKIT = {
 
     # ---- Session 09 · structural equation modelling ----------------------
     "semopy.examples": ("09", "Load and shape", "Holzinger-Swineford and Political Democracy, bundled: nothing to download"),
+    "np.random.default_rng": ("09", "Load and shape", "simulate data from a model you chose, so the true answer is known: `rng.normal`"),
     ".corr()": ("09", "Describe", "the correlations the model is trying to reproduce"),
     "plt.imshow": ("09", "Plot", "a matrix as a picture: look for your constructs before fitting"),
     "semopy.Model": ("09", "Fit", "from a model description: `=~` measured by, `~` regressed on, `~~` covaries"),
@@ -193,7 +194,7 @@ TOOLKIT = {
     "plt.barh": ("09", "Plot", "one bar per indicator: which loadings are weak"),
 
     # ---- Session 10 · causal foundations ---------------------------------
-    "np.random.default_rng": ("10", "Load and shape", "simulate data: `rng.normal`, `rng.integers` for a coin flip"),
+    "rng.integers": ("10", "Load and shape", "a coin flip per row: `rng.integers(0, 2, n)`, 1 = treated"),
     "np.where": ("10", "Load and shape", "pick one of two columns row by row: the outcome you observe"),
     "pd.read_stata": ("10", "Load and shape", "a Stata .dta file, straight from a URL"),
     "pd.concat": ("10", "Load and shape", "stack treated units and candidate controls into one table"),
