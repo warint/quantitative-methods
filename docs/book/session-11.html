@@ -332,8 +332,8 @@ window.Quarto = {
   <li><a href="#pre-trends-what-this-data-cannot-tell-you" id="toc-pre-trends-what-this-data-cannot-tell-you" class="nav-link" data-scroll-target="#pre-trends-what-this-data-cannot-tell-you"><span class="header-section-number">11.6.5</span> Pre-trends: what this data cannot tell you</a></li>
   <li><a href="#how-large-a-violation-would-it-take" id="toc-how-large-a-violation-would-it-take" class="nav-link" data-scroll-target="#how-large-a-violation-would-it-take"><span class="header-section-number">11.6.6</span> How large a violation would it take?</a></li>
   </ul></li>
-  <li><a href="#matching-or-difference-in-differences" id="toc-matching-or-difference-in-differences" class="nav-link" data-scroll-target="#matching-or-difference-in-differences"><span class="header-section-number">11.7</span> Matching or difference-in-differences?</a></li>
-  <li><a href="#when-neither-design-works-an-instrument" id="toc-when-neither-design-works-an-instrument" class="nav-link" data-scroll-target="#when-neither-design-works-an-instrument"><span class="header-section-number">11.8</span> When neither design works: an instrument</a></li>
+  <li><a href="#example-4-does-exporting-raise-productivity" id="toc-example-4-does-exporting-raise-productivity" class="nav-link" data-scroll-target="#example-4-does-exporting-raise-productivity"><span class="header-section-number">11.7</span> Example 4 · Does exporting raise productivity?</a></li>
+  <li><a href="#matching-difference-in-differences-or-an-instrument" id="toc-matching-difference-in-differences-or-an-instrument" class="nav-link" data-scroll-target="#matching-difference-in-differences-or-an-instrument"><span class="header-section-number">11.8</span> Matching, difference-in-differences or an instrument?</a></li>
   <li><a href="#what-difference-in-differences-cannot-fix" id="toc-what-difference-in-differences-cannot-fix" class="nav-link" data-scroll-target="#what-difference-in-differences-cannot-fix"><span class="header-section-number">11.9</span> What difference-in-differences cannot fix</a></li>
   <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">11.10</span> A short review of the literature</a></li>
   <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">11.11</span> What to report</a></li>
@@ -367,7 +367,7 @@ window.Quarto = {
 <p>Chapter 10 recovered a causal effect by assuming that the variables driving treatment were all observed, and then conditioning on them. That assumption is untestable and, in most settings, false — countries do not adopt policies for reasons that are fully captured by three indicators.</p>
 <p>This chapter takes the opposite route. Rather than measuring the confounders, it uses <em>timing</em> to remove them: if a country’s unobserved characteristics are stable over a short window, then comparing that country to itself before and after differences them away. The remaining problem — that things change over time for everyone — is handled by a second comparison, against units that did not adopt.</p>
 <p>Two differences, hence the name.</p>
-<p>The chapter works through three examples, each adding one idea. A simulated affordable-housing policy observed in two periods, where the two differences can be seen doing their work against a known answer. The same city over six years, in two versions — one where the assumption holds and one where it fails — to show what an event study can and cannot reveal. And the course’s own data on national AI strategies, adopted by different countries in different years, where the modern estimators earn their place and the assumption cannot be examined at all.</p>
+<p>The chapter works through four examples, each adding one idea. A simulated affordable-housing policy observed in two periods, where the two differences can be seen doing their work against a known answer. The same city over six years, in two versions — one where the assumption holds and one where it fails — to show what an event study can and cannot reveal. And the course’s own data on national AI strategies, adopted by different countries in different years, where the modern estimators earn their place and the assumption cannot be examined at all. And simulated exporting firms, where neither matching nor difference-in-differences can work and a third design, an instrument, can — until its key condition fails.</p>
 <div class="plate">
 <p><img src="images/session-11-snow.jpg" class="img-fluid" alt="John Snow** · **1813–1858."></p>
 <p><strong>John Snow</strong> · <strong>1813–1858</strong></p>
@@ -822,54 +822,9 @@ Figure&nbsp;11.1: Event study for the 2022 cohort against the never-treated. Eve
 <p><strong>Example 3 in three sentences.</strong> The adoption table decides what can be estimated before any regression is run: one cohort has no pre-period and another is a single country. Two-way fixed effects gives 2.81 and the staggered-robust estimator 2.20 with a standard error of 0.78, covering the truth. Parallel trends cannot be examined here, and the sensitivity analysis says how little violation the result can absorb.</p>
 </section>
 </section>
-<section id="matching-or-difference-in-differences" class="level2" data-number="11.7">
-<h2 data-number="11.7" class="anchored" data-anchor-id="matching-or-difference-in-differences"><span class="header-section-number">11.7</span> Matching or difference-in-differences?</h2>
-<p>The two designs of chapters 10 and 11 answer different worries, and both rest on an assumption the data cannot test.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Matching (chapter 10)</th>
-<th>Difference-in-differences</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Removes</strong></td>
-<td>differences in what was measured</td>
-<td>everything constant about a unit, measured or not</td>
-</tr>
-<tr class="even">
-<td><strong>Assumes</strong></td>
-<td>conditional independence: no unmeasured confounder</td>
-<td>parallel trends: no change that hits only the treated</td>
-</tr>
-<tr class="odd">
-<td><strong>Needs</strong></td>
-<td>rich pre-treatment covariates, overlap</td>
-<td>observations before and after, on treated and controls</td>
-</tr>
-<tr class="even">
-<td><strong>Checkable part</strong></td>
-<td>balance, overlap</td>
-<td>pre-trends, when there are several pre-periods</td>
-</tr>
-<tr class="odd">
-<td><strong>Fails when</strong></td>
-<td>an unmeasured trait drives selection</td>
-<td>the treated were already on a different path</td>
-</tr>
-</tbody>
-</table>
-<p>Matching is the tool when the groups differ in ways that were measured; difference-in-differences when they differ in ways that were not, but that do not change over time. When treatment is driven by something both unmeasured and changing, neither applies.</p>
-</section>
-<section id="when-neither-design-works-an-instrument" class="level2" data-number="11.8">
-<h2 data-number="11.8" class="anchored" data-anchor-id="when-neither-design-works-an-instrument"><span class="header-section-number">11.8</span> When neither design works: an instrument</h2>
+<section id="example-4-does-exporting-raise-productivity" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="example-4-does-exporting-raise-productivity"><span class="header-section-number">11.7</span> Example 4 · Does exporting raise productivity?</h2>
+<p>Exporters are more productive than non-exporters in almost every economy where the comparison has been made, and the question that follows is the one <span class="citation" data-cites="bernard1999">Bernard and Jensen (<a href="#ref-bernard1999" role="doc-biblioref">1999</a>)</span> posed: is exporting the cause of the gap, its effect, or both? Firms may learn from foreign buyers and competitors; or the better firms may be the ones that export. The selection runs through something rarely measured well — the quality of management — and in a single cross-section there is no before and after to difference. Matching cannot see the confounder and difference-in- differences has nothing to difference. A third design is needed.</p>
 <p>The remaining route is a variable that moves treatment from outside the system: an <strong>instrumental variable</strong> <span class="math inline">\(Z\)</span>. It identifies an effect when it satisfies three conditions <span class="citation" data-cites="angrist1996">(<a href="#ref-angrist1996" role="doc-biblioref">Angrist, Imbens, and Rubin 1996</a>)</span>.</p>
 <div class="definition">
 <p><span class="term"><strong>Relevance</strong></span> — <span class="math inline">\(Z\)</span> actually moves the treatment. This is the first stage, and it is the only one of the three conditions the data can check.</p>
@@ -880,7 +835,118 @@ Figure&nbsp;11.1: Event study for the 2022 cohort against the never-treated. Eve
 <div class="definition">
 <p><span class="term"><strong>Exclusion</strong></span> — <span class="math inline">\(Z\)</span> affects the outcome <em>only through</em> the treatment.</p>
 </div>
-<p>The estimate is then the effect of <span class="math inline">\(Z\)</span> on the outcome divided by its effect on the treatment, and it applies to the units whose treatment the instrument actually moved — the <em>compliers</em> — not to everyone. Good instruments are rare because the two conditions that carry the identification are arguments, not tests. Lotteries, distances, rainfall and quarter of birth have all been used, and for each a plausible path to the outcome that bypasses the treatment has been proposed. A strong first stage with a doubtful exclusion is not an instrument.</p>
+<p>Here the candidate is distance to the nearest port. Firms far from a port export less, because shipping costs more; where a firm sits was settled by history, not by its managers; and — the claim that carries everything — distance matters for productivity only by changing who exports. The data are simulated, 2,000 firms, so the truth is known: exporting adds 5. In version A all three conditions hold. In version B remote firms also pay more for their inputs, so distance lowers productivity directly and the exclusion fails.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-iv-diagram.png" class="img-fluid figure-img" alt="Distance to port → exports → productivity, with unobserved management affecting both; in B a red arrow from distance to productivity."></p>
+<figcaption>The instrument. Distance moves exporting; management, never observed, drives both exporting and productivity. In B, distance also reaches productivity directly.</figcaption>
+</figure>
+</div>
+<p>If distance touches productivity only through exporting, its effect on productivity (the <strong>reduced form</strong>) must be its effect on exporting (the <strong>first stage</strong>) multiplied by the effect of exporting. So the effect is a ratio,</p>
+<p><span class="math display">\[
+\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}}
+= \frac{\widehat{\operatorname{Cov}}(Y, Z)}{\widehat{\operatorname{Cov}}(D, Z)} ,
+\]</span></p>
+<p>and two-stage least squares computes the same number with a correct standard error.</p>
+<div id="check-iv" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Run it: naive, the two stages by hand, and two-stage least squares</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.sandbox.regression.gmm <span class="im">import</span> IV2SLS</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> version, direct <span class="kw">in</span> [(<span class="st">"A"</span>, <span class="fl">0.0</span>), (<span class="st">"B"</span>, <span class="op">-</span><span class="fl">0.02</span>)]:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(<span class="dv">13</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    n_firms <span class="op">=</span> <span class="dv">2000</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    management <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n_firms)                     <span class="co"># never in the data</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    distance <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">300</span>, n_firms)                    <span class="co"># km to the nearest port</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    exports <span class="op">=</span> (<span class="fl">0.8</span> <span class="op">*</span> management <span class="op">-</span> <span class="fl">0.01</span> <span class="op">*</span> distance <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n_firms) <span class="op">&gt;</span> <span class="op">-</span><span class="fl">1.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    productivity <span class="op">=</span> (<span class="dv">100</span> <span class="op">+</span> <span class="dv">5</span> <span class="op">*</span> exports <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> management <span class="op">+</span> direct <span class="op">*</span> distance</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">5</span>, n_firms))</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    firms <span class="op">=</span> pd.DataFrame({<span class="st">"exports"</span>: exports, <span class="st">"distance"</span>: distance, <span class="st">"productivity"</span>: productivity})</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    gap <span class="op">=</span> firms.groupby(<span class="st">"exports"</span>)[<span class="st">"productivity"</span>].mean()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    first <span class="op">=</span> smf.ols(<span class="st">"exports ~ distance"</span>, data<span class="op">=</span>firms).fit()</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    reduced <span class="op">=</span> smf.ols(<span class="st">"productivity ~ distance"</span>, data<span class="op">=</span>firms).fit()</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    iv <span class="op">=</span> IV2SLS(firms[<span class="st">"productivity"</span>], sm.add_constant(firms[[<span class="st">"exports"</span>]]),</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>                sm.add_constant(firms[[<span class="st">"distance"</span>]])).fit()</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"version </span><span class="sc">{</span>version<span class="sc">}</span><span class="ss">: naive </span><span class="sc">{</span>gap[<span class="dv">1</span>] <span class="op">-</span> gap[<span class="dv">0</span>]<span class="sc">:5.2f}</span><span class="ss">   "</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"first stage </span><span class="sc">{</span>first<span class="sc">.</span>params[<span class="st">'distance'</span>]<span class="sc">:.4f}</span><span class="ss"> (F </span><span class="sc">{</span>first<span class="sc">.</span>tvalues[<span class="st">'distance'</span>] <span class="op">**</span> <span class="dv">2</span><span class="sc">:.0f}</span><span class="ss">)   "</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"reduced form </span><span class="sc">{</span>reduced<span class="sc">.</span>params[<span class="st">'distance'</span>]<span class="sc">:.4f}</span><span class="ss">   "</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"IV </span><span class="sc">{</span>iv<span class="sc">.</span>params[<span class="st">'exports'</span>]<span class="sc">:.2f}</span><span class="ss"> (SE </span><span class="sc">{</span>iv<span class="sc">.</span>bse[<span class="st">'exports'</span>]<span class="sc">:.2f}</span><span class="ss">)   truth 5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>version A: naive  9.96   first stage -0.0027 (F 543)   reduced form -0.0124   IV 4.62 (SE 0.76)   truth 5
+version B: naive 11.56   first stage -0.0027 (F 543)   reduced form -0.0324   IV 12.09 (SE 0.70)   truth 5</code></pre>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-iv-two-stages.png" class="img-fluid figure-img" alt="Binned scatter plots: exporting share and productivity both falling with distance to port."></p>
+<figcaption>The two regressions behind the ratio, in version A. Each extra 100 km cuts the share of firms exporting by 27 points and productivity by 1.24; the ratio is 4.6.</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-iv-estimates.png" class="img-fluid figure-img" alt="Version A: naive 10.0, IV 4.6 covering 5; version B: naive 11.6, IV 12.1."></p>
+<figcaption>Naive and instrumental-variable estimates in both versions, against the truth.</figcaption>
+</figure>
+</div>
+<p>In version A the naive comparison says 10, double the truth, because exporters are about 0.8 standard deviations better managed; the instrument gives 4.6 with a standard error of 0.76, covering the truth. In version B the first stage is exactly as strong — the F statistic of 543 is far above any conventional bar — and the estimate is 12.1, <em>further</em> from the truth than the naive comparison. Nothing in the output distinguishes the two versions, because the condition that failed is the one the data cannot test.</p>
+<p>Two practical warnings. Running the second stage by hand — regressing the outcome on the <em>fitted</em> treatment with <code>smf.ols</code> — gives the right coefficient and the wrong standard error, since it ignores that the fitted values were estimated; use a two-stage routine. And what IV identifies is the effect on the units whose treatment the instrument actually moved — the <em>compliers</em>, here the firms whose export decision depends on their distance to a port — not on every firm. A weak first stage makes everything worse: the estimate becomes noisy and biased toward the naive one, which is why the F statistic is reported.</p>
+<p><strong>Example 4 in three sentences.</strong> When the confounder is unmeasured and there is no before and after, a variable that moves treatment from outside can still identify the effect, as the ratio of the reduced form to the first stage. With a valid instrument it recovers the truth where the naive gap was double. Good instruments are rare because the exclusion restriction is an argument, and when it fails the estimate can be worse than doing nothing.</p>
+</section>
+<section id="matching-difference-in-differences-or-an-instrument" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="matching-difference-in-differences-or-an-instrument"><span class="header-section-number">11.8</span> Matching, difference-in-differences or an instrument?</h2>
+<p>The three designs of chapters 10 and 11 answer different worries, and each rests on an assumption the data cannot test.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Matching (chapter 10)</th>
+<th>Difference-in-differences</th>
+<th>Instrumental variable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Uses</strong></td>
+<td>comparisons on what was measured</td>
+<td>changes within units over time</td>
+<td>only the variation in treatment the instrument causes</td>
+</tr>
+<tr class="even">
+<td><strong>Assumes</strong></td>
+<td>conditional independence</td>
+<td>parallel trends</td>
+<td>relevance, independence, exclusion</td>
+</tr>
+<tr class="odd">
+<td><strong>Needs</strong></td>
+<td>rich pre-treatment covariates, overlap</td>
+<td>observations before and after</td>
+<td>a variable that moves treatment from outside</td>
+</tr>
+<tr class="even">
+<td><strong>Checkable part</strong></td>
+<td>balance, overlap</td>
+<td>pre-trends, with several pre-periods</td>
+<td>the first stage</td>
+</tr>
+<tr class="odd">
+<td><strong>Fails when</strong></td>
+<td>an unmeasured trait drives selection</td>
+<td>the treated were already on a different path</td>
+<td>the instrument has its own path to the outcome</td>
+</tr>
+</tbody>
+</table>
+<p>Choose the design whose assumption can be argued best in the setting at hand, and say in words which assumption that is.</p>
 </section>
 <section id="what-difference-in-differences-cannot-fix" class="level2" data-number="11.9">
 <h2 data-number="11.9" class="anchored" data-anchor-id="what-difference-in-differences-cannot-fix"><span class="header-section-number">11.9</span> What difference-in-differences cannot fix</h2>
@@ -917,6 +983,9 @@ Figure&nbsp;11.1: Event study for the 2022 cohort against the never-treated. Eve
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-angrist1996" class="csl-entry" role="listitem">
 Angrist, Joshua D., Guido W. Imbens, and Donald B. Rubin. 1996. <span>“<span>Identification</span> of <span>Causal</span> <span>Effects</span> <span>Using</span> <span>Instrumental</span> <span>Variables</span>.”</span> <em><span>Journal</span> of the <span>American</span> <span>Statistical</span> <span>Association</span></em> 91 (434): 444–55. <a href="https://doi.org/10.1080/01621459.1996.10476902">https://doi.org/10.1080/01621459.1996.10476902</a>.
+</div>
+<div id="ref-bernard1999" class="csl-entry" role="listitem">
+Bernard, Andrew B., and J. Bradford Jensen. 1999. <span>“<span>Exceptional</span> Exporter Performance: Cause, Effect, or Both?”</span> <em><span>Journal</span> of <span>International</span> <span>Economics</span></em> 47 (1): 1–25. <a href="https://doi.org/10.1016/S0022-1996(98)00027-0">https://doi.org/10.1016/S0022-1996(98)00027-0</a>.
 </div>
 <div id="ref-callaway2021" class="csl-entry" role="listitem">
 Callaway, Brantly, and Pedro H. C. Sant’Anna. 2021. <span>“<span>Difference</span>-in-<span>Differences</span> with Multiple Time Periods.”</span> <em><span>Journal</span> of <span>Econometrics</span></em> 225 (2): 200–230. <a href="https://doi.org/10.1016/j.jeconom.2020.12.001">https://doi.org/10.1016/j.jeconom.2020.12.001</a>.

@@ -35,12 +35,14 @@ format:
     footer: "MATH60033A · Session 11 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- The deck teaches through three examples first, with no code on screen: a
+<!-- The deck teaches through four examples first, with no code on screen: a
      simulated affordable-housing policy in two periods (the two differences),
      the same city over six years (parallel trends, and an event study that
      catches its failure), and the course's own data on national AI strategies
      adopted in different years (TWFE against Callaway-Sant'Anna, and a
-     Rambachan-Roth sensitivity analysis). The code comes last, in the in-class
+     Rambachan-Roth sensitivity analysis), and simulated exporters where neither
+     design applies and an instrument does, then fails its exclusion. The code
+     comes last, in the in-class
      part, where every cell is live: it executes at render time, so the output on
      the slides is the output the students' own machines produce. Examples 1 and
      2 simulate their data in the cell; Example 3 loads it with qmib.load, which
@@ -71,8 +73,9 @@ pd.set_option("display.max_columns", 10)
 2. Example 1 · Did affordable housing lower nearby prices?
 3. Example 2 · Were the trends parallel?
 4. Example 3 · Do national AI strategies raise firms' AI use?
-5. Wrapping up · What the design cannot fix
-6. In class · The code behind the three examples
+5. Example 4 · Does exporting raise productivity?
+6. Wrapping up · What the design cannot fix
+7. In class · The code behind the four examples
 
 ## What session 11 is for {.scrollable}
 ::::: columns
@@ -152,9 +155,10 @@ among units that were **not** treated. Two differences, hence the name.
 :::
 
 ::: {.check}
-**Three examples:** a housing policy in two periods (the idea), the same city over six years (the
-assumption, and how it fails), and national AI strategies adopted in different years (the method, on the
-course's own data).
+**Four examples:** a housing policy in two periods (the idea), the same city over six years (the
+assumption, and how it fails), national AI strategies adopted in different years (the method, on the
+course's own data), and exporting firms, where neither matching nor DiD can work and an **instrument**
+does, until its key condition fails.
 :::
 
 ## The two differences {.scrollable}
@@ -215,6 +219,8 @@ $\beta_0 + \beta_1 + \beta_2$; what they actually reached is that plus $\beta_3$
 | **Staggered adoption** · **cohort** | units treated in different years; a cohort is the units first treated in the same year | the AI strategies, 2021–2023 |
 | **TWFE** · two-way fixed effects | a regression with a dummy per unit and per year, plus the treatment | Example 3 |
 | **ATT** · average treatment effect on the treated | the effect on those who got the policy (session 10) | what DiD estimates |
+| **Instrument** · IV, instrumental variable | a variable that moves the treatment and touches the outcome **only through it** | distance to port, Example 4 |
+| **First stage** / **reduced form** | the instrument's effect on the treatment / on the outcome; IV = their ratio | Example 4 |
 
 ## The assumption, stated exactly {.scrollable}
 
@@ -488,22 +494,133 @@ point**, and it should be: it rests on one country's single year.
 the adoption structure, a staggered-robust estimate beside TWFE, and how much violation the result survives.
 :::
 
-## Wrapping up · What the design cannot fix {.center}
+## Example 4 · Does exporting raise productivity? {.center}
 
-## Matching or difference-in-differences? {.scrollable}
+## The case: learning by exporting {.scrollable}
 
-| | Matching (session 10) | Difference-in-differences |
-|---|---|---|
-| **Removes** | differences in what you **measured** | everything **constant** about a unit, measured or not |
-| **Assumes** | conditional independence: no unmeasured confounder | parallel trends: no **change** that hits only the treated |
-| **Needs** | rich pre-treatment covariates, overlap | data **before and after**, on treated and controls |
-| **Checkable part** | balance, overlap | pre-trends, if there are several pre-periods |
-| **Fails when** | an unmeasured trait drives selection (session 10, Example 3B) | the treated were already on a different path (Example 2B) |
+Exporters are more productive than non-exporters, everywhere it has been measured. Does **exporting make
+firms more productive** (they learn from foreign buyers and competitors), or do the **better firms export**?
+
+| Column | Meaning |
+|---|---|
+| `exports` | 1 = the firm exports |
+| `productivity` | a productivity index |
+| `distance` | km from the firm to the nearest port |
+| `management` | the quality of management: **not in the data** |
+
+::: {.step .question}
+**The question:** how much does exporting itself raise a firm's productivity, when the firms that export
+are the better-managed ones?
+:::
+
+::: {.muted}
+**Simulated**, 2,000 firms, so we know the truth: exporting adds **+5**. Well-managed firms export more *and*
+are more productive anyway.
+:::
+
+## Why neither matching nor DiD can help {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+::: {.warn}
+**Matching** (session 10) needs the confounder in the data. Management is not: exporters are 0.8 standard
+deviations better managed, and no score built from what we have can see it.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**DiD** needs a before and an after. This is one year of data: no firm is seen switching, so there is no
+first difference to take.
+:::
+:::
+:::
 
 ::: {.check}
-**They answer different worries.** Matching is for "the groups differ in ways I measured"; DiD for "the
-groups differ in ways I cannot measure, but that do not change over time". Both rest on an assumption the
-data cannot test.
+**The naive comparison** of exporters and non-exporters says **+10.0**: double the truth. Half of it is
+management.
+:::
+
+## The instrument: distance to the nearest port {.scrollable}
+
+![](economist-assets/iv-diagram.png){.wide fig-alt="Distance to port causes exports, which cause productivity; management, unobserved, causes both. In B, distance also affects productivity directly."}
+
+| An instrument must be | Here | Testable? |
+|---|---|---|
+| **relevant**: it moves the treatment | firms far from a port export less: shipping costs more | **yes**: the first stage |
+| **independent**: as good as random | where a firm sits was decided by history, not by its managers | no: an argument |
+| **excludable**: it affects the outcome **only through** the treatment | distance matters for productivity only by changing who exports | no: an argument |
+
+## Two regressions and a ratio {.scrollable}
+
+![](economist-assets/iv-two-stages.png){fig-alt="Left: the share exporting falls by 27 points per 100 km. Right: average productivity falls by 1.24 per 100 km."}
+
+::: columns
+::: {.column width="50%"}
+**First stage:** each extra 100 km cuts the share of firms exporting by **27 points** (F = 543: strong).
+
+**Reduced form:** each extra 100 km cuts productivity by **1.24**.
+:::
+::: {.column width="50%"}
+::: {.check}
+**If distance touches productivity only through exporting**, the 1.24 is the effect of 27 points of
+exporting, so
+$$
+\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}} = \frac{-0.0124}{-0.0027} = 4.6 .
+$$
+Two-stage least squares gives the same number, with a standard error: **4.6 (0.76)**.
+:::
+:::
+:::
+
+## The results, against the truth, and when exclusion fails {.scrollable}
+
+![](economist-assets/iv-estimates.png){.mid fig-alt="Version A: naive 10.0, IV 4.6 with interval covering 5. Version B: naive 11.6, IV 12.1."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Version A:** the instrument is valid, and IV gives **4.6**, its interval covering the truth of 5. The
+naive comparison said 10.0.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Version B:** remote firms also pay more for their inputs, so distance lowers productivity **directly**.
+The first stage is just as strong (F = 543), and IV says **12.1**: worse than the naive comparison. Nothing
+in the output warns you.
+:::
+:::
+:::
+
+## Example 4 · Plain summary {.scrollable}
+
+- When the confounder is not measured and there is no before and after, a variable that moves the
+  treatment **from outside** can still identify the effect.
+- IV is the reduced form divided by the first stage: **4.6** against a truth of 5, where the naive gap said 10.
+- The only checkable condition is the first stage. **Exclusion is an argument**, and when it fails, IV can be
+  further from the truth than the naive comparison.
+
+::: {.step}
+**What this example teaches:** instruments are rare because the conditions that matter most cannot be tested.
+Lotteries, distances, rainfall and birth dates have all been used, and each has been argued to fail the
+exclusion. Optional practice: [an IV example (R, RPubs)](https://rpubs.com/Sternonyos/913599).
+:::
+
+## Wrapping up · What the design cannot fix {.center}
+
+## Matching, DiD or an instrument? {.scrollable}
+
+| | Matching (session 10) | Difference-in-differences | Instrumental variable |
+|---|---|---|---|
+| **Removes** | differences in what you **measured** | everything **constant** about a unit | it uses **only** the variation in treatment the instrument causes |
+| **Assumes** | no unmeasured confounder | parallel trends | relevance, independence, **exclusion** |
+| **Needs** | rich covariates, overlap | data before and after | a variable that moves treatment from outside |
+| **Checkable part** | balance, overlap | pre-trends, with several pre-periods | the first stage |
+| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path (Ex. 2B) | the instrument has its own path to the outcome (Ex. 4B) |
+
+::: {.check}
+**They answer different worries**, and each rests on an assumption the data cannot test. Choose the design
+whose assumption you can **argue** best for your setting, and say which assumption that is.
 :::
 
 ## What difference-in-differences cannot fix {.scrollable}
@@ -517,27 +634,6 @@ data cannot test.
   estimate shrinks toward zero.
 - **Standard errors.** DiD data are panels: cluster by unit, and say how many clusters you have.
 
-## When neither design works: an instrument {.scrollable}
-
-Sometimes treatment is driven by something unmeasured **and** changing. Then you need a variable that moves
-treatment **from outside**: an **instrumental variable** (IV).
-
-| An instrument $Z$ must be | Meaning | Testable? |
-|---|---|---|
-| **relevant** | it actually moves the treatment | **yes**: the first stage |
-| **independent** | as good as randomly assigned | no: an argument |
-| **excludable** | it affects the outcome **only through** the treatment | no: an argument |
-
-::: {.warn}
-**Why good ones are rare:** relevance is the only condition the data can check; the other two carry the identification, and only an argument supports them.
-A strong first stage with a doubtful exclusion is not an instrument. Lotteries, distances and rainfall have all
-been used, and each has been argued to fail the exclusion.
-:::
-
-::: {.muted}
-Optional practice: [an IV example (R, RPubs)](https://rpubs.com/Sternonyos/913599).
-:::
-
 ## Seven steps for a DiD study {.scrollable}
 
 | Step | What you do | In Python |
@@ -550,15 +646,15 @@ Optional practice: [an IV example (R, RPubs)](https://rpubs.com/Sternonyos/91359
 | 6 | the event study: is the pre-period flat? | the DiD year by year |
 | 7 | staggered timing: a robust estimator beside TWFE; then sensitivity | `diff_diff.CallawaySantAnna`, `HonestDiD` |
 
-## In class · The code behind the three examples {.center}
+## In class · The code behind the four examples {.center}
 
 ## How this part works {.scrollable}
 
 ::: columns
 ::: {.column width="50%"}
 Every cell that follows **runs on its own**: copy it into a new file in VS Codium, run it **from the
-repository's root folder**, and you should see exactly the numbers from the lecture. Examples 1 and 2 simulate
-their data in the cell; Example 3 loads the course data with `qmib.load`.
+repository's root folder**, and you should see exactly the numbers from the lecture. Examples 1, 2 and 4
+simulate their data in the cell; Example 3 loads the course data with `qmib.load`.
 :::
 
 ::: {.column width="50%"}
@@ -746,6 +842,72 @@ far does TWFE move? (2) Why does the one-country cohort report a **smaller** sta
 nine-country one? Is it more precise?
 :::
 
+## Example 4 in Python · The two stages, by hand {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 4 · 2,000 firms; exporting adds +5; management is never observed
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+rng = np.random.default_rng(13)
+n = 2000
+management = rng.normal(0, 1, n)                     # not in the data
+distance = rng.uniform(0, 300, n)                    # km to the nearest port: the instrument
+exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n) > -1.5).astype(int)
+productivity = 100 + 5 * exports + 6 * management + rng.normal(0, 5, n)
+firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
+
+naive = firms.groupby("exports")["productivity"].mean()
+print(f"naive: exporters minus non-exporters = {naive[1] - naive[0]:.2f}   (truth 5)")
+
+first = smf.ols("exports ~ distance", data=firms).fit()          # does distance move exporting?
+reduced = smf.ols("productivity ~ distance", data=firms).fit()  # does distance move productivity?
+print(f"first stage:  {first.params['distance']:.4f} per km   F = {first.tvalues['distance'] ** 2:.0f}")
+print(f"reduced form: {reduced.params['distance']:.4f} per km")
+print(f"IV = reduced / first = {reduced.params['distance'] / first.params['distance']:.2f}")
+```
+
+## Example 4 in Python · Two-stage least squares, with a standard error {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 4 · statsmodels' IV2SLS: outcome, then [constant + treatment], then [constant + instrument]
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.sandbox.regression.gmm import IV2SLS
+
+for version, direct in [("A", 0.0), ("B", -0.02)]:   # B: distance also lowers productivity directly
+    rng = np.random.default_rng(13)
+    n = 2000
+    management = rng.normal(0, 1, n)
+    distance = rng.uniform(0, 300, n)
+    exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n) > -1.5).astype(int)
+    productivity = 100 + 5 * exports + 6 * management + direct * distance + rng.normal(0, 5, n)
+    firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
+
+    iv = IV2SLS(firms["productivity"],
+                sm.add_constant(firms[["exports"]]),
+                sm.add_constant(firms[["distance"]])).fit()
+    print(f"version {version}: IV {iv.params['exports']:.2f}  (SE {iv.bse['exports']:.2f})   truth 5")
+```
+
+::: {.warn}
+**Do not run the second stage yourself with `smf.ols`.** Regressing productivity on the *predicted*
+exports gives the right number and the **wrong standard error**: it ignores that the prediction was
+estimated. `IV2SLS` does both stages and corrects it.
+:::
+
+::: {.step}
+**Your turn.** (1) Weaken the instrument: change `- 0.01 * distance` to `- 0.001 * distance`. What happens
+to the F statistic, to the IV estimate and to its standard error? (2) In version B, is there anything in the
+output that tells you the exclusion fails?
+:::
+
 ## What to report {.scrollable}
 
 1. **The adoption structure**: units per cohort, years before and after, and which cohorts are unusable.
@@ -755,6 +917,7 @@ nine-country one? Is it more precise?
 5. **Standard errors clustered by unit**, with the number of clusters.
 6. **What else changed at the same time**, and why it is not the explanation.
 7. **How much violation the result survives**, when the pre-trend evidence is thin.
+8. **For an instrument:** the first stage and its F statistic, and the **argument** for exclusion, in words.
 
 ::: {.warn}
 **A flat pre-trend makes parallel trends plausible. It does not make it true.**

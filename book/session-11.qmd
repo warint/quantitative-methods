@@ -19,13 +19,15 @@ not adopt.
 
 Two differences, hence the name.
 
-The chapter works through three examples, each adding one idea. A simulated
+The chapter works through four examples, each adding one idea. A simulated
 affordable-housing policy observed in two periods, where the two differences can
 be seen doing their work against a known answer. The same city over six years, in
 two versions — one where the assumption holds and one where it fails — to show
 what an event study can and cannot reveal. And the course's own data on national
 AI strategies, adopted by different countries in different years, where the
 modern estimators earn their place and the assumption cannot be examined at all.
+And simulated exporting firms, where neither matching nor difference-in-differences
+can work and a third design, an instrument, can — until its key condition fails.
 
 ::: {.plate}
 ![](images/session-11-snow.jpg){fig-alt="John Snow** · **1813–1858."}
@@ -613,25 +615,16 @@ estimator 2.20 with a standard error of 0.78, covering the truth. Parallel trend
 cannot be examined here, and the sensitivity analysis says how little violation
 the result can absorb.
 
-## Matching or difference-in-differences?
+## Example 4 · Does exporting raise productivity?
 
-The two designs of chapters 10 and 11 answer different worries, and both rest on
-an assumption the data cannot test.
-
-| | Matching (chapter 10) | Difference-in-differences |
-|---|---|---|
-| **Removes** | differences in what was measured | everything constant about a unit, measured or not |
-| **Assumes** | conditional independence: no unmeasured confounder | parallel trends: no change that hits only the treated |
-| **Needs** | rich pre-treatment covariates, overlap | observations before and after, on treated and controls |
-| **Checkable part** | balance, overlap | pre-trends, when there are several pre-periods |
-| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path |
-
-Matching is the tool when the groups differ in ways that were measured;
-difference-in-differences when they differ in ways that were not, but that do not
-change over time. When treatment is driven by something both unmeasured and
-changing, neither applies.
-
-## When neither design works: an instrument
+Exporters are more productive than non-exporters in almost every economy where
+the comparison has been made, and the question that follows is the one
+@bernard1999 posed: is exporting the cause of the gap, its effect, or both? Firms
+may learn from foreign buyers and competitors; or the better firms may be the
+ones that export. The selection runs through something rarely measured well —
+the quality of management — and in a single cross-section there is no before and
+after to difference. Matching cannot see the confounder and difference-in-
+differences has nothing to difference. A third design is needed.
 
 The remaining route is a variable that moves treatment from outside the system:
 an **instrumental variable** $Z$. It identifies an effect when it satisfies three
@@ -651,13 +644,99 @@ unmeasured causes of the outcome.
 [**Exclusion**]{.term} — $Z$ affects the outcome *only through* the treatment.
 :::
 
-The estimate is then the effect of $Z$ on the outcome divided by its effect on the
-treatment, and it applies to the units whose treatment the instrument actually
-moved — the *compliers* — not to everyone. Good instruments are rare because the
-two conditions that carry the identification are arguments, not tests. Lotteries,
-distances, rainfall and quarter of birth have all been used, and for each a
-plausible path to the outcome that bypasses the treatment has been proposed. A
-strong first stage with a doubtful exclusion is not an instrument.
+Here the candidate is distance to the nearest port. Firms far from a port export
+less, because shipping costs more; where a firm sits was settled by history, not
+by its managers; and — the claim that carries everything — distance matters for
+productivity only by changing who exports. The data are simulated, 2,000 firms,
+so the truth is known: exporting adds 5. In version A all three conditions hold.
+In version B remote firms also pay more for their inputs, so distance lowers
+productivity directly and the exclusion fails.
+
+![The instrument. Distance moves exporting; management, never observed, drives both exporting and productivity. In B, distance also reaches productivity directly.](images/decks/session-11-01-lecture-economist-assets-iv-diagram.png){fig-alt="Distance to port → exports → productivity, with unobserved management affecting both; in B a red arrow from distance to productivity."}
+
+If distance touches productivity only through exporting, its effect on
+productivity (the **reduced form**) must be its effect on exporting (the **first
+stage**) multiplied by the effect of exporting. So the effect is a ratio,
+
+$$
+\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}}
+= \frac{\widehat{\operatorname{Cov}}(Y, Z)}{\widehat{\operatorname{Cov}}(D, Z)} ,
+$$
+
+and two-stage least squares computes the same number with a correct standard
+error.
+
+```{python}
+#| label: check-iv
+#| code-summary: "Run it: naive, the two stages by hand, and two-stage least squares"
+
+import statsmodels.api as sm
+from statsmodels.sandbox.regression.gmm import IV2SLS
+
+for version, direct in [("A", 0.0), ("B", -0.02)]:
+    rng = np.random.default_rng(13)
+    n_firms = 2000
+    management = rng.normal(0, 1, n_firms)                     # never in the data
+    distance = rng.uniform(0, 300, n_firms)                    # km to the nearest port
+    exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n_firms) > -1.5).astype(int)
+    productivity = (100 + 5 * exports + 6 * management + direct * distance
+                    + rng.normal(0, 5, n_firms))
+    firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
+
+    gap = firms.groupby("exports")["productivity"].mean()
+    first = smf.ols("exports ~ distance", data=firms).fit()
+    reduced = smf.ols("productivity ~ distance", data=firms).fit()
+    iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),
+                sm.add_constant(firms[["distance"]])).fit()
+    print(f"version {version}: naive {gap[1] - gap[0]:5.2f}   "
+          f"first stage {first.params['distance']:.4f} (F {first.tvalues['distance'] ** 2:.0f})   "
+          f"reduced form {reduced.params['distance']:.4f}   "
+          f"IV {iv.params['exports']:.2f} (SE {iv.bse['exports']:.2f})   truth 5")
+```
+
+![The two regressions behind the ratio, in version A. Each extra 100 km cuts the share of firms exporting by 27 points and productivity by 1.24; the ratio is 4.6.](images/decks/session-11-01-lecture-economist-assets-iv-two-stages.png){fig-alt="Binned scatter plots: exporting share and productivity both falling with distance to port."}
+
+![Naive and instrumental-variable estimates in both versions, against the truth.](images/decks/session-11-01-lecture-economist-assets-iv-estimates.png){fig-alt="Version A: naive 10.0, IV 4.6 covering 5; version B: naive 11.6, IV 12.1."}
+
+In version A the naive comparison says 10, double the truth, because exporters
+are about 0.8 standard deviations better managed; the instrument gives 4.6 with
+a standard error of 0.76, covering the truth. In version B the first stage is
+exactly as strong — the F statistic of 543 is far above any conventional bar —
+and the estimate is 12.1, *further* from the truth than the naive comparison.
+Nothing in the output distinguishes the two versions, because the condition that
+failed is the one the data cannot test.
+
+Two practical warnings. Running the second stage by hand — regressing the
+outcome on the *fitted* treatment with `smf.ols` — gives the right coefficient
+and the wrong standard error, since it ignores that the fitted values were
+estimated; use a two-stage routine. And what IV identifies is the effect on the
+units whose treatment the instrument actually moved — the *compliers*, here the
+firms whose export decision depends on their distance to a port — not on every
+firm. A weak first stage makes everything worse: the estimate becomes noisy and
+biased toward the naive one, which is why the F statistic is reported.
+
+**Example 4 in three sentences.** When the confounder is unmeasured and there is
+no before and after, a variable that moves treatment from outside can still
+identify the effect, as the ratio of the reduced form to the first stage. With a
+valid instrument it recovers the truth where the naive gap was double. Good
+instruments are rare because the exclusion restriction is an argument, and when
+it fails the estimate can be worse than doing nothing.
+
+## Matching, difference-in-differences or an instrument?
+
+The three designs of chapters 10 and 11 answer different worries, and each rests
+on an assumption the data cannot test.
+
+| | Matching (chapter 10) | Difference-in-differences | Instrumental variable |
+|---|---|---|---|
+| **Uses** | comparisons on what was measured | changes within units over time | only the variation in treatment the instrument causes |
+| **Assumes** | conditional independence | parallel trends | relevance, independence, exclusion |
+| **Needs** | rich pre-treatment covariates, overlap | observations before and after | a variable that moves treatment from outside |
+| **Checkable part** | balance, overlap | pre-trends, with several pre-periods | the first stage |
+| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path | the instrument has its own path to the outcome |
+
+Choose the design whose assumption can be argued best in the setting at hand, and
+say in words which assumption that is.
 
 ## What difference-in-differences cannot fix
 

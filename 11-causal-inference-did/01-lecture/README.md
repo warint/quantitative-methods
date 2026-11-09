@@ -28,7 +28,7 @@ call — `qmib.load("core")`.
 
 ## What the lecture covers
 
-The lecture is built on **three examples**, with no code on screen while they are taught; the code
+The lecture is built on **four examples**, with no code on screen while they are taught; the code
 for all three comes at the end, for you to run in class.
 
 1. **The language of difference-in-differences (DiD)** — the two differences, the interaction
@@ -40,8 +40,11 @@ for all three comes at the end, for you to run in class.
 4. **Example 3 · Do national AI strategies raise firms' AI use?** — the course data, adopted in different
    years: the adoption table, two-way fixed effects against Callaway–Sant'Anna, and how much violation of
    parallel trends the result survives
-5. **Wrapping up** — matching or DiD, what DiD cannot fix, and instrumental variables when neither works
-6. **In class · The code behind the three examples** — every cell, and a *Your turn* per example
+5. **Example 4 · Does exporting raise productivity?** — 2,000 simulated firms, management unobserved:
+   distance to the nearest port as an instrument, the first stage and the reduced form, two-stage least
+   squares against the truth, and what happens when the exclusion fails
+6. **Wrapping up** — matching, DiD or an instrument; what DiD cannot fix; the seven steps
+7. **In class · The code behind the four examples** — every cell, and a *Your turn* per example
 
 ---
 
@@ -68,7 +71,7 @@ wide = qmib.load("angle_c_country")    # Example 3: AI use and AI strategies, by
 ```
 
 Run it once before class from the repository root; it caches locally and then works offline.
-Examples 1 and 2 are simulated inside their cells.
+Examples 1, 2 and 4 are simulated inside their cells.
 
 ---
 

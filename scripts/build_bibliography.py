@@ -79,6 +79,13 @@ def escape(text):
                   r"{\1}", text)
 
 
+# Names a publisher registered wrongly at Crossref, corrected by hand. Keyed by
+# what Crossref returns as (family, given); the value is what the person is called.
+NAME_FIXES = {
+    ("Bradford Jensen", "J."): ("Jensen", "J. Bradford"),     # Bernard & Jensen (1999), JIE
+}
+
+
 def entry(doi, msg, key):
     kind = TYPES.get(msg.get("type", ""), "misc")
     fields = {}
@@ -92,7 +99,8 @@ def entry(doi, msg, key):
             # MacKinnon and van Es survive untouched.
             if family.isupper() and len(family) > 1:
                 family = family.title()
-            authors.append(f"{family}, {a.get('given', '')}".strip().rstrip(","))
+            family, given = NAME_FIXES.get((family, a.get("given", "")), (family, a.get("given", "")))
+            authors.append(f"{family}, {given}".strip().rstrip(","))
         elif a.get("name"):
             authors.append(a["name"])
     if authors:

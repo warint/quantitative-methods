@@ -14,6 +14,9 @@ Writes, next to this file:
     housing-event-study.png Example 2: the event study, versions A and B
     ai-estimates.png       Example 3: TWFE, Callaway-Sant'Anna and the cohorts, against the truth
     ai-honest.png          Example 3: how large a violation of parallel trends the result survives
+    iv-diagram.png         Example 4: the instrument, and the path that breaks it in version B
+    iv-two-stages.png      Example 4: the first stage and the reduced form, by distance to port
+    iv-estimates.png       Example 4: naive and IV estimates, versions A and B, against the truth
 """
 
 import warnings
@@ -24,6 +27,8 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from statsmodels.sandbox.regression.gmm import IV2SLS
 
 warnings.filterwarnings("ignore")
 OUT = Path(__file__).resolve().parent
@@ -253,6 +258,119 @@ def ai_figures():
     return twfe.params[D], cs.overall_att, cs.overall_se, groups, list(zip(Ms, lo, hi))
 
 
+# --- Example 4: an instrument (same seed, same lines as the slide) ------------------
+def simulate_exporters(direct):
+    """2,000 firms; exporting raises productivity by 5; management is never observed;
+    distance to the nearest port moves exporting. direct != 0 lets distance also
+    lower productivity on its own, which breaks the exclusion restriction."""
+    rng = np.random.default_rng(13)
+    n = 2000
+    management = rng.normal(0, 1, n)                     # never in the data
+    distance = rng.uniform(0, 300, n)                    # km to the nearest port
+    exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n) > -1.5).astype(int)
+    productivity = (100 + 5 * exports + 6 * management + direct * distance
+                    + rng.normal(0, 5, n))
+    return pd.DataFrame({"exports": exports, "distance": distance,
+                         "productivity": productivity, "management": management})
+
+
+def iv_fit(firms):
+    naive = (firms.loc[firms["exports"] == 1, "productivity"].mean()
+             - firms.loc[firms["exports"] == 0, "productivity"].mean())
+    first = smf.ols("exports ~ distance", data=firms).fit()
+    reduced = smf.ols("productivity ~ distance", data=firms).fit()
+    iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),
+                sm.add_constant(firms[["distance"]])).fit()
+    return {"naive": naive, "first": first.params["distance"],
+            "F": first.tvalues["distance"] ** 2, "reduced": reduced.params["distance"],
+            "iv": iv.params["exports"], "se": iv.bse["exports"]}
+
+
+def _node(ax, x, y, text, fc="white", ec=INK, dashed=False, w=2.6, h=0.9):
+    p = FancyBboxPatch((x - w / 2, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.12",
+                       fc=fc, ec=ec, lw=1.6, ls="--" if dashed else "-", zorder=3)
+    ax.add_patch(p)
+    ax.text(x, y, text, ha="center", va="center", fontsize=11.5, fontweight="bold", zorder=4)
+    return p
+
+
+def _arrow(ax, a, b, color=INK, rad=0.0, lw=2, ls="-"):
+    ax.add_patch(FancyArrowPatch(_c(a), _c(b), patchA=a, patchB=b,
+                                 arrowstyle="-|>", mutation_scale=16, lw=lw, color=color,
+                                 connectionstyle=f"arc3,rad={rad}", linestyle=ls, zorder=2))
+
+
+def _c(p):
+    return (p.get_x() + p.get_width() / 2, p.get_y() + p.get_height() / 2)
+
+
+def iv_diagram():
+    fig, axes = plt.subplots(1, 2, figsize=(12, 3.6))
+    for ax, title, broken in ((axes[0], "A · a valid instrument", False),
+                              (axes[1], "B · the exclusion fails", True)):
+        ax.set_xlim(0, 12); ax.set_ylim(0, 5); ax.axis("off")
+        z = _node(ax, 1.6, 1.4, "distance\nto port", fc=PALE_TEAL, ec=TEAL)
+        d = _node(ax, 6.0, 1.4, "exports", fc=PALE_BLUE, ec=BLUE)
+        y = _node(ax, 10.4, 1.4, "productivity", fc="white")
+        u = _node(ax, 8.2, 4.0, "management\n(not in the data)", fc=BG, ec=MUTED, dashed=True,
+                  w=3.6, h=1.1)
+        _arrow(ax, z, d, color=TEAL)
+        _arrow(ax, d, y, color=BLUE, lw=2.6)
+        _arrow(ax, u, d, color=MUTED, ls="--")
+        _arrow(ax, u, y, color=MUTED, ls="--")
+        if broken:
+            _arrow(ax, z, y, color=RED, rad=0.32, lw=2.4)
+            ax.text(6.0, -0.15, "remote firms also pay more for inputs", color=RED,
+                    ha="center", fontsize=10.5, fontweight="bold")
+        ax.set_title(title, loc="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "iv-diagram.png")
+
+
+def iv_two_stages(firms, r):
+    bins = pd.cut(firms["distance"], np.arange(0, 301, 30))
+    g = firms.groupby(bins, observed=True).agg(d=("distance", "mean"), exp=("exports", "mean"),
+                                               prod=("productivity", "mean"))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
+    for ax, col, raw, ylab, color, title in (
+            (axes[0], "exp", "exports", "share of firms exporting", TEAL,
+             f"First stage: {r['first'] * 100 * 100:+.0f} points of exporting per 100 km"),
+            (axes[1], "prod", "productivity", "average productivity", BLUE,
+             f"Reduced form: {r['reduced'] * 100:+.2f} productivity per 100 km")):
+        ax.scatter(g["d"], g[col], s=60, color=color, zorder=3)
+        xs = np.array([0, 300])
+        fit = np.polyfit(firms["distance"], firms[raw], 1)
+        ax.plot(xs, np.polyval(fit, xs), color=color, lw=2, alpha=0.7)
+        ax.set_xlabel("distance to the nearest port, km")
+        ax.set_ylabel(ylab)
+        ax.set_title(title, loc="left", fontsize=11.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "iv-two-stages.png")
+
+
+def iv_estimates(rA, rB):
+    rows = [("A · naive: exporters vs not", rA["naive"], None, RED),
+            ("A · instrumental variable", rA["iv"], rA["se"], BLUE),
+            ("B · naive: exporters vs not", rB["naive"], None, RED),
+            ("B · instrumental variable", rB["iv"], rB["se"], GOLD)]
+    fig, ax = plt.subplots(figsize=(8.6, 3.2))
+    ax.axvline(5, color=TEAL, lw=2, ls="--")
+    ys = np.arange(len(rows))[::-1]
+    for (lab, v, se, col), y in zip(rows, ys):
+        if se is not None:
+            ax.plot([v - 1.96 * se, v + 1.96 * se], [y, y], color=col, lw=2.5, alpha=0.6)
+        ax.scatter(v, y, s=110, color=col, zorder=3)
+        ax.text(v, y + 0.28, f"{v:.1f}", ha="center", fontweight="bold")
+    ax.text(5.2, -0.65, "truth: +5", color=TEAL, fontweight="bold")
+    ax.set_yticks(ys, [r[0] for r in rows])
+    ax.set_ylim(-0.9, len(rows) - 0.3)
+    ax.set_xlim(0, 15)
+    ax.set_xlabel("effect of exporting on productivity (95% interval for IV)")
+    ax.tick_params(axis="y", length=0)
+    fig.tight_layout()
+    save(fig, "iv-estimates.png")
+
+
 if __name__ == "__main__":
     houses = simulate_two_periods()
     m, cf = housing_2x2(houses)
@@ -262,3 +380,11 @@ if __name__ == "__main__":
     for v, (did, es) in out.items():
         print(v, round(did, 1), es.round(1).to_dict())
     print(ai_figures())
+    fA, fB = simulate_exporters(0.0), simulate_exporters(-0.02)
+    rA, rB = iv_fit(fA), iv_fit(fB)
+    print("IV A", {k: round(v, 4) for k, v in rA.items()})
+    print("IV B", {k: round(v, 4) for k, v in rB.items()})
+    print("management by exports", fA.groupby("exports")["management"].mean().round(2).to_dict())
+    iv_diagram()
+    iv_two_stages(fA, rA)
+    iv_estimates(rA, rB)

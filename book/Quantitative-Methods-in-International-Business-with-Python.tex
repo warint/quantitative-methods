@@ -9076,7 +9076,7 @@ is handled by a second comparison, against units that did not adopt.
 
 Two differences, hence the name.
 
-The chapter works through three examples, each adding one idea. A
+The chapter works through four examples, each adding one idea. A
 simulated affordable-housing policy observed in two periods, where the
 two differences can be seen doing their work against a known answer. The
 same city over six years, in two versions --- one where the assumption
@@ -9084,7 +9084,9 @@ holds and one where it fails --- to show what an event study can and
 cannot reveal. And the course's own data on national AI strategies,
 adopted by different countries in different years, where the modern
 estimators earn their place and the assumption cannot be examined at
-all.
+all. And simulated exporting firms, where neither matching nor
+difference-in-differences can work and a third design, an instrument,
+can --- until its key condition fails.
 
 \begin{qmibplate}
 
@@ -9857,46 +9859,19 @@ pre-period and another is a single country. Two-way fixed effects gives
 the sensitivity analysis says how little violation the result can
 absorb.
 
-\section{Matching or
-difference-in-differences?}\label{matching-or-difference-in-differences}
+\section{Example 4 · Does exporting raise
+productivity?}\label{example-4-does-exporting-raise-productivity}
 
-The two designs of chapters 10 and 11 answer different worries, and both
-rest on an assumption the data cannot test.
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Matching (chapter 10)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Difference-in-differences
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\textbf{Removes} & differences in what was measured & everything
-constant about a unit, measured or not \\
-\textbf{Assumes} & conditional independence: no unmeasured confounder &
-parallel trends: no change that hits only the treated \\
-\textbf{Needs} & rich pre-treatment covariates, overlap & observations
-before and after, on treated and controls \\
-\textbf{Checkable part} & balance, overlap & pre-trends, when there are
-several pre-periods \\
-\textbf{Fails when} & an unmeasured trait drives selection & the treated
-were already on a different path \\
-\end{longtable}
-
-Matching is the tool when the groups differ in ways that were measured;
-difference-in-differences when they differ in ways that were not, but
-that do not change over time. When treatment is driven by something both
-unmeasured and changing, neither applies.
-
-\section{When neither design works: an
-instrument}\label{when-neither-design-works-an-instrument}
+Exporters are more productive than non-exporters in almost every economy
+where the comparison has been made, and the question that follows is the
+one Bernard and Jensen (\citeproc{ref-bernard1999}{1999}) posed: is
+exporting the cause of the gap, its effect, or both? Firms may learn
+from foreign buyers and competitors; or the better firms may be the ones
+that export. The selection runs through something rarely measured well
+--- the quality of management --- and in a single cross-section there is
+no before and after to difference. Matching cannot see the confounder
+and difference-in- differences has nothing to difference. A third design
+is needed.
 
 The remaining route is a variable that moves treatment from outside the
 system: an \textbf{instrumental variable} \(Z\). It identifies an effect
@@ -9925,14 +9900,163 @@ the treatment.
 
 \end{qmibdefinition}
 
-The estimate is then the effect of \(Z\) on the outcome divided by its
-effect on the treatment, and it applies to the units whose treatment the
-instrument actually moved --- the \emph{compliers} --- not to everyone.
-Good instruments are rare because the two conditions that carry the
-identification are arguments, not tests. Lotteries, distances, rainfall
-and quarter of birth have all been used, and for each a plausible path
-to the outcome that bypasses the treatment has been proposed. A strong
-first stage with a doubtful exclusion is not an instrument.
+Here the candidate is distance to the nearest port. Firms far from a
+port export less, because shipping costs more; where a firm sits was
+settled by history, not by its managers; and --- the claim that carries
+everything --- distance matters for productivity only by changing who
+exports. The data are simulated, 2,000 firms, so the truth is known:
+exporting adds 5. In version A all three conditions hold. In version B
+remote firms also pay more for their inputs, so distance lowers
+productivity directly and the exclusion fails.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-11-01-lecture-economist-assets-iv-diagram.png}}
+
+}
+
+\caption{The instrument. Distance moves exporting; management, never
+observed, drives both exporting and productivity. In B, distance also
+reaches productivity directly.}
+
+\end{figure}%
+
+If distance touches productivity only through exporting, its effect on
+productivity (the \textbf{reduced form}) must be its effect on exporting
+(the \textbf{first stage}) multiplied by the effect of exporting. So the
+effect is a ratio,
+
+\[
+\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}}
+= \frac{\widehat{\operatorname{Cov}}(Y, Z)}{\widehat{\operatorname{Cov}}(D, Z)} ,
+\]
+
+and two-stage least squares computes the same number with a correct
+standard error.
+
+\phantomsection\label{check-iv}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ statsmodels.api }\ImportTok{as}\NormalTok{ sm}
+\ImportTok{from}\NormalTok{ statsmodels.sandbox.regression.gmm }\ImportTok{import}\NormalTok{ IV2SLS}
+
+\ControlFlowTok{for}\NormalTok{ version, direct }\KeywordTok{in}\NormalTok{ [(}\StringTok{"A"}\NormalTok{, }\FloatTok{0.0}\NormalTok{), (}\StringTok{"B"}\NormalTok{, }\OperatorTok{{-}}\FloatTok{0.02}\NormalTok{)]:}
+\NormalTok{    rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{13}\NormalTok{)}
+\NormalTok{    n\_firms }\OperatorTok{=} \DecValTok{2000}
+\NormalTok{    management }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n\_firms)                     }\CommentTok{\# never in the data}
+\NormalTok{    distance }\OperatorTok{=}\NormalTok{ rng.uniform(}\DecValTok{0}\NormalTok{, }\DecValTok{300}\NormalTok{, n\_firms)                    }\CommentTok{\# km to the nearest port}
+\NormalTok{    exports }\OperatorTok{=}\NormalTok{ (}\FloatTok{0.8} \OperatorTok{*}\NormalTok{ management }\OperatorTok{{-}} \FloatTok{0.01} \OperatorTok{*}\NormalTok{ distance }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n\_firms) }\OperatorTok{\textgreater{}} \OperatorTok{{-}}\FloatTok{1.5}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{    productivity }\OperatorTok{=}\NormalTok{ (}\DecValTok{100} \OperatorTok{+} \DecValTok{5} \OperatorTok{*}\NormalTok{ exports }\OperatorTok{+} \DecValTok{6} \OperatorTok{*}\NormalTok{ management }\OperatorTok{+}\NormalTok{ direct }\OperatorTok{*}\NormalTok{ distance}
+                    \OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, n\_firms))}
+\NormalTok{    firms }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"exports"}\NormalTok{: exports, }\StringTok{"distance"}\NormalTok{: distance, }\StringTok{"productivity"}\NormalTok{: productivity\})}
+
+\NormalTok{    gap }\OperatorTok{=}\NormalTok{ firms.groupby(}\StringTok{"exports"}\NormalTok{)[}\StringTok{"productivity"}\NormalTok{].mean()}
+\NormalTok{    first }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exports \textasciitilde{} distance"}\NormalTok{, data}\OperatorTok{=}\NormalTok{firms).fit()}
+\NormalTok{    reduced }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"productivity \textasciitilde{} distance"}\NormalTok{, data}\OperatorTok{=}\NormalTok{firms).fit()}
+\NormalTok{    iv }\OperatorTok{=}\NormalTok{ IV2SLS(firms[}\StringTok{"productivity"}\NormalTok{], sm.add\_constant(firms[[}\StringTok{"exports"}\NormalTok{]]),}
+\NormalTok{                sm.add\_constant(firms[[}\StringTok{"distance"}\NormalTok{]])).fit()}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"version }\SpecialCharTok{\{}\NormalTok{version}\SpecialCharTok{\}}\SpecialStringTok{: naive }\SpecialCharTok{\{}\NormalTok{gap[}\DecValTok{1}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ gap[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:5.2f\}}\SpecialStringTok{   "}
+          \SpecialStringTok{f"first stage }\SpecialCharTok{\{}\NormalTok{first}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}distance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.4f\}}\SpecialStringTok{ (F }\SpecialCharTok{\{}\NormalTok{first}\SpecialCharTok{.}\NormalTok{tvalues[}\StringTok{\textquotesingle{}distance\textquotesingle{}}\NormalTok{] }\OperatorTok{**} \DecValTok{2}\SpecialCharTok{:.0f\}}\SpecialStringTok{)   "}
+          \SpecialStringTok{f"reduced form }\SpecialCharTok{\{}\NormalTok{reduced}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}distance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.4f\}}\SpecialStringTok{   "}
+          \SpecialStringTok{f"IV }\SpecialCharTok{\{}\NormalTok{iv}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}exports\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{ (SE }\SpecialCharTok{\{}\NormalTok{iv}\SpecialCharTok{.}\NormalTok{bse[}\StringTok{\textquotesingle{}exports\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{)   truth 5"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+version A: naive  9.96   first stage -0.0027 (F 543)   reduced form -0.0124   IV 4.62 (SE 0.76)   truth 5
+version B: naive 11.56   first stage -0.0027 (F 543)   reduced form -0.0324   IV 12.09 (SE 0.70)   truth 5
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-11-01-lecture-economist-assets-iv-two-stages.png}}
+
+}
+
+\caption{The two regressions behind the ratio, in version A. Each extra
+100 km cuts the share of firms exporting by 27 points and productivity
+by 1.24; the ratio is 4.6.}
+
+\end{figure}%
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-11-01-lecture-economist-assets-iv-estimates.png}}
+
+}
+
+\caption{Naive and instrumental-variable estimates in both versions,
+against the truth.}
+
+\end{figure}%
+
+In version A the naive comparison says 10, double the truth, because
+exporters are about 0.8 standard deviations better managed; the
+instrument gives 4.6 with a standard error of 0.76, covering the truth.
+In version B the first stage is exactly as strong --- the F statistic of
+543 is far above any conventional bar --- and the estimate is 12.1,
+\emph{further} from the truth than the naive comparison. Nothing in the
+output distinguishes the two versions, because the condition that failed
+is the one the data cannot test.
+
+Two practical warnings. Running the second stage by hand --- regressing
+the outcome on the \emph{fitted} treatment with \texttt{smf.ols} ---
+gives the right coefficient and the wrong standard error, since it
+ignores that the fitted values were estimated; use a two-stage routine.
+And what IV identifies is the effect on the units whose treatment the
+instrument actually moved --- the \emph{compliers}, here the firms whose
+export decision depends on their distance to a port --- not on every
+firm. A weak first stage makes everything worse: the estimate becomes
+noisy and biased toward the naive one, which is why the F statistic is
+reported.
+
+\textbf{Example 4 in three sentences.} When the confounder is unmeasured
+and there is no before and after, a variable that moves treatment from
+outside can still identify the effect, as the ratio of the reduced form
+to the first stage. With a valid instrument it recovers the truth where
+the naive gap was double. Good instruments are rare because the
+exclusion restriction is an argument, and when it fails the estimate can
+be worse than doing nothing.
+
+\section{Matching, difference-in-differences or an
+instrument?}\label{matching-difference-in-differences-or-an-instrument}
+
+The three designs of chapters 10 and 11 answer different worries, and
+each rests on an assumption the data cannot test.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Matching (chapter 10)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Difference-in-differences
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Instrumental variable
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Uses} & comparisons on what was measured & changes within units
+over time & only the variation in treatment the instrument causes \\
+\textbf{Assumes} & conditional independence & parallel trends &
+relevance, independence, exclusion \\
+\textbf{Needs} & rich pre-treatment covariates, overlap & observations
+before and after & a variable that moves treatment from outside \\
+\textbf{Checkable part} & balance, overlap & pre-trends, with several
+pre-periods & the first stage \\
+\textbf{Fails when} & an unmeasured trait drives selection & the treated
+were already on a different path & the instrument has its own path to
+the outcome \\
+\end{longtable}
+
+Choose the design whose assumption can be argued best in the setting at
+hand, and say in words which assumption that is.
 
 \section{What difference-in-differences cannot
 fix}\label{what-difference-in-differences-cannot-fix}
@@ -11899,6 +12023,12 @@ Berkson, Joseph. 1944. {``{Application} of the {Logistic} {Function} to
 {Bio}-{Assay}.''} \emph{{Journal} of the {American} {Statistical}
 {Association}} 39 (227): 357--65.
 \url{https://doi.org/10.1080/01621459.1944.10500699}.
+
+\bibitem[\citeproctext]{ref-bernard1999}
+Bernard, Andrew B., and J. Bradford Jensen. 1999. {``{Exceptional}
+Exporter Performance: Cause, Effect, or Both?''} \emph{{Journal} of
+{International} {Economics}} 47 (1): 1--25.
+\url{https://doi.org/10.1016/S0022-1996(98)00027-0}.
 
 \bibitem[\citeproctext]{ref-bertrand2004}
 Bertrand, M., E. Duflo, and S. Mullainathan. 2004. {``{How} {Much}
