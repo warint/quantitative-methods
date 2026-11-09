@@ -230,7 +230,7 @@ schools, Pasteur and Grant-White. The data ship with semopy, so there is nothing
 | `x4` · `x5` · `x6` | paragraph comprehension · sentence completion · word meaning | **textual** ability |
 | `x7` · `x8` · `x9` | speeded addition · speeded dot counting · straight vs curved capitals | **speed** |
 
-::: {.step}
+::: {.step .question}
 **The question:** do nine scores really reduce to **three abilities**, or to one general
 "cleverness", or to something else? This is a **confirmatory factor analysis** (CFA): a measurement
 model with no structural arrows at all.
@@ -475,7 +475,7 @@ both are measured by indicators.
 | **dem60** · democracy, 1960 | `y1` press freedom · `y2` freedom of opposition · `y3` fair elections · `y4` effective legislature |
 | **dem65** · democracy, 1965 | `y5`–`y8`: **the same four questions, five years later** |
 
-::: {.step}
+::: {.step .question}
 **The question:** does a more industrialised country become more democratic, and does it do so
 directly, or because it was already more democratic?
 :::
@@ -620,7 +620,7 @@ three things. Applied to exporting:
 | **control** | the firm feels able to do it | `ctrl1` "We have the resources" · `ctrl2` "We know how" |
 | **intention** | the firm plans to export | `int1` "We plan to export within two years" · `int2` "…are preparing to" |
 
-::: {.step}
+::: {.step .question}
 **The question:** which of the three drives the intention to export, and by how much? Four constructs,
 none observed, two items each: 400 managers of SMEs (small and medium-sized enterprises).
 :::
@@ -809,6 +809,68 @@ the cell: nothing to download.
 1. run the cells and check you get the numbers from the lecture;
 2. do the **Your turn** task under the last cell, changing one thing at a time.
 :::
+:::
+:::
+
+## Reading a model description: `=~`, `~`, `~~` {.scrollable}
+
+A model description is a **plain text string**, one relation per line. semopy (like R's lavaan) reads three operators:
+
+| Operator | Read it as | On the diagram | Example | Says |
+|---|---|---|---|---|
+| **`=~`** | "**is measured by**" | ellipse → rectangles | `visual =~ x1 + x2 + x3` | the construct *visual* exists, and x1, x2, x3 are its indicators. **Left: a latent; right: observed columns** |
+| **`~`** | "**is regressed on**", "depends on" | arrow **into** the left side | `dem65 ~ ind60 + dem60` | dem65 is explained by ind60 and dem60: a regression, like `smf.ols`, but between constructs |
+| **`~~`** | "**covaries with**" | two-headed arrow | `y1 ~~ y5` | the errors of y1 and y5 may move together. With the same name twice, `y1 ~~ y1`, it is a **variance** |
+
+::: columns
+::: {.column width="50%"}
+**The small print of the syntax:**
+
+- `+` lists several variables on the right of one operator.
+- `1*x2` **fixes** a parameter to 1: here x2, not x1, sets the construct's scale.
+- `#` starts a comment, as in Python.
+- Names on the right of `=~` must be **columns** of your DataFrame; names on the left must **not** be.
+:::
+
+::: {.column width="50%"}
+::: {.warn}
+**The arrow points the other way from the operator.** `visual =~ x1` is drawn visual → x1 (the ability causes
+the score). `dem65 ~ dem60` is drawn dem60 → dem65 (the left side receives the arrow). Read `=~` from left to
+right, `~` from right to left.
+:::
+:::
+:::
+
+## Reading `.inspect()`: the same operators, written back {.scrollable}
+
+`model.inspect(std_est=True)` returns one row per parameter, with three columns naming it: `lval`, `op`, `rval`.
+semopy writes **everything as `~` or `~~`**, so a loading comes back turned around:
+
+| You wrote | `.inspect()` shows | What the row is |
+|---|---|---|
+| `visual =~ x2` | `x2  ~  visual` | a **loading**: "x2 depends on visual" |
+| `dem60 ~ ind60` | `dem60  ~  ind60` | a **structural path** |
+| `y1 ~~ y5` | `y1  ~~  y5` | a **covariance** between two errors |
+| (added for you) | `x2  ~~  x2` | x2's **error variance**: the share left unexplained, in `Est. Std` |
+| (added for you) | `visual  ~~  textual` | the **factor covariance**: in `Est. Std`, the factor correlation |
+
+::: columns
+::: {.column width="50%"}
+**So the filters in the cells mean:**
+
+- `est[est["op"] == "~"]`: loadings **and** paths
+- `... & est["lval"].isin(["dem60", "dem65"])`: only the paths, since a loading's left side is an indicator
+- `est[(est["op"] == "~~") & (est["lval"] != est["rval"])]`: covariances, not variances
+:::
+
+::: {.column width="50%"}
+**And the columns:**
+
+- `Estimate`: in the indicator's units; `1.0` with `-` as standard error = fixed, not estimated
+- `Est. Std`: standardised, **the one to read**
+- `p-value`: tests "different from **0**"
+
+Plain Python around it: `"""..."""` is a string over several lines; `"\n"` is a line break inside one.
 :::
 :::
 
