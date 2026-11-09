@@ -213,6 +213,7 @@ SNIPPETS = {
     "semopy.calc_stats": "fit = semopy.calc_stats(model)\n"
                          'fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T',
     "plt.barh": 'plt.barh(loadings["lval"], loadings["Est. Std"])   # weak indicators at a glance',
+    ".sample": 'again = data.sample(len(data), replace=True, random_state=rng)   # one bootstrap draw',
 
     # ---- Session 10 -------------------------------------------------------
     "rng.integers": "rng = np.random.default_rng(10)\n"
@@ -229,6 +230,23 @@ SNIPPETS = {
     "plt.hist": 'plt.hist(control["pscore"], bins=25, alpha=0.6, label="control")   # overlap',
     "plt.yscale": 'plt.yscale("log")',
     ".boxplot": 'firms.boxplot(column="productivity", by="applies")   # balance at a glance',
+    "rng.uniform": "treat = (rng.uniform(size=n) < probability).astype(int)   # 1 with that probability",
+
+    # ---- Session 11 -------------------------------------------------------
+    ".unstack()": 'means = houses.groupby(["near", "post"])["price"].mean().unstack()',
+    'cov_type="cluster"': 'did = smf.ols("price ~ near * post", data=houses).fit(\n'
+                          '    cov_type="cluster", cov_kwds={"groups": houses["house"]})\n'
+                          'did.params["near:post"]                  # the DiD estimate',
+    "C(geo)": 'smf.ols("ai_use_any ~ has_ai_strategy + C(geo) + C(time)", data=panel).fit()',
+    "dd.CallawaySantAnna": "import diff_diff as dd\n"
+                           'cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome="ai_use_any",\n'
+                           '    unit="geo", time="time", first_treat="g")   # g = adoption year, 0 = never\n'
+                           "cs.overall_att, cs.overall_se",
+    "dd.HonestDiD": 'es = cs.aggregate("event_study")\n'
+                    'dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb',
+    "IV2SLS": "from statsmodels.sandbox.regression.gmm import IV2SLS\n"
+              'iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),\n'
+              '            sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument',
 }
 
 

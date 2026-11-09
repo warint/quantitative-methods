@@ -370,6 +370,7 @@ loadings = est[est["op"] == "~"]   # read the "Est. Std" column
 # -- Choose and validate -------------------------------------------
 fit = semopy.calc_stats(model)
 fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T
+again = data.sample(len(data), replace=True, random_state=rng)   # one bootstrap draw
 
 # -- Plot ----------------------------------------------------------
 plt.imshow(corr, cmap="Blues", vmin=0, vmax=1); plt.colorbar()
@@ -386,6 +387,7 @@ observed = np.where(coin == 1, sales_with, sales_without)   # one outcome per ro
 url = "https://users.nber.org/~rdehejia/data/"
 nsw = pd.read_stata(url + "nsw_dw.dta")
 data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+treat = (rng.uniform(size=n) < probability).astype(int)   # 1 with that probability
 
 # -- Describe ------------------------------------------------------
 data.groupby("treat")["re78"].mean()   # the naive comparison
@@ -404,5 +406,25 @@ firms.boxplot(column="productivity", by="applies")   # balance at a glance
 
 ### Session 11 · Causal inference (2/2)
 
-No new Python: session 11 reuses what you already have.
+```python
+# -- Describe ------------------------------------------------------
+means = houses.groupby(["near", "post"])["price"].mean().unstack()
+
+# -- Fit -----------------------------------------------------------
+did = smf.ols("price ~ near * post", data=houses).fit(
+    cov_type="cluster", cov_kwds={"groups": houses["house"]})
+did.params["near:post"]                  # the DiD estimate
+smf.ols("ai_use_any ~ has_ai_strategy + C(geo) + C(time)", data=panel).fit()
+import diff_diff as dd
+cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome="ai_use_any",
+    unit="geo", time="time", first_treat="g")   # g = adoption year, 0 = never
+cs.overall_att, cs.overall_se
+from statsmodels.sandbox.regression.gmm import IV2SLS
+iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),
+            sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument
+
+# -- Choose and validate -------------------------------------------
+es = cs.aggregate("event_study")
+dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb
+```
 

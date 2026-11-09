@@ -12,7 +12,7 @@ META = dict(
     title="statsmodels",
     color=ACCENT,
     tagline="Regression you can read: fit, read, check, predict",
-    sessions="2 to 7, 10, 11 and 13",
+    sessions="2 to 7, 9 to 11 and 13",
 )
 META["import"] = "import statsmodels.formula.api as smf"
 META["version_note"] = "+ import statsmodels.api as sm (no formula)"
@@ -240,4 +240,15 @@ PAGES = [[
              dict(code="a.aic, b.aic", text="any two models — but only **on the same rows**."),
              dict(code="1 - m.llf / null.llf", text="McFadden's pseudo-R² for a logit; 0.2–0.4 is already good."),
          ]),
+], [
+    dict(title="11 · Causal designs: DiD and an instrument",
+         intro="Sessions 10 and 11.",
+         items=[
+             dict(code='smf.ols("y ~ treated * post", data=d)', text="difference-in-differences: the coefficient on `treated:post` is the estimate."),
+             dict(code='.fit(cov_type="cluster", cov_kwds={"groups": d["unit"]})', text="each unit is seen several times: cluster its standard errors."),
+             dict(code='"y ~ D + C(unit) + C(year)"', text="two-way fixed effects. With staggered adoption, check it against `diff_diff`."),
+             dict(code="from statsmodels.sandbox.regression.gmm import IV2SLS", text="two-stage least squares, for an instrument:",
+                  ex='IV2SLS(d["y"], sm.add_constant(d[["D"]]), sm.add_constant(d[["Z"]])).fit()'),
+         ],
+         warn="Never run the second stage yourself with `smf.ols` on fitted values: right estimate, **wrong** standard error."),
 ]]

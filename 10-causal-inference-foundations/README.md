@@ -6,7 +6,7 @@
 > [`01-lecture/MATH60033A-S10-Lecture.qmd`](01-lecture/MATH60033A-S10-Lecture.qmd).
 
 > **Python cheatsheets for this session**, one per package, functions explained with
-> pictures: [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [scikit-learn](https://warint.github.io/quantitative-methods/python-cheatsheets/sklearn.pdf) · [SciPy](https://warint.github.io/quantitative-methods/python-cheatsheets/scipy.pdf)
 
 **Wednesday 18 November 2026** · 15:30–18:30 · Décelles — Victoriaville
 

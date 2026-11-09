@@ -6,7 +6,7 @@
 > [`01-lecture/MATH60033A-S11-Lecture.qmd`](01-lecture/MATH60033A-S11-Lecture.qmd).
 
 > **Python cheatsheets for this session**, one per package, functions explained with
-> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf)
+> pictures: [pandas](https://warint.github.io/quantitative-methods/python-cheatsheets/pandas.pdf) · [NumPy](https://warint.github.io/quantitative-methods/python-cheatsheets/numpy.pdf) · [matplotlib](https://warint.github.io/quantitative-methods/python-cheatsheets/matplotlib.pdf) · [statsmodels](https://warint.github.io/quantitative-methods/python-cheatsheets/statsmodels.pdf) · [diff-diff](https://warint.github.io/quantitative-methods/python-cheatsheets/diffdiff.pdf)
 
 **Wednesday 25 November 2026** · 15:30–18:30 · Décelles — Victoriaville
 

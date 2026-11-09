@@ -138,6 +138,7 @@ PAGES = [[
              dict(code="chi2 p-value", text="almost always significant with real data and a decent sample: read it, but do not decide on it alone."),
          ],
          warn="Report **all** the indices, not the one that passes. A good fit does not make the model true — other models fit too."),
+], [
     dict(title="6 · A full model: measurement and paths",
          intro="Session 9's second example: 75 countries.",
          items=[
@@ -146,7 +147,17 @@ PAGES = [[
                   ex='model = """\n  ind60 =~ x1 + x2 + x3\n  dem60 =~ y1 + y2 + y3 + y4\n  dem65 =~ y5 + y6 + y7 + y8\n  dem60 ~ ind60\n  dem65 ~ ind60 + dem60\n"""'),
              dict(code="dem65 ~ ind60 + dem60", text="the structural paths: a regression whose variables are all latent."),
          ]),
-    dict(title="7 · Pitfalls",
+    dict(title="7 · Are the constructs distinct?",
+         items=[
+             dict(code='ins[(ins["op"] == "~~") & (ins["lval"] != ins["rval"])]',
+                  text="covariances; between two latent variables, `Est. Std` is their **factor correlation**."),
+             dict(code="AVE = mean of the squared standardised loadings",
+                  text="average variance extracted: at least 0.5 for convergent validity.",
+                  ex='(ld["Est. Std"] ** 2).groupby(ld["rval"]).mean()'),
+             dict(code="factor correlation < 0.85", text="and its bootstrap interval excludes 1: discriminant validity. Fornell–Larcker: AVE > every squared correlation."),
+             dict(code="data.sample(len(data), replace=True)", text="one bootstrap draw: refit 500 times, keep the middle 95%."),
+         ]),
+    dict(title="8 · Pitfalls",
          items=[
              dict(code="KeyError / variable not found", text="a name in the string is not a column of the data: check spelling and case."),
              dict(code="three indicators per factor", text="fewer than three and the factor is hard to identify; one indicator cannot carry a latent variable."),

@@ -192,6 +192,7 @@ TOOLKIT = {
     ".inspect()": ("09", "Read the fit", "`std_est=True` for the standardised loadings and paths"),
     "semopy.calc_stats": ("09", "Choose and validate", "chi-square, CFI, TLI, RMSEA — report all four"),
     "plt.barh": ("09", "Plot", "one bar per indicator: which loadings are weak"),
+    ".sample": ("09", "Choose and validate", "`replace=True` resamples rows: refit many times for a bootstrap interval"),
 
     # ---- Session 10 · causal foundations ---------------------------------
     "rng.integers": ("10", "Load and shape", "a coin flip per row: `rng.integers(0, 2, n)`, 1 = treated"),
@@ -204,6 +205,15 @@ TOOLKIT = {
     "plt.hist": ("10", "Plot", "overlap: the score's distribution in each group"),
     "plt.yscale": ("10", "Plot", "`\"log\"` when one group dwarfs the other"),
     ".boxplot": ("10", "Plot", "balance at a glance: one box per group"),
+    "rng.uniform": ("10", "Load and shape", "a number between 0 and 1: compare it with a probability to draw who is treated"),
+
+    # ---- Session 11 · difference-in-differences, and an instrument -------------
+    ".unstack()": ("11", "Describe", "the four means as a table: groups in rows, periods in columns"),
+    'cov_type="cluster"': ("11", "Fit", "standard errors clustered by unit: each unit is seen several times"),
+    "C(geo)": ("11", "Fit", "a dummy per category in a formula: `C(geo) + C(time)` is two-way fixed effects"),
+    "dd.CallawaySantAnna": ("11", "Fit", "DiD with staggered adoption: each cohort against clean controls, then averaged"),
+    "dd.HonestDiD": ("11", "Choose and validate", "how large a violation of parallel trends the result survives"),
+    "IV2SLS": ("11", "Fit", "two-stage least squares: the instrument's effect, with a correct standard error"),
 }
 
 
