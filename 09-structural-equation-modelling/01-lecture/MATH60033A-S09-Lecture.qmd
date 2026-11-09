@@ -305,28 +305,102 @@ A **standardised loading** is the **correlation between the test and its ability
 | **visual** | 0.77 · **0.42** · 0.58 | cubes, x2, is the weak one: $0.42^2 = 0.18$, so 82% of a child's cubes score is something else |
 | **speed** | 0.57 – 0.72 | adequate; addition, x7, is the weakest |
 
-| Pair of abilities | Correlation | Reading |
-|---|---|---|
-| visual ↔ textual | 0.46 | related, but not the same thing |
-| visual ↔ speed | 0.47 | |
-| textual ↔ speed | 0.28 | the most distinct pair |
-
 ::: {.muted}
 Rule of thumb: above 0.7 is strong, below 0.4 is a candidate to drop. The share left unexplained
 is the number in each error circle: 1 − loading².
 :::
 
-## Does the model fit? {.scrollable}
+## Reading the factor correlations: are the abilities really different? {.scrollable}
 
-| Index | Question it answers | Convention | Here | Verdict |
-|---|---|---|---|---|
-| $\chi^2$ | could the model be *exactly* right? | p > 0.05 | 85.3 on 24 df, p < 0.001 | no |
-| **CFI** | how far from "nothing correlates" toward perfect? | > 0.95 | 0.931 | close, not there |
-| **TLI** | the same, penalised for extra parameters | > 0.95 | 0.896 | short |
-| **RMSEA** | misfit per degree of freedom | < 0.06 good, > 0.10 poor | 0.092 | mediocre |
+The dashed arrows are **correlations between the abilities themselves**, cleaned of measurement error, so
+they are larger than the correlations between averaged test scores would be.
+
+| Pair | Correlation | 95% interval | Shared variance | HTMT | Reading |
+|---|---|---|---|---|---|
+| visual ↔ textual | 0.46 | 0.28 – 0.59 | 21% | 0.42 | related, clearly distinct |
+| visual ↔ speed | 0.47 | 0.24 – 0.67 | 22% | 0.42 | related, clearly distinct; the widest interval |
+| textual ↔ speed | 0.28 | 0.12 – 0.43 | 8% | 0.29 | the most distinct pair |
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Rules of thumb (discriminant validity):**
+
+1. **Below about 0.85** (0.80 for the strict): distinct constructs. Above it, you may be measuring one thing twice.
+2. **The 95% interval must exclude 1.** The p-value in the output tests "different from **0**", which is not the question.
+3. **HTMT below 0.85** (0.90 lenient): the newer standard many journals now ask for.
+4. **Fornell–Larcker:** each construct's AVE must exceed its squared correlation with every other.
+:::
+:::
+
+::: {.column width="50%"}
+| Ability | AVE = mean loading² | Largest r² | Fornell–Larcker |
+|---|---|---|---|
+| visual | **0.37** | 0.22 | passes |
+| textual | **0.72** | 0.21 | passes |
+| speed | **0.43** | 0.22 | passes |
+
+::: {.warn}
+**But AVE should be at least 0.5** (convergent validity). Visual and speed fall short: on average
+their tests are more noise than ability. The cubes problem, seen from the construct's side.
+:::
+:::
+:::
+
+::: {.muted}
+Also check the **sign** against theory, and treat a correlation **above 1** as an inadmissible solution
+(a Heywood case), not as "very similar". Interval: 500 bootstrap resamples of the 301 children.
+:::
+
+## Does the model fit? One test, three indices {.scrollable}
+
+| | Kind | What it measures | Judged by | Here | Verdict |
+|---|---|---|---|---|---|
+| $\chi^2$ | **a test** | $H_0$: the model reproduces the covariances **exactly** | p-value: reject if p < 0.05 | 85.3 on 24 df, p < 0.001 | exact fit rejected |
+| **CFI** | an index | share of the **baseline's** misfit the model removes | convention: > 0.95 | 0.931 | close, not there |
+| **TLI** | an index | the same comparison, **per degree of freedom** | convention: > 0.95 | 0.896 | short |
+| **RMSEA** | an index | misfit **per degree of freedom**, no baseline | convention: < 0.06 good, > 0.10 poor | 0.092 | mediocre |
+
+::: {.check}
+**Only χ² is a test.** It has a null hypothesis and a p-value. CFI, TLI and RMSEA have neither: they are
+**distances**, measured from different starting points, and the thresholds are conventions from a simulation
+study (Hu and Bentler, 1999), not significance levels. "TLI is significant" means nothing.
+:::
+
+::: {.muted}
+**The baseline** is the worst sensible model: nine tests, **no correlation between any of them**. Here it scores
+χ² = 918.9 on 36 df. CFI and TLI ask how far your model moves from it toward perfect fit.
+:::
 
 ::: {.warn}
 **Report all four, and say which convention you applied.** Quoting only the one that passes loses marks.
+:::
+
+## The three indices, by hand {.scrollable}
+
+A correct model has $E[\chi^2] = \mathrm{df}$, so the **excess** $\chi^2 - \mathrm{df}$, or the ratio $\chi^2 / \mathrm{df}$ against 1, is the misfit.
+Subscript $m$ is your model (85.3 on 24 df), $0$ the baseline (918.9 on 36 df), $n = 301$.
+
+| | Formula | Here | Reading |
+|---|---|---|---|
+| **CFI** | $1 - \dfrac{\chi^2_m - \mathrm{df}_m}{\chi^2_0 - \mathrm{df}_0}$ | $1 - \dfrac{61.3}{882.9} = 0.931$ | the model removes 93% of the baseline's excess misfit |
+| **TLI** | $\dfrac{\chi^2_0/\mathrm{df}_0 \,-\, \chi^2_m/\mathrm{df}_m}{\chi^2_0/\mathrm{df}_0 \,-\, 1}$ | $\dfrac{25.52 - 3.55}{25.52 - 1} = 0.896$ | the same, in misfit **per df**: a parameter that does not earn the df it costs **lowers** TLI |
+| **RMSEA** | $\sqrt{\dfrac{\max(\chi^2_m - \mathrm{df}_m,\, 0)}{\mathrm{df}_m\,(n-1)}}$ | $\sqrt{\dfrac{61.3}{24 \times 300}} = 0.092$ | typical misfit per df and per observation; 0 is perfect |
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Why TLI is below CFI:** TLI divides by df first, so it charges for every parameter; CFI does not.
+That is why TLI is the one to watch when a model gains fit by adding arrows.
+:::
+:::
+
+::: {.column width="50%"}
+::: {.step}
+**TLI is "non-normed":** it can exceed 1 (when $\chi^2_m < \mathrm{df}_m$, common in small samples) or fall below 0.
+CFI is clipped to $[0, 1]$. A TLI of 1.02 is not "better than perfect"; it is noise.
+:::
+:::
 :::
 
 ## Where does the model miss? {.scrollable}
@@ -631,6 +705,60 @@ the structural model.
 structural paths come out right.
 :::
 
+## Why SEM, and not a regression? {.scrollable}
+
+A regression (session 3) needs **one column per variable** and **one outcome per model**. SEM drops both
+requirements. What that buys, shown in the three examples:
+
+| | Linear or logistic regression | SEM | Seen in |
+|---|---|---|---|
+| **Measurement error** | assumes every regressor is measured without error: noisy ones shrink their coefficients toward zero | separates each item into construct + error, and estimates the path between the constructs | Ex. 3: 0.37 instead of 0.5; SEM 0.44 |
+| **Several items per concept** | one column, so you average or sum the items: equal weights, and no check that they measure one thing | one **loading per item**, and a test of whether the items belong together | Ex. 1: cubes loads 0.42 |
+| **Chains of effects** | one equation per model; a mediation takes several regressions and multiplying by hand | the whole system in **one fit**: direct, indirect and total effects together | Ex. 2: 0.17 direct, 0.39 indirect |
+| **Testing the model** | always "fits": R² describes, it does not test the structure | an over-identified model is a **prediction** of every correlation, with χ², CFI, TLI, RMSEA | Ex. 1: the x9 misfit |
+| **Correlated errors** | assumed away | written down when the design predicts them: `y1 ~~ y5` | Ex. 2: same question twice |
+| **Comparing groups** | the same scale is assumed to mean the same thing in every country | **measurement invariance** can be tested: loadings constrained equal across groups | What SEM does not fix |
+
+::: {.check}
+**Underneath all six:** a regression treats the column as the concept. SEM treats the column as
+*evidence about* the concept, and says how good that evidence is.
+:::
+
+## And with a yes/no outcome? When is a regression enough? {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+### A binary outcome
+
+*Did the firm export, yes or no?* Logistic regression (session 4) models it, but **with observed
+predictors only**: averaging the attitude items before a logit carries the same attenuation as in
+Example 3.
+
+SEM handles a binary or ordinal outcome, or ordinal survey items, through a **probit** link with a
+categorical estimator (WLSMV in R's lavaan or in Mplus), so the predictors can stay latent.
+
+::: {.muted}
+Logit coefficients are on a log-odds scale, probit ones on a latent-normal scale: compare signs and
+significance across the two, not raw sizes.
+:::
+:::
+
+::: {.column width="50%"}
+### When a regression is enough
+
+- **Every variable is a single, well-measured column**: exports in dollars, GDP, distance. With no
+  latent constructs, an SEM of observed variables gives the regression's coefficients back.
+- **One outcome, no mediators** to decompose.
+- **Prediction is the goal** (session 8): SEM is built to explain a structure, not to minimise out-of-sample error.
+- **The sample is small**: SEM wants 200 or more; a regression on 75 rows is honest about what it can do.
+
+::: {.warn}
+**SEM is not a better regression.** It is a regression that takes measurement seriously; when
+nothing is measured with error, the extra machinery buys nothing.
+:::
+:::
+:::
+
 ## What a good fit does not prove {.center}
 
 ## What SEM does not fix {.scrollable}
@@ -786,6 +914,53 @@ plt.gca().invert_yaxis()
 plt.xlabel("standardised loading")
 plt.show()
 ```
+
+## Example 1 in Python · Are the abilities distinct? {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 1 · AVE, and a bootstrap interval for each factor correlation
+import numpy as np
+import pandas as pd
+import semopy
+from semopy.examples import holzinger39
+
+data = holzinger39.get_data()
+description = """
+visual  =~ x1 + x2 + x3
+textual =~ x4 + x5 + x6
+speed   =~ x7 + x8 + x9
+"""
+abilities = ["visual", "textual", "speed"]
+
+def factor_correlations(d):
+    model = semopy.Model(description)
+    model.fit(d)
+    est = model.inspect(std_est=True)
+    pairs = est[(est["op"] == "~~") & (est["lval"] != est["rval"])
+                & est["lval"].isin(abilities) & est["rval"].isin(abilities)]
+    return dict(zip(pairs["lval"] + " ~~ " + pairs["rval"], pairs["Est. Std"])), est
+
+corr, est = factor_correlations(data)
+
+# AVE: the mean squared standardised loading of each ability
+loadings = est[est["op"] == "~"]
+print((loadings["Est. Std"] ** 2).groupby(loadings["rval"]).mean().round(2))
+
+# Bootstrap: resample the children, refit, keep the correlations
+rng = np.random.default_rng(9)
+boot = pd.DataFrame([factor_correlations(data.sample(len(data), replace=True,
+                                                     random_state=rng))[0]
+                     for _ in range(500)])
+print(pd.DataFrame({"r": corr, "lower": boot.quantile(0.025),
+                    "upper": boot.quantile(0.975)}).round(2))
+```
+
+::: {.step}
+**Your turn.** Add `+ x4` to the *visual* line, so that paragraph comprehension measures both. What happens
+to the visual ↔ textual correlation, and why?
+:::
 
 ## Example 1 in Python · Fit, and three drawings compared {.scrollable}
 

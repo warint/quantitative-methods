@@ -267,6 +267,80 @@ measure *textual*, so the model says their correlation is
 $0.85 \times 0.86 = 0.73$ — and the correlation in the first figure is 0.73. The
 three abilities correlate at 0.28 to 0.47: related, but distinct.
 
+**Are the abilities really different?** "Distinct" is a claim with its own
+checks, grouped under the name *discriminant validity*. A factor correlation is
+the correlation between the constructs themselves, cleaned of measurement error,
+so it is larger than the correlation between averaged scores would be, and it is
+the number to judge. Four rules of thumb are in use.
+
+1. **Size.** Below about 0.85 (0.80 for the strict) the constructs are distinct.
+   Above it, two names may be covering one thing.
+2. **The interval, not the p-value.** The p-value printed beside a factor
+   correlation tests whether it differs from 0, which is rarely in doubt. The
+   question is whether it differs from 1, so the 95% interval must exclude 1.
+3. **Fornell–Larcker** [@fornell1981]. The **average variance extracted**, AVE,
+   is the mean squared standardised loading of a construct: the share of its
+   indicators' variance it explains. Each construct's AVE must exceed its squared
+   correlation with every other construct — it must share more with its own
+   indicators than with a neighbour.
+4. **HTMT** [@henseler2014]. The heterotrait–monotrait ratio, the average
+   correlation between indicators of two different constructs divided by the
+   geometric mean of the average correlations within each, computed straight from
+   the correlation matrix. Below 0.85 (0.90 lenient). It is now often asked for in
+   place of Fornell–Larcker, which detects overlap poorly.
+
+The cell computes the AVE of each ability and a bootstrap interval for each factor
+correlation: resample the 301 children with replacement, refit, and keep the
+middle 95% of 500 refits.
+
+```{python}
+#| label: check-hs-distinct
+#| code-summary: "Run it: AVE, and a bootstrap interval for each factor correlation"
+
+import numpy as np
+import pandas as pd
+
+abilities = ["visual", "textual", "speed"]
+
+def factor_correlations(d):
+    m = semopy.Model(description)
+    m.fit(d)
+    e = m.inspect(std_est=True)
+    pairs = e[(e["op"] == "~~") & (e["lval"] != e["rval"])
+              & e["lval"].isin(abilities) & e["rval"].isin(abilities)]
+    return dict(zip(pairs["lval"] + " ~~ " + pairs["rval"], pairs["Est. Std"]))
+
+print((loadings["Est. Std"] ** 2).groupby(loadings["rval"]).mean().round(2))
+
+rng = np.random.default_rng(9)
+boot = pd.DataFrame([factor_correlations(data.sample(len(data), replace=True,
+                                                     random_state=rng))
+                     for _ in range(500)])
+print(pd.DataFrame({"r": factor_correlations(data),
+                    "lower": boot.quantile(0.025),
+                    "upper": boot.quantile(0.975)}).round(2))
+```
+
+| Pair | $r$ | 95% interval | $r^2$ | HTMT |
+|---|---|---|---|---|
+| visual ↔ textual | 0.46 | 0.28 – 0.59 | 0.21 | 0.42 |
+| visual ↔ speed | 0.47 | 0.24 – 0.67 | 0.22 | 0.42 |
+| textual ↔ speed | 0.28 | 0.12 – 0.43 | 0.08 | 0.29 |
+
+Every check passes: the correlations are far below 0.85, no interval comes near 1,
+the HTMT ratios are well under 0.85, and the AVEs (visual 0.37, textual 0.72,
+speed 0.43) all exceed the largest squared correlation, 0.22. The abilities are
+distinct. The AVEs say something else as well. The usual standard for
+*convergent* validity is an AVE of at least 0.5, and visual and speed fall short:
+on average their tests carry more noise than ability. That is the weak cubes
+loading again, seen from the construct's side.
+
+Two further checks need no computation. The sign should be the one theory
+predicts — here positive, since children good at one ability tend to be good at
+the others. And a factor correlation above 1 is not "very similar constructs" but
+an inadmissible solution, a *Heywood case*, which says the model is
+misspecified or the sample too small.
+
 ## The fit indices, and what each would have to be
 
 The $\chi^2$ test is the only one with a null hypothesis, and it is almost never
@@ -296,6 +370,29 @@ misfit per degree of freedom, so it rewards parsimony directly. **Below about
 0.06** is good, above 0.10 poor.
 :::
 
+**Only $\chi^2$ is a test.** It has a null hypothesis and a sampling
+distribution. CFI, TLI and RMSEA have neither: they are distances, each measured
+from a different starting point, and "TLI is significant" means nothing. Since a
+correct model has $E[\chi^2] = \mathrm{df}$, all three are built on the excess
+$\chi^2 - \mathrm{df}$ or on the ratio $\chi^2/\mathrm{df}$ against 1. With $m$
+the model and $0$ the **baseline**, a model in which no two observed variables
+correlate,
+
+$$
+\text{CFI} = 1 - \frac{\chi^2_m - \mathrm{df}_m}{\chi^2_0 - \mathrm{df}_0},
+\qquad
+\text{TLI} = \frac{\chi^2_0/\mathrm{df}_0 - \chi^2_m/\mathrm{df}_m}{\chi^2_0/\mathrm{df}_0 - 1},
+\qquad
+\text{RMSEA} = \sqrt{\frac{\max(\chi^2_m - \mathrm{df}_m,\, 0)}{\mathrm{df}_m\,(n-1)}} .
+$$
+
+CFI is the share of the baseline's excess misfit the model removes, clipped to
+$[0, 1]$. TLI is the same comparison per degree of freedom, so a parameter that
+does not earn the degree of freedom it costs *lowers* it, and it can stray above 1
+or below 0, which is why it is called non-normed; a TLI of 1.02 is noise, not a
+better-than-perfect model. RMSEA needs no baseline: it is the misfit per degree of
+freedom and per observation.
+
 Those thresholds come from a simulation study [@hu1999] that has been cited tens
 of thousands of times and whose authors were careful to say they were not
 proposing universal cut-offs. They are conventions, and the honest use is to
@@ -316,6 +413,12 @@ print(fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T.round(3))
 | CFI | $> 0.95$ | 0.931 | close, not there |
 | TLI | $> 0.95$ | 0.896 | short |
 | RMSEA | $< 0.06$ | 0.092 | mediocre |
+
+By hand, with the baseline at $\chi^2_0 = 918.9$ on 36 df and $n = 301$:
+CFI $= 1 - 61.3/882.9 = 0.931$; TLI $= (25.52 - 3.55)/(25.52 - 1) = 0.896$;
+RMSEA $= \sqrt{61.3/(24 \times 300)} = 0.092$. TLI is below CFI because it charges
+for parameters, which makes it the index to watch when a model gains fit by
+adding arrows.
 
 A model drawn from a well-established theory of mental abilities, and it does not
 quite fit. That is a normal outcome, and the useful question is where it misses.
@@ -619,6 +722,42 @@ checked against a known answer.
 export, subjective norms most. SEM recovers the true paths; averaging the items
 and running a regression understates every one. Measurement error is not a
 nuisance to be averaged away: model it, and the structural paths come out right.
+
+## Why SEM, and not a regression?
+
+The three examples can now be read against the alternative most papers use: a
+regression, linear (chapter 3) or logistic (chapter 4), on observed columns. A
+regression needs one column per variable and one outcome per model. SEM drops
+both requirements, and each example showed what that buys.
+
+| | Linear or logistic regression | SEM | Seen in |
+|---|---|---|---|
+| **Measurement error** | assumes every regressor is measured without error; noisy ones shrink their coefficients | separates each item into construct and error | Example 3 |
+| **Several items per concept** | one column, so the items are averaged or summed: equal weights, no check that they measure one thing | one loading per item, and a test that the items belong together | Example 1 |
+| **Chains of effects** | one equation per model; a mediation takes several regressions and multiplying by hand | the whole system in one fit, with direct, indirect and total effects | Example 2 |
+| **Testing the model** | R² describes; nothing tests the structure | an over-identified model predicts every covariance, and $\chi^2$ tests it | Example 1 |
+| **Correlated errors** | assumed away | written down when the design predicts them | Example 2 |
+| **Comparing groups** | the scale is assumed to mean the same everywhere | measurement invariance can be tested | below |
+
+Underneath all six is one difference. A regression treats the column as the
+concept; SEM treats the column as evidence about the concept, and says how good
+that evidence is.
+
+**A binary outcome.** *Did the firm export, yes or no?* Logistic regression
+handles it with observed predictors only, and averaging survey items before a
+logit carries the same attenuation as Example 3. SEM handles binary and ordinal
+outcomes, and ordinal items, through a probit link with a categorical estimator
+(WLSMV, in lavaan or Mplus), so the predictors can stay latent. Logit
+coefficients live on the log-odds scale and probit ones on a latent normal scale,
+so across the two compare signs and significance, not sizes.
+
+**When a regression is enough.** When every variable is a single, well-measured
+column — exports in dollars, GDP, distance — an SEM of observed variables returns
+the regression's coefficients, and the extra machinery buys nothing. The same is
+true with one outcome and no mediation to decompose, when prediction rather than
+explanation is the goal (chapter 8), and when the sample is too small for SEM's
+appetite of 200 or more. SEM is not a better regression. It is a regression that
+takes measurement seriously.
 
 ## What the estimator assumes
 

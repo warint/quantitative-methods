@@ -32,11 +32,14 @@ when pasted into a file: the data either ship with semopy or are simulated in th
 1. **The language of SEM** — a construct and its indicators, the five symbols, five words (observed,
    latent, exogenous and endogenous, path, error), the two halves, and corr = λᵢλⱼ
 2. **Example 1 · Nine tests, three abilities** — Holzinger and Swineford's 301 children: the
-   correlations, the drawing, the loadings, the fit, where the model misses, and three competing models
+   correlations, the drawing, the loadings, whether the abilities are really distinct (AVE, HTMT,
+   bootstrap intervals), the fit (one test, three indices, computed by hand), where the model misses,
+   and three competing models
 3. **Example 2 · Does industrialisation bring democracy?** — Bollen's 75 countries: structural
    paths, R², direct and indirect effects, the same-question covariances, and an arrow turned around
 4. **Example 3 · Will this firm export?** — the theory of planned behaviour on a simulated survey of
    400 managers, where the true paths are known: SEM recovers them, averaging the items shrinks them
+   — and why SEM rather than a linear or logistic regression, and when a regression is enough
 5. **What a good fit does not prove** — equivalent models, confounding, small samples, invariance
 6. **In class · The code behind the three examples** — every cell, and a *Your turn* task per example
 

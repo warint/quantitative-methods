@@ -1381,11 +1381,29 @@ speed   =~ x7 + x8 + x9</code></pre>
 </tr>
 </tbody>
 </table>
-<table class="caption-top">
+<div class="muted">
+<p>Rule of thumb: above 0.7 is strong, below 0.4 is a candidate to drop. The share left unexplained is the number in each error circle: 1 − loading².</p>
+</div>
+</section>
+<section id="reading-the-factor-correlations-are-the-abilities-really-different" class="slide level2 scrollable">
+<h2>Reading the factor correlations: are the abilities really different?</h2>
+<p>The dashed arrows are <strong>correlations between the abilities themselves</strong>, cleaned of measurement error, so they are larger than the correlations between averaged test scores would be.</p>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Pair of abilities</th>
+<th>Pair</th>
 <th>Correlation</th>
+<th>95% interval</th>
+<th>Shared variance</th>
+<th>HTMT</th>
 <th>Reading</th>
 </tr>
 </thead>
@@ -1393,39 +1411,96 @@ speed   =~ x7 + x8 + x9</code></pre>
 <tr class="odd">
 <td>visual ↔︎ textual</td>
 <td>0.46</td>
-<td>related, but not the same thing</td>
+<td>0.28 – 0.59</td>
+<td>21%</td>
+<td>0.42</td>
+<td>related, clearly distinct</td>
 </tr>
 <tr class="even">
 <td>visual ↔︎ speed</td>
 <td>0.47</td>
-<td></td>
+<td>0.24 – 0.67</td>
+<td>22%</td>
+<td>0.42</td>
+<td>related, clearly distinct; the widest interval</td>
 </tr>
 <tr class="odd">
 <td>textual ↔︎ speed</td>
 <td>0.28</td>
+<td>0.12 – 0.43</td>
+<td>8%</td>
+<td>0.29</td>
 <td>the most distinct pair</td>
 </tr>
 </tbody>
 </table>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="check">
+<p><strong>Rules of thumb (discriminant validity):</strong></p>
+<ol type="1">
+<li><strong>Below about 0.85</strong> (0.80 for the strict): distinct constructs. Above it, you may be measuring one thing twice.</li>
+<li><strong>The 95% interval must exclude 1.</strong> The p-value in the output tests “different from <strong>0</strong>”, which is not the question.</li>
+<li><strong>HTMT below 0.85</strong> (0.90 lenient): the newer standard many journals now ask for.</li>
+<li><strong>Fornell–Larcker:</strong> each construct’s AVE must exceed its squared correlation with every other.</li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Ability</th>
+<th>AVE = mean loading²</th>
+<th>Largest r²</th>
+<th>Fornell–Larcker</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>visual</td>
+<td><strong>0.37</strong></td>
+<td>0.22</td>
+<td>passes</td>
+</tr>
+<tr class="even">
+<td>textual</td>
+<td><strong>0.72</strong></td>
+<td>0.21</td>
+<td>passes</td>
+</tr>
+<tr class="odd">
+<td>speed</td>
+<td><strong>0.43</strong></td>
+<td>0.22</td>
+<td>passes</td>
+</tr>
+</tbody>
+</table>
+<div class="warn">
+<p><strong>But AVE should be at least 0.5</strong> (convergent validity). Visual and speed fall short: on average their tests are more noise than ability. The cubes problem, seen from the construct’s side.</p>
+</div>
+</div></div>
 <div class="muted">
-<p>Rule of thumb: above 0.7 is strong, below 0.4 is a candidate to drop. The share left unexplained is the number in each error circle: 1 − loading².</p>
+<p>Also check the <strong>sign</strong> against theory, and treat a correlation <strong>above 1</strong> as an inadmissible solution (a Heywood case), not as “very similar”. Interval: 500 bootstrap resamples of the 301 children.</p>
 </div>
 </section>
-<section id="does-the-model-fit" class="slide level2 scrollable">
-<h2>Does the model fit?</h2>
-<table class="caption-top">
+<section id="does-the-model-fit-one-test-three-indices" class="slide level2 scrollable">
+<h2>Does the model fit? One test, three indices</h2>
+<table class="caption-top" style="width:100%;">
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Index</th>
-<th>Question it answers</th>
-<th>Convention</th>
+<th></th>
+<th>Kind</th>
+<th>What it measures</th>
+<th>Judged by</th>
 <th>Here</th>
 <th>Verdict</th>
 </tr>
@@ -1433,37 +1508,97 @@ speed   =~ x7 + x8 + x9</code></pre>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(\chi^2\)</span></td>
-<td>could the model be <em>exactly</em> right?</td>
-<td>p &gt; 0.05</td>
+<td><strong>a test</strong></td>
+<td><span class="math inline">\(H_0\)</span>: the model reproduces the covariances <strong>exactly</strong></td>
+<td>p-value: reject if p &lt; 0.05</td>
 <td>85.3 on 24 df, p &lt; 0.001</td>
-<td>no</td>
+<td>exact fit rejected</td>
 </tr>
 <tr class="even">
 <td><strong>CFI</strong></td>
-<td>how far from “nothing correlates” toward perfect?</td>
-<td>&gt; 0.95</td>
+<td>an index</td>
+<td>share of the <strong>baseline’s</strong> misfit the model removes</td>
+<td>convention: &gt; 0.95</td>
 <td>0.931</td>
 <td>close, not there</td>
 </tr>
 <tr class="odd">
 <td><strong>TLI</strong></td>
-<td>the same, penalised for extra parameters</td>
-<td>&gt; 0.95</td>
+<td>an index</td>
+<td>the same comparison, <strong>per degree of freedom</strong></td>
+<td>convention: &gt; 0.95</td>
 <td>0.896</td>
 <td>short</td>
 </tr>
 <tr class="even">
 <td><strong>RMSEA</strong></td>
-<td>misfit per degree of freedom</td>
-<td>&lt; 0.06 good, &gt; 0.10 poor</td>
+<td>an index</td>
+<td>misfit <strong>per degree of freedom</strong>, no baseline</td>
+<td>convention: &lt; 0.06 good, &gt; 0.10 poor</td>
 <td>0.092</td>
 <td>mediocre</td>
 </tr>
 </tbody>
 </table>
+<div class="check">
+<p><strong>Only χ² is a test.</strong> It has a null hypothesis and a p-value. CFI, TLI and RMSEA have neither: they are <strong>distances</strong>, measured from different starting points, and the thresholds are conventions from a simulation study (Hu and Bentler, 1999), not significance levels. “TLI is significant” means nothing.</p>
+</div>
+<div class="muted">
+<p><strong>The baseline</strong> is the worst sensible model: nine tests, <strong>no correlation between any of them</strong>. Here it scores χ² = 918.9 on 36 df. CFI and TLI ask how far your model moves from it toward perfect fit.</p>
+</div>
 <div class="warn">
 <p><strong>Report all four, and say which convention you applied.</strong> Quoting only the one that passes loses marks.</p>
 </div>
+</section>
+<section id="the-three-indices-by-hand" class="slide level2 scrollable">
+<h2>The three indices, by hand</h2>
+<p>A correct model has <span class="math inline">\(E[\chi^2] = \mathrm{df}\)</span>, so the <strong>excess</strong> <span class="math inline">\(\chi^2 - \mathrm{df}\)</span>, or the ratio <span class="math inline">\(\chi^2 / \mathrm{df}\)</span> against 1, is the misfit. Subscript <span class="math inline">\(m\)</span> is your model (85.3 on 24 df), <span class="math inline">\(0\)</span> the baseline (918.9 on 36 df), <span class="math inline">\(n = 301\)</span>.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Formula</th>
+<th>Here</th>
+<th>Reading</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CFI</strong></td>
+<td><span class="math inline">\(1 - \dfrac{\chi^2_m - \mathrm{df}_m}{\chi^2_0 - \mathrm{df}_0}\)</span></td>
+<td><span class="math inline">\(1 - \dfrac{61.3}{882.9} = 0.931\)</span></td>
+<td>the model removes 93% of the baseline’s excess misfit</td>
+</tr>
+<tr class="even">
+<td><strong>TLI</strong></td>
+<td><span class="math inline">\(\dfrac{\chi^2_0/\mathrm{df}_0 \,-\, \chi^2_m/\mathrm{df}_m}{\chi^2_0/\mathrm{df}_0 \,-\, 1}\)</span></td>
+<td><span class="math inline">\(\dfrac{25.52 - 3.55}{25.52 - 1} = 0.896\)</span></td>
+<td>the same, in misfit <strong>per df</strong>: a parameter that does not earn the df it costs <strong>lowers</strong> TLI</td>
+</tr>
+<tr class="odd">
+<td><strong>RMSEA</strong></td>
+<td><span class="math inline">\(\sqrt{\dfrac{\max(\chi^2_m - \mathrm{df}_m,\, 0)}{\mathrm{df}_m\,(n-1)}}\)</span></td>
+<td><span class="math inline">\(\sqrt{\dfrac{61.3}{24 \times 300}} = 0.092\)</span></td>
+<td>typical misfit per df and per observation; 0 is perfect</td>
+</tr>
+</tbody>
+</table>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="check">
+<p><strong>Why TLI is below CFI:</strong> TLI divides by df first, so it charges for every parameter; CFI does not. That is why TLI is the one to watch when a model gains fit by adding arrows.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="step">
+<p><strong>TLI is “non-normed”:</strong> it can exceed 1 (when <span class="math inline">\(\chi^2_m &lt; \mathrm{df}_m\)</span>, common in small samples) or fall below 0. CFI is clipped to <span class="math inline">\([0, 1]\)</span>. A TLI of 1.02 is not “better than perfect”; it is noise.</p>
+</div>
+</div></div>
 </section>
 <section id="where-does-the-model-miss" class="slide level2 scrollable">
 <h2>Where does the model miss?</h2>
@@ -1868,6 +2003,90 @@ intention ~ attitude + norms + control</code></pre>
 <p><strong>What this example teaches:</strong> measurement error is not a nuisance to average away. Model it, and the structural paths come out right.</p>
 </div>
 </section>
+<section id="why-sem-and-not-a-regression" class="slide level2 scrollable">
+<h2>Why SEM, and not a regression?</h2>
+<p>A regression (session 3) needs <strong>one column per variable</strong> and <strong>one outcome per model</strong>. SEM drops both requirements. What that buys, shown in the three examples:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Linear or logistic regression</th>
+<th>SEM</th>
+<th>Seen in</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Measurement error</strong></td>
+<td>assumes every regressor is measured without error: noisy ones shrink their coefficients toward zero</td>
+<td>separates each item into construct + error, and estimates the path between the constructs</td>
+<td>Ex. 3: 0.37 instead of 0.5; SEM 0.44</td>
+</tr>
+<tr class="even">
+<td><strong>Several items per concept</strong></td>
+<td>one column, so you average or sum the items: equal weights, and no check that they measure one thing</td>
+<td>one <strong>loading per item</strong>, and a test of whether the items belong together</td>
+<td>Ex. 1: cubes loads 0.42</td>
+</tr>
+<tr class="odd">
+<td><strong>Chains of effects</strong></td>
+<td>one equation per model; a mediation takes several regressions and multiplying by hand</td>
+<td>the whole system in <strong>one fit</strong>: direct, indirect and total effects together</td>
+<td>Ex. 2: 0.17 direct, 0.39 indirect</td>
+</tr>
+<tr class="even">
+<td><strong>Testing the model</strong></td>
+<td>always “fits”: R² describes, it does not test the structure</td>
+<td>an over-identified model is a <strong>prediction</strong> of every correlation, with χ², CFI, TLI, RMSEA</td>
+<td>Ex. 1: the x9 misfit</td>
+</tr>
+<tr class="odd">
+<td><strong>Correlated errors</strong></td>
+<td>assumed away</td>
+<td>written down when the design predicts them: <code>y1 ~~ y5</code></td>
+<td>Ex. 2: same question twice</td>
+</tr>
+<tr class="even">
+<td><strong>Comparing groups</strong></td>
+<td>the same scale is assumed to mean the same thing in every country</td>
+<td><strong>measurement invariance</strong> can be tested: loadings constrained equal across groups</td>
+<td>What SEM does not fix</td>
+</tr>
+</tbody>
+</table>
+<div class="check">
+<p><strong>Underneath all six:</strong> a regression treats the column as the concept. SEM treats the column as <em>evidence about</em> the concept, and says how good that evidence is.</p>
+</div>
+</section>
+<section id="and-with-a-yesno-outcome-when-is-a-regression-enough" class="slide level2 scrollable">
+<h2>And with a yes/no outcome? When is a regression enough?</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="a-binary-outcome">A binary outcome</h3>
+<p><em>Did the firm export, yes or no?</em> Logistic regression (session 4) models it, but <strong>with observed predictors only</strong>: averaging the attitude items before a logit carries the same attenuation as in Example 3.</p>
+<p>SEM handles a binary or ordinal outcome, or ordinal survey items, through a <strong>probit</strong> link with a categorical estimator (WLSMV in R’s lavaan or in Mplus), so the predictors can stay latent.</p>
+<div class="muted">
+<p>Logit coefficients are on a log-odds scale, probit ones on a latent-normal scale: compare signs and significance across the two, not raw sizes.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="when-a-regression-is-enough">When a regression is enough</h3>
+<ul>
+<li><strong>Every variable is a single, well-measured column</strong>: exports in dollars, GDP, distance. With no latent constructs, an SEM of observed variables gives the regression’s coefficients back.</li>
+<li><strong>One outcome, no mediators</strong> to decompose.</li>
+<li><strong>Prediction is the goal</strong> (session 8): SEM is built to explain a structure, not to minimise out-of-sample error.</li>
+<li><strong>The sample is small</strong>: SEM wants 200 or more; a regression on 75 rows is honest about what it can do.</li>
+</ul>
+<div class="warn">
+<p><strong>SEM is not a better regression.</strong> It is a regression that takes measurement seriously; when nothing is measured with error, the extra machinery buys nothing.</p>
+</div>
+</div></div>
+</section>
 <section id="what-a-good-fit-does-not-prove" class="slide level2 center">
 <h2>What a good fit does not prove</h2>
 </section>
@@ -1949,7 +2168,7 @@ intention ~ attitude + norms + control</code></pre>
 </section>
 <section id="example-1-in-python-load-and-look" class="slide level2 scrollable">
 <h2>Example 1 in Python · Load and look</h2>
-<div id="f7ece891" class="cell" data-execution_count="2">
+<div id="32f79874" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href></a><span class="co"># Example 1 · Load the data</span></span>
 <span id="cb4-2"><a href></a><span class="im">import</span> semopy</span>
 <span id="cb4-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
@@ -1970,7 +2189,7 @@ intention ~ attitude + norms + control</code></pre>
 </section>
 <section id="example-1-in-python-the-correlation-picture" class="slide level2 scrollable">
 <h2>Example 1 in Python · The correlation picture</h2>
-<div id="cfc2adbf" class="cell columns column-output-location" data-fig-height="4.8" data-fig-width="5.6" data-execution_count="3">
+<div id="e9f76d06" class="cell columns column-output-location" data-fig-height="4.8" data-fig-width="5.6" data-execution_count="3">
 <div class="column">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href></a><span class="co"># Example 1 · A picture of the correlation matrix</span></span>
 <span id="cb6-2"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -2003,7 +2222,7 @@ intention ~ attitude + norms + control</code></pre>
 </section>
 <section id="example-1-in-python-fit-and-inspect" class="slide level2 scrollable">
 <h2>Example 1 in Python · Fit and inspect</h2>
-<div id="d7e0605e" class="cell" data-execution_count="4">
+<div id="11918384" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href></a><span class="co"># Example 1 · Model(), then .fit(), then .inspect()</span></span>
 <span id="cb7-2"><a href></a><span class="im">import</span> semopy</span>
 <span id="cb7-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
@@ -2030,11 +2249,11 @@ intention ~ attitude + norms + control</code></pre>
 7        x8   ~    speed  1.179980  0.722802  0.165045   7.149459       0.0
 8        x9   ~    speed  1.082517  0.665275  0.151354   7.152197       0.0
 9     speed  ~~    speed  0.383377  1.000000  0.086171   4.449045  0.000009
-10    speed  ~~   visual  0.262135  0.470895  0.056252   4.659977  0.000003
-11  textual  ~~  textual  0.980034  1.000000  0.112145   8.739002       0.0
-12  textual  ~~    speed  0.173603  0.283220  0.049316   3.520223  0.000431
-13  textual  ~~   visual  0.408277  0.458718  0.073527    5.55273       0.0
-14   visual  ~~   visual  0.808310  1.000000  0.145287   5.563548       0.0
+10  textual  ~~  textual  0.980034  1.000000  0.112145   8.739002       0.0
+11  textual  ~~    speed  0.173603  0.283220  0.049316   3.520223  0.000431
+12  textual  ~~   visual  0.408277  0.458718  0.073527    5.55273       0.0
+13   visual  ~~   visual  0.808310  1.000000  0.145287   5.563548       0.0
+14   visual  ~~    speed  0.262135  0.470895  0.056252   4.659977  0.000003
 15       x1  ~~       x1  0.550161  0.404985  0.113439    4.84983  0.000001
 16       x2  ~~       x2  1.133391  0.820197  0.101711  11.143202       0.0
 17       x3  ~~       x3  0.843731  0.661698  0.090625    9.31016       0.0
@@ -2079,7 +2298,7 @@ intention ~ attitude + norms + control</code></pre>
 </section>
 <section id="example-1-in-python-the-loadings" class="slide level2 scrollable">
 <h2>Example 1 in Python · The loadings</h2>
-<div id="e40a4aba" class="cell columns column-output-location" data-fig-height="4.2" data-fig-width="5.4" data-execution_count="5">
+<div id="1bcee908" class="cell columns column-output-location" data-fig-height="4.2" data-fig-width="5.4" data-execution_count="5">
 <div class="column">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a><span class="co"># Example 1 · The loadings are the rows with op &quot;~&quot;</span></span>
 <span id="cb9-2"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -2125,26 +2344,80 @@ intention ~ attitude + norms + control</code></pre>
 </div>
 </div></div>
 </section>
+<section id="example-1-in-python-are-the-abilities-distinct" class="slide level2 scrollable">
+<h2>Example 1 in Python · Are the abilities distinct?</h2>
+<div id="9d7836d0" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># Example 1 · AVE, and a bootstrap interval for each factor correlation</span></span>
+<span id="cb11-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb11-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb11-4"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb11-5"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
+<span id="cb11-6"><a href></a></span>
+<span id="cb11-7"><a href></a>data <span class="op">=</span> holzinger39.get_data()</span>
+<span id="cb11-8"><a href></a>description <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb11-9"><a href></a><span class="st">visual  =~ x1 + x2 + x3</span></span>
+<span id="cb11-10"><a href></a><span class="st">textual =~ x4 + x5 + x6</span></span>
+<span id="cb11-11"><a href></a><span class="st">speed   =~ x7 + x8 + x9</span></span>
+<span id="cb11-12"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb11-13"><a href></a>abilities <span class="op">=</span> [<span class="st">&quot;visual&quot;</span>, <span class="st">&quot;textual&quot;</span>, <span class="st">&quot;speed&quot;</span>]</span>
+<span id="cb11-14"><a href></a></span>
+<span id="cb11-15"><a href></a><span class="kw">def</span> factor_correlations(d):</span>
+<span id="cb11-16"><a href></a>    model <span class="op">=</span> semopy.Model(description)</span>
+<span id="cb11-17"><a href></a>    model.fit(d)</span>
+<span id="cb11-18"><a href></a>    est <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-19"><a href></a>    pairs <span class="op">=</span> est[(est[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~~&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;lval&quot;</span>] <span class="op">!=</span> est[<span class="st">&quot;rval&quot;</span>])</span>
+<span id="cb11-20"><a href></a>                <span class="op">&amp;</span> est[<span class="st">&quot;lval&quot;</span>].isin(abilities) <span class="op">&amp;</span> est[<span class="st">&quot;rval&quot;</span>].isin(abilities)]</span>
+<span id="cb11-21"><a href></a>    <span class="cf">return</span> <span class="bu">dict</span>(<span class="bu">zip</span>(pairs[<span class="st">&quot;lval&quot;</span>] <span class="op">+</span> <span class="st">&quot; ~~ &quot;</span> <span class="op">+</span> pairs[<span class="st">&quot;rval&quot;</span>], pairs[<span class="st">&quot;Est. Std&quot;</span>])), est</span>
+<span id="cb11-22"><a href></a></span>
+<span id="cb11-23"><a href></a>corr, est <span class="op">=</span> factor_correlations(data)</span>
+<span id="cb11-24"><a href></a></span>
+<span id="cb11-25"><a href></a><span class="co"># AVE: the mean squared standardised loading of each ability</span></span>
+<span id="cb11-26"><a href></a>loadings <span class="op">=</span> est[est[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>]</span>
+<span id="cb11-27"><a href></a><span class="bu">print</span>((loadings[<span class="st">&quot;Est. Std&quot;</span>] <span class="op">**</span> <span class="dv">2</span>).groupby(loadings[<span class="st">&quot;rval&quot;</span>]).mean().<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb11-28"><a href></a></span>
+<span id="cb11-29"><a href></a><span class="co"># Bootstrap: resample the children, refit, keep the correlations</span></span>
+<span id="cb11-30"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">9</span>)</span>
+<span id="cb11-31"><a href></a>boot <span class="op">=</span> pd.DataFrame([factor_correlations(data.sample(<span class="bu">len</span>(data), replace<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-32"><a href></a>                                                     random_state<span class="op">=</span>rng))[<span class="dv">0</span>]</span>
+<span id="cb11-33"><a href></a>                     <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">500</span>)])</span>
+<span id="cb11-34"><a href></a><span class="bu">print</span>(pd.DataFrame({<span class="st">&quot;r&quot;</span>: corr, <span class="st">&quot;lower&quot;</span>: boot.quantile(<span class="fl">0.025</span>),</span>
+<span id="cb11-35"><a href></a>                    <span class="st">&quot;upper&quot;</span>: boot.quantile(<span class="fl">0.975</span>)}).<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>rval
+speed      0.43
+textual    0.72
+visual     0.37
+Name: Est. Std, dtype: float64
+                      r  lower  upper
+textual ~~ speed   0.28   0.12   0.43
+textual ~~ visual  0.46   0.28   0.59
+visual ~~ speed    0.47   0.24   0.67</code></pre>
+</div>
+</div>
+<div class="step">
+<p><strong>Your turn.</strong> Add <code>+ x4</code> to the <em>visual</em> line, so that paragraph comprehension measures both. What happens to the visual ↔︎ textual correlation, and why?</p>
+</div>
+</section>
 <section id="example-1-in-python-fit-and-three-drawings-compared" class="slide level2 scrollable">
 <h2>Example 1 in Python · Fit, and three drawings compared</h2>
-<div id="c1d2e8bc" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># Example 1 · Same data, three different drawings, every fit index</span></span>
-<span id="cb11-2"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb11-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
-<span id="cb11-4"><a href></a></span>
-<span id="cb11-5"><a href></a>data <span class="op">=</span> holzinger39.get_data()</span>
-<span id="cb11-6"><a href></a>models <span class="op">=</span> {</span>
-<span id="cb11-7"><a href></a>    <span class="st">&quot;one factor&quot;</span>:     <span class="st">&quot;ability =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9&quot;</span>,</span>
-<span id="cb11-8"><a href></a>    <span class="st">&quot;three factors&quot;</span>:  <span class="st">&quot;visual =~ x1 + x2 + x3 </span><span class="ch">\n</span><span class="st"> textual =~ x4 + x5 + x6 </span><span class="ch">\n</span><span class="st"> speed =~ x7 + x8 + x9&quot;</span>,</span>
-<span id="cb11-9"><a href></a>    <span class="st">&quot;three + x9 vis&quot;</span>: <span class="st">&quot;visual =~ x1 + x2 + x3 + x9 </span><span class="ch">\n</span><span class="st"> textual =~ x4 + x5 + x6 </span><span class="ch">\n</span><span class="st"> speed =~ x7 + x8 + x9&quot;</span>,</span>
-<span id="cb11-10"><a href></a>}</span>
-<span id="cb11-11"><a href></a><span class="cf">for</span> name, description <span class="kw">in</span> models.items():</span>
-<span id="cb11-12"><a href></a>    model <span class="op">=</span> semopy.Model(description)</span>
-<span id="cb11-13"><a href></a>    model.fit(data)</span>
-<span id="cb11-14"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
-<span id="cb11-15"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:15}</span><span class="ss"> chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:6.1f}</span><span class="ss">  df = </span><span class="sc">{</span>fit[<span class="st">&#39;DoF&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.0f}</span><span class="ss">&quot;</span></span>
-<span id="cb11-16"><a href></a>          <span class="ss">f&quot;  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  TLI = </span><span class="sc">{</span>fit[<span class="st">&#39;TLI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
-<span id="cb11-17"><a href></a>          <span class="ss">f&quot;  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e1964375" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Example 1 · Same data, three different drawings, every fit index</span></span>
+<span id="cb13-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb13-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
+<span id="cb13-4"><a href></a></span>
+<span id="cb13-5"><a href></a>data <span class="op">=</span> holzinger39.get_data()</span>
+<span id="cb13-6"><a href></a>models <span class="op">=</span> {</span>
+<span id="cb13-7"><a href></a>    <span class="st">&quot;one factor&quot;</span>:     <span class="st">&quot;ability =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9&quot;</span>,</span>
+<span id="cb13-8"><a href></a>    <span class="st">&quot;three factors&quot;</span>:  <span class="st">&quot;visual =~ x1 + x2 + x3 </span><span class="ch">\n</span><span class="st"> textual =~ x4 + x5 + x6 </span><span class="ch">\n</span><span class="st"> speed =~ x7 + x8 + x9&quot;</span>,</span>
+<span id="cb13-9"><a href></a>    <span class="st">&quot;three + x9 vis&quot;</span>: <span class="st">&quot;visual =~ x1 + x2 + x3 + x9 </span><span class="ch">\n</span><span class="st"> textual =~ x4 + x5 + x6 </span><span class="ch">\n</span><span class="st"> speed =~ x7 + x8 + x9&quot;</span>,</span>
+<span id="cb13-10"><a href></a>}</span>
+<span id="cb13-11"><a href></a><span class="cf">for</span> name, description <span class="kw">in</span> models.items():</span>
+<span id="cb13-12"><a href></a>    model <span class="op">=</span> semopy.Model(description)</span>
+<span id="cb13-13"><a href></a>    model.fit(data)</span>
+<span id="cb13-14"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
+<span id="cb13-15"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:15}</span><span class="ss"> chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:6.1f}</span><span class="ss">  df = </span><span class="sc">{</span>fit[<span class="st">&#39;DoF&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.0f}</span><span class="ss">&quot;</span></span>
+<span id="cb13-16"><a href></a>          <span class="ss">f&quot;  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  TLI = </span><span class="sc">{</span>fit[<span class="st">&#39;TLI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
+<span id="cb13-17"><a href></a>          <span class="ss">f&quot;  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>one factor      chi2 =  312.3  df = 27  CFI = 0.677  TLI = 0.569  RMSEA = 0.188
 three factors   chi2 =   85.3  df = 24  CFI = 0.931  TLI = 0.896  RMSEA = 0.092
@@ -2157,35 +2430,35 @@ three + x9 vis  chi2 =   52.4  df = 23  CFI = 0.967  TLI = 0.948  RMSEA = 0.065<
 </section>
 <section id="example-2-in-python-load-fit-read-the-paths" class="slide level2 scrollable">
 <h2>Example 2 in Python · Load, fit, read the paths</h2>
-<div id="9a42bdc4" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Example 2 · =~ measures, ~ explains, ~~ covaries</span></span>
-<span id="cb13-2"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb13-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
-<span id="cb13-4"><a href></a></span>
-<span id="cb13-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
-<span id="cb13-6"><a href></a><span class="bu">print</span>(countries.shape)</span>
-<span id="cb13-7"><a href></a></span>
-<span id="cb13-8"><a href></a>description <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb13-9"><a href></a><span class="st"># measurement: each construct and its indicators</span></span>
-<span id="cb13-10"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
-<span id="cb13-11"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
-<span id="cb13-12"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
-<span id="cb13-13"><a href></a><span class="st"># structural: arrows between constructs</span></span>
-<span id="cb13-14"><a href></a><span class="st">dem60 ~ ind60</span></span>
-<span id="cb13-15"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
-<span id="cb13-16"><a href></a><span class="st"># the same question, five years apart</span></span>
-<span id="cb13-17"><a href></a><span class="st">y1 ~~ y5</span></span>
-<span id="cb13-18"><a href></a><span class="st">y2 ~~ y6</span></span>
-<span id="cb13-19"><a href></a><span class="st">y3 ~~ y7</span></span>
-<span id="cb13-20"><a href></a><span class="st">y4 ~~ y8</span></span>
-<span id="cb13-21"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb13-22"><a href></a>model <span class="op">=</span> semopy.Model(description)</span>
-<span id="cb13-23"><a href></a>model.fit(countries)</span>
-<span id="cb13-24"><a href></a>estimates <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb13-25"><a href></a></span>
-<span id="cb13-26"><a href></a><span class="co"># The structural paths: the rows whose left side is a construct</span></span>
-<span id="cb13-27"><a href></a>paths <span class="op">=</span> estimates[(estimates[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>) <span class="op">&amp;</span> estimates[<span class="st">&quot;lval&quot;</span>].isin([<span class="st">&quot;dem60&quot;</span>, <span class="st">&quot;dem65&quot;</span>])]</span>
-<span id="cb13-28"><a href></a><span class="bu">print</span>(paths[[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;op&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>, <span class="st">&quot;p-value&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="4d0e6bb2" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Example 2 · =~ measures, ~ explains, ~~ covaries</span></span>
+<span id="cb15-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb15-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
+<span id="cb15-4"><a href></a></span>
+<span id="cb15-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
+<span id="cb15-6"><a href></a><span class="bu">print</span>(countries.shape)</span>
+<span id="cb15-7"><a href></a></span>
+<span id="cb15-8"><a href></a>description <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb15-9"><a href></a><span class="st"># measurement: each construct and its indicators</span></span>
+<span id="cb15-10"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
+<span id="cb15-11"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
+<span id="cb15-12"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
+<span id="cb15-13"><a href></a><span class="st"># structural: arrows between constructs</span></span>
+<span id="cb15-14"><a href></a><span class="st">dem60 ~ ind60</span></span>
+<span id="cb15-15"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
+<span id="cb15-16"><a href></a><span class="st"># the same question, five years apart</span></span>
+<span id="cb15-17"><a href></a><span class="st">y1 ~~ y5</span></span>
+<span id="cb15-18"><a href></a><span class="st">y2 ~~ y6</span></span>
+<span id="cb15-19"><a href></a><span class="st">y3 ~~ y7</span></span>
+<span id="cb15-20"><a href></a><span class="st">y4 ~~ y8</span></span>
+<span id="cb15-21"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb15-22"><a href></a>model <span class="op">=</span> semopy.Model(description)</span>
+<span id="cb15-23"><a href></a>model.fit(countries)</span>
+<span id="cb15-24"><a href></a>estimates <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-25"><a href></a></span>
+<span id="cb15-26"><a href></a><span class="co"># The structural paths: the rows whose left side is a construct</span></span>
+<span id="cb15-27"><a href></a>paths <span class="op">=</span> estimates[(estimates[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>) <span class="op">&amp;</span> estimates[<span class="st">&quot;lval&quot;</span>].isin([<span class="st">&quot;dem60&quot;</span>, <span class="st">&quot;dem65&quot;</span>])]</span>
+<span id="cb15-28"><a href></a><span class="bu">print</span>(paths[[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;op&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>, <span class="st">&quot;p-value&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(75, 11)
     lval op   rval  Estimate  Est. Std   p-value
@@ -2197,32 +2470,32 @@ three + x9 vis  chi2 =   52.4  df = 23  CFI = 0.967  TLI = 0.948  RMSEA = 0.065<
 </section>
 <section id="example-2-in-python-direct-and-indirect-effects" class="slide level2 scrollable">
 <h2>Example 2 in Python · Direct and indirect effects</h2>
-<div id="7b65ead5" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Example 2 · An indirect effect is the product of the paths along the road</span></span>
-<span id="cb15-2"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb15-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
-<span id="cb15-4"><a href></a></span>
-<span id="cb15-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
-<span id="cb15-6"><a href></a>model <span class="op">=</span> semopy.Model(<span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb15-7"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
-<span id="cb15-8"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
-<span id="cb15-9"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
-<span id="cb15-10"><a href></a><span class="st">dem60 ~ ind60</span></span>
-<span id="cb15-11"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
-<span id="cb15-12"><a href></a><span class="st">y1 ~~ y5</span></span>
-<span id="cb15-13"><a href></a><span class="st">y2 ~~ y6</span></span>
-<span id="cb15-14"><a href></a><span class="st">y3 ~~ y7</span></span>
-<span id="cb15-15"><a href></a><span class="st">y4 ~~ y8</span></span>
-<span id="cb15-16"><a href></a><span class="st">&quot;&quot;&quot;</span>)</span>
-<span id="cb15-17"><a href></a>model.fit(countries)</span>
-<span id="cb15-18"><a href></a>est <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb15-19"><a href></a></span>
-<span id="cb15-20"><a href></a>a <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem60&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;ind60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
-<span id="cb15-21"><a href></a>b <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem65&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
-<span id="cb15-22"><a href></a>c <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem65&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;ind60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
-<span id="cb15-23"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;direct    c     = </span><span class="sc">{</span>c<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb15-24"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;indirect  a * b = </span><span class="sc">{</span>a<span class="sc">:.2f}</span><span class="ss"> * </span><span class="sc">{</span>b<span class="sc">:.2f}</span><span class="ss"> = </span><span class="sc">{</span>a <span class="op">*</span> b<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb15-25"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;total     c + a * b = </span><span class="sc">{</span>c <span class="op">+</span> a <span class="op">*</span> b<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="4f46cbff" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="co"># Example 2 · An indirect effect is the product of the paths along the road</span></span>
+<span id="cb17-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb17-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
+<span id="cb17-4"><a href></a></span>
+<span id="cb17-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
+<span id="cb17-6"><a href></a>model <span class="op">=</span> semopy.Model(<span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb17-7"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
+<span id="cb17-8"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
+<span id="cb17-9"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
+<span id="cb17-10"><a href></a><span class="st">dem60 ~ ind60</span></span>
+<span id="cb17-11"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
+<span id="cb17-12"><a href></a><span class="st">y1 ~~ y5</span></span>
+<span id="cb17-13"><a href></a><span class="st">y2 ~~ y6</span></span>
+<span id="cb17-14"><a href></a><span class="st">y3 ~~ y7</span></span>
+<span id="cb17-15"><a href></a><span class="st">y4 ~~ y8</span></span>
+<span id="cb17-16"><a href></a><span class="st">&quot;&quot;&quot;</span>)</span>
+<span id="cb17-17"><a href></a>model.fit(countries)</span>
+<span id="cb17-18"><a href></a>est <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-19"><a href></a></span>
+<span id="cb17-20"><a href></a>a <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem60&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;ind60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
+<span id="cb17-21"><a href></a>b <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem65&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
+<span id="cb17-22"><a href></a>c <span class="op">=</span> est.loc[(est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;dem65&quot;</span>) <span class="op">&amp;</span> (est[<span class="st">&quot;rval&quot;</span>] <span class="op">==</span> <span class="st">&quot;ind60&quot;</span>), <span class="st">&quot;Est. Std&quot;</span>].iloc[<span class="dv">0</span>]</span>
+<span id="cb17-23"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;direct    c     = </span><span class="sc">{</span>c<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb17-24"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;indirect  a * b = </span><span class="sc">{</span>a<span class="sc">:.2f}</span><span class="ss"> * </span><span class="sc">{</span>b<span class="sc">:.2f}</span><span class="ss"> = </span><span class="sc">{</span>a <span class="op">*</span> b<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb17-25"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;total     c + a * b = </span><span class="sc">{</span>c <span class="op">+</span> a <span class="op">*</span> b<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>direct    c     = 0.17
 indirect  a * b = 0.45 * 0.87 = 0.39
@@ -2235,28 +2508,28 @@ total     c + a * b = 0.56</code></pre>
 </section>
 <section id="example-2-in-python-with-and-without-the-extra-arrows" class="slide level2 scrollable">
 <h2>Example 2 in Python · With and without the extra arrows</h2>
-<div id="c04f06e9" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="co"># Example 2 · The model with and without the four same-question covariances</span></span>
-<span id="cb17-2"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb17-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
-<span id="cb17-4"><a href></a></span>
-<span id="cb17-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
-<span id="cb17-6"><a href></a>base <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb17-7"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
-<span id="cb17-8"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
-<span id="cb17-9"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
-<span id="cb17-10"><a href></a><span class="st">dem60 ~ ind60</span></span>
-<span id="cb17-11"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
-<span id="cb17-12"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb17-13"><a href></a>same_question <span class="op">=</span> <span class="st">&quot;y1 ~~ y5 </span><span class="ch">\n</span><span class="st"> y2 ~~ y6 </span><span class="ch">\n</span><span class="st"> y3 ~~ y7 </span><span class="ch">\n</span><span class="st"> y4 ~~ y8&quot;</span></span>
-<span id="cb17-14"><a href></a></span>
-<span id="cb17-15"><a href></a><span class="cf">for</span> name, description <span class="kw">in</span> {<span class="st">&quot;without&quot;</span>: base, <span class="st">&quot;with&quot;</span>: base <span class="op">+</span> same_question}.items():</span>
-<span id="cb17-16"><a href></a>    model <span class="op">=</span> semopy.Model(description)</span>
-<span id="cb17-17"><a href></a>    model.fit(countries)</span>
-<span id="cb17-18"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
-<span id="cb17-19"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:8}</span><span class="ss"> chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:5.1f}</span><span class="ss">  df = </span><span class="sc">{</span>fit[<span class="st">&#39;DoF&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.0f}</span><span class="ss">&quot;</span></span>
-<span id="cb17-20"><a href></a>          <span class="ss">f&quot;  p = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2 p-value&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
-<span id="cb17-21"><a href></a>          <span class="ss">f&quot;  TLI = </span><span class="sc">{</span>fit[<span class="st">&#39;TLI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="5d0f0423" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href></a><span class="co"># Example 2 · The model with and without the four same-question covariances</span></span>
+<span id="cb19-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb19-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
+<span id="cb19-4"><a href></a></span>
+<span id="cb19-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
+<span id="cb19-6"><a href></a>base <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb19-7"><a href></a><span class="st">ind60 =~ x1 + x2 + x3</span></span>
+<span id="cb19-8"><a href></a><span class="st">dem60 =~ y1 + y2 + y3 + y4</span></span>
+<span id="cb19-9"><a href></a><span class="st">dem65 =~ y5 + y6 + y7 + y8</span></span>
+<span id="cb19-10"><a href></a><span class="st">dem60 ~ ind60</span></span>
+<span id="cb19-11"><a href></a><span class="st">dem65 ~ ind60 + dem60</span></span>
+<span id="cb19-12"><a href></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb19-13"><a href></a>same_question <span class="op">=</span> <span class="st">&quot;y1 ~~ y5 </span><span class="ch">\n</span><span class="st"> y2 ~~ y6 </span><span class="ch">\n</span><span class="st"> y3 ~~ y7 </span><span class="ch">\n</span><span class="st"> y4 ~~ y8&quot;</span></span>
+<span id="cb19-14"><a href></a></span>
+<span id="cb19-15"><a href></a><span class="cf">for</span> name, description <span class="kw">in</span> {<span class="st">&quot;without&quot;</span>: base, <span class="st">&quot;with&quot;</span>: base <span class="op">+</span> same_question}.items():</span>
+<span id="cb19-16"><a href></a>    model <span class="op">=</span> semopy.Model(description)</span>
+<span id="cb19-17"><a href></a>    model.fit(countries)</span>
+<span id="cb19-18"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
+<span id="cb19-19"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:8}</span><span class="ss"> chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:5.1f}</span><span class="ss">  df = </span><span class="sc">{</span>fit[<span class="st">&#39;DoF&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.0f}</span><span class="ss">&quot;</span></span>
+<span id="cb19-20"><a href></a>          <span class="ss">f&quot;  p = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2 p-value&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
+<span id="cb19-21"><a href></a>          <span class="ss">f&quot;  TLI = </span><span class="sc">{</span>fit[<span class="st">&#39;TLI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>without  chi2 =  72.5  df = 41  p = 0.002  CFI = 0.953  TLI = 0.938  RMSEA = 0.102
 with     chi2 =  50.8  df = 37  p = 0.064  CFI = 0.980  TLI = 0.970  RMSEA = 0.071</code></pre>
@@ -2265,19 +2538,19 @@ with     chi2 =  50.8  df = 37  p = 0.064  CFI = 0.980  TLI = 0.970  RMSEA = 0.0
 </section>
 <section id="example-2-in-python-turn-the-arrow-around" class="slide level2 scrollable">
 <h2>Example 2 in Python · Turn the arrow around</h2>
-<div id="e541f6b4" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href></a><span class="co"># Example 2 · Two opposite causal stories, fitted to the same data</span></span>
-<span id="cb19-2"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb19-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
-<span id="cb19-4"><a href></a></span>
-<span id="cb19-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
-<span id="cb19-6"><a href></a>measurement <span class="op">=</span> <span class="st">&quot;ind60 =~ x1 + x2 + x3 </span><span class="ch">\n</span><span class="st"> dem60 =~ y1 + y2 + y3 + y4 </span><span class="ch">\n</span><span class="st">&quot;</span></span>
-<span id="cb19-7"><a href></a><span class="cf">for</span> arrow <span class="kw">in</span> [<span class="st">&quot;dem60 ~ ind60&quot;</span>, <span class="st">&quot;ind60 ~ dem60&quot;</span>]:</span>
-<span id="cb19-8"><a href></a>    model <span class="op">=</span> semopy.Model(measurement <span class="op">+</span> arrow)</span>
-<span id="cb19-9"><a href></a>    model.fit(countries)</span>
-<span id="cb19-10"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
-<span id="cb19-11"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>arrow<span class="sc">}</span><span class="ss">:  chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
-<span id="cb19-12"><a href></a>          <span class="ss">f&quot;  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="97a384d2" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href></a><span class="co"># Example 2 · Two opposite causal stories, fitted to the same data</span></span>
+<span id="cb21-2"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb21-3"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> political_democracy</span>
+<span id="cb21-4"><a href></a></span>
+<span id="cb21-5"><a href></a>countries <span class="op">=</span> political_democracy.get_data()</span>
+<span id="cb21-6"><a href></a>measurement <span class="op">=</span> <span class="st">&quot;ind60 =~ x1 + x2 + x3 </span><span class="ch">\n</span><span class="st"> dem60 =~ y1 + y2 + y3 + y4 </span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb21-7"><a href></a><span class="cf">for</span> arrow <span class="kw">in</span> [<span class="st">&quot;dem60 ~ ind60&quot;</span>, <span class="st">&quot;ind60 ~ dem60&quot;</span>]:</span>
+<span id="cb21-8"><a href></a>    model <span class="op">=</span> semopy.Model(measurement <span class="op">+</span> arrow)</span>
+<span id="cb21-9"><a href></a>    model.fit(countries)</span>
+<span id="cb21-10"><a href></a>    fit <span class="op">=</span> semopy.calc_stats(model)</span>
+<span id="cb21-11"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>arrow<span class="sc">}</span><span class="ss">:  chi2 = </span><span class="sc">{</span>fit[<span class="st">&#39;chi2&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">  CFI = </span><span class="sc">{</span>fit[<span class="st">&#39;CFI&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span></span>
+<span id="cb21-12"><a href></a>          <span class="ss">f&quot;  RMSEA = </span><span class="sc">{</span>fit[<span class="st">&#39;RMSEA&#39;</span>]<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>dem60 ~ ind60:  chi2 = 23.74  CFI = 0.972  RMSEA = 0.106
 ind60 ~ dem60:  chi2 = 23.74  CFI = 0.972  RMSEA = 0.106</code></pre>
@@ -2289,32 +2562,32 @@ ind60 ~ dem60:  chi2 = 23.74  CFI = 0.972  RMSEA = 0.106</code></pre>
 </section>
 <section id="example-3-in-python-simulate-the-data" class="slide level2 scrollable">
 <h2>Example 3 in Python · Simulate the data</h2>
-<div id="5ebd3c5e" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href></a><span class="co"># Example 3 · 400 managers, four constructs, two survey items each</span></span>
-<span id="cb21-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb21-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb21-4"><a href></a></span>
-<span id="cb21-5"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">9</span>)</span>
-<span id="cb21-6"><a href></a>n <span class="op">=</span> <span class="dv">400</span></span>
-<span id="cb21-7"><a href></a>attitude <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
-<span id="cb21-8"><a href></a>norms <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
-<span id="cb21-9"><a href></a>control <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
-<span id="cb21-10"><a href></a><span class="co"># the truth: 0.5, 0.6 and 0.3</span></span>
-<span id="cb21-11"><a href></a>intention <span class="op">=</span> (<span class="fl">0.5</span> <span class="op">*</span> attitude <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> norms <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> control</span>
-<span id="cb21-12"><a href></a>             <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.5</span>, size<span class="op">=</span>n))</span>
-<span id="cb21-13"><a href></a></span>
-<span id="cb21-14"><a href></a><span class="kw">def</span> item(latent):</span>
-<span id="cb21-15"><a href></a>    <span class="co"># what a survey sees: the construct plus its own noise</span></span>
-<span id="cb21-16"><a href></a>    <span class="cf">return</span> latent <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.6</span>, size<span class="op">=</span>n)</span>
-<span id="cb21-17"><a href></a></span>
-<span id="cb21-18"><a href></a>firms <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb21-19"><a href></a>    <span class="st">&quot;att1&quot;</span>: item(attitude), <span class="st">&quot;att2&quot;</span>: item(attitude),</span>
-<span id="cb21-20"><a href></a>    <span class="st">&quot;norm1&quot;</span>: item(norms), <span class="st">&quot;norm2&quot;</span>: item(norms),</span>
-<span id="cb21-21"><a href></a>    <span class="st">&quot;ctrl1&quot;</span>: item(control), <span class="st">&quot;ctrl2&quot;</span>: item(control),</span>
-<span id="cb21-22"><a href></a>    <span class="st">&quot;int1&quot;</span>: item(intention), <span class="st">&quot;int2&quot;</span>: item(intention),</span>
-<span id="cb21-23"><a href></a>})</span>
-<span id="cb21-24"><a href></a><span class="bu">print</span>(firms.head().<span class="bu">round</span>(<span class="dv">2</span>))</span>
-<span id="cb21-25"><a href></a><span class="bu">print</span>(firms.corr().<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c20435f1" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href></a><span class="co"># Example 3 · 400 managers, four constructs, two survey items each</span></span>
+<span id="cb23-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb23-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb23-4"><a href></a></span>
+<span id="cb23-5"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">9</span>)</span>
+<span id="cb23-6"><a href></a>n <span class="op">=</span> <span class="dv">400</span></span>
+<span id="cb23-7"><a href></a>attitude <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb23-8"><a href></a>norms <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb23-9"><a href></a>control <span class="op">=</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb23-10"><a href></a><span class="co"># the truth: 0.5, 0.6 and 0.3</span></span>
+<span id="cb23-11"><a href></a>intention <span class="op">=</span> (<span class="fl">0.5</span> <span class="op">*</span> attitude <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> norms <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> control</span>
+<span id="cb23-12"><a href></a>             <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.5</span>, size<span class="op">=</span>n))</span>
+<span id="cb23-13"><a href></a></span>
+<span id="cb23-14"><a href></a><span class="kw">def</span> item(latent):</span>
+<span id="cb23-15"><a href></a>    <span class="co"># what a survey sees: the construct plus its own noise</span></span>
+<span id="cb23-16"><a href></a>    <span class="cf">return</span> latent <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.6</span>, size<span class="op">=</span>n)</span>
+<span id="cb23-17"><a href></a></span>
+<span id="cb23-18"><a href></a>firms <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb23-19"><a href></a>    <span class="st">&quot;att1&quot;</span>: item(attitude), <span class="st">&quot;att2&quot;</span>: item(attitude),</span>
+<span id="cb23-20"><a href></a>    <span class="st">&quot;norm1&quot;</span>: item(norms), <span class="st">&quot;norm2&quot;</span>: item(norms),</span>
+<span id="cb23-21"><a href></a>    <span class="st">&quot;ctrl1&quot;</span>: item(control), <span class="st">&quot;ctrl2&quot;</span>: item(control),</span>
+<span id="cb23-22"><a href></a>    <span class="st">&quot;int1&quot;</span>: item(intention), <span class="st">&quot;int2&quot;</span>: item(intention),</span>
+<span id="cb23-23"><a href></a>})</span>
+<span id="cb23-24"><a href></a><span class="bu">print</span>(firms.head().<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb23-25"><a href></a><span class="bu">print</span>(firms.corr().<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   att1  att2  norm1  norm2  ctrl1  ctrl2  int1  int2
 0 -0.24 -0.91   1.78   2.37  -1.65  -0.75 -0.29  0.63
@@ -2339,43 +2612,43 @@ int2   0.36  0.34   0.51   0.52   0.15   0.17  0.71  1.00</code></pre>
 </section>
 <section id="example-3-in-python-sem-against-averaged-items" class="slide level2 scrollable">
 <h2>Example 3 in Python · SEM against averaged items</h2>
-<div id="8f2550e1" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href></a><span class="co"># Example 3 · Same data, two methods, one known truth</span></span>
-<span id="cb23-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb23-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb23-4"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb23-5"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
-<span id="cb23-6"><a href></a></span>
-<span id="cb23-7"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">9</span>)</span>
-<span id="cb23-8"><a href></a>n <span class="op">=</span> <span class="dv">400</span></span>
-<span id="cb23-9"><a href></a>attitude, norms, control <span class="op">=</span> rng.normal(size<span class="op">=</span>n), rng.normal(size<span class="op">=</span>n), rng.normal(size<span class="op">=</span>n)</span>
-<span id="cb23-10"><a href></a>intention <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> attitude <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> norms <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> control <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.5</span>, size<span class="op">=</span>n)</span>
-<span id="cb23-11"><a href></a>item <span class="op">=</span> <span class="kw">lambda</span> latent: latent <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.6</span>, size<span class="op">=</span>n)</span>
-<span id="cb23-12"><a href></a>firms <span class="op">=</span> pd.DataFrame({<span class="st">&quot;att1&quot;</span>: item(attitude), <span class="st">&quot;att2&quot;</span>: item(attitude),</span>
-<span id="cb23-13"><a href></a>                      <span class="st">&quot;norm1&quot;</span>: item(norms), <span class="st">&quot;norm2&quot;</span>: item(norms),</span>
-<span id="cb23-14"><a href></a>                      <span class="st">&quot;ctrl1&quot;</span>: item(control), <span class="st">&quot;ctrl2&quot;</span>: item(control),</span>
-<span id="cb23-15"><a href></a>                      <span class="st">&quot;int1&quot;</span>: item(intention), <span class="st">&quot;int2&quot;</span>: item(intention)})</span>
-<span id="cb23-16"><a href></a></span>
-<span id="cb23-17"><a href></a><span class="co"># 1 · SEM: the paths between the constructs</span></span>
-<span id="cb23-18"><a href></a>model <span class="op">=</span> semopy.Model(<span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb23-19"><a href></a><span class="st">attitude  =~ att1 + att2</span></span>
-<span id="cb23-20"><a href></a><span class="st">norms     =~ norm1 + norm2</span></span>
-<span id="cb23-21"><a href></a><span class="st">control   =~ ctrl1 + ctrl2</span></span>
-<span id="cb23-22"><a href></a><span class="st">intention =~ int1 + int2</span></span>
-<span id="cb23-23"><a href></a><span class="st">intention ~ attitude + norms + control</span></span>
-<span id="cb23-24"><a href></a><span class="st">&quot;&quot;&quot;</span>)</span>
-<span id="cb23-25"><a href></a>model.fit(firms)</span>
-<span id="cb23-26"><a href></a>est <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb23-27"><a href></a><span class="bu">print</span>(est[est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;intention&quot;</span>][[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;op&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>]].<span class="bu">round</span>(<span class="dv">2</span>))</span>
-<span id="cb23-28"><a href></a>fit <span class="op">=</span> semopy.calc_stats(model)</span>
-<span id="cb23-29"><a href></a><span class="bu">print</span>(fit[[<span class="st">&quot;chi2&quot;</span>, <span class="st">&quot;DoF&quot;</span>, <span class="st">&quot;chi2 p-value&quot;</span>, <span class="st">&quot;CFI&quot;</span>, <span class="st">&quot;TLI&quot;</span>, <span class="st">&quot;RMSEA&quot;</span>]].T.<span class="bu">round</span>(<span class="dv">3</span>))</span>
-<span id="cb23-30"><a href></a></span>
-<span id="cb23-31"><a href></a><span class="co"># 2 · The shortcut: average the items, then a regression</span></span>
-<span id="cb23-32"><a href></a>firms[<span class="st">&quot;att&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;att1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;att2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb23-33"><a href></a>firms[<span class="st">&quot;norm&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;norm1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;norm2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb23-34"><a href></a>firms[<span class="st">&quot;ctrl&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;ctrl1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;ctrl2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb23-35"><a href></a>firms[<span class="st">&quot;intent&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;int1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;int2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb23-36"><a href></a><span class="bu">print</span>(smf.ols(<span class="st">&quot;intent ~ att + norm + ctrl&quot;</span>, data<span class="op">=</span>firms).fit().params.<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="852f714b" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href></a><span class="co"># Example 3 · Same data, two methods, one known truth</span></span>
+<span id="cb25-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb25-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb25-4"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb25-5"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb25-6"><a href></a></span>
+<span id="cb25-7"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">9</span>)</span>
+<span id="cb25-8"><a href></a>n <span class="op">=</span> <span class="dv">400</span></span>
+<span id="cb25-9"><a href></a>attitude, norms, control <span class="op">=</span> rng.normal(size<span class="op">=</span>n), rng.normal(size<span class="op">=</span>n), rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb25-10"><a href></a>intention <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> attitude <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> norms <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> control <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.5</span>, size<span class="op">=</span>n)</span>
+<span id="cb25-11"><a href></a>item <span class="op">=</span> <span class="kw">lambda</span> latent: latent <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.6</span>, size<span class="op">=</span>n)</span>
+<span id="cb25-12"><a href></a>firms <span class="op">=</span> pd.DataFrame({<span class="st">&quot;att1&quot;</span>: item(attitude), <span class="st">&quot;att2&quot;</span>: item(attitude),</span>
+<span id="cb25-13"><a href></a>                      <span class="st">&quot;norm1&quot;</span>: item(norms), <span class="st">&quot;norm2&quot;</span>: item(norms),</span>
+<span id="cb25-14"><a href></a>                      <span class="st">&quot;ctrl1&quot;</span>: item(control), <span class="st">&quot;ctrl2&quot;</span>: item(control),</span>
+<span id="cb25-15"><a href></a>                      <span class="st">&quot;int1&quot;</span>: item(intention), <span class="st">&quot;int2&quot;</span>: item(intention)})</span>
+<span id="cb25-16"><a href></a></span>
+<span id="cb25-17"><a href></a><span class="co"># 1 · SEM: the paths between the constructs</span></span>
+<span id="cb25-18"><a href></a>model <span class="op">=</span> semopy.Model(<span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb25-19"><a href></a><span class="st">attitude  =~ att1 + att2</span></span>
+<span id="cb25-20"><a href></a><span class="st">norms     =~ norm1 + norm2</span></span>
+<span id="cb25-21"><a href></a><span class="st">control   =~ ctrl1 + ctrl2</span></span>
+<span id="cb25-22"><a href></a><span class="st">intention =~ int1 + int2</span></span>
+<span id="cb25-23"><a href></a><span class="st">intention ~ attitude + norms + control</span></span>
+<span id="cb25-24"><a href></a><span class="st">&quot;&quot;&quot;</span>)</span>
+<span id="cb25-25"><a href></a>model.fit(firms)</span>
+<span id="cb25-26"><a href></a>est <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-27"><a href></a><span class="bu">print</span>(est[est[<span class="st">&quot;lval&quot;</span>] <span class="op">==</span> <span class="st">&quot;intention&quot;</span>][[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;op&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>]].<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb25-28"><a href></a>fit <span class="op">=</span> semopy.calc_stats(model)</span>
+<span id="cb25-29"><a href></a><span class="bu">print</span>(fit[[<span class="st">&quot;chi2&quot;</span>, <span class="st">&quot;DoF&quot;</span>, <span class="st">&quot;chi2 p-value&quot;</span>, <span class="st">&quot;CFI&quot;</span>, <span class="st">&quot;TLI&quot;</span>, <span class="st">&quot;RMSEA&quot;</span>]].T.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb25-30"><a href></a></span>
+<span id="cb25-31"><a href></a><span class="co"># 2 · The shortcut: average the items, then a regression</span></span>
+<span id="cb25-32"><a href></a>firms[<span class="st">&quot;att&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;att1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;att2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb25-33"><a href></a>firms[<span class="st">&quot;norm&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;norm1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;norm2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb25-34"><a href></a>firms[<span class="st">&quot;ctrl&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;ctrl1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;ctrl2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb25-35"><a href></a>firms[<span class="st">&quot;intent&quot;</span>] <span class="op">=</span> (firms[<span class="st">&quot;int1&quot;</span>] <span class="op">+</span> firms[<span class="st">&quot;int2&quot;</span>]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb25-36"><a href></a><span class="bu">print</span>(smf.ols(<span class="st">&quot;intent ~ att + norm + ctrl&quot;</span>, data<span class="op">=</span>firms).fit().params.<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         lval  op       rval  Estimate  Est. Std
 0   intention   ~   attitude      0.44      0.46
@@ -2402,31 +2675,31 @@ dtype: float64</code></pre>
 </section>
 <section id="the-whole-recipe-in-one-cell-to-copy" class="slide level2 scrollable">
 <h2>The whole recipe, in one cell to copy</h2>
-<div id="0b47488c" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href></a><span class="co"># A measurement model, start to finish: change the data and the description for your project</span></span>
-<span id="cb25-2"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb25-3"><a href></a><span class="im">import</span> semopy</span>
-<span id="cb25-4"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
-<span id="cb25-5"><a href></a></span>
-<span id="cb25-6"><a href></a>data <span class="op">=</span> holzinger39.get_data()                       <span class="co"># 1 · your data: one column per indicator</span></span>
-<span id="cb25-7"><a href></a>description <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb25-8"><a href></a><span class="st">visual  =~ x1 + x2 + x3</span></span>
-<span id="cb25-9"><a href></a><span class="st">textual =~ x4 + x5 + x6</span></span>
-<span id="cb25-10"><a href></a><span class="st">speed   =~ x7 + x8 + x9</span></span>
-<span id="cb25-11"><a href></a><span class="st">&quot;&quot;&quot;</span>                                                 <span class="co"># 2 · your drawing, as text</span></span>
-<span id="cb25-12"><a href></a></span>
-<span id="cb25-13"><a href></a>model <span class="op">=</span> semopy.Model(description)                   <span class="co"># 3 · fit</span></span>
-<span id="cb25-14"><a href></a>model.fit(data)</span>
-<span id="cb25-15"><a href></a></span>
-<span id="cb25-16"><a href></a>estimates <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)             <span class="co"># 4 · the loadings, standardised</span></span>
-<span id="cb25-17"><a href></a>loadings <span class="op">=</span> estimates[estimates[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>]</span>
-<span id="cb25-18"><a href></a><span class="bu">print</span>(loadings[[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>, <span class="st">&quot;p-value&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span>
-<span id="cb25-19"><a href></a></span>
-<span id="cb25-20"><a href></a>fit <span class="op">=</span> semopy.calc_stats(model)                      <span class="co"># 5 · the fit, all of it</span></span>
-<span id="cb25-21"><a href></a><span class="bu">print</span>(fit[[<span class="st">&quot;chi2&quot;</span>, <span class="st">&quot;DoF&quot;</span>, <span class="st">&quot;chi2 p-value&quot;</span>, <span class="st">&quot;CFI&quot;</span>, <span class="st">&quot;TLI&quot;</span>, <span class="st">&quot;RMSEA&quot;</span>]].T.<span class="bu">round</span>(<span class="dv">3</span>))</span>
-<span id="cb25-22"><a href></a></span>
-<span id="cb25-23"><a href></a>weak <span class="op">=</span> loadings[loadings[<span class="st">&quot;Est. Std&quot;</span>] <span class="op">&lt;</span> <span class="fl">0.4</span>]         <span class="co"># 6 · which indicators would you drop?</span></span>
-<span id="cb25-24"><a href></a><span class="bu">print</span>(<span class="st">&quot;weak indicators:&quot;</span>, <span class="bu">list</span>(weak[<span class="st">&quot;lval&quot;</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="634a77bc" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href></a><span class="co"># A measurement model, start to finish: change the data and the description for your project</span></span>
+<span id="cb27-2"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb27-3"><a href></a><span class="im">import</span> semopy</span>
+<span id="cb27-4"><a href></a><span class="im">from</span> semopy.examples <span class="im">import</span> holzinger39</span>
+<span id="cb27-5"><a href></a></span>
+<span id="cb27-6"><a href></a>data <span class="op">=</span> holzinger39.get_data()                       <span class="co"># 1 · your data: one column per indicator</span></span>
+<span id="cb27-7"><a href></a>description <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb27-8"><a href></a><span class="st">visual  =~ x1 + x2 + x3</span></span>
+<span id="cb27-9"><a href></a><span class="st">textual =~ x4 + x5 + x6</span></span>
+<span id="cb27-10"><a href></a><span class="st">speed   =~ x7 + x8 + x9</span></span>
+<span id="cb27-11"><a href></a><span class="st">&quot;&quot;&quot;</span>                                                 <span class="co"># 2 · your drawing, as text</span></span>
+<span id="cb27-12"><a href></a></span>
+<span id="cb27-13"><a href></a>model <span class="op">=</span> semopy.Model(description)                   <span class="co"># 3 · fit</span></span>
+<span id="cb27-14"><a href></a>model.fit(data)</span>
+<span id="cb27-15"><a href></a></span>
+<span id="cb27-16"><a href></a>estimates <span class="op">=</span> model.inspect(std_est<span class="op">=</span><span class="va">True</span>)             <span class="co"># 4 · the loadings, standardised</span></span>
+<span id="cb27-17"><a href></a>loadings <span class="op">=</span> estimates[estimates[<span class="st">&quot;op&quot;</span>] <span class="op">==</span> <span class="st">&quot;~&quot;</span>]</span>
+<span id="cb27-18"><a href></a><span class="bu">print</span>(loadings[[<span class="st">&quot;lval&quot;</span>, <span class="st">&quot;rval&quot;</span>, <span class="st">&quot;Estimate&quot;</span>, <span class="st">&quot;Est. Std&quot;</span>, <span class="st">&quot;p-value&quot;</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb27-19"><a href></a></span>
+<span id="cb27-20"><a href></a>fit <span class="op">=</span> semopy.calc_stats(model)                      <span class="co"># 5 · the fit, all of it</span></span>
+<span id="cb27-21"><a href></a><span class="bu">print</span>(fit[[<span class="st">&quot;chi2&quot;</span>, <span class="st">&quot;DoF&quot;</span>, <span class="st">&quot;chi2 p-value&quot;</span>, <span class="st">&quot;CFI&quot;</span>, <span class="st">&quot;TLI&quot;</span>, <span class="st">&quot;RMSEA&quot;</span>]].T.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb27-22"><a href></a></span>
+<span id="cb27-23"><a href></a>weak <span class="op">=</span> loadings[loadings[<span class="st">&quot;Est. Std&quot;</span>] <span class="op">&lt;</span> <span class="fl">0.4</span>]         <span class="co"># 6 · which indicators would you drop?</span></span>
+<span id="cb27-24"><a href></a><span class="bu">print</span>(<span class="st">&quot;weak indicators:&quot;</span>, <span class="bu">list</span>(weak[<span class="st">&quot;lval&quot;</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  lval     rval  Estimate  Est. Std p-value
 0   x1   visual     1.000     0.771       -
