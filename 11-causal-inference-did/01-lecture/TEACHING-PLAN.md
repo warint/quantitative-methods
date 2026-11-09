@@ -25,19 +25,22 @@ establishes that the reading is load-bearing rather than decorative.
 
 | Minutes | |
 |---|---|
-| **0–10** | The question, and the paper they read. Establish what is at stake. |
-| **10–35** | The key concept — build it from intuition before notation. |
-| **35–60** | The statistical model — derive it, then run it in Python on the session dataset. |
-| **60–80** | The coefficients — read the output in units, out loud. |
-| **80–90** | What the method does **not** license. Hand off to the practice. |
+| **0–10** | The question, and the paper they read. Part 1: why time can replace measurement; the two differences. |
+| **10–20** | The interaction regression, the words, parallel trends stated exactly. |
+| **20–30** | Example 1, housing: after-only −25, before-after +20, DiD −10.5. Ask the room what each naive comparison mixes in. No code on screen. |
+| **30–40** | Example 2: six years, two cities; the event study catches B. Ask them to read the pre-years *before* showing the estimate. |
+| **40–55** | Example 3, AI strategies: the adoption table first, then TWFE 2.81 against Callaway–Sant'Anna 2.20, then the sensitivity plot. |
+| **55–65** | Matching or DiD; what DiD cannot fix; instruments when neither works. |
+| **65–90** | In class: the code behind the three examples. Circulate; hand off to the practice. |
 
 ---
 
 ## Run the code live
 
-Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
-the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
-error appear and be read is worth more than a slide saying errors happen.
+The examples are taught from pictures and tables; the code waits until minute 65. Then open the
+VS Codium terminal **at the repository root** (Example 3 needs `import qmib`), activate `.venv`, and run
+the first cell of each example in front of them before they run the rest themselves. Type the mistakes
+as well as the fixes: an adoption year taken from the rows with an outcome, a 2021 cohort left in.
 
 ---
 

@@ -1,9 +1,10 @@
 ---
-title: "Session 11: Causal Inference (2/2)"
+title: "Session 11: Difference-in-Differences, Through Three Examples"
 subtitle: "Published course presentation · repository edition"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session11_cours/"
+jupyter: python3
 filters:
   - ../../slides/drop-comments.lua
 format:
@@ -22,20 +23,56 @@ format:
     margin: 0.06
     smaller: true
     include-in-header:
-      text: "<style>.reveal .slides{font-size:0.93em;} .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;} .reveal .slides img.r-stretch{max-height:420px !important;object-fit:contain;}</style>"
+      text: |
+        <style>
+        .reveal .slides{font-size:0.93em;}
+        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}
+        .reveal section img.big{max-height:470px;}
+        .reveal section img.mid{max-height:400px;}
+        .reveal section img.wide{max-height:250px;}
+        .reveal section img.short{max-height:190px;}
+        </style>
     footer: "MATH60033A · Session 11 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- Imported from https://warin.ca/quant/en/session11_cours/. Content is static so the deck renders without R or Python. -->
+<!-- The deck teaches through three examples first, with no code on screen: a
+     simulated affordable-housing policy in two periods (the two differences),
+     the same city over six years (parallel trends, and an event study that
+     catches its failure), and the course's own data on national AI strategies
+     adopted in different years (TWFE against Callaway-Sant'Anna, and a
+     Rambachan-Roth sensitivity analysis). The code comes last, in the in-class
+     part, where every cell is live: it executes at render time, so the output on
+     the slides is the output the students' own machines produce. Examples 1 and
+     2 simulate their data in the cell; Example 3 loads it with qmib.load, which
+     a student runs from the repository root.
+     The charts are drawn by economist-assets/build_did_figures.py, from the same
+     simulations and the same data, so every number on a picture is the number
+     the matching cell prints. -->
+```{python}
+#| label: setup
+#| echo: false
+
+# Hidden: keep library warnings off the slides, print tables wide, and let
+# `import qmib` find the repository root, as it does for a student working there.
+import sys
+import warnings
+warnings.filterwarnings("ignore")
+sys.path.insert(0, "../..")
+import pandas as pd
+pd.set_option("display.width", 96)
+pd.set_option("display.max_columns", 10)
+```
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. The key concept
-2. A Difference-in-Difference model
-3. Instrumental Variables: Your turn!
-4. Conclusion
+1. Part 1 · The language of difference-in-differences
+2. Example 1 · Did affordable housing lower nearby prices?
+3. Example 2 · Were the trends parallel?
+4. Example 3 · Do national AI strategies raise firms' AI use?
+5. Wrapping up · What the design cannot fix
+6. In class · The code behind the three examples
 
 ## What session 11 is for {.scrollable}
 ::::: columns
@@ -47,6 +84,7 @@ format:
 - Set up a **difference-in-differences** design and identify the four cells
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
+- Explain why **two-way fixed effects** can mislead under staggered adoption
 - Say what an **instrument** must satisfy, and why good ones are rare
 
 ::::
@@ -57,7 +95,8 @@ format:
 
 - Build the four cells, then get the same number from an interaction in `smf.ols`
 - Plot an event study and let the pre-period speak for the design
-- Handle staggered adoption without letting the cohorts blur
+- Handle staggered adoption without letting the cohorts blur, with `diff_diff.CallawaySantAnna`
+- Ask how much violation of parallel trends a result survives, with `HonestDiD`
 
 ::::
 
@@ -90,390 +129,636 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-## The key concept {#imported-s11-002 .center .scrollable}
+## Part 1 · The language of difference-in-differences {.center}
 
-## The key concept {#imported-s11-003 .scrollable}
+## Did the policy work, if you cannot match on the reason? {.scrollable}
 
-The difference-in-difference model is used to estimate the effect of a policy intervention or treatment by comparing changes over time in an outcome for a treated group to changes over time for a comparison (control) group.
+Session 10 removed selection bias by **measuring** the confounders and comparing like with like. Its last
+example showed the limit: one unmeasured trait, and matching fails without a warning.
 
-1.  It measures how the mean of an outcome changes before and after treatment for the treatment group.
-2.  It compares this change with the mean change over time for a control group that is not exposed to the treatment.
-
-We observe average outcomes for two groups, before and after the intervention.
-
-## The key concept (cont.) {#imported-s11-004 .scrollable}
-
-Difference in difference model
-
-![](economist-assets/did-basic.png){.r-stretch}
-
-## The key concept (cont.) {#imported-s11-005 .scrollable}
-
-The DiD estimator is the difference between the average change in the treatment group and the average change in the control group:
-
-[\\\[ (\\text{Treatment_post} - \\text{Treatment_pre}) - (\\text{Control_post} - \\text{Control_pre}) = \\widehat{\\text{DiD}} \\\]]{.math .display}
-
-Using the values in :
-
-[\\\[ (85 - 50) - (55 - 35) = 15 \\\]]{.math .display}
-
-## The key concept (cont.) {#imported-s11-006 .scrollable}
-
-A more detailed representation is shown in the following table.
-
-Difference in difference, an example
-
-![](economist-assets/did-table.png){.r-stretch}
-
-The red number in the bottom-right cell represents the DiD estimator. When this estimator is different from zero, the treatment is interpreted as having an effect.
-
-## The key concept (cont.) {#imported-s11-007 .scrollable}
-
-In this simple DiD setup:
-
-> -   We work with grouped data, comparing a treatment and a control group.
-> -   Coefficients represent group means and differences between group means; there is no time trend slope as in a standard time series regression.
-
-## The statistical model {#imported-s11-008 .scrollable}
-
-A basic DiD model can be written as:
-
-[\\\[ Y = \\beta_0 + \\beta_1 \\cdot \\text{Treatment} + \\beta_2 \\cdot \\text{Post} + \\beta_3 \\cdot (\\text{Treatment} \\times \\text{Post}) + e \\\]]{.math .display}
-
-Where:
-
--   Y.  is the outcome variable.
--   `Treatment` is a dummy variable equal to 1 for units in the treatment group and 0 for the control group.
--   `Post` is a dummy variable equal to 1 for the post-treatment period and 0 for the pre-treatment period.
--   `Treatment × Post` is an interaction term, equal to 1 only for treated units observed after the intervention.
-
-## The statistical model (cont.) {#imported-s11-009 .scrollable}
-
-A schematic dataset for a simple DiD design is:
-
-  Subject   Outcome   Treatment   Post   Treatment × Post
-  --------- --------- ----------- ------ ------------------
-  1         74        1           1      1
-  1         46        1           0      0
-  2         96        1           1      1
-  2         54        1           0      0
-  3         50        0           1      0
-  3         30        0           0      0
-  4         60        0           1      0
-  4         40        0           0      0
-
-Two units belong to the treatment group and two units to the control group. For each unit there is one observation before and one observation after the treatment.
-
-## The coefficients {#imported-s11-010 .scrollable}
-
-We can estimate a simple DiD model corresponding to
-
-  **Dependent variable:** Outcome   Estimate      Std. Error
-  --------------------------------- ------------- ------------
-  **Intercept (B0)**                35.00\*\*\*   (0.00)
-  **Treatment (B1)**                15.00\*\*\*   (0.00)
-  **Post-treatment (B2)**           20.00\*\*\*   (0.00)
-  **Diff in Diff (B3)**             15.00\*\*\*   (0.00)
-
-**Note:** p\<0.1; p\<0.05; p\<0.01
-
-## The coefficients (cont.) {#imported-s11-011 .scrollable}
-
-Each coefficient corresponds to a group mean or a difference between group means.
-
-:::: columns
-::: {.column width="55%"}
--   [\\(\\beta_0\\)]{.math .inline} is the average outcome of the control group before treatment.
-
--   [\\(\\beta_1\\)]{.math .inline} is the difference between the treatment and control group in the pre-treatment period. In the example, [\\(\\beta_1 = 15\\)]{.math .inline}, so [\\(\\beta_0 + \\beta_1 = 50\\)]{.math .inline}, the pre-treatment mean for the treatment group.
-
--   [\\(\\beta_2\\)]{.math .inline} captures the change in the average outcome of the control group from the pre-treatment to the post-treatment period. The post-treatment mean for the control group is [\\(\\beta_0 + \\beta_2\\)]{.math .inline}.
-
--   [\\(\\beta_3\\)]{.math .inline} is the DiD estimator: it measures how much the average outcome in the treatment group changes in the post-treatment period relative to what would have happened in the absence of treatment.
+::: columns
+::: {.column width="50%"}
+::: {.step}
+**Today's idea:** do not measure the confounders. Use **time**. If what makes the treated units different is
+**stable**, comparing each unit with *itself* before and after removes it, observed or not.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**The catch:** things change over time for everyone. So compare the change among the treated with the change
+among units that were **not** treated. Two differences, hence the name.
+:::
+:::
 :::
 
-::: {.column width="45%"}
-![](economist-assets/did-coefficients.png){width="100%"}
-:::
-::::
-
-## The coefficients (cont.) {#imported-s11-012 .scrollable}
-
-Diff-in-Diff, beta 3
-
-To obtain the post-treatment mean for the treatment group, we add:
-
-[\\\[ \\beta_0 + \\beta_1 + \\beta_2 + \\beta_3 \\\]]{.math .display}
-
-Each coefficient corresponds to a distinct hypothesis:
-
-  --------------------------------------------------------------------------------------------------------------------------
-  Coefficient                       Hypothesis
-  --------------------------------- ----------------------------------------------------------------------------------------
-  [\\(\\beta_0\\)]{.math .inline}   Is the average outcome of the control group before treatment different from 0?
-
-  [\\(\\beta_1\\)]{.math .inline}   Is the pre-treatment difference between treatment and control groups different from 0?
-
-  [\\(\\beta_2\\)]{.math .inline}   Is the change over time in the control group different from 0?
-
-  [\\(\\beta_3\\)]{.math .inline}   DiD estimator: does the treatment have an effect?
-  --------------------------------------------------------------------------------------------------------------------------
-
-## The counterfactual {#imported-s11-013 .scrollable}
-
-To interpret [\\(\\beta_3\\)]{.math .inline}, it is useful to consider the counterfactual.
-
-The counterfactual is the outcome the treatment group would have experienced in the absence of the policy intervention. In the DiD framework, the counterfactual is inferred from the time trend observed in the control group.
-
-## The counterfactual (cont.) {#imported-s11-014 .scrollable}
-
-DID counterfactual
-
-![](economist-assets/did-counterfactual.png){.r-stretch}
-
-## The counterfactual (cont.) {#imported-s11-015 .scrollable}
-
-Using the simple four-cell example:
-
-[\\\[ (\\text{Treatment_post} - \\text{Treatment_pre}) = (\\text{Control_post} - \\text{Control_pre}) \\\\ (X - 50) = (55 - 35) \\\\ (X - 50) = 20 \\\\ X = 20 + 50 = 70 \\\]]{.math .display}
-
-So the counterfactual outcome for the treatment group in the post-treatment period is 70.
-
-## The counterfactual (cont.) {#imported-s11-016 .scrollable}
-
-Using the regression coefficients, the counterfactual can also be written as:
-
-[\\\[ \\text{Counterfactual} = \\beta_0 + \\beta_1 + \\beta_2 \\\]]{.math .display}
-
-Counterfactual, betas
-
-## A Difference-in-Difference model {#imported-s11-017 .center .scrollable}
-
-## A Difference-in-Difference model {#imported-s11-018 .scrollable}
-
-:::: columns
-::: {.column width="45%"}
-Figure 1: A housing project in New York
-
-![](economist-assets/housing-project-editorial.png){width="100%"}
+::: {.check}
+**Three examples:** a housing policy in two periods (the idea), the same city over six years (the
+assumption, and how it fails), and national AI strategies adopted in different years (the method, on the
+course's own data).
 :::
 
-::: {.column width="55%"}
-Governments at different levels subsidize housing projects to create affordable dwellings. This policy has gained prominence as housing costs have increased in many cities.
+## The two differences {.scrollable}
 
-Critics of such programs often argue that the construction of affordable housing may reduce nearby property values. Possible mechanisms include:
+Let $\bar Y_{g,t}$ be the average outcome of group $g$ (treated or control) in period $t$ (pre or post):
 
--   Neighborhood preferences for proximity to high-income households
--   Congestion effects due to higher local population
--   Architectural mismatch between new projects and the existing housing stock
+$$
+\widehat{\text{DiD}}
+=
+\underbrace{\big(\bar Y_{\text{treated, post}} - \bar Y_{\text{treated, pre}}\big)}_{\text{change among the treated}}
+-
+\underbrace{\big(\bar Y_{\text{control, post}} - \bar Y_{\text{control, pre}}\big)}_{\text{change among the controls}}
+$$
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**The first difference** removes everything **constant** about the treated group, measured or not: its
+location, its institutions, its wealth.
 :::
-::::
+:::
+::: {.column width="50%"}
+::: {.check}
+**The second difference** removes everything **common** to both groups over time: the market, the business
+cycle, inflation.
+:::
+:::
+:::
 
-## A Difference-in-Difference model (cont.) {#imported-s11-019 .scrollable}
+## As a regression: the interaction is the estimate {.scrollable}
 
-A DiD design can be used to examine whether housing projects reduce nearby house prices, as in Ellen et al. (2007).
+$$
+Y = \beta_0 + \beta_1\,\text{Treated} + \beta_2\,\text{Post} + \beta_3\,(\text{Treated} \times \text{Post}) + e
+$$
 
-We simulate data on housing prices for:
+| Coefficient | Equals | In words |
+|---|---|---|
+| $\beta_0$ | $\bar Y_{\text{control, pre}}$ | the control group, before |
+| $\beta_1$ | $\bar Y_{\text{treated, pre}} - \bar Y_{\text{control, pre}}$ | how different the groups were **before**: allowed to be anything |
+| $\beta_2$ | $\bar Y_{\text{control, post}} - \bar Y_{\text{control, pre}}$ | what happened to everyone over time |
+| $\beta_3$ | the DiD | **the effect**: the extra change among the treated |
 
--   Houses located close to a subsidized housing project (treatment group)
--   Houses located far from such projects (control group)
+::: {.muted}
+`Treated × Post` is 1 only for treated units after the policy. The counterfactual for the treated after is
+$\beta_0 + \beta_1 + \beta_2$; what they actually reached is that plus $\beta_3$.
+:::
 
-## A Difference-in-Difference model (cont.) {#imported-s11-020 .scrollable}
+## Words you will need {.scrollable}
 
-Prices are observed before and after the construction of the subsidized housing site.
+| Term | What it is | In this session's examples |
+|---|---|---|
+| **DiD** · difference-in-differences | the change among the treated minus the change among the controls | the housing sites; the AI strategies |
+| **Pre** / **post** period | before / after the policy starts | before / after a site opens |
+| **Counterfactual** | what the treated would have reached **without** the policy; here, their start plus the controls' change | the dashed line |
+| **Parallel trends** | without treatment, the treated would have followed the **same trajectory** as the controls. **Untestable** | what fails in Example 2B |
+| **Event study** | the DiD estimated year by year, relative to the last pre-period | the plot of Example 2 |
+| **Pre-trend** | a gap that was already moving **before** the policy: evidence against parallel trends | Example 2B |
+| **Staggered adoption** · **cohort** | units treated in different years; a cohort is the units first treated in the same year | the AI strategies, 2021–2023 |
+| **TWFE** · two-way fixed effects | a regression with a dummy per unit and per year, plus the treatment | Example 3 |
+| **ATT** · average treatment effect on the treated | the effect on those who got the policy (session 10) | what DiD estimates |
 
-> **Research question:** Do affordable housing projects reduce the prices of nearby houses?
->
-> **Hypothesis:** Houses near subsidized housing projects experience a larger decrease in prices over time.
+## The assumption, stated exactly {.scrollable}
 
-## Data {#imported-s11-021 .scrollable}
+::: {.warn}
+**Parallel trends:** in the absence of treatment, the **change** among the treated would have equalled the
+change among the controls,
+$$
+\mathrm{E}[Y_{\text{tr,post}}(0) - Y_{\text{tr,pre}}(0)] = \mathrm{E}[Y_{\text{co,post}}(0) - Y_{\text{co,pre}}(0)] .
+$$
+:::
 
-::::: cell
-::: {#cb1 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-# In the VS Codium terminal, with .venv active:  python
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**It is not** that the groups are similar. They may differ by any amount in **level**; only the **gap**
+must stay constant.
+:::
+:::
+::: {.column width="50%"}
+::: {.step}
+**It is untestable**, for the same reason as session 10's conditional independence: it is about $Y(0)$ for
+the treated after treatment, the column nobody sees. What you **can** look at is whether the trends were
+parallel **before**.
+:::
+:::
+:::
+
+## Example 1 · Did affordable housing lower nearby prices? {.center}
+
+## The case {.scrollable}
+
+Governments subsidise **affordable-housing projects**. Critics argue they lower the value of nearby homes:
+neighbours' preferences, congestion, buildings that do not match the street (Ellen et al., 2007).
+
+| Column | Meaning |
+|---|---|
+| `near` | 1 = the house is near a new subsidised site (treated), 0 = far from any (control) |
+| `post` | 1 = observed after the site opened, 0 = before |
+| `price` | the sale price, in \$ thousands |
+
+::: {.step .question}
+**The question:** did the sites lower the prices of nearby houses, and by how much?
+:::
+
+::: {.muted}
+**Simulated**, 1,000 houses, so we know the truth: a site lowers nearby prices by **\$10,000**. Near houses
+were cheaper to begin with (by about \$15,000), and the whole market rose by \$30,000.
+:::
+
+## Three ways to answer, one of them right {.scrollable}
+
+![](economist-assets/housing-estimators.png){.wide fig-alt="After-only comparison −25.2, before-after +20.2, difference-in-differences −10.5, truth −10."}
+
+| Comparison | Estimate | What it gets wrong |
+|---|---|---|
+| **after only**: near vs far, after the sites opened | **−25.2** | mixes the effect with the **\$15,000 gap that was always there** |
+| **before–after**: near houses, after vs before | **+20.2** | mixes the effect with the **market's \$30,000 rise** |
+| **difference-in-differences** | **−10.5** | removes both: the truth is −10 |
+
+## The four means, and the counterfactual {.scrollable}
+
+::: columns
+::: {.column width="58%"}
+![](economist-assets/housing-2x2.png){.big fig-alt="Far houses rise from 250.1 to 280.9; near houses from 235.5 to 255.7; had the site not opened they would have reached 266.2; the gap is −10.5."}
+:::
+
+::: {.column width="42%"}
+$$
+\begin{aligned}
+\text{DiD} &= (255.7 - 235.5) - (280.9 - 250.1) \\
+&= 20.2 - 30.8 = -10.5
+\end{aligned}
+$$
+
+::: {.check}
+**The dashed line** is the counterfactual: near houses start at 235.5 and, without the site, would have risen
+like the far ones, by 30.8, to **266.2**. They reached 255.7. The difference is the effect.
+:::
+:::
+:::
+
+## The same number from a regression {.scrollable}
+
+`price ~ near * post`, standard errors clustered by house:
+
+| | Coefficient | Std. error | Reading |
+|---|---|---|---|
+| Intercept $\beta_0$ | 250.12 | 1.03 | far houses, before |
+| `near` $\beta_1$ | −14.65 | 1.43 | near houses were \$14,650 cheaper **before**: allowed |
+| `post` $\beta_2$ | 30.76 | 0.64 | the market rose by \$30,760 for everyone |
+| `near:post` $\beta_3$ | **−10.51** | 0.92 | **the effect**: the DiD |
+
+::: {.check}
+**Check:** $\beta_0 + \beta_1 = 235.47$, the near houses before; $\beta_0 + \beta_1 + \beta_2 = 266.23$, the
+counterfactual. The regression adds what the four means cannot: a **standard error**, covariates, and more
+than two periods.
+:::
+
+## Example 1 · Plain summary {.scrollable}
+
+- Comparing near and far houses **after** the sites opened says −25: the gap that was always there.
+- Comparing near houses **before and after** says +20: the market's rise.
+- The **difference of the two changes** says −10.5, against a truth of −10. In a regression, it is the
+  coefficient on the interaction.
+
+::: {.step}
+**What this example teaches:** DiD needs no measure of *why* near houses were cheaper; it needs only that,
+without the sites, both groups would have **moved together**. Example 2 asks what happens when they would not.
+:::
+
+## Example 2 · Were the trends parallel? {.center}
+
+## The case: the same city, six years {.scrollable}
+
+The sites open in **2006**. We now have prices from **2003 to 2008**: three years before, three after. The
+truth is the same −10. Two versions of the city:
+
+- **A:** without the sites, near and far houses would have risen **together**.
+- **B:** near neighbourhoods were **already slipping**, losing \$3,000 a year on far ones before any site opened.
+
+::: {.step .question}
+**The question:** can the data tell the two cities apart, and what does the DiD say in each?
+:::
+
+## The raw prices {.scrollable}
+
+![](economist-assets/housing-trends.png){fig-alt="Two panels of prices from 2003 to 2008: in A the near and far lines run parallel before 2006; in B the near line rises more slowly from the start."}
+
+::: {.check}
+**Look before the shaded years.** In A, the two lines run parallel until 2005: the gap is constant. In B, the
+gap is already **widening** from 2003, before any site exists.
+:::
+
+## The event study: the DiD, year by year {.scrollable}
+
+![](economist-assets/housing-event-study.png){fig-alt="Event studies: in A the pre-2006 points sit at zero and the post points at about −11; in B the pre points are +5.2 and +2.3, falling to −20.1 by 2008."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**A:** before 2006 the points sit at **0** (−0.8, −0.7): no pre-trend. After, about **−11** each year.
+The two-period DiD, 2005 to 2008, says **−11.1**.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**B:** the points before 2006 are **+5.2, +2.3, 0**: a line already falling. The two-period DiD says
+**−20.1**, double the truth: the pre-existing slide, \$3,000 a year, is counted as the policy.
+:::
+:::
+:::
+
+::: {.muted}
+2005 is the **reference year**: zero by construction, not by evidence. The other pre-years are the evidence.
+:::
+
+## Example 2 · Plain summary {.scrollable}
+
+- When the trends were parallel, the DiD finds the effect, and the years **before** the policy are flat.
+- When the treated group was already on a different path, the DiD **doubles** the effect, and the years before
+  the policy show it.
+- A flat pre-trend is **evidence**, not proof: parallel trends is about the years *after*, which nobody sees.
+
+::: {.step}
+**What this example teaches:** with several pre-periods, plot them first. Example 3 shows what to do when
+there is only one.
+:::
+
+## Example 3 · Do national AI strategies raise firms' AI use? {.center}
+
+## The case: the course's own data {.scrollable}
+
+Between 2021 and 2023, **18 European countries** adopted a national **AI strategy**; 12 did not. Did firms
+in adopting countries start **using AI** more? The outcome, `ai_use_any`, is the share of firms using any AI
+technology, in percentage points; `qmib.load("angle_c_country")` gives it by country and year.
+
+| Adopted in | Countries | Years observed **before** adopting |
+|---|---|---|
+| 2021 | 8 | **none**: the outcome starts in 2021 |
+| 2022 | 9 | one: 2021 |
+| 2023 | 1 | two: 2021, 2022 |
+| never | 12 | (the controls) |
+
+::: {.step .question}
+**The question:** what did adopting a strategy do to firms' AI use, and how much can 30 countries over four
+years establish?
+:::
+
+::: {.muted}
+The course data are generated with a known effect, **+2.4 points**, so every estimate can be scored, as in
+sessions 9 and 10.
+:::
+
+## What the adoption table already decides {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+::: {.warn}
+**The 2021 cohort cannot be used at all.** No year before adoption: no before, no difference. Not weak
+evidence: **no** evidence for this design.
+:::
+
+::: {.warn}
+**The 2023 cohort is one country.** Its estimate is one country's trajectory.
+:::
+:::
+::: {.column width="50%"}
+::: {.check}
+**The 2022 cohort has one pre-period.** Enough to compute a DiD, **not** enough to see a pre-trend: a trend
+needs at least two points.
+:::
+
+::: {.step}
+**With staggered adoption, which controls?** Only countries **not yet** or **never** treated. A country that
+adopted in 2021 is not a control for one that adopted in 2022.
+:::
+:::
+:::
+
+## The estimates, against the truth {.scrollable}
+
+![](economist-assets/ai-estimates.png){.mid fig-alt="Two-way fixed effects 2.81, Callaway–Sant'Anna overall 2.20, cohort 2022 2.21, cohort 2023 1.84 from one country; truth 2.4."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**TWFE** (two-way fixed effects: a dummy per country and per year) gives **2.81**. Close, but it silently
+uses already-treated countries as controls for later ones, and with staggered timing its weights can even
+be **negative** (Goodman-Bacon, 2021; de Chaisemartin and D'Haultfœuille, 2020).
+:::
+:::
+::: {.column width="50%"}
+::: {.step}
+**Callaway and Sant'Anna (2021)** estimate each cohort against clean controls, then average: **2.20**
+(standard error 0.78, 30 clusters). The 2021 cohort is dropped, **out loud**. The one-country cohort's
+narrow interval is not precision: there is no variation left to measure.
+:::
+:::
+:::
+
+## One pre-period: how much violation does the result survive? {.scrollable}
+
+![](economist-assets/ai-honest.png){.mid fig-alt="Robust 95% intervals widening with M; they exclude zero at M = 0 and 0.25 and include it from M = 0.5."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**The only pre-treatment evidence** is one country (the 2023 cohort) in one year: −1.13 against the
+never-treated. The 2022 cohort's single pre-period is its reference year, zero by construction.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Rambachan and Roth (2023):** allow post-treatment departures from parallel trends up to $M$ times that
+pre-treatment one. The effect stays positive up to $M = 0.25$, not at $0.5$. That is a **low breakdown
+point**, and it should be: it rests on one country's single year.
+:::
+:::
+:::
+
+## Example 3 · Plain summary {.scrollable}
+
+- The adoption table decides what can be estimated before any regression: one cohort is unusable, one is a
+  single country.
+- TWFE gives 2.81; the staggered-robust estimator gives **2.20 ± 1.5**, covering the truth of 2.4.
+- Parallel trends **cannot be examined** here; a sensitivity analysis says how much of it the result needs:
+  not much violation before the interval reaches zero.
+
+::: {.step}
+**What this example teaches:** with real panels, the design is decided by **who was treated when**. Report
+the adoption structure, a staggered-robust estimate beside TWFE, and how much violation the result survives.
+:::
+
+## Wrapping up · What the design cannot fix {.center}
+
+## Matching or difference-in-differences? {.scrollable}
+
+| | Matching (session 10) | Difference-in-differences |
+|---|---|---|
+| **Removes** | differences in what you **measured** | everything **constant** about a unit, measured or not |
+| **Assumes** | conditional independence: no unmeasured confounder | parallel trends: no **change** that hits only the treated |
+| **Needs** | rich pre-treatment covariates, overlap | data **before and after**, on treated and controls |
+| **Checkable part** | balance, overlap | pre-trends, if there are several pre-periods |
+| **Fails when** | an unmeasured trait drives selection (session 10, Example 3B) | the treated were already on a different path (Example 2B) |
+
+::: {.check}
+**They answer different worries.** Matching is for "the groups differ in ways I measured"; DiD for "the
+groups differ in ways I cannot measure, but that do not change over time". Both rest on an assumption the
+data cannot test.
+:::
+
+## What difference-in-differences cannot fix {.scrollable}
+
+- **Anything that changes at the same time as treatment.** A shock hitting only the treated in the treatment
+  year is indistinguishable from the treatment. Countries adopting an AI strategy may do other things that year.
+- **Anticipation.** If units react before the policy starts, the "before" is already contaminated.
+- **Composition change.** If the units in the panel change, the first difference compares different
+  populations, not the same one over time.
+- **Spillovers.** If the policy affects the controls too (neighbouring houses, neighbouring countries), the
+  estimate shrinks toward zero.
+- **Standard errors.** DiD data are panels: cluster by unit, and say how many clusters you have.
+
+## When neither design works: an instrument {.scrollable}
+
+Sometimes treatment is driven by something unmeasured **and** changing. Then you need a variable that moves
+treatment **from outside**: an **instrumental variable** (IV).
+
+| An instrument $Z$ must be | Meaning | Testable? |
+|---|---|---|
+| **relevant** | it actually moves the treatment | **yes**: the first stage |
+| **independent** | as good as randomly assigned | no: an argument |
+| **excludable** | it affects the outcome **only through** the treatment | no: an argument |
+
+::: {.warn}
+**Why good ones are rare:** relevance is the only condition the data can check; the other two carry the identification, and only an argument supports them.
+A strong first stage with a doubtful exclusion is not an instrument. Lotteries, distances and rainfall have all
+been used, and each has been argued to fail the exclusion.
+:::
+
+::: {.muted}
+Optional practice: [an IV example (R, RPubs)](https://rpubs.com/Sternonyos/913599).
+:::
+
+## Seven steps for a DiD study {.scrollable}
+
+| Step | What you do | In Python |
+|---|---|---|
+| 1 | name the policy, the treated, the controls, the dates | on paper |
+| 2 | the **adoption table**: cohorts, and how many pre-periods each has | `.groupby("geo")["time"].min()` |
+| 3 | plot the outcome over time for each group | `.groupby(["time", "group"]).mean()`, `plt.plot` |
+| 4 | the four means, then the interaction regression | `smf.ols("y ~ treated * post")` |
+| 5 | standard errors clustered by unit | `.fit(cov_type="cluster", cov_kwds={"groups": ...})` |
+| 6 | the event study: is the pre-period flat? | the DiD year by year |
+| 7 | staggered timing: a robust estimator beside TWFE; then sensitivity | `diff_diff.CallawaySantAnna`, `HonestDiD` |
+
+## In class · The code behind the three examples {.center}
+
+## How this part works {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+Every cell that follows **runs on its own**: copy it into a new file in VS Codium, run it **from the
+repository's root folder**, and you should see exactly the numbers from the lecture. Examples 1 and 2 simulate
+their data in the cell; Example 3 loads the course data with `qmib.load`.
+:::
+
+::: {.column width="50%"}
+::: {.step}
+**For each example:**
+
+1. run the cells and check you get the numbers from the lecture;
+2. do the **Your turn** task under the last cell, changing one thing at a time.
+:::
+:::
+:::
+
+## Example 1 in Python · Simulate, then the four means {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 1 · 1,000 houses, half near a new site; the site lowers nearby prices by 10 ($ thousands)
+import numpy as np
 import pandas as pd
 
-data = pd.DataFrame({
-    "House_Price": [213679.8, 229355.4, 190580.1, 188669.0, 253573.7,
-                    320094.0, 188525.7, 282998.4, 184424.0, 290409.4],
-    "Group":          [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],   # 1 = treated area
-    "Post_Treatment": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],   # 1 = after the policy
-})
+rng = np.random.default_rng(11)
+n = 1000
+near = (np.arange(n) < 500).astype(int)
+base = 250 - 15 * near + rng.normal(0, 20, n)          # near houses were cheaper already
+before = base + rng.normal(0, 10, n)
+after = base + 30 - 10 * near + rng.normal(0, 10, n)   # +30 for everyone; -10 near the site
 
-data
+houses = pd.DataFrame({"house": np.r_[np.arange(n), np.arange(n)],
+                       "near": np.r_[near, near],
+                       "post": np.r_[np.zeros(n), np.ones(n)].astype(int),
+                       "price": np.r_[before, after]})
+
+means = houses.groupby(["near", "post"])["price"].mean().unstack()
+print(means.round(1))
+print("after only:  ", round(means.loc[1, 1] - means.loc[0, 1], 1))
+print("before-after:", round(means.loc[1, 1] - means.loc[1, 0], 1))
+print("DiD:         ", round((means.loc[1, 1] - means.loc[1, 0]) - (means.loc[0, 1] - means.loc[0, 0]), 1))
 ```
-:::
 
-::: {.cell-output .cell-output-stdout}
-       House_Price Group Post_Treatment
-    1     213679.8     0              0
-    2     229355.4     0              1
-    3     190580.1     1              0
-    4     188669.0     1              1
-    5     253573.7     0              0
-    6     320094.0     0              1
-    7     188525.7     1              0
-    8     282998.4     1              1
-    9     184424.0     0              0
-    10    290409.4     0              1
-:::
-:::::
+## Example 1 in Python · The interaction regression {.scrollable}
 
-Variables:
+```{python}
+#| echo: true
 
--   `House_Price`: house price
--   `Group`: 1 if close to a subsidized housing site, 0 otherwise
--   `Post_Treatment`: 1 if observed after the site opens, 0 otherwise
-
-## Analysis {#imported-s11-022 .scrollable}
-
-The DiD regression is:
-
-[\\\[ Y = \\beta_0 + \\beta_1 \\cdot \\text{Group} + \\beta_2 \\cdot \\text{Post_Treatment} + \\beta_3 \\cdot (\\text{Group} \\times \\text{Post_Treatment}) + e \\\]]{.math .display}
-
-:::: cell
-::: {#cb3 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
+# Example 1 · near * post expands to near + post + near:post; the interaction is the DiD
+import numpy as np
+import pandas as pd
 import statsmodels.formula.api as smf
 
-# The interaction IS the difference-in-differences estimate
-reg_housing = smf.ols("House_Price ~ Group * Post_Treatment", data=data).fit()
+rng = np.random.default_rng(11)
+n = 1000
+near = (np.arange(n) < 500).astype(int)
+base = 250 - 15 * near + rng.normal(0, 20, n)
+before = base + rng.normal(0, 10, n)
+after = base + 30 - 10 * near + rng.normal(0, 10, n)
+houses = pd.DataFrame({"house": np.r_[np.arange(n), np.arange(n)],
+                       "near": np.r_[near, near],
+                       "post": np.r_[np.zeros(n), np.ones(n)].astype(int),
+                       "price": np.r_[before, after]})
 
-print(reg_housing.summary())
-print(f"\nDiD estimate = {reg_housing.params['Group:Post_Treatment']:+,.0f}")
+did = smf.ols("price ~ near * post", data=houses).fit(
+    cov_type="cluster", cov_kwds={"groups": houses["house"]})   # each house is seen twice
+print(did.summary().tables[1])
 ```
+
+::: {.step}
+**Your turn.** (1) Change the market's rise from `+ 30` to `+ 60`: which of the three comparisons moves, and
+which does not? (2) Make near houses **more** expensive before (`+ 15 * near`): does the DiD change? Why not?
 :::
-::::
 
-## The interaction IS the difference-in-differences estimate (cont.) {#imported-s11-023 .scrollable}
+## Example 2 in Python · Six years, and the event study {.scrollable}
 
-:::: cell
-::: {.cell-output .cell-output-stdout}
-    ================================================
-                             Dependent variable:    
-                         ---------------------------
-                               Housing prices       
-                                                    
-    ------------------------------------------------
-    Intercept (B0)              217,225.80***       
-                                 (24,879.25)        
-                                                    
-    Treatment group (B1)         -27,672.93         
-                                 (39,337.54)        
-                                                    
-    Post-treatment (B2)           62,727.10         
-                                 (35,184.57)        
-                                                    
-    Diff in Diff (B3)            -16,446.30         
-                                 (55,631.68)        
-                                                    
-    ================================================
-    ================================================
-    Note:                *p<0.1; **p<0.05; ***p<0.01
-:::
-::::
+```{python}
+#| echo: true
 
-## The interaction IS the difference-in-differences estimate (cont.) {#imported-s11-024 .scrollable}
+# Example 2 · 2003-2008, sites open in 2006; B adds a pre-existing slide of -3 a year near the sites
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
 
-Illustrative table (as in the original document):
+n = 1000
+near = (np.arange(n) < 500).astype(int)
+for version, drift in [("A", 0.0), ("B", -3.0)]:
+    rng = np.random.default_rng(12)
+    house_effect = rng.normal(0, 20, n)
+    rows = []
+    for year in range(2003, 2009):
+        price = (250 - 15 * near + house_effect + 8 * (year - 2003)
+                 + drift * near * (year - 2003)
+                 - 10 * near * (year >= 2006) + rng.normal(0, 10, n))
+        rows.append(pd.DataFrame({"house": np.arange(n), "near": near, "year": year, "price": price}))
+    prices = pd.concat(rows, ignore_index=True)
 
--   Intercept ([\\(\\beta_0\\)]{.math .inline}): 216,672.60
--   Treatment group ([\\(\\beta_1\\)]{.math .inline}): 16,461.22
--   Post-treatment ([\\(\\beta_2\\)]{.math .inline}): 35,230.86
--   Diff in Diff ([\\(\\beta_3\\)]{.math .inline}): 34,066.02
+    by_year = prices.groupby(["year", "near"])["price"].mean().unstack()
+    gap = by_year[1] - by_year[0]
+    event_study = gap - gap[2005]                       # relative to the last year before the sites
 
-## Discussion of the results {#imported-s11-025 .scrollable}
-
-With the housing example, the main questions are:
-
--   Is the average price in the control group at time 1 different from zero?
--   Did the treatment and control groups differ in average price at time 1?
--   Did the control group experience a significant change in average price between time 1 and time 2?
--   Does the treatment group at time 2 differ from its counterfactual?
-
-## Discussion of the results (cont.) {#imported-s11-026 .scrollable}
-
-Interpretation (following the original text):
-
--   [\\(\\beta_0\\)]{.math .inline} is statistically different from zero: average control-group price at time 1 is 216,672.60.
--   [\\(\\beta_1\\)]{.math .inline} is statistically different from zero: treatment-group houses cost 16,461.22 more than control-group houses at time 1. The average price in the treatment group is 233,133.80.
--   [\\(\\beta_2\\)]{.math .inline} is statistically different from zero: prices in the control group increase by 35,230.86, reaching 251,903.5 at time 2.
--   [\\(\\beta_3\\)]{.math .inline} is statistically different from zero: the treatment group's prices increase by 34,066.02 more than they would have in the absence of treatment.
-
-## The counterfactual {#imported-s11-027 .scrollable}
-
-Using the coefficients, the counterfactual for the treatment group at time 2 is:
-
-[\\\[ \\text{Counterfactual} = \\beta_0 + \\beta_1 + \\beta_2 = 216,672.6 + 16,461.2 + 35,230.9 = 268,364.7 \\\]]{.math .display}
-
-Because the intervention occurred, the observed average price is:
-
-[\\\[ 268,364.7 + 34,066.0 = 302,430.7 \\\]]{.math .display}
-
-## The counterfactual (cont.) {#imported-s11-028 .scrollable}
-
-These values are summarized graphically:
-
-Results from the working example
-
-## Instrumental Variables: Your turn! {#imported-s11-029 .center .scrollable}
-
-## Instrumental Variables: Your turn! {#imported-s11-030 .scrollable}
-
--   <https://rpubs.com/Sternonyos/913599>
-
-::::: cell
-::: {#cb5 .sourceCode .cell-code}
-``` {.sourceCode .numberSource .python .number-lines .code-with-copy}
-data = pd.DataFrame({
-    "Treatment":  [1, 0, 1, 1, 1, 0, 0, 1, 0, 1],
-    "age":        [75, 62, 60, 60, 57, 55, 50, 48, 60, 51],
-    "sex":        [1, 2, 1, 2, 2, 2, 2, 2, 1, 2],
-    "education":  [3, 2, 1, 2, 1, 1, 1, 2, 2, 2],
-    "marital":    [4, 4, 4, 4, 4, 4, 4, 4, 3, 3],
-    "information":[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    "income":     [3000, 3000, 11000, 1000, 1000, 4000, 3000, 2000, 2000, 3000],
-    "newvar":     [1.45, 1.00, 1.45, 1.45, 1.45, 1.00, 1.00, 1.45, 1.00, 1.45],
-    "info_index": [2.2967648, -0.6487551, 1.5254940, 1.5254940, 1.3712398,
-                   -0.7515912, -0.8250455, 0.9084774, -0.6781368, 1.0627315],
-})
-
-data
+    two = prices[prices["year"].isin([2005, 2008])].copy()
+    two["post"] = (two["year"] == 2008).astype(int)
+    estimate = smf.ols("price ~ near * post", data=two).fit().params["near:post"]
+    print(f"version {version}: DiD 2005->2008 = {estimate:.1f}   (truth -10)")
+    print("   event study:", event_study.round(1).to_dict())
 ```
+
+::: {.step}
+**Your turn.** (1) In version B, compute the DiD from **2003** to 2008 instead of 2005: is it better or worse,
+and why? (2) Add the line `print(by_year.round(1))` and plot it with `by_year.plot()`: can you see the
+pre-trend by eye?
 :::
 
-::: {.cell-output .cell-output-stdout}
-       Treatment age sex education marital information income newvar info_index
-    1          1  75   1         3       4           1   3000   1.45  2.2967648
-    2          0  62   2         2       4           1   3000   1.00 -0.6487551
-    3          1  60   1         1       4           1  11000   1.45  1.5254940
-    4          1  60   2         2       4           1   1000   1.45  1.5254940
-    5          1  57   2         1       4           1   1000   1.45  1.3712398
-    6          0  55   2         1       4           1   4000   1.00 -0.7515912
-    7          0  50   2         1       4           1   3000   1.00 -0.8250455
-    8          1  48   2         2       4           1   2000   1.45  0.9084774
-    9          0  60   1         2       3           1   2000   1.00 -0.6781368
-    10         1  51   2         2       3           1   3000   1.45  1.0627315
+## Example 3 in Python · The adoption table {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 3 · Who adopted a national AI strategy, and when
+import qmib
+
+Y, D = "ai_use_any", "has_ai_strategy"
+wide = qmib.load("angle_c_country")
+
+# The adoption year comes from the full treatment series, not from the rows with an outcome
+adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
+panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
+panel["cohort"] = panel["geo"].map(adopted).fillna(9999).astype(int)    # 9999 = never
+
+table = panel.groupby("cohort")["geo"].nunique()
+print(table.rename(index={9999: "never"}))
+```
+
+## Example 3 in Python · TWFE against Callaway–Sant'Anna {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 3 · The regression two decades of papers used, and the staggered-robust estimator
+import pandas as pd
+import statsmodels.formula.api as smf
+import diff_diff as dd
+import qmib
+
+Y, D = "ai_use_any", "has_ai_strategy"
+wide = qmib.load("angle_c_country")
+adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
+panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
+panel["cohort"] = panel["geo"].map(adopted).fillna(9999).astype(int)
+
+twfe = smf.ols(f"{Y} ~ {D} + C(geo) + C(time)", data=panel).fit(
+    cov_type="cluster", cov_kwds={"groups": panel["geo"]})
+print(f"TWFE:                {twfe.params[D]:.2f}  (SE {twfe.bse[D]:.2f})   truth 2.4")
+
+panel["g"] = panel["cohort"].replace(9999, 0)          # the package wants 0 for never-treated
+cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome=Y, unit="geo", time="time", first_treat="g")
+print(f"Callaway-Sant'Anna:  {cs.overall_att:.2f}  (SE {cs.overall_se:.2f}, {cs.n_clusters} clusters)")
+print(cs.to_dataframe()[["group", "time", "effect", "se", "skip_reason"]].round(2))
+```
+
+## Example 3 in Python · How much violation does it survive? {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 3 · Rambachan-Roth sensitivity, from the Callaway-Sant'Anna event study
+import diff_diff as dd
+import qmib
+
+Y, D = "ai_use_any", "has_ai_strategy"
+wide = qmib.load("angle_c_country")
+adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
+panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
+panel["g"] = panel["geo"].map(adopted).fillna(0).astype(int)
+
+cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome=Y, unit="geo", time="time", first_treat="g")
+es = cs.aggregate("event_study")
+for M in (0.0, 0.25, 0.5, 1.0):
+    h = dd.HonestDiD(method="relative_magnitude", M=M).fit(es)
+    print(f"M = {M:4.2f}   95% robust interval [{h.ci_lb:6.2f}, {h.ci_ub:6.2f}]   "
+          f"rules out zero: {'yes' if h.is_significant else 'no'}")
+```
+
+::: {.step}
+**Your turn.** (1) In the TWFE cell, drop the 2021 cohort (`panel[panel["cohort"] != 2021]`) and refit: how
+far does TWFE move? (2) Why does the one-country cohort report a **smaller** standard error than the
+nine-country one? Is it more precise?
 :::
-:::::
 
-## Conclusion {#imported-s11-031 .center .scrollable}
+## What to report {.scrollable}
 
-## Conclusion {#imported-s11-032 .scrollable}
+1. **The adoption structure**: units per cohort, years before and after, and which cohorts are unusable.
+2. **The parallel-trends argument**, as an argument: why would the gap have stayed constant?
+3. **An event study**, with the reference year marked; if there are too few pre-periods, say so.
+4. **A staggered-robust estimator beside TWFE.** If they agree, show it; if they disagree, that is the finding.
+5. **Standard errors clustered by unit**, with the number of clusters.
+6. **What else changed at the same time**, and why it is not the explanation.
+7. **How much violation the result survives**, when the pre-trend evidence is thin.
 
--   The difference-in-difference model is a powerful tool for estimating causal effects in observational data.
--   It relies on the parallel trends assumption, which must be carefully considered and validated.
--   Proper data structuring and interpretation of coefficients are crucial for accurate analysis.
--   DiD models can be extended to include multiple time periods, covariates, and more complex designs.
--   Always visualize your data and results to ensure the validity of your findings.
--   IV models are another tool for causal inference when endogeneity is a concern.
--   Continue practicing with real-world datasets to solidify your understanding of these methods.
-
-## Conclusion (cont.) {#imported-s11-033 .scrollable}
-
--   You have now an incredible toolbox to analyse social and business phenomena! I am really proud of you! You will change the world!
-
+::: {.warn}
+**A flat pre-trend makes parallel trends plausible. It does not make it true.**
+:::
 
 ## Before the next session {.scrollable}
 

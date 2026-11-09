@@ -30,6 +30,7 @@ By the end of this session you should be able to:
 - Set up a **difference-in-differences** design and identify the four cells
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
+- Explain why **two-way fixed effects** can mislead under staggered adoption
 - Explain what an **instrument** must satisfy, and why good ones are rare
 - Say what neither design can rescue
 

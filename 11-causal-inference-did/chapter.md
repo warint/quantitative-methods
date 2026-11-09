@@ -19,6 +19,14 @@ not adopt.
 
 Two differences, hence the name.
 
+The chapter works through three examples, each adding one idea. A simulated
+affordable-housing policy observed in two periods, where the two differences can
+be seen doing their work against a known answer. The same city over six years, in
+two versions — one where the assumption holds and one where it fails — to show
+what an event study can and cannot reveal. And the course's own data on national
+AI strategies, adopted by different countries in different years, where the
+modern estimators earn their place and the assumption cannot be examined at all.
+
 {{portrait}}
 
 ::: {.archive}
@@ -115,7 +123,121 @@ unit, and treating the country-years as independent understates the standard
 error badly. Clustering by unit is the minimum, and the classic demonstration of
 what happens otherwise is Bertrand, Duflo and Mullainathan's, cited in chapter 3.
 
-## When treatment arrives at different times
+## Example 1 · Did affordable housing lower nearby prices?
+
+Governments subsidise affordable-housing projects, and critics argue that they
+lower the value of nearby homes [@ellen2007]. Suppose a city opens several
+sites. A thousand houses are observed twice, before and after; half are near a
+site and half far from any. The data are simulated, so the truth is known: a site
+lowers nearby prices by \$10,000. Near houses were cheaper to begin with, by about
+\$15,000, and the whole market rose by \$30,000 over the period.
+
+```{python}
+#| label: check-housing
+#| code-summary: "Run it: three comparisons, and the interaction regression"
+
+import warnings
+warnings.filterwarnings("ignore")
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+rng = np.random.default_rng(11)
+n = 1000
+near = (np.arange(n) < 500).astype(int)
+base = 250 - 15 * near + rng.normal(0, 20, n)          # $ thousands
+before = base + rng.normal(0, 10, n)
+after = base + 30 - 10 * near + rng.normal(0, 10, n)
+houses = pd.DataFrame({"house": np.r_[np.arange(n), np.arange(n)],
+                       "near": np.r_[near, near],
+                       "post": np.r_[np.zeros(n), np.ones(n)].astype(int),
+                       "price": np.r_[before, after]})
+
+m = houses.groupby(["near", "post"])["price"].mean().unstack()
+print(f"after only     {m.loc[1, 1] - m.loc[0, 1]:+6.1f}")
+print(f"before-after   {m.loc[1, 1] - m.loc[1, 0]:+6.1f}")
+print(f"DiD            {(m.loc[1, 1] - m.loc[1, 0]) - (m.loc[0, 1] - m.loc[0, 0]):+6.1f}   (truth -10)")
+
+did = smf.ols("price ~ near * post", data=houses).fit(
+    cov_type="cluster", cov_kwds={"groups": houses["house"]})
+print(did.params.round(2).to_string())
+```
+
+![Three comparisons against the truth. The after-only comparison absorbs the gap that was always there; the before-after comparison absorbs the market's rise; the difference of the two changes removes both.](01-lecture/economist-assets/housing-estimators.png){fig-alt="After-only −25.2, before-after +20.2, difference-in-differences −10.5, truth −10."}
+
+Each naive comparison is wrong for a reason the two differences remove.
+Comparing near and far houses after the sites opened says −25: the effect plus
+the \$15,000 gap that predates the sites. Comparing near houses before and after
+says +20: the effect plus the market's rise. The difference of the two changes
+says −10.5. The regression returns the same number as the coefficient on
+`near:post`, and adds a standard error; the other coefficients are the cells of
+the table — $\beta_0$ the far houses before, $\beta_1$ the pre-existing gap,
+$\beta_2$ the common change.
+
+![The four means and the counterfactual. Near houses start at 235.5; had the sites not opened they would have risen like the far ones, to 266.2. They reached 255.7.](01-lecture/economist-assets/housing-2x2.png){fig-alt="Far houses from 250.1 to 280.9, near houses from 235.5 to 255.7, counterfactual 266.2."}
+
+**Example 1 in three sentences.** The after-only and before-after comparisons are
+each biased by something the design removes. The difference of the two changes
+recovers the effect, and in a regression it is the interaction. Nothing about *why*
+near houses were cheaper had to be measured; only that, without the sites, both
+groups would have moved together.
+
+## Example 2 · Were the trends parallel?
+
+The same city, now observed every year from 2003 to 2008, with the sites opening
+in 2006 and the same true effect of −10. In version A, near and far houses would
+have risen together without the sites. In version B, the near neighbourhoods were
+already slipping, by \$3,000 a year relative to the far ones, before any site
+existed. The two-period estimate compares 2005 with 2008; an **event study**
+estimates the near–far gap year by year, relative to 2005.
+
+```{python}
+#| label: check-housing-trends
+#| code-summary: "Run it: the event study in both versions"
+
+for version, drift in [("A", 0.0), ("B", -3.0)]:
+    rng = np.random.default_rng(12)
+    house_effect = rng.normal(0, 20, n)
+    rows = []
+    for year in range(2003, 2009):
+        price = (250 - 15 * near + house_effect + 8 * (year - 2003)
+                 + drift * near * (year - 2003)
+                 - 10 * near * (year >= 2006) + rng.normal(0, 10, n))
+        rows.append(pd.DataFrame({"house": np.arange(n), "near": near, "year": year, "price": price}))
+    prices = pd.concat(rows, ignore_index=True)
+    by_year = prices.groupby(["year", "near"])["price"].mean().unstack()
+    gap = by_year[1] - by_year[0]
+    two = prices[prices["year"].isin([2005, 2008])].assign(
+        post=lambda d: (d["year"] == 2008).astype(int))
+    est = smf.ols("price ~ near * post", data=two).fit().params["near:post"]
+    print(f"version {version}: DiD 2005->2008 {est:+.1f}; event study",
+          (gap - gap[2005]).round(1).to_dict())
+```
+
+![The event study in both versions. In A the pre-2006 points sit at zero; in B they lie on a line already falling, and the two-period estimate doubles.](01-lecture/economist-assets/housing-event-study.png){fig-alt="Event studies: A flat before 2006 then about −11; B +5.2 and +2.3 before, falling to −20.1."}
+
+In version A the years before the sites are flat and the estimate is −11. In
+version B the same two-period estimate is −20, double the truth, because the
+pre-existing slide of \$3,000 a year is counted as the policy — and the event
+study shows it, as points that are already falling before 2006. That is what
+several pre-periods buy: not a test of parallel trends, which concerns the years
+after treatment, but evidence about its plausibility. The reference year is zero
+by construction; only the other pre-years are evidence.
+
+**Example 2 in three sentences.** When the trends were parallel, the years before
+the policy are flat and the estimate is right. When the treated group was already
+on a different path, the estimate absorbs that path, and the years before show it.
+A flat pre-trend makes the assumption plausible; it cannot make it true.
+
+## Example 3 · Do national AI strategies raise firms' AI use?
+
+The third example is the course's own data: national AI strategies adopted by
+European countries between 2021 and 2023, and the share of firms using AI. It is
+generated with a known effect of 2.4 percentage points, so the estimators below
+can be scored, and it has the feature that makes modern difference-in-differences
+necessary — treatment arrives in different years for different countries.
+
+### When treatment arrives at different times
 
 The clean two-by-two case has one treatment date. Real policies arrive in
 different years for different units — which is exactly what the course fixture
@@ -136,7 +258,7 @@ The remedy is to build the average yourself: estimate each cohort's effect
 against clean controls — units not yet treated, or never treated — and aggregate
 with weights you chose [@callaway2021; @sun2021].
 
-## The data, and what it will and will not support
+### The data, and what it will and will not support
 
 ```{python}
 #| label: check-timing
@@ -200,7 +322,7 @@ which is not.
 estimator and *not* enough to examine pre-trends, which needs at least two
 pre-periods to have a trend to look at.
 
-## The estimates
+### The estimates
 
 ```{python}
 #| label: check-did
@@ -268,7 +390,7 @@ estimable at all because that country is absent from the final year. Both are
 reported rather than quietly dropped, because a cohort of one is a fact about the
 design and hiding it would make the evidence look stronger than it is.
 
-## The estimator has a name
+### The estimator has a name
 
 The loop in that cell is not an improvisation. Estimating each cohort against a
 clean comparison group and aggregating with weights you chose is precisely the
@@ -368,7 +490,7 @@ package rather than the argument against it: not that it is cleverer, but that
 the choices the hand-rolled version made silently are ones it is forced to make
 out loud.
 
-## Pre-trends: what this data cannot tell you
+### Pre-trends: what this data cannot tell you
 
 ```{python}
 #| label: fig-event-study
@@ -420,7 +542,7 @@ It is worth noticing how much weaker that is than what chapter 10 could do. Ther
 the assumption was also untestable, but the covariates could at least be shown to
 be balanced. Here, there is nothing to show.
 
-## How large a violation would it take?
+### How large a violation would it take?
 
 "The assumption cannot be checked" is where this dataset leaves you. It is not
 where the literature leaves you. @rambachan2023 changes the question: rather
@@ -475,6 +597,59 @@ That is real progress over asserting the assumption, and it is not the same
 thing as evidence for it.
 :::
 
+**Example 3 in three sentences.** The adoption table decides what can be
+estimated before any regression is run: one cohort has no pre-period and another
+is a single country. Two-way fixed effects gives 2.81 and the staggered-robust
+estimator 2.20 with a standard error of 0.78, covering the truth. Parallel trends
+cannot be examined here, and the sensitivity analysis says how little violation
+the result can absorb.
+
+## Matching or difference-in-differences?
+
+The two designs of chapters 10 and 11 answer different worries, and both rest on
+an assumption the data cannot test.
+
+| | Matching (chapter 10) | Difference-in-differences |
+|---|---|---|
+| **Removes** | differences in what was measured | everything constant about a unit, measured or not |
+| **Assumes** | conditional independence: no unmeasured confounder | parallel trends: no change that hits only the treated |
+| **Needs** | rich pre-treatment covariates, overlap | observations before and after, on treated and controls |
+| **Checkable part** | balance, overlap | pre-trends, when there are several pre-periods |
+| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path |
+
+Matching is the tool when the groups differ in ways that were measured;
+difference-in-differences when they differ in ways that were not, but that do not
+change over time. When treatment is driven by something both unmeasured and
+changing, neither applies.
+
+## When neither design works: an instrument
+
+The remaining route is a variable that moves treatment from outside the system:
+an **instrumental variable** $Z$. It identifies an effect when it satisfies three
+conditions [@angrist1996].
+
+::: {.definition}
+[**Relevance**]{.term} — $Z$ actually moves the treatment. This is the first
+stage, and it is the only one of the three conditions the data can check.
+:::
+
+::: {.definition}
+[**Independence**]{.term} — $Z$ is as good as randomly assigned, unrelated to the
+unmeasured causes of the outcome.
+:::
+
+::: {.definition}
+[**Exclusion**]{.term} — $Z$ affects the outcome *only through* the treatment.
+:::
+
+The estimate is then the effect of $Z$ on the outcome divided by its effect on the
+treatment, and it applies to the units whose treatment the instrument actually
+moved — the *compliers* — not to everyone. Good instruments are rare because the
+two conditions that carry the identification are arguments, not tests. Lotteries,
+distances, rainfall and quarter of birth have all been used, and for each a
+plausible path to the outcome that bypasses the treatment has been proposed. A
+strong first stage with a doubtful exclusion is not an instrument.
+
 ## What difference-in-differences cannot fix
 
 **Anything that changes at the same time as treatment.** Fixed effects remove
@@ -526,6 +701,10 @@ assumption the finding actually needs rather than being told it holds.
 On inference, the reference remains Bertrand, Duflo and Mullainathan, discussed
 in chapter 3: DiD data are serially correlated panels, and standard errors that
 ignore it reject true nulls at many times the nominal rate.
+
+For the case where neither design applies, @angrist1996 set out the conditions
+under which an instrument identifies a causal effect, and showed that what it
+identifies is the effect on the units the instrument moves, not on everyone.
 :::
 
 ## What to report

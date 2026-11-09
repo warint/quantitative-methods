@@ -28,15 +28,20 @@ call — `qmib.load("core")`.
 
 ## What the lecture covers
 
-1. **The key concept**
-2. **The statistical model**
-3. **The coefficients**
-4. **The counterfactual**
-5. **A Difference-in-Difference model**
-6. **Data**
-7. **Analysis**
-8. **Discussion of the results**
-9. **Instrumental Variables: Your turn!**
+The lecture is built on **three examples**, with no code on screen while they are taught; the code
+for all three comes at the end, for you to run in class.
+
+1. **The language of difference-in-differences (DiD)** — the two differences, the interaction
+   regression, the words you will need, and parallel trends stated exactly
+2. **Example 1 · Did affordable housing lower nearby prices?** — 1,000 simulated houses, two periods:
+   after-only, before-after and DiD against a known effect, the four means and the counterfactual
+3. **Example 2 · Were the trends parallel?** — the same city over six years, in two versions: the event
+   study is flat when the trends were parallel and slopes when they were not
+4. **Example 3 · Do national AI strategies raise firms' AI use?** — the course data, adopted in different
+   years: the adoption table, two-way fixed effects against Callaway–Sant'Anna, and how much violation of
+   parallel trends the result survives
+5. **Wrapping up** — matching or DiD, what DiD cannot fix, and instrumental variables when neither works
+6. **In class · The code behind the three examples** — every cell, and a *Your turn* per example
 
 ---
 
@@ -47,6 +52,7 @@ By the end of the session you should be able to:
 - Set up a **difference-in-differences** design and identify the four cells
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
+- Explain why **two-way fixed effects** can mislead under staggered adoption
 - Explain what an **instrument** must satisfy, and why good ones are rare
 - Say what neither design can rescue
 
@@ -54,14 +60,15 @@ By the end of the session you should be able to:
 
 ## The data
 
-**The spine's post-2021 structural break, treated as a policy change**
+**Two simulations, and the course data on national AI strategies**
 
 ```python
 import qmib
-data = qmib.load("core")
+wide = qmib.load("angle_c_country")    # Example 3: AI use and AI strategies, by country and year
 ```
 
-Run it once before class; it caches locally and then works offline.
+Run it once before class from the repository root; it caches locally and then works offline.
+Examples 1 and 2 are simulated inside their cells.
 
 ---
 
