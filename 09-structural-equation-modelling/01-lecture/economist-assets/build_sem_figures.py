@@ -13,6 +13,7 @@ Writes, next to this file:
     sem-anatomy.png       one latent variable and its three indicators, labelled
     sem-symbols.png       the five symbols of a path diagram
     sem-two-halves.png    the measurement model and the structural model, shaded
+    hs-correlations.png   Holzinger-Swineford: the nine tests' correlations, before any model
     hs-model.png          Holzinger-Swineford: the three-factor model, before fitting
     hs-model-fitted.png   the same diagram with the standardised estimates on it
     hs-reproduce.png      observed correlations, the model's, and the difference
@@ -20,6 +21,9 @@ Writes, next to this file:
     pd-model.png          Political Democracy: measurement + structural, before fitting
     pd-model-fitted.png   the same diagram with the standardised estimates on it
     pd-effects.png        direct, indirect and total effect of industrialisation
+    tpb-model.png         Theory of Planned Behaviour: four constructs, eight items, before fitting
+    tpb-model-fitted.png  the same diagram with the estimates and the true values on it
+    tpb-recovery.png      true paths, SEM estimates, and a regression on averaged items
     sem-equivalent.png    two opposite arrows, one fit
     sem-workflow.png      the seven steps of building an SEM
 """
@@ -29,7 +33,9 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import semopy
+import statsmodels.formula.api as smf
 from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, FancyBboxPatch
 from semopy.examples import holzinger39, political_democracy
 
@@ -233,6 +239,39 @@ def two_halves():
     save(fig, "sem-two-halves.png")
 
 
+# Example 3 is simulated, so the true paths are known. This block is the one
+# the deck's practice part prints; keep the two identical.
+def simulate_tpb():
+    rng = np.random.default_rng(9)
+    n = 400
+    attitude = rng.normal(size=n)
+    norms = rng.normal(size=n)
+    control = rng.normal(size=n)
+    intention = (0.5 * attitude + 0.6 * norms + 0.3 * control
+                 + rng.normal(scale=0.5, size=n))
+
+    def item(latent):
+        return latent + rng.normal(scale=0.6, size=n)
+
+    return pd.DataFrame({
+        "att1": item(attitude), "att2": item(attitude),
+        "norm1": item(norms), "norm2": item(norms),
+        "ctrl1": item(control), "ctrl2": item(control),
+        "int1": item(intention), "int2": item(intention),
+    })
+
+
+TPB = simulate_tpb()
+TPB_DESC = """
+attitude  =~ att1 + att2
+norms     =~ norm1 + norm2
+control   =~ ctrl1 + ctrl2
+intention =~ int1 + int2
+intention ~ attitude + norms + control
+"""
+TPB_TRUE = {"attitude": 0.5, "norms": 0.6, "control": 0.3}
+
+
 # --- 4. Holzinger-Swineford, before and after fitting -----------------------
 def hs_diagram(est=None, name="hs-model.png"):
     fig, ax = canvas(12, 6.4, (-5.6, 11.6), (-5.6, 5.9))
@@ -274,6 +313,29 @@ def hs_diagram(est=None, name="hs-model.png"):
         note(ax, -5.4, -5.3, "standardised estimates · a loading in red is below 0.6: "
              "the weakest test of its ability", fs=11)
     save(fig, name)
+
+
+def hs_correlations():
+    cols = list(TESTS)
+    S = HS[cols].corr().to_numpy()
+    fig, ax = plt.subplots(figsize=(6.2, 5.4))
+    im = ax.imshow(S, cmap="Blues", vmin=0, vmax=1)
+    for i in range(9):
+        for j in range(9):
+            ax.text(j, i, f"{S[i, j]:.2f}".replace("0.", "."), ha="center",
+                    va="center", fontsize=8.5,
+                    color="white" if S[i, j] > 0.6 else INK)
+    ax.set_xticks(range(9), cols, fontsize=10)
+    ax.set_yticks(range(9), cols, fontsize=10)
+    for k in (2.5, 5.5):
+        ax.axhline(k, color=INK, lw=0.8)
+        ax.axvline(k, color=INK, lw=0.8)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    fig.colorbar(im, ax=ax, shrink=0.8)
+    ax.set_title("Correlations between the nine tests", fontsize=13,
+                 loc="left", fontweight="bold")
+    save(fig, "hs-correlations.png")
 
 
 def hs_reproduce(model):
@@ -410,6 +472,85 @@ def pd_effects(est):
     save(fig, "pd-effects.png")
 
 
+# --- 5b. Theory of Planned Behaviour (simulated), before and after fitting ---
+TPB_ITEMS = {"attitude": ["att1", "att2"], "norms": ["norm1", "norm2"],
+             "control": ["ctrl1", "ctrl2"]}
+TPB_LABELS = {"attitude": "attitude to\nexporting", "norms": "subjective\nnorms",
+              "control": "perceived\ncontrol", "intention": "intention\nto export"}
+
+
+def tpb_diagram(est=None, name="tpb-model.png"):
+    fig, ax = canvas(12.5, 6.4, (-1.4, 19.6), (-5.6, 5.4))
+    ys = {"attitude": 3.6, "norms": 0.0, "control": -3.6}
+    L = {k: oval(ax, 4.6, y, TPB_LABELS[k], w=3.0, h=1.5, fs=11.5) for k, y in ys.items()}
+    T = oval(ax, 12.4, 0.0, TPB_LABELS["intention"], w=3.0, h=1.5, fs=11.5, color=RED)
+
+    def loading(it, lat):
+        return None if est is None else f"{std(est, it, '~', lat):.2f}"
+
+    for k, items in TPB_ITEMS.items():
+        for j, it in enumerate(items):
+            b = box(ax, 0.6, ys[k] + 0.75 - 1.5 * j, it, w=1.3, h=0.7)
+            link(ax, L[k], b, color=BLUE, label=loading(it, k), fs=9.5, at=0.55)
+    for j, it in enumerate(["int1", "int2"]):
+        b = box(ax, 17.6, 0.75 - 1.5 * j, it, w=1.3, h=0.7)
+        link(ax, T, b, color=BLUE, label=loading(it, "intention"), fs=9.5, at=0.55)
+    for k in ys:
+        lab = None
+        if est is not None:
+            raw = float(est[(est["lval"] == "intention") & (est["op"] == "~")
+                            & (est["rval"] == k)]["Estimate"].iloc[0])
+            lab = f"{raw:.2f}  (true {TPB_TRUE[k]})"
+        link(ax, L[k], T, color=RED, lw=2.6, label=lab, lcolor=RED, bold=True,
+             at=0.55, fs=10.5)
+    z = err(ax, 12.4, 2.6, "ζ" if est is None else
+            f"{std(est, 'intention', '~~', 'intention'):.2f}", r=0.45, fs=9.5)
+    link(ax, z, T)
+    if est is None:
+        note(ax, -1.2, -5.2, "blue: each construct measured by two survey items · "
+             "red: the three paths the theory claims", fs=11, color=INK)
+    else:
+        r2 = 1 - std(est, "intention", "~~", "intention")
+        note(ax, -1.2, -5.2, f"red: raw paths, with the value the data were simulated "
+             f"from · blue: standardised loadings · R² intention = {r2:.2f}",
+             fs=11, color=INK)
+    save(fig, name)
+
+
+def tpb_recovery(est):
+    avg = TPB.assign(attitude=(TPB.att1 + TPB.att2) / 2,
+                     norms=(TPB.norm1 + TPB.norm2) / 2,
+                     control=(TPB.ctrl1 + TPB.ctrl2) / 2,
+                     intention=(TPB.int1 + TPB.int2) / 2)
+    ols = smf.ols("intention ~ attitude + norms + control", avg).fit().params
+    keys = list(TPB_TRUE)
+    sem = [float(est[(est["lval"] == "intention") & (est["op"] == "~")
+                     & (est["rval"] == k)]["Estimate"].iloc[0]) for k in keys]
+    fig, ax = plt.subplots(figsize=(10, 3.8))
+    y = np.arange(len(keys))
+    h = 0.26
+    for off, vals, col, lab in ((-h, [TPB_TRUE[k] for k in keys], INK, "true value"),
+                                (0, sem, BLUE, "SEM, latent constructs"),
+                                (h, [ols[k] for k in keys], GOLD,
+                                 "regression on averaged items")):
+        ax.barh(y + off, vals, height=h * 0.92, color=col, label=lab)
+        for yi, v in zip(y + off, vals):
+            ax.text(v + 0.01, yi, f"{v:.2f}", va="center", fontsize=10, color=INK)
+    ax.set_yticks(y, [TPB_LABELS[k].replace("\n", " ") for k in keys], fontsize=11)
+    ax.invert_yaxis()
+    ax.set_xlim(0, 0.75)
+    ax.set_xlabel("effect on intention to export")
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    ax.grid(axis="x", color=GRID, lw=0.8)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower right", frameon=False, fontsize=10)
+    ax.set_title("Averaging noisy items shrinks every path; SEM corrects for the noise", fontsize=13,
+                 loc="left", fontweight="bold")
+    fig.tight_layout()
+    save(fig, "tpb-recovery.png")
+
+
 # --- 6. equivalent models -----------------------------------------------------
 def equivalent():
     A = "ind60 =~ x1 + x2 + x3\ndem60 =~ y1 + y2 + y3 + y4\ndem60 ~ ind60"
@@ -461,6 +602,7 @@ if __name__ == "__main__":
     anatomy()
     symbols()
     two_halves()
+    hs_correlations()
     hs_diagram()
     m3, e3, s3 = fit(HS_DESC, HS)
     hs_diagram(e3, "hs-model-fitted.png")
@@ -471,5 +613,9 @@ if __name__ == "__main__":
     _, ep, _ = fit(PD_DESC, PD)
     pd_diagram(ep, "pd-model-fitted.png")
     pd_effects(ep)
+    tpb_diagram()
+    _, et, _ = fit(TPB_DESC, TPB)
+    tpb_diagram(et, "tpb-model-fitted.png")
+    tpb_recovery(et)
     equivalent()
     workflow()

@@ -1,9 +1,10 @@
 ---
-title: "Session 9: Structural Equation Modelling, Built Step by Step"
+title: "Session 9: Structural Equation Modelling, Through Three Examples"
 subtitle: "Published course presentation · repository edition"
 author: "Thierry Warin, PhD"
 institute: "HEC Montréal"
 source-url: "https://warin.ca/quant/en/session9_cours/"
+jupyter: python3
 filters:
   - ../../slides/drop-comments.lua
 format:
@@ -34,15 +35,18 @@ format:
     footer: "MATH60033A · Session 09 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- The code cells below are live: they execute at render time, so the output
-     on the slides is the output the students' own machines produce. Every
-     visible cell is plain Python with three packages by name — semopy, pandas,
-     matplotlib — and data that ships inside semopy, so a student can copy any
-     one cell into a file of their own and run it, with nothing to download and
-     no function of the instructor's to import.
-     The path diagrams are drawn by economist-assets/build_sem_figures.py, from
-     the same models fitted on the same data, so every number on a picture is
-     the number the matching cell prints. -->
+<!-- The deck teaches through three examples first, with no code on screen:
+     Holzinger-Swineford (a measurement model), Political Democracy (a
+     structural model) and a simulated Theory of Planned Behaviour survey
+     (a known truth, to show what SEM gains over averaged items). The code
+     comes last, in the in-class part, where every cell is live: it executes
+     at render time, so the output on the slides is the output the students'
+     own machines produce. Every visible cell is plain Python with packages by
+     name, and data that ship inside semopy or are simulated in the cell, so
+     a student can copy any one cell into a file and run it.
+     The path diagrams and charts are drawn by economist-assets/build_sem_figures.py,
+     from the same models fitted on the same data, so every number on a picture
+     is the number the matching cell prints. -->
 ```{python}
 #| label: setup
 #| echo: false
@@ -59,11 +63,12 @@ pd.set_option("display.max_columns", 10)
 
 ## Outline · The hour ahead {.center .scrollable}
 
-1. Part 1 · The idea, in pictures
-2. Part 2 · A measurement model, step by step
-3. Part 3 · Adding arrows between constructs
-4. Part 4 · What a good fit does not prove
-5. Part 5 · Your recipe
+1. Part 1 · The language of SEM
+2. Example 1 · Nine tests, three abilities
+3. Example 2 · Does industrialisation bring democracy?
+4. Example 3 · Will this firm export?
+5. What a good fit does not prove
+6. In class · The code behind the three examples
 
 ## What session 9 is for {.scrollable}
 ::::: columns
@@ -77,6 +82,7 @@ pd.set_option("display.max_columns", 10)
 - Interpret a **standardised loading**, and say when an indicator is weak
 - Report **CFI, TLI and RMSEA**, and say what each would have to be
 - Decompose a **mediation** into direct and indirect paths
+- Explain why averaging noisy items **shrinks** a path, and why SEM does not
 
 ::::
 
@@ -88,6 +94,7 @@ pd.set_option("display.max_columns", 10)
 - Turn a drawing into a model description, fit it with `semopy.Model`, and read `.inspect()`
 - Pull fit indices with `semopy.calc_stats` and report them all
 - Fit two models with opposite arrows and watch the fit not decide between them
+- Simulate survey data from a known model and check that SEM recovers it
 
 ::::
 
@@ -120,7 +127,7 @@ assumed.
 
 <!-- END deck-frontmatter -->
 
-## Part 1 · The idea, in pictures {.center}
+## Part 1 · The language of SEM {.center}
 
 ## The problem: the thing you care about is not in your data {.scrollable}
 
@@ -148,7 +155,23 @@ an exact translation into one line of text, which is what semopy reads:
 | ellipse → rectangles | `visual =~ x1 + x2 + x3` | "visual **is measured by** x1, x2 and x3" |
 | ellipse → ellipse | `dem65 ~ dem60` | "dem65 **is regressed on** dem60" |
 | two-headed arrow | `y1 ~~ y5` | "y1 **covaries with** y5" |
-| error circles | nothing | semopy adds one for every indicator, on its own |
+| error circles | nothing | semopy adds one for every endogenous variable, on its own |
+
+## Five words to name what you draw {.scrollable}
+
+| Term | What it is | On the diagram | In this session's examples |
+|---|---|---|---|
+| **Observed variable** (indicator) | A column you measured: a survey item, a test score. It is the data the constructs are estimated from | rectangle | the nine test scores `x1` … `x9`; the eleven country scores `x1` … `x3`, `y1` … `y8` |
+| **Latent variable** (factor, construct) | A concept no one measures directly, inferred from what its indicators have in common | ellipse | `visual`, `textual`, `speed`; `ind60`, `dem60`, `dem65`; `attitude`, `intention` |
+| **Exogenous** / **endogenous** | Exogenous: arrows only leave it, like an independent variable. Endogenous: at least one arrow points *into* it, like a dependent variable | where the arrowheads land | `ind60` is exogenous; `dem60` and `dem65` are endogenous |
+| **Path** | A one-headed arrow: a directional effect, read like a regression coefficient. A two-headed arrow is a covariance, with no direction | → and ↔ | `dem65 ~ dem60` is a path; `y1 ~~ y5` is a covariance |
+| **Error** (disturbance) | The part of a variable the model does not explain | a small circle with an arrow into the variable | semopy adds one for every endogenous variable, on its own |
+
+::: {.check}
+**Endogenous is a fact about the drawing, not about the world.** `dem65` is never measured, yet it is
+endogenous, because arrows from `ind60` and `dem60` point into it. And every indicator is endogenous
+too: the arrow from its construct points into it, and so does its error.
+:::
 
 ## Every SEM has two halves {.scrollable}
 
@@ -158,8 +181,8 @@ an exact translation into one line of text, which is what semopy reads:
 - **Structural model** (red): once measured, does one construct move another? Its numbers are **path coefficients**, read like regression coefficients.
 
 ::: {.muted}
-Fitting both at once is the point: the path is estimated between the *constructs*, cleaned of the
-measurement error in the indicators, which a regression on averaged scores does not do.
+The three examples climb this picture: Example 1 is **only** a measurement model; Example 2 adds the
+structural half; Example 3 shows, on data where we know the answer, why fitting both halves at once matters.
 :::
 
 ## What SEM actually fits: the correlations {.scrollable}
@@ -194,12 +217,12 @@ parameters than that, the leftover is a test of whether the diagram is right.
 :::
 :::
 
-## Part 2 · A measurement model, step by step {.center}
+## Example 1 · Nine tests, three abilities {.center}
 
 ## The data: 301 children, nine tests {.scrollable}
 
 Holzinger and Swineford (1939) gave nine ability tests to seventh- and eighth-graders in two
-schools. The data ship with semopy, so there is nothing to download.
+schools, Pasteur and Grant-White. The data ship with semopy, so there is nothing to download.
 
 | Column | Test | Meant to measure |
 |---|---|---|
@@ -207,10 +230,466 @@ schools. The data ship with semopy, so there is nothing to download.
 | `x4` · `x5` · `x6` | paragraph comprehension · sentence completion · word meaning | **textual** ability |
 | `x7` · `x8` · `x9` | speeded addition · speeded dot counting · straight vs curved capitals | **speed** |
 
+::: {.step}
+**The question:** do nine scores really reduce to **three abilities**, or to one general
+"cleverness", or to something else? This is a **confirmatory factor analysis** (CFA): a measurement
+model with no structural arrows at all.
+:::
+
+## Look at the correlations before you model anything {.scrollable}
+
+::: columns
+::: {.column width="52%"}
+![](economist-assets/hs-correlations.png){.big fig-alt="Heat map of the nine tests' correlations, with three darker blocks on the diagonal."}
+:::
+
+::: {.column width="48%"}
+::: {.check}
+**Reading it:** three dark squares on the diagonal. x4–x6 correlate at about 0.7 with each other and
+0.1–0.4 with everything else; x1–x3 and x7–x9 form weaker blocks.
+:::
+
+::: {.step}
+That is three groups, *before* any model. If you cannot see your constructs in this picture, no fit
+index will find them for you.
+:::
+:::
+:::
+
+## The drawing, and its translation {.scrollable}
+
+::: columns
+::: {.column width="62%"}
+![](economist-assets/hs-model.png){.big fig-alt="The three-factor model: visual, textual and speed, each with three tests, the three abilities linked by dashed two-headed arrows."}
+:::
+
+::: {.column width="38%"}
+The whole model, as semopy reads it:
+
+```
+visual  =~ x1 + x2 + x3
+textual =~ x4 + x5 + x6
+speed   =~ x7 + x8 + x9
+```
+
+**What semopy adds without being asked:**
+
+1. **One loading per construct fixed to 1** (x1, x4, x7): a construct has no units of its own, so it borrows its first indicator's.
+2. **An error for every test**: the circles.
+3. **The three abilities may correlate**: the dashed arrows.
+:::
+:::
+
+::: {.step}
+**Every arrow is a claim, and so is every missing arrow.** No arrow from *visual* to x9 says "the
+capitals test has nothing to do with visual ability". The data will get a say on that.
+:::
+
+## The results, on the drawing {.scrollable}
+
+![](economist-assets/hs-model-fitted.png){.big fig-alt="The three-factor diagram with standardised loadings on the arrows, factor correlations on the dashed arrows and unexplained shares in the error circles."}
+
+::: {.check}
+**Check the rule from Part 1:** x4 and x5 both measure *textual*, so the model says
+corr(x4, x5) = 0.85 × 0.86 = **0.73**. The correlation in the heat map is **0.73**.
+:::
+
+## Reading the loadings {.scrollable}
+
+A **standardised loading** is the **correlation between the test and its ability**; its square is the
+**share of the test the ability explains**.
+
+| Ability | Loadings | Reading |
+|---|---|---|
+| **textual** | 0.84 – 0.86 | measured well: about 72% of each test is textual ability |
+| **visual** | 0.77 · **0.42** · 0.58 | cubes, x2, is the weak one: $0.42^2 = 0.18$, so 82% of a child's cubes score is something else |
+| **speed** | 0.57 – 0.72 | adequate; addition, x7, is the weakest |
+
+| Pair of abilities | Correlation | Reading |
+|---|---|---|
+| visual ↔ textual | 0.46 | related, but not the same thing |
+| visual ↔ speed | 0.47 | |
+| textual ↔ speed | 0.28 | the most distinct pair |
+
+::: {.muted}
+Rule of thumb: above 0.7 is strong, below 0.4 is a candidate to drop. The share left unexplained
+is the number in each error circle: 1 − loading².
+:::
+
+## Does the model fit? {.scrollable}
+
+| Index | Question it answers | Convention | Here | Verdict |
+|---|---|---|---|---|
+| $\chi^2$ | could the model be *exactly* right? | p > 0.05 | 85.3 on 24 df, p < 0.001 | no |
+| **CFI** | how far from "nothing correlates" toward perfect? | > 0.95 | 0.931 | close, not there |
+| **TLI** | the same, penalised for extra parameters | > 0.95 | 0.896 | short |
+| **RMSEA** | misfit per degree of freedom | < 0.06 good, > 0.10 poor | 0.092 | mediocre |
+
+::: {.warn}
+**Report all four, and say which convention you applied.** Quoting only the one that passes loses marks.
+:::
+
+## Where does the model miss? {.scrollable}
+
+![](economist-assets/hs-reproduce.png){fig-alt="Three heat maps: the observed correlations, the correlations the model implies, and their difference, which is largest between x9 and the visual tests."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Reading it:** the model reproduces the textual block almost perfectly (differences of 0.00). The biggest
+misses are in the last row: **x9 correlates with x1 and x3 by 0.15 more than the model allows**.
+:::
+:::
+
+::: {.column width="50%"}
+::: {.step}
+**Is there a reason?** x9 asks children to tell straight from curved capital letters, fast. That is a
+*speed* task that also needs *visual* discrimination, so an arrow from visual to x9 can be argued
+from what the test is, not just from the numbers.
+:::
+:::
+:::
+
+## Three drawings, one data set {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+![](economist-assets/hs-one-vs-three.png){.big fig-alt="The one-factor model and the three-factor model side by side, with their fit indices."}
+:::
+
+::: {.column width="50%"}
+| Model | χ² (df) | CFI | TLI | RMSEA |
+|---|---|---|---|---|
+| one general ability | 312.3 (27) | 0.677 | 0.569 | 0.188 |
+| three abilities | 85.3 (24) | 0.931 | 0.896 | 0.092 |
+| three + x9 on visual | 52.4 (23) | **0.967** | 0.948 | 0.065 |
+
+::: {.check}
+**One general ability** is clearly rejected: the tests do not all measure one thing.
+**Three abilities** is far better. **x9 on visual too** passes CFI and nearly RMSEA.
+:::
+
+::: {.warn}
+The third model was chosen *after looking at the misfit*. Report it as such, and confirm it on new
+data (the other school, next year's class) before you believe it.
+:::
+:::
+:::
+
+## Example 1 · Plain summary {.scrollable}
+
+- The nine tests **do** sort into three abilities: the one-factor story is rejected, the three-factor story fits reasonably.
+- **Textual** ability is measured very well; **visual** ability has a weak indicator (cubes, 0.42).
+- The three abilities are **positively related** (0.28–0.47), but distinct: children good at one tend to be good at the others, not identical in all three.
+- The fit is **not perfect**, and the main miss (x9) has a reason that can be argued from the test itself. Any fix made after looking is **exploratory**.
+
+::: {.step}
+**What this example teaches:** a measurement model answers *"do my indicators measure what I say they
+measure, and how well?"*. That question comes **before** any arrow between constructs.
+:::
+
+## Example 2 · Does industrialisation bring democracy? {.center}
+
+## The data: 75 countries, 1960 and 1965 {.scrollable}
+
+Bollen's (1989) classic, also bundled with semopy. Neither industrialisation nor democracy is a column;
+both are measured by indicators.
+
+| Construct | Indicators |
+|---|---|
+| **ind60** · industrialisation, 1960 | `x1` GNP per capita · `x2` energy per capita · `x3` share of labour in industry |
+| **dem60** · democracy, 1960 | `y1` press freedom · `y2` freedom of opposition · `y3` fair elections · `y4` effective legislature |
+| **dem65** · democracy, 1965 | `y5`–`y8`: **the same four questions, five years later** |
+
+::: {.step}
+**The question:** does a more industrialised country become more democratic, and does it do so
+directly, or because it was already more democratic?
+:::
+
+## The theory, then the drawing {.scrollable}
+
+![](economist-assets/pd-model.png){.big fig-alt="Industrialisation in 1960 measured by x1 to x3, with arrows to democracy in 1960 and 1965, each measured by four indicators; the same-question indicators linked by dashed arrows."}
+
+::: {.step}
+**Three structural claims (red):** industrialisation raises democracy; democracy persists; and
+industrialisation may also act on 1965 directly. **One claim from the design (gold):** y1 and y5 are the
+same question rated by the same experts, so their errors may move together. That is decided
+*before* fitting, from how the data were collected.
+:::
+
+## The drawing, as text: all three operators {.scrollable}
+
+::: columns
+::: {.column width="45%"}
+```
+# measurement: each construct and its indicators
+ind60 =~ x1 + x2 + x3
+dem60 =~ y1 + y2 + y3 + y4
+dem65 =~ y5 + y6 + y7 + y8
+# structural: arrows between constructs
+dem60 ~ ind60
+dem65 ~ ind60 + dem60
+# the same question, five years apart
+y1 ~~ y5
+y2 ~~ y6
+y3 ~~ y7
+y4 ~~ y8
+```
+:::
+
+::: {.column width="55%"}
+| Operator | Says | Lines here |
+|---|---|---|
+| `=~` | is **measured by** | 3: the blue arrows |
+| `~` | is **explained by** | 2: the red arrows |
+| `~~` | **covaries with** | 4: the gold arrows |
+
+::: {.check}
+**Exogenous or endogenous?** `ind60` has no arrow in: exogenous. `dem60` and `dem65` both receive
+arrows: endogenous, so each gets a disturbance ζ.
+:::
+:::
+:::
+
+## The results, on the drawing {.scrollable}
+
+![](economist-assets/pd-model-fitted.png){.big fig-alt="The democracy model with standardised loadings, path coefficients, and the unexplained share of each democracy construct."}
+
+::: {.check}
+**Measurement:** all eleven loadings are above 0.69: the indicators measure their constructs well.
+**Structure:** `dem60 ← ind60` at **0.45**: a country one standard deviation more industrialised in 1960
+was 0.45 standard deviations more democratic that year. `dem65 ← dem60` at **0.87**: democracy is very
+persistent. `dem65 ← ind60` at **0.17** (p = 0.015): a smaller direct push, on top of persistence.
+:::
+
+## How much is explained: R² {.scrollable}
+
+The number in each ζ circle is the share **left unexplained**, so R² = 1 − that number.
+
+| Construct | Explained by | R² | Reading |
+|---|---|---|---|
+| **dem60** | ind60 | **0.20** | industrialisation explains a fifth of democracy in 1960 |
+| **dem65** | ind60 and dem60 | **0.91** | democracy five years later is almost entirely predictable |
+
+::: {.muted}
+A high R² for dem65 is mostly persistence: the best predictor of a country's democracy is its
+democracy five years earlier. That is a finding, not a flaw.
+:::
+
+## Direct and indirect effects {.scrollable}
+
+![](economist-assets/pd-effects.png){fig-alt="Two routes from ind60 to dem65: the direct path c, and the indirect route through dem60, a times b."}
+
+::: {.check}
+**Reading it:** an indirect effect is the **product of the paths along the road**. Two-thirds of what
+1960 industrialisation does for 1965 democracy (0.39 of 0.56) goes *through* 1960 democracy. This is a
+**mediation**: dem60 carries the effect.
+:::
+
+## Justify every extra arrow {.scrollable}
+
+| Model | χ² (df) | p | CFI | TLI | RMSEA | ind60 → dem60 | dem60 → dem65 | ind60 → dem65 |
+|---|---|---|---|---|---|---|---|---|
+| without the 4 gold arrows | 72.5 (41) | 0.002 | 0.953 | 0.938 | 0.102 | 0.45 | 0.91 | 0.15 |
+| with them | 50.8 (37) | 0.064 | 0.980 | 0.970 | 0.071 | 0.45 | 0.87 | 0.17 |
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**With them:** χ² no longer rejects, CFI and TLI pass, RMSEA is acceptable. The structural paths
+hardly move: the conclusions do not depend on them.
+:::
+:::
+
+::: {.column width="50%"}
+::: {.warn}
+**Legitimate here, because the design says so:** same question, same raters. Adding `~~` lines
+*because they raise the CFI* is fitting noise, and it loses marks.
+:::
+:::
+:::
+
+## Turn an arrow around: the fit does not change {.scrollable}
+
+![](economist-assets/sem-equivalent.png){.short fig-alt="Industry causes democracy, and democracy causes industry: two diagrams with identical fit."}
+
+::: {.warn}
+**Identical, to the last decimal.** "Industry builds democracy" and "democracy builds industry" imply the
+same correlations, so no fit index can choose. **The direction of an arrow is your assumption**; it comes
+from theory, timing (a 1960 cause cannot follow a 1965 effect) or design, never from the fit.
+:::
+
+## Example 2 · Plain summary {.scrollable}
+
+- The model **fits well** once the same-question covariances, justified by the design, are in.
+- The indicators **measure their constructs well** (all loadings above 0.69).
+- Industrialisation in 1960 goes with **more democracy**, in 1960 (0.45) and, mostly **through** that, in 1965 (total 0.56, of which 0.39 indirect).
+- Democracy is **highly persistent** (0.87).
+- The direction of the arrows comes from **timing and theory**, not from the fit: the reversed model fits exactly as well.
+
+::: {.step}
+**What this example teaches:** once the constructs are measured, arrows between them are read like
+regression coefficients, with two new tools, **indirect effects** and **R² for a construct**.
+:::
+
+## Example 3 · Will this firm export? {.center}
+
+## A theory from management research {.scrollable}
+
+The **Theory of Planned Behaviour** (Ajzen, 1991) says a decision-maker's **intention** to act comes from
+three things. Applied to exporting:
+
+| Construct | Means | Survey items (1–7 scale) |
+|---|---|---|
+| **attitude** | the manager thinks exporting is good for the firm | `att1` "Exporting would be profitable" · `att2` "…would be good for us" |
+| **norms** | people who matter expect it | `norm1` "Our board expects us to export" · `norm2` "Our bank / peers do" |
+| **control** | the firm feels able to do it | `ctrl1` "We have the resources" · `ctrl2` "We know how" |
+| **intention** | the firm plans to export | `int1` "We plan to export within two years" · `int2` "…are preparing to" |
+
+::: {.step}
+**The question:** which of the three drives the intention to export, and by how much? Four constructs,
+none observed, two items each: 400 SME managers.
+:::
+
+## The data are simulated, so we know the answer {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+We **built** the data from a known model:
+
+$$\text{intention} = 0.5\,\text{attitude} + 0.6\,\text{norms} + 0.3\,\text{control} + \text{noise}$$
+
+and each survey item = its construct + its own noise.
+:::
+
+::: {.column width="50%"}
+::: {.check}
+**Why simulate?** On real data you never know whether a method got the answer right. Here we do, so we
+can watch two methods side by side and see which one finds 0.5, 0.6 and 0.3.
+:::
+:::
+:::
+
+::: {.muted}
+The same trick as session 10: before you trust a method on data where the truth is unknown, check it
+on data where the truth is known.
+:::
+
+## The drawing {.scrollable}
+
+![](economist-assets/tpb-model.png){.big fig-alt="Attitude, norms and control, each measured by two items, with red arrows to intention to export, measured by two items."}
+
+```
+attitude  =~ att1 + att2
+norms     =~ norm1 + norm2
+control   =~ ctrl1 + ctrl2
+intention =~ int1 + int2
+intention ~ attitude + norms + control
+```
+
+## The results, against the truth {.scrollable}
+
+![](economist-assets/tpb-model-fitted.png){.big fig-alt="The fitted model: paths 0.44, 0.62 and 0.29 against true values 0.5, 0.6 and 0.3; loadings 0.81 to 0.90; R-squared 0.75."}
+
+::: {.check}
+**SEM finds the truth, up to sampling noise:** 0.44, 0.62 and 0.29 for 0.5, 0.6 and 0.3. Every
+loading is above 0.8. The fit is excellent (χ² = 18.2 on 14 df, p = 0.20; CFI 0.997; RMSEA 0.027),
+as it should be: the model **is** the one that made the data.
+:::
+
+## Why not just average the items and run a regression? {.scrollable}
+
+![](economist-assets/tpb-recovery.png){fig-alt="Bar chart: true paths, SEM estimates close to them, and regression on averaged items about 15 to 20 percent smaller for all three."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**The regression on averaged items gets every path too small**, by 15–25%: 0.37, 0.51, 0.24.
+An average of two noisy items is still noisy, and **noise in a regressor shrinks its coefficient
+toward zero** (attenuation bias, session 6).
+:::
+:::
+
+::: {.column width="50%"}
+::: {.step}
+**SEM estimates the path between the constructs themselves**, after separating each item into
+construct and error. That is the payoff from Part 1's "two halves": the measurement model cleans
+the structural model.
+:::
+:::
+:::
+
+## Example 3 · Plain summary {.scrollable}
+
+- All three constructs **drive the intention to export**; subjective norms most (0.62), perceived control least (0.29).
+- Together they explain **75%** of intention (R² = 0.75).
+- **SEM recovers the true paths**; averaging the items and running a regression **understates every one of them**.
+- Perfect fit here is no surprise: we simulated from this model. On real survey data, expect worse, and look for the reasons as in Example 1.
+
+::: {.step}
+**What this example teaches:** measurement error is not a nuisance to average away. Model it, and the
+structural paths come out right.
+:::
+
+## What a good fit does not prove {.center}
+
+## What SEM does not fix {.scrollable}
+
+- **Confounding.** A cause left out of the diagram biases the paths exactly as it biases a regression.
+  Latent variables absorb *measurement error*, not omitted causes. That is sessions 10 and 11.
+- **Direction.** The reversed model in Example 2 fits identically. With everything measured on the same day,
+  an arrow has a direction only because you drew one.
+- **Small samples.** With 75 countries the χ² test has little power: "good fit" in a small sample is weak
+  evidence. Aim for 200 or more, and 5–10 observations per parameter.
+- **Comparisons across countries.** Comparing *trust* between Canada and Japan assumes the questions mean the
+  same thing in both, **measurement invariance**, which has to be tested, not assumed.
+- **Non-normal data.** The default estimator assumes multivariate normality; skewed survey items make χ² too
+  large and p-values too small. Say which estimator you used.
+
+::: {.warn}
+**Good fit means the diagram is *consistent* with the data. It does not mean the diagram is right.**
+:::
+
+## Seven steps, the same in all three examples {.scrollable}
+
+![](economist-assets/sem-workflow.png){fig-alt="Seven steps from theory to judging the fit, with an arrow back from the fit to the theory."}
+
+| Step | What you do | In Python |
+|---|---|---|
+| 1–3 | argue which indicators measure which construct, draw it, write one line per ellipse | a string with `=~`, `~`, `~~` |
+| 4 | look at the correlations: can you see your groups? | `data[cols].corr()`, `plt.imshow` |
+| 5 | fit | `model = semopy.Model(description)` · `model.fit(data)` |
+| 6 | read loadings and paths, **standardised** | `model.inspect(std_est=True)` |
+| 7 | judge the fit, all four indices | `semopy.calc_stats(model)` |
+
+## In class · The code behind the three examples {.center}
+
+## How this part works {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+Every cell that follows **runs on its own**: copy it into a new file in VS Codium, run it, and you
+should see exactly the output on the slide. Three packages, by name: `semopy`, `pandas`,
+`matplotlib` (and `statsmodels` once, in Example 3). The data ship with semopy or are simulated in
+the cell: nothing to download.
+:::
+
+::: {.column width="50%"}
+::: {.step}
+**For each example:**
+
+1. run the cells and check you get the numbers from the lecture;
+2. do the **Your turn** task under the last cell, changing one thing at a time.
+:::
+:::
+:::
+
+## Example 1 in Python · Load and look {.scrollable}
+
 ```{python}
 #| echo: true
 
-# Step 1 · Load the data
+# Example 1 · Load the data
 import semopy
 from semopy.examples import holzinger39
 
@@ -219,7 +698,7 @@ print(data.shape)
 print(data[["school", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9"]].head().round(2))
 ```
 
-## Step 2 · Look at the correlations before you model anything {.scrollable}
+## Example 1 in Python · The correlation picture {.scrollable}
 
 ```{python}
 #| echo: true
@@ -227,7 +706,7 @@ print(data[["school", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9"]].hea
 #| fig-width: 5.6
 #| fig-height: 4.8
 
-# Step 2 · A picture of the correlation matrix
+# Example 1 · A picture of the correlation matrix
 import matplotlib.pyplot as plt
 from semopy.examples import holzinger39
 
@@ -248,58 +727,12 @@ plt.title("Correlations between the nine tests")
 plt.show()
 ```
 
-::: {.check}
-**Reading it:** three dark squares on the diagonal. x4–x6 correlate at about 0.7 with each other and
-0.1–0.4 with everything else; x1–x3 and x7–x9 form weaker blocks. That is three groups, *before* any
-model. If you cannot see your constructs in this picture, no fit index will find them for you.
-:::
-
-## Step 3 · Draw the model, on paper, first {.scrollable}
-
-![](economist-assets/hs-model.png){.big fig-alt="The three-factor model: visual, textual and speed, each with three tests, the three abilities linked by dashed two-headed arrows."}
-
-::: {.step}
-**Every arrow is a claim, and so is every missing arrow.** No arrow from *visual* to x9 says "the
-capitals test has nothing to do with visual ability". You will test that claim in step 9.
-:::
-
-## Step 4 · Translate the drawing, one line per ellipse {.scrollable}
-
-::: columns
-::: {.column width="48%"}
-```{python}
-#| echo: true
-
-# Step 4 · The model description: a plain string
-description = """
-visual  =~ x1 + x2 + x3
-textual =~ x4 + x5 + x6
-speed   =~ x7 + x8 + x9
-"""
-print(description)
-```
-:::
-
-::: {.column width="52%"}
-**What semopy adds without being asked**, so the three lines are a complete model:
-
-1. **One loading per construct is fixed to 1** (x1, x4, x7). A construct has no units of its own; this lends it the units of its first indicator. That is why those rows will show no standard error.
-2. **An error term for every indicator**: the circles you drew.
-3. **The three constructs may correlate**: the dashed arrows.
-
-::: {.muted}
-semopy uses the same syntax as R's *lavaan*, so papers that print a lavaan model can be refitted
-in Python as written.
-:::
-:::
-:::
-
-## Step 5 · Fit the model {.scrollable}
+## Example 1 in Python · Fit and inspect {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Step 5 · Model(), then .fit(), then .inspect()
+# Example 1 · Model(), then .fit(), then .inspect()
 import semopy
 from semopy.examples import holzinger39
 
@@ -318,11 +751,11 @@ print(estimates)
 | Column | Means |
 |---|---|
 | `lval op rval` | the parameter. semopy writes a loading as `x2 ~ visual`: "x2 depends on visual" |
-| `Estimate` | in the indicator's own units; `1.0` and a `-` standard error = fixed in step 4, not estimated |
+| `Estimate` | in the indicator's own units; `1.0` and a `-` standard error = fixed, not estimated |
 | `Est. Std` | **standardised**: comparable across indicators. This is the column you read |
 | `p-value` | is the estimate different from zero? (`0.0` means below 0.0000005) |
 
-## Step 6 · Read the loadings {.scrollable}
+## Example 1 in Python · The loadings {.scrollable}
 
 ```{python}
 #| echo: true
@@ -330,7 +763,7 @@ print(estimates)
 #| fig-width: 5.4
 #| fig-height: 4.2
 
-# Step 6 · The loadings are the rows with op "~"
+# Example 1 · The loadings are the rows with op "~"
 import matplotlib.pyplot as plt
 import semopy
 from semopy.examples import holzinger39
@@ -354,85 +787,12 @@ plt.xlabel("standardised loading")
 plt.show()
 ```
 
-::: {.check}
-**Reading it:** a standardised loading is the **correlation between the test and its ability**;
-its square is the **share of the test the ability explains**. Textual is measured well (0.84–0.86:
-about 72% of each test). Cubes, x2, is the weak one: $0.42^2 = 0.18$, so 82% of a child's cubes
-score is something other than visual ability. Above 0.7 is strong, below 0.4 is a candidate to drop.
-:::
-
-## Step 7 · Put the numbers back on the drawing {.scrollable}
-
-![](economist-assets/hs-model-fitted.png){.big fig-alt="The three-factor diagram with standardised loadings on the arrows, factor correlations on the dashed arrows and unexplained shares in the error circles."}
-
-::: {.check}
-**Check the rule from Part 1:** x4 and x5 both measure *textual*, so the model says
-corr(x4, x5) = 0.85 × 0.86 = **0.73**. The correlation in step 2 is **0.73**. The abilities correlate
-0.28–0.47: related, but not the same thing.
-:::
-
-## Step 8 · Judge the fit {.scrollable}
-
-```{python}
-#| echo: true
-#| output-location: column
-
-# Step 8 · calc_stats() returns every fit index
-import semopy
-from semopy.examples import holzinger39
-
-data = holzinger39.get_data()
-model = semopy.Model("""
-visual  =~ x1 + x2 + x3
-textual =~ x4 + x5 + x6
-speed   =~ x7 + x8 + x9
-""")
-model.fit(data)
-
-fit = semopy.calc_stats(model)
-columns = ["chi2", "DoF", "chi2 p-value",
-           "CFI", "TLI", "RMSEA"]
-print(fit[columns].T.round(3))
-```
-
-| Index | Question it answers | Convention | Here | Verdict |
-|---|---|---|---|---|
-| $\chi^2$ | could the model be *exactly* right? | p > 0.05 | 85.3 on 24 df, p < 0.001 | no |
-| **CFI** | how far from "nothing correlates" toward perfect? | > 0.95 | 0.931 | close, not there |
-| **TLI** | the same, penalised for extra parameters | > 0.95 | 0.896 | short |
-| **RMSEA** | misfit per degree of freedom | < 0.06 good, > 0.10 poor | 0.092 | mediocre |
-
-::: {.warn}
-**Report all four, and say which convention you applied.** Quoting only the one that passes loses marks.
-:::
-
-## Step 9 · Where does the model miss? {.scrollable}
-
-![](economist-assets/hs-reproduce.png){fig-alt="Three heat maps: the observed correlations, the correlations the model implies, and their difference, which is largest between x9 and the visual tests."}
-
-::: columns
-::: {.column width="50%"}
-::: {.check}
-**Reading it:** the model reproduces the textual block almost perfectly (differences of 0.00). The biggest
-misses are in the last row: **x9 correlates with x1 and x3 by 0.15 more than the model allows**.
-:::
-:::
-
-::: {.column width="50%"}
-::: {.step}
-**Is there a reason?** x9 asks children to tell straight from curved capital letters, fast. That is a
-*speed* task that also needs *visual* discrimination, so an arrow from visual to x9 can be argued
-from what the test is, not just from the numbers.
-:::
-:::
-:::
-
-## Step 10 · Compare with the alternatives {.scrollable}
+## Example 1 in Python · Fit, and three drawings compared {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Step 10 · Same data, three different drawings
+# Example 1 · Same data, three different drawings, every fit index
 import semopy
 from semopy.examples import holzinger39
 
@@ -451,71 +811,24 @@ for name, description in models.items():
           f"  RMSEA = {fit['RMSEA'].iloc[0]:.3f}")
 ```
 
-## Step 10 · Reading the comparison {.scrollable}
-
-::: columns
-::: {.column width="50%"}
-![](economist-assets/hs-one-vs-three.png){.big fig-alt="The one-factor model and the three-factor model side by side, with their fit indices."}
-:::
-
-::: {.column width="50%"}
-::: {.check}
-**One general ability** is clearly rejected (CFI 0.677): the tests do not all measure one thing.
-**Three abilities** is far better. **x9 on visual too** passes CFI (0.967) and nearly RMSEA (0.065).
-:::
-
-::: {.warn}
-The third model was chosen *after looking at the misfit*. Report it as such, and confirm it on new
-data (the other school, next year's class) before you believe it.
-:::
-:::
-:::
-
-## Part 3 · Adding arrows between constructs {.center}
-
-## The data: 75 countries, 1960 and 1965 {.scrollable}
-
-Bollen's (1989) classic: does industrialisation bring democracy? Neither is a column; both are
-measured by indicators. Also bundled with semopy.
-
-| Construct | Indicators |
-|---|---|
-| **ind60** · industrialisation, 1960 | `x1` GNP per capita · `x2` energy per capita · `x3` share of labour in industry |
-| **dem60** · democracy, 1960 | `y1` press freedom · `y2` freedom of opposition · `y3` fair elections · `y4` effective legislature |
-| **dem65** · democracy, 1965 | `y5`–`y8`: **the same four questions, five years later** |
-
-```{python}
-#| echo: true
-
-# Step 1 · Load the data
-from semopy.examples import political_democracy
-
-countries = political_democracy.get_data()
-print(countries.shape)
-print(countries.head().round(2))
-```
-
-## Step 2 · The theory, then the drawing {.scrollable}
-
-![](economist-assets/pd-model.png){.big fig-alt="Industrialisation in 1960 measured by x1 to x3, with arrows to democracy in 1960 and 1965, each measured by four indicators; the same-question indicators linked by dashed arrows."}
-
 ::: {.step}
-**Three structural claims (red):** industrialisation raises democracy; democracy persists; and
-industrialisation may also act on 1965 directly. **One claim from the design (gold):** y1 and y5 are the
-same question rated by the same experts, so their errors may move together. That is decided
-*before* fitting, from how the data were collected.
+**Your turn.** (1) Fit the three-factor model on **one school only**:
+`data[data["school"] == "Pasteur"]`, then Grant-White. Does x9 still misfit in both?
+(2) Drop x2, the weak cubes test, from *visual*. What happens to the CFI, and to the other two visual loadings?
 :::
 
-## Step 3 · All three operators in one description {.scrollable}
+## Example 2 in Python · Load, fit, read the paths {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Step 3 · =~ measures, ~ explains, ~~ covaries
+# Example 2 · =~ measures, ~ explains, ~~ covaries
 import semopy
 from semopy.examples import political_democracy
 
 countries = political_democracy.get_data()
+print(countries.shape)
+
 description = """
 # measurement: each construct and its indicators
 ind60 =~ x1 + x2 + x3
@@ -539,37 +852,12 @@ paths = estimates[(estimates["op"] == "~") & estimates["lval"].isin(["dem60", "d
 print(paths[["lval", "op", "rval", "Estimate", "Est. Std", "p-value"]].round(3))
 ```
 
-::: {.check}
-**Reading it:** `dem60 ~ ind60` at **0.45**: a country one standard deviation more industrialised in 1960 was
-0.45 standard deviations more democratic that year. `dem65 ~ dem60` at **0.87**: democracy is very
-persistent. `dem65 ~ ind60` at **0.17** (p = 0.015): a smaller direct push, on top of persistence.
-:::
-
-## Step 4 · The numbers on the drawing {.scrollable}
-
-![](economist-assets/pd-model-fitted.png){.big fig-alt="The democracy model with standardised loadings, path coefficients, and the unexplained share of each democracy construct."}
-
-::: {.check}
-**R², read from the ζ circles:** industrialisation explains **20%** of democracy in 1960 (1 − 0.80).
-Democracy in 1960 and industrialisation together explain **91%** of democracy in 1965 (1 − 0.09).
-All eleven loadings are above 0.69: the indicators measure their constructs well.
-:::
-
-## Step 5 · Direct and indirect effects {.scrollable}
-
-![](economist-assets/pd-effects.png){fig-alt="Two routes from ind60 to dem65: the direct path c, and the indirect route through dem60, a times b."}
-
-::: {.check}
-**Reading it:** two-thirds of what 1960 industrialisation does for 1965 democracy (0.39 of 0.56) goes
-*through* 1960 democracy. This is a **mediation**: dem60 carries the effect.
-:::
-
-## Step 5 · The same arithmetic, in Python {.scrollable}
+## Example 2 in Python · Direct and indirect effects {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Step 5 · An indirect effect is the product of the paths along the road
+# Example 2 · An indirect effect is the product of the paths along the road
 import semopy
 from semopy.examples import political_democracy
 
@@ -601,12 +889,12 @@ print(f"total     c + a * b = {c + a * b:.2f}")
 dem60 and the right side ind60. Standardised paths multiply; raw ones would mix units.
 :::
 
-## Step 6 · Judge the fit, and justify every extra arrow {.scrollable}
+## Example 2 in Python · With and without the extra arrows {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Step 6 · The model with and without the four same-question covariances
+# Example 2 · The model with and without the four same-question covariances
 import semopy
 from semopy.examples import political_democracy
 
@@ -629,30 +917,12 @@ for name, description in {"without": base, "with": base + same_question}.items()
           f"  TLI = {fit['TLI'].iloc[0]:.3f}  RMSEA = {fit['RMSEA'].iloc[0]:.3f}")
 ```
 
-::: columns
-::: {.column width="50%"}
-::: {.check}
-**With them:** χ² no longer rejects (p = 0.064), CFI 0.980 and TLI 0.970 pass, RMSEA 0.071 is acceptable.
-The structural paths hardly move (0.45, 0.87, 0.17): the conclusions do not depend on them.
-:::
-:::
-
-::: {.column width="50%"}
-::: {.warn}
-**Legitimate here, because the design says so:** same question, same raters. Adding `~~` lines
-*because they raise the CFI* is fitting noise, and it loses marks.
-:::
-:::
-:::
-
-## Part 4 · What a good fit does not prove {.center}
-
-## Turn an arrow around: the fit does not change {.scrollable}
+## Example 2 in Python · Turn the arrow around {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Two opposite causal stories, fitted to the same data
+# Example 2 · Two opposite causal stories, fitted to the same data
 import semopy
 from semopy.examples import political_democracy
 
@@ -666,40 +936,96 @@ for arrow in ["dem60 ~ ind60", "ind60 ~ dem60"]:
           f"  RMSEA = {fit['RMSEA'].iloc[0]:.3f}")
 ```
 
-![](economist-assets/sem-equivalent.png){.short fig-alt="Industry causes democracy, and democracy causes industry: two diagrams with identical fit."}
-
-::: {.warn}
-**Identical, to the last decimal.** "Industry builds democracy" and "democracy builds industry" imply the
-same correlations, so no fit index can choose. **The direction of an arrow is your assumption**; it comes
-from theory, timing (a 1960 cause cannot follow a 1965 effect) or design, never from the fit.
+::: {.step}
+**Your turn.** (1) Remove the direct path: write `dem65 ~ dem60` instead of `dem65 ~ ind60 + dem60`.
+Does the fit get worse? Is the whole effect of ind60 on dem65 now indirect?
+(2) Compute the R² of dem65 yourself: find the row `dem65 ~~ dem65` in `Est. Std` and take 1 minus it.
 :::
 
-## What SEM does not fix {.scrollable}
+## Example 3 in Python · Simulate the data {.scrollable}
 
-- **Confounding.** A cause left out of the diagram biases the paths exactly as it biases a regression.
-  Latent variables absorb *measurement error*, not omitted causes. That is sessions 10 and 11.
-- **Cross-sectional data.** With everything measured on the same day, an arrow has a direction only because
-  you drew one.
-- **Small samples.** With 75 countries the χ² test has little power: "good fit" in a small sample is weak
-  evidence. Aim for 200 or more, and 5–10 observations per parameter.
-- **Comparisons across countries.** Comparing *trust* between Canada and Japan assumes the questions mean the
-  same thing in both, **measurement invariance**, which has to be tested, not assumed.
-- **Non-normal data.** The default estimator assumes multivariate normality; skewed survey items make χ² too
-  large and p-values too small. Say which estimator you used.
+```{python}
+#| echo: true
 
-## Part 5 · Your recipe {.center}
+# Example 3 · 400 managers, four constructs, two survey items each
+import numpy as np
+import pandas as pd
 
-## Seven steps, and the one rule {.scrollable}
+rng = np.random.default_rng(9)
+n = 400
+attitude = rng.normal(size=n)
+norms = rng.normal(size=n)
+control = rng.normal(size=n)
+# the truth: 0.5, 0.6 and 0.3
+intention = (0.5 * attitude + 0.6 * norms + 0.3 * control
+             + rng.normal(scale=0.5, size=n))
 
-![](economist-assets/sem-workflow.png){fig-alt="Seven steps from theory to judging the fit, with an arrow back from the fit to the theory."}
+def item(latent):
+    # what a survey sees: the construct plus its own noise
+    return latent + rng.normal(scale=0.6, size=n)
 
-| Step | What you do | In Python |
-|---|---|---|
-| 1–3 | argue which indicators measure which construct, draw it, write one line per ellipse | a string with `=~`, `~`, `~~` |
-| 4 | look at the correlations: can you see your groups? | `data[cols].corr()`, `plt.imshow` |
-| 5 | fit | `model = semopy.Model(description)` · `model.fit(data)` |
-| 6 | read loadings and paths, **standardised** | `model.inspect(std_est=True)` |
-| 7 | judge the fit, all four indices | `semopy.calc_stats(model)` |
+firms = pd.DataFrame({
+    "att1": item(attitude), "att2": item(attitude),
+    "norm1": item(norms), "norm2": item(norms),
+    "ctrl1": item(control), "ctrl2": item(control),
+    "int1": item(intention), "int2": item(intention),
+})
+print(firms.head().round(2))
+print(firms.corr().round(2))
+```
+
+::: {.muted}
+In your own analysis this cell is replaced by `pd.read_csv(...)`: one row per respondent, one column per item.
+Only the four unobserved columns, `attitude` … `intention`, never reach the data set.
+:::
+
+## Example 3 in Python · SEM against averaged items {.scrollable}
+
+```{python}
+#| echo: true
+
+# Example 3 · Same data, two methods, one known truth
+import numpy as np
+import pandas as pd
+import semopy
+import statsmodels.formula.api as smf
+
+rng = np.random.default_rng(9)
+n = 400
+attitude, norms, control = rng.normal(size=n), rng.normal(size=n), rng.normal(size=n)
+intention = 0.5 * attitude + 0.6 * norms + 0.3 * control + rng.normal(scale=0.5, size=n)
+item = lambda latent: latent + rng.normal(scale=0.6, size=n)
+firms = pd.DataFrame({"att1": item(attitude), "att2": item(attitude),
+                      "norm1": item(norms), "norm2": item(norms),
+                      "ctrl1": item(control), "ctrl2": item(control),
+                      "int1": item(intention), "int2": item(intention)})
+
+# 1 · SEM: the paths between the constructs
+model = semopy.Model("""
+attitude  =~ att1 + att2
+norms     =~ norm1 + norm2
+control   =~ ctrl1 + ctrl2
+intention =~ int1 + int2
+intention ~ attitude + norms + control
+""")
+model.fit(firms)
+est = model.inspect(std_est=True)
+print(est[est["lval"] == "intention"][["lval", "op", "rval", "Estimate", "Est. Std"]].round(2))
+fit = semopy.calc_stats(model)
+print(fit[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T.round(3))
+
+# 2 · The shortcut: average the items, then a regression
+firms["att"] = (firms["att1"] + firms["att2"]) / 2
+firms["norm"] = (firms["norm1"] + firms["norm2"]) / 2
+firms["ctrl"] = (firms["ctrl1"] + firms["ctrl2"]) / 2
+firms["intent"] = (firms["int1"] + firms["int2"]) / 2
+print(smf.ols("intent ~ att + norm + ctrl", data=firms).fit().params.round(2))
+```
+
+::: {.step}
+**Your turn.** (1) Make the survey noisier: change `scale=0.6` in `item` to `scale=1.0`. Which method
+moves further from 0.5, 0.6, 0.3? (2) Set `n = 100`. Are the SEM estimates still close? Is the fit still good?
+:::
 
 ## The whole recipe, in one cell to copy {.scrollable}
 
