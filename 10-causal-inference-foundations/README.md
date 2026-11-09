@@ -32,6 +32,7 @@ By the end of this session you should be able to:
 - Estimate a **propensity score** and use it to match treated to control units
 - Check **overlap** and **balance**, and say what to do when they fail
 - Report an **ATT**, and state the assumption it rests on
+- Say why matching and regression rest on the **same assumption**, and where they differ
 
 ---
 

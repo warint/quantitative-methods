@@ -11,9 +11,15 @@ Writes, next to this file:
     po-table.png          the table you never get to see: both potential outcomes
     po-decomposition.png  naive difference = effect + selection bias, in bars
     dag-selection.png     why self-selection biases the comparison (and a coin flip does not)
+    coin-histogram.png    1,000 coin flips: randomisation is right on average
+    firms-balance.png     productivity of the firms that joined and did not, before the programme
     nsw-design.png        LaLonde's test: an experiment, then its controls swapped for a survey
+    nsw-overlap.png       the propensity score in each group: is there anyone to compare with?
+    nsw-loveplot.png      standardised differences before and after matching (the love plot)
     matching-idea.png     each treated person paired with the nearest control on the score
     nsw-estimates.png     every estimate on one axis, against the experimental benchmark
+    hr-estimates.png      Example 3: naive and matched estimates, selection on records vs on motivation
+    hr-hidden.png         Example 3: perfect balance on the records, none on motivation
     dag-bad-control.png   a confounder to control for, a mediator not to
     ci-workflow.png       the seven steps of a matching study
 """
@@ -140,6 +146,38 @@ def nsw_numbers():
         _, idx = nn.kneighbors(t[["pscore"]])
         out[key] = t["re78"].mean() - c.iloc[idx.ravel()]["re78"].mean()
     return out
+
+
+# Example 3: the employee-training simulation the slides run (same seed, same lines)
+def simulate_staff():
+    rng = np.random.default_rng(10)
+    n = 800
+    age = rng.normal(40, 10, n).round()
+    education = rng.normal(14, 2, n).round()
+    experience = np.clip(age - 6 - education + rng.normal(0, 3, n), 0, None).round()
+    motivation = rng.normal(0, 1, n)                      # never in the HR file
+    perf_without = (50 + 0.3 * experience + 1.5 * (education - 14) + 4 * motivation
+                    + rng.normal(0, 5, n))
+    perf_with = perf_without + 5                          # the true effect: +5
+    records = -1 + 0.05 * (age - 40) + 0.4 * (education - 14) + 0.03 * (experience - 20)
+    out = {}
+    for version, index in [("A", records), ("B", records + 1.2 * motivation)]:
+        draw = np.random.default_rng(11)
+        treat = (draw.uniform(size=n) < 1 / (1 + np.exp(-index))).astype(int)
+        out[version] = pd.DataFrame({
+            "age": age, "education": education, "experience": experience,
+            "motivation": motivation, "treat": treat,
+            "performance": np.where(treat == 1, perf_with, perf_without)})
+    return out
+
+
+def match_staff(staff):
+    staff = staff.copy()
+    staff["pscore"] = smf.logit("treat ~ age + education + experience",
+                                data=staff).fit(disp=0).predict(staff)
+    t, c = staff[staff["treat"] == 1], staff[staff["treat"] == 0]
+    _, idx = NearestNeighbors(n_neighbors=1).fit(c[["pscore"]]).kneighbors(t[["pscore"]])
+    return t, c, c.iloc[idx.ravel()]
 
 
 # --- 1. the table you never see ---------------------------------------------
@@ -287,6 +325,92 @@ def matching_idea():
     save(fig, "matching-idea.png")
 
 
+# --- 2b. Example 1: a thousand coins, and the balance a choice destroys --------
+def coin_histogram():
+    rng = np.random.default_rng(10)
+    n = 1000
+    productivity = rng.normal(0, 1, n)
+    sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
+    sales_with = sales_without + 2
+    est = []
+    for _ in range(1000):
+        coin = rng.integers(0, 2, n)
+        obs = np.where(coin == 1, sales_with, sales_without)
+        est.append(obs[coin == 1].mean() - obs[coin == 0].mean())
+    fig, ax = plt.subplots(figsize=(8, 3.8))
+    ax.hist(est, bins=30, color=BLUE, alpha=0.85)
+    ax.axvline(2, color=RED, lw=2)
+    ax.text(1.98, ax.get_ylim()[1] * 0.92, "true effect: +2", color=RED, fontweight="bold",
+            ha="right", bbox=dict(fc=BG, ec="none", pad=1.5))
+    ax.set_xlabel("difference in means, one coin flip per firm, 1,000 experiments")
+    ax.set_ylabel("experiments")
+    ax.set_title(f"Centred on the truth (mean {np.mean(est):.2f}); any one experiment misses by "
+                 f"about {np.std(est):.2f}", loc="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "coin-histogram.png")
+
+
+def firms_balance(firms):
+    fig, ax = plt.subplots(figsize=(6.4, 4.2))
+    groups = [firms.loc[firms["applies"] == g, "productivity"] for g in (0, 1)]
+    bp = ax.boxplot(groups, widths=0.5, patch_artist=True, medianprops=dict(color=INK))
+    for patch, col in zip(bp["boxes"], (PALE_BLUE, PALE_RED)):
+        patch.set_facecolor(col)
+    ax.set_xticks([1, 2], [f"did not join\nmean {groups[0].mean():.2f}",
+                           f"joined\nmean {groups[1].mean():.2f}"])
+    ax.set_ylabel("productivity, before the programme")
+    ax.set_title("The firms that chose to join were already different", loc="left",
+                 fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "firms-balance.png")
+
+
+# --- 5b. Example 2: overlap and the love plot -----------------------------------
+def nsw_overlap_and_balance():
+    nsw = pd.read_stata(URL + "nsw_dw.dta")
+    cps = pd.read_stata(URL + "cps_controls.dta")
+    df = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+    t0, c0 = df[df["treat"] == 1], df[df["treat"] == 0]
+    sd = np.sqrt((t0[X].var() + c0[X].var()) / 2)
+    before = (t0[X].mean() - c0[X].mean()) / sd
+    after = {}
+    for key, f in [("first score", PS1), ("score fixed for balance", PS2)]:
+        df["pscore"] = smf.logit(f, data=df).fit(disp=0).predict(df)
+        t, c = df[df["treat"] == 1], df[df["treat"] == 0]
+        _, idx = NearestNeighbors(n_neighbors=1).fit(c[["pscore"]]).kneighbors(t[["pscore"]])
+        after[key] = (t[X].mean() - c.iloc[idx.ravel()][X].mean()) / sd
+        if key == "first score":
+            fig, ax = plt.subplots(figsize=(8, 3.8))
+            bins = np.linspace(0, 0.5, 26)
+            ax.hist(c["pscore"], bins=bins, alpha=0.75, color=BLUE, label="survey (control)")
+            ax.hist(t["pscore"], bins=bins, alpha=0.75, color=RED, label="trained")
+            ax.set_yscale("log")
+            ax.set_xlabel("propensity score: the probability of being trained")
+            ax.set_ylabel("people (log scale)")
+            ax.legend(frameon=False)
+            ax.set_title("Almost every survey person sits near 0, but every bar with trainees "
+                         "also has controls", loc="left", fontsize=12, fontweight="bold")
+            fig.tight_layout()
+            save(fig, "nsw-overlap.png")
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    ax.axvspan(-0.1, 0.1, color=PALE_TEAL, zorder=0)
+    ax.axvline(0, color=MUTED, lw=1)
+    y = np.arange(len(X))
+    ax.scatter(before.astype(float), y, s=60, color=RED, label="before matching", zorder=3)
+    ax.scatter(after["first score"].astype(float), y, s=60, color=GOLD,
+               label="after, first score", zorder=3)
+    ax.scatter(after["score fixed for balance"].astype(float), y, s=60, color=BLUE,
+               label="after, score fixed for balance", zorder=3)
+    ax.set_yticks(y, X)
+    ax.invert_yaxis()
+    ax.set_xlabel("standardised difference, trained minus controls (shaded: within ±0.1)")
+    ax.legend(frameon=False, loc="lower right", fontsize=10)
+    ax.set_title("The love plot: matching closes every gap; age needs a better score",
+                 loc="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "nsw-loveplot.png")
+
+
 # --- 6. every estimate on one axis --------------------------------------------
 def nsw_estimates(r):
     exp, se = r["experiment"]
@@ -312,6 +436,59 @@ def nsw_estimates(r):
     ax.tick_params(axis="y", length=0)
     fig.tight_layout()
     save(fig, "nsw-estimates.png")
+
+
+# --- 6b. Example 3: what matching cannot see ------------------------------------
+def hr_figures(staff):
+    res = {}
+    for v, d in staff.items():
+        t, c, m = match_staff(d)
+        res[v] = {"naive": t["performance"].mean() - c["performance"].mean(),
+                  "matched": t["performance"].mean() - m["performance"].mean(),
+                  "t": t, "c": c, "m": m}
+    fig, ax = plt.subplots(figsize=(8.4, 3.4))
+    rows = [("A · sign-up driven by the records", "A"),
+            ("B · motivation drives it too", "B")]
+    for i, (lab, v) in enumerate(rows):
+        ax.plot([res[v]["naive"], res[v]["matched"]], [i, i], color=GRID, lw=3, zorder=1)
+        ax.scatter(res[v]["naive"], i, s=110, color=RED, zorder=3)
+        ax.scatter(res[v]["matched"], i, s=110, color=BLUE, zorder=3)
+        ax.text(res[v]["naive"], i - 0.28, f"naive {res[v]['naive']:.1f}", ha="center",
+                fontsize=10.5, color=RED, fontweight="bold")
+        ax.text(res[v]["matched"], i - 0.28, f"matched {res[v]['matched']:.1f}", ha="center",
+                fontsize=10.5, color=BLUE, fontweight="bold")
+    ax.axvline(5, color=TEAL, lw=2, ls="--")
+    ax.text(5.1, 1.45, "truth: +5", color=TEAL, fontweight="bold")
+    ax.set_yticks([0, 1], [r[0] for r in rows])
+    ax.set_ylim(1.7, -0.6)
+    ax.set_xlim(3, 13)
+    ax.set_xlabel("estimated effect of the training on performance, points")
+    ax.tick_params(axis="y", length=0)
+    fig.tight_layout()
+    save(fig, "hr-estimates.png")
+
+    t, c, m = res["B"]["t"], res["B"]["c"], res["B"]["m"]
+    cols = ["age", "education", "experience", "motivation"]
+    sd = np.sqrt((t[cols].var() + c[cols].var()) / 2)
+    after = (t[cols].mean() - m[cols].mean()) / sd
+    fig, ax = plt.subplots(figsize=(8, 3.0))
+    ax.axvspan(-0.1, 0.1, color=PALE_TEAL, zorder=0)
+    ax.axvline(0, color=MUTED, lw=1)
+    colors = [BLUE, BLUE, BLUE, RED]
+    ax.scatter(after.values, range(4), s=90, color=colors, zorder=3)
+    for k, v in enumerate(after.values):
+        ax.text(v + 0.04, k, f"{v:+.2f}", va="center", fontsize=10.5,
+                color=colors[k], fontweight="bold")
+    ax.set_yticks(range(4), ["age", "education", "experience",
+                             "motivation (not in the file)"])
+    ax.invert_yaxis()
+    ax.set_xlim(-0.3, 1.4)
+    ax.set_xlabel("standardised difference after matching, version B")
+    ax.set_title("The love plot you can draw is perfect; the one you cannot is not",
+                 loc="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "hr-hidden.png")
+    return {v: (round(r["naive"], 2), round(r["matched"], 2)) for v, r in res.items()}, after
 
 
 # --- 7. good and bad controls ---------------------------------------------------
@@ -367,6 +544,8 @@ def workflow():
 if __name__ == "__main__":
     firms = simulate()
     po_table(firms)
+    coin_histogram()
+    firms_balance(firms)
     print("decomposition (naive, effect, bias):", po_decomposition(firms))
     dag_selection()
     nsw_design()
@@ -374,5 +553,7 @@ if __name__ == "__main__":
     r = nsw_numbers()
     print(r)
     nsw_estimates(r)
+    nsw_overlap_and_balance()
+    print(hr_figures(simulate_staff()))
     dag_bad_control()
     workflow()

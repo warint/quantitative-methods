@@ -28,16 +28,21 @@ pasted into a file: the data is either simulated in the cell or read from a URL.
 
 ## What the lecture covers
 
-1. **The question, in pictures** — two potential outcomes per unit, the fundamental problem, ATE and
-   ATT, and the naive difference written as effect plus selection bias
-2. **A world where we know the truth** — 1,000 simulated firms: a coin flip recovers the effect,
-   self-selection does not, and a balance check shows why
-3. **Matching, tested on real data** — LaLonde's job-training experiment, its controls swapped for a
-   survey: naive estimate, balance, propensity score, overlap, nearest-neighbour matching, a better
-   score, and the ATT against the experiment's answer
-4. **What matching does not fix** — unmeasured confounders, bad controls, overlap, standard errors
-5. **Your recipe** — seven steps, one cell to copy, what to report, and the same test with a second
-   survey
+The lecture is built on **three examples**, with no code on screen while they are taught; the code
+for all three comes at the end, for you to run in class.
+
+1. **The language of causal inference** — two potential outcomes per unit, the fundamental problem,
+   ATE and ATT, the words you will need, and the naive difference as effect plus selection bias
+2. **Example 1 · Did the export programme work?** — 1,000 simulated firms: a coin flip recovers the
+   effect, self-selection does not, and a balance check shows why
+3. **Example 2 · LaLonde's test** — a job-training lottery, its controls swapped for a survey: naive
+   estimate, balance, propensity score, overlap, matching, the love plot, and the ATT against the
+   experiment's answer
+4. **Example 3 · Does analytics training raise performance?** — 800 simulated employees: matching
+   recovers the course's effect, then fails, with perfect balance, once motivation drives enrolment
+5. **Wrapping up** — matching or regression, what matching does not fix, the seven steps
+6. **In class · The code behind the three examples** — every cell, a *Your turn* per example, and the
+   same test with a second survey
 
 ---
 
@@ -50,12 +55,13 @@ By the end of the session you should be able to:
 - Estimate a **propensity score** and use it to match treated to control units
 - Check **overlap** and **balance**, and say what to do when they fail
 - Report an **ATT**, and state the assumption it rests on
+- Say why matching and regression rest on the **same assumption**, and where they differ
 
 ---
 
 ## The data
 
-**A simulation, and LaLonde's job-training data (Dehejia and Wahba's version)**
+**Two simulations, and LaLonde's job-training data (Dehejia and Wahba's version)**
 
 ```python
 import pandas as pd
@@ -64,7 +70,8 @@ nsw = pd.read_stata(url + "nsw_dw.dta")            # the experiment: 185 trained
 cps = pd.read_stata(url + "cps_controls.dta")      # 15,992 people from a survey
 ```
 
-Nothing to download by hand; the cells read the files directly.
+Nothing to download by hand; the cells read the files directly. Examples 1 and 3 are simulated
+inside their cells.
 
 ---
 

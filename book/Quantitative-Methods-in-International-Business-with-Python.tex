@@ -8121,6 +8121,14 @@ The reason for all that caution is that the question --- \emph{did the
 policy do anything?} --- is not a question about the data you have. It
 is a question about data you do not have and cannot get.
 
+This chapter answers it through three examples, each adding one idea. A
+thousand simulated firms, where both answers are written down and a coin
+flip can be watched beating self-selection. A real job-training
+programme, run as a lottery, whose experimental answer lets matching on
+survey data be checked. And a simulated training scheme in which
+matching first works and then, with one unmeasured trait added, fails
+without any warning.
+
 \begin{qmibplate}
 
 \pandocbounded{\includegraphics[keepaspectratio]{images/session-10-hume.jpg}}
@@ -8304,8 +8312,8 @@ rather than comparing. Unlike conditional independence, overlap
 
 \end{qmibdefinition}
 
-\section{A world where the answer is
-known}\label{a-world-where-the-answer-is-known}
+\section{Example 1 · Did the export programme
+work?}\label{example-1-did-the-export-programme-work}
 
 Everything above can be watched happening in a simulation, which is the
 one setting where both potential outcomes exist. A thousand firms; a
@@ -8362,7 +8370,12 @@ treatment, here about one standard deviation of productivity. That
 comparison --- balance --- is the diagnostic the rest of the chapter is
 built on.
 
-\section{LaLonde's test}\label{lalondes-test}
+\textbf{Example 1 in three sentences.} With a coin, the difference in
+means finds the truth on average. When firms choose, the same difference
+says 5.33, of which 2 is programme and 3.33 is selection. The selection
+bias itself is invisible; the imbalance that causes it is not.
+
+\section{Example 2 · LaLonde's test}\label{example-2-lalondes-test}
 
 The simulation knows the answer because it wrote it. A real data set
 that knows the answer is rarer, and the most famous one is a
@@ -8705,6 +8718,14 @@ the lesson is about the conditions under which matching works --- rich
 pre-treatment earnings, comparison groups from the same labour market
 --- rather than about matching as such.
 
+\textbf{Example 2 in three sentences.} The experiment says training
+raised 1978 earnings by about \$1,800; against survey controls, the
+naive comparison says −\$8,500. A propensity score, an overlap check and
+a balance check, all settled before the outcome is seen, bring matching
+to about \$2,000, while a linear regression on the same variables misses
+by more than half. It worked because two years of pre-programme earnings
+capture most of what decided who enrolled.
+
 \section{The control that changes the
 question}\label{the-control-that-changes-the-question}
 
@@ -8770,59 +8791,161 @@ the next dataset, and no diagnostic will announce it.
 
 \end{qmibwarn}
 
-\section{What none of this fixes}\label{what-none-of-this-fixes}
+\section{Example 3 · Does analytics training raise
+performance?}\label{example-3-does-analytics-training-raise-performance}
 
-Matching came within \$210 of the truth on the CPS. It would be a
-mistake to conclude that it solved the problem, and the simulation shows
-why. Suppose the analyst sees only firm size, a noisy sign of the
-productivity that actually drove selection.
+Matching came within \$210 of the experiment on the CPS. The third
+example shows why that is not the same as solving the problem, in a
+setting from the human-resources side of international business. A large
+organisation offers its employees an advanced data-analytics course;
+taking it is voluntary; the HR analytics team wants to know whether it
+raises a standardised annual performance score. The HR file records age,
+education and experience. It does not record motivation.
 
-\phantomsection\label{check-proxy}
+The data are simulated, 800 employees, so the truth is known: the course
+adds 5 points to everyone. Older and more educated employees are more
+likely to enrol. In version A that is all that drives enrolment. In
+version B motivated employees also enrol more, and motivation raises
+performance on its own. The same matching procedure --- a logit score on
+the three recorded variables, one nearest neighbour, a balance check ---
+is applied to both.
+
+\phantomsection\label{check-hr}
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{10}\NormalTok{)}
-\NormalTok{productivity }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)}
-\NormalTok{sales\_without }\OperatorTok{=} \DecValTok{10} \OperatorTok{+} \DecValTok{3} \OperatorTok{*}\NormalTok{ productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, n)}
-\NormalTok{applies }\OperatorTok{=}\NormalTok{ (productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n) }\OperatorTok{\textgreater{}} \FloatTok{0.5}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
-\NormalTok{size }\OperatorTok{=}\NormalTok{ productivity }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n)}
-\NormalTok{firms }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"productivity"}\NormalTok{: productivity, }\StringTok{"size"}\NormalTok{: size, }\StringTok{"applies"}\NormalTok{: applies,}
-                      \StringTok{"sales"}\NormalTok{: sales\_without }\OperatorTok{+} \DecValTok{2} \OperatorTok{*}\NormalTok{ applies\})}
-\NormalTok{t, c }\OperatorTok{=}\NormalTok{ firms[firms[}\StringTok{"applies"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], firms[firms[}\StringTok{"applies"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
-\ControlFlowTok{for}\NormalTok{ v }\KeywordTok{in}\NormalTok{ [}\StringTok{"size"}\NormalTok{, }\StringTok{"productivity"}\NormalTok{]:}
-\NormalTok{    nn\_v }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(c[[v]])}
-\NormalTok{    \_, idx }\OperatorTok{=}\NormalTok{ nn\_v.kneighbors(t[[v]])}
-    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"matched on }\SpecialCharTok{\{}\NormalTok{v}\SpecialCharTok{:13\}}\SpecialStringTok{ ATT }\SpecialCharTok{\{}\NormalTok{t[}\StringTok{\textquotesingle{}sales\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ c}\SpecialCharTok{.}\NormalTok{iloc[idx.ravel()][}\StringTok{\textquotesingle{}sales\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:.2f\}}\SpecialStringTok{   (truth 2)"}\NormalTok{)}
+\NormalTok{n\_staff }\OperatorTok{=} \DecValTok{800}
+\NormalTok{age }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{40}\NormalTok{, }\DecValTok{10}\NormalTok{, n\_staff).}\BuiltInTok{round}\NormalTok{()}
+\NormalTok{education }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{14}\NormalTok{, }\DecValTok{2}\NormalTok{, n\_staff).}\BuiltInTok{round}\NormalTok{()}
+\NormalTok{experience }\OperatorTok{=}\NormalTok{ np.clip(age }\OperatorTok{{-}} \DecValTok{6} \OperatorTok{{-}}\NormalTok{ education }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{3}\NormalTok{, n\_staff), }\DecValTok{0}\NormalTok{, }\VariableTok{None}\NormalTok{).}\BuiltInTok{round}\NormalTok{()}
+\NormalTok{motivation }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n\_staff)                          }\CommentTok{\# never in the HR file}
+\NormalTok{perf\_without }\OperatorTok{=}\NormalTok{ (}\DecValTok{50} \OperatorTok{+} \FloatTok{0.3} \OperatorTok{*}\NormalTok{ experience }\OperatorTok{+} \FloatTok{1.5} \OperatorTok{*}\NormalTok{ (education }\OperatorTok{{-}} \DecValTok{14}\NormalTok{) }\OperatorTok{+} \DecValTok{4} \OperatorTok{*}\NormalTok{ motivation}
+                \OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, n\_staff))}
+\NormalTok{perf\_with }\OperatorTok{=}\NormalTok{ perf\_without }\OperatorTok{+} \DecValTok{5}                                    \CommentTok{\# the truth: +5}
+
+\NormalTok{records }\OperatorTok{=} \OperatorTok{{-}}\DecValTok{1} \OperatorTok{+} \FloatTok{0.05} \OperatorTok{*}\NormalTok{ (age }\OperatorTok{{-}} \DecValTok{40}\NormalTok{) }\OperatorTok{+} \FloatTok{0.4} \OperatorTok{*}\NormalTok{ (education }\OperatorTok{{-}} \DecValTok{14}\NormalTok{) }\OperatorTok{+} \FloatTok{0.03} \OperatorTok{*}\NormalTok{ (experience }\OperatorTok{{-}} \DecValTok{20}\NormalTok{)}
+\NormalTok{cols }\OperatorTok{=}\NormalTok{ [}\StringTok{"age"}\NormalTok{, }\StringTok{"education"}\NormalTok{, }\StringTok{"experience"}\NormalTok{]}
+\ControlFlowTok{for}\NormalTok{ version, index\_ }\KeywordTok{in}\NormalTok{ [(}\StringTok{"A"}\NormalTok{, records), (}\StringTok{"B"}\NormalTok{, records }\OperatorTok{+} \FloatTok{1.2} \OperatorTok{*}\NormalTok{ motivation)]:}
+\NormalTok{    draw }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{11}\NormalTok{)}
+\NormalTok{    enrol }\OperatorTok{=}\NormalTok{ (draw.uniform(size}\OperatorTok{=}\NormalTok{n\_staff) }\OperatorTok{\textless{}} \DecValTok{1} \OperatorTok{/}\NormalTok{ (}\DecValTok{1} \OperatorTok{+}\NormalTok{ np.exp(}\OperatorTok{{-}}\NormalTok{index\_))).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{    staff }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"age"}\NormalTok{: age, }\StringTok{"education"}\NormalTok{: education, }\StringTok{"experience"}\NormalTok{: experience,}
+                          \StringTok{"treat"}\NormalTok{: enrol, }\StringTok{"motivation"}\NormalTok{: motivation,}
+                          \StringTok{"performance"}\NormalTok{: np.where(enrol }\OperatorTok{==} \DecValTok{1}\NormalTok{, perf\_with, perf\_without)\})}
+\NormalTok{    staff[}\StringTok{"pscore"}\NormalTok{] }\OperatorTok{=}\NormalTok{ smf.logit(}\StringTok{"treat \textasciitilde{} age + education + experience"}\NormalTok{,}
+\NormalTok{                                data}\OperatorTok{=}\NormalTok{staff).fit(disp}\OperatorTok{=}\DecValTok{0}\NormalTok{).predict(staff)}
+\NormalTok{    t, c }\OperatorTok{=}\NormalTok{ staff[staff[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{1}\NormalTok{], staff[staff[}\StringTok{"treat"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}\NormalTok{]}
+\NormalTok{    \_, idx }\OperatorTok{=}\NormalTok{ NearestNeighbors(n\_neighbors}\OperatorTok{=}\DecValTok{1}\NormalTok{).fit(c[[}\StringTok{"pscore"}\NormalTok{]]).kneighbors(t[[}\StringTok{"pscore"}\NormalTok{]])}
+\NormalTok{    m }\OperatorTok{=}\NormalTok{ c.iloc[idx.ravel()]}
+\NormalTok{    sd\_s }\OperatorTok{=}\NormalTok{ np.sqrt((t[cols }\OperatorTok{+}\NormalTok{ [}\StringTok{"motivation"}\NormalTok{]].var() }\OperatorTok{+}\NormalTok{ c[cols }\OperatorTok{+}\NormalTok{ [}\StringTok{"motivation"}\NormalTok{]].var()) }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
+\NormalTok{    gaps }\OperatorTok{=}\NormalTok{ (t[cols }\OperatorTok{+}\NormalTok{ [}\StringTok{"motivation"}\NormalTok{]].mean() }\OperatorTok{{-}}\NormalTok{ m[cols }\OperatorTok{+}\NormalTok{ [}\StringTok{"motivation"}\NormalTok{]].mean()) }\OperatorTok{/}\NormalTok{ sd\_s}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"version }\SpecialCharTok{\{}\NormalTok{version}\SpecialCharTok{\}}\SpecialStringTok{: naive }\SpecialCharTok{\{}\NormalTok{t[}\StringTok{\textquotesingle{}performance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ c[}\StringTok{\textquotesingle{}performance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:5.2f\}}\SpecialStringTok{"}
+          \SpecialStringTok{f"   matched }\SpecialCharTok{\{}\NormalTok{t[}\StringTok{\textquotesingle{}performance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean() }\OperatorTok{{-}}\NormalTok{ m[}\StringTok{\textquotesingle{}performance\textquotesingle{}}\NormalTok{]}\SpecialCharTok{.}\NormalTok{mean()}\SpecialCharTok{:5.2f\}}\SpecialStringTok{   (truth 5)"}\NormalTok{)}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"   standardised differences after matching:"}\NormalTok{, gaps.}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_dict())}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-matched on size          ATT 3.94   (truth 2)
-matched on productivity  ATT 2.21   (truth 2)
+version A: naive  8.58   matched  5.29   (truth 5)
+   standardised differences after matching: {'age': 0.04, 'education': -0.04, 'experience': 0.06, 'motivation': 0.14}
+version B: naive 11.48   matched  9.05   (truth 5)
+   standardised differences after matching: {'age': 0.05, 'education': -0.02, 'experience': 0.02, 'motivation': 1.14}
 \end{verbatim}
 
-Matching on the variable that drove selection recovers the effect.
-Matching on a proxy for it leaves more than half of the bias in place
---- and size, the variable matched on, would look perfectly balanced.
-Balance can only be checked on what was measured; conditional
-independence is a claim about everything else, and it is untestable. On
-LaLonde's data, matching worked because the survey records two years of
-earnings before the programme, which capture most of what decided who
-enrolled. Remove them and no score recovers the experiment.
+\begin{figure}[htbp]
 
-The honest response is to ask how wrong the assumption could be.
-Sensitivity analysis asks how strong an unobserved confounder would have
-to be --- how strongly associated with both treatment and outcome --- to
-overturn the conclusion. If the answer is ``about as strong as the
-covariates already controlled for'', the finding is fragile. If it is
-``stronger than any known determinant'', it is robust. Either way the
-reader learns something a point estimate does not tell them.
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-hr-estimates.png}}
 
-The deeper limitation is that matching and regression adjustment are the
-\emph{same assumption} in different clothing. Both require that
-conditioning on observed covariates suffices. Matching implements it
-better --- it compares like with like instead of extrapolating along a
-line --- but neither creates identification. When the assumption fails,
-both fail, and in the same direction.
+}
+
+\caption{The same procedure on the two versions. In A, matching moves
+the estimate from 8.6 to 5.3, close to the truth; in B it stops at 9.0.}
+
+\end{figure}%
+
+In version A, matching does what it did on LaLonde's data: the naive
+comparison says 8.6 and the matched estimate 5.3. In version B, the same
+steps produce the same reassuring balance table and an estimate of 9.0,
+nearly double the truth. The reason is in the last column of the balance
+check, the one the analyst cannot compute.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-10-01-lecture-economist-assets-hr-hidden.png}}
+
+}
+
+\caption{Balance after matching in version B. The three recorded
+variables are inside ±0.1; motivation, which is not in the file, is off
+by more than a standard deviation.}
+
+\end{figure}%
+
+Balance can only be checked on what was measured, and conditional
+independence is a claim about everything else. On LaLonde's data,
+matching worked because the survey records two years of earnings before
+the programme, which capture most of what decided who enrolled. Here
+nothing in the file captures motivation, and no score built from the
+file can recover the experiment that was never run.
+
+\textbf{Example 3 in three sentences.} When enrolment depends on what
+the HR file records, matching recovers the course's effect. When
+motivation also drives it, matching still balances everything in the
+file and still reports a number, nearly double the truth. The difference
+between the two versions is invisible in the data; it is an argument
+about who enrols and why.
+
+\section{Matching or regression?}\label{matching-or-regression}
+
+Matching and regression adjustment are the \emph{same assumption} in
+different clothing: both require that conditioning on the observed
+covariates suffices. They differ in how they use it.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Regression on the confounders
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Matching on the propensity score
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Comparison} & every treated unit against a line fitted through
+all controls & each treated unit against the controls most like it \\
+\textbf{Overlap} & not checked; extrapolates where no comparable control
+exists & visible in the score's distribution \\
+\textbf{Functional form} & must be right --- linear unless specified
+otherwise & needs only a score that balances \\
+\textbf{Order of work} & the outcome sits in the same model as the
+controls & the design is fixed, by balance, before the outcome is
+seen \\
+\textbf{In this chapter} & LaLonde: +\$699 & LaLonde: +\$2,001
+(experiment +\$1,794) \\
+\end{longtable}
+
+When overlap is good and the relations are close to linear, the two
+agree: in version A of Example 3 a regression on the three recorded
+variables gives about 4.6. When overlap is poor, as with LaLonde's
+survey, regression's line carries the comparison into regions with no
+trainees and matching is the safer device. When the assumption itself
+fails, as in version B, neither helps, and both fail in the same
+direction.
+
+\section{What none of this fixes}\label{what-none-of-this-fixes}
+
+Example 3 cannot be diagnosed from the data, so the honest response is
+to ask how wrong the assumption could be. Sensitivity analysis asks how
+strong an unobserved confounder would have to be --- how strongly
+associated with both treatment and outcome --- to overturn the
+conclusion. If the answer is ``about as strong as the covariates already
+controlled for'', the finding is fragile. If it is ``stronger than any
+known determinant'', it is robust. Either way the reader learns
+something a point estimate does not tell them.
 
 One caution about the method itself. Propensity-score matching is the
 most popular approach here and not the best one: matching on a scalar

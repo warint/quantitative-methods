@@ -310,6 +310,7 @@ SESSIONS = {
             "Estimate a **propensity score** and use it to match treated to control units",
             "Check **overlap** and **balance**, and say what to do when they fail",
             "Report an **ATT**, and state the assumption it rests on",
+            "Say why matching and regression rest on the **same assumption**, and where they differ",
         ],
         reading=("Atkin, Khandelwal & Osman (2017), *Exporting and Firm Performance: Evidence from a "
                  "Randomized Experiment*, Quarterly Journal of Economics 132(2)"),

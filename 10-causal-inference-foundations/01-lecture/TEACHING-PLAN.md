@@ -25,20 +25,23 @@ establishes that the reading is load-bearing rather than decorative.
 
 | Minutes | |
 |---|---|
-| **0–10** | The question, and the paper they read. Part 1: two outcomes per firm, one observed. |
-| **10–25** | Naive = effect + selection bias, on the board, then the back-door picture. |
-| **25–45** | Part 2, the simulation: a coin recovers +2, self-selection says 5.3, the boxplot shows why. |
-| **45–75** | Part 3, LaLonde: −\$8,498 → balance → score → overlap → match → balance fails on age → fix → +\$2,001 against +\$1,794. |
-| **75–85** | Part 4: matching on a proxy leaves most of the bias; mediators are not controls. |
-| **85–90** | The recipe, and the PSID exercise. Hand off to the practice. |
+| **0–10** | The question, and the paper they read. Part 1: two outcomes per firm, one observed; the words. |
+| **10–20** | Naive = effect + selection bias, on the board, then the back-door picture. |
+| **20–30** | Example 1, the firms: a coin recovers +2, self-selection says 5.3, the boxplot shows why. No code on screen. |
+| **30–50** | Example 2, LaLonde: −\$8,498 → balance → score → overlap → love plot → +\$2,001 against +\$1,794. |
+| **50–60** | Example 3, the HR course: matching works (5.3), then fails with perfect balance (9.0). Ask the room what is missing *before* showing the motivation plot. |
+| **60–65** | Matching or regression; what matching does not fix. |
+| **65–90** | In class: the code behind the three examples, then the PSID exercise. Circulate; hand off to the practice. |
 
 ---
 
 ## Run the code live
 
-Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
-the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
-error appear and be read is worth more than a slide saying errors happen.
+The examples are taught from pictures and tables; the code waits until minute 65. Then open the
+VS Codium terminal, activate `.venv`, and run the first cell of each example in front of them before
+they run the rest themselves. Type the mistakes as well as the fixes: matching on `re78`, a score
+fitted after looking at the ATT. Watching an error appear and be read is worth more than a slide
+saying errors happen.
 
 ---
 
