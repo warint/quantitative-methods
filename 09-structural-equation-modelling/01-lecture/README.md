@@ -21,23 +21,24 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S09-Lecture.qmd`](MATH60033A-S09-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**, and every dataset loads with one
-call — `qmib.load("efa")`.
+what loses marks. The lecture is built on **three examples**, with no code on screen while they are
+taught; the code for all three comes at the end, for you to run in class. Every cell runs on its own
+when pasted into a file: the data either ship with semopy or are simulated in the cell.
 
 ---
 
 ## What the lecture covers
 
-1. **Part I: SEM Basics**
-2. **What is SEM?**
-3. **Why use SEM?**
-4. **Key Terminology in SEM**
-5. **Components of a SEM**
-6. **Example 1**
-7. **Example Dataset: HolzingerSwineford1939**
-8. **🔹 **Dataset overview****
-9. **🔹 **Latent and observed variables****
-10. **🔹 **Typical CFA model specification****
+1. **The language of SEM** — a construct and its indicators, the five symbols, five words (observed,
+   latent, exogenous and endogenous, path, error), the two halves, and corr = λᵢλⱼ
+2. **Example 1 · Nine tests, three abilities** — Holzinger and Swineford's 301 children: the
+   correlations, the drawing, the loadings, the fit, where the model misses, and three competing models
+3. **Example 2 · Does industrialisation bring democracy?** — Bollen's 75 countries: structural
+   paths, R², direct and indirect effects, the same-question covariances, and an arrow turned around
+4. **Example 3 · Will this firm export?** — the theory of planned behaviour on a simulated survey of
+   400 managers, where the true paths are known: SEM recovers them, averaging the items shrinks them
+5. **What a good fit does not prove** — equivalent models, confounding, small samples, invariance
+6. **In class · The code behind the three examples** — every cell, and a *Your turn* task per example
 
 ---
 
@@ -49,20 +50,24 @@ By the end of the session you should be able to:
 - Write a model description and read `=~` as "is measured by"
 - Interpret a **standardised loading**, and say when an indicator is weak
 - Report **CFI, TLI and RMSEA**, and say what each would have to be
+- Decompose a **mediation** into direct and indirect paths
+- Explain why averaging noisy items **shrinks** a path, and why SEM does not
 - State why good fit is not evidence that the model is correct
 
 ---
 
 ## The data
 
-**A 14-item questionnaire on purchase decisions, plus semopy's bundled examples**
+**Three examples, nothing to download**
 
 ```python
-import qmib
-data = qmib.load("efa")
+from semopy.examples import holzinger39, political_democracy
+data = holzinger39.get_data()                 # Example 1: 301 children, nine tests
+countries = political_democracy.get_data()    # Example 2: 75 countries, 1960 and 1965
+# Example 3 is simulated in the deck's cell: 400 managers, eight survey items
 ```
 
-Run it once before class; it caches locally and then works offline.
+Your group's own measurement model, in the practice, uses `qmib.load("efa")`.
 
 ---
 

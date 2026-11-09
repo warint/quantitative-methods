@@ -26,19 +26,22 @@ establishes that the reading is load-bearing rather than decorative.
 | Minutes | |
 |---|---|
 | **0–10** | The question, and the paper they read. Establish what is at stake. |
-| **10–25** | Part 1: the idea in pictures — one construct and its indicators, the five symbols, the two halves, corr = λᵢλⱼ. |
-| **25–55** | Part 2: a measurement model in ten steps on Holzinger–Swineford — look, draw, write, fit, read, judge, diagnose. |
-| **55–75** | Part 3: the structural part on Political Democracy — paths, R², direct and indirect effects, the same-question covariances. |
-| **75–80** | Part 4: turn an arrow around and watch the fit not change. |
-| **80–90** | What the method does **not** license. Hand off to the practice. |
+| **10–20** | Part 1: the language — one construct and its indicators, the five symbols, the five words, the two halves, corr = λᵢλⱼ. |
+| **20–35** | Example 1, Holzinger–Swineford: look, draw, read the loadings, judge the fit, find the miss, compare three drawings. No code on screen. |
+| **35–50** | Example 2, Political Democracy: paths, R², direct and indirect effects, the same-question covariances, the reversed arrow. |
+| **50–60** | Example 3, the exporting survey: a known truth; SEM finds it, averaged items shrink it. Ask the room *why* before showing the attenuation. |
+| **60–65** | What a good fit does not prove. |
+| **65–90** | In class: the code behind the three examples. Students run each cell, check they get the lecture's numbers, then do the *Your turn* task. Circulate; hand off to the practice. |
 
 ---
 
 ## Run the code live
 
-Open the VS Codium terminal, activate `.venv`, and run the deck's examples in front of them. Type
-the mistakes as well as the fixes: a forgotten `dropna`, an unstandardised predictor. Watching an
-error appear and be read is worth more than a slide saying errors happen.
+The examples are taught from pictures and tables; the code waits until minute 65. Then open the
+VS Codium terminal, activate `.venv`, and run the first cell of each example in front of them before
+they run the rest themselves. Type the mistakes as well as the fixes: a `=~` written as `~`, a
+variable name misspelled in the description. Watching an error appear and be read is worth more
+than a slide saying errors happen.
 
 ---
 

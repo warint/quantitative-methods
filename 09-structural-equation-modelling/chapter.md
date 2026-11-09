@@ -16,9 +16,15 @@ Chapter 7 met this and handled it descriptively: factor analysis found a small
 number of common factors behind a battery of correlated items. This chapter
 takes the same idea and makes it a model you can *state and test* — a set of
 explicit claims about which indicators measure which construct, and about how the
-constructs relate to one another. And it builds that model the way you should
-build your own: on paper first, then in one line of text per construct, then in
-four lines of Python, and only then with numbers.
+constructs relate to one another.
+
+It does so through three examples, each adding one idea. Nine ability tests that
+should measure three abilities: a measurement model and nothing else. Seventy-five
+countries, where industrialisation may bring democracy: arrows between constructs.
+And a simulated survey of exporting firms, where the true answer is known and you
+can watch what SEM gains over the shortcut of averaging the items. Each is built
+the way you should build your own: on paper first, then in one line of text per
+construct, then in four lines of Python, and only then with numbers.
 
 ![One construct, three indicators. The construct is never measured; it is what the three scores have in common, and the error circles hold everything else in each score.](01-lecture/economist-assets/sem-anatomy.png){fig-alt="One latent variable, verbal ability, with arrows to three observed test scores, each with its own error."}
 
@@ -104,6 +110,26 @@ indicator: its own content, and its measurement error. This is chapter 7's
 factor model written one indicator at a time, and the interpretive move is the
 same — the construct is what the indicators have in common, and nothing else.
 
+**Five words for what you draw.** Papers describe the same diagrams in words,
+and five terms carry most of it.
+
+| Term | What it is | On the diagram |
+|---|---|---|
+| **Observed variable** (indicator) | a column you measured: a survey item, a test score | rectangle |
+| **Latent variable** (factor, construct) | a concept nobody measures directly, inferred from what its indicators share | ellipse |
+| **Exogenous** / **endogenous** | arrows only leave it / at least one arrow points into it | where the arrowheads land |
+| **Path** | a one-headed arrow, a directed effect read like a regression coefficient; a two-headed arrow is a covariance, with no direction | → and ↔ |
+| **Error** (disturbance) | the part of a variable the model does not explain | small circle with an arrow into the variable |
+
+::: {.definition}
+[**Exogenous and endogenous**]{.term} — an exogenous variable is explained by
+nothing in the model, like an independent variable; an endogenous one receives
+at least one arrow, like a dependent variable, and so carries an error term. The
+distinction is a fact about the diagram, not about the world: a construct that is
+never measured is endogenous as soon as an arrow points into it, and every
+reflective indicator is endogenous, because its construct points into it.
+:::
+
 **Identification.** A latent variable has no units, so a scale must be imposed
 before anything can be estimated. Two conventions exist: fix one loading to 1,
 which gives the construct the units of that indicator, or fix the construct's
@@ -142,9 +168,13 @@ three-factor model below estimates 21 parameters, and the 24 left over are what
 make it testable. A model that says more about the covariances than it has
 parameters to absorb can be wrong, and therefore can be checked.
 
-## Building a measurement model, step by step
+## Example 1 · Nine tests, three abilities
 
-The data are the classic of the field: Holzinger and Swineford gave nine ability
+The first example asks the measurement question alone: do nine test scores
+reduce to three abilities, to one general "cleverness", or to something else? A
+model with constructs and indicators but no arrows between constructs is a
+**confirmatory factor analysis**, and it is where every SEM starts. The data are
+the classic of the field: Holzinger and Swineford gave nine ability
 tests to 301 seventh- and eighth-graders in two Chicago schools in 1939. They ship
 with `semopy`, so every cell below runs as written, with nothing to download.
 
@@ -353,7 +383,14 @@ helps but still falls short (CFI 0.927, RMSEA 0.092). The change is real in one
 school and only partial in the other — a finding about the tests, and the kind of
 result that a single pooled fit would have hidden.
 
-## Adding the structural part
+**Example 1 in four sentences.** The nine tests sort into three abilities: one
+general ability is rejected, three fit reasonably. Textual ability is measured
+very well and visual ability has one weak indicator, cubes. The abilities are
+positively related but distinct. The main misfit, `x9`, has a reason that can be
+argued from the test itself, and the model that fixes it is exploratory until it
+holds on new data.
+
+## Example 2 · Does industrialisation bring democracy?
 
 A measurement model says what the constructs are. A structural model says what
 they do to each other. Bollen's political-democracy data [@bollen1989], also
@@ -434,7 +471,7 @@ print(f"total     c + a * b = {c + a * b:.2f}")
 Two-thirds of the total effect (0.39 of 0.56) runs through 1960 democracy: a
 mediation, in which dem60 carries most of what industrialisation does for dem65.
 The arithmetic is exact within the model; whether it is a causal decomposition
-depends entirely on whether the arrows are, which is the subject of the next two
+depends entirely on whether the arrows are, which is the subject of the closing
 sections.
 
 **Every extra arrow needs a reason.** The four same-question covariances changed
@@ -466,6 +503,122 @@ With them, $\chi^2$ no longer rejects ($p = 0.064$), CFI reaches 0.980 and RMSEA
 design predicts them. The same four lines added *because they raise the CFI* would
 be fitting noise — and correlated residuals added until a model passes are the
 most common way an SEM paper overstates its evidence.
+
+**Example 2 in four sentences.** Once the same-question covariances that the
+design predicts are in, the model fits well, and every indicator measures its
+construct well. Industrialisation in 1960 goes with more democracy in 1960 and,
+mostly through it, in 1965. Democracy is highly persistent. Whether any of this
+is causal rests on the direction of the arrows, which the fit cannot check — the
+subject of the section "Good fit is not evidence that the model is correct" below.
+
+## Example 3 · Will this firm export?
+
+The first two examples showed what SEM estimates. The third shows why it is worth
+the trouble, on data where the right answer is known.
+
+The **theory of planned behaviour** [@ajzen1991] holds that a decision-maker's
+*intention* to act comes from three things: their *attitude* to the act, the
+*subjective norms* (what people who matter expect), and their *perceived
+behavioural control* (whether they feel able to do it). It is one of the most
+used theories in management research, and it travels naturally to international
+business: will a small firm's managers intend to export?
+
+| Construct | Means | Survey items |
+|---|---|---|
+| **attitude** | exporting would be good for the firm | `att1` "Exporting would be profitable" · `att2` "…would be good for us" |
+| **norms** | people who matter expect it | `norm1` "Our board expects us to export" · `norm2` "Our bank and peers do" |
+| **control** | the firm feels able to | `ctrl1` "We have the resources" · `ctrl2` "We know how" |
+| **intention** | the firm plans to export | `int1` "We plan to export within two years" · `int2` "…are preparing to" |
+
+Nothing here is a column you could observe; every construct has two items. The
+data are **simulated**: 400 managers, with intention built as
+$0.5 \times \text{attitude} + 0.6 \times \text{norms} + 0.3 \times
+\text{control}$ plus noise, and each item equal to its construct plus noise of its
+own. On real data you never know whether a method found the right answer. Here
+you do.
+
+![The exporting model before fitting. Each construct is measured by two items; the red arrows are the three claims of the theory.](01-lecture/economist-assets/tpb-model.png){fig-alt="Attitude, norms and control, each with two items, with arrows to intention to export, measured by two items."}
+
+The cell simulates the survey, fits the model, and then does what many applied
+papers do instead: averages each pair of items into a score and regresses one
+score on the others.
+
+```{python}
+#| label: check-tpb
+#| code-summary: "Run it: simulate the survey, fit the SEM, and compare with a regression on averaged items"
+
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+rng = np.random.default_rng(9)
+n = 400
+attitude, norms, control = rng.normal(size=n), rng.normal(size=n), rng.normal(size=n)
+intention = 0.5 * attitude + 0.6 * norms + 0.3 * control + rng.normal(scale=0.5, size=n)
+
+def item(latent):
+    return latent + rng.normal(scale=0.6, size=n)
+
+firms = pd.DataFrame({"att1": item(attitude), "att2": item(attitude),
+                      "norm1": item(norms), "norm2": item(norms),
+                      "ctrl1": item(control), "ctrl2": item(control),
+                      "int1": item(intention), "int2": item(intention)})
+
+tpb = semopy.Model("""
+attitude  =~ att1 + att2
+norms     =~ norm1 + norm2
+control   =~ ctrl1 + ctrl2
+intention =~ int1 + int2
+intention ~ attitude + norms + control
+""")
+tpb.fit(firms)
+tpb_est = tpb.inspect(std_est=True)
+print(tpb_est[(tpb_est["lval"] == "intention") & (tpb_est["op"] == "~")]
+      [["lval", "op", "rval", "Estimate", "Est. Std"]].round(2))
+print(semopy.calc_stats(tpb)[["chi2", "DoF", "chi2 p-value", "CFI", "TLI", "RMSEA"]].T.round(3))
+
+scores = pd.DataFrame({"att": (firms["att1"] + firms["att2"]) / 2,
+                       "norm": (firms["norm1"] + firms["norm2"]) / 2,
+                       "ctrl": (firms["ctrl1"] + firms["ctrl2"]) / 2,
+                       "intent": (firms["int1"] + firms["int2"]) / 2})
+print(smf.ols("intent ~ att + norm + ctrl", data=scores).fit().params.round(2))
+```
+
+![The fitted model. The red paths are raw estimates, beside the values the data were simulated from; the blue loadings are standardised.](01-lecture/economist-assets/tpb-model-fitted.png){fig-alt="Paths 0.44, 0.62 and 0.29 against true values 0.5, 0.6 and 0.3."}
+
+SEM recovers the truth up to sampling noise — 0.44, 0.62 and 0.29 for 0.5, 0.6
+and 0.3 — and fits almost perfectly ($\chi^2 = 18.2$ on 14 df, CFI 0.997, RMSEA
+0.027), as it should, since this model made the data. The regression on averaged
+items does not:
+
+![True paths, SEM estimates, and the regression on averaged items. Averaging shrinks all three paths toward zero.](01-lecture/economist-assets/tpb-recovery.png){fig-alt="Bar chart of the three paths: true values, SEM estimates close to them, and smaller regression estimates."}
+
+Every regression coefficient is too small, by 15 to 25 percent. This is
+**attenuation**, and it was diagnosed before regression had its modern name
+[@spearman1904proof]. A score made of noisy items is the construct plus noise,
+$\bar x = \xi + \bar\delta$, and noise in a regressor pulls its coefficient
+toward zero by the score's **reliability**,
+
+$$
+\operatorname{plim} \hat\beta \thickspace=\thickspace \beta \cdot
+\frac{\operatorname{var}(\xi)}{\operatorname{var}(\xi) + \operatorname{var}(\bar\delta)} .
+$$
+
+Each item here has noise variance $0.36$; averaging two halves it, so the
+reliability is $1 / 1.18 = 0.85$ and the regression should find roughly
+$0.85 \times (0.5, 0.6, 0.3) = (0.42, 0.51, 0.25)$, which is what it finds up to
+sampling noise. Noise in the *outcome* score adds variance but no bias; it is
+noise in the regressors that shrinks. Averaging more items raises the
+reliability and shrinks the bias, but never removes it. SEM removes it, because
+the measurement model separates each item into construct and error and the
+structural path is estimated between the constructs themselves — the claim
+made at the start of this chapter about estimating the two halves jointly, now
+checked against a known answer.
+
+**Example 3 in three sentences.** All three constructs drive the intention to
+export, subjective norms most. SEM recovers the true paths; averaging the items
+and running a regression understates every one. Measurement error is not a
+nuisance to be averaged away: model it, and the structural paths come out right.
 
 ## What the estimator assumes
 
@@ -609,7 +762,10 @@ into the general covariance-structure model that all current software
 implements, @bollen1989 wrote the textbook that taught a generation to use it —
 the political-democracy model above is its running example — and @rosseel2012
 gave the modern open-source implementation whose syntax `semopy` follows in
-Python.
+Python. @ajzen1991's theory of planned behaviour, the third example, is among
+the theories most often tested this way in management research, and the
+attenuation that SEM corrects was first diagnosed by @spearman1904proof, the same
+year he proposed the common factor.
 
 Assessment of fit is where the applied literature has moved most. @bentler1990
 introduced the comparative fit index and @browne1992 the RMSEA, both as responses

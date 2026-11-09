@@ -363,7 +363,7 @@
 \makeatother
 \subtitle{MATH60033A · HEC Montréal}
 \author{Thierry Warin, PhD}
-\date{6 November 2026}
+\date{9 November 2026}
 \begin{document}
 \frontmatter
 \maketitle
@@ -593,7 +593,7 @@ decision-maker act on this --- and say what would change your mind? \\
 
 Source:
 \href{https://github.com/warint/quantitative-methods}{github.com/warint/quantitative-methods}
-· 6 November 2026
+· 9 November 2026
 
 \end{qmibmuted}
 
@@ -5636,7 +5636,7 @@ correlated columns into a few for prediction or display, and factor
 analysis when you believe in a latent quantity and want to estimate it.
 Spearman's original argument for a general factor of intelligence is the
 founding example of the second (\citeproc{ref-spearman1904}{Spearman
-1904}), and the tradition of using PCA where the question was really
+1904a}), and the tradition of using PCA where the question was really
 factor-analytic is long and mostly unhelpful
 (\citeproc{ref-fabrigar1999}{Fabrigar et al. 1999}).
 
@@ -5813,8 +5813,8 @@ differently the same method looks from a geometric and an algebraic
 starting point.
 
 Factor analysis has a separate origin in Spearman
-(\citeproc{ref-spearman1904}{1904}), whose argument for a general factor
-from correlations among school subjects established the model of
+(\citeproc{ref-spearman1904}{1904a}), whose argument for a general
+factor from correlations among school subjects established the model of
 observed variables as combinations of unobserved ones. The distinction
 from PCA was blurred almost immediately, and Fabrigar et al.
 (\citeproc{ref-fabrigar1999}{1999}) documents how routinely PCA is
@@ -6624,9 +6624,16 @@ small number of common factors behind a battery of correlated items.
 This chapter takes the same idea and makes it a model you can
 \emph{state and test} --- a set of explicit claims about which
 indicators measure which construct, and about how the constructs relate
-to one another. And it builds that model the way you should build your
-own: on paper first, then in one line of text per construct, then in
-four lines of Python, and only then with numbers.
+to one another.
+
+It does so through three examples, each adding one idea. Nine ability
+tests that should measure three abilities: a measurement model and
+nothing else. Seventy-five countries, where industrialisation may bring
+democracy: arrows between constructs. And a simulated survey of
+exporting firms, where the true answer is known and you can watch what
+SEM gains over the shortcut of averaging the items. Each is built the
+way you should build your own: on paper first, then in one line of text
+per construct, then in four lines of Python, and only then with numbers.
 
 \begin{figure}[htbp]
 
@@ -6776,6 +6783,50 @@ chapter 7's factor model written one indicator at a time, and the
 interpretive move is the same --- the construct is what the indicators
 have in common, and nothing else.
 
+\textbf{Five words for what you draw.} Papers describe the same diagrams
+in words, and five terms carry most of it.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it is
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+On the diagram
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Observed variable} (indicator) & a column you measured: a survey
+item, a test score & rectangle \\
+\textbf{Latent variable} (factor, construct) & a concept nobody measures
+directly, inferred from what its indicators share & ellipse \\
+\textbf{Exogenous} / \textbf{endogenous} & arrows only leave it / at
+least one arrow points into it & where the arrowheads land \\
+\textbf{Path} & a one-headed arrow, a directed effect read like a
+regression coefficient; a two-headed arrow is a covariance, with no
+direction & → and ↔ \\
+\textbf{Error} (disturbance) & the part of a variable the model does not
+explain & small circle with an arrow into the variable \\
+\end{longtable}
+
+\begin{qmibdefinition}
+
+{\textbf{Exogenous and endogenous}} --- an exogenous variable is
+explained by nothing in the model, like an independent variable; an
+endogenous one receives at least one arrow, like a dependent variable,
+and so carries an error term. The distinction is a fact about the
+diagram, not about the world: a construct that is never measured is
+endogenous as soon as an arrow points into it, and every reflective
+indicator is endogenous, because its construct points into it.
+
+\end{qmibdefinition}
+
 \textbf{Identification.} A latent variable has no units, so a scale must
 be imposed before anything can be estimated. Two conventions exist: fix
 one loading to 1, which gives the construct the units of that indicator,
@@ -6818,13 +6869,17 @@ the 24 left over are what make it testable. A model that says more about
 the covariances than it has parameters to absorb can be wrong, and
 therefore can be checked.
 
-\section{Building a measurement model, step by
-step}\label{building-a-measurement-model-step-by-step}
+\section{Example 1 · Nine tests, three
+abilities}\label{example-1-nine-tests-three-abilities}
 
-The data are the classic of the field: Holzinger and Swineford gave nine
-ability tests to 301 seventh- and eighth-graders in two Chicago schools
-in 1939. They ship with \texttt{semopy}, so every cell below runs as
-written, with nothing to download.
+The first example asks the measurement question alone: do nine test
+scores reduce to three abilities, to one general ``cleverness'', or to
+something else? A model with constructs and indicators but no arrows
+between constructs is a \textbf{confirmatory factor analysis}, and it is
+where every SEM starts. The data are the classic of the field: Holzinger
+and Swineford gave nine ability tests to 301 seventh- and eighth-graders
+in two Chicago schools in 1939. They ship with \texttt{semopy}, so every
+cell below runs as written, with nothing to download.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -7179,7 +7234,16 @@ change is real in one school and only partial in the other --- a finding
 about the tests, and the kind of result that a single pooled fit would
 have hidden.
 
-\section{Adding the structural part}\label{adding-the-structural-part}
+\textbf{Example 1 in four sentences.} The nine tests sort into three
+abilities: one general ability is rejected, three fit reasonably.
+Textual ability is measured very well and visual ability has one weak
+indicator, cubes. The abilities are positively related but distinct. The
+main misfit, \texttt{x9}, has a reason that can be argued from the test
+itself, and the model that fixes it is exploratory until it holds on new
+data.
+
+\section{Example 2 · Does industrialisation bring
+democracy?}\label{example-2-does-industrialisation-bring-democracy}
 
 A measurement model says what the constructs are. A structural model
 says what they do to each other. Bollen's political-democracy data
@@ -7321,7 +7385,7 @@ Two-thirds of the total effect (0.39 of 0.56) runs through 1960
 democracy: a mediation, in which dem60 carries most of what
 industrialisation does for dem65. The arithmetic is exact within the
 model; whether it is a causal decomposition depends entirely on whether
-the arrows are, which is the subject of the next two sections.
+the arrows are, which is the subject of the closing sections.
 
 \textbf{Every extra arrow needs a reason.} The four same-question
 covariances changed the fit, and it is worth seeing by how much:
@@ -7358,6 +7422,199 @@ legitimate here because the design predicts them. The same four lines
 added \emph{because they raise the CFI} would be fitting noise --- and
 correlated residuals added until a model passes are the most common way
 an SEM paper overstates its evidence.
+
+\textbf{Example 2 in four sentences.} Once the same-question covariances
+that the design predicts are in, the model fits well, and every
+indicator measures its construct well. Industrialisation in 1960 goes
+with more democracy in 1960 and, mostly through it, in 1965. Democracy
+is highly persistent. Whether any of this is causal rests on the
+direction of the arrows, which the fit cannot check --- the subject of
+the section ``Good fit is not evidence that the model is correct''
+below.
+
+\section{Example 3 · Will this firm
+export?}\label{example-3-will-this-firm-export}
+
+The first two examples showed what SEM estimates. The third shows why it
+is worth the trouble, on data where the right answer is known.
+
+The \textbf{theory of planned behaviour} (\citeproc{ref-ajzen1991}{Ajzen
+1991}) holds that a decision-maker's \emph{intention} to act comes from
+three things: their \emph{attitude} to the act, the \emph{subjective
+norms} (what people who matter expect), and their \emph{perceived
+behavioural control} (whether they feel able to do it). It is one of the
+most used theories in management research, and it travels naturally to
+international business: will a small firm's managers intend to export?
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Construct
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Means
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Survey items
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{attitude} & exporting would be good for the firm & \texttt{att1}
+``Exporting would be profitable'' · \texttt{att2} ``\ldots would be good
+for us'' \\
+\textbf{norms} & people who matter expect it & \texttt{norm1} ``Our
+board expects us to export'' · \texttt{norm2} ``Our bank and peers
+do'' \\
+\textbf{control} & the firm feels able to & \texttt{ctrl1} ``We have the
+resources'' · \texttt{ctrl2} ``We know how'' \\
+\textbf{intention} & the firm plans to export & \texttt{int1} ``We plan
+to export within two years'' · \texttt{int2} ``\ldots are preparing
+to'' \\
+\end{longtable}
+
+Nothing here is a column you could observe; every construct has two
+items. The data are \textbf{simulated}: 400 managers, with intention
+built as
+\(0.5 \times \text{attitude} + 0.6 \times \text{norms} + 0.3 \times
+\text{control}\) plus noise, and each item equal to its construct plus
+noise of its own. On real data you never know whether a method found the
+right answer. Here you do.
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-tpb-model.png}}
+
+}
+
+\caption{The exporting model before fitting. Each construct is measured
+by two items; the red arrows are the three claims of the theory.}
+
+\end{figure}%
+
+The cell simulates the survey, fits the model, and then does what many
+applied papers do instead: averages each pair of items into a score and
+regresses one score on the others.
+
+\phantomsection\label{check-tpb}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ numpy }\ImportTok{as}\NormalTok{ np}
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+\ImportTok{import}\NormalTok{ statsmodels.formula.api }\ImportTok{as}\NormalTok{ smf}
+
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{9}\NormalTok{)}
+\NormalTok{n }\OperatorTok{=} \DecValTok{400}
+\NormalTok{attitude, norms, control }\OperatorTok{=}\NormalTok{ rng.normal(size}\OperatorTok{=}\NormalTok{n), rng.normal(size}\OperatorTok{=}\NormalTok{n), rng.normal(size}\OperatorTok{=}\NormalTok{n)}
+\NormalTok{intention }\OperatorTok{=} \FloatTok{0.5} \OperatorTok{*}\NormalTok{ attitude }\OperatorTok{+} \FloatTok{0.6} \OperatorTok{*}\NormalTok{ norms }\OperatorTok{+} \FloatTok{0.3} \OperatorTok{*}\NormalTok{ control }\OperatorTok{+}\NormalTok{ rng.normal(scale}\OperatorTok{=}\FloatTok{0.5}\NormalTok{, size}\OperatorTok{=}\NormalTok{n)}
+
+\KeywordTok{def}\NormalTok{ item(latent):}
+    \ControlFlowTok{return}\NormalTok{ latent }\OperatorTok{+}\NormalTok{ rng.normal(scale}\OperatorTok{=}\FloatTok{0.6}\NormalTok{, size}\OperatorTok{=}\NormalTok{n)}
+
+\NormalTok{firms }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"att1"}\NormalTok{: item(attitude), }\StringTok{"att2"}\NormalTok{: item(attitude),}
+                      \StringTok{"norm1"}\NormalTok{: item(norms), }\StringTok{"norm2"}\NormalTok{: item(norms),}
+                      \StringTok{"ctrl1"}\NormalTok{: item(control), }\StringTok{"ctrl2"}\NormalTok{: item(control),}
+                      \StringTok{"int1"}\NormalTok{: item(intention), }\StringTok{"int2"}\NormalTok{: item(intention)\})}
+
+\NormalTok{tpb }\OperatorTok{=}\NormalTok{ semopy.Model(}\StringTok{"""}
+\StringTok{attitude  =\textasciitilde{} att1 + att2}
+\StringTok{norms     =\textasciitilde{} norm1 + norm2}
+\StringTok{control   =\textasciitilde{} ctrl1 + ctrl2}
+\StringTok{intention =\textasciitilde{} int1 + int2}
+\StringTok{intention \textasciitilde{} attitude + norms + control}
+\StringTok{"""}\NormalTok{)}
+\NormalTok{tpb.fit(firms)}
+\NormalTok{tpb\_est }\OperatorTok{=}\NormalTok{ tpb.inspect(std\_est}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(tpb\_est[(tpb\_est[}\StringTok{"lval"}\NormalTok{] }\OperatorTok{==} \StringTok{"intention"}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (tpb\_est[}\StringTok{"op"}\NormalTok{] }\OperatorTok{==} \StringTok{"\textasciitilde{}"}\NormalTok{)]}
+\NormalTok{      [[}\StringTok{"lval"}\NormalTok{, }\StringTok{"op"}\NormalTok{, }\StringTok{"rval"}\NormalTok{, }\StringTok{"Estimate"}\NormalTok{, }\StringTok{"Est. Std"}\NormalTok{]].}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{))}
+\BuiltInTok{print}\NormalTok{(semopy.calc\_stats(tpb)[[}\StringTok{"chi2"}\NormalTok{, }\StringTok{"DoF"}\NormalTok{, }\StringTok{"chi2 p{-}value"}\NormalTok{, }\StringTok{"CFI"}\NormalTok{, }\StringTok{"TLI"}\NormalTok{, }\StringTok{"RMSEA"}\NormalTok{]].T.}\BuiltInTok{round}\NormalTok{(}\DecValTok{3}\NormalTok{))}
+
+\NormalTok{scores }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"att"}\NormalTok{: (firms[}\StringTok{"att1"}\NormalTok{] }\OperatorTok{+}\NormalTok{ firms[}\StringTok{"att2"}\NormalTok{]) }\OperatorTok{/} \DecValTok{2}\NormalTok{,}
+                       \StringTok{"norm"}\NormalTok{: (firms[}\StringTok{"norm1"}\NormalTok{] }\OperatorTok{+}\NormalTok{ firms[}\StringTok{"norm2"}\NormalTok{]) }\OperatorTok{/} \DecValTok{2}\NormalTok{,}
+                       \StringTok{"ctrl"}\NormalTok{: (firms[}\StringTok{"ctrl1"}\NormalTok{] }\OperatorTok{+}\NormalTok{ firms[}\StringTok{"ctrl2"}\NormalTok{]) }\OperatorTok{/} \DecValTok{2}\NormalTok{,}
+                       \StringTok{"intent"}\NormalTok{: (firms[}\StringTok{"int1"}\NormalTok{] }\OperatorTok{+}\NormalTok{ firms[}\StringTok{"int2"}\NormalTok{]) }\OperatorTok{/} \DecValTok{2}\NormalTok{\})}
+\BuiltInTok{print}\NormalTok{(smf.ols(}\StringTok{"intent \textasciitilde{} att + norm + ctrl"}\NormalTok{, data}\OperatorTok{=}\NormalTok{scores).fit().params.}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        lval op      rval  Estimate  Est. Std
+0  intention  ~  attitude      0.44      0.46
+1  intention  ~     norms      0.62      0.64
+2  intention  ~   control      0.29      0.32
+               Value
+chi2          18.168
+DoF           14.000
+chi2 p-value   0.199
+CFI            0.997
+TLI            0.995
+RMSEA          0.027
+Intercept    0.03
+att          0.37
+norm         0.51
+ctrl         0.24
+dtype: float64
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-tpb-model-fitted.png}}
+
+}
+
+\caption{The fitted model. The red paths are raw estimates, beside the
+values the data were simulated from; the blue loadings are
+standardised.}
+
+\end{figure}%
+
+SEM recovers the truth up to sampling noise --- 0.44, 0.62 and 0.29 for
+0.5, 0.6 and 0.3 --- and fits almost perfectly (\(\chi^2 = 18.2\) on 14
+df, CFI 0.997, RMSEA 0.027), as it should, since this model made the
+data. The regression on averaged items does not:
+
+\begin{figure}[htbp]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{images/decks/session-09-01-lecture-economist-assets-tpb-recovery.png}}
+
+}
+
+\caption{True paths, SEM estimates, and the regression on averaged
+items. Averaging shrinks all three paths toward zero.}
+
+\end{figure}%
+
+Every regression coefficient is too small, by 15 to 25 percent. This is
+\textbf{attenuation}, and it was diagnosed before regression had its
+modern name (\citeproc{ref-spearman1904proof}{Spearman 1904b}). A score
+made of noisy items is the construct plus noise,
+\(\bar x = \xi + \bar\delta\), and noise in a regressor pulls its
+coefficient toward zero by the score's \textbf{reliability},
+
+\[
+\operatorname{plim} \hat\beta \thickspace=\thickspace \beta \cdot
+\frac{\operatorname{var}(\xi)}{\operatorname{var}(\xi) + \operatorname{var}(\bar\delta)} .
+\]
+
+Each item here has noise variance \(0.36\); averaging two halves it, so
+the reliability is \(1 / 1.18 = 0.85\) and the regression should find
+roughly \(0.85 \times (0.5, 0.6, 0.3) = (0.42, 0.51, 0.25)\), which is
+what it finds up to sampling noise. Noise in the \emph{outcome} score
+adds variance but no bias; it is noise in the regressors that shrinks.
+Averaging more items raises the reliability and shrinks the bias, but
+never removes it. SEM removes it, because the measurement model
+separates each item into construct and error and the structural path is
+estimated between the constructs themselves --- the claim made at the
+start of this chapter about estimating the two halves jointly, now
+checked against a known answer.
+
+\textbf{Example 3 in three sentences.} All three constructs drive the
+intention to export, subjective norms most. SEM recovers the true paths;
+averaging the items and running a regression understates every one.
+Measurement error is not a nuisance to be averaged away: model it, and
+the structural paths come out right.
 
 \section{What the estimator assumes}\label{what-the-estimator-assumes}
 
@@ -7566,7 +7823,7 @@ literature}\label{a-short-review-of-the-literature-7}
 The method has two ancestors that met in the 1970s. Wright
 (\citeproc{ref-wright1934}{1934}) developed path analysis in genetics,
 with the diagram as the model and the decomposition of correlations
-along paths; Spearman (\citeproc{ref-spearman1904}{1904}) and the
+along paths; Spearman (\citeproc{ref-spearman1904}{1904a}) and the
 factor-analytic tradition supplied latent variables measured by
 indicators. Jöreskog (\citeproc{ref-joreskog1971}{1971}) combined them
 into the general covariance-structure model that all current software
@@ -7574,7 +7831,12 @@ implements, Bollen (\citeproc{ref-bollen1989}{1989}) wrote the textbook
 that taught a generation to use it --- the political-democracy model
 above is its running example --- and Rosseel
 (\citeproc{ref-rosseel2012}{2012}) gave the modern open-source
-implementation whose syntax \texttt{semopy} follows in Python.
+implementation whose syntax \texttt{semopy} follows in Python. Ajzen
+(\citeproc{ref-ajzen1991}{1991})'s theory of planned behaviour, the
+third example, is among the theories most often tested this way in
+management research, and the attenuation that SEM corrects was first
+diagnosed by Spearman (\citeproc{ref-spearman1904proof}{1904b}), the
+same year he proposed the common factor.
 
 Assessment of fit is where the applied literature has moved most.
 Bentler (\citeproc{ref-bentler1990}{1990}) introduced the comparative
@@ -10939,6 +11201,11 @@ Abadie, Alberto, Susan Athey, Guido W Imbens, and Jeffrey M Wooldridge.
 {Clustering}?''} \emph{{The} {Quarterly} {Journal} of {Economics}} 138
 (1): 1--35. \url{https://doi.org/10.1093/qje/qjac038}.
 
+\bibitem[\citeproctext]{ref-ajzen1991}
+Ajzen, Icek. 1991. {``{The} Theory of Planned Behavior.''}
+\emph{{Organizational} {Behavior} and {Human} {Decision} {Processes}} 50
+(2): 179--211. \url{https://doi.org/10.1016/0749-5978(91)90020-T}.
+
 \bibitem[\citeproctext]{ref-akaike1974}
 Akaike, H. 1974. {``A New Look at the Statistical Model
 Identification.''} \emph{{IEEE} {Transactions} on {Automatic} {Control}}
@@ -11441,9 +11708,14 @@ Simpson, E. H. 1951. {``{The} {Interpretation} of {Interaction} in
 \url{https://doi.org/10.1111/j.2517-6161.1951.tb00088.x}.
 
 \bibitem[\citeproctext]{ref-spearman1904}
-Spearman, C. 1904. {``"{General} {Intelligence}," {Objectively}
+Spearman, C. 1904a. {``"{General} {Intelligence}," {Objectively}
 {Determined} and {Measured}.''} \emph{{The} {American} {Journal} of
 {Psychology}} 15 (2): 201. \url{https://doi.org/10.2307/1412107}.
+
+\bibitem[\citeproctext]{ref-spearman1904proof}
+---------. 1904b. {``{The} {Proof} and {Measurement} of {Association}
+Between {Two} {Things}.''} \emph{{The} {American} {Journal} of
+{Psychology}} 15 (1): 72. \url{https://doi.org/10.2307/1412159}.
 
 \bibitem[\citeproctext]{ref-stone1977}
 Stone, Charles J. 1977. {``{Consistent} {Nonparametric} {Regression}.''}

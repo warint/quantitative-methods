@@ -31,6 +31,8 @@ By the end of this session you should be able to:
 - Write a model description and read `=~` as "is measured by"
 - Interpret a **standardised loading**, and say when an indicator is weak
 - Report **CFI, TLI and RMSEA**, and say what each would have to be
+- Decompose a **mediation** into direct and indirect paths
+- Explain why averaging noisy items **shrinks** a path, and why SEM does not
 - State why good fit is not evidence that the model is correct
 
 ---
