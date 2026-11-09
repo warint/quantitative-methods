@@ -363,7 +363,7 @@ window.Quarto = {
 <h2 data-number="9.1" class="anchored" data-anchor-id="measuring-what-cannot-be-observed"><span class="header-section-number">9.1</span> Measuring what cannot be observed</h2>
 <p>Some of the most important quantities in international business are not measured, because they cannot be. <em>Absorptive capacity</em>, <em>institutional quality</em>, <em>brand strength</em>, <em>digital maturity</em> — each is meant to be a real property of a firm or a country, each is invoked in explanations, and none of them appears in any dataset. What appears instead is a set of indicators, each a noisy and partial reflection of the thing.</p>
 <p>Chapter 7 met this and handled it descriptively: factor analysis found a small number of common factors behind a battery of correlated items. This chapter takes the same idea and makes it a model you can <em>state and test</em> — a set of explicit claims about which indicators measure which construct, and about how the constructs relate to one another.</p>
-<p>It does so through three examples, each adding one idea. Nine ability tests that should measure three abilities: a measurement model and nothing else. Seventy-five countries, where industrialisation may bring democracy: arrows between constructs. And a simulated survey of exporting firms, where the true answer is known and you can watch what SEM gains over the shortcut of averaging the items. Each is built the way you should build your own: on paper first, then in one line of text per construct, then in four lines of Python, and only then with numbers.</p>
+<p>It does so through three examples, each adding one idea. Nine ability tests that should measure three abilities: a measurement model and nothing else. Seventy-five countries, where industrialisation may bring democracy: arrows between constructs. And a simulated survey of exporting firms, where the true answer is known and you can watch what structural equation modelling (SEM) gains over the shortcut of averaging the items. Each is built the way you should build your own: on paper first, then in one line of text per construct, then in four lines of Python, and only then with numbers.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/decks/session-09-01-lecture-economist-assets-sem-anatomy.png" class="img-fluid figure-img" alt="One latent variable, verbal ability, with arrows to three observed test scores, each with its own error."></p>
@@ -664,8 +664,8 @@ textual    0.72
 visual     0.37
 Name: Est. Std, dtype: float64
                       r  lower  upper
-speed ~~ textual   0.28   0.12   0.43
-speed ~~ visual    0.47   0.24   0.67
+textual ~~ speed   0.28   0.12   0.43
+visual ~~ speed    0.47   0.24   0.67
 visual ~~ textual  0.46   0.28   0.59</code></pre>
 </div>
 </div>
@@ -1165,7 +1165,7 @@ dtype: float64</code></pre>
 </tbody>
 </table>
 <p>Underneath all six is one difference. A regression treats the column as the concept; SEM treats the column as evidence about the concept, and says how good that evidence is.</p>
-<p><strong>A binary outcome.</strong> <em>Did the firm export, yes or no?</em> Logistic regression handles it with observed predictors only, and averaging survey items before a logit carries the same attenuation as Example 3. SEM handles binary and ordinal outcomes, and ordinal items, through a probit link with a categorical estimator (WLSMV, in lavaan or Mplus), so the predictors can stay latent. Logit coefficients live on the log-odds scale and probit ones on a latent normal scale, so across the two compare signs and significance, not sizes.</p>
+<p><strong>A binary outcome.</strong> <em>Did the firm export, yes or no?</em> Logistic regression handles it with observed predictors only, and averaging survey items before a logit carries the same attenuation as Example 3. SEM handles binary and ordinal outcomes, and ordinal items, through a probit link with a categorical estimator (WLSMV, weighted least squares with mean- and variance-adjusted statistics, in lavaan or Mplus), so the predictors can stay latent. Logit coefficients live on the log-odds scale and probit ones on a latent normal scale, so across the two compare signs and significance, not sizes.</p>
 <p><strong>When a regression is enough.</strong> When every variable is a single, well-measured column — exports in dollars, GDP, distance — an SEM of observed variables returns the regression’s coefficients, and the extra machinery buys nothing. The same is true with one outcome and no mediation to decompose, when prediction rather than explanation is the goal (chapter 8), and when the sample is too small for SEM’s appetite of 200 or more. SEM is not a better regression. It is a regression that takes measurement seriously.</p>
 </section>
 <section id="what-the-estimator-assumes" class="level2" data-number="9.11">

@@ -22,7 +22,7 @@ It does so through three examples, each adding one idea. Nine ability tests that
 should measure three abilities: a measurement model and nothing else. Seventy-five
 countries, where industrialisation may bring democracy: arrows between constructs.
 And a simulated survey of exporting firms, where the true answer is known and you
-can watch what SEM gains over the shortcut of averaging the items. Each is built
+can watch what structural equation modelling (SEM) gains over the shortcut of averaging the items. Each is built
 the way you should build your own: on paper first, then in one line of text per
 construct, then in four lines of Python, and only then with numbers.
 
@@ -747,7 +747,8 @@ that evidence is.
 handles it with observed predictors only, and averaging survey items before a
 logit carries the same attenuation as Example 3. SEM handles binary and ordinal
 outcomes, and ordinal items, through a probit link with a categorical estimator
-(WLSMV, in lavaan or Mplus), so the predictors can stay latent. Logit
+(WLSMV, weighted least squares with mean- and variance-adjusted statistics, in
+lavaan or Mplus), so the predictors can stay latent. Logit
 coefficients live on the log-odds scale and probit ones on a latent normal scale,
 so across the two compare signs and significance, not sizes.
 
