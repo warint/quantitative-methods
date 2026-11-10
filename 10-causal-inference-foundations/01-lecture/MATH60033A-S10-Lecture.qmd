@@ -26,7 +26,7 @@ format:
       text: |
         <style>
         .reveal .slides{font-size:0.93em;}
-        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;}
+        .reveal .cell-output-display img, .reveal section img{max-height:330px;width:auto;max-width:100%;object-fit:contain;}
         .reveal section img.big{max-height:470px;}
         .reveal section img.mid{max-height:400px;}
         .reveal section img.wide{max-height:250px;}
@@ -229,6 +229,8 @@ difference in means measures the programme alone. That is the whole case for **r
 
 In a simulation we can do what real data never allows: write down **both** potential outcomes.
 
+![](economist-assets/firms-two-outcomes.png){.big fig-alt="Forty firms, each with a grey dot for growth without the programme and a blue dot two points above for growth with it; both rise with productivity."}
+
 ::: columns
 ::: {.column width="50%"}
 $$
@@ -237,20 +239,35 @@ Y_i(0) &= 10 + 3\,\text{productivity}_i + \text{noise}_i \\
 Y_i(1) &= Y_i(0) + 2
 \end{aligned}
 $$
-
-- **productivity**: drawn for each firm; nobody in the ministry sees it
-- more productive firms grow faster **with or without** the programme
-- the effect is exactly **+2 for every firm**: the number each method must recover
+:::
+::: {.column width="50%"}
+::: {.check}
+**Read the picture:** every firm has **two** dots, 2 apart: that gap is the effect. Both dots climb with
+productivity: better firms grow faster **whatever** they do.
+:::
+:::
 :::
 
+## The question: who joins? {.scrollable}
+
+::: {.step .question}
+**The question:** the same 1,000 firms, the same true effect of +2. Decide who joins in two ways:
+**a coin**, or **the firms themselves**. Which comparison of joiners with non-joiners finds the +2?
+:::
+
+::: columns
 ::: {.column width="50%"}
 ::: {.step}
-**The question:** two ways of deciding who joins, the same firms, the same true effect.
+**Predict first.** Before the next slides, write down a number for each:
 
-1. **A coin decides.**
-2. **The firms decide**: productive firms are more likely to apply.
-
-Which comparison finds the +2?
+- the difference in means when a coin decides: about ___
+- the difference in means when firms decide: about ___
+:::
+:::
+::: {.column width="50%"}
+::: {.muted}
+Hint: think about which firms would apply for an export programme if nobody forced them, and what those
+firms' sales would have done anyway.
 :::
 :::
 :::
@@ -277,7 +294,17 @@ confidence intervals are for.
 
 ## Now the firms choose {.scrollable}
 
-Same firms, same true effect of +2, but now **productive firms are more likely to join**.
+Same firms, same true effect of +2, but now each firm **decides for itself**, and the better firms are keener:
+
+![](economist-assets/firms-who-joins.png){.mid fig-alt="An S-shaped curve: the probability of joining rises from near 0 for unproductive firms to near 1 for productive ones; joiners in red at the top, non-joiners in grey at the bottom."}
+
+::: {.check}
+**Read the picture:** red dots (joiners) sit mostly to the **right**; grey dots (non-joiners) to the
+**left**. Productivity decides who joins, and productivity also raises sales. That is the back door of
+Part 1, now in data.
+:::
+
+## What the naive comparison says {.scrollable}
 
 ![](economist-assets/po-decomposition.png){.wide fig-alt="A bar of 5.33 split into the effect, 2.00, and selection bias, 3.33."}
 
@@ -287,24 +314,32 @@ firms that joined would have grown 3.33 points faster without the programme. In 
 cannot be computed, because it needs the column you never see.
 :::
 
-## You *can* see that the groups differ {.scrollable}
-
-::: columns
-::: {.column width="55%"}
-![](economist-assets/firms-balance.png){.mid fig-alt="Box plots of productivity: firms that did not join average -0.42, firms that joined 0.67."}
+::: {.muted}
+Check your prediction: how close were you for the coin (2.15), and for the choice (5.33)?
 :::
 
-::: {.column width="45%"}
+## You *can* see that the groups differ {.scrollable}
+
+![](economist-assets/coin-vs-choice.png){fig-alt="Two histograms of productivity: with a coin the joiners and non-joiners overlap, means −0.04 and −0.10; with choice the joiners sit to the right, means +0.67 and −0.42."}
+
+::: columns
+::: {.column width="50%"}
 ::: {.check}
-**The firms that joined were about one standard deviation more productive** before the programme
-existed.
+**Left, a coin:** the two groups are the same shape, in the same place. Any difference in sales afterwards
+can only be the programme.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Right, a choice:** the joiners were about **one standard deviation** more productive before the
+programme existed. Their higher sales afterwards are partly the programme, partly themselves.
+:::
+:::
 :::
 
 ::: {.step}
 This is the **balance check**: compare the groups on what was fixed **before** treatment. In real data you
 cannot see the bias, but you can see this, and it tells you the naive comparison is not to be trusted.
-:::
-:::
 :::
 
 ## What randomisation buys, and what it costs {.scrollable}
@@ -359,6 +394,10 @@ asked whether the methods economists use on survey data would recover the experi
 
 ## The answer, and the naive estimate {.scrollable}
 
+::: {.step .question}
+**The question:** using only the 185 trainees and a national survey, can we recover the experiment's answer?
+:::
+
 | Comparison | Estimate | Reading |
 |---|---|---|
 | **the experiment**: trainees vs the lottery's losers | **+\$1,794** (s.e. \$633, p = 0.005) | the benchmark every method must hit |
@@ -370,6 +409,8 @@ ever would have: that is selection bias, about \$10,000 of it.
 :::
 
 ## How different are the groups? {.scrollable}
+
+![](economist-assets/nsw-profiles.png){.wide fig-alt="Bars comparing trainees and survey people: age 26 against 33, 19% against 71% married, 71% against 30% without a diploma, earnings in 1975 of $1,532 against $13,651."}
 
 | | Trained | Survey | Standardised difference |
 |---|---|---|---|
@@ -452,7 +493,32 @@ the answer, is what makes the estimate defensible.
 :::
 :::
 
+## What a match looks like {.scrollable}
+
+![](economist-assets/nsw-pairs.png){.mid fig-alt="Five trainees, each above the survey person matched to them: nearly identical scores, similar ages, schooling and 1975 earnings; then their 1978 earnings."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Read each pair:** the trainee and the survey person have almost the **same score**, and therefore similar
+age, schooling and earnings **before** training. The match is the trainee's stand-in: what the trainee would
+probably have earned in 1978 without training.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**One pair proves nothing.** The first trainee earned \$9,930 and the match \$0; the last, \$26,372 against
+\$4,528. Individual outcomes are noisy; only the **average** over all 185 pairs is the estimate.
+:::
+:::
+:::
+
 ## Only now, the outcome {.scrollable}
+
+::: {.muted}
+**Predict first:** the experiment says +\$1,794. Will the matched estimate be close? Above or below?
+:::
+
 
 ![](economist-assets/nsw-estimates.png){.mid fig-alt="Five estimates on one axis: naive −8,498, regression +699, first matching +1,831, balanced matching +2,001, and the experiment +1,794 with its 95% interval."}
 
@@ -499,12 +565,36 @@ annual score.
 | `performance` | the annual score, **after** the course |
 | `motivation` | **not in the HR file**: nobody measures it |
 
-::: {.step}
-**The data are simulated**, 800 employees, so we know the truth: the course adds **+5 points** to everyone.
-Older and more educated employees are more likely to sign up. Two versions:
+::: {.step .question}
+**The question:** does the course raise performance, and can matching on the HR file tell?
+:::
 
-- **A:** sign-up depends only on what is in the HR file.
-- **B:** **motivated** employees also sign up more, and motivation raises performance on its own.
+::: {.muted}
+**Simulated**, 800 employees, so we know the truth: the course adds **+5 points** to everyone. Older and more
+educated employees are more likely to sign up.
+:::
+
+## Two versions of who signs up {.scrollable}
+
+![](economist-assets/hr-dag.png){.mid fig-alt="Version A: age, education and experience drive both taking the course and performance; motivation affects only performance. Version B: motivation, not in the file, also drives taking the course."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**A:** everything that decides who signs up is **in the HR file**. Matching on the file closes every back
+door.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**B:** **motivation** also decides who signs up, and raises performance on its own. It is a back door the
+file does not record.
+:::
+:::
+:::
+
+::: {.muted}
+**Predict first:** in which version will matching find +5? In the other, will it say more or less than 5?
 :::
 
 ## The results, against the truth {.scrollable}
@@ -561,6 +651,26 @@ is a claim you defend with knowledge of the setting, not with a table.
 :::
 
 ## Wrapping up · What matching does not fix {.center}
+
+## Why regression missed in Example 2 {.scrollable}
+
+![](economist-assets/nsw-regression.png){.mid fig-alt="Earnings in 1978 against 1975: thousands of survey people spread up to $25,000, the trainees bunched near zero, the matched controls among them, and a straight line fitted through all survey people."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Regression** fits **one line** through all 15,992 survey people, most earning \$10,000–25,000, then reads
+off what the line says at the trainees' earnings, near zero. Its answer depends on that line being right
+where almost **no** survey person lives.
+:::
+:::
+::: {.column width="50%"}
+::: {.step}
+**Matching** ignores the grey cloud and uses only the **blue** survey people, those who look like the
+trainees. That is why it found +\$2,001 and regression +\$699.
+:::
+:::
+:::
 
 ## Matching or regression? {.scrollable}
 

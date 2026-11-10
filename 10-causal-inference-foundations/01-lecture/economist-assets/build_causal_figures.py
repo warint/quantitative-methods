@@ -11,13 +11,20 @@ Writes, next to this file:
     po-table.png          the table you never get to see: both potential outcomes
     po-decomposition.png  naive difference = effect + selection bias, in bars
     dag-selection.png     why self-selection biases the comparison (and a coin flip does not)
+    firms-two-outcomes.png  Example 1: both potential outcomes for 40 firms, +2 apart
+    firms-who-joins.png   Example 1: the probability of joining rises with productivity
+    coin-vs-choice.png    Example 1: productivity of the two groups, under a coin and under choice
     coin-histogram.png    1,000 coin flips: randomisation is right on average
     firms-balance.png     productivity of the firms that joined and did not, before the programme
     nsw-design.png        LaLonde's test: an experiment, then its controls swapped for a survey
+    nsw-profiles.png      Example 2: trainees against survey people, four characteristics
+    nsw-pairs.png         Example 2: what a match looks like, five trainees and their matches
     nsw-overlap.png       the propensity score in each group: is there anyone to compare with?
+    nsw-regression.png    Example 2: regression extrapolates along a line; matching compares like with like
     nsw-loveplot.png      standardised differences before and after matching (the love plot)
     matching-idea.png     each treated person paired with the nearest control on the score
     nsw-estimates.png     every estimate on one axis, against the experimental benchmark
+    hr-dag.png            Example 3: who enrols, in versions A and B
     hr-estimates.png      Example 3: naive and matched estimates, selection on records vs on motivation
     hr-hidden.png         Example 3: perfect balance on the records, none on motivation
     dag-bad-control.png   a confounder to control for, a mediator not to
@@ -411,6 +418,168 @@ def nsw_overlap_and_balance():
     save(fig, "nsw-loveplot.png")
 
 
+# --- 2c. Example 1, made visible ----------------------------------------------------
+def firms_two_outcomes(firms):
+    """Both columns for 40 firms: the vertical gap is the effect, the slope is productivity."""
+    f = firms.head(40)
+    fig, ax = plt.subplots(figsize=(8.6, 4.2))
+    for _, r in f.iterrows():
+        ax.plot([r.productivity, r.productivity], [r.sales_without, r.sales_with],
+                color=GRID, lw=2, zorder=1)
+    ax.scatter(f["productivity"], f["sales_without"], s=40, color=MUTED,
+               label="Y(0): growth WITHOUT the programme", zorder=2)
+    ax.scatter(f["productivity"], f["sales_with"], s=40, color=BLUE,
+               label="Y(1): growth WITH the programme", zorder=3)
+    xs = np.linspace(-2.5, 2.5, 2)
+    ax.plot(xs, 10 + 3 * xs, color=MUTED, lw=1.2, ls="--")
+    ax.plot(xs, 12 + 3 * xs, color=BLUE, lw=1.2, ls="--")
+    i = f["productivity"].idxmax()
+    ax.annotate("each firm's effect:\nexactly +2", xy=(f.loc[i, "productivity"], f.loc[i, "sales_with"] - 1),
+                xytext=(1.0, 2.5), fontsize=10.5, color=INK,
+                arrowprops=dict(arrowstyle="->", color=INK))
+    ax.set_xlabel("productivity (nobody in the ministry sees it)")
+    ax.set_ylabel("export sales growth, points")
+    ax.legend(frameon=False, loc="upper left", fontsize=10)
+    ax.set_title("In a simulation both columns exist; in real data you see one dot per firm",
+                 loc="left", fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "firms-two-outcomes.png")
+
+
+def firms_who_joins(firms):
+    """P(join | productivity): applies = productivity + noise > 0.5, so P = Phi(productivity - 0.5)."""
+    from scipy.stats import norm
+    fig, ax = plt.subplots(figsize=(8.6, 3.6))
+    xs = np.linspace(-3, 3, 200)
+    ax.plot(xs, norm.cdf(xs - 0.5), color=RED, lw=2.4, label="probability of joining")
+    jit = np.random.default_rng(0).uniform(-0.04, 0.04, len(firms))
+    ax.scatter(firms["productivity"], firms["applies"] + jit, s=6, alpha=0.25,
+               color=np.where(firms["applies"] == 1, RED, MUTED))
+    ax.set_yticks([0, 0.5, 1], ["did not join", "50%", "joined"])
+    ax.set_xlabel("productivity")
+    ax.set_title("The more productive the firm, the more likely it joins: that is self-selection",
+                 loc="left", fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "firms-who-joins.png")
+
+
+def coin_vs_choice(firms):
+    rng = np.random.default_rng(10)                     # the coin cell's own draws
+    n = 1000
+    productivity = rng.normal(0, 1, n)
+    rng.normal(0, 2, n)
+    coin = rng.integers(0, 2, n)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
+    bins = np.linspace(-3.5, 3.5, 29)
+    for ax, groups, title in (
+            (axes[0], (productivity[coin == 0], productivity[coin == 1]),
+             "A coin decides: the groups overlap"),
+            (axes[1], (firms.loc[firms["applies"] == 0, "productivity"],
+                       firms.loc[firms["applies"] == 1, "productivity"]),
+             "The firms decide: the joiners sit to the right")):
+        ax.hist(groups[0], bins=bins, alpha=0.6, color=MUTED, label="did not join")
+        ax.hist(groups[1], bins=bins, alpha=0.6, color=RED, label="joined")
+        for g, col in ((groups[0], MUTED), (groups[1], RED)):
+            ax.axvline(np.mean(g), color=col, lw=2)
+        ax.set_title(title, loc="left", fontsize=12, fontweight="bold")
+        ax.set_xlabel("productivity, before the programme")
+        ax.text(0.98, 0.95, f"means: {np.mean(groups[0]):+.2f} vs {np.mean(groups[1]):+.2f}",
+                transform=ax.transAxes, ha="right", va="top", fontsize=10.5)
+    axes[0].set_ylabel("firms")
+    axes[0].legend(frameon=False, loc="upper left", fontsize=10)
+    fig.tight_layout()
+    save(fig, "coin-vs-choice.png")
+
+
+# --- 5c. Example 2, made visible ----------------------------------------------------
+def _nsw_data():
+    nsw = pd.read_stata(URL + "nsw_dw.dta")
+    cps = pd.read_stata(URL + "cps_controls.dta")
+    return nsw, pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+
+
+def nsw_profiles():
+    _, df = _nsw_data()
+    t, c = df[df["treat"] == 1], df[df["treat"] == 0]
+    items = [("age", "age, years", "{:.0f}"), ("married", "share married", "{:.0%}"),
+             ("nodegree", "share without a diploma", "{:.0%}"),
+             ("re75", "earnings in 1975, $", "{:,.0f}")]
+    fig, axes = plt.subplots(1, 4, figsize=(12, 3.0))
+    for ax, (col, lab, fmt) in zip(axes, items):
+        vals = [t[col].mean(), c[col].mean()]
+        ax.bar([0, 1], vals, color=[RED, MUTED], width=0.6)
+        for x, v in zip([0, 1], vals):
+            ax.text(x, v, fmt.format(v), ha="center", va="bottom", fontsize=11, fontweight="bold")
+        ax.set_xticks([0, 1], ["trainees", "survey"])
+        ax.set_yticks([])
+        ax.spines["left"].set_visible(False)
+        ax.set_title(lab, fontsize=11.5, fontweight="bold")
+        ax.set_ylim(0, max(vals) * 1.25)
+    fig.suptitle("The survey's average worker is nobody's idea of a trainee", x=0.01, ha="left",
+                 fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "nsw-profiles.png")
+
+
+def nsw_pairs():
+    _, df = _nsw_data()
+    df["pscore"] = smf.logit(PS2, data=df).fit(disp=0).predict(df)
+    t, c = df[df["treat"] == 1], df[df["treat"] == 0]
+    _, idx = NearestNeighbors(n_neighbors=1).fit(c[["pscore"]]).kneighbors(t[["pscore"]])
+    m = c.iloc[idx.ravel()]
+    rows = list(range(0, 185, 37))[:5]
+    fig, ax = plt.subplots(figsize=(11, 3.6))
+    ax.axis("off")
+    ax.set_xlim(0, 11); ax.set_ylim(-0.3, 6.4)
+    head = ["", "score", "age", "school", "earned 1975", "earned 1978"]
+    xs = [0.9, 2.6, 3.9, 5.1, 6.9, 9.4]
+    for x, h in zip(xs, head):
+        ax.text(x, 6.0, h, ha="center", fontsize=11, fontweight="bold")
+    ax.plot([0.1, 10.9], [5.65, 5.65], color=INK, lw=1)
+    for k, i in enumerate(rows):
+        y = 5.1 - k * 1.05
+        for dy, r, who, col in ((0.22, t.iloc[i], "trainee", RED), (-0.22, m.iloc[i], "match", BLUE)):
+            ax.text(xs[0], y + dy, who, ha="center", va="center", fontsize=10, color=col,
+                    fontweight="bold")
+            vals = [f"{r.pscore:.3f}", f"{r.age:.0f}", f"{r.education:.0f}",
+                    f"${r.re75:,.0f}", f"${r.re78:,.0f}"]
+            for x, v in zip(xs[1:], vals):
+                ax.text(x, y + dy, v, ha="center", va="center", fontsize=10.5,
+                        color=INK if x < 9 else col, fontweight="bold" if x > 9 else "normal")
+        ax.plot([0.1, 10.9], [y - 0.5, y - 0.5], color=GRID, lw=0.8)
+    ax.text(8.15, -0.15, "← fixed before training: matched on these   ·   after: compared →",
+            ha="center", fontsize=9.5, color=MUTED)
+    save(fig, "nsw-pairs.png")
+
+
+def nsw_regression():
+    """re75 against re78: the treated sit near zero; a line through everyone carries the comparison."""
+    _, df = _nsw_data()
+    df["pscore"] = smf.logit(PS2, data=df).fit(disp=0).predict(df)
+    t, c = df[df["treat"] == 1], df[df["treat"] == 0]
+    _, idx = NearestNeighbors(n_neighbors=1).fit(c[["pscore"]]).kneighbors(t[["pscore"]])
+    m = c.iloc[idx.ravel()]
+    fig, ax = plt.subplots(figsize=(9, 4.2))
+    sample = c.sample(3000, random_state=1)
+    ax.scatter(sample["re75"] / 1000, sample["re78"] / 1000, s=5, alpha=0.18, color=MUTED,
+               label="survey people (3,000 of 15,992)")
+    ax.scatter(m["re75"] / 1000, m["re78"] / 1000, s=22, color=BLUE, alpha=0.8,
+               label="the controls matching uses")
+    ax.scatter(t["re75"] / 1000, t["re78"] / 1000, s=22, color=RED, alpha=0.8, label="trainees")
+    fit = np.polyfit(c["re75"], c["re78"], 1)
+    xs = np.array([0, 26000])
+    ax.plot(xs / 1000, np.polyval(fit, xs) / 1000, color=GOLD, lw=2.4,
+            label="a straight line through every survey person")
+    ax.set_xlim(-1, 27); ax.set_ylim(-1, 40)
+    ax.set_xlabel("earnings in 1975, $ thousands (before training)")
+    ax.set_ylabel("earnings in 1978, $ thousands")
+    ax.legend(frameon=False, fontsize=9.5, loc="upper left")
+    ax.set_title("The line is learnt where the survey people are; the trainees sit at the far left",
+                 loc="left", fontsize=11.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "nsw-regression.png")
+
+
 # --- 6. every estimate on one axis --------------------------------------------
 def nsw_estimates(r):
     exp, se = r["experiment"]
@@ -436,6 +605,28 @@ def nsw_estimates(r):
     ax.tick_params(axis="y", length=0)
     fig.tight_layout()
     save(fig, "nsw-estimates.png")
+
+
+def hr_dag():
+    fig, axes = plt.subplots(1, 2, figsize=(12, 3.4))
+    for ax, title, hidden in ((axes[0], "A · enrolment follows the HR file", False),
+                              (axes[1], "B · motivation drives it too", True)):
+        ax.set_xlim(0, 12); ax.set_ylim(0, 5); ax.axis("off")
+        rec = box(ax, 1.8, 2.5, "age, education,\nexperience", w=3.0, h=1.2, fs=11,
+                  fc=PALE_BLUE, ec=BLUE)
+        tr = box(ax, 6.0, 2.5, "takes the\ncourse", w=2.2, h=1.2, fs=11, bold=True)
+        y = box(ax, 10.2, 2.5, "performance", w=2.6, h=1.2, fs=11, bold=True)
+        link(ax, rec, tr, color=BLUE, lw=2)
+        link(ax, tr, y, color=TEAL, lw=2.6, label="+5", lcolor=TEAL)
+        link(ax, rec, y, color=BLUE, lw=1.6, rad=0.35)
+        mot = box(ax, 8.1, 4.5, "motivation (not in the file)", w=4.6, h=0.8, fs=10.5,
+                  fc=BG, ec=RED if hidden else GRID)
+        if hidden:
+            link(ax, mot, tr, color=RED, lw=2, dashed=True)
+        link(ax, mot, y, color=RED if hidden else GRID, lw=2 if hidden else 1.4, dashed=True)
+        ax.set_title(title, loc="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "hr-dag.png")
 
 
 # --- 6b. Example 3: what matching cannot see ------------------------------------
@@ -546,6 +737,9 @@ if __name__ == "__main__":
     po_table(firms)
     coin_histogram()
     firms_balance(firms)
+    firms_two_outcomes(firms)
+    firms_who_joins(firms)
+    coin_vs_choice(firms)
     print("decomposition (naive, effect, bias):", po_decomposition(firms))
     dag_selection()
     nsw_design()
@@ -554,6 +748,10 @@ if __name__ == "__main__":
     print(r)
     nsw_estimates(r)
     nsw_overlap_and_balance()
+    nsw_profiles()
+    nsw_pairs()
+    nsw_regression()
+    hr_dag()
     print(hr_figures(simulate_staff()))
     dag_bad_control()
     workflow()

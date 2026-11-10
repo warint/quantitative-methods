@@ -148,6 +148,8 @@ adds exactly two points to every firm's export growth; and a productivity that
 nobody in the ministry observes, which raises growth with or without the
 programme.
 
+![Both potential outcomes for forty of the simulated firms. Each firm has two dots, two points apart: that gap is its effect. Both dots rise with productivity, because better firms grow faster whatever they do. Real data show one dot per firm.](01-lecture/economist-assets/firms-two-outcomes.png){fig-alt="Forty firms, each with a grey dot for growth without the programme and a blue dot two points above for growth with it; both rise with productivity."}
+
 ```{python}
 #| label: check-sim
 #| code-summary: "Run it: a coin flip against self-selection, with the truth known"
@@ -189,6 +191,10 @@ error describes. The selection term cannot be computed in real data, since it
 needs the column nobody sees; what *can* be computed is how different the groups
 were before treatment, here about one standard deviation of productivity. That
 comparison — balance — is the diagnostic the rest of the chapter is built on.
+
+![Who chooses to join. The probability of joining rises with productivity, so the joiners (red, top) sit to the right of the non-joiners (grey, bottom): self-selection, in data.](01-lecture/economist-assets/firms-who-joins.png){fig-alt="An S-shaped curve: the probability of joining rises with productivity."}
+
+![Balance under a coin and under choice. With a coin the two groups have the same productivity before the programme; with choice the joiners were about one standard deviation more productive. The left panel is why randomisation works; the right is why the naive comparison fails.](01-lecture/economist-assets/coin-vs-choice.png){fig-alt="Two histograms of productivity: overlapping under a coin, shifted under choice."}
 
 **Example 1 in three sentences.** With a coin, the difference in means finds the
 truth on average. When firms choose, the same difference says 5.33, of which 2 is
@@ -246,12 +252,16 @@ differences put that in common units — the gap in means divided by the pooled
 standard deviation — and most are between 0.7 and 2.4, against a convention
 that calls anything under 0.1 balanced.
 
+![Trainees and survey people on four characteristics. The survey's average worker is older, mostly married, has a diploma and earned nine times as much before the programme.](01-lecture/economist-assets/nsw-profiles.png){fig-alt="Bars: age 26 against 33, 19% against 71% married, 71% against 30% without a diploma, 1975 earnings $1,532 against $13,651."}
+
 Regression with all eight characteristics does much better, and is still off by
 more than half. The reason is worth understanding, because it is what matching
 fixes. A linear regression uses *every* survey respondent, including the
-thousands earning \$30,000 who resemble no trainee, and lets a straight line
-carry the comparison from them to the trainees. The estimate depends on that
+thousands earning \$20,000 and more who resemble no trainee, and lets a straight
+line carry the comparison from them to the trainees. The estimate depends on that
 line being right far outside the region where the trainees live.
+
+![Earnings in 1978 against 1975. The survey people spread up to the survey's \$25,000 recording cap; the trainees bunch near zero. A regression learns its line from the grey cloud; matching uses only the blue survey people, who look like the trainees.](01-lecture/economist-assets/nsw-regression.png){fig-alt="Scatter of survey people, trainees and matched controls, with a regression line through all survey people."}
 
 ## The propensity score, and a match that fails its check
 
@@ -350,6 +360,8 @@ which are a means and not an end.
 
 Only now is the outcome looked at. The matched ATT is about \$2,000, within a
 third of a standard error of the experiment.
+
+![What a match looks like: five trainees, each above the survey person matched to them. Score, age, schooling and earnings before training are close; earnings after are compared. Single pairs are noisy; only the average over all 185 is the estimate.](01-lecture/economist-assets/nsw-pairs.png){fig-alt="Five trainee and match pairs with their scores, ages, schooling and earnings in 1975 and 1978."}
 
 ![Every estimate on one axis. Both matching estimates fall inside the experiment's 95% interval; the naive comparison has the wrong sign, and the linear regression is pulled down by respondents who resemble no trainee.](01-lecture/economist-assets/nsw-estimates.png){fig-alt="Five estimates on one axis: naive −8,498, regression +699, first matching +1,831, balanced matching +2,001, and the experiment +1,794 with its 95% interval."}
 
@@ -480,6 +492,8 @@ In version A that is all that drives enrolment. In version B motivated employees
 also enrol more, and motivation raises performance on its own. The same matching
 procedure — a logit score on the three recorded variables, one nearest neighbour,
 a balance check — is applied to both.
+
+![Who enrols. In A, everything that decides enrolment is in the HR file; in B, motivation, which the file does not record, also decides it and raises performance on its own.](01-lecture/economist-assets/hr-dag.png){fig-alt="Two causal diagrams for versions A and B of the HR example."}
 
 ```{python}
 #| label: check-hr
