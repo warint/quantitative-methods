@@ -173,17 +173,25 @@ $$
 \underbrace{\big(\bar Y_{\text{control, post}} - \bar Y_{\text{control, pre}}\big)}_{\text{change among the controls}}
 $$
 
+## The two differences, drawn {.scrollable}
+
 ::: columns
-::: {.column width="50%"}
-::: {.check}
-**The first difference** removes everything **constant** about the treated group, measured or not: its
-location, its institutions, its wealth.
+::: {.column width="60%"}
+![](economist-assets/did-idea.png){.big fig-alt="Control rises from 40 to 60, treated from 60 to 70; had nothing happened the treated would have reached 80; the gap of −10 is the DiD."}
 :::
-:::
-::: {.column width="50%"}
+::: {.column width="40%"}
 ::: {.check}
-**The second difference** removes everything **common** to both groups over time: the market, the business
-cycle, inflation.
+**Read the picture:**
+
+1. the treated rose by **+10**;
+2. the controls rose by **+20**: that is what time alone did;
+3. so the treated would have reached **80** (dashed); they reached 70. The policy: **−10**.
+:::
+
+::: {.step}
+**The first difference** removes everything **constant** about the treated group: its location, its
+institutions, its wealth. **The second** removes everything **common** to both groups: the market, the
+business cycle.
 :::
 :::
 :::
@@ -232,18 +240,20 @@ $$
 $$
 :::
 
+![](economist-assets/parallel-idea.png){.wide fig-alt="Left: two lines 25 apart, both rising by 4 a year: the gap never moves. Right: the treated line rises more slowly, so the gap shrinks from 25 to 13 with no policy at all."}
+
 ::: columns
 ::: {.column width="50%"}
 ::: {.check}
-**It is not** that the groups are similar. They may differ by any amount in **level**; only the **gap**
+**It is not** that the groups are similar. **Left:** they are 25 apart, and that is fine; only the **gap**
 must stay constant.
 :::
 :::
 ::: {.column width="50%"}
 ::: {.step}
-**It is untestable**, for the same reason as session 10's conditional independence: it is about $Y(0)$ for
-the treated after treatment, the column nobody sees. What you **can** look at is whether the trends were
-parallel **before**.
+**Right:** the gap shrinks by itself. A DiD would call that shrinkage a policy effect. The assumption is
+about the years **after** the policy, which nobody sees: it is **untestable**. What you **can** look at is
+whether the trends were parallel **before**.
 :::
 :::
 :::
@@ -255,11 +265,18 @@ parallel **before**.
 Governments subsidise **affordable-housing projects**. Critics argue they lower the value of nearby homes:
 neighbours' preferences, congestion, buildings that do not match the street (Ellen et al., 2007).
 
+::: columns
+::: {.column width="55%"}
+![](economist-assets/housing-map.png){fig-alt="A schematic city: three new sites, each with a shaded circle; houses inside the circles are treated (red), houses outside are controls (blue)."}
+:::
+::: {.column width="45%"}
 | Column | Meaning |
 |---|---|
-| `near` | 1 = the house is near a new subsidised site (treated), 0 = far from any (control) |
-| `post` | 1 = observed after the site opened, 0 = before |
-| `price` | the sale price, in \$ thousands |
+| `near` | 1 = near a new site (treated), 0 = far (control) |
+| `post` | 1 = after the site opened, 0 = before |
+| `price` | the sale price, \$ thousands |
+:::
+:::
 
 ::: {.step .question}
 **The question:** did the sites lower the prices of nearby houses, and by how much?
@@ -268,6 +285,11 @@ neighbours' preferences, congestion, buildings that do not match the street (Ell
 ::: {.muted}
 **Simulated**, 1,000 houses, so we know the truth: a site lowers nearby prices by **\$10,000**. Near houses
 were cheaper to begin with (by about \$15,000), and the whole market rose by \$30,000.
+:::
+
+::: {.muted}
+**Predict first:** comparing near and far houses *after* the sites opened, will you find more or less than
+−10? And comparing near houses *before and after*?
 :::
 
 ## Three ways to answer, one of them right {.scrollable}
@@ -303,6 +325,8 @@ like the far ones, by 30.8, to **266.2**. They reached 255.7. The difference is 
 :::
 
 ## The same number from a regression {.scrollable}
+
+![](economist-assets/housing-betas.png){.wide fig-alt="The four means with each coefficient drawn: β0 the far houses before, β1 the gap before, β2 the far houses' rise, β3 the gap between near-after and its counterfactual."}
 
 `price ~ near * post`, standard errors clustered by house:
 
@@ -345,6 +369,10 @@ truth is the same −10. Two versions of the city:
 **The question:** can the data tell the two cities apart, and what does the DiD say in each?
 :::
 
+::: {.muted}
+**Predict first:** in city B, will the DiD say more than −10, less, or the same? Why?
+:::
+
 ## The raw prices {.scrollable}
 
 ![](economist-assets/housing-trends.png){fig-alt="Two panels of prices from 2003 to 2008: in A the near and far lines run parallel before 2006; in B the near line rises more slowly from the start."}
@@ -377,6 +405,25 @@ The two-period DiD, 2005 to 2008, says **−11.1**.
 2005 is the **reference year**: zero by construction, not by evidence. The other pre-years are the evidence.
 :::
 
+## Why B's estimate is wrong: two counterfactuals {.scrollable}
+
+![](economist-assets/housing-b-counterfactual.png){.mid fig-alt="City B: near houses observed in red; the gold dashed line is the counterfactual DiD assumes, following the far houses' rise; the black dotted line is the true counterfactual, still slipping; DiD measures −20, the truth is −10."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Gold, dashed:** what DiD assumes the near houses would have done without the sites: rise **like the far
+ones**. **Black, dotted:** what they would really have done: keep **slipping**, as they had since 2003.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+The true effect is the gap to the **black** line, −10. DiD measures the gap to the **gold** line, −20: it
+adds the slide that was already under way to the policy.
+:::
+:::
+:::
+
 ## Example 2 · Plain summary {.scrollable}
 
 - When the trends were parallel, the DiD finds the effect, and the years **before** the policy are flat.
@@ -397,12 +444,7 @@ Between 2021 and 2023, **18 European countries** adopted a national **AI strateg
 in adopting countries start **using AI** more? The outcome, `ai_use_any`, is the share of firms using any AI
 technology, in percentage points; `qmib.load("angle_c_country")` gives it by country and year.
 
-| Adopted in | Countries | Years observed **before** adopting |
-|---|---|---|
-| 2021 | 8 | **none**: the outcome starts in 2021 |
-| 2022 | 9 | one: 2021 |
-| 2023 | 1 | two: 2021, 2022 |
-| never | 12 | (the controls) |
+![](economist-assets/ai-adoption.png){.mid fig-alt="A grid of cohorts by year: the 2021 cohort is treated in every observed year; the 2022 cohort has one year before; the 2023 cohort, one country, has two; the 12 never-adopters are never treated."}
 
 ::: {.step .question}
 **The question:** what did adopting a strategy do to firms' AI use, and how much can 30 countries over four
@@ -438,6 +480,48 @@ needs at least two points.
 adopted in 2021 is not a control for one that adopted in 2022.
 :::
 :::
+:::
+
+## The raw data {.scrollable}
+
+![](economist-assets/ai-trends.png){.mid fig-alt="Average AI use by cohort, 2021 to 2024: adopters use more AI than never-adopters throughout; the 2022 cohort rises from 10.9 to 13.8 in its adoption year."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Levels differ a lot:** adopters used AI about twice as much as never-adopters, even **before** adopting.
+That is allowed: DiD only needs the **gap** to have been stable.
+:::
+:::
+::: {.column width="50%"}
+::: {.step}
+**Look at the 2022 cohort (red):** a jump in its adoption year, while the never-adopters (blue) barely move.
+That jump, minus the never-adopters' change, is its DiD.
+:::
+:::
+:::
+
+## Why not one big regression? {.scrollable}
+
+![](economist-assets/twfe-comparisons.png){fig-alt="Three schematic comparisons: early adopter against never-treated, clean; late adopter against never-treated, clean; late adopter against the already-treated early adopter, which TWFE also uses and should not."}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Panels 1 and 2** are clean: the comparison group has **no** policy, so its change is what time did.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**Panel 3:** two-way fixed effects also compares a late adopter with an **early** one that is still
+adjusting to its **own** policy. Its change is not "time alone", and subtracting it can bias the estimate,
+even flip its sign when effects grow over time.
+:::
+:::
+:::
+
+::: {.muted}
+**Predict first:** will TWFE land above or below the truth of 2.4 here? And Callaway–Sant'Anna?
 :::
 
 ## The estimates, against the truth {.scrollable}
@@ -535,9 +619,11 @@ first difference to take.
 :::
 :::
 
+![](economist-assets/iv-management.png){.wide fig-alt="Histograms of management quality: exporters average +0.40, non-exporters −0.39."}
+
 ::: {.check}
 **The naive comparison** of exporters and non-exporters says **+10.0**: double the truth. Half of it is
-management.
+management: the gap in the picture, which real data never record.
 :::
 
 ## The instrument: distance to the nearest port {.scrollable}
@@ -573,6 +659,12 @@ Two-stage least squares gives the same number, with a standard error: **4.6 (0.7
 :::
 
 ## The results, against the truth, and when exclusion fails {.scrollable}
+
+::: {.muted}
+**Predict first:** in version B the first stage is exactly as strong. Will IV be closer to the truth than
+the naive 10, or further?
+:::
+
 
 ![](economist-assets/iv-estimates.png){.mid fig-alt="Version A: naive 10.0, IV 4.6 with interval covering 5. Version B: naive 11.6, IV 12.1."}
 

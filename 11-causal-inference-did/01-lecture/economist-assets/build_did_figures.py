@@ -8,7 +8,16 @@ says about a picture is true of the picture.
     .venv/bin/python 11-causal-inference-did/01-lecture/economist-assets/build_did_figures.py
 
 Writes, next to this file:
+    did-idea.png           Part 1: the two differences, drawn
+    parallel-idea.png      Part 1: parallel trends allow any gap in level, not a change in the gap
+    housing-map.png        Example 1: the city, the sites, the near and the far houses
     housing-2x2.png        Example 1: four means, the counterfactual, and the two differences
+    housing-betas.png      Example 1: the four regression coefficients, on the same picture
+    housing-b-counterfactual.png Example 2: the counterfactual DiD assumes, against the true one
+    ai-adoption.png        Example 3: who adopted when, and which country-years carry an outcome
+    ai-trends.png          Example 3: average AI use by adoption cohort, 2021-2024
+    twfe-comparisons.png   Example 3: the clean comparisons, and the one TWFE also makes
+    iv-management.png      Example 4: exporters are better managed: the confounder you cannot see
     housing-estimators.png Example 1: after-only, before-after and DiD against the truth
     housing-trends.png     Example 2: six years of prices, versions A and B
     housing-event-study.png Example 2: the event study, versions A and B
@@ -84,6 +93,82 @@ def simulate_six_years(drift):
     return pd.concat(rows, ignore_index=True)
 
 
+# --- Part 1: the ideas, drawn --------------------------------------------------
+def did_idea():
+    fig, ax = plt.subplots(figsize=(8.6, 4.6))
+    co = (40, 60); tr = (60, 70); cf = tr[0] + (co[1] - co[0])
+    ax.plot([0, 1], co, marker="o", ms=10, lw=2.6, color=BLUE, label="control group")
+    ax.plot([0, 1], tr, marker="o", ms=10, lw=2.6, color=RED, label="treated group")
+    ax.plot([0, 1], [tr[0], cf], ls="--", lw=2, color=RED, alpha=0.5,
+            label="treated, had the policy not happened")
+    for lvl, col in ((co[0], BLUE), (tr[0], RED)):
+        ax.plot([0, 1.0], [lvl, lvl], ls=":", color=col, lw=1.2)
+    def arrow_(x, a_, b_, col, txt, dx=0.03):
+        ax.annotate("", xy=(x, b_), xytext=(x, a_), arrowprops=dict(arrowstyle="->", color=col, lw=2))
+        ax.text(x + dx, (a_ + b_) / 2, txt, color=col, fontsize=10.5, va="center", fontweight="bold")
+    arrow_(1.04, co[0], co[1], BLUE, "change among the\ncontrols: +20")
+    ax.annotate("", xy=(0.86, tr[1]), xytext=(0.86, tr[0]), arrowprops=dict(arrowstyle="->", color=RED, lw=2))
+    ax.text(0.83, tr[0] - 2.2, "change among the treated: +10", color=RED, fontsize=10.5,
+            ha="right", va="top", fontweight="bold")
+    ax.annotate("", xy=(1.04, tr[1]), xytext=(1.04, cf), arrowprops=dict(arrowstyle="<->", color=INK, lw=2))
+    ax.text(1.07, (tr[1] + cf) / 2, "DiD = +10 − (+20) = −10", fontsize=11, fontweight="bold",
+            va="center")
+    ax.set_xticks([0, 1], ["before", "after"])
+    ax.set_xlim(-0.3, 1.75)
+    ax.set_ylabel("average outcome")
+    ax.legend(frameon=False, loc="upper left", fontsize=10)
+    ax.set_title("Two changes, and the difference between them", loc="left", fontsize=12.5,
+                 fontweight="bold")
+    fig.tight_layout()
+    save(fig, "did-idea.png")
+
+
+def parallel_idea():
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), sharey=True)
+    t = np.arange(5)
+    for ax, (co, tr, title, col) in zip(axes, (
+            (20 + 4 * t, 45 + 4 * t, "Parallel: far apart in level, the gap never moves", TEAL),
+            (20 + 4 * t, 45 + 1 * t, "Not parallel: the gap shrinks by itself", RED))):
+        ax.plot(t, co, marker="o", color=BLUE, lw=2.2, label="control")
+        ax.plot(t, tr, marker="o", color=RED, lw=2.2, label="treated")
+        for x in (0, 4):
+            ax.annotate("", xy=(x, tr[x]), xytext=(x, co[x]),
+                        arrowprops=dict(arrowstyle="<->", color=MUTED, lw=1.2))
+            ax.text(x + 0.12, (tr[x] + co[x]) / 2, f"gap {tr[x] - co[x]:.0f}", fontsize=10,
+                    color=MUTED, va="center")
+        ax.set_title(title, loc="left", fontsize=11.5, fontweight="bold", color=col)
+        ax.set_xticks(t, [f"year {i + 1}" for i in t])
+    axes[0].legend(frameon=False, loc="lower right")
+    axes[0].set_ylabel("outcome, before any policy")
+    fig.tight_layout()
+    save(fig, "parallel-idea.png")
+
+
+def housing_map():
+    rng = np.random.default_rng(5)
+    fig, ax = plt.subplots(figsize=(8.6, 4.2))
+    ax.set_xlim(0, 20); ax.set_ylim(0, 10); ax.set_aspect("equal"); ax.axis("off")
+    for x in range(0, 21, 2):
+        ax.plot([x, x], [0, 10], color=GRID, lw=0.6, zorder=0)
+    for y in range(0, 11, 2):
+        ax.plot([0, 20], [y, y], color=GRID, lw=0.6, zorder=0)
+    sites = [(4, 6.5), (11, 3), (16.5, 7)]
+    for sx, sy in sites:
+        ax.add_patch(plt.Circle((sx, sy), 2.2, color=PALE_RED, alpha=0.5, zorder=1))
+    pts = rng.uniform([0.3, 0.3], [19.7, 9.7], size=(140, 2))
+    for x, y in pts:
+        near = min(np.hypot(x - sx, y - sy) for sx, sy in sites) < 2.2
+        ax.scatter(x, y, marker="s", s=26, color=RED if near else BLUE, zorder=2)
+    for sx, sy in sites:
+        ax.scatter(sx, sy, marker="^", s=220, color=INK, zorder=3)
+    ax.scatter([], [], marker="^", s=90, color=INK, label="new affordable-housing site")
+    ax.scatter([], [], marker="s", s=30, color=RED, label="house near a site: treated")
+    ax.scatter([], [], marker="s", s=30, color=BLUE, label="house far from any site: control")
+    ax.legend(frameon=True, facecolor=BG, edgecolor=GRID, loc="lower center",
+              bbox_to_anchor=(0.5, -0.17), ncol=3, fontsize=9.5)
+    save(fig, "housing-map.png")
+
+
 # --- Example 1 -----------------------------------------------------------------
 def housing_2x2(h):
     m = h.groupby(["near", "post"])["price"].mean().unstack()
@@ -111,6 +196,37 @@ def housing_2x2(h):
     fig.tight_layout()
     save(fig, "housing-2x2.png")
     return m, cf
+
+
+def housing_betas(h):
+    r = smf.ols("price ~ near * post", data=h).fit().params
+    b0, b1, b2, b3 = r["Intercept"], r["near"], r["post"], r["near:post"]
+    fig, ax = plt.subplots(figsize=(8.4, 4.6))
+    ax.plot([0, 1], [b0, b0 + b2], marker="o", ms=9, lw=2.4, color=BLUE, label="far (control)")
+    ax.plot([0, 1], [b0 + b1, b0 + b1 + b2 + b3], marker="o", ms=9, lw=2.4, color=RED,
+            label="near (treated)")
+    ax.plot([0, 1], [b0 + b1, b0 + b1 + b2], ls="--", lw=2, color=RED, alpha=0.5,
+            label="near, without the site")
+    def tag(x, y, txt, col, ha="left"):
+        ax.text(x, y, txt, color=col, fontsize=11, fontweight="bold", ha=ha, va="center",
+                bbox=dict(fc=BG, ec="none", pad=1))
+    tag(-0.05, b0, f"β₀ = {b0:.1f}", BLUE, "right")
+    ax.annotate("", xy=(-0.02, b0 + b1), xytext=(-0.02, b0), arrowprops=dict(arrowstyle="<->", color=GOLD))
+    tag(-0.05, b0 + b1 / 2, f"β₁ = {b1:.1f}", GOLD, "right")
+    ax.annotate("", xy=(1.02, b0 + b2), xytext=(1.02, b0), arrowprops=dict(arrowstyle="<->", color=TEAL))
+    tag(1.05, b0 + b2 / 2 + 6, f"β₂ = {b2:.1f}", TEAL)
+    ax.annotate("", xy=(1.02, b0 + b1 + b2 + b3), xytext=(1.02, b0 + b1 + b2),
+                arrowprops=dict(arrowstyle="<->", color=INK, lw=1.8))
+    tag(1.05, b0 + b1 + b2 + b3 / 2, f"β₃ = {b3:.1f}: the DiD", INK)
+    ax.set_xticks([0, 1], ["before", "after"])
+    ax.set_xlim(-0.45, 1.5)
+    ax.set_ylabel("average price, $ thousands")
+    ax.legend(frameon=False, loc="upper left", fontsize=10)
+    ax.set_title("price ~ near * post: each coefficient is a piece of the picture", loc="left",
+                 fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "housing-betas.png")
+    return b0, b1, b2, b3
 
 
 def housing_estimators(m):
@@ -186,6 +302,39 @@ def housing_trends_and_events():
     return out
 
 
+def housing_b_counterfactual():
+    p = simulate_six_years(-3.0)
+    g = p.groupby(["year", "near"])["price"].mean().unstack()
+    years = g.index.values
+    true_cf = g[1] + 10 * (years >= 2006)                 # the same houses, without the -10
+    did_cf = g.loc[2005, 1] + (g[0] - g.loc[2005, 0])     # what DiD assumes: the far trend
+    fig, ax = plt.subplots(figsize=(9, 4.4))
+    ax.axvspan(2005.5, 2008.4, color=PALE_TEAL, alpha=0.5, zorder=0)
+    ax.plot(years, g[0], marker="o", color=BLUE, lw=2, label="far: observed")
+    ax.plot(years, g[1], marker="o", color=RED, lw=2.4, label="near: observed")
+    post = years >= 2005
+    ax.plot(years[post], did_cf[post], ls="--", color=GOLD, lw=2.2,
+            label="near without the site, as DiD assumes (far's trend)")
+    ax.plot(years[post], true_cf[post], ls=":", color=INK, lw=2.2,
+            label="near without the site, in truth (still slipping)")
+    y8 = 2008.08
+    ax.annotate("", xy=(y8, g.loc[2008, 1]), xytext=(y8, true_cf[2008]),
+                arrowprops=dict(arrowstyle="<->", color=INK))
+    ax.text(y8 + 0.06, (g.loc[2008, 1] + true_cf[2008]) / 2, "true\neffect −10", fontsize=9.5)
+    ax.annotate("", xy=(y8 + 0.35, g.loc[2008, 1]), xytext=(y8 + 0.35, did_cf[2008]),
+                arrowprops=dict(arrowstyle="<->", color=GOLD))
+    ax.text(y8 + 0.41, (g.loc[2008, 1] + did_cf[2008]) / 2 + 3, f"DiD\n{g.loc[2008, 1] - did_cf[2008]:.0f}",
+            fontsize=9.5, color=GOLD, fontweight="bold")
+    ax.set_xlim(2002.7, 2009.1)
+    ax.set_xticks(years)
+    ax.set_ylabel("average price, $ thousands")
+    ax.legend(frameon=False, loc="upper left", fontsize=9.5)
+    ax.set_title("Version B: DiD borrows the far houses' trend, but the near ones were already falling",
+                 loc="left", fontsize=11.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "housing-b-counterfactual.png")
+
+
 # --- Example 3: the course data, as in book chapter 11 -------------------------------
 def ai_figures():
     import sys
@@ -211,6 +360,48 @@ def ai_figures():
     cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome=Y, unit="geo", time="time",
                                                 first_treat="g")
     groups = cs.aggregate("group").to_dataframe()
+
+    # who adopted when: the grid
+    years = [2021, 2022, 2023, 2024]
+    counts = panel.groupby("cohort")["geo"].nunique()
+    fig, ax = plt.subplots(figsize=(8.6, 3.4))
+    ax.set_xlim(-2.6, 4.2); ax.set_ylim(-0.6, 4.2); ax.axis("off")
+    rows_ = [(2021, "adopted 2021"), (2022, "adopted 2022"), (2023, "adopted 2023"), (9999, "never")]
+    for j, yr in enumerate(years):
+        ax.text(j + 0.5, 3.95, str(yr), ha="center", fontsize=11, fontweight="bold")
+    for i, (c, lab) in enumerate(rows_):
+        y = 3 - i
+        ax.text(-0.15, y + 0.4, f"{lab}  ·  {counts.get(c, 0)} countr{'y' if counts.get(c, 0) == 1 else 'ies'}",
+                ha="right", va="center", fontsize=10.5, color=RED if c != 9999 else BLUE,
+                fontweight="bold")
+        for j, yr in enumerate(years):
+            treated = c != 9999 and yr >= c
+            ax.add_patch(plt.Rectangle((j + 0.05, y + 0.08), 0.9, 0.7,
+                                       fc=RED if treated else PALE_BLUE, ec=BG, lw=2))
+            ax.text(j + 0.5, y + 0.43, "treated" if treated else "before",
+                    ha="center", va="center", fontsize=9, color="white" if treated else INK)
+    ax.text(2.0, -0.4, "the outcome is only measured from 2021: the 2021 cohort has no 'before' cell",
+            ha="center", fontsize=10, color=RED)
+    save(fig, "ai-adoption.png")
+
+    # average AI use by cohort
+    means = panel.groupby(["time", "cohort"])[Y].mean().unstack()
+    fig, ax = plt.subplots(figsize=(8.6, 3.8))
+    cols = {2021: GOLD, 2022: RED, 2023: TEAL, 9999: BLUE}
+    for c in means.columns:
+        n = counts.get(c, 0)
+        lab = "never adopted" if c == 9999 else f"adopted {c}"
+        ax.plot(means.index, means[c], marker="o", lw=2.2, color=cols[c],
+                label=f"{lab} ({n})")
+        if c != 9999:
+            ax.scatter([c], [means.loc[c, c]], s=160, facecolors="none", edgecolors=cols[c], lw=2)
+    ax.set_xticks(means.index)
+    ax.set_ylabel("share of firms using AI, %")
+    ax.legend(frameon=False, fontsize=9.5, loc="lower right", bbox_to_anchor=(1.0, 0.13))
+    ax.set_title("Average AI use by cohort; the circle marks each cohort's adoption year",
+                 loc="left", fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "ai-trends.png")
 
     rows = [("two-way fixed effects, all cohorts", twfe.params[D], twfe.bse[D], GOLD),
             ("Callaway–Sant'Anna, overall", cs.overall_att, cs.overall_se, BLUE)]
@@ -256,6 +447,43 @@ def ai_figures():
     fig.tight_layout()
     save(fig, "ai-honest.png")
     return twfe.params[D], cs.overall_att, cs.overall_se, groups, list(zip(Ms, lo, hi))
+
+
+def twfe_comparisons():
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.3), sharey=True)
+    t = np.array([0, 1, 2, 3])
+    early = np.array([10, 13, 15, 17]); late = np.array([8, 9, 10, 13]); never = np.array([9, 10, 11, 12])
+    specs = [("1 · early adopter vs never: clean", (early, RED, 1), (never, BLUE, None), TEAL),
+             ("2 · late adopter vs never: clean", (late, GOLD, 3), (never, BLUE, None), TEAL),
+             ("3 · late vs early, already treated:\nTWFE uses it, and should not", (late, GOLD, 3), (early, RED, 1), RED)]
+    for ax, (title, a, b, col) in zip(axes, specs):
+        for series, c, start in (a, b):
+            ax.plot(t, series, marker="o", color=c, lw=2)
+            if start is not None:
+                ax.axvline(start - 0.5, color=c, ls=":", lw=1.2)
+        ax.set_title(title, loc="left", fontsize=10.5, fontweight="bold", color=col)
+        ax.set_xticks(t, ["2021", "2022", "2023", "2024"], fontsize=9)
+    axes[0].set_ylabel("outcome")
+    axes[2].text(2.0, 8.0, "the 'control' here is still\nchanging because of its\nown treatment",
+                 fontsize=9, color=RED, ha="center", va="bottom")
+    fig.tight_layout()
+    save(fig, "twfe-comparisons.png")
+
+
+def iv_management(firms):
+    fig, ax = plt.subplots(figsize=(8.4, 3.5))
+    bins = np.linspace(-3.5, 3.5, 30)
+    for e, col, lab in ((0, MUTED, "non-exporters"), (1, BLUE, "exporters")):
+        v = firms.loc[firms["exports"] == e, "management"]
+        ax.hist(v, bins=bins, alpha=0.6, color=col, label=f"{lab}: mean {v.mean():+.2f}")
+        ax.axvline(v.mean(), color=col, lw=2)
+    ax.set_xlabel("management quality (in the simulation only: real data never record it)")
+    ax.set_ylabel("firms")
+    ax.legend(frameon=False, loc="upper left", fontsize=10)
+    ax.set_title("Exporters are better managed, and management raises productivity on its own",
+                 loc="left", fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "iv-management.png")
 
 
 # --- Example 4: an instrument (same seed, same lines as the slide) ------------------
@@ -372,7 +600,13 @@ def iv_estimates(rA, rB):
 
 
 if __name__ == "__main__":
+    did_idea()
+    parallel_idea()
+    housing_map()
+    twfe_comparisons()
     houses = simulate_two_periods()
+    print("betas", housing_betas(houses))
+    housing_b_counterfactual()
     m, cf = housing_2x2(houses)
     print(m.round(1), "counterfactual", round(cf, 1))
     print(housing_estimators(m))
@@ -388,3 +622,4 @@ if __name__ == "__main__":
     iv_diagram()
     iv_two_stages(fA, rA)
     iv_estimates(rA, rB)
+    iv_management(fA)

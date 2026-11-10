@@ -392,6 +392,12 @@ window.Quarto = {
 \underbrace{\big(\bar Y_{\text{co,post}} - \bar Y_{\text{co,pre}}\big)}_{\text{change among the controls}} .
 \]</span></p>
 <p>The first difference removes everything time-invariant about the treated group, observed or not — its wealth, its institutions, its geography. The second estimates what would have happened anyway, and subtracting it removes any shock common to both groups.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-did-idea.png" class="img-fluid figure-img" alt="Control from 40 to 60, treated from 60 to 70, counterfactual 80; DiD −10."></p>
+<figcaption>The two differences on one picture. The treated rose by 10 and the controls by 20; had nothing happened, the treated would have risen like the controls, to the dashed line. The gap between where they ended and that line is the estimate.</figcaption>
+</figure>
+</div>
 <p>What licenses the subtraction is a single assumption, and it is worth stating in its exact form because the loose version is misleading.</p>
 <div class="definition">
 <p><span class="term"><strong>Parallel trends</strong></span> — in the absence of treatment, the average outcome of the treated group would have followed the same <em>trajectory</em> as the control group. Formally, <span class="math display">\[
@@ -399,6 +405,12 @@ window.Quarto = {
 =
 \mathrm{E}[Y_{\text{co,post}}(0) - Y_{\text{co,pre}}(0)] .
 \]</span> It is not an assumption that the groups are <em>similar</em> — they may differ by any amount in level — only that the gap between them would have stayed constant.</p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-parallel-idea.png" class="img-fluid figure-img" alt="Left: two parallel lines 25 apart. Right: the treated line rises more slowly, the gap shrinking from 25 to 13."></p>
+<figcaption>Parallel and not parallel, with no policy in either. On the left the groups are 25 apart and stay 25 apart; on the right the gap shrinks by itself, and a difference-in-differences would report the shrinkage as an effect.</figcaption>
+</figure>
 </div>
 <p>The assumption concerns <span class="math inline">\(Y(0)\)</span> for the treated group in the post period, which is precisely the counterfactual that does not exist. <strong>Parallel trends is therefore untestable</strong>, in the same way and for the same reason as chapter 10’s conditional independence. What can be examined is whether the trends were parallel <em>before</em> treatment, which is evidence about plausibility rather than a test of the assumption itself.</p>
 <p>Note also that parallel trends is not invariant to how the outcome is measured. If two groups have parallel trends in levels they generally do not in logs, and vice versa, so the choice of scale is part of the identifying assumption rather than a presentational detail.</p>
@@ -415,6 +427,12 @@ Y_{it} \thickspace=\thickspace \alpha_i + \gamma_t + \delta \thinspace D_{it} + 
 <section id="example-1-did-affordable-housing-lower-nearby-prices" class="level2" data-number="11.4">
 <h2 data-number="11.4" class="anchored" data-anchor-id="example-1-did-affordable-housing-lower-nearby-prices"><span class="header-section-number">11.4</span> Example 1 · Did affordable housing lower nearby prices?</h2>
 <p>Governments subsidise affordable-housing projects, and critics argue that they lower the value of nearby homes <span class="citation" data-cites="ellen2007">(<a href="#ref-ellen2007" role="doc-biblioref">Ellen et al. 2007</a>)</span>. Suppose a city opens several sites. A thousand houses are observed twice, before and after; half are near a site and half far from any. The data are simulated, so the truth is known: a site lowers nearby prices by $10,000. Near houses were cheaper to begin with, by about $15,000, and the whole market rose by $30,000 over the period.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-housing-map.png" class="img-fluid figure-img" alt="A schematic city with three sites, nearby houses in red and the rest in blue."></p>
+<figcaption>The design, schematically: houses within reach of a new site are treated, those beyond it are controls.</figcaption>
+</figure>
+</div>
 <div id="check-housing" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Run it: three comparisons, and the interaction regression</summary>
@@ -467,6 +485,12 @@ near:post    -10.51</code></pre>
 <figcaption>The four means and the counterfactual. Near houses start at 235.5; had the sites not opened they would have risen like the far ones, to 266.2. They reached 255.7.</figcaption>
 </figure>
 </div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-housing-betas.png" class="img-fluid figure-img" alt="The four means with β0, β1, β2 and β3 drawn on them."></p>
+<figcaption>The regression’s coefficients on the same picture: <span class="math inline">\(\beta_0\)</span> the far houses before, <span class="math inline">\(\beta_1\)</span> the gap before, <span class="math inline">\(\beta_2\)</span> the far houses’ rise, and <span class="math inline">\(\beta_3\)</span> the distance from the counterfactual — the estimate.</figcaption>
+</figure>
+</div>
 <p><strong>Example 1 in three sentences.</strong> The after-only and before-after comparisons are each biased by something the design removes. The difference of the two changes recovers the effect, and in a regression it is the interaction. Nothing about <em>why</em> near houses were cheaper had to be measured; only that, without the sites, both groups would have moved together.</p>
 </section>
 <section id="example-2-were-the-trends-parallel" class="level2" data-number="11.5">
@@ -505,6 +529,12 @@ version B: DiD 2005-&gt;2008 -20.1; event study {2003: 5.2, 2004: 2.3, 2005: 0.0
 </figure>
 </div>
 <p>In version A the years before the sites are flat and the estimate is −11. In version B the same two-period estimate is −20, double the truth, because the pre-existing slide of $3,000 a year is counted as the policy — and the event study shows it, as points that are already falling before 2006. That is what several pre-periods buy: not a test of parallel trends, which concerns the years after treatment, but evidence about its plausibility. The reference year is zero by construction; only the other pre-years are evidence.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-housing-b-counterfactual.png" class="img-fluid figure-img" alt="City B: observed prices, the counterfactual DiD assumes, and the true counterfactual; DiD −20 against a true −10."></p>
+<figcaption>Why version B’s estimate is wrong. Difference-in-differences assumes the near houses would have risen like the far ones (gold); in truth they would have kept slipping (black). The true effect is the gap to the black line; the estimate is the gap to the gold one.</figcaption>
+</figure>
+</div>
 <p><strong>Example 2 in three sentences.</strong> When the trends were parallel, the years before the policy are flat and the estimate is right. When the treated group was already on a different path, the estimate absorbs that path, and the years before show it. A flat pre-trend makes the assumption plausible; it cannot make it true.</p>
 </section>
 <section id="example-3-do-national-ai-strategies-raise-firms-ai-use" class="level2" data-number="11.6">
@@ -515,9 +545,27 @@ version B: DiD 2005-&gt;2008 -20.1; event study {2003: 5.2, 2004: 2.3, 2005: 0.0
 <p>The clean two-by-two case has one treatment date. Real policies arrive in different years for different units — which is exactly what the course fixture contains — and for two decades the profession simply put a treatment dummy into a two-way fixed effects regression and read off the coefficient.</p>
 <p>That turns out to be wrong in a way nobody noticed until recently. With staggered timing, the TWFE estimate is a <em>weighted average</em> of all the two-by-two comparisons available in the data, and some of those comparisons use already-treated units as controls for later-treated ones. When effects vary over time — when the policy’s impact grows, say — those comparisons subtract a treatment effect rather than a counterfactual trend, and the implied weights can be <strong>negative</strong> <span class="citation" data-cites="dechaisemartin2020 goodmanbacon2021">(<a href="#ref-dechaisemartin2020" role="doc-biblioref">Chaisemartin and D’Haultfœuille 2020</a>; <a href="#ref-goodmanbacon2021" role="doc-biblioref">Goodman-Bacon 2021</a>)</span>. A weighted average with negative weights can lie outside the range of the things being averaged, so the estimate can have the wrong sign while every underlying effect has the right one.</p>
 <p>The remedy is to build the average yourself: estimate each cohort’s effect against clean controls — units not yet treated, or never treated — and aggregate with weights you chose <span class="citation" data-cites="callaway2021 sun2021">(<a href="#ref-callaway2021" role="doc-biblioref">Callaway and Sant’Anna 2021</a>; <a href="#ref-sun2021" role="doc-biblioref">Sun and Abraham 2021</a>)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-twfe-comparisons.png" class="img-fluid figure-img" alt="Three schematic comparisons: two clean, one using an already-treated unit as a control."></p>
+<figcaption>Which comparisons a two-way fixed effects regression makes. The first two are clean: the comparison group has no policy. The third uses an early adopter, still adjusting to its own policy, as the control for a late one.</figcaption>
+</figure>
+</div>
 </section>
 <section id="the-data-and-what-it-will-and-will-not-support" class="level3" data-number="11.6.2">
 <h3 data-number="11.6.2" class="anchored" data-anchor-id="the-data-and-what-it-will-and-will-not-support"><span class="header-section-number">11.6.2</span> The data, and what it will and will not support</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-ai-adoption.png" class="img-fluid figure-img" alt="Grid of cohorts by year, treated cells in red, untreated in blue."></p>
+<figcaption>The adoption structure: which country-years are treated, and which are before adoption. The outcome is measured only from 2021, so the 2021 cohort has no before.</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-ai-trends.png" class="img-fluid figure-img" alt="Average AI use for each cohort from 2021 to 2024."></p>
+<figcaption>Average AI use by cohort. Adopters used AI about twice as much as never-adopters even before adopting — a difference in level, which the design allows. The circles mark adoption years.</figcaption>
+</figure>
+</div>
 <div id="check-timing" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Run it: the adoption structure</summary>
@@ -825,6 +873,12 @@ Figure&nbsp;11.1: Event study for the 2022 cohort against the never-treated. Eve
 <section id="example-4-does-exporting-raise-productivity" class="level2" data-number="11.7">
 <h2 data-number="11.7" class="anchored" data-anchor-id="example-4-does-exporting-raise-productivity"><span class="header-section-number">11.7</span> Example 4 · Does exporting raise productivity?</h2>
 <p>Exporters are more productive than non-exporters in almost every economy where the comparison has been made, and the question that follows is the one <span class="citation" data-cites="bernard1999">Bernard and Jensen (<a href="#ref-bernard1999" role="doc-biblioref">1999</a>)</span> posed: is exporting the cause of the gap, its effect, or both? Firms may learn from foreign buyers and competitors; or the better firms may be the ones that export. The selection runs through something rarely measured well — the quality of management — and in a single cross-section there is no before and after to difference. Matching cannot see the confounder and difference-in- differences has nothing to difference. A third design is needed.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/decks/session-11-01-lecture-economist-assets-iv-management.png" class="img-fluid figure-img" alt="Histograms of management quality for exporters and non-exporters."></p>
+<figcaption>Management quality by export status, visible only because the data are simulated. Exporters are about 0.8 standard deviations better managed; that gap is what the naive comparison mistakes for an effect of exporting.</figcaption>
+</figure>
+</div>
 <p>The remaining route is a variable that moves treatment from outside the system: an <strong>instrumental variable</strong> <span class="math inline">\(Z\)</span>. It identifies an effect when it satisfies three conditions <span class="citation" data-cites="angrist1996">(<a href="#ref-angrist1996" role="doc-biblioref">Angrist, Imbens, and Rubin 1996</a>)</span>.</p>
 <div class="definition">
 <p><span class="term"><strong>Relevance</strong></span> — <span class="math inline">\(Z\)</span> actually moves the treatment. This is the first stage, and it is the only one of the three conditions the data can check.</p>
