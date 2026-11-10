@@ -321,9 +321,9 @@ you hand back something she can act on without you in the room.
 
 What you hand her is a **methods paper**, written by your team of three: your group's method,
 carried from European data to a problem in francophone Africa, written so that a student working
-in R, on a modest machine, can use it. It comes with a **reproducible repository**, a **governance
+in Python, on a modest machine, can use it. It comes with a **reproducible repository**, a **governance
 section** — what the model is for, what it must not be used for, how it was validated, where it is
-weakest — and an **implementation note for R users**. You **present and defend** it in Session 12
+weakest — and an **implementation note** with a Python example that runs. You **present and defend** it in Session 12
 (4 of the 20); the finished paper is due **Sunday 13 December** (16 of the 20).
 
 > **Why the governance section carries so much weight.** Because it is where every other skill in
@@ -338,7 +338,7 @@ weakest — and an **implementation note for R users**. You **present and defend
 >
 > **Whose project it is.** The project and its intellectual property belong to the SDAfrique team.
 > You provide intelligence — analysis, method, evaluation — and you do **not** code their software:
-> they build it themselves, in R.
+> they build it themselves, in Python.
 >
 > **Why reproducibility is graded, not assumed.** A result that does not reproduce from a clean
 > clone is not a result. This is not pedantry: it is the difference between a finding and an
@@ -390,7 +390,7 @@ of the course, and 5 for honesty under pressure.
 > measure you individually, so there is nothing to correct.
 
 **The shape of the paper.** **6,000–8,000 words, including references and appendices**: a research
-question on an **international** topic, a literature review of **10 academic articles**, the
+question on an **international** topic, a literature review of **at least 5 academic articles**, the
 data, the model, the results, and references. Full brief:
 [`assessments/final-exam/`](assessments/final-exam/README.md).
 

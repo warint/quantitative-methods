@@ -46,13 +46,13 @@ OWSD-Benin, HEC Montréal, the Digital Data Design Institute at Harvard, CIRANO 
 Its pedagogy is experiential and problem-first. Students work in teams of three to five. **Each team
 identifies a societal problem in their own community and builds a project that addresses one
 dimension of it** — past cohorts have worked on speech recognition, disinformation detection and
-health service delivery. They work in R and Markdown, and present their findings as dynamic reports.
+health service delivery. They work in Python and Markdown, and present their findings as dynamic reports.
 
 **Your commission is to write a methods paper that an SDAfrique student in her second or third year
 could pick up and use.**
 
 Concretely: take the method your group spent eleven weeks mastering on European data, carry it — **as a team** — to a
-problem in Africa, and write the paper that makes the method usable by someone who works in R, on a
+problem in Africa, and write the paper that makes the method usable by someone who works in Python, on a
 modest machine, with limited bandwidth, on a problem she chose herself.
 
 **This is not a simulated client.** The papers judged strong will be offered to the SDAfrique
@@ -71,8 +71,8 @@ themselves — the literature, the method derived, an honest evaluation, an impl
 That is what the paper is. The paper is yours, written by the three of you (§8); the project it
 serves is theirs.
 
-**You do not code their software.** The SDAfrique team builds its own project, in R. Your
-repository exists to reproduce *your* analysis, and the twenty to forty lines of R in the
+**You do not code their software.** The SDAfrique team builds its own project, in Python. Your
+repository exists to reproduce *your* analysis, and the twenty to forty lines of Python in the
 implementation note exist to show the method working on a small extract. Neither is a product
 delivered to them, and neither should become one. If you find yourself writing their application,
 stop: the point is that they can build it without you.
@@ -105,8 +105,9 @@ visible:
 - **Your outcome may not be measured at all.** Several of the most important questions in African
   development economics have no direct outcome variable, only proxies — and choosing a proxy is a
   modelling decision you now have to defend.
-- **Your reader's constraints are real.** No GPU. A dataset that must be downloadable. A language,
-  R, that is not the one you wrote your code in.
+- **Your reader's constraints are real.** No GPU. A dataset that must be downloadable. A free
+  Python installation on a modest laptop, and none of the files, caches or helper functions that
+  made your own code run.
 
 None of this is an obstacle to the assignment. **All of it is the assignment.** A paper that
 reports honestly that a method fails to transfer, and diagnoses precisely why, is worth more than
@@ -117,7 +118,7 @@ European one.
 
 ## 3. Why a literature review
 
-You are asked for a literature review of **10 academic articles**. Here is the argument for it,
+You are asked for a literature review of **at least 5 academic articles**. Here is the argument for it,
 because "because papers have them" is not an argument.
 
 ### The old reason, which no longer holds
@@ -168,11 +169,11 @@ what puts you in the first category.
 You will also, in the course of it, discover that your assistant invents citations. Finding one is
 a required element of your LLM statement (§8).
 
-**10 academic articles**, of which at least eight peer-reviewed and at least four concerning the
-African context specifically. A source you cite is a source you have read.
+**At least 5 academic articles**, of which at least four peer-reviewed and at least two concerning
+the African context specifically. A source you cite is a source you have read.
 
-> Ten is the number, not a floor to exceed. Ten articles you have read and organised by argument
-> beats twenty-five you have skimmed and listed alphabetically.
+> Five is a minimum, not a target to inflate. Five articles you have read and organised by argument
+> beat twenty-five you have skimmed and listed alphabetically.
 
 ---
 
@@ -217,7 +218,7 @@ All open, all reachable from most of Africa.
 
 | Source | What it has | Access |
 |---|---|---|
-| **World Bank Open Data / WDI** | development indicators, all countries, long series | open API, `wbdata`, R `WDI` |
+| **World Bank Open Data / WDI** | development indicators, all countries, long series | open API, `wbdata` |
 | **Afrobarometer** | survey micro-data, 39 countries, francophone Africa well covered | free registration |
 | **FAOSTAT** | agriculture, food security, land use | open API |
 | **ILOSTAT** | labour force, employment, informality | open API |
@@ -251,12 +252,12 @@ All open, all reachable from most of Africa.
 |---|---|---|
 | — | **Title, author, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
 | 1 | **Introduction** | The question, why it matters, what you contribute, and — in the last paragraph — what you found. Do not withhold the finding for suspense; this is not a novel. |
-| 2 | **Literature** | 10 academic articles. Organised by argument, not by author. It must end with the gap your paper addresses. |
+| 2 | **Literature** | At least 5 academic articles. Organised by argument, not by author. It must end with the gap your paper addresses. |
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations. Include the descriptive table a referee will ask for. |
 | 4 | **Method** | **Derive it.** Not "we use elastic net (Zou and Hastie 2005)" but the objective function, what the penalty does, why the tuning parameter is chosen as it is. Assume a reader who knows regression but not your method. |
 | 5 | **Results** | Main result with uncertainty and against a named benchmark. Figures with captions that say what they *show*. |
 | 6 | **Robustness, limitations and governance** | What you tested, what moved, what did not; the paragraph naming what would change your conclusion. Then the governance content from Session 11.4, written for your SDAfrique client: what the model is for, what it must **not** be used for, how it was validated, where it is weakest, and how she should monitor it. |
-| 7 | **Implementation note for R users** | See §7. This is graded separately and heavily. |
+| 7 | **Implementation note** | See §7. This is graded separately and heavily. |
 | 8 | **Conclusion** | What an SDAfrique team should take from this, and what they should not. |
 | — | **References** | Consistent style. APA or Chicago; choose one. |
 | — | **Statements** | Authorship, acknowledgements and LLM use. See §8. |
@@ -271,28 +272,31 @@ one-command reproduction, seeds set, and the provenance file.
 **Section 7 of the paper, and 15 of the paper's 100 marks** — see the rubric in §9. This is the
 section that makes the paper a deliverable rather than an exercise.
 
-Your reader works in **R**. You worked in Python. Write the bridge.
+Your reader works in **Python**, as you did, but not with your repository, your data cache or your
+eleven weeks of habits. Write the bridge from your analysis to her project.
 
 It must contain:
 
 1. **The method restated free of implementation.** What the procedure *is*, in equations and steps,
    with no reference to any library. If your description only works if the reader has scikit-learn,
    you have not separated method from tooling.
-2. **The R route.** Which packages accomplish each step — `glmnet`, `tidymodels`, `ranger`, `caret`,
-   `factoextra`, `quanteda` as applicable — and precisely where their defaults differ from the ones
-   you used. *(A worked example: `glmnet` standardises by default and returns coefficients on the
-   original scale; scikit-learn does neither. A reader who does not know that will not reproduce
-   your numbers and will not know why.)*
+2. **The Python route.** Which packages accomplish each step — `statsmodels`, `scikit-learn`,
+   `linearmodels`, `semopy`, `diff-diff` as applicable — and precisely where their defaults differ
+   from what the method requires. *(A worked example: scikit-learn's `Lasso` does not standardise
+   the predictors, calls the penalty `alpha` where the textbook says $\lambda$, and scales it by
+   $1/(2n)$; its `LogisticRegression` takes `C`, the *inverse* of the penalty. A reader who does not know
+   that will not reproduce your numbers and will not know why.)*
 3. **The pitfalls that cost you time.** Whatever you got wrong, and how you noticed. Be specific.
    This is the most useful paragraph in the paper.
-4. **A minimal reproducible example.** Twenty to forty lines of R that run on a small extract and
-   produce one interpretable output. It must actually run — test it. It demonstrates the method; it is
-   not their software, which they build themselves (§1).
+4. **A minimal reproducible example.** Twenty to forty lines of Python that run on a small extract,
+   in a fresh environment, and produce one interpretable output. It must actually run — test it, with
+   nothing but the packages it imports. It demonstrates the method; it is not their software, which
+   they build themselves (§1).
 5. **Resource requirements.** Download size, RAM, runtime. Say it plainly.
 
 > **Why it carries 15 marks.** Because a method you can only apply inside your own environment is not
-> a method you have understood — it is a script you have. Explaining a procedure to someone using
-> different tools forces you to separate what is essential from what is incidental, and that
+> a method you have understood — it is a script you have. Explaining a procedure to someone who must
+> rebuild it from nothing forces you to separate what is essential from what is incidental, and that
 > separation *is* the understanding. It is also, incidentally, the single most valuable professional
 > skill on this list: the ability to hand your work to somebody else.
 
@@ -350,11 +354,11 @@ Out of 100, for the 16 points the paper and its repository carry.
 | Component | Weight | What earns full marks |
 |---|---|---|
 | **Question and contribution** | 10 | A specific, answerable question that matters locally, with the contribution stated plainly in the introduction |
-| **Literature review** | 15 | 10 read articles organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
+| **Literature review** | 15 | At least 5 read articles organised by argument; establishes priors on magnitudes and known data problems; ends with a genuine gap |
 | **Data and provenance** | 10 | Full provenance; missingness confronted rather than concealed; survey design respected |
 | **Method** | 20 | Derived, not cited. Assumptions stated. Choice of method defended against the obvious alternative |
 | **Results and honest evaluation** | 20 | Uncertainty reported; named benchmark; evaluation design matching the data's dependence structure; no leakage |
-| **Implementation note** | 15 | An SDAfrique student could follow it in R without contacting you. The MRE runs |
+| **Implementation note** | 15 | An SDAfrique student could follow it in Python without contacting you. The MRE runs in a fresh environment |
 | **Writing, references, statements** | 10 | Clear prose; consistent references; authorship, acknowledgements and LLM statements complete and specific |
 
 ### What earns credit that students do not expect

@@ -120,7 +120,7 @@ That is a real relationship, not a simulated one, and it carries obligations:
 
 **It is their project, and their intellectual property.** The problem, their data and the project
 they build belong to them. What your group provides is **intelligence** — analysis, method,
-evaluation — **not software**: they build their own project, in R, and you do not code it for
+evaluation — **not software**: they build their own project, in Python, and you do not code it for
 them. Details: [the team-work brief](assessments/team-work/README.md#whose-project-it-is).
 
 > **What being a client does not mean.** They are not a source of requirements you satisfy
@@ -145,7 +145,7 @@ are the whole of your work.
 
 > **This is not a simulated client.** These are real teams with real projects. Papers judged strong
 > are offered back to the SDAfrique programme. Write accordingly — and remember that your reader
-> works in R, on a modest machine, with limited bandwidth.
+> works in Python, on a modest machine, with limited bandwidth.
 
 ---
 

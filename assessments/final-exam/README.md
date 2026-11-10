@@ -132,7 +132,7 @@ single-authored.
 |---|---|---|
 | — | **Title, author, abstract** | Abstract 150–200 words: question, data, method, finding, limitation. Write it last. |
 | 1 | **Introduction** | The question, why it matters and to whom, what you contribute, and — in the last paragraph — what you found. |
-| 2 | **Literature** | **10 academic articles**, organised by argument, not by author. It must end with the gap your paper addresses. |
+| 2 | **Literature** | **At least 5 academic articles**, organised by argument, not by author. It must end with the gap your paper addresses. |
 | 3 | **Data** | Sources, construction, provenance table, missingness, limitations, and the descriptive table a referee will ask for. |
 | 4 | **Method** | **Derive it.** The model or objective function, its assumptions, how its tuning or identification is chosen, and why it and not the obvious alternative. |
 | 5 | **Results** | The main result with its uncertainty and against a named benchmark. Figures with captions that say what they *show*. |
@@ -169,7 +169,7 @@ Out of 100, for the 25 points the paper carries.
 | Component | Weight | What earns full marks |
 |---|---|---|
 | **Question and contribution** | 15 | A specific, answerable, international question; why it matters and to whom; the contribution stated plainly |
-| **Literature review** | 15 | 10 read articles organised by argument; priors on magnitudes and known data problems; ends with a genuine gap |
+| **Literature review** | 15 | At least 5 read articles organised by argument; priors on magnitudes and known data problems; ends with a genuine gap |
 | **Data and provenance** | 10 | Full provenance; missingness confronted rather than concealed; the descriptive table |
 | **Method** | 25 | One method, derived rather than cited; assumptions stated; the choice defended against the obvious alternative |
 | **Results and honest evaluation** | 20 | Uncertainty reported; a named benchmark; an evaluation design that matches the data's dependence; no leakage |
@@ -247,7 +247,7 @@ Out of 15, in three equal parts:
 | When | What |
 |---|---|
 | **By Session 9 — Wed 11 November** | **One-page proposal**: the question, why it is international, why it matters to you and to whom, the data with links, the one method. Approved before you proceed. |
-| **By Session 11 — Wed 25 November** | Literature review draft: the ten sources and the argument. Formative feedback returned. |
+| **By Session 11 — Wed 25 November** | Literature review draft: the sources (at least five) and the argument. Formative feedback returned. |
 | **Sunday 13 December 2026, 23:59** | **Final submission**: the paper as PDF, and the repository — the same deadline as the team paper. |
 | **Monday 14 December 2026** (to be confirmed) | **The oral**, 15 minutes. |
 

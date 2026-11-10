@@ -89,7 +89,7 @@ it does not license.
 ## 5. Team work — 20%
 
 **The SDAfrique methods paper**: your practice group's method, carried from European data to a
-problem in francophone Africa, written for a student in the SDAfrique programme who works in R.
+problem in francophone Africa, written for a student in the SDAfrique programme who works in Python.
 The project and its **intellectual property belong to the SDAfrique team**: you provide
 intelligence — analysis, method, evaluation — and you **do not code their software**
 ([details](team-work/README.md#whose-project-it-is)).
@@ -105,11 +105,11 @@ intelligence — analysis, method, evaluation — and you **do not code their so
 | | Weight |
 |---|---|
 | Question and contribution | 10 |
-| Literature review (10 articles, organised by argument) | 15 |
+| Literature review (at least 5 articles, organised by argument) | 15 |
 | Data and provenance | 10 |
 | Method — derived, not cited | 20 |
 | Results and honest evaluation | 20 |
-| Implementation note for R users — its example must run | 15 |
+| Implementation note — its Python example must run | 15 |
 | Writing, references and statements | 10 |
 
 - **The defence (4)** is judged on the clarity of the recommendation and on the answers of whichever
@@ -153,7 +153,7 @@ the semester, and a 15-minute oral the day after it is due.**
 | | Weight |
 |---|---|
 | Question and contribution — specific, answerable, international | 15 |
-| Literature review (10 articles, organised by argument) | 15 |
+| Literature review (at least 5 articles, organised by argument) | 15 |
 | Data and provenance | 10 |
 | Method — one method, derived, defended against the obvious alternative | 25 |
 | Results and honest evaluation | 20 |
