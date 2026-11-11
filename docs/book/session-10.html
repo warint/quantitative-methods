@@ -328,9 +328,12 @@ window.Quarto = {
   <li><a href="#the-control-that-changes-the-question" id="toc-the-control-that-changes-the-question" class="nav-link" data-scroll-target="#the-control-that-changes-the-question"><span class="header-section-number">10.8</span> The control that changes the question</a></li>
   <li><a href="#example-3-does-analytics-training-raise-performance" id="toc-example-3-does-analytics-training-raise-performance" class="nav-link" data-scroll-target="#example-3-does-analytics-training-raise-performance"><span class="header-section-number">10.9</span> Example 3 · Does analytics training raise performance?</a></li>
   <li><a href="#matching-or-regression" id="toc-matching-or-regression" class="nav-link" data-scroll-target="#matching-or-regression"><span class="header-section-number">10.10</span> Matching or regression?</a></li>
-  <li><a href="#what-none-of-this-fixes" id="toc-what-none-of-this-fixes" class="nav-link" data-scroll-target="#what-none-of-this-fixes"><span class="header-section-number">10.11</span> What none of this fixes</a></li>
-  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">10.12</span> A short review of the literature</a></li>
-  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">10.13</span> What to report</a></li>
+  <li><a href="#one-problem-two-solutions" id="toc-one-problem-two-solutions" class="nav-link" data-scroll-target="#one-problem-two-solutions"><span class="header-section-number">10.11</span> One problem, two solutions</a></li>
+  <li><a href="#doing-it-a-trial-from-the-baseline-file-to-the-estimate" id="toc-doing-it-a-trial-from-the-baseline-file-to-the-estimate" class="nav-link" data-scroll-target="#doing-it-a-trial-from-the-baseline-file-to-the-estimate"><span class="header-section-number">10.12</span> Doing it · A trial, from the baseline file to the estimate</a></li>
+  <li><a href="#doing-it-a-match-from-the-score-to-the-interval" id="toc-doing-it-a-match-from-the-score-to-the-interval" class="nav-link" data-scroll-target="#doing-it-a-match-from-the-score-to-the-interval"><span class="header-section-number">10.13</span> Doing it · A match, from the score to the interval</a></li>
+  <li><a href="#what-none-of-this-fixes" id="toc-what-none-of-this-fixes" class="nav-link" data-scroll-target="#what-none-of-this-fixes"><span class="header-section-number">10.14</span> What none of this fixes</a></li>
+  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">10.15</span> A short review of the literature</a></li>
+  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">10.16</span> What to report</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-10.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -361,6 +364,7 @@ window.Quarto = {
 <p>Every method so far has described an association and then, carefully, declined to call it an effect. Chapter 2 insisted on “associated with” rather than “causes”. Chapter 6 showed the same association taking four different values depending on which variation identified it. Chapter 9 produced two models with identical fit and opposite causal arrows.</p>
 <p>The reason for all that caution is that the question — <em>did the policy do anything?</em> — is not a question about the data you have. It is a question about data you do not have and cannot get.</p>
 <p>This chapter answers it through three examples, each adding one idea. A thousand simulated firms, where both answers are written down and a coin flip can be watched beating self-selection. A real job-training programme, run as a lottery, whose experimental answer lets matching on survey data be checked. And a simulated training scheme in which matching first works and then, with one unmeasured trait added, fails without any warning.</p>
+<p>The examples show the two solutions, a randomised trial and propensity-score matching, at work. Two later sections then carry each one out from start to finish on new data, a trial that is designed, drawn and analysed and a match that is built and checked, because knowing why a method works and knowing how to do it are different skills.</p>
 <div class="plate">
 <p><img src="images/session-10-hume.jpg" class="img-fluid" alt="David Hume** · **1711–1776."></p>
 <p><strong>David Hume</strong> · <strong>1711–1776</strong></p>
@@ -883,29 +887,392 @@ version B: naive 11.48   matched  9.05   (truth 5)
 </table>
 <p>When overlap is good and the relations are close to linear, the two agree: in version A of Example 3 a regression on the three recorded variables gives about 4.6. When overlap is poor, as with LaLonde’s survey, regression’s line carries the comparison into regions with no trainees and matching is the safer device. When the assumption itself fails, as in version B, neither helps, and both fail in the same direction.</p>
 </section>
-<section id="what-none-of-this-fixes" class="level2" data-number="10.11">
-<h2 data-number="10.11" class="anchored" data-anchor-id="what-none-of-this-fixes"><span class="header-section-number">10.11</span> What none of this fixes</h2>
-<p>Example 3 cannot be diagnosed from the data, so the honest response is to ask how wrong the assumption could be. Sensitivity analysis asks how strong an unobserved confounder would have to be — how strongly associated with both treatment and outcome — to overturn the conclusion. If the answer is “about as strong as the covariates already controlled for”, the finding is fragile. If it is “stronger than any known determinant”, it is robust. Either way the reader learns something a point estimate does not tell them.</p>
+<section id="one-problem-two-solutions" class="level2" data-number="10.11">
+<h2 data-number="10.11" class="anchored" data-anchor-id="one-problem-two-solutions"><span class="header-section-number">10.11</span> One problem, two solutions</h2>
+<p>The three examples showed one problem from three sides: the treated and the untreated differed before the treatment, so the difference in their outcomes mixes the effect with selection. There are two ways out of it, and they are different kinds of thing.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Randomised controlled trial</th>
+<th>Propensity-score matching</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>When</strong></td>
+<td>you decide who is treated, before it happens</td>
+<td>treatment has already been chosen by the units</td>
+</tr>
+<tr class="even">
+<td><strong>The idea</strong></td>
+<td>chance picks the treated, so nothing about a unit can influence the draw</td>
+<td>for each treated unit, find untreated units that were as likely to be treated</td>
+</tr>
+<tr class="odd">
+<td><strong>Why selection goes</strong></td>
+<td>the groups are alike on everything, measured or not</td>
+<td>the groups are alike on what was measured</td>
+</tr>
+<tr class="even">
+<td><strong>What is assumed</strong></td>
+<td>that the draw was respected</td>
+<td>that nothing unmeasured drives both treatment and outcome</td>
+</tr>
+<tr class="odd">
+<td><strong>What is checked</strong></td>
+<td>balance, as a check of the draw</td>
+<td>overlap, then balance, as a check of the match</td>
+</tr>
+<tr class="even">
+<td><strong>The estimate</strong></td>
+<td>a difference in means</td>
+<td>treated mean minus matched-control mean, the ATT</td>
+</tr>
+</tbody>
+</table>
+<p>A trial solves the problem <strong>by design</strong>, matching <strong>by assumption</strong>. The first is to be preferred whenever it is available; the second exists for the many questions where nobody will let you draw. The examples showed both <em>working</em>. The next two sections show both being <em>done</em>, from the first file to the reported number, on data that appear nowhere else in the chapter, because the order of the steps is most of the method and it is easier to see on a clean case.</p>
+</section>
+<section id="doing-it-a-trial-from-the-baseline-file-to-the-estimate" class="level2" data-number="10.12">
+<h2 data-number="10.12" class="anchored" data-anchor-id="doing-it-a-trial-from-the-baseline-file-to-the-estimate"><span class="header-section-number">10.12</span> Doing it · A trial, from the baseline file to the estimate</h2>
+<p>An export agency can place foreign orders with 200 of the 400 small workshops that applied for them. Does receiving export orders raise a workshop’s monthly profit? This is the design of <span class="citation" data-cites="atkin2017">Atkin, Khandelwal, and Osman (<a href="#ref-atkin2017" role="doc-biblioref">2017</a>)</span>, who had export orders offered to a randomly chosen subset of small rug producers in Egypt. The data here are simulated, so that the true effect, $150 a month, is known.</p>
+<p>A trial has six steps, and four of them happen before any outcome exists.</p>
+<p><strong>Step 1 · The baseline file.</strong> Everything known about the applicants before anyone is treated. It is used three times: to draw within sectors, to check the draw, and to make the estimate more precise.</p>
+<p><strong>Step 2 · Power.</strong> A trial too small to detect the effect it is looking for is wasted, and the sample size cannot be changed afterwards. Power is the probability of detecting an effect that is really there. It depends on the effect measured in standard deviations of the outcome, here 150 against a standard deviation of about 500, on the sample in each group, and on the significance level; fix any three and the fourth follows.</p>
+<div id="check-trial-power" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Run it: the baseline file, and whether 400 firms are enough</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.power <span class="im">import</span> TTestIndPower</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">10</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>n_firms <span class="op">=</span> <span class="dv">400</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>workshops <span class="op">=</span> pd.DataFrame({<span class="st">"firm"</span>: np.arange(<span class="dv">1</span>, n_firms <span class="op">+</span> <span class="dv">1</span>),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"sector"</span>: rng.choice([<span class="st">"rugs"</span>, <span class="st">"garments"</span>, <span class="st">"ceramics"</span>], n_firms),</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"employees"</span>: rng.integers(<span class="dv">2</span>, <span class="dv">40</span>, n_firms),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"profit_before"</span>: rng.gamma(<span class="dv">4</span>, <span class="dv">250</span>, n_firms).<span class="bu">round</span>()})   <span class="co"># dollars a month</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(workshops[<span class="st">"profit_before"</span>].describe().<span class="bu">round</span>(<span class="dv">0</span>)[[<span class="st">"mean"</span>, <span class="st">"std"</span>]].to_string())</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>power <span class="op">=</span> TTestIndPower()</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>effect_size <span class="op">=</span> <span class="dv">150</span> <span class="op">/</span> <span class="dv">500</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">firms needed per group for 80% power:  "</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>power<span class="sc">.</span>solve_power(effect_size<span class="op">=</span>effect_size, alpha<span class="op">=</span><span class="fl">0.05</span>, power<span class="op">=</span><span class="fl">0.80</span>)<span class="sc">:.0f}</span><span class="ss">"</span>)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"power with 200 per group:              "</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>power<span class="sc">.</span>solve_power(effect_size<span class="op">=</span>effect_size, nobs1<span class="op">=</span><span class="dv">200</span>, alpha<span class="op">=</span><span class="fl">0.05</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>smallest <span class="op">=</span> power.solve_power(nobs1<span class="op">=</span><span class="dv">200</span>, alpha<span class="op">=</span><span class="fl">0.05</span>, power<span class="op">=</span><span class="fl">0.80</span>)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"smallest effect 200 per group detects: </span><span class="sc">{</span>smallest<span class="sc">:.2f}</span><span class="ss"> sd = </span><span class="sc">{</span>smallest <span class="op">*</span> <span class="dv">500</span><span class="sc">:.0f}</span><span class="ss"> dollars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean    1011.0
+std      509.0
+
+firms needed per group for 80% power:  175
+power with 200 per group:              0.85
+smallest effect 200 per group detects: 0.28 sd = 140 dollars</code></pre>
+</div>
+</div>
+<p>Two hundred firms a group is enough, with a little to spare: 175 would give the conventional 80%, and 200 give 85%. The last line is the one to take to whoever funds the trial. An effect smaller than about $140 would probably go undetected, and a true effect of $75 would need some 700 firms a group.</p>
+<p><strong>Step 3 · The draw.</strong> Chance picks the treated, once, with a seed written down so that anyone can redo it. Shuffling the list and treating the first half gives two groups of exactly equal size. Doing so <em>within each sector</em>, stratifying, guarantees that every sector is split evenly, which a single shuffle achieves only on average.</p>
+<p><strong>Step 4 · The balance check.</strong> The same standardised differences as in Example 2, with a different status. After matching, balance is the only evidence the comparison is fair. After a draw it is a check that the draw was carried out as a draw: the groups are known to be comparable in expectation, on everything, and the table confirms that nothing went wrong in the field.</p>
+<div id="check-trial-draw" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Run it: draw half of each sector, then check the draw</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">2026</span>)              <span class="co"># write the seed down: anyone can redo the draw</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> half(group):                               <span class="co"># shuffle one sector, treat the first half</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rng.permutation(<span class="bu">len</span>(group)) <span class="op">&lt;</span> <span class="bu">len</span>(group) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>workshops[<span class="st">"treat"</span>] <span class="op">=</span> workshops.groupby(<span class="st">"sector"</span>)[<span class="st">"firm"</span>].transform(half).astype(<span class="bu">int</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.crosstab(workshops[<span class="st">"sector"</span>], workshops[<span class="st">"treat"</span>]))</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>base <span class="op">=</span> [<span class="st">"employees"</span>, <span class="st">"profit_before"</span>]</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>drawn, not_drawn <span class="op">=</span> workshops[workshops[<span class="st">"treat"</span>] <span class="op">==</span> <span class="dv">1</span>], workshops[workshops[<span class="st">"treat"</span>] <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>sd_w <span class="op">=</span> np.sqrt((drawn[base].var() <span class="op">+</span> not_drawn[base].var()) <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">standardised differences at baseline:"</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(((drawn[base].mean() <span class="op">-</span> not_drawn[base].mean()) <span class="op">/</span> sd_w).<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>joint <span class="op">=</span> smf.ols(<span class="st">"treat ~ employees + profit_before + C(sector)"</span>, data<span class="op">=</span>workshops).fit()</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"do the characteristics predict the draw?  p = </span><span class="sc">{</span>joint<span class="sc">.</span>f_pvalue<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>treat      0   1
+sector          
+ceramics  69  69
+garments  65  65
+rugs      66  66
+
+standardised differences at baseline:
+employees       -0.06
+profit_before    0.07
+do the characteristics predict the draw?  p = 0.92</code></pre>
+</div>
+</div>
+<p>Both differences are inside 0.1, and a regression of the draw on every baseline characteristic at once finds nothing to explain, as it should when a shuffle decided. One rule matters more than the code: <strong>one draw, saved</strong>. Redrawing until the groups “look right” is choosing the treated yourself, by another name.</p>
+<p><strong>Step 5 · The estimate.</strong> When the follow-up survey arrives, the effect is the difference in mean outcomes between the two groups. A regression of the outcome on the treatment indicator computes exactly that difference and adds its standard error and confidence interval.</p>
+<div id="check-trial-estimate" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Run it: the difference in means, then the same with baseline controls</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)                <span class="co"># stands in for the follow-up survey; true effect +150</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>workshops[<span class="st">"profit_after"</span>] <span class="op">=</span> (<span class="dv">300</span> <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> workshops[<span class="st">"profit_before"</span>] <span class="op">+</span> <span class="dv">150</span> <span class="op">*</span> workshops[<span class="st">"treat"</span>]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                             <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">300</span>, n_firms)).<span class="bu">round</span>()</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>simple <span class="op">=</span> smf.ols(<span class="st">"profit_after ~ treat"</span>, data<span class="op">=</span>workshops).fit(cov_type<span class="op">=</span><span class="st">"HC2"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>adjusted <span class="op">=</span> smf.ols(<span class="st">"profit_after ~ treat + profit_before + employees + C(sector)"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                   data<span class="op">=</span>workshops).fit(cov_type<span class="op">=</span><span class="st">"HC2"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, fit <span class="kw">in</span> [(<span class="st">"difference in means"</span>, simple), (<span class="st">"with baseline controls"</span>, adjusted)]:</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    low, high <span class="op">=</span> fit.conf_int().loc[<span class="st">"treat"</span>]</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:23s}</span><span class="ss"> </span><span class="sc">{</span>fit<span class="sc">.</span>params[<span class="st">'treat'</span>]<span class="sc">:5.0f}</span><span class="ss">   se </span><span class="sc">{</span>fit<span class="sc">.</span>bse[<span class="st">'treat'</span>]<span class="sc">:3.0f}</span><span class="ss">   "</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"95% CI [</span><span class="sc">{</span>low<span class="sc">:.0f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.0f}</span><span class="ss">]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>difference in means       167   se  51   95% CI [68, 266]
+with baseline controls    135   se  29   95% CI [78, 192]</code></pre>
+</div>
+</div>
+<p>The difference in means is $167, with an interval from 68 to 266 that contains the truth and excludes zero. Adding the baseline variables gives $135 and an interval a little more than half as wide. The controls are not there to remove bias, which the draw already did; they absorb variation in the outcome that has nothing to do with the treatment, so what is left is measured more precisely. This is the one place in the chapter where adding controls is safe by construction, provided they were measured before the draw.</p>
+<p><strong>Step 6 · Firms that refuse.</strong> In the field, some of the firms drawn will decline the orders. Suppose the stronger ones accept. Taking the orders is then a choice again, and comparing the takers with everyone else brings back precisely the selection the draw was meant to remove.</p>
+<div id="check-trial-takeup" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Run it: compare by the draw, not by who took the treatment</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ready <span class="op">=</span> workshops[<span class="st">"profit_before"</span>] <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">400</span>, n_firms) <span class="op">&gt;</span> <span class="dv">800</span>     <span class="co"># stronger firms accept</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>field <span class="op">=</span> workshops.assign(took_up<span class="op">=</span>((workshops[<span class="st">"treat"</span>] <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> ready).astype(<span class="bu">int</span>))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>field[<span class="st">"profit_after"</span>] <span class="op">=</span> (<span class="dv">300</span> <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> field[<span class="st">"profit_before"</span>] <span class="op">+</span> <span class="dv">150</span> <span class="op">*</span> field[<span class="st">"took_up"</span>]</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                         <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">300</span>, n_firms)).<span class="bu">round</span>()</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>share <span class="op">=</span> field.loc[field[<span class="st">"treat"</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">"took_up"</span>].mean()</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>offered <span class="op">=</span> smf.ols(<span class="st">"profit_after ~ treat"</span>, data<span class="op">=</span>field).fit().params[<span class="st">"treat"</span>]</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>took <span class="op">=</span> smf.ols(<span class="st">"profit_after ~ took_up"</span>, data<span class="op">=</span>field).fit().params[<span class="st">"took_up"</span>]</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"share of drawn firms that took the orders:  </span><span class="sc">{</span>share<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"by who took the orders (selection is back): </span><span class="sc">{</span>took<span class="sc">:5.0f}</span><span class="ss">"</span>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"by the draw (effect of being offered):      </span><span class="sc">{</span>offered<span class="sc">:5.0f}</span><span class="ss">"</span>)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"draw effect / share (effect of taking):     </span><span class="sc">{</span>offered <span class="op">/</span> share<span class="sc">:5.0f}</span><span class="ss">   truth 150"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>share of drawn firms that took the orders:  0.62
+by who took the orders (selection is back):   468
+by the draw (effect of being offered):        109
+draw effect / share (effect of taking):       175   truth 150</code></pre>
+</div>
+</div>
+<p>Comparing by who took the orders says $468, three times the truth. Comparing by the draw says $109: the effect of being <em>offered</em> the orders, the <strong>intention-to-treat</strong> effect, which is smaller than 150 because 38% of the firms offered them took nothing. It is an honest answer to a slightly different question, and often the one a policy-maker needs, since a programme can only offer. Dividing it by the take-up share gives $175, an estimate of the effect on the firms that took the orders. That division is an instrumental-variables estimate with the draw as the instrument <span class="citation" data-cites="angrist1996">(<a href="#ref-angrist1996" role="doc-biblioref">Angrist, Imbens, and Rubin 1996</a>)</span>, and chapter 11 returns to it.</p>
+<p><strong>The trial in three sentences.</strong> Size it before it starts, draw once with a seed, and check the draw on the baseline file. The estimate is a difference in means with an interval, made more precise, not less biased, by baseline controls. Whatever happens in the field, compare by the draw.</p>
+</section>
+<section id="doing-it-a-match-from-the-score-to-the-interval" class="level2" data-number="10.13">
+<h2 data-number="10.13" class="anchored" data-anchor-id="doing-it-a-match-from-the-score-to-the-interval"><span class="header-section-number">10.13</span> Doing it · A match, from the score to the interval</h2>
+<p>Of 4,000 manufacturing firms, some chose to obtain a quality certification (ISO 9001). Does certification raise export sales two years later? Nobody drew anything: larger, foreign-owned and already-exporting firms certify more often. The data are simulated again, so the true effect, 8 ($ thousand), is known, and so is something no real analyst knows: that only the four recorded variables drive the choice. The assumption therefore holds by construction, and what follows is about carrying the method out. Example 3 was about the assumption failing.</p>
+<div id="check-cert-data" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Run it: 4,000 firms that chose for themselves, and the naive answer</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">10</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>n_cert <span class="op">=</span> <span class="dv">4000</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>cert <span class="op">=</span> pd.DataFrame({<span class="st">"employees"</span>: rng.lognormal(<span class="fl">3.5</span>, <span class="fl">0.8</span>, n_cert).<span class="bu">round</span>() <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"age"</span>: rng.integers(<span class="dv">1</span>, <span class="dv">40</span>, n_cert),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"foreign"</span>: rng.binomial(<span class="dv">1</span>, <span class="fl">0.2</span>, n_cert),</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"exports_before"</span>: rng.gamma(<span class="dv">2</span>, <span class="dv">20</span>, n_cert).<span class="bu">round</span>()})</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>choice <span class="op">=</span> (<span class="op">-</span><span class="dv">14</span> <span class="op">+</span> <span class="dv">3</span> <span class="op">*</span> np.log(cert[<span class="st">"employees"</span>]) <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> cert[<span class="st">"foreign"</span>]</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>          <span class="op">+</span> <span class="fl">0.02</span> <span class="op">*</span> cert[<span class="st">"exports_before"</span>])</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>cert[<span class="st">"certified"</span>] <span class="op">=</span> (rng.uniform(size<span class="op">=</span>n_cert) <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>choice))).astype(<span class="bu">int</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>cert[<span class="st">"exports_after"</span>] <span class="op">=</span> (<span class="dv">5</span> <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> cert[<span class="st">"exports_before"</span>] <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> np.log(cert[<span class="st">"employees"</span>])</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>                         <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> cert[<span class="st">"foreign"</span>] <span class="op">+</span> <span class="dv">8</span> <span class="op">*</span> cert[<span class="st">"certified"</span>]</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>                         <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">8</span>, n_cert)).<span class="bu">round</span>()</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cert.groupby(<span class="st">"certified"</span>)[[<span class="st">"employees"</span>, <span class="st">"foreign"</span>, <span class="st">"exports_before"</span>, <span class="st">"exports_after"</span>]]</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>      .mean().<span class="bu">round</span>(<span class="dv">1</span>).to_string())</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">certified firms: </span><span class="sc">{</span>cert[<span class="st">'certified'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">   "</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"naive difference: </span><span class="sc">{</span>cert<span class="sc">.</span>groupby(<span class="st">'certified'</span>)[<span class="st">'exports_after'</span>]<span class="sc">.</span>mean()<span class="sc">.</span>diff()<span class="sc">.</span>iloc[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           employees  foreign  exports_before  exports_after
+certified                                                   
+0               33.1      0.2            38.3           42.3
+1               92.1      0.3            47.7           60.6
+
+certified firms: 827   naive difference: 18.3</code></pre>
+</div>
+</div>
+<p>The naive answer is 18.3, more than twice the truth, and the other columns say why: the certified firms were nearly three times as large, more often foreign-owned, and exported more before certifying.</p>
+<p><strong>Step 1 · The list.</strong> Which pre-treatment variables drive the choice? The list <em>is</em> the identifying assumption, written down. It is made on paper, from knowledge of how firms decide, and every variable on it must have been fixed before certification.</p>
+<p><strong>Steps 2 and 3 · The score, and overlap.</strong> A logit of the treatment on the list gives each firm its probability of certifying. The first thing to do with it is to look at where the two groups’ scores lie.</p>
+<div id="cell-fig-cert-overlap" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Run it: estimate the score and look at overlap</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>SCORE <span class="op">=</span> <span class="st">"certified ~ np.log(employees) + age + foreign + exports_before"</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>cert[<span class="st">"pscore"</span>] <span class="op">=</span> smf.logit(SCORE, data<span class="op">=</span>cert).fit(disp<span class="op">=</span><span class="dv">0</span>).predict(cert)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>cert[<span class="st">"logit"</span>] <span class="op">=</span> np.log(cert[<span class="st">"pscore"</span>] <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> cert[<span class="st">"pscore"</span>]))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>got, not_got <span class="op">=</span> cert[cert[<span class="st">"certified"</span>] <span class="op">==</span> <span class="dv">1</span>], cert[cert[<span class="st">"certified"</span>] <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">26</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.4</span>))</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>plt.hist(not_got[<span class="st">"pscore"</span>], bins<span class="op">=</span>bins, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"not certified"</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>plt.hist(got[<span class="st">"pscore"</span>], bins<span class="op">=</span>bins, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"certified"</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>plt.yscale(<span class="st">"log"</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"propensity score"</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"highest score among uncertified firms: </span><span class="sc">{</span>not_got[<span class="st">'pscore'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"certified firms above it: </span><span class="sc">{</span>(got[<span class="st">'pscore'</span>] <span class="op">&gt;</span> not_got[<span class="st">'pscore'</span>].<span class="bu">max</span>())<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-cert-overlap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cert-overlap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="session-10_files/figure-html/fig-cert-overlap-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cert-overlap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.3: The propensity score among certified and uncertified firms, on a logarithmic scale. The two overlap over almost the whole range. At the far right there are certified firms and almost no uncertified ones: very large firms nearly all certify, so there is nobody to compare them with.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>highest score among uncertified firms: 0.976
+certified firms above it: 30</code></pre>
+</div>
+</div>
+<p><strong>Step 4 · The match, within a caliper.</strong> Each certified firm is given the uncertified firm with the closest score. Left at that, every treated firm gets a match, however far away it is. A <strong>caliper</strong> sets a limit on “close”: a common choice is a fifth of a standard deviation of the logit of the score, the logit being used because it spreads out the scores near 0 and 1. A treated firm with no control inside the caliper is set aside rather than badly matched.</p>
+<div id="check-cert-match" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Run it: nearest neighbour within a caliper</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> NearestNeighbors(n_neighbors<span class="op">=</span><span class="dv">1</span>).fit(not_got[[<span class="st">"logit"</span>]])</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>distance, index <span class="op">=</span> nn.kneighbors(got[[<span class="st">"logit"</span>]])</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>keep <span class="op">=</span> distance.ravel() <span class="op">&lt;=</span> <span class="fl">0.2</span> <span class="op">*</span> cert[<span class="st">"logit"</span>].std()</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>kept, partners <span class="op">=</span> got[keep], not_got.iloc[index.ravel()[keep]]</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"certified firms: </span><span class="sc">{</span><span class="bu">len</span>(got)<span class="sc">}</span><span class="ss">   matched: </span><span class="sc">{</span>keep<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">   set aside: </span><span class="sc">{</span>(<span class="op">~</span>keep)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"different controls used: </span><span class="sc">{</span>partners<span class="sc">.</span>index<span class="sc">.</span>nunique()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"employees, matched firms: </span><span class="sc">{</span>kept[<span class="st">'employees'</span>]<span class="sc">.</span>mean()<span class="sc">:.0f}</span><span class="ss">   "</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"set-aside firms: </span><span class="sc">{</span>got[<span class="op">~</span>keep][<span class="st">'employees'</span>]<span class="sc">.</span>mean()<span class="sc">:.0f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>certified firms: 827   matched: 810   set aside: 17
+different controls used: 387
+employees, matched firms: 87   set-aside firms: 313</code></pre>
+</div>
+</div>
+<p>Seventeen firms are set aside, and they are not a random seventeen: they average 313 employees against 87 for the rest. Setting them aside changes what is estimated, and that has to be said. The estimate is now the effect of certification on certified firms <em>that have a comparable uncertified firm</em>, which here means all but the very largest. Nothing in these data can say what certification did for those.</p>
+<p><strong>Step 5 · Balance, before the outcome.</strong></p>
+<div id="cell-fig-cert-balance" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Run it: balance before matching, without the caliper, and within it</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"employees"</span>, <span class="st">"age"</span>, <span class="st">"foreign"</span>, <span class="st">"exports_before"</span>]</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>sd_c <span class="op">=</span> np.sqrt((got[cols].var() <span class="op">+</span> not_got[cols].var()) <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>balance <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"before"</span>: (got[cols].mean() <span class="op">-</span> not_got[cols].mean()) <span class="op">/</span> sd_c,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"no caliper"</span>: (got[cols].mean() <span class="op">-</span> not_got.iloc[index.ravel()][cols].mean()) <span class="op">/</span> sd_c,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"caliper"</span>: (kept[cols].mean() <span class="op">-</span> partners[cols].mean()) <span class="op">/</span> sd_c})</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(balance.<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.2</span>))</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>plt.scatter(balance[<span class="st">"before"</span>], cols, label<span class="op">=</span><span class="st">"before"</span>)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(balance[<span class="st">"caliper"</span>], cols, label<span class="op">=</span><span class="st">"matched, caliper"</span>)</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="op">-</span><span class="fl">0.1</span>, color<span class="op">=</span><span class="st">"grey"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">0.1</span>, color<span class="op">=</span><span class="st">"grey"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"standardised difference"</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                before  no caliper  caliper
+employees         1.27        0.12     0.03
+age              -0.00       -0.08    -0.09
+foreign           0.27       -0.09    -0.06
+exports_before    0.32       -0.02     0.03</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-cert-balance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cert-balance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="session-10_files/figure-html/fig-cert-balance-output-2.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cert-balance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.4: Standardised differences before matching (blue) and after matching within the caliper (orange). The dashed lines mark ±0.1. Firm size starts 1.27 standard deviations apart and ends at 0.03.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Without the caliper, firm size is still out by 0.12, because the largest certified firms were matched to much smaller ones. Within it, every difference is inside 0.1. Had one stayed outside, the response would be the one from Example 2: change the score, with a square, a logarithm or an interaction, or tighten the caliper, and check again. The outcome column has not been touched yet, and that is the discipline that makes the next number worth reading.</p>
+<p><strong>Step 6 · The ATT, and how sure you are.</strong> The estimate is the mean outcome of the matched certified firms minus that of their partners. For its uncertainty, the whole procedure is wrapped in a function, so that it can be rerun from the score onwards on each of 200 resampled data sets.</p>
+<div id="check-cert-att" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Run it: the ATT, a bootstrap of the whole procedure, and other choices</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> att(data, neighbours<span class="op">=</span><span class="dv">1</span>, caliper<span class="op">=</span><span class="fl">0.2</span>):</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> smf.logit(SCORE, data<span class="op">=</span>data).fit(disp<span class="op">=</span><span class="dv">0</span>).predict(data)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data.assign(logit<span class="op">=</span>np.log(p <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p)))</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    t, c <span class="op">=</span> data[data[<span class="st">"certified"</span>] <span class="op">==</span> <span class="dv">1</span>], data[data[<span class="st">"certified"</span>] <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    d, i <span class="op">=</span> NearestNeighbors(n_neighbors<span class="op">=</span>neighbours).fit(c[[<span class="st">"logit"</span>]]).kneighbors(t[[<span class="st">"logit"</span>]])</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    ok <span class="op">=</span> d[:, <span class="dv">0</span>] <span class="op">&lt;=</span> caliper <span class="op">*</span> data[<span class="st">"logit"</span>].std()</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t[ok][<span class="st">"exports_after"</span>].mean() <span class="op">-</span> c.iloc[i[ok].ravel()][<span class="st">"exports_after"</span>].mean()</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>draws <span class="op">=</span> [att(cert.sample(<span class="bu">len</span>(cert), replace<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>b)) <span class="cf">for</span> b <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>)]</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>low, high <span class="op">=</span> np.percentile(draws, [<span class="fl">2.5</span>, <span class="fl">97.5</span>])</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"ATT (matching):    </span><span class="sc">{</span>att(cert)<span class="sc">:5.1f}</span><span class="ss">   truth 8"</span>)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bootstrap 95% CI:  [</span><span class="sc">{</span>low<span class="sc">:.1f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.1f}</span><span class="ss">]   se </span><span class="sc">{</span>np<span class="sc">.</span>std(draws)<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>ols <span class="op">=</span> smf.ols(<span class="st">"exports_after ~ certified + np.log(employees) + age + foreign + exports_before"</span>,</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>              data<span class="op">=</span>cert).fit()</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">1 neighbour, caliper 0.1:   </span><span class="sc">{</span>att(cert, caliper<span class="op">=</span><span class="fl">0.1</span>)<span class="sc">:5.1f}</span><span class="ss">"</span>)</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"1 neighbour, no caliper:    </span><span class="sc">{</span>att(cert, caliper<span class="op">=</span>np.inf)<span class="sc">:5.1f}</span><span class="ss">"</span>)</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"5 neighbours, caliper 0.2:  </span><span class="sc">{</span>att(cert, neighbours<span class="op">=</span><span class="dv">5</span>)<span class="sc">:5.1f}</span><span class="ss">"</span>)</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"regression, same variables: </span><span class="sc">{</span>ols<span class="sc">.</span>params[<span class="st">'certified'</span>]<span class="sc">:5.1f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ATT (matching):      7.7   truth 8
+bootstrap 95% CI:  [5.2, 11.3]   se 1.7
+
+1 neighbour, caliper 0.1:     8.2
+1 neighbour, no caliper:      7.0
+5 neighbours, caliper 0.2:    8.8
+regression, same variables:   8.0</code></pre>
+</div>
+</div>
+<p>Matching says 7.7 against a truth of 8 and a naive 18.3. Unlike the bootstrap in Example 2, this one re-estimates the score inside every replication, which is what the function is for. The interval, 5.2 to 11.3, is wide for 810 matched firms: one nearest neighbour, drawn with replacement from 387 distinct controls, is a noisy device. It should be reported as approximate, since the bootstrap is known to be imperfect for nearest-neighbour matching, and as a guide to precision it is far better than the standard error of a regression run on the matched sample.</p>
+<p><strong>Step 7 · Other reasonable choices.</strong> The last four lines redo the estimate under choices another analyst could defend equally well: a tighter caliper, none, five neighbours, and a regression on the same variables. They range from 7.0 to 8.8, all inside the interval. That is what a result which does not hang on one decision looks like, and the table belongs in the report beside the main estimate. It is not a test of the assumption. A characteristic of the firms that was never recorded would move every line together, exactly as motivation did in Example 3, and no line would show it.</p>
+<p><strong>The match in three sentences.</strong> Write down the list of pre-treatment variables, estimate the score, and look at overlap before anything else. Match within a caliper, say who was set aside, and settle balance before the outcome is read. Report the ATT with an interval from a bootstrap of the whole procedure, and beside it the estimates under other defensible choices.</p>
+</section>
+<section id="what-none-of-this-fixes" class="level2" data-number="10.14">
+<h2 data-number="10.14" class="anchored" data-anchor-id="what-none-of-this-fixes"><span class="header-section-number">10.14</span> What none of this fixes</h2>
+<p>The failure in Example 3 cannot be diagnosed from the data, so the honest response is to ask how wrong the assumption could be. Sensitivity analysis asks how strong an unobserved confounder would have to be — how strongly associated with both treatment and outcome — to overturn the conclusion. If the answer is “about as strong as the covariates already controlled for”, the finding is fragile. If it is “stronger than any known determinant”, it is robust. Either way the reader learns something a point estimate does not tell them.</p>
 <p>One caution about the method itself. Propensity-score matching is the most popular approach here and not the best one: matching on a scalar score discards information and can <em>increase</em> imbalance as the caliper tightens, a pathology documented at length by <span class="citation" data-cites="king2019">King and Nielsen (<a href="#ref-king2019" role="doc-biblioref">2019</a>)</span>. Matching directly on the covariates, or weighting rather than matching, generally does better. The score remains a good diagnostic for overlap even where it is a poor matching device.</p>
 <p>Chapter 11 takes the other route: rather than assuming the confounders are all observed, it uses the structure of <em>when</em> treatment arrived to difference the unobserved ones away.</p>
 </section>
-<section id="a-short-review-of-the-literature" class="level2" data-number="10.12">
-<h2 data-number="10.12" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">10.12</span> A short review of the literature</h2>
+<section id="a-short-review-of-the-literature" class="level2" data-number="10.15">
+<h2 data-number="10.15" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">10.15</span> A short review of the literature</h2>
 <div class="lit">
 <p>The potential-outcomes notation is <span class="citation" data-cites="rubin1974">Rubin (<a href="#ref-rubin1974" role="doc-biblioref">1974</a>)</span>, though the idea traces to Neyman’s 1923 work on agricultural experiments. <span class="citation" data-cites="holland1986">Holland (<a href="#ref-holland1986" role="doc-biblioref">1986</a>)</span> named the fundamental problem and drew the boundary the discipline still uses — “no causation without manipulation” — which remains contested and clarifying.</p>
+<p><span class="citation" data-cites="atkin2017">Atkin, Khandelwal, and Osman (<a href="#ref-atkin2017" role="doc-biblioref">2017</a>)</span> is the trial this chapter’s worked example imitates: export orders offered to a randomly chosen subset of small rug producers, so that the effect of exporting on the firm can be read from a difference in means. When some of those drawn do not take the treatment, the draw can serve as an instrument for it, and <span class="citation" data-cites="angrist1996">Angrist, Imbens, and Rubin (<a href="#ref-angrist1996" role="doc-biblioref">1996</a>)</span> is the paper that says what that estimates.</p>
 <p>LaLonde’s 1986 comparison of experimental and non-experimental estimates of a job-training programme is the benchmark the matching literature is still judged against; <span class="citation" data-cites="dehejia1999">Dehejia and Wahba (<a href="#ref-dehejia1999" role="doc-biblioref">1999</a>)</span> showed propensity-score matching recovering the experimental answer, and <span class="citation" data-cites="smith2005">A. Smith and E. Todd (<a href="#ref-smith2005" role="doc-biblioref">2005</a>)</span> showed how much that depends on the sample and the specification.</p>
 <p><span class="citation" data-cites="rosenbaum1983">Rosenbaum and Rubin (<a href="#ref-rosenbaum1983" role="doc-biblioref">1983</a>)</span> proved the result that made observational adjustment tractable: if treatment is unconfounded given a covariate vector, it is unconfounded given the scalar propensity score alone, so a many-dimensional matching problem collapses to one dimension. <span class="citation" data-cites="imbens2004">Imbens (<a href="#ref-imbens2004" role="doc-biblioref">2004</a>)</span> surveys the estimators that followed and <span class="citation" data-cites="stuart2010">Stuart (<a href="#ref-stuart2010" role="doc-biblioref">2010</a>)</span> is the practical review, covering matching, weighting and the diagnostics that should accompany them.</p>
 <p>The corrective literature is as important as the constructive one. <span class="citation" data-cites="king2019">King and Nielsen (<a href="#ref-king2019" role="doc-biblioref">2019</a>)</span> argues that propensity-score matching specifically — as opposed to matching in general — often increases imbalance and should be replaced by methods that match on covariates directly. <span class="citation" data-cites="elwert2014">Elwert and Winship (<a href="#ref-elwert2014" role="doc-biblioref">2014</a>)</span> sets out endogenous selection bias, the family of errors created by conditioning on colliders, and <span class="citation" data-cites="cinelli2022">Cinelli, Forney, and Pearl (<a href="#ref-cinelli2022" role="doc-biblioref">2022</a>)</span> gives the compact treatment of which controls help and which do damage.</p>
 </div>
 </section>
-<section id="what-to-report" class="level2" data-number="10.13">
-<h2 data-number="10.13" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">10.13</span> What to report</h2>
+<section id="what-to-report" class="level2" data-number="10.16">
+<h2 data-number="10.16" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">10.16</span> What to report</h2>
+<p><strong>For a trial</strong></p>
 <ol type="1">
-<li><strong>The estimand, named.</strong> ATE or ATT — they answer different questions and matching usually estimates the second.</li>
+<li><strong>How the draw was made.</strong> The unit, the strata, the seed, and that it was made once.</li>
+<li><strong>The sample size and the power</strong> it gave for the effect that was expected, computed before the trial.</li>
+<li><strong>Balance at baseline</strong>, as standardised differences.</li>
+<li><strong>The difference in means with its confidence interval</strong>, and the estimate with baseline controls beside it.</li>
+<li><strong>Who dropped out or refused</strong>, and that the comparison is by the draw.</li>
+</ol>
+<p><strong>For a match</strong></p>
+<ol type="1">
+<li><strong>The estimand, named.</strong> ATE or ATT — they answer different questions and matching usually estimates the second. If a caliper set units aside, say which treated units the estimate now describes.</li>
 <li><strong>The identifying assumption, in words.</strong> Which variables are claimed to close every path from treatment to outcome, and why that list is complete. This is an argument, not a table.</li>
 <li><strong>Balance before and after</strong>, for every covariate, with standardised differences — a love plot. Not the propensity model’s coefficients or its fit. And say that the score was settled before the outcome was looked at.</li>
-<li><strong>Overlap</strong>, with the range of the score in both groups, and what you did about units outside common support.</li>
+<li><strong>Overlap</strong>, with the range of the score in both groups, and how many units were outside common support or set aside by the caliper.</li>
 <li><strong>The naive estimate alongside the adjusted one.</strong> The distance between them is the size of the selection problem, and hiding it hides the reason for the analysis.</li>
+<li><strong>The ATT with an interval</strong>, from a bootstrap of the whole procedure, and the estimates under other defensible choices beside it.</li>
 <li><strong>A sensitivity analysis.</strong> How strong an unobserved confounder would need to be to overturn the result.</li>
 <li><strong>That every control is pre-treatment</strong>, and that you know it. If a covariate is measured after treatment, say why it is not a mediator or a collider — and if you cannot, drop it, even when it improves the number.</li>
 </ol>
@@ -914,6 +1281,12 @@ version B: naive 11.48   matched  9.05   (truth 5)
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-smith2005" class="csl-entry" role="listitem">
 A. Smith, Jeffrey, and Petra E. Todd. 2005. <span>“<span>Does</span> Matching Overcome <span>LaLonde</span>’s Critique of Nonexperimental Estimators?”</span> <em><span>Journal</span> of <span>Econometrics</span></em> 125 (1-2): 305–53. <a href="https://doi.org/10.1016/j.jeconom.2004.04.011">https://doi.org/10.1016/j.jeconom.2004.04.011</a>.
+</div>
+<div id="ref-angrist1996" class="csl-entry" role="listitem">
+Angrist, Joshua D., Guido W. Imbens, and Donald B. Rubin. 1996. <span>“<span>Identification</span> of <span>Causal</span> <span>Effects</span> <span>Using</span> <span>Instrumental</span> <span>Variables</span>.”</span> <em><span>Journal</span> of the <span>American</span> <span>Statistical</span> <span>Association</span></em> 91 (434): 444–55. <a href="https://doi.org/10.1080/01621459.1996.10476902">https://doi.org/10.1080/01621459.1996.10476902</a>.
+</div>
+<div id="ref-atkin2017" class="csl-entry" role="listitem">
+Atkin, David, Amit K. Khandelwal, and Adam Osman. 2017. <span>“<span>Exporting</span> and <span>Firm</span> <span>Performance</span>: <span>Evidence</span> from a <span>Randomized</span> <span>Experiment</span>*.”</span> <em><span>The</span> <span>Quarterly</span> <span>Journal</span> of <span>Economics</span></em> 132 (2): 551–615. <a href="https://doi.org/10.1093/qje/qjx002">https://doi.org/10.1093/qje/qjx002</a>.
 </div>
 <div id="ref-cinelli2022" class="csl-entry" role="listitem">
 Cinelli, Carlos, Andrew Forney, and Judea Pearl. 2022. <span>“A <span>Crash</span> <span>Course</span> in <span>Good</span> and <span>Bad</span> <span>Controls</span>.”</span> <em><span>Sociological</span> <span>Methods</span> &amp; <span>Research</span></em> 53 (3): 1071–1104. <a href="https://doi.org/10.1177/00491241221099552">https://doi.org/10.1177/00491241221099552</a>.

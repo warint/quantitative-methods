@@ -22,6 +22,12 @@ lottery, whose experimental answer lets matching on survey data be checked. And
 a simulated training scheme in which matching first works and then, with one
 unmeasured trait added, fails without any warning.
 
+The examples show the two solutions, a randomised trial and propensity-score
+matching, at work. Two later sections then carry each one out from start to
+finish on new data, a trial that is designed, drawn and analysed and a match
+that is built and checked, because knowing why a method works and knowing how
+to do it are different skills.
+
 {{portrait}}
 
 ::: {.archive}
@@ -572,10 +578,380 @@ the comparison into regions with no trainees and matching is the safer device.
 When the assumption itself fails, as in version B, neither helps, and both fail
 in the same direction.
 
+## One problem, two solutions
+
+The three examples showed one problem from three sides: the treated and the
+untreated differed before the treatment, so the difference in their outcomes
+mixes the effect with selection. There are two ways out of it, and they are
+different kinds of thing.
+
+| | Randomised controlled trial | Propensity-score matching |
+|---|---|---|
+| **When** | you decide who is treated, before it happens | treatment has already been chosen by the units |
+| **The idea** | chance picks the treated, so nothing about a unit can influence the draw | for each treated unit, find untreated units that were as likely to be treated |
+| **Why selection goes** | the groups are alike on everything, measured or not | the groups are alike on what was measured |
+| **What is assumed** | that the draw was respected | that nothing unmeasured drives both treatment and outcome |
+| **What is checked** | balance, as a check of the draw | overlap, then balance, as a check of the match |
+| **The estimate** | a difference in means | treated mean minus matched-control mean, the ATT |
+
+A trial solves the problem **by design**, matching **by assumption**. The first
+is to be preferred whenever it is available; the second exists for the many
+questions where nobody will let you draw. The examples showed both *working*.
+The next two sections show both being *done*, from the first file to the
+reported number, on data that appear nowhere else in the chapter, because the
+order of the steps is most of the method and it is easier to see on a clean
+case.
+
+## Doing it · A trial, from the baseline file to the estimate
+
+An export agency can place foreign orders with 200 of the 400 small workshops
+that applied for them. Does receiving export orders raise a workshop's monthly
+profit? This is the design of @atkin2017, who had export orders offered to a randomly
+chosen subset of small rug producers in Egypt. The data here are simulated, so
+that the true effect, \$150 a month, is known.
+
+A trial has six steps, and four of them happen before any outcome exists.
+
+**Step 1 · The baseline file.** Everything known about the applicants before
+anyone is treated. It is used three times: to draw within sectors, to check the
+draw, and to make the estimate more precise.
+
+**Step 2 · Power.** A trial too small to detect the effect it is looking for is
+wasted, and the sample size cannot be changed afterwards. Power is the
+probability of detecting an effect that is really there. It depends on the
+effect measured in standard deviations of the outcome, here 150 against a
+standard deviation of about 500, on the sample in each group, and on the
+significance level; fix any three and the fourth follows.
+
+```{python}
+#| label: check-trial-power
+#| code-summary: "Run it: the baseline file, and whether 400 firms are enough"
+
+from statsmodels.stats.power import TTestIndPower
+
+rng = np.random.default_rng(10)
+n_firms = 400
+workshops = pd.DataFrame({"firm": np.arange(1, n_firms + 1),
+                          "sector": rng.choice(["rugs", "garments", "ceramics"], n_firms),
+                          "employees": rng.integers(2, 40, n_firms),
+                          "profit_before": rng.gamma(4, 250, n_firms).round()})   # dollars a month
+print(workshops["profit_before"].describe().round(0)[["mean", "std"]].to_string())
+
+power = TTestIndPower()
+effect_size = 150 / 500
+print(f"\nfirms needed per group for 80% power:  "
+      f"{power.solve_power(effect_size=effect_size, alpha=0.05, power=0.80):.0f}")
+print(f"power with 200 per group:              "
+      f"{power.solve_power(effect_size=effect_size, nobs1=200, alpha=0.05):.2f}")
+smallest = power.solve_power(nobs1=200, alpha=0.05, power=0.80)
+print(f"smallest effect 200 per group detects: {smallest:.2f} sd = {smallest * 500:.0f} dollars")
+```
+
+Two hundred firms a group is enough, with a little to spare: 175 would give the
+conventional 80%, and 200 give 85%. The last line is the one to take to whoever
+funds the trial. An effect smaller than about \$140 would probably go
+undetected, and a true effect of \$75 would need some 700 firms a group.
+
+**Step 3 · The draw.** Chance picks the treated, once, with a seed written
+down so that anyone can redo it. Shuffling the list and treating the first half
+gives two groups of exactly equal size. Doing so *within each sector*,
+stratifying, guarantees that every sector is split evenly, which a single
+shuffle achieves only on average.
+
+**Step 4 · The balance check.** The same standardised differences as in
+Example 2, with a different status. After matching, balance is the only evidence
+the comparison is fair. After a draw it is a check that the draw was carried out
+as a draw: the groups are known to be comparable in expectation, on everything,
+and the table confirms that nothing went wrong in the field.
+
+```{python}
+#| label: check-trial-draw
+#| code-summary: "Run it: draw half of each sector, then check the draw"
+
+rng = np.random.default_rng(2026)              # write the seed down: anyone can redo the draw
+
+
+def half(group):                               # shuffle one sector, treat the first half
+    return rng.permutation(len(group)) < len(group) // 2
+
+
+workshops["treat"] = workshops.groupby("sector")["firm"].transform(half).astype(int)
+print(pd.crosstab(workshops["sector"], workshops["treat"]))
+
+base = ["employees", "profit_before"]
+drawn, not_drawn = workshops[workshops["treat"] == 1], workshops[workshops["treat"] == 0]
+sd_w = np.sqrt((drawn[base].var() + not_drawn[base].var()) / 2)
+print("\nstandardised differences at baseline:")
+print(((drawn[base].mean() - not_drawn[base].mean()) / sd_w).round(2).to_string())
+
+joint = smf.ols("treat ~ employees + profit_before + C(sector)", data=workshops).fit()
+print(f"do the characteristics predict the draw?  p = {joint.f_pvalue:.2f}")
+```
+
+Both differences are inside 0.1, and a regression of the draw on every baseline
+characteristic at once finds nothing to explain, as it should when a shuffle
+decided. One rule matters more than the code: **one draw, saved**. Redrawing
+until the groups "look right" is choosing the treated yourself, by another name.
+
+**Step 5 · The estimate.** When the follow-up survey arrives, the effect is the
+difference in mean outcomes between the two groups. A regression of the outcome
+on the treatment indicator computes exactly that difference and adds its
+standard error and confidence interval.
+
+```{python}
+#| label: check-trial-estimate
+#| code-summary: "Run it: the difference in means, then the same with baseline controls"
+
+rng = np.random.default_rng(11)                # stands in for the follow-up survey; true effect +150
+workshops["profit_after"] = (300 + 0.8 * workshops["profit_before"] + 150 * workshops["treat"]
+                             + rng.normal(0, 300, n_firms)).round()
+
+simple = smf.ols("profit_after ~ treat", data=workshops).fit(cov_type="HC2")
+adjusted = smf.ols("profit_after ~ treat + profit_before + employees + C(sector)",
+                   data=workshops).fit(cov_type="HC2")
+for name, fit in [("difference in means", simple), ("with baseline controls", adjusted)]:
+    low, high = fit.conf_int().loc["treat"]
+    print(f"{name:23s} {fit.params['treat']:5.0f}   se {fit.bse['treat']:3.0f}   "
+          f"95% CI [{low:.0f}, {high:.0f}]")
+```
+
+The difference in means is \$167, with an interval from 68 to 266 that contains
+the truth and excludes zero. Adding the baseline variables gives \$135 and an
+interval a little more than half as wide. The controls are not there to remove
+bias, which the draw already did; they absorb variation in the outcome that has
+nothing to do with the treatment, so what is left is measured more precisely.
+This is the one place in the chapter where adding controls is safe by
+construction, provided they were measured before the draw.
+
+**Step 6 · Firms that refuse.** In the field, some of the firms drawn will
+decline the orders. Suppose the stronger ones accept. Taking the orders is then
+a choice again, and comparing the takers with everyone else brings back
+precisely the selection the draw was meant to remove.
+
+```{python}
+#| label: check-trial-takeup
+#| code-summary: "Run it: compare by the draw, not by who took the treatment"
+
+rng = np.random.default_rng(11)
+ready = workshops["profit_before"] + rng.normal(0, 400, n_firms) > 800     # stronger firms accept
+field = workshops.assign(took_up=((workshops["treat"] == 1) & ready).astype(int))
+field["profit_after"] = (300 + 0.8 * field["profit_before"] + 150 * field["took_up"]
+                         + rng.normal(0, 300, n_firms)).round()
+
+share = field.loc[field["treat"] == 1, "took_up"].mean()
+offered = smf.ols("profit_after ~ treat", data=field).fit().params["treat"]
+took = smf.ols("profit_after ~ took_up", data=field).fit().params["took_up"]
+print(f"share of drawn firms that took the orders:  {share:.2f}")
+print(f"by who took the orders (selection is back): {took:5.0f}")
+print(f"by the draw (effect of being offered):      {offered:5.0f}")
+print(f"draw effect / share (effect of taking):     {offered / share:5.0f}   truth 150")
+```
+
+Comparing by who took the orders says \$468, three times the truth. Comparing
+by the draw says \$109: the effect of being *offered* the orders, the
+**intention-to-treat** effect, which is smaller than 150 because 38% of the
+firms offered them took nothing. It is an honest answer to a slightly different
+question, and often the one a policy-maker needs, since a programme can only
+offer. Dividing it by the take-up share gives \$175, an estimate of the effect
+on the firms that took the orders. That division is an instrumental-variables
+estimate with the draw as the instrument [@angrist1996], and chapter 11 returns
+to it.
+
+**The trial in three sentences.** Size it before it starts, draw once with a
+seed, and check the draw on the baseline file. The estimate is a difference in
+means with an interval, made more precise, not less biased, by baseline
+controls. Whatever happens in the field, compare by the draw.
+
+## Doing it · A match, from the score to the interval
+
+Of 4,000 manufacturing firms, some chose to obtain a quality certification
+(ISO 9001). Does certification raise export sales two years later? Nobody drew
+anything: larger, foreign-owned and already-exporting firms certify more often.
+The data are simulated again, so the true effect, 8 (\$ thousand), is known,
+and so is something no real analyst knows: that only the four recorded
+variables drive the choice. The assumption therefore holds by construction, and
+what follows is about carrying the method out. Example 3 was about the
+assumption failing.
+
+```{python}
+#| label: check-cert-data
+#| code-summary: "Run it: 4,000 firms that chose for themselves, and the naive answer"
+
+rng = np.random.default_rng(10)
+n_cert = 4000
+cert = pd.DataFrame({"employees": rng.lognormal(3.5, 0.8, n_cert).round() + 1,
+                     "age": rng.integers(1, 40, n_cert),
+                     "foreign": rng.binomial(1, 0.2, n_cert),
+                     "exports_before": rng.gamma(2, 20, n_cert).round()})
+choice = (-14 + 3 * np.log(cert["employees"]) + 0.8 * cert["foreign"]
+          + 0.02 * cert["exports_before"])
+cert["certified"] = (rng.uniform(size=n_cert) < 1 / (1 + np.exp(-choice))).astype(int)
+cert["exports_after"] = (5 + 0.6 * cert["exports_before"] + 4 * np.log(cert["employees"])
+                         + 6 * cert["foreign"] + 8 * cert["certified"]
+                         + rng.normal(0, 8, n_cert)).round()
+
+print(cert.groupby("certified")[["employees", "foreign", "exports_before", "exports_after"]]
+      .mean().round(1).to_string())
+print(f"\ncertified firms: {cert['certified'].sum()}   "
+      f"naive difference: {cert.groupby('certified')['exports_after'].mean().diff().iloc[-1]:.1f}")
+```
+
+The naive answer is 18.3, more than twice the truth, and the other columns say
+why: the certified firms were nearly three times as large, more often
+foreign-owned, and exported more before certifying.
+
+**Step 1 · The list.** Which pre-treatment variables drive the choice? The list
+*is* the identifying assumption, written down. It is made on paper, from
+knowledge of how firms decide, and every variable on it must have been fixed
+before certification.
+
+**Steps 2 and 3 · The score, and overlap.** A logit of the treatment on the
+list gives each firm its probability of certifying. The first thing to do with
+it is to look at where the two groups' scores lie.
+
+```{python}
+#| label: fig-cert-overlap
+#| code-summary: "Run it: estimate the score and look at overlap"
+#| fig-cap: "The propensity score among certified and uncertified firms, on a logarithmic scale. The two overlap over almost the whole range. At the far right there are certified firms and almost no uncertified ones: very large firms nearly all certify, so there is nobody to compare them with."
+
+SCORE = "certified ~ np.log(employees) + age + foreign + exports_before"
+cert["pscore"] = smf.logit(SCORE, data=cert).fit(disp=0).predict(cert)
+cert["logit"] = np.log(cert["pscore"] / (1 - cert["pscore"]))
+got, not_got = cert[cert["certified"] == 1], cert[cert["certified"] == 0]
+
+bins = np.linspace(0, 1, 26)
+plt.figure(figsize=(7, 3.4))
+plt.hist(not_got["pscore"], bins=bins, alpha=0.6, label="not certified")
+plt.hist(got["pscore"], bins=bins, alpha=0.6, label="certified")
+plt.yscale("log")
+plt.xlabel("propensity score")
+plt.legend()
+plt.show()
+
+print(f"highest score among uncertified firms: {not_got['pscore'].max():.3f}")
+print(f"certified firms above it: {(got['pscore'] > not_got['pscore'].max()).sum()}")
+```
+
+**Step 4 · The match, within a caliper.** Each certified firm is given the
+uncertified firm with the closest score. Left at that, every treated firm gets
+a match, however far away it is. A **caliper** sets a limit on "close": a
+common choice is a fifth of a standard deviation of the logit of the score, the
+logit being used because it spreads out the scores near 0 and 1. A treated firm
+with no control inside the caliper is set aside rather than badly matched.
+
+```{python}
+#| label: check-cert-match
+#| code-summary: "Run it: nearest neighbour within a caliper"
+
+nn = NearestNeighbors(n_neighbors=1).fit(not_got[["logit"]])
+distance, index = nn.kneighbors(got[["logit"]])
+keep = distance.ravel() <= 0.2 * cert["logit"].std()
+kept, partners = got[keep], not_got.iloc[index.ravel()[keep]]
+
+print(f"certified firms: {len(got)}   matched: {keep.sum()}   set aside: {(~keep).sum()}")
+print(f"different controls used: {partners.index.nunique()}")
+print(f"employees, matched firms: {kept['employees'].mean():.0f}   "
+      f"set-aside firms: {got[~keep]['employees'].mean():.0f}")
+```
+
+Seventeen firms are set aside, and they are not a random seventeen: they average
+313 employees against 87 for the rest. Setting them aside changes what is
+estimated, and that has to be said. The estimate is now the effect of
+certification on certified firms *that have a comparable uncertified firm*,
+which here means all but the very largest. Nothing in these data can say what
+certification did for those.
+
+**Step 5 · Balance, before the outcome.**
+
+```{python}
+#| label: fig-cert-balance
+#| code-summary: "Run it: balance before matching, without the caliper, and within it"
+#| fig-cap: "Standardised differences before matching (blue) and after matching within the caliper (orange). The dashed lines mark ±0.1. Firm size starts 1.27 standard deviations apart and ends at 0.03."
+
+cols = ["employees", "age", "foreign", "exports_before"]
+sd_c = np.sqrt((got[cols].var() + not_got[cols].var()) / 2)
+balance = pd.DataFrame({
+    "before": (got[cols].mean() - not_got[cols].mean()) / sd_c,
+    "no caliper": (got[cols].mean() - not_got.iloc[index.ravel()][cols].mean()) / sd_c,
+    "caliper": (kept[cols].mean() - partners[cols].mean()) / sd_c})
+print(balance.round(2).to_string())
+
+plt.figure(figsize=(7, 3.2))
+plt.scatter(balance["before"], cols, label="before")
+plt.scatter(balance["caliper"], cols, label="matched, caliper")
+plt.axvline(-0.1, color="grey", linestyle="--")
+plt.axvline(0.1, color="grey", linestyle="--")
+plt.xlabel("standardised difference")
+plt.legend()
+plt.show()
+```
+
+Without the caliper, firm size is still out by 0.12, because the largest
+certified firms were matched to much smaller ones. Within it, every difference
+is inside 0.1. Had one stayed outside, the response would be the one from
+Example 2: change the score, with a square, a logarithm or an interaction, or
+tighten the caliper, and check again. The outcome column has not been touched
+yet, and that is the discipline that makes the next number worth reading.
+
+**Step 6 · The ATT, and how sure you are.** The estimate is the mean outcome of
+the matched certified firms minus that of their partners. For its uncertainty,
+the whole procedure is wrapped in a function, so that it can be rerun from the
+score onwards on each of 200 resampled data sets.
+
+```{python}
+#| label: check-cert-att
+#| code-summary: "Run it: the ATT, a bootstrap of the whole procedure, and other choices"
+
+def att(data, neighbours=1, caliper=0.2):
+    p = smf.logit(SCORE, data=data).fit(disp=0).predict(data)
+    data = data.assign(logit=np.log(p / (1 - p)))
+    t, c = data[data["certified"] == 1], data[data["certified"] == 0]
+    d, i = NearestNeighbors(n_neighbors=neighbours).fit(c[["logit"]]).kneighbors(t[["logit"]])
+    ok = d[:, 0] <= caliper * data["logit"].std()
+    return t[ok]["exports_after"].mean() - c.iloc[i[ok].ravel()]["exports_after"].mean()
+
+
+draws = [att(cert.sample(len(cert), replace=True, random_state=b)) for b in range(200)]
+low, high = np.percentile(draws, [2.5, 97.5])
+print(f"ATT (matching):    {att(cert):5.1f}   truth 8")
+print(f"bootstrap 95% CI:  [{low:.1f}, {high:.1f}]   se {np.std(draws):.1f}")
+
+ols = smf.ols("exports_after ~ certified + np.log(employees) + age + foreign + exports_before",
+              data=cert).fit()
+print(f"\n1 neighbour, caliper 0.1:   {att(cert, caliper=0.1):5.1f}")
+print(f"1 neighbour, no caliper:    {att(cert, caliper=np.inf):5.1f}")
+print(f"5 neighbours, caliper 0.2:  {att(cert, neighbours=5):5.1f}")
+print(f"regression, same variables: {ols.params['certified']:5.1f}")
+```
+
+Matching says 7.7 against a truth of 8 and a naive 18.3. Unlike the bootstrap
+in Example 2, this one re-estimates the score inside every replication, which
+is what the function is for. The interval, 5.2 to 11.3, is wide for 810 matched
+firms: one nearest neighbour, drawn with replacement from 387 distinct
+controls, is a noisy device. It should be reported as approximate, since the
+bootstrap is known to be imperfect for nearest-neighbour matching, and as a
+guide to precision it is far better than the standard error of a regression run
+on the matched sample.
+
+**Step 7 · Other reasonable choices.** The last four lines redo the estimate
+under choices another analyst could defend equally well: a tighter caliper,
+none, five neighbours, and a regression on the same variables. They range from
+7.0 to 8.8, all inside the interval. That is what a result which does not hang
+on one decision looks like, and the table belongs in the report beside the main
+estimate. It is not a test of the assumption. A characteristic of the firms
+that was never recorded would move every line together, exactly as motivation
+did in Example 3, and no line would show it.
+
+**The match in three sentences.** Write down the list of pre-treatment
+variables, estimate the score, and look at overlap before anything else. Match
+within a caliper, say who was set aside, and settle balance before the outcome
+is read. Report the ATT with an interval from a bootstrap of the whole
+procedure, and beside it the estimates under other defensible choices.
+
 ## What none of this fixes
 
-Example 3 cannot be diagnosed from the data, so the honest response is to ask how
-wrong the assumption could be. Sensitivity
+The failure in Example 3 cannot be diagnosed from the data, so the honest response
+is to ask how wrong the assumption could be. Sensitivity
 analysis asks how strong an unobserved confounder would have to be — how
 strongly associated with both treatment and outcome — to overturn the
 conclusion. If the answer is "about as strong as the covariates already
@@ -602,6 +978,12 @@ The potential-outcomes notation is @rubin1974, though the idea traces to Neyman'
 and drew the boundary the discipline still uses — "no causation without
 manipulation" — which remains contested and clarifying.
 
+@atkin2017 is the trial this chapter's worked example imitates: export orders
+offered to a randomly chosen subset of small rug producers, so that the effect of
+exporting on the firm can be read from a difference in means. When some of those
+drawn do not take the treatment, the draw can serve as an instrument for it, and
+@angrist1996 is the paper that says what that estimates.
+
 LaLonde's 1986 comparison of experimental and non-experimental estimates of a
 job-training programme is the benchmark the matching literature is still judged
 against; @dehejia1999 showed propensity-score matching recovering the
@@ -625,21 +1007,37 @@ compact treatment of which controls help and which do damage.
 
 ## What to report
 
+**For a trial**
+
+1. **How the draw was made.** The unit, the strata, the seed, and that it was
+   made once.
+2. **The sample size and the power** it gave for the effect that was expected,
+   computed before the trial.
+3. **Balance at baseline**, as standardised differences.
+4. **The difference in means with its confidence interval**, and the estimate
+   with baseline controls beside it.
+5. **Who dropped out or refused**, and that the comparison is by the draw.
+
+**For a match**
+
 1. **The estimand, named.** ATE or ATT — they answer different questions and
-   matching usually estimates the second.
+   matching usually estimates the second. If a caliper set units aside, say
+   which treated units the estimate now describes.
 2. **The identifying assumption, in words.** Which variables are claimed to
    close every path from treatment to outcome, and why that list is complete.
    This is an argument, not a table.
 3. **Balance before and after**, for every covariate, with standardised
    differences — a love plot. Not the propensity model's coefficients or its
    fit. And say that the score was settled before the outcome was looked at.
-4. **Overlap**, with the range of the score in both groups, and what you did
-   about units outside common support.
+4. **Overlap**, with the range of the score in both groups, and how many units
+   were outside common support or set aside by the caliper.
 5. **The naive estimate alongside the adjusted one.** The distance between them
    is the size of the selection problem, and hiding it hides the reason for the
    analysis.
-6. **A sensitivity analysis.** How strong an unobserved confounder would need to
+6. **The ATT with an interval**, from a bootstrap of the whole procedure, and
+   the estimates under other defensible choices beside it.
+7. **A sensitivity analysis.** How strong an unobserved confounder would need to
    be to overturn the result.
-7. **That every control is pre-treatment**, and that you know it. If a covariate
+8. **That every control is pre-treatment**, and that you know it. If a covariate
    is measured after treatment, say why it is not a mediator or a collider — and
    if you cannot, drop it, even when it improves the number.
