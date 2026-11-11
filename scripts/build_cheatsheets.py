@@ -244,7 +244,7 @@ SNIPPETS = {
     'cov_type="cluster"': 'did = smf.ols("price ~ near * post", data=houses).fit(\n'
                           '    cov_type="cluster", cov_kwds={"groups": houses["house"]})\n'
                           'did.params["near:post"]                  # the DiD estimate',
-    "C(geo)": 'smf.ols("ai_use_any ~ has_ai_strategy + C(geo) + C(time)", data=panel).fit()',
+    "C(region)": 'smf.ols("exporters ~ desk + C(region) + C(year)", data=panel).fit()   # two-way fixed effects',
     "dd.CallawaySantAnna": "import diff_diff as dd\n"
                            'cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome="ai_use_any",\n'
                            '    unit="geo", time="time", first_treat="g")   # g = adoption year, 0 = never\n'
@@ -254,6 +254,9 @@ SNIPPETS = {
     "IV2SLS": "from statsmodels.sandbox.regression.gmm import IV2SLS\n"
               'iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),\n'
               '            sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument',
+    "Treatment(reference=2017)": 'smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).fit()\n'
+                                 "# one interaction per year: the gap that year minus the gap in 2017",
+    "plt.errorbar": 'plt.errorbar(study.index, study["effect"], yerr=1.96 * study["se"], fmt="o", capsize=3)',
 }
 
 

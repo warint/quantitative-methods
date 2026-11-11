@@ -32,16 +32,21 @@ establishes that the reading is load-bearing rather than decorative.
 | **33–45** | Example 3, AI strategies: the adoption table first, then TWFE 2.81 against Callaway–Sant'Anna 2.20, then the sensitivity plot. |
 | **45–57** | Example 4, exporters: why neither design applies; the three conditions; the ratio 4.6; then version B at 12.1 with the same F. Ask which condition failed *before* showing the diagram. |
 | **57–62** | Matching, DiD or an instrument; what DiD cannot fix. |
-| **62–90** | In class: the code behind the four examples. Circulate; hand off to the practice. |
+| **62–66** | Two more solutions: differencing removes what is constant, an instrument uses only what an outside push caused. |
+| **66–80** | Solution 3 in Python, a DiD from start to finish: panel and adoption table, the plot, one clean 2×2, the event study, all cohorts, sensitivity. |
+| **80–90** | Solution 4 in Python, an instrument from start to finish: naive, balance and first stage, reduced form and ratio, two-stage least squares, whom it describes. Hand off to the practice. |
 
 ---
 
 ## Run the code live
 
-The examples are taught from pictures and tables; the code waits until minute 62. Then open the
-VS Codium terminal **at the repository root** (Example 3 needs `import qmib`), activate `.venv`, and run
-the first cell of each example in front of them before they run the rest themselves. Type the mistakes
-as well as the fixes: an adoption year taken from the rows with an outcome, a 2021 cohort left in.
+The examples are taught from pictures and tables; the code waits until minute 62, and it does not
+replay them. The students carry out each design on new data: a staggered rollout they analyse as a
+difference-in-differences, then a randomly drawn voucher they use as an instrument. Open the
+VS Codium terminal, activate `.venv`, and run the first cell of each design in front of them (it
+writes the data file the later cells read) before they run the rest themselves. Before each cell,
+ask what the step is **for**. Type the mistakes as well as the fixes: an already-treated cohort used
+as the control group, a second stage run by hand with `smf.ols`.
 
 ---
 

@@ -42,14 +42,20 @@ format:
      adopted in different years (TWFE against Callaway-Sant'Anna, and a
      Rambachan-Roth sensitivity analysis), and simulated exporters where neither
      design applies and an instrument does, then fails its exclusion. The code
-     comes last, in the in-class
-     part, where every cell is live: it executes at render time, so the output on
-     the slides is the output the students' own machines produce. Examples 1 and
-     2 simulate their data in the cell; Example 3 loads it with qmib.load, which
-     a student runs from the repository root.
-     The charts are drawn by economist-assets/build_did_figures.py, from the same
-     simulations and the same data, so every number on a picture is the number
-     the matching cell prints. -->
+     comes last, in the in-class part, and does not replay those examples: it
+     explains the two designs and has the students carry each one out on new
+     simulated data. A difference-in-differences: a staggered rollout of export
+     desks across 40 regions (panel and adoption table, the plot, one clean
+     2x2, an event study by regression, TWFE against Callaway-Sant'Anna,
+     sensitivity). An instrument: a randomly drawn trade-fair voucher (naive,
+     balance and first stage, reduced form and ratio, IV2SLS, whom the estimate
+     describes). Every cell is live: it executes at render time. The first cell
+     of each design writes a small CSV (export_desks.csv, trade_fair.csv) and
+     the later cells read it, so each runs on its own once the first has run;
+     the CSVs are git-ignored.
+     The charts of the four examples are drawn by
+     economist-assets/build_did_figures.py, from the examples' own simulations
+     and data. -->
 ```{python}
 #| label: setup
 #| echo: false
@@ -75,7 +81,7 @@ pd.set_option("display.max_columns", 10)
 4. Example 3 · Do national AI strategies raise firms' AI use?
 5. Example 4 · Does exporting raise productivity?
 6. Wrapping up · What the design cannot fix
-7. In class · The code behind the four examples
+7. In class · The two designs, done in Python
 
 ## What session 11 is for {.scrollable}
 ::::: columns
@@ -96,10 +102,11 @@ pd.set_option("display.max_columns", 10)
 
 ### The Python
 
-- Build the four cells, then get the same number from an interaction in `smf.ols`
-- Plot an event study and let the pre-period speak for the design
-- Handle staggered adoption without letting the cohorts blur, with `diff_diff.CallawaySantAnna`
-- Ask how much violation of parallel trends a result survives, with `HonestDiD`
+- Print the adoption table and plot each cohort before estimating anything
+- Build the four cells, then get the same number from an interaction in `smf.ols`, clustered by unit
+- Estimate an event study by regression and let the pre-period speak for the design
+- Handle staggered adoption with `diff_diff.CallawaySantAnna`, and test its sturdiness with `HonestDiD`
+- Check an instrument's first stage, then estimate with `IV2SLS`
 
 ::::
 
@@ -738,281 +745,475 @@ whose assumption you can **argue** best for your setting, and say which assumpti
 | 6 | the event study: is the pre-period flat? | the DiD year by year |
 | 7 | staggered timing: a robust estimator beside TWFE; then sensitivity | `diff_diff.CallawaySantAnna`, `HonestDiD` |
 
-## In class · The code behind the four examples {.center}
+## In class · The two designs, done in Python {.center}
+
+## Two more solutions to the same problem {.scrollable}
+
+Session 10 gave two solutions to selection: a trial, and matching on what you measured. Today's two are for
+when the reason units were treated is **not measured** and you could not draw.
+
+| | **Solution 3 · Difference-in-differences** | **Solution 4 · An instrument** |
+|---|---|---|
+| When | you observe treated and untreated units **before and after** | no before and after, but something **outside** pushed some units into treatment |
+| The idea | compare **changes**, not levels: the control group's change stands in for what the treated would have done | use **only** the part of treatment that the outside push caused |
+| Why it removes selection | anything **constant** about a unit cancels in its own change | the push is unrelated to the unit's hidden traits |
+| What you must assume | **parallel trends**: without the policy, both groups would have changed alike | **exclusion**: the push affects the outcome only through the treatment |
+| What you check | the years **before** the policy | the **first stage**: does the push move the treatment? |
+| The estimate | the interaction of *treated* and *after* | reduced form divided by first stage |
+
+::: {.step}
+Neither needs the confounder to be measured. Each replaces "nothing unmeasured matters" with a different
+assumption, and each assumption is an **argument**, with one part you can check.
+:::
 
 ## How this part works {.scrollable}
 
 ::: columns
 ::: {.column width="50%"}
-Every cell that follows **runs on its own**: copy it into a new file in VS Codium, run it **from the
-repository's root folder**, and you should see exactly the numbers from the lecture. Examples 1, 2 and 4
-simulate their data in the cell; Example 3 loads the course data with `qmib.load`.
+You now **do** each design from start to finish, on **new data**, not the lecture's examples. The
+packages, by name: `numpy`, `pandas`, `statsmodels`, `matplotlib`, `diff_diff`.
+
+Each design is one short piece of work in steps. Its **first cell writes a small data file** in your
+folder; every later cell starts by reading that file, so each cell runs on its own once the first has run.
 :::
 
 ::: {.column width="50%"}
 ::: {.step}
-**For each example:**
+**For each design:**
 
-1. run the cells and check you get the numbers from the lecture;
-2. do the **Your turn** task under the last cell, changing one thing at a time.
+1. run the cells in order, and say what each step is **for** before reading its output;
+2. do the **Your turn** task under the last cell;
+3. keep the file: it is the template for your project.
 :::
 :::
 :::
 
-## Example 1 in Python · Simulate, then the four means {.scrollable}
+## Solution 3 · A difference-in-differences study, step by step {.scrollable}
+
+**The case.** A government opens **export desks**, one-stop offices for customs paperwork, in 12 regions in
+2018 and in 10 more in 2021; 18 regions never get one. Does a desk raise the share of a region's firms that
+export? Regions with a desk already exported more, for reasons nobody recorded. Simulated data, so the truth
+is known: a desk adds **2 points for every year it has been open**, 6.1 on average over the years observed.
+
+| Step | What you do | Why | In Python |
+|---|---|---|---|
+| 1 | the **panel file** and the **adoption table** | who was treated, when, and how many years before | `.groupby("opened")["region"].nunique()` |
+| 2 | **plot** the outcome by group over time | the design, and its assumption, are visible before any regression | `.groupby([...]).mean().unstack().plot()` |
+| 3 | one **clean 2×2**: four means, then the interaction | every DiD is this comparison underneath | `smf.ols("y ~ treated * post")`, clustered |
+| 4 | the **event study** | the checkable part: were the groups moving alike before? | `treated * C(year, Treatment(reference=2017))` |
+| 5 | **all cohorts**, with an estimator built for staggered timing | one big regression mixes in comparisons it should not make | `dd.CallawaySantAnna` beside TWFE |
+| 6 | **sensitivity** | how wrong could parallel trends be before the result goes? | `dd.HonestDiD` |
+
+## DiD · Step 1 · The panel, and the adoption table {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 1 · 1,000 houses, half near a new site; the site lowers nearby prices by 10 ($ thousands)
+# DiD, step 1 · 40 regions, 2014-2023: one row per region and year
 import numpy as np
 import pandas as pd
 
-rng = np.random.default_rng(11)
-n = 1000
-near = (np.arange(n) < 500).astype(int)
-base = 250 - 15 * near + rng.normal(0, 20, n)          # near houses were cheaper already
-before = base + rng.normal(0, 10, n)
-after = base + 30 - 10 * near + rng.normal(0, 10, n)   # +30 for everyone; -10 near the site
+rng = np.random.default_rng(11)                 # simulated here; in your project, the panel you were given
+regions = 40
+opened = np.r_[np.full(12, 2018), np.full(10, 2021), np.zeros(18)].astype(int)   # 0 = never
+level = rng.normal(30, 6, regions) + 4 * (opened > 0)   # regions with a desk exported more already
+rows = []
+for year in range(2014, 2024):
+    years_open = np.where((opened > 0) & (year >= opened), year - opened + 1, 0)
+    exporters = level + 1.0 * (year - 2014) + 2.0 * years_open + rng.normal(0, 1.5, regions)
+    rows.append(pd.DataFrame({"region": np.arange(regions), "year": year, "opened": opened,
+                              "desk": (years_open > 0).astype(int), "exporters": exporters.round(1)}))
+panel = pd.concat(rows, ignore_index=True)
+panel.to_csv("export_desks.csv", index=False)
 
-houses = pd.DataFrame({"house": np.r_[np.arange(n), np.arange(n)],
-                       "near": np.r_[near, near],
-                       "post": np.r_[np.zeros(n), np.ones(n)].astype(int),
-                       "price": np.r_[before, after]})
-
-means = houses.groupby(["near", "post"])["price"].mean().unstack()
-print(means.round(1))
-print("after only:  ", round(means.loc[1, 1] - means.loc[0, 1], 1))
-print("before-after:", round(means.loc[1, 1] - means.loc[1, 0], 1))
-print("DiD:         ", round((means.loc[1, 1] - means.loc[1, 0]) - (means.loc[0, 1] - means.loc[0, 0]), 1))
-```
-
-## Example 1 in Python · The interaction regression {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 1 · near * post expands to near + post + near:post; the interaction is the DiD
-import numpy as np
-import pandas as pd
-import statsmodels.formula.api as smf
-
-rng = np.random.default_rng(11)
-n = 1000
-near = (np.arange(n) < 500).astype(int)
-base = 250 - 15 * near + rng.normal(0, 20, n)
-before = base + rng.normal(0, 10, n)
-after = base + 30 - 10 * near + rng.normal(0, 10, n)
-houses = pd.DataFrame({"house": np.r_[np.arange(n), np.arange(n)],
-                       "near": np.r_[near, near],
-                       "post": np.r_[np.zeros(n), np.ones(n)].astype(int),
-                       "price": np.r_[before, after]})
-
-did = smf.ols("price ~ near * post", data=houses).fit(
-    cov_type="cluster", cov_kwds={"groups": houses["house"]})   # each house is seen twice
-print(did.summary().tables[1])
+print(panel.head(3))
+print(panel.groupby("opened")["region"].nunique().rename(index={0: "never"}))
 ```
 
 ::: {.step}
-**Your turn.** (1) Change the market's rise from `+ 30` to `+ 60`: which of the three comparisons moves, and
-which does not? (2) Make near houses **more** expensive before (`+ 15 * near`): does the DiD change? Why not?
+A DiD needs a **panel**: the same units, several dates, one row per unit and date. The adoption table is
+the first thing to print: it says which comparisons exist. Here both cohorts have years before their desk
+(four and seven), and 18 regions are never treated, so there is always a clean control group.
 :::
 
-## Example 2 in Python · Six years, and the event study {.scrollable}
+## DiD · Step 2 · Look before you estimate {.scrollable}
 
 ```{python}
 #| echo: true
+#| output-location: column
+#| fig-width: 5.4
+#| fig-height: 4.0
 
-# Example 2 · 2003-2008, sites open in 2006; B adds a pre-existing slide of -3 a year near the sites
-import numpy as np
+# DiD, step 2 · The average outcome of each cohort, year by year
 import pandas as pd
-import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
 
-n = 1000
-near = (np.arange(n) < 500).astype(int)
-for version, drift in [("A", 0.0), ("B", -3.0)]:
-    rng = np.random.default_rng(12)
-    house_effect = rng.normal(0, 20, n)
-    rows = []
-    for year in range(2003, 2009):
-        price = (250 - 15 * near + house_effect + 8 * (year - 2003)
-                 + drift * near * (year - 2003)
-                 - 10 * near * (year >= 2006) + rng.normal(0, 10, n))
-        rows.append(pd.DataFrame({"house": np.arange(n), "near": near, "year": year, "price": price}))
-    prices = pd.concat(rows, ignore_index=True)
+panel = pd.read_csv("export_desks.csv")
+by_year = panel.groupby(["year", "opened"])["exporters"].mean().unstack()
+by_year.columns = ["never", "desk in 2018", "desk in 2021"]
 
-    by_year = prices.groupby(["year", "near"])["price"].mean().unstack()
-    gap = by_year[1] - by_year[0]
-    event_study = gap - gap[2005]                       # relative to the last year before the sites
+by_year.plot(marker="o")
+plt.axvline(2017.5, color="grey", linestyle="--")
+plt.axvline(2020.5, color="grey", linestyle="--")
+plt.ylabel("firms exporting, %")
+plt.show()
 
-    two = prices[prices["year"].isin([2005, 2008])].copy()
-    two["post"] = (two["year"] == 2008).astype(int)
-    estimate = smf.ols("price ~ near * post", data=two).fit().params["near:post"]
-    print(f"version {version}: DiD 2005->2008 = {estimate:.1f}   (truth -10)")
-    print("   event study:", event_study.round(1).to_dict())
+print(by_year.loc[[2014, 2017, 2020, 2023]].round(1))
 ```
 
 ::: {.step}
-**Your turn.** (1) In version B, compute the DiD from **2003** to 2008 instead of 2005: is it better or worse,
-and why? (2) Add the line `print(by_year.round(1))` and plot it with `by_year.plot()`: can you see the
-pre-trend by eye?
+Two things to read. The lines are at **different heights** before any desk opens: that is selection, and it
+does not matter, because a DiD compares changes. The lines are **parallel** before each dashed line: that
+is what matters, and it is the only part of the assumption the data can show.
 :::
 
-## Example 3 in Python · The adoption table {.scrollable}
+## DiD · Step 3 · One clean 2×2 {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 3 · Who adopted a national AI strategy, and when
-import qmib
+# DiD, step 3 · The 2018 cohort against the never-treated, 2017 against 2018
+import pandas as pd
+import statsmodels.formula.api as smf
 
-Y, D = "ai_use_any", "has_ai_strategy"
-wide = qmib.load("angle_c_country")
+panel = pd.read_csv("export_desks.csv")
+two = panel[panel["opened"].isin([0, 2018]) & panel["year"].isin([2017, 2018])].copy()
+two["treated"] = (two["opened"] == 2018).astype(int)
+two["post"] = (two["year"] == 2018).astype(int)
 
-# The adoption year comes from the full treatment series, not from the rows with an outcome
-adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
-panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
-panel["cohort"] = panel["geo"].map(adopted).fillna(9999).astype(int)    # 9999 = never
+means = two.groupby(["treated", "post"])["exporters"].mean().unstack()
+print(means.round(2))
+print("change, treated:", round(means.loc[1, 1] - means.loc[1, 0], 2),
+      "  change, control:", round(means.loc[0, 1] - means.loc[0, 0], 2))
 
-table = panel.groupby("cohort")["geo"].nunique()
-print(table.rename(index={9999: "never"}))
+did = smf.ols("exporters ~ treated * post", data=two).fit(
+    cov_type="cluster", cov_kwds={"groups": two["region"]})      # each region is seen twice
+low, high = did.conf_int().loc["treated:post"]
+print(f"DiD = {did.params['treated:post']:.2f}   95% CI [{low:.2f}, {high:.2f}]   truth, first year: 2")
 ```
 
-## Example 3 in Python · TWFE against Callaway–Sant'Anna {.scrollable}
+::: {.step}
+Choose the comparison **yourself**: one cohort, a control group that is never treated, one year before
+and one after. The interaction `treated:post` is the difference of the two changes; clustering by region
+tells the standard error that a region's two rows are not independent.
+:::
+
+## DiD · Step 4 · The event study, by regression {.scrollable}
+
+```{python}
+#| echo: true
+#| output-location: column
+#| fig-width: 5.4
+#| fig-height: 4.0
+
+# DiD, step 4 · The same DiD for every year, each against 2017, the last year before the desks
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+
+panel = pd.read_csv("export_desks.csv")
+clean = panel[panel["opened"].isin([0, 2018])].copy()
+clean["treated"] = (clean["opened"] == 2018).astype(int)
+
+fit = smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).fit(
+    cov_type="cluster", cov_kwds={"groups": clean["region"]})
+rows = [name for name in fit.params.index if name.startswith("treated:")]
+study = pd.DataFrame({"year": [int(name[-5:-1]) for name in rows],
+                      "effect": fit.params[rows].values,
+                      "low": fit.conf_int().loc[rows, 0].values,
+                      "high": fit.conf_int().loc[rows, 1].values}).set_index("year")
+print(study.round(2))
+
+plt.errorbar(study.index, study["effect"], yerr=[study["effect"] - study["low"],
+             study["high"] - study["effect"]], fmt="o", capsize=3)
+plt.axhline(0, color="grey")
+plt.axvline(2017.5, color="grey", linestyle="--")
+plt.ylabel("gap, relative to 2017")
+plt.show()
+```
+
+::: {.step}
+`treated * C(year, ...)` gives one interaction per year: the gap between the groups in that year, minus the
+gap in 2017. **Before** the desks, the intervals should include zero: the groups were moving alike. **After**,
+the points are the effect, year by year, and here they grow, as the truth says they should.
+:::
+
+## DiD · Step 5 · All cohorts, with staggered timing {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 3 · The regression two decades of papers used, and the staggered-robust estimator
+# DiD, step 5 · The one big regression (TWFE) beside an estimator built for staggered adoption
 import pandas as pd
 import statsmodels.formula.api as smf
 import diff_diff as dd
-import qmib
 
-Y, D = "ai_use_any", "has_ai_strategy"
-wide = qmib.load("angle_c_country")
-adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
-panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
-panel["cohort"] = panel["geo"].map(adopted).fillna(9999).astype(int)
+panel = pd.read_csv("export_desks.csv")
 
-twfe = smf.ols(f"{Y} ~ {D} + C(geo) + C(time)", data=panel).fit(
-    cov_type="cluster", cov_kwds={"groups": panel["geo"]})
-print(f"TWFE:                {twfe.params[D]:.2f}  (SE {twfe.bse[D]:.2f})   truth 2.4")
+twfe = smf.ols("exporters ~ desk + C(region) + C(year)", data=panel).fit(
+    cov_type="cluster", cov_kwds={"groups": panel["region"]})
+cs = dd.CallawaySantAnna(cluster="region").fit(
+    panel, outcome="exporters", unit="region", time="year", first_treat="opened")   # 0 = never
 
-panel["g"] = panel["cohort"].replace(9999, 0)          # the package wants 0 for never-treated
-cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome=Y, unit="geo", time="time", first_treat="g")
-print(f"Callaway-Sant'Anna:  {cs.overall_att:.2f}  (SE {cs.overall_se:.2f}, {cs.n_clusters} clusters)")
-print(cs.to_dataframe()[["group", "time", "effect", "se", "skip_reason"]].round(2))
-```
-
-## Example 3 in Python · How much violation does it survive? {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 3 · Rambachan-Roth sensitivity, from the Callaway-Sant'Anna event study
-import diff_diff as dd
-import qmib
-
-Y, D = "ai_use_any", "has_ai_strategy"
-wide = qmib.load("angle_c_country")
-adopted = wide[wide[D] == 1].groupby("geo")["time"].min()
-panel = wide[(wide["time"] >= 2021) & wide[Y].notna()].copy()
-panel["g"] = panel["geo"].map(adopted).fillna(0).astype(int)
-
-cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome=Y, unit="geo", time="time", first_treat="g")
-es = cs.aggregate("event_study")
-for M in (0.0, 0.25, 0.5, 1.0):
-    h = dd.HonestDiD(method="relative_magnitude", M=M).fit(es)
-    print(f"M = {M:4.2f}   95% robust interval [{h.ci_lb:6.2f}, {h.ci_ub:6.2f}]   "
-          f"rules out zero: {'yes' if h.is_significant else 'no'}")
+print(f"two-way fixed effects:  {twfe.params['desk']:.2f}  (SE {twfe.bse['desk']:.2f})")
+print(f"Callaway-Sant'Anna:     {cs.overall_att:.2f}  (SE {cs.overall_se:.2f}, {cs.n_clusters} clusters)")
+print("truth, average over the treated years: 6.12")
+print(cs.aggregate("event_study").to_dataframe()[["event_time", "att", "se"]].round(2).to_string(index=False))
 ```
 
 ::: {.step}
-**Your turn.** (1) In the TWFE cell, drop the 2021 cohort (`panel[panel["cohort"] != 2021]`) and refit: how
-far does TWFE move? (2) Why does the one-country cohort report a **smaller** standard error than the
-nine-country one? Is it more precise?
+`CallawaySantAnna` does step 3 for **every** cohort and year, always against regions not yet treated, then
+averages. Two-way fixed effects also uses the 2018 regions, whose effect is still growing, as controls for
+the 2021 regions, and so comes out too low. Report both: if they differ, the difference is a finding.
 :::
 
-## Example 4 in Python · The two stages, by hand {.scrollable}
+## DiD · Step 6 · How wrong could parallel trends be? {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 4 · 2,000 firms; exporting adds +5; management is never observed
+# DiD, step 6 · Rambachan-Roth: allow a violation up to M times the largest pre-period wobble
+import pandas as pd
+import diff_diff as dd
+
+panel = pd.read_csv("export_desks.csv")
+cs = dd.CallawaySantAnna(cluster="region").fit(
+    panel, outcome="exporters", unit="region", time="year", first_treat="opened")
+study = cs.aggregate("event_study")
+
+for M in (0, 1, 2, 4, 8):
+    honest = dd.HonestDiD(method="relative_magnitude", M=M).fit(study)
+    print(f"M = {M}   95% robust interval [{honest.ci_lb:5.2f}, {honest.ci_ub:5.2f}]   "
+          f"rules out zero: {'yes' if honest.is_significant else 'no'}")
+```
+
+::: {.step}
+A flat pre-period does not prove the trends would have **stayed** parallel. This asks: if they had drifted
+apart afterwards by up to `M` times the largest movement seen before, would the conclusion survive? `M = 0`
+is exact parallel trends. Report the largest `M` at which zero is still ruled out. (The interval is for the
+average effect over the six years after opening, whose true value is 7.)
+:::
+
+## Your turn · The difference-in-differences {.scrollable}
+
+::: {.step}
+1. **The wrong comparison.** In step 3, compute the after-only gap (treated minus control, 2018) and the
+   before-after change of the treated alone. How far is each from 2, and what does each mix in?
+2. **A pre-trend.** In step 1, add `+ 0.8 * (opened == 2018) * (year - 2014)` to `exporters`, so that the
+   2018 regions were already pulling away. Rerun steps 2 to 4. Where do you see it first: the plot, the
+   2×2 or the event study? What does the 2×2 now say, against a truth of 2?
+3. **The comparison the big regression should not make.** In step 3, estimate the first-year effect for the
+   **2021** cohort (2020 against 2021), once with the never-treated as controls (`[0, 2021]`) and once with
+   the **2018** regions as controls (`[2018, 2021]`, and `treated` is `opened == 2021`). By how much does the
+   estimate fall, and what were the 2018 regions doing between 2020 and 2021?
+:::
+
+## Solution 4 · An instrument, step by step {.scrollable}
+
+**The case.** Does attending an international **trade fair** raise a firm's export sales? Ambitious firms
+attend more and export more, and ambition is in no file; there is no before and after. But the trade
+agency once mailed a **voucher** for a free stand to 1,500 of 3,000 firms, **drawn at random**. Simulated
+data, so the truth is known: attending adds **+12** (\$ thousand).
+
+| An instrument must be | Here | Checkable? |
+|---|---|---|
+| **relevant**: it moves the treatment | firms with a voucher attend more often | **yes**: the first stage |
+| **independent**: as good as random | the vouchers were drawn | **partly**: balance on what was fixed before |
+| **excludable**: it affects the outcome **only through** the treatment | a voucher changes exports only by getting a firm to the fair | no: an argument |
+
+| Step | What you do | In Python |
+|---|---|---|
+| 1 | the file, and the naive answer | `.groupby("attends")["exports"].mean()` |
+| 2 | check the instrument: **balance**, then the **first stage** | `smf.ols("attends ~ voucher")`, its F |
+| 3 | the **reduced form**, and the ratio | `smf.ols("exports ~ voucher")` |
+| 4 | **two-stage least squares**, for the standard error | `IV2SLS` |
+| 5 | say **whom** the estimate describes, and argue exclusion | on paper |
+
+## Instrument · Step 1 · The file, and the naive answer {.scrollable}
+
+```{python}
+#| echo: true
+
+# Instrument, step 1 · 3,000 firms; attending the fair adds exactly +12; ambition is never recorded
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-rng = np.random.default_rng(13)
-n = 2000
-management = rng.normal(0, 1, n)                     # not in the data
-distance = rng.uniform(0, 300, n)                    # km to the nearest port: the instrument
-exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n) > -1.5).astype(int)
-productivity = 100 + 5 * exports + 6 * management + rng.normal(0, 5, n)
-firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
+rng = np.random.default_rng(13)                 # simulated here; in your project, the file you were given
+n = 3000
+ambition = rng.normal(0, 1, n)                                   # in no file
+employees = rng.lognormal(3, 0.7, n).round() + 1
+voucher = (rng.permutation(n) < n // 2).astype(int)              # the agency drew who received one
+attends = (0.9 * ambition + 1.2 * voucher + rng.normal(0, 1, n) > 0.8).astype(int)
+exports = (40 + 12 * attends + 10 * ambition + 5 * np.log(employees) + rng.normal(0, 12, n)).round(1)
+firms = pd.DataFrame({"employees": employees, "voucher": voucher, "attends": attends, "exports": exports})
+firms.to_csv("trade_fair.csv", index=False)
 
-naive = firms.groupby("exports")["productivity"].mean()
-print(f"naive: exporters minus non-exporters = {naive[1] - naive[0]:.2f}   (truth 5)")
-
-first = smf.ols("exports ~ distance", data=firms).fit()          # does distance move exporting?
-reduced = smf.ols("productivity ~ distance", data=firms).fit()  # does distance move productivity?
-print(f"first stage:  {first.params['distance']:.4f} per km   F = {first.tvalues['distance'] ** 2:.0f}")
-print(f"reduced form: {reduced.params['distance']:.4f} per km")
-print(f"IV = reduced / first = {reduced.params['distance'] / first.params['distance']:.2f}")
+naive = firms.groupby("attends")["exports"].mean()
+controlled = smf.ols("exports ~ attends + np.log(employees)", data=firms).fit()
+print(f"naive: attenders minus the rest = {naive[1] - naive[0]:.1f}   (truth 12)")
+print(f"regression, controlling for size: {controlled.params['attends']:.1f}")
 ```
 
-## Example 4 in Python · Two-stage least squares, with a standard error {.scrollable}
+::: {.step}
+Controlling for what is in the file does not help, because the confounder is not in the file. Matching
+would fail for the same reason, and there is no "before" to difference away. This is the situation an
+instrument is for.
+:::
+
+## Instrument · Step 2 · Check the instrument {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 4 · statsmodels' IV2SLS: outcome, then [constant + treatment], then [constant + instrument]
+# Instrument, step 2 · Is the voucher as good as random, and does it move attendance?
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+firms = pd.read_csv("trade_fair.csv")
+print(firms.groupby("voucher")[["employees", "attends"]].mean().round(2))
+
+balance = smf.ols("np.log(employees) ~ voucher", data=firms).fit()
+first = smf.ols("attends ~ voucher", data=firms).fit()
+
+print(f"does the voucher predict firm size?  p = {balance.pvalues['voucher']:.2f}")
+print(f"first stage: a voucher raises attendance by {first.params['voucher']:.2f}   "
+      f"F = {first.tvalues['voucher'] ** 2:.0f}")
+```
+
+::: {.step}
+**Independence** can be checked only on what was fixed before: firms with and without a voucher should
+look alike, and they do. **Relevance** is the first stage: the voucher must move attendance, strongly. The
+usual rule asks for an F statistic above 10; a weak instrument gives an estimate that is noisy and biased.
+:::
+
+## Instrument · Step 3 · The reduced form, and the ratio {.scrollable}
+
+```{python}
+#| echo: true
+
+# Instrument, step 3 · What the voucher did to exports, divided by what it did to attendance
+import pandas as pd
+import statsmodels.formula.api as smf
+
+firms = pd.read_csv("trade_fair.csv")
+first = smf.ols("attends ~ voucher", data=firms).fit().params["voucher"]
+reduced = smf.ols("exports ~ voucher", data=firms).fit().params["voucher"]
+
+print(f"reduced form: a voucher raises exports by     {reduced:.2f}")
+print(f"first stage:  a voucher raises attendance by  {first:.2f}")
+print(f"instrument estimate = reduced / first =       {reduced / first:.1f}   (truth 12)")
+```
+
+::: {.step}
+Both regressions compare firms by the **draw**, so both are free of selection. A voucher raised exports a
+little, and it did so by sending about a third of the firms to the fair. **If** that is the only way it
+acts, the effect of attending is the first number divided by the second.
+:::
+
+## Instrument · Step 4 · Two-stage least squares {.scrollable}
+
+```{python}
+#| echo: true
+
+# Instrument, step 4 · The same estimate with a correct standard error, then with a control
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.sandbox.regression.gmm import IV2SLS
 
-for version, direct in [("A", 0.0), ("B", -0.02)]:   # B: distance also lowers productivity directly
-    rng = np.random.default_rng(13)
-    n = 2000
-    management = rng.normal(0, 1, n)
-    distance = rng.uniform(0, 300, n)
-    exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n) > -1.5).astype(int)
-    productivity = 100 + 5 * exports + 6 * management + direct * distance + rng.normal(0, 5, n)
-    firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
+firms = pd.read_csv("trade_fair.csv")
+firms["log_employees"] = np.log(firms["employees"])
 
-    iv = IV2SLS(firms["productivity"],
-                sm.add_constant(firms[["exports"]]),
-                sm.add_constant(firms[["distance"]])).fit()
-    print(f"version {version}: IV {iv.params['exports']:.2f}  (SE {iv.bse['exports']:.2f})   truth 5")
+# IV2SLS(outcome, [constant + treatment + controls], [constant + instrument + controls])
+iv = IV2SLS(firms["exports"],
+            sm.add_constant(firms[["attends"]]),
+            sm.add_constant(firms[["voucher"]])).fit()
+with_size = IV2SLS(firms["exports"],
+                   sm.add_constant(firms[["attends", "log_employees"]]),
+                   sm.add_constant(firms[["voucher", "log_employees"]])).fit()
+
+for name, fit in [("instrument only", iv), ("with firm size", with_size)]:
+    low, high = fit.conf_int().loc["attends"]
+    print(f"{name:16s} {fit.params['attends']:5.1f}   se {fit.bse['attends']:.1f}   95% CI [{low:.1f}, {high:.1f}]")
 ```
 
+::: {.step}
+A control goes in **both** lists: it is its own instrument. The interval is much wider than a regression's
+would be: the instrument uses only the part of attendance that the voucher caused, about a third of it.
+That is the price of the design.
+:::
+
 ::: {.warn}
-**Do not run the second stage yourself with `smf.ols`.** Regressing productivity on the *predicted*
-exports gives the right number and the **wrong standard error**: it ignores that the prediction was
-estimated. `IV2SLS` does both stages and corrects it.
+**Do not run the second stage yourself with `smf.ols`** on predicted attendance: the number is right and
+the standard error is wrong. `IV2SLS` does both stages and corrects it.
+:::
+
+## Instrument · Step 5 · What the number means, and what could break it {.scrollable}
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**Whom it describes.** The estimate is the effect of the fair on firms that attended **because of** the
+voucher. Firms that would have gone anyway, and firms that would never go, contribute nothing: the voucher
+did not change what they did. Say so when you report it.
+:::
+:::
+::: {.column width="50%"}
+::: {.warn}
+**What could break it.** Exclusion: does a voucher change exports in **any other way**? If the letter
+also advertised the agency's export loans, it does, and the ratio is wrong by an amount no output shows.
+This step is written, not computed.
+:::
+:::
 :::
 
 ::: {.step}
-**Your turn.** (1) Weaken the instrument: change `- 0.01 * distance` to `- 0.001 * distance`. What happens
-to the F statistic, to the IV estimate and to its standard error? (2) In version B, is there anything in the
-output that tells you the exclusion fails?
+The link with session 10: firms that refused the treatment in a trial. There, the **draw** was the
+instrument for **taking** the treatment. An encouragement, a lottery, a distance, an eligibility rule:
+every instrument is an attempt to find a draw that someone else made.
+:::
+
+## Your turn · The instrument {.scrollable}
+
+::: {.step}
+1. **A weak instrument.** In step 1, change `1.2 * voucher` to `0.1 * voucher` and rerun steps 1, 2 and 4.
+   What happens to the F statistic, to the estimate and to its interval?
+2. **Exclusion fails.** Back at `1.2`, add `+ 3 * voucher` to `exports` in step 1: the letter helped firms
+   directly. Rerun steps 2 to 4. Does any check in step 2 warn you? How far is the estimate from 12?
+3. **The second stage by hand.** In step 4, save the first stage's `.fittedvalues` as a column and run
+   `smf.ols("exports ~ fitted")`. Compare the coefficient and the standard error with `IV2SLS`.
 :::
 
 ## What to report {.scrollable}
 
+::: columns
+::: {.column width="50%"}
+**For a difference-in-differences**
+
 1. **The adoption structure**: units per cohort, years before and after, and which cohorts are unusable.
 2. **The parallel-trends argument**, as an argument: why would the gap have stayed constant?
-3. **An event study**, with the reference year marked; if there are too few pre-periods, say so.
-4. **A staggered-robust estimator beside TWFE.** If they agree, show it; if they disagree, that is the finding.
+3. **The plot** of each group over time, and **an event study** with the reference year marked.
+4. **A staggered-robust estimator beside TWFE.** If they disagree, that is the finding.
 5. **Standard errors clustered by unit**, with the number of clusters.
-6. **What else changed at the same time**, and why it is not the explanation.
-7. **How much violation the result survives**, when the pre-trend evidence is thin.
-8. **For an instrument:** the first stage and its F statistic, and the **argument** for exclusion, in words.
+6. **What else changed at the same time**, and **how much violation** the result survives.
+:::
+
+::: {.column width="50%"}
+**For an instrument**
+
+1. **The naive estimate**, and why it cannot be trusted.
+2. **Why the instrument is as good as random**, with balance on what was fixed before.
+3. **The first stage** and its F statistic.
+4. **The reduced form**, then the two-stage estimate with its interval.
+5. **Whom the estimate describes**: the units the instrument moved.
+6. **The argument for exclusion**, in words.
+:::
+:::
 
 ::: {.warn}
-**A flat pre-trend makes parallel trends plausible. It does not make it true.**
+**A flat pre-trend makes parallel trends plausible, and a strong first stage makes an instrument relevant. Neither makes the design true.**
 :::
 
 ## Before the next session {.scrollable}

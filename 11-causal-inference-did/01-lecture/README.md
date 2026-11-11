@@ -21,15 +21,17 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S11-Lecture.qmd`](MATH60033A-S11-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**, and every dataset loads with one
-call — `qmib.load("core")`.
+what loses marks. Every code example in the deck is **Python**. The first cell of each design
+simulates its data and writes a small CSV in your folder; every later cell starts from that file, so
+each runs on its own once the first has run.
 
 ---
 
 ## What the lecture covers
 
-The lecture is built on **four examples**, with no code on screen while they are taught; the code
-for all three comes at the end, for you to run in class.
+The lecture is built on **four examples**, with no code on screen while they are taught. The code
+comes at the end and does not replay the examples: it explains the two designs,
+difference-in-differences and an instrument, and has you carry each one out on new data.
 
 1. **The language of difference-in-differences (DiD)** — the two differences, the interaction
    regression, the words you will need, and parallel trends stated exactly
@@ -44,7 +46,15 @@ for all three comes at the end, for you to run in class.
    distance to the nearest port as an instrument, the first stage and the reduced form, two-stage least
    squares against the truth, and what happens when the exclusion fails
 6. **Wrapping up** — matching, DiD or an instrument; what DiD cannot fix; the seven steps
-7. **In class · The code behind the four examples** — every cell, and a *Your turn* per example
+7. **In class · The two designs, done in Python** — what each design is and why it removes
+   selection, then:
+   - **a difference-in-differences study, step by step** (export desks opened in 40 regions, in two
+     waves): the panel and the adoption table, the plot, one clean 2×2, an event study by regression,
+     two-way fixed effects against Callaway–Sant'Anna, and a sensitivity analysis
+   - **an instrument, step by step** (a randomly drawn voucher for a trade fair): the naive answer,
+     balance and the first stage, the reduced form and the ratio, two-stage least squares, and whom
+     the estimate describes
+   - a *Your turn* for each
 
 ---
 
@@ -63,15 +73,23 @@ By the end of the session you should be able to:
 
 ## The data
 
-**Two simulations, and the course data on national AI strategies**
+**The four examples: three simulations, and the course data on national AI strategies**
 
 ```python
 import qmib
 wide = qmib.load("angle_c_country")    # Example 3: AI use and AI strategies, by country and year
 ```
 
-Run it once before class from the repository root; it caches locally and then works offline.
-Examples 1, 2 and 4 are simulated inside their cells.
+The lecture's charts are drawn from these. Examples 1, 2 and 4 are simulated.
+
+**The in-class code: two new simulations, each with a known effect**
+
+- `export_desks.csv` — 40 regions, 2014–2023; export desks open in 12 regions in 2018 and 10 more in
+  2021 (true effect: 2 points of exporting firms per year open)
+- `trade_fair.csv` — 3,000 firms, half of which were sent a voucher for a trade fair at random (true
+  effect of attending: +12, \$ thousand of exports)
+
+The first cell of each design writes its file; nothing is downloaded.
 
 ---
 

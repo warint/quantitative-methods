@@ -423,7 +423,7 @@ means = houses.groupby(["near", "post"])["price"].mean().unstack()
 did = smf.ols("price ~ near * post", data=houses).fit(
     cov_type="cluster", cov_kwds={"groups": houses["house"]})
 did.params["near:post"]                  # the DiD estimate
-smf.ols("ai_use_any ~ has_ai_strategy + C(geo) + C(time)", data=panel).fit()
+smf.ols("exporters ~ desk + C(region) + C(year)", data=panel).fit()   # two-way fixed effects
 import diff_diff as dd
 cs = dd.CallawaySantAnna(cluster="geo").fit(panel, outcome="ai_use_any",
     unit="geo", time="time", first_treat="g")   # g = adoption year, 0 = never
@@ -431,10 +431,15 @@ cs.overall_att, cs.overall_se
 from statsmodels.sandbox.regression.gmm import IV2SLS
 iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),
             sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument
+smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).fit()
+# one interaction per year: the gap that year minus the gap in 2017
 
 # -- Choose and validate -------------------------------------------
 es = cs.aggregate("event_study")
 dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb
+
+# -- Plot ----------------------------------------------------------
+plt.errorbar(study.index, study["effect"], yerr=1.96 * study["se"], fmt="o", capsize=3)
 ```
 
 ### Session 12 · Final group presentations, and the closing address

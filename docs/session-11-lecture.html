@@ -1084,7 +1084,7 @@ Thierry Warin, PhD
 <li>Example 3 · Do national AI strategies raise firms’ AI use?</li>
 <li>Example 4 · Does exporting raise productivity?</li>
 <li>Wrapping up · What the design cannot fix</li>
-<li>In class · The code behind the four examples</li>
+<li>In class · The two designs, done in Python</li>
 </ol>
 </section>
 <section id="what-session-11-is-for" class="slide level2 scrollable">
@@ -1102,10 +1102,11 @@ Thierry Warin, PhD
 </div><div class="column" style="width:33%;">
 <h3 id="the-python">The Python</h3>
 <ul>
-<li>Build the four cells, then get the same number from an interaction in <code>smf.ols</code></li>
-<li>Plot an event study and let the pre-period speak for the design</li>
-<li>Handle staggered adoption without letting the cohorts blur, with <code>diff_diff.CallawaySantAnna</code></li>
-<li>Ask how much violation of parallel trends a result survives, with <code>HonestDiD</code></li>
+<li>Print the adoption table and plot each cohort before estimating anything</li>
+<li>Build the four cells, then get the same number from an interaction in <code>smf.ols</code>, clustered by unit</li>
+<li>Estimate an event study by regression and let the pre-period speak for the design</li>
+<li>Handle staggered adoption with <code>diff_diff.CallawaySantAnna</code>, and test its sturdiness with <code>HonestDiD</code></li>
+<li>Check an instrument’s first stage, then estimate with <code>IV2SLS</code></li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="the-international-business">The international business</h3>
@@ -1895,313 +1896,631 @@ Y = \beta_0 + \beta_1\,\text{Treated} + \beta_2\,\text{Post} + \beta_3\,(\text{T
 </tbody>
 </table>
 </section>
-<section id="in-class-the-code-behind-the-four-examples" class="slide level2 center">
-<h2>In class · The code behind the four examples</h2>
+<section id="in-class-the-two-designs-done-in-python" class="slide level2 center">
+<h2>In class · The two designs, done in Python</h2>
+</section>
+<section id="two-more-solutions-to-the-same-problem" class="slide level2 scrollable">
+<h2>Two more solutions to the same problem</h2>
+<p>Session 10 gave two solutions to selection: a trial, and matching on what you measured. Today’s two are for when the reason units were treated is <strong>not measured</strong> and you could not draw.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Solution 3 · Difference-in-differences</strong></th>
+<th><strong>Solution 4 · An instrument</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>When</td>
+<td>you observe treated and untreated units <strong>before and after</strong></td>
+<td>no before and after, but something <strong>outside</strong> pushed some units into treatment</td>
+</tr>
+<tr class="even">
+<td>The idea</td>
+<td>compare <strong>changes</strong>, not levels: the control group’s change stands in for what the treated would have done</td>
+<td>use <strong>only</strong> the part of treatment that the outside push caused</td>
+</tr>
+<tr class="odd">
+<td>Why it removes selection</td>
+<td>anything <strong>constant</strong> about a unit cancels in its own change</td>
+<td>the push is unrelated to the unit’s hidden traits</td>
+</tr>
+<tr class="even">
+<td>What you must assume</td>
+<td><strong>parallel trends</strong>: without the policy, both groups would have changed alike</td>
+<td><strong>exclusion</strong>: the push affects the outcome only through the treatment</td>
+</tr>
+<tr class="odd">
+<td>What you check</td>
+<td>the years <strong>before</strong> the policy</td>
+<td>the <strong>first stage</strong>: does the push move the treatment?</td>
+</tr>
+<tr class="even">
+<td>The estimate</td>
+<td>the interaction of <em>treated</em> and <em>after</em></td>
+<td>reduced form divided by first stage</td>
+</tr>
+</tbody>
+</table>
+<div class="step">
+<p>Neither needs the confounder to be measured. Each replaces “nothing unmeasured matters” with a different assumption, and each assumption is an <strong>argument</strong>, with one part you can check.</p>
+</div>
 </section>
 <section id="how-this-part-works" class="slide level2 scrollable">
 <h2>How this part works</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p>Every cell that follows <strong>runs on its own</strong>: copy it into a new file in VS Codium, run it <strong>from the repository’s root folder</strong>, and you should see exactly the numbers from the lecture. Examples 1, 2 and 4 simulate their data in the cell; Example 3 loads the course data with <code>qmib.load</code>.</p>
+<p>You now <strong>do</strong> each design from start to finish, on <strong>new data</strong>, not the lecture’s examples. The packages, by name: <code>numpy</code>, <code>pandas</code>, <code>statsmodels</code>, <code>matplotlib</code>, <code>diff_diff</code>.</p>
+<p>Each design is one short piece of work in steps. Its <strong>first cell writes a small data file</strong> in your folder; every later cell starts by reading that file, so each cell runs on its own once the first has run.</p>
 </div><div class="column" style="width:50%;">
 <div class="step">
-<p><strong>For each example:</strong></p>
+<p><strong>For each design:</strong></p>
 <ol type="1">
-<li>run the cells and check you get the numbers from the lecture;</li>
-<li>do the <strong>Your turn</strong> task under the last cell, changing one thing at a time.</li>
+<li>run the cells in order, and say what each step is <strong>for</strong> before reading its output;</li>
+<li>do the <strong>Your turn</strong> task under the last cell;</li>
+<li>keep the file: it is the template for your project.</li>
 </ol>
 </div>
 </div></div>
 </section>
-<section id="example-1-in-python-simulate-then-the-four-means" class="slide level2 scrollable">
-<h2>Example 1 in Python · Simulate, then the four means</h2>
-<div id="1e3a30af" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="co"># Example 1 · 1,000 houses, half near a new site; the site lowers nearby prices by 10 ($ thousands)</span></span>
+<section id="solution-3-a-difference-in-differences-study-step-by-step" class="slide level2 scrollable">
+<h2>Solution 3 · A difference-in-differences study, step by step</h2>
+<p><strong>The case.</strong> A government opens <strong>export desks</strong>, one-stop offices for customs paperwork, in 12 regions in 2018 and in 10 more in 2021; 18 regions never get one. Does a desk raise the share of a region’s firms that export? Regions with a desk already exported more, for reasons nobody recorded. Simulated data, so the truth is known: a desk adds <strong>2 points for every year it has been open</strong>, 6.1 on average over the years observed.</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>What you do</th>
+<th>Why</th>
+<th>In Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>the <strong>panel file</strong> and the <strong>adoption table</strong></td>
+<td>who was treated, when, and how many years before</td>
+<td><code>.groupby(&quot;opened&quot;)[&quot;region&quot;].nunique()</code></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>plot</strong> the outcome by group over time</td>
+<td>the design, and its assumption, are visible before any regression</td>
+<td><code>.groupby([...]).mean().unstack().plot()</code></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>one <strong>clean 2×2</strong>: four means, then the interaction</td>
+<td>every DiD is this comparison underneath</td>
+<td><code>smf.ols(&quot;y ~ treated * post&quot;)</code>, clustered</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>the <strong>event study</strong></td>
+<td>the checkable part: were the groups moving alike before?</td>
+<td><code>treated * C(year, Treatment(reference=2017))</code></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><strong>all cohorts</strong>, with an estimator built for staggered timing</td>
+<td>one big regression mixes in comparisons it should not make</td>
+<td><code>dd.CallawaySantAnna</code> beside TWFE</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><strong>sensitivity</strong></td>
+<td>how wrong could parallel trends be before the result goes?</td>
+<td><code>dd.HonestDiD</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="did-step-1-the-panel-and-the-adoption-table" class="slide level2 scrollable">
+<h2>DiD · Step 1 · The panel, and the adoption table</h2>
+<div id="da7d2eac" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="co"># DiD, step 1 · 40 regions, 2014-2023: one row per region and year</span></span>
 <span id="cb1-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-4"><a href></a></span>
-<span id="cb1-5"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
-<span id="cb1-6"><a href></a>n <span class="op">=</span> <span class="dv">1000</span></span>
-<span id="cb1-7"><a href></a>near <span class="op">=</span> (np.arange(n) <span class="op">&lt;</span> <span class="dv">500</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb1-8"><a href></a>base <span class="op">=</span> <span class="dv">250</span> <span class="op">-</span> <span class="dv">15</span> <span class="op">*</span> near <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">20</span>, n)          <span class="co"># near houses were cheaper already</span></span>
-<span id="cb1-9"><a href></a>before <span class="op">=</span> base <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">10</span>, n)</span>
-<span id="cb1-10"><a href></a>after <span class="op">=</span> base <span class="op">+</span> <span class="dv">30</span> <span class="op">-</span> <span class="dv">10</span> <span class="op">*</span> near <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">10</span>, n)   <span class="co"># +30 for everyone; -10 near the site</span></span>
-<span id="cb1-11"><a href></a></span>
-<span id="cb1-12"><a href></a>houses <span class="op">=</span> pd.DataFrame({<span class="st">&quot;house&quot;</span>: np.r_[np.arange(n), np.arange(n)],</span>
-<span id="cb1-13"><a href></a>                       <span class="st">&quot;near&quot;</span>: np.r_[near, near],</span>
-<span id="cb1-14"><a href></a>                       <span class="st">&quot;post&quot;</span>: np.r_[np.zeros(n), np.ones(n)].astype(<span class="bu">int</span>),</span>
-<span id="cb1-15"><a href></a>                       <span class="st">&quot;price&quot;</span>: np.r_[before, after]})</span>
-<span id="cb1-16"><a href></a></span>
-<span id="cb1-17"><a href></a>means <span class="op">=</span> houses.groupby([<span class="st">&quot;near&quot;</span>, <span class="st">&quot;post&quot;</span>])[<span class="st">&quot;price&quot;</span>].mean().unstack()</span>
-<span id="cb1-18"><a href></a><span class="bu">print</span>(means.<span class="bu">round</span>(<span class="dv">1</span>))</span>
-<span id="cb1-19"><a href></a><span class="bu">print</span>(<span class="st">&quot;after only:  &quot;</span>, <span class="bu">round</span>(means.loc[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">0</span>, <span class="dv">1</span>], <span class="dv">1</span>))</span>
-<span id="cb1-20"><a href></a><span class="bu">print</span>(<span class="st">&quot;before-after:&quot;</span>, <span class="bu">round</span>(means.loc[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">1</span>, <span class="dv">0</span>], <span class="dv">1</span>))</span>
-<span id="cb1-21"><a href></a><span class="bu">print</span>(<span class="st">&quot;DiD:         &quot;</span>, <span class="bu">round</span>((means.loc[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">1</span>, <span class="dv">0</span>]) <span class="op">-</span> (means.loc[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">0</span>, <span class="dv">0</span>]), <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)                 <span class="co"># simulated here; in your project, the panel you were given</span></span>
+<span id="cb1-6"><a href></a>regions <span class="op">=</span> <span class="dv">40</span></span>
+<span id="cb1-7"><a href></a>opened <span class="op">=</span> np.r_[np.full(<span class="dv">12</span>, <span class="dv">2018</span>), np.full(<span class="dv">10</span>, <span class="dv">2021</span>), np.zeros(<span class="dv">18</span>)].astype(<span class="bu">int</span>)   <span class="co"># 0 = never</span></span>
+<span id="cb1-8"><a href></a>level <span class="op">=</span> rng.normal(<span class="dv">30</span>, <span class="dv">6</span>, regions) <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> (opened <span class="op">&gt;</span> <span class="dv">0</span>)   <span class="co"># regions with a desk exported more already</span></span>
+<span id="cb1-9"><a href></a>rows <span class="op">=</span> []</span>
+<span id="cb1-10"><a href></a><span class="cf">for</span> year <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2014</span>, <span class="dv">2024</span>):</span>
+<span id="cb1-11"><a href></a>    years_open <span class="op">=</span> np.where((opened <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (year <span class="op">&gt;=</span> opened), year <span class="op">-</span> opened <span class="op">+</span> <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb1-12"><a href></a>    exporters <span class="op">=</span> level <span class="op">+</span> <span class="fl">1.0</span> <span class="op">*</span> (year <span class="op">-</span> <span class="dv">2014</span>) <span class="op">+</span> <span class="fl">2.0</span> <span class="op">*</span> years_open <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.5</span>, regions)</span>
+<span id="cb1-13"><a href></a>    rows.append(pd.DataFrame({<span class="st">&quot;region&quot;</span>: np.arange(regions), <span class="st">&quot;year&quot;</span>: year, <span class="st">&quot;opened&quot;</span>: opened,</span>
+<span id="cb1-14"><a href></a>                              <span class="st">&quot;desk&quot;</span>: (years_open <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>), <span class="st">&quot;exporters&quot;</span>: exporters.<span class="bu">round</span>(<span class="dv">1</span>)}))</span>
+<span id="cb1-15"><a href></a>panel <span class="op">=</span> pd.concat(rows, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-16"><a href></a>panel.to_csv(<span class="st">&quot;export_desks.csv&quot;</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-17"><a href></a></span>
+<span id="cb1-18"><a href></a><span class="bu">print</span>(panel.head(<span class="dv">3</span>))</span>
+<span id="cb1-19"><a href></a><span class="bu">print</span>(panel.groupby(<span class="st">&quot;opened&quot;</span>)[<span class="st">&quot;region&quot;</span>].nunique().rename(index<span class="op">=</span>{<span class="dv">0</span>: <span class="st">&quot;never&quot;</span>}))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>post      0      1
-near              
-0     250.1  280.9
-1     235.5  255.7
-after only:   -25.2
-before-after: 20.2
-DiD:          -10.5</code></pre>
-</div>
-</div>
-</section>
-<section id="example-1-in-python-the-interaction-regression" class="slide level2 scrollable">
-<h2>Example 1 in Python · The interaction regression</h2>
-<div id="0465e378" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># Example 1 · near * post expands to near + post + near:post; the interaction is the DiD</span></span>
-<span id="cb3-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb3-4"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
-<span id="cb3-5"><a href></a></span>
-<span id="cb3-6"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
-<span id="cb3-7"><a href></a>n <span class="op">=</span> <span class="dv">1000</span></span>
-<span id="cb3-8"><a href></a>near <span class="op">=</span> (np.arange(n) <span class="op">&lt;</span> <span class="dv">500</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb3-9"><a href></a>base <span class="op">=</span> <span class="dv">250</span> <span class="op">-</span> <span class="dv">15</span> <span class="op">*</span> near <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">20</span>, n)</span>
-<span id="cb3-10"><a href></a>before <span class="op">=</span> base <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">10</span>, n)</span>
-<span id="cb3-11"><a href></a>after <span class="op">=</span> base <span class="op">+</span> <span class="dv">30</span> <span class="op">-</span> <span class="dv">10</span> <span class="op">*</span> near <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">10</span>, n)</span>
-<span id="cb3-12"><a href></a>houses <span class="op">=</span> pd.DataFrame({<span class="st">&quot;house&quot;</span>: np.r_[np.arange(n), np.arange(n)],</span>
-<span id="cb3-13"><a href></a>                       <span class="st">&quot;near&quot;</span>: np.r_[near, near],</span>
-<span id="cb3-14"><a href></a>                       <span class="st">&quot;post&quot;</span>: np.r_[np.zeros(n), np.ones(n)].astype(<span class="bu">int</span>),</span>
-<span id="cb3-15"><a href></a>                       <span class="st">&quot;price&quot;</span>: np.r_[before, after]})</span>
-<span id="cb3-16"><a href></a></span>
-<span id="cb3-17"><a href></a>did <span class="op">=</span> smf.ols(<span class="st">&quot;price ~ near * post&quot;</span>, data<span class="op">=</span>houses).fit(</span>
-<span id="cb3-18"><a href></a>    cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>, cov_kwds<span class="op">=</span>{<span class="st">&quot;groups&quot;</span>: houses[<span class="st">&quot;house&quot;</span>]})   <span class="co"># each house is seen twice</span></span>
-<span id="cb3-19"><a href></a><span class="bu">print</span>(did.summary().tables[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>==============================================================================
-                 coef    std err          z      P&gt;|z|      [0.025      0.975]
-------------------------------------------------------------------------------
-Intercept    250.1188      1.027    243.480      0.000     248.105     252.132
-near         -14.6524      1.427    -10.269      0.000     -17.449     -11.856
-post          30.7593      0.644     47.789      0.000      29.498      32.021
-near:post    -10.5128      0.921    -11.414      0.000     -12.318      -8.708
-==============================================================================</code></pre>
+<pre><code>   region  year  opened  desk  exporters
+0       0  2014    2018     0       34.7
+1       1  2014    2018     0       42.5
+2       2  2014    2018     0       43.0
+opened
+never    18
+2018     12
+2021     10
+Name: region, dtype: int64</code></pre>
 </div>
 </div>
 <div class="step">
-<p><strong>Your turn.</strong> (1) Change the market’s rise from <code>+ 30</code> to <code>+ 60</code>: which of the three comparisons moves, and which does not? (2) Make near houses <strong>more</strong> expensive before (<code>+ 15 * near</code>): does the DiD change? Why not?</p>
+<p>A DiD needs a <strong>panel</strong>: the same units, several dates, one row per unit and date. The adoption table is the first thing to print: it says which comparisons exist. Here both cohorts have years before their desk (four and seven), and 18 regions are never treated, so there is always a clean control group.</p>
 </div>
 </section>
-<section id="example-2-in-python-six-years-and-the-event-study" class="slide level2 scrollable">
-<h2>Example 2 in Python · Six years, and the event study</h2>
-<div id="b616a4bb" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="co"># Example 2 · 2003-2008, sites open in 2006; B adds a pre-existing slide of -3 a year near the sites</span></span>
-<span id="cb5-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb5-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb5-4"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
-<span id="cb5-5"><a href></a></span>
-<span id="cb5-6"><a href></a>n <span class="op">=</span> <span class="dv">1000</span></span>
-<span id="cb5-7"><a href></a>near <span class="op">=</span> (np.arange(n) <span class="op">&lt;</span> <span class="dv">500</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb5-8"><a href></a><span class="cf">for</span> version, drift <span class="kw">in</span> [(<span class="st">&quot;A&quot;</span>, <span class="fl">0.0</span>), (<span class="st">&quot;B&quot;</span>, <span class="op">-</span><span class="fl">3.0</span>)]:</span>
-<span id="cb5-9"><a href></a>    rng <span class="op">=</span> np.random.default_rng(<span class="dv">12</span>)</span>
-<span id="cb5-10"><a href></a>    house_effect <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">20</span>, n)</span>
-<span id="cb5-11"><a href></a>    rows <span class="op">=</span> []</span>
-<span id="cb5-12"><a href></a>    <span class="cf">for</span> year <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2003</span>, <span class="dv">2009</span>):</span>
-<span id="cb5-13"><a href></a>        price <span class="op">=</span> (<span class="dv">250</span> <span class="op">-</span> <span class="dv">15</span> <span class="op">*</span> near <span class="op">+</span> house_effect <span class="op">+</span> <span class="dv">8</span> <span class="op">*</span> (year <span class="op">-</span> <span class="dv">2003</span>)</span>
-<span id="cb5-14"><a href></a>                 <span class="op">+</span> drift <span class="op">*</span> near <span class="op">*</span> (year <span class="op">-</span> <span class="dv">2003</span>)</span>
-<span id="cb5-15"><a href></a>                 <span class="op">-</span> <span class="dv">10</span> <span class="op">*</span> near <span class="op">*</span> (year <span class="op">&gt;=</span> <span class="dv">2006</span>) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">10</span>, n))</span>
-<span id="cb5-16"><a href></a>        rows.append(pd.DataFrame({<span class="st">&quot;house&quot;</span>: np.arange(n), <span class="st">&quot;near&quot;</span>: near, <span class="st">&quot;year&quot;</span>: year, <span class="st">&quot;price&quot;</span>: price}))</span>
-<span id="cb5-17"><a href></a>    prices <span class="op">=</span> pd.concat(rows, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb5-18"><a href></a></span>
-<span id="cb5-19"><a href></a>    by_year <span class="op">=</span> prices.groupby([<span class="st">&quot;year&quot;</span>, <span class="st">&quot;near&quot;</span>])[<span class="st">&quot;price&quot;</span>].mean().unstack()</span>
-<span id="cb5-20"><a href></a>    gap <span class="op">=</span> by_year[<span class="dv">1</span>] <span class="op">-</span> by_year[<span class="dv">0</span>]</span>
-<span id="cb5-21"><a href></a>    event_study <span class="op">=</span> gap <span class="op">-</span> gap[<span class="dv">2005</span>]                       <span class="co"># relative to the last year before the sites</span></span>
-<span id="cb5-22"><a href></a></span>
-<span id="cb5-23"><a href></a>    two <span class="op">=</span> prices[prices[<span class="st">&quot;year&quot;</span>].isin([<span class="dv">2005</span>, <span class="dv">2008</span>])].copy()</span>
-<span id="cb5-24"><a href></a>    two[<span class="st">&quot;post&quot;</span>] <span class="op">=</span> (two[<span class="st">&quot;year&quot;</span>] <span class="op">==</span> <span class="dv">2008</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb5-25"><a href></a>    estimate <span class="op">=</span> smf.ols(<span class="st">&quot;price ~ near * post&quot;</span>, data<span class="op">=</span>two).fit().params[<span class="st">&quot;near:post&quot;</span>]</span>
-<span id="cb5-26"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;version </span><span class="sc">{</span>version<span class="sc">}</span><span class="ss">: DiD 2005-&gt;2008 = </span><span class="sc">{</span>estimate<span class="sc">:.1f}</span><span class="ss">   (truth -10)&quot;</span>)</span>
-<span id="cb5-27"><a href></a>    <span class="bu">print</span>(<span class="st">&quot;   event study:&quot;</span>, event_study.<span class="bu">round</span>(<span class="dv">1</span>).to_dict())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="did-step-2-look-before-you-estimate" class="slide level2 scrollable">
+<h2>DiD · Step 2 · Look before you estimate</h2>
+<div id="ef0ce1c8" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="3">
+<div class="column">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># DiD, step 2 · The average outcome of each cohort, year by year</span></span>
+<span id="cb3-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb3-3"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-4"><a href></a></span>
+<span id="cb3-5"><a href></a>panel <span class="op">=</span> pd.read_csv(<span class="st">&quot;export_desks.csv&quot;</span>)</span>
+<span id="cb3-6"><a href></a>by_year <span class="op">=</span> panel.groupby([<span class="st">&quot;year&quot;</span>, <span class="st">&quot;opened&quot;</span>])[<span class="st">&quot;exporters&quot;</span>].mean().unstack()</span>
+<span id="cb3-7"><a href></a>by_year.columns <span class="op">=</span> [<span class="st">&quot;never&quot;</span>, <span class="st">&quot;desk in 2018&quot;</span>, <span class="st">&quot;desk in 2021&quot;</span>]</span>
+<span id="cb3-8"><a href></a></span>
+<span id="cb3-9"><a href></a>by_year.plot(marker<span class="op">=</span><span class="st">&quot;o&quot;</span>)</span>
+<span id="cb3-10"><a href></a>plt.axvline(<span class="fl">2017.5</span>, color<span class="op">=</span><span class="st">&quot;grey&quot;</span>, linestyle<span class="op">=</span><span class="st">&quot;--&quot;</span>)</span>
+<span id="cb3-11"><a href></a>plt.axvline(<span class="fl">2020.5</span>, color<span class="op">=</span><span class="st">&quot;grey&quot;</span>, linestyle<span class="op">=</span><span class="st">&quot;--&quot;</span>)</span>
+<span id="cb3-12"><a href></a>plt.ylabel(<span class="st">&quot;firms exporting, %&quot;</span>)</span>
+<span id="cb3-13"><a href></a>plt.show()</span>
+<span id="cb3-14"><a href></a></span>
+<span id="cb3-15"><a href></a><span class="bu">print</span>(by_year.loc[[<span class="dv">2014</span>, <span class="dv">2017</span>, <span class="dv">2020</span>, <span class="dv">2023</span>]].<span class="bu">round</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img role="img" data-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAygAAAGuCAYAAAB7giIdAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAOxAAADsQBlSsOGwAAivZJREFUeJzt3Qd0k+XbBvCre+/BLHvvPWQroGwHin8Vt+DeiH6oiAMVFfcC98YtQ0CQrQgyZY8yCrR07z3ynft5mzRJU2hL2qzrd07O27wZfZsmba48z/3cbjqdTgciIiIiIiI74G7rAyAiIiIiItJjQCEiIiIiIrvBgEJERERERHaDAYWIiIiIiOwGAwoREREREdkNBhQiIiIiIrIbDChERERERGQ3POGEysrKkJGRAV9fX7i5udn6cIiIiIiIXJpOp0NBQQFCQ0Ph7u7uegFFwklERIStD4OIiIiIiIykpqYiPDwcLhdQZORE/wD4+fnZ+nCIiIiIiFxafn6+GkDQv093uYCin9Yl4YQBhYjszYIFC9R22rRptj4UIpfF1yGRbVSn/MIpAwoRkT1LSEiw9SEQuTy+DonsF1fxIiIiIiIiu8GAQkREREREdsOlp3jJcsTFxcW2PgyyAS8vr/MucUdERERE9c/TVddhTkpKQlpamq0PhWxIlriLjo5mrxwiIiIiO+KSAUUfTho0aAB/f3++QXXBgJqXl4fExER1Xp4HRERERGQfPF1xWpc+nJyvSQw5L/0a3BJSoqKiON2L6lWvXr34iBPZGF+HRPbL5QKKvuZERk7ItemfA/Kc8PHxsfXhkAuZMGGCrQ+ByOXxdUhkv1y2Srg6TWLIufE5QERERGR/XDagEBHZSnx8vDoRke3wdUguJT8dSDmibR2Ay03xIiKytYULF6rt7NmzbX0oRC6Lr0NyCamxwKqngUO/A7oywM0d6DAOGDkHiGgNe8URlAuQmVeM2OQctSUiIiIisqtwsnAEcHiFFk6EbA8t1/bL5XaKIyi1cCIlFy8uP4BV+xNRpgPc3YBRnRrgiTEd0SIywPq/JSIiIiKimlg9GyjKBcpKTPfLedkvl0/5CvaIIyi1CCcT39mE1QeSVDgRspXzsl8ut/ayyI8//riaK7to0SI8//zz+O233ypdb9u2bXj99dfV6cCBA4b9n332Gf744w/Tn+HECcyaNQslJSXnvb3++585cwbfffedmpKSmppq1Z+RiIiIiKwoPx04uKxyONGT/Qd/t9uaFAaUGpKRk9yiUpTq00k5OS/75XJrkoDw8ssvY/To0Vi9erVqMHjHHXfgueeeM1xHQoMslygh4uTJkxg8eDAWL16sLsvJycHMmTNN7vODDz7Ajh074Onped7b67//JZdcooKOn58fPDw8rPozEhEREZEV5aZUTOuqiq5Uu54d4hQvAC0eX2aVB1NCysp9idW6vxMvjavRfd97772488471dcdOnTA3Llz8dRTT2Hv3r2YN28e9u/fj5YtW6rLJWA8/PDDmDhxIq677jo8+uij2LVrF3r06IHS0lJ8+eWXeOONN9R1z3d7vdtvv13dDxERERHZsawEYMMr57+emwcQEAl7xIDiICQ06LVq1Up1QBd///03goKC8OGHHxoul1GT2NhYZGVlITw8XAUNmeoloURGQQoLCzFp0qRq3V7fzFBGUIiIiIjIThVkAX+/Bfz9DlCSX75T+v6ZzvpR3D2B9mMAvzDYIwaUGoxmyGpdPZ/7w1B7YokUzO98ajRC/L1gTfrpWHo6nc6w9fb2RmhoqOEy+frFF180NCK89dZbMXXqVLzyyiv49NNPcf3116vbVPf2QqZ2EZF1yDRNIrItvg7JaZQWA9s/A9a9BOSVT9nqOBHofSvw402VC+UlnHgHaEsN2ykGlBqQ0CGrdUlBvHkNivBwd8PIjtFWDyfnMmTIEGRkZGDy5Mlo06aNYf+mTZvUyIiQ+hUfHx988cUXqrbkn3/+qfbtjQvpicg6GjduzIeSyMb4OiSHp9MBBxYDq+cAaeVLBsf0B0Y9BzTrr52/Y622WpcUzKs+KB7ayImd90FhQKkhWUp4c2xqpUJ5CScB3h7q8vrUqVMnPPvssxgwYADGjh2LwMBAbNmyBf379zdMC3N3d8eNN96IBx54QF1falFqcnsiIiIisiNx/wB/PAWc3qqdj2ijhQ5pwmg0A0aFEFlKWFbrkoJ4qTmx02ldxhhQakj6nCy+d3ClPigyclIXfVBkxSyZbhUdHV1xDC1a4JlnnjGcl4L2yy+/HH/99Rdyc3Mxffp0dO/e3eR+7rrrLgQHB2PgwIGVvse5bm/p+xPRhVmyZInayup5RGQbfB2SQ0o5Aqx+Bji4VDsfEAUMfxzodRPgcY4ZPBJKHCCY6Lnp9MUMTiQ/P18Vd8uSvOa1E1IgfuzYMVVoLtOeLoTUpKTkFiIywKdep3WRdVjzuUBUE3PmzDEs8U1EtsHXITmUnCStxkRqTWR5YC9/4KL7tJOPNqXfkd+fm+MIygWQUMJgQkRERER1ojAH2Pwu8NebQHEu4OYO9L4ZGP4EENTQaR90BhQiIiIiIntSWgLs/BJY9yKQo7WWQPuxwMhngKj2cHYMKERERERE9kAqLw4t11beSjms7WvSW1uZq8UguAqbBRSZfyaNAI0FBAQYlsY93+VERERERE7j9DZtZa64v7XzYS2BkbOBTpebrszlAtxt9Y3fe+89NG/eXC15qz/JalHVvZyIiIiIyOGlxgLf3wR8dIkWTvwjgDHzgHu2Ap2vcLlwYvMpXiNGjMCKFStqfTkRkSNq1KiRrQ+ByOXxdUg2J31J1s8Dtn2sdXr39AUG3gMMegDwDYErs3kNikzjkiXHPD09a3U5EZGjmTZtmq0Pgcjl8XVINlOUB/zzHrDpDaAoW7p+AD1vAIb/HxDShL8YW07xknqSvXv3ok2bNurrSy65BAcPHqz25caKi4vV2srGJyIiIiIiu1FWCuz4Eni7F7DmOS2ctB0N3PUXMOldhhN7CCjS2fz06dNISkpCYmKi6lQ+fvx4FBUVVetyYy+88IIaZdGfIiIi4Mx27tyJ++6774Lvp6ysDNdeey3i4+OtclxEREREZGFlrsN/AO8PAhbfC2QnAI26AzcuBq7/AWjQmQ+ZvQQUY6GhoXjrrbcQGxuLPXv21PjyWbNmqVW/9KfU1FQ4szNnzmDJkiVWCSiLFi2qtFrauVx//fU4efLkBX9vIlfvYK3vYk1EfB2SEzuzA/h8AvDN1UDyASC0GXDVx8Ad64BWw2x9dHbLZoUdOp0ObkarEmRnyxw8wNfXt1qXG/Py8lKnepefrhU4BUQCfmFwBZMmTUJISO0Lt9LT0/HZZ5+p6XtSoDh16lS0b2/acOjXX3/F0qVL4e3tjf/9738YMmSI4bKnnnoKR44cUV+3bdsWzz33nMltZYTtiy++wL///qvqlmShhauuusrkuURERERUp9JPAH8+B+z9UTvvGwoMewzoezvg6cMH315HUC6//HL88MMPalRkw4YN6pP5gQMHomPHjtW63ObLwX13PTCvFfBOH2276AZtv5O75ppr1IhWbRw/fhx9+vRRU/cuuugiJCcno2vXrti0aZPhOq+88gpuvfVWdOjQAVFRURg1ahR++eUXw+XDhg1Tz42SkhKsWrWq0veYMmUKXn31VfTs2ROtW7fGvffei8cff7yWPy0RERFRDeSlASv+D3i7jxZOPHy0Vbke2KWt0MVwYt8jKK+99pqa4vB///d/6hP5iy++WL2RdHd3r9blNiMhZOEIoCgX0JVp+2QrXT+PbwDuWAtEtLbqtywsLFR9Yfbv34/OnTsjJiam0nV+/vlnrF+/Xn09ceJEtaiA3saNG/Hjjz+q+5H9V199tcXvI6NW0mtGtvK4Wxp1kKA4d+5c1aNGpohdd911mD17NhYvXqxGNiRw3H333RZHtKQ2SOpngoOD1fnbbrsNCQkJWLBgAQYPHqwWN3j22Wfx4YcfqvsV8vt+4okncMUVV6jzI0eOVFtZMEGCjjGZ3vfbb79hzZo1GD58uNonjT3lefTyyy/X4BEnIiIiqoHifGDLh8DG+UBhprYyV/f/ASNmAaGV37fRudns3b6szvXll1+qN7Xbtm3DvHnzEB4eXu3LbWb1bC2cyHrVxuS87JfLrWzcuHH49ttv1eiDjELIAgLGbrnlFjX1SaY8tWzZUk2b+vjjj9Vl//zzD8aMGaNGI/r27atGI+SxNFdQUKAK5uXNvYw6VDUlSmpWZJqWcQ2LTPuSEY1+/frh7bffxqOPPmrxthJM9OFELycnR4UIsX37dnVefl49WRjh0KFDaqGE85Hpfw0bNsSpU6cM++Li4tCqVavz3paIiIioVitz7fpWGzGR94ASTlqNAKZvAK74gOGklthcRDxjpWY4ElIOLKne/T0j6fr81q5di61bt6o32vqpVVJnsXz5cvX1li1b8P3336vC9cjISLWvU6dOuOmmm9QIxX///YdevXrhySefVJfJvpSUFJPvIedlv4RCud+a1vM888wzhhGPsLAwNeLx5ptvnvd2Mqojx//uu++q8xJCJGQY17hI4NBf1qBBg3Pen4y2yOIBN998M77++ms1IiNLUEu4IyIiIrKqo38Cq2YDieULODXoCoyaA7SpmMVCtcOAYudk1bLu3bub1H1IHYY+oMjokhSTy6iH8WjI2bNn1UjH5MmT1UiUTO2Seg7ZykiKManpkMs+//zzWh1jjx49DF9L4Xt1VlGTIngJRRKu9HVFUtQugcJ4gQSZlqa/7HxkREemqAUGBuLKK69Ut5XwI9PjOMWLiIiIrCLhP2DV08Cxtdr54KbAxU8C3a4B3D34IFsBA0oNRjPUql1SEK+vPbHEzQN4LNZqq3pJXxeprTBmfN7Pz09Nm5KQYUyma8lohFwuNSgy7envv/9W/VMkoMhULL2nn35ajYJI/YZM16op87ogCRjnIqFEOvjKCIoEIz2ZilVaWqpGi6TGRciUNrl//flzkRocqcVJS0szBDpZWEF+3gcffFCFJyJ7IFMXici2+DqkGsuIA9a8APy3SN7tAD4hwJCHgf7TAS8/PqDO1gfFYUjo6DAOcK8i18n+DmOtuuSwLLEroyhSnyFkhEGW0dWTZXRlpETewEsokZMsqytv6iWcyBQx6ZsihfWywpUEFPMeKqNHj1ZF7jKi8c0336AuyRLDd955pzoG43AiunTpoqaZvf/++4Z9H3zwgTq+gICA8963BDUJRydOnDDs0wccGVUhshe9e/dWJyLi65AcgHxA/cdTWp3Jf99p7/cG3KOtzDX4QYaTOsARlJoaOUdbrcu8UF6erN4B2uVWJD1CZHRDVqWSsHLs2DE0bdrUcLkUxcsqWLJyl0yVkjfi+/btUyMUwsPDQ62AJrUcUowuS/rKiIk5WUVr5cqVqqBeCtX1t7cmWcFLlhCWlb5k6pW+9kSWFJafUaZ1ffLJJ+pnkePMzc1V9TFSuK8nxf+yvLD0UZFpbBLIZAEAGRGSN3zTp09XP4tMg5MpXjJqJNO79IX4RERERNVSUghsXQhseAUoyND2dZkMXPIUENaCD2IdctOdbz6OA5LiaP3UKBlFMCZvWuVNvkwn8vHxqf1Sw7JSw8Fl2nQvmdYlIycSTqy8xLDe0aNH1WpWUgAvxy0jKhMmTDBcLt3gd+/erd7Uyxt1edNu/DNLMbo0u5R6kSZNmqj98quXVbhk1Sz9G3j5PnLfEhLMHzv99CwZ0ZApVJZuL4FC+tZIDYi5pKQkk7ChJ8dqvCxyRkaGCihSrD906FCT45CaGzlGYzK6YvxYyO/3wIEDqm6lW7duVU7tsspzgagW9COiHEUhsh2+DqlKZWXA3p+ANc9q07pEiyHAqGeBJr34wNXB+3NzDCgXwgU7yTsTBhSyFenNI6SHEBHxdUh25Nh6YNVTQMJu7XxURy2YtB0FVNGCgawfUDjF60JIKGEwISIiInJsifu0JYOPrtLOBzXSmiz2uI4rc9kAAwoRERERuabMM8DaucCur7WVubyDtML3AXcD3v62PjqXxYBCRERERK6lIBP4601g83tASb622FGf24Bhj2lT98mmGFCIiIiIyDWUFAHbPgHWvwzkp2n7Ol0OXPJ0nS10RDXHgEJEREREzk0Wrd33C/DnHCC9vF9as4HAqOeAmL62Pjoyw4BCRERERM7rxF/aylxntCXeEdlOaw3RfgxX5rJTXGaYXBaXGSYiInJiSQeB1c8Ah5dr5wOigRH/B/ScCnjwM/r6xmWGiYiIiMi5VdWPLvustjLXzi+1htpeAcCgB4CB9wA+gbY8YqomxkcHJF3W582bh8WLF1/Q/ZSWlqJ///746aef0Lx5c6sdHxEREVGdSY0FVj0NHPpdCyBu7kCHccDQx4ADS4DN7wDFeYCbR/nKXDOBoAb8hTgQBhQHlJGRgf/++++C70en02H79u1qyK26BgwYgC+++ALt2rW74O9P5KoWLFigttOmTbP1oRC5LL4OHTicLBwBFOVq4UTI9uAy4MBSrZeJ6DAeuGQ2EMX3K46IAeUCZBZmIq0gDeG+4QjxCYErePfddxETE1Pr2x84cADvvPMO9u7di0aNGuHWW2/F6NGjTUZ1Xn/9dSxduhTe3t647rrrcPPNN1f79rfccgv27Nmjvu7atSs+/fTTWh8rUV1JSEjgg0tkY3wdOqjVs7VwUlZiul8fVnxDgf99BzQfaJPDI+tgQKmFuKw4zN8+H2vj1qIMZXCHO0Y0G4GHez+MZsHN4Mx69+5d69sePHgQ1157Le68805cc8012Lp1K8aNG4cffvgBl19+ubrOo48+il9//VWFlOzsbNx3333Iy8vD3XffXa3bz5w5Ezk5OeqTMWuMMhEREZEd1ZzISIk+jFhSmA1Ed6jPo6I6wIBSi3By7bJrkVecp8KJkO26U+uw9exWfDfuO6uHlJSUFMyePRv79+9H586d0adPH5PLi4qK8MYbb2D9+vXq/KRJk3DHHXfAzc1NnZcpWYsWLVKrVl1yySUqBHh5eVX6PgUFBSoINGzYEC+88ILh9lVN8dLXsLz66qv4+uuvceTIETVq8eyzzyIszKhYrVzLli2xc+dOuLu7q/PDhg1TU8zk2CRgZGZm4r333sPPP/+sgodIS0vDiy++qI7rfLcXHTpof5RkBIYBhYiIyIkk/HfucCJ0pVrhvHHRPDkc7Z0eVZuMnEg4KZUXgBE5L/vlcmuSEDBixAg1FP3kk0+iffv2eOihh0yuM3bsWPzxxx9qtOGuu+7CW2+9heeff15dtnLlSjz44IOYOnUqnnrqKVVv8tJLL1X6PsnJybj44ovV1xIwLIUTsW3bNjWiYVzDIiMaI0eOxNNPP41///0XDzzwgMXb+vj4GMKFXmxsLJo2baq+3rFjhwpb8vPqydenT59Wp/PdnoiIiJxMaYlWW/LVZOCLiee/vhTGy6pe5NA4giK1Cp93tcqDKSHlz7g/q3V/e27S6iTOZ/ny5Th79qx64+/r66tGQM6cOYPvvvtOXf7nn3+qkCD7/P391b7IyEhcdtllKpDEx8ejTZs2akqUvLmXUQcZSTF2+PBhPPLIIyrESMioKRlBGT9+vPpaQtQ999xTrdvNnz8fJ0+eVAFKpKamqp9B/3Pofxb9ZeZBxPz2RERE5CTST2rLBO/4Esg5q+3z8AYCorRlhM0+KFbcPbXmixw9cXgMKHZOpk116tRJhRPjOhB9QNm3b58adRg6dKjh8pKSEjVdSkZFpGZjw4YN6Natm5qeJQHn6quvNvkeN9xwg5oiVZtwIiQA6YWGhqrvXZ1ie5m6JSM8TZo0UftkhESmmZWVlRlGSnJzc9XW+Oev6vZERETkwEqLgcMrge2fAkf/rFiRK6It0OcWoNu1QEFGxSpexoXyEk68A7QO8eTwGFBqMJohq3YN/W6oofbEEnc3d2yYssFqq3qFh4er0QPzmhTjyxs0aIAPPvig0m0lLEitiaxkJaFl9+7deO6551RRudR56H388ce4//778eabb1Y5PcuaXn75ZVUzs2bNGlWzoif1IxJODh06hI4dO6p9Uhgvq3m1aNHivLcnchS9evWy9SEQuTy+Du1stGTHF8DOr4xGS3yATpOA3jcDzS8C9FPPAyKAO9Zqq3npC+ZlWpeMnEg4iWht0x+FrIMBpQYkdMhqXVIQb16DIjzcPDA8ZrhVlxyWEQ+p8ZCmjBMnTlQ9UN5//33D5bLErkxxkmlasiSvkJGTzz//XBXTSxNGmRolxewy8iJTv1555RWT7yFv8mWURepIZOUsmaZVV2TamRybFPSb91Jp27atOkYJIJ999pkaGZJpXFdddZUaXTnf7YkcxYQJE2x9CEQuj69DexgtWQFs+xSIXVMxWhLZTgsl3f8H+Idbvq2EkClfVd1JnhweA0oNyVLCslqXeaG8hBN/L391uTVJuFi4cKEKH40bN0ZWVhZGjRqFjRs3qsujo6Pxyy+/qFW7ZsyYgYCAALXMrrzJF1JUL83gpFYjKChIjb7ISlnmJBzIfUogkpCiv701/f3336p4X7rW68OU6NGjBz766CP19ZdffqlWIZMeJ1IrIyFERkuqe3uZ9iWhTGpv5LGSkCaPmwQ8IiIisrH0E0ajJYkVoyWdL9eCSbOBFaMl5yOhhMHEKbnpZCkmJyMrVUmhtaw25efnZ3KZvOk9duwYWrVqZfhU/oL7oLi5Y0RM3fZBkdoMCRmy1K78fHFxcZWmN8lKX1Kz0bp160qrcMll8oZdbi9TpoxX5erSpYuhxiM9PV2tjCXLGZs/dkIK8qUmRn+Z+e0lHB09elSFBnMSfGT6ljkJThKk9GSal4wIyfQ0+Vlqcnt5XJKSkkwul9+zpalg1nguENWGBGgh4ZmIbIOvw3oeLTm0HNj+mYXRkluA7tdWPVpCLvH+3BwDygVwxU7yzoQBhWxlzhytiFP6GxERX4dOPVqy/XNttCQ36cJGS8ilAgqneF0ACSUMJkRERETGoyW/G42WlItsX74S1xSOltB5MaAQERER0YVJO15RW2IyWnJF+WjJAI6WULUxoBARERFR7UdLZCWuY2sr9kd10EIJR0uolhhQiIiIiKj60o6Vj5Z8XTFa4ulbMVoS05+jJXRBXDagOOHiZVRDfA4QERFVU0lRRW1JpdESqS25hrUlZDUuF1Bk6VohKwjol8Yl1yTPAePnBBEREVkYLZGVuHbJaEmy2WjJLUBMP46WkNW5XEBxd3dHeHg4EhO15kCy3Jl5zxBy/pETCSfyHJDngjwniOqTNFYlItvi6/B8oyXLykdL1lXsj+pYvhLXNWyQSHXK5QKKvvu60IcUck0STvTPBaL6xAaNRLbH16EFqbFabUml0ZIry2tLOFpC9cMlA4qMmDRo0ABRUVEoLi629eGQDci0Lo6cEBGRy5PRkoNLtdGS4+srHo7oTuW1JVdztITqnUsGFD15g+rj42PrwyAiF7NkyRK1nTBhgq0PhchlufzrUI2WSJf3r4G8FO1B8fQDupSPljTty9oSshmXDihERLawY8cOtWVAIbIdl3wdGkZLPgWOb6jYH91Zqy3pKqMlobY8QiKFAYWIiIjI2UdLZArXrm/MRkuuKh8t6cPRErIrDChEREREzqakUBstkS7vJzZW7OdoCTkABhQiIiIiZ5FyFNihHy1J1fZ5+ZfXltwCNOnN0RKyewwoRERERI4+WnJgiTaNy3i0pEEXbQqX9C3xDbHlERLVCAMKERERkdONltwKNOnF0RJySAwoRET1rFGjRnzMiWzMLl+H+elAbgoQEFl175EqR0u6An1u1lbi4mgJOTg3nU6ng5PJz8+Hv78/8vLy4OfnZ+vDISIiIjr3KlurngYO/Q7oygA3d6DDOGDkHCCitXadlCMVK3HlpxmNllxVXlvC0RJynvfnHEEhIiIismU4WTgCKMrVwomQ7aHlWq+SYTOBg78DJzdV3KZhVy2UqNGSYJsdOlFdYUAhIiIispXVs7VwUlZiul/OF2QCK/9PO+8VAHQt71vSmKMl5NwYUIiI6tmcOXPUdvbs2XzsiVz5dSg1JweXVYycVGX0C0CvGzlaQi7D3dYHQEREROSSpCD+fOFEtLuU4YRcis1GUIqLi1FYWGiyz9vbW50sXdfLy6sej46IiIioDskaRWf/O//13Dy0Vb2IXIjNRlDefPNNhIaGomHDhobTE088YXKdZ599FmFhYarSv2/fvvjvv2q8kImIiIjsOZgcWQV8dAnw463nvq67J9BhbNVLDhM5KZtO8Ro5ciRycnIMp9dee81w2eeff4433ngDK1euRFZWFgYNGoTx48ejoKDAlodMREREVMtgshr4aCTw9WTgzHYgIAoY/DDgE6KFEWNy3jtAW2qYyMXYvAalpMRs1YpyH330EW699Vb069dPrZn8wgsvIDU1FX/88Ue9HyMRERFRrYPJ0T+Bj0cDX18FnNkG+EcCo58HHvgPGDkbmLYWaD9G63+in9Yl5+9YW9EHhciF2KwGRWpN/v33XzXNy83NDRdffDFef/11tGrVSl0u07nuvPNOw/UDAgLQtm1b7NmzBxMnTqxUo2IcdKQRDBEREZFNg8mxdcC6l4BT/2j7/COAQQ8AfW/XRkf0JIRM+ap6neSJXIDNRlDuv/9+NSIiU7sOHjyoQsq4ceNU2BCyPzjYtPlQSEgIsrOzK92XjK7IKIv+FBERUW8/BxFRTcl0VTkRkRO+DlUwWQ98Ogb48nItnPiFAyOf0UZMJKAYhxNjEkoi2zKckMuziz4oTZo0wQcffIBGjRph79696NmzpwojGRkZJtdLT09X+83NmjULM2fONBlBYUghInvVu3dvWx8Ckcurk9fh8Y3AuheBk39VBI6L7gP6TQN8glz+MSdyqIAiioqK1NbTUzskCSn//PMPpk6dqs5LWDl06JDab06WIOYyxERERGQTJ/7SgsmJjdp531DgonuBftPZv4TIkQLKlClTcPPNN6NXr144c+YMHnnkEfV1p06d1OX33nuvCieXXnopunfvjieffFLVp8jKX0REjmz79u1qy5EUIgd/HZ7cDKybCxzfoJ33DQEG3gv0l2BSecYHEdl5QJHA8fTTT6tREpm2JUXyct7Dw0NdfsUVV6hlh2fMmKFqVQYMGIDff//dMMJCROSoli5dqrYMKEQO+jqM26IFEymCF7JM8MC7gf53An6hVj5SItdjs3f7Xbt2xS+//HLO60yfPl2diIiIiGzu1FZtKlfsGu28TzAw4C5gwN0MJkRWxOEIIiIionM5vQ1YOxeI/VM77x0EDLgTGHgPV9wiqgMMKERERESWSLf3tS8CR1dp570DtWlcEkz8w/mYEdURBhQiIiIiY2d2aA0Wj6zUznsFaIXvsmQwgwlRnWNAISIiIhLxu7Rgcnh5RTDpdwdw0f1AAJtAE9UXBhQiIiJybQn/acHk0DLtvJc/0Pd2ret7QKStj47I5bjpdDodnIx0kvf390deXh78/PxsfThERERkj87u1VblOqgtOQxPP6DvbcCgB4HAKFsfHZHLvj/nCAoRERG5lsR92ojJgcXaeU9foI8EkweAoAa2Pjoil8eAQkRERK4hcT+w/iVg/2/aeQ8foM+twOAHgaCGtj46ojqTWZiJtII0hPuGI0Qai9o5BhQionq2YMECtZ02bRofe6L6kHRQCyb7fgWgU8Fkge9dQGA0po25h78DclpxWXGYv30+1satRRnK4A53jGg2Ag/3fhjNgpvBXjGgEBHVs4SEBD7mRPUh+RCw/mVg78/lwcQb6H0zMPghJLy+EMhL4e+BnDqcXLvsWuQV56lwImS77tQ6bD27Fd+N+85uQwoDChERETmXlCNaMNnzY0Uw6XUjMPhhIKSJrY+OqF7M3z5fhZNSXanJfjkv++XyN0a8YZe/DQYUIiIicg4pR4EN84A9PwC6MsDdC+g1FRjyCBDS1NZHR1SvNSdr4tZAJwHdAgkpa0+tVdezx5oUBhQiIiJybKmxwIZXgP8WlQcTT23ERIJJqH1OYSGqC2W6MvyT8A++2v9VleHE+LpSOM+AQkRERGQtaceA9fpgUqoFk543AEMeBcKa83Eml3Em5wx+O/obfj36KxJyq1fn6O7mrlb1skccQSEiIiLHknYc2PAqsPtbLZi4eWjBZOgMIKyFrY+OqF4UlBTgz7g/8cvRX7AlYYthf5PAJpjUZhJ2J+1WoynmNSjCw80Dw2OG2+XoiWBAISKqZ7169eJjTlQb6Se1qVwSTMpKtGDSQ4LJI0B4K74OyenpdDrsT92vQsnvx35HdnG22u/j4YORzUfiijZXoG/Dvmp0xHgVL+OQIuHE38tfLTVsr9x08pM6mfz8fPj7+yMvLw9+fn62PhwiIiK6EBlx2ojJrq/Lg4k70O1aYOijQERrPrbk9NIL0rHs2DIVTA6nHzbs7xzRGVe2vRKXtbwMwd7B5++D4uaOETG26YNSk/fnDChERERknzJOARtfA3Z+BZQVa8Gk6zXAsMcYTMjplZaV4u/4v1UokRW3SiScAwj1CcX4VuNxeZvL0T68vcN0kq9JQOEULyKiehYfH6+2jRs35mNPZEnmaWDjfGDHF5WDSWRbvg7JqcVlxali999if0NSXpLaJyMfQ5oMwRVtr8DwpsPh5eFVo/uUUGKv9SaWMKAQEdWzhQsXqu3s2bP52BMZyzwDbCoPJqVFMtED6DIZGDYTiGrH1yE5LakTWR23Gr8c+QXbErcZ9scExai6komtJ6JBQAO4CgYUIiIisq2sBC2YbP+sIph0vlILJtEd+NshpyRl4P+l/KdCyYoTK5BbnKv2+3n6YVTzUSqY9G7QG25ubnA1DChERERUd/LTgdwUICAS8AszvSz7LLDpdWDbp0Bpobav0+XA8MeB6I78rZBTSslP0Qrej/yC2MxYw/7uUd1VKLm0xaUI9A6EK2NAISIiorrp7r7qaeDQ71p3d6kj6TAOGDkHkDdff70BbPsEKCnQrt9pkjZi0qAzfxvkdKTAfdOZTSqUbDi9ASU6reBditZl+pYUvLcO5Yp0egwoREREZP1wsnAEUJSrhRMh24O/A4f/0M7rR0w6TgCGPQ407MLfAjmd45nH1SpcS2KXqJET4yaJMloypOkQeLnXrODdFTCgEBERkXWtnq2Fk/JlUQ2kWVxpecO4DuO1EZNG3fjok1ORWpI/TvyhgsnOpJ2G/S2CW6hVuGTEJNIv0qbHaO8YUIiIiMi6NScHl1WMnFgi070mvVO5JoXIgQveJYxIKFl5YiXyS/LVfn9Pf9VEUUZLpMbEFQvebRJQdu/ejS+++AKFhYWYMGECLr300gu9SyIip3bHHXfY+hCI6o4UxJ8rnAi5XK5nw4DC1yFZQ3JeMhbHLlZ9S05knTDs7xXdS9WVSMG7v5c/H+z6DCjHjh3DyJEjcf/99yMwMBC33XabWt9/zJgxF3K3REROjQ0ayWmln9A6v5+Pm4e2qpcN8XVItVVcWqwK3WW0RArfS2XqIoAovyhDwXuLkBZ8gOsroGzduhWNGjVCTEyMOv/333+rEZOnnnpKnS8pKcGaNWsYUIiIiFxJylEtmPy3SKszUWQqi67ydd09gfZjOL2LHM7R9KMqlCw9thRpBWlqn6ebJy5pdgmubHslLmp8ETzl+U0XrEaPooeHhwokDz30kBoa7dmzJx599FF89tlnagTlk08+wZw5cy78qIiInNiSJUvUVqbFEjm0xP3AxleBfb+ULyXsAXT/H9DlauCnWyoXysubN+8AbalhG+PrkKojuyhbNVH89civqqmiXuuQ1qrgfXyr8Yjwi+CDacuA0rt3bzVq8vDDD+P7779X07mk/uSjjz5CUVGRCivXXHONtY+RiMip7NixQ20ZUMhhxe8ENrwKHFyqnZdlUntOBQY/BIS31PbdsVZbzUtfMC/hRUZOJJxE2L7fA1+HVJUyXRm2J25XPUtWnVyFglKtV0+gVyDGtByjCt67RHZhwXsdqvE4VGhoqBopWblyJcaNG4d77rkHixYt4i+JiIjI2Z3aCmx4BThS3svEwwfofRNw0f1AqDb920BCyJSvzt1JnsiOnM09qwreJZiczjlt2N+3YV8VSkY2Hwk/Tz+bHqOrqNVEueLiYgwdOhSbN2/GjBkzcPHFF6tRlNatbf+JCBEREVmRTgec2KQFk+PrtX2yKlGfW4GL7gOCGp779hJKGEzIThWVFmHtqbWqtmRz/GY1eiIa+DfApDaTcHnryxETbBa+yb4CiqzxPH36dDWty93dHYMGDcJPP/2Ebdu2YdKkSbj99tvVil5yGRERETl4MIn9U5vKFbdZ2+cdBPSfBgy4BwjgvHtyXIfSDhkK3jMLM9U+KXAf2WykKngf0GgAPNw9bH2YLqtGAWXFihUqjCQlJcHPzw833ngj3nvvPTz++OPYsmWL2j755JOYO3du3R0xERER1W0wObRcGzGJ1+ql4BsKDLwH6HcHR0PIYUkQWX58uQom+1P3G/a3C2unQsnYlmMR5stpiA4XUHJzcxEZGYng4GB1vkmTJsjJyVFfBwQE4O2330Z6enrdHCkRERHVnbJS4MBibcQkca+2LyAKGHgv0Pc2wCeIjz45HJmytSVhiwolf578E0VlRWp/kHcQxrUcp1bi6hjekbXUjhxQxo4di3nz5qFDhw5qWeHExERs3LjR5DphYUyeRETnIv2kiOxGaQmw9ydtueCUw9q+oEbAoAeAXjcB3s7ZBZuvQ+cYEZF+JOG+4QjxCTG5LD4nHr8d/U11eI/PjTfsl6lbUvB+SfNL4COLPJBdctNJYUkNlJWVYdeuXSgsLESPHj3UVC97k5+fD39/f+Tl5dnl8REREdlcSRGw+1tg03ytA7wIaQYMfhDocT3g5WvrIySyKC4rDvO3z8fauLUoQxnc4Y4RzUbgnh734Ej6ETVaIqMmuvJGoY0DGqvu7hPbTESTwCZ8VB3g/XmNA4ojYEAhIiKqQnEBsPNLYNMbQFb5UqrhrYAhjwDdpgAeXnzoyK7DybXLrkVecR5KdaWG/W5wMwQS4e3urUZJZLSkf6P+cHfjAk6O9P68VssMExERkYORru7bPgX+fgvISdT2RXUAhjwKdL4C8OBbArJ/MnJiHk6EPpwEeQXh/l73q4aK5tO+yHHwrxERUT2bM2eO2s6ePZuPPdW9gizg34XA5neBvFRtX8OuwNAZQIcJgIu2BuDr0DFrTtbErTEZKTGXW5LLcOIEGFCIiIicUV4asOVDYMv7QIHW5wFN+gDDHgPajgbc3Gx9hETVItUIu5N34/3d758znOhX7ZLCeY6eODYGFCIiImeSkwz88y6w9SOgKFvb13yQNmLSajiDCTmMkrISrI5bjS/3fYn/Uv6r1m2k1kRW9SLHZrWA8u2336oGjffeey9uu+02eHoy+xAREdWbrATg77eBbZ8AJfnavlYjtGDSYhB/EeQwsouy8fORn/H1ga+RkJug9smIyDXtrsGBtAPYHL+5Ug2K8HDzwPCY4Rw9cQJWSxEdO3bElClTsGTJEpw6dQrPP/+8te6aiIiIqpIRB/z1JrDjS6C0UNvXbgww9FGgaR8+buQwTmefVqFEwkleSZ7a1zy4OaZ2nIoJrSfA38u/ylW8JJzI5Q/3ftiGPwHZXUCRnihyIiIionqQGqv1MNn9HVBWou3rOFEbMWnUjb8Cchi7knbhi/1f4M+4P1UNiejbsC9u7HQjhjYdarJEcLPgZvhu3HemfVDc3NXIiYQTuZxcNKAUFBQgJyen0n43NzfVYd7Hh505iYiI6kTyIWDDq8DeHwF5Mydv3rpeAwx5GIjuyAedHKa+RAKJBJP/krX6Ek83T4xrNQ5TO01Fx4iqn8sSQt4Y8cY5O8mTCwaUzz77DHfddZfFyySkdO7cGc8++yyuuOKKCz0+IiKnM378eFsfAjmis3uADa8A+xerrg9w9wR6XAcMfhiIaG3ro3M4fB3aRk5RjqG+JD43Xu0L9g7GNe2vwbXtr0WDgAbVvi8JJQwmzqlWneSzs7MxatQoXHzxxbj++uvh7e2NP//8E6+88go+//xzbN68Gc888wz++ecfdO3aFfWNneSJiMhpnN6uBZPDy7XzHt5Az6nAoAeAsOa2PjqiaonPiVeh5KcjPyG3OFftaxbUTI2WTGw9UdWPkHPLr+tO8jt27EBwcLBatUuvbdu2OHbsmLpsxowZiI2NxdKlS20SUIiIiBzeyb+1YBK7Rjvv6Qf0uQW46D4guLGtj46oWmT6lkzjWnVylaG+pE+DPqq+ZFjMMJP6EqILCihnzpxBUFBQpf2y7/Tp0+rrli1bIisrqzZ3T0Tk1LZv3662vXv3tvWhkL2RSQ3H1mk1Jic3afu8A4G+twMD7wUCo2x9hE6Dr8O6U1pWijWn1uCLfV9gV/IuQ33JmFZj1IhJ54jOdfjdyRnUKrb269cPK1aswPfff4/S0lLV4fPvv//Gu+++i8GDB6vr/PHHH7jsssuqdX+33HKLql358ccfDfteffVVtc/4JD1WiIgcnYwuy4nIJJgcXgl8PAr48nItnEjR77CZwIN7gFFzGE74OrR7MnXrq/1fYdwv4/DwuodVOAnyDsKtXW7F8quW46UhLzGcUN2NoLRp0wYffPAB7rzzTlWDIk0ZJaQ8/vjjmDhxIs6ePYu7774bQ4YMOe99Sd8UmQ4mc9LMXXrppSoIEREROaWyMuDgUm0q19nyTtl+4cDAe4B+dwC+XJmI7F9CTgK+OfgNfjz8I3KKtVVeY4JicEPHG3B5m8tZX0L11wdl6tSpuOqqq3DgwAEUFRWhQ4cOCAsLU5c1bNhQXXY+qampeOCBB7By5Ur07NmztodCRETkWMpKgX2/aFO5kg9o+wIbABfdr9WZeAfY+giJzmtP8h58uf9L/HHyD0PTxF7RvXBj5xsxvOlweLh78FGk+m/UKNOuJJSUlZWpsCGnkJAQREVVb46sjLLISQrsLdm4caMaWZH7lBXDXn75ZTRt2rTS9YqLi1FSUmKySgAREZHdKS0G/vse2PgakBar7QtuCgx+EOh5A+B17pVtiOyhvmTtqbWq8H1n0k5DF/exLceqwvfOkawvIRsGFJnetXDhQhVOjE2fPl1N/zofqV85ceIEvvnmG4uXP/roo+ok93/kyBHcf//9GDdunCpqkyllxl544QXMmTOntj8KERFR3SopBHZ9DWx6HciI0/aFtdB6mHT/H+Dpzd8A2X19ya9Hf1U1JqdztAWRgryCMLn9ZFzX4To0DGho60MkVw8oa9euxa+//qr6nEhTRnf3ilp78/BgSUpKCh566CGsWrUKHh7nHv6T+27fvj0++eQTNXqyb98+dO/e3eQ6s2bNwsyZM01GUCIiImrzoxEREVlPUR6w4wvgrzeBbK0pHSLaAkMfBbpMBjwuaCIDUZ07m3sW3xzQ6kuyi7PVvqaBTXFDpxtwRZsrWF9CdaJWfxnj4+MxevRo9O3bt1bf9OjRo+o+JNwYu/rqqzFp0iQVfixNJ6uKl5eXOhEREdmFwmzg34+Bze8AucnavujOWjDpNAng3Hyyc/tS9uHz/Z/jjxNm9SWdbsTwGNaXkB12kpfC+Jtuuglbt2612oEEBgbis88+w+TJk9X5m2++Gbfddht69eql+q5IMb30WNm5c+d5R2nYSZ6IiOpUfjqQmwIERAJ+YUb7M4CtC4B/3tOuIxr3BIbOANqNkWkB/MWQXdeXrDu9TvUv2ZG0w1BfMrr5aNW/pGsUm2+THXeSl4AgpyuvvBLjx4+Ht3fF3Nl27dqpPikX6q677sKTTz6pppHpi+QXLFhQrSlkREREdSI1Flj1NHDod0C6YksX7A7jgEEPafsknBSWNymO6Q8MfQxoc4lMA+AvhOxWXnGeVl9y4Cucyj6l9gV6BWJyO62+pFFgI1sfIrmYWo2gSEPF559/3uJlMk1LakJsiSMoRERUJ+Fk4QigKBcoq1g5EpDwYfSvtOVQbcSkxRAGE7L7+pJvD36LHw7/gOwirb6kSWAT1b/kirZXIMCLy12Tbd6f1yqg2DsGFCKyZzIaLKZNm2brQ6GaWHQDcGi5WTgxEhANTPkKaNafj6sDcOXX4b7Ufap/ycrjK1Gi057PPaJ6qP4lF8dczP4l5JhTvIiIqPYSEhL48DkaqSc5uEyb1lWVvFQgql19HhVdAFd7HZbpyrD+1HrVv2Rb4jZDfcllLS5T9SXdorrZ+hCJah5QDh48qBoxDho0SH29adMmi9fr2LGjug4REZHTiN957nAiZKUjKZw3LponsoP6ksWxi9WISVx2nKG+5Kq2V+G6jtehcWBjWx8iUe0DiqzcJQ0TJXzI1x999JHF60nhPAMKERE5hZSjwMZXgd2Lzn9dNw9tVS8iO5CYm2ioL8kq0hZuaBzQ2NC/JNA70NaHSHThAeWKK64w+dr4PBERkVNJOqgFk70/la/W5QEExwBZ8dpIiTl3T6D9GI6ekM0dSD2gpnGtOL7CUF/SPaq76l9ycbOL4SnPVSI7V6tn6S+//KJGUx577LFq7SciInIIifuADa8A+6RhsE4LHj2nAoMf0oKKpVW85DreAcDIObY8cnJhUl+y4fQGFUz+Pfuv2ufu5m7oX9IjuoetD5Go7gNKYmIijh07Vmm/NFSUZopEREQOJWE3sH4ecHCpdt7DuzyYPAiENqu43h1rgdWzKwrmZWRFRk4knES0ttnhk+vWlyyJXaL6l5zIOqH2ydLAV7a9Etd3vF4tGUzk9AHl0KFD2Lx5szrFxcWpzu96xcXF+Pzzz3HDDTfUxXESETmNXr162foQSO/MdmD9K8Dh5dp5T1+g103AoAeAEAtv7iSEyFLCVXWSJ4fhyK/DpLwkfHfwO3x/+HtkFmaqfY0CGqlQIuEkyDvI1odIdEFq1Afl559/xty5c5GcnKzWMm7WrOJTJV9fX/Ts2RMvvvgiAgNtW3jFPihERHROp7ZqIyZHV2nnPf2AvrcBF90HBDXkg0c2IWEjrSAN4b7hCPEJqXT5wbSDajWu34//jpLyaYbdIrup/iWXNLuE9SXk2o0av/jiC1Vr8txzz8EeMaAQEZFFJ/8G1r8MHFunnZdO2f1uBwbeBwRG8UEjm4jLisP87fOxNm4tylAGd7hjRLMReLj3w2ga1BSbzmzCF/u+wJazWwz1JRJIpPCd9SXkKOq8UaOHhwfOnj1b2+MjInJp8fHxatu4MfsP1Av5HO7ERm3ERLZCpsD0nw4MuBsIiKif4yC7Yi+vQwkn1y67VtWTSDgRsl13ah3+OvMXIvwicCbnjNrv7+lvqC+R4ELkrGoVUGQq1/z58yGDL25ubtY/KiIiJ7Zw4UK1nT17tq0PxfmDSewaLZic+kfbJ9NmBtwFDLiTtSMuzl5ehzJyIuGk1Gz5ajlfWlqqwknDgIa4oeMNrC8hl1GrgOLl5aVOY8eOxaRJk0xqTtq1a4d+/fpZ8xiJiIhqFkyOrNKmcp3Zpu2TQvaB9wD9pgG+lef2E9mq5kQ/rasqbnDDd+O+UyMpRK6iVgFl9+7dKCgoQEJCAj744AOTy66++moGFCIisk0wOfS7NmKSsEvb5x+hFb73vR3w4cpGZF+kIP5c4UTooFOd4BlQyJXUKqBMnjxZnYiIiGyurAw4uERbLjhxj7YvIBoYdD/Q51atiSKRHQr3CVcjJBJCqiIF8bKqF5ErqVVAMe59cvToURQVFaFt27aqMp+IiKhelJUC+34BNrwKJB/Q9gU10nqYSC8Tb/5PIvuVXZSNF7a+cM5w4uHmgeExwy0uOUzkzGodUJYuXYo77rjDsJpXQEAAXnrpJdx7773WPD4iIiJTpSXA3p+ADa8AqUe0fcFNgMEPad3fvXz5iJFd25W0C49vfFwVwPt4+KhRlOKyYpNCeQkn/l7+aqlhIldTq4AioeT666/H008/jZtuugne3t5YuXIlbrvtNtWZ9aKLLrL+kRIRkWsrLQb++x7Y+CqQdkzbF9IMGPIw0OM6wNPH1kdIdE6lZaVYsGcBPtz9oQojnSI6Yd7QeSqgmPRBcXNXIycSTpoFVzTFJnIVtWrUKB3lP/74Yyxbtsxk/6xZs+Dp6Yk5c+bAltiokYjsmb30X3AYJUXA7m+Bja8BGSe1fWEtgaGPAt2mAB5etj5CckD1/TpMyElQoyY7knao87d0uQX39bgPXkbP3/N1kidyZHXeqFEyjTRrrHRnnp7qMiIiqhqDSTWVFAI7vwQ2vQFkntL2RbQBhs4AukwGPC6ojJJcXH2+DleeWIk5m+eoupMovyi8MPgFDGw8sNL1JJQwmBDVMqAMHDgQt9xyCz788EPceOONqifKn3/+ibfffhu//vorH1ciIqq94nxgxxdaMMnWPuVGVActmHS+AnCv/AEZkT2SBowvbX0Jvxz9RZ0f3nQ4nh30LMJ8w2x9aETOF1DkU4dPPvkEd955J+666y64u7urkCJTu4YOHWr9oyQiciJLlixR2wkTJtj6UOxLUS6w7VPg77eAnERtX4MuWjDpOBFwd7f1EZITqevX4f7U/Zi5YSZOZJ1QhfCP9nkUU9pPgZubW518PyJnUuvxcemDMm7cOBw4cEAtM9yhQweEhoZa9+iIiJzQjh3aHHQGlHKFOcC/HwF/vw3kpWj7GnUHhj4GtB/LYEIO9Tos05Xhi31f4M2db6KkrARtQtuoQvi2YW2t+n2InJnnhb64//rrLxVQUlNTMXbsWH4yQERE1VOQBWxdAGx+F8hP0/Y16Q0Mmwm0HQ3wk2ZyMMl5yZi1aRY2J2xW5//X4X9qJS5fTy59TVQvAUWmd3322WeqHkWWGX7ttdfQs2dPrFixQp0nIiKyKD8d2PIh8M97QEGmti+mPzDsMaD1JQwm5JDWn1qPp/56CumF6QjzCcNzg57DsJhhtj4sItcJKFu2bMFPP/2kpne1bNlS7cvMzMSwYcNUaJk2bZq1j5OIiBxdXpoWSiScFGZp+5oP0kZMWg5lMCGHVFhaiNe2vYZvD36rzg9sNFCt0hXlH2XrQyNyrYBy9OhRjB492hBOREhICK677jp1GRERkUFuilZfInUmRTnavpbDtBGTFoP5QJHDOpp+FDM2zMDRjKPwdPfEAz0fwI2db1SNFomongNKt27dMG/ePJSUlKjeJ8Y1KSz6JCIiJTtRW5Fr2ydAcZ62T6ZwSTBpNoAPEjks6fm26NAivLrtVTWC0jy4OV4e+jI6R3S29aERuW5A8fX1VSeZ0nXNNdeompNVq1bhn3/+UYXyX331lbpeu3bt0K9fP2sfMxGRQ2vUqBGcWlY88NebwPbPgJICbV+7y7RVuZr2tvXREV3Q6zC9IB1P//001p1ap85f2fZKzOw7E/5e/nxkiazETVeL1u8//vgjnn/++fNe7+qrr8asWbNQ3/Lz8+Hv74+8vDz4+fnV+/cnInJJGaeAv97QmiyWFmn7OowHhj4KNO5p66MjumD/JPyD/9v4f0jOT0aQVxCevuhpXNbiMj6yRFZ+f16rgGLvGFCIiOpR+glg0+vAzq+BsmL51wJ0mqg1WGzYlb8KcnjFpcV4Z9c7+HTvp9BBh17RvfDikBfROLCxrQ+NyCnfn9dqildpaSk8PDwsXpaTk4PAwMDa3C0RETmS1Fhg43xg97eArlQLJl0mayMm0R1tfXREVnEy66TqCL8vdR883DxwZ/c7cXvX21VRPBHVjVq9umQp4fT0dDz66KMm+19//XUcP34cb731lrWOj4jI6cyZM0dtZ8+eDYeUcgTY8Cqw53tAVwbIikXdrgWGPAJEtbP10RFZ5XUoE0x+i/0Nc7fMRX5JPhoHNFaF8D2ie/ARJrLHgDJo0CCMHz8eGzduVGHFzc0Nt9xyC3bv3q3qU4iIyAklHQA2vALs/VnevgHyCXKP64DBDwMRrW19dERWk1WUhec3P4/lJ5ar82NajMGTA59EsHcwH2Uiew0oHTp0wPbt23HrrbeiV69eap9sd+7cqfqhEBGRg3Z4l54lAZGAX1jF/rN7gQ3zgP2/aefdvYCe1wODHwLCWtjscInqws6knXh8w+OIz42Hv6c/Zg2YhQmtJqgPY4moftR6AqUEkeHDh2Pp0qXqvPRFYTghInLQWpJVTwOHfq+YstVhnDZtS+pLDmp/5+HhDfS6CRj0ABAaY+ujJrKqkrISLPxvIT747wOU6cpUT5N5Q+ehWXAzPtJEjhBQsrKycNttt+Hff/9V07xSUlJw4403YsOGDXjttddUXxQiInKQcLJwBFCUq4UTIdsDS4EDS7Tznr5A71uAQfcDwVy1iJxPfE48Ht/4uBo9cYMbbutyG+7pcQ+8PLxsfWhELqlWAeXbb79FQUGB6hwfHh6u9sn0Lmna+MQTT6iQQkREDmD1bC2clJWYXVC+An14K+CWFUBQA1scHVGdW3FiBZ79+1lkF2cj2i8aLwx5AQMaDeAjT+RoAWXSpEmYNm2ayXzMmJgYNYIi3eSJiMhBak4OLqsYObEk/STgyVFxcl4z1s9Q2+Exw/HsRc8izNeo/oqIHCegNGzYUG3XrVuHzZs3o127dhgyZAgSExPVloiIqiarINqF09vPHU6E9DeRwnnjonkiB7cvZR9ONDmB1IJU+Hj4YEafGbim/TUshCdy9CL5O++8E4sXL0aDBg3Qv39/jB49Wk3xklGUqKgo6x4lEZET6d27t20PIOMUsP5lrfP7+bh5aKt6ETkBKX7/fN/neGvnWyjxKkHb6Lb4bsh3aBPWxtaHRkRG3FELssTw8uXLceDAAUyfPl3tCwoKwqWXXqr6ohARkR3KSQaWPw683QvY+SUg03RDmmkhxBLpc9JhLEdPyCkk5SVh2qppmL99vlqx6/qO1+Pbcd8ynBA5ywjK/v37MWzYsErLCjdr1gxnzpyx1rERETkl+ZCnXkdS8jOAze8Am98DinO1fV2uAkbM0r7Wr+JlXCgv4cQ7ABipddsmcmTrTq3DU389hYzCDIT5hOH5wc8jIDEAe3fttf2IJhFZJ6BIQbyMnpiTVb0uuuii2twlEZHL0PePqvM3RkV5wNYPgU1vAAUZ2r52lwEXPwk07FpxvTvWaqt56QvmZUSl/RgtnLBDPDmwgpICvLbtNXx36Dt1/qLGF+H5Qc8jyj8Kcz7WwjcDCpGTBJRBgwahsLBQ9UIJCAhQxfEvvPACVq9ejbfeesv6R0lERNVXUgTs+BzY8AqQk6jtaz4YuORpoFn/yteXEDLlq6o7yRM5oMPphzFzw0wczTgKT3dPPNjrQUztNBXu0oiUiJwvoHh5eWHZsmV48MEH8dNPP6meKMnJyVixYoWhLwoREdWzslLgv0XAuheBjDhtX+OeWjBpNUKrOTkXCSUMJuTgdDodvj34rRo5KSorQovgFnh56MvoFNHJ1odGRHW9ipdM85JwIkpLS+HhUUWRJRER1S2dTuv6vuZ5IOWQti+yvTaVq+OE8wcTIieRVpCGp/96GutPr1fnr2p7FR7r+xj8vfxtfWhEVB8BxRjDCRGRjYJJ7Brgz2eBhF3avtBmwPD/A7pdA7jzgyNyHX/H/41Zm2YhJT8FQd5BeGbgMxjdYrStD4uIbBVQiIionsVt0YLJyU3a+cAGwNAZQK+b2PmdXEpxabHqa/LZPq3NQa/oXnhpyEtoFNjI1odGRLXEgEJE5EgS/tOmch1ZqZ33DQUGPwT0mwZ4cxoLuZYTmScwc+NM7E/dDw83D9zV/S7c3vV2eHD0kMihuemkmszJ5Ofnw9/fH3l5efDz87P14RARXbiUo8C6ucBerfYPXgHAwLuBgfcCfqF8hMmlyFuXX4/+ihe3voj8knw0CWyiRk16RPew9aERkRXen1tlrT35Rr/88gtOnDhRq9vfd999CAwMxK+//mqyf8GCBejQoQMiIyMxYcIEHD9+3BqHS0TkODJPA4vvA97tp4UTD29gwN3AA7u1IniGE3IxmYWZmLFhBp7++2kVTsa0HIMfJvzAcELkRNxr+8nFpZdeig0bNqjzV199Ne6991706NEDJ0+erNF9rVq1Cv/++6+6z5KSii7GEngefvhhzJs3D9u2bUNoaCjGjh1rch0iIqeVkwyseAJ4qyew4wttX68bgft2AJe9CARG2foIierdjsQduHrJ1Vh5YiX8Pf0xd/BcvDzkZVUUT0QuHlA2btyogsLQoUNVk8b09HScPn0aV111FRYtWlTt+8nMzMRdd92Fjz/+GG5my2C+8847uOmmmzBx4kS0aNECb7/9No4dO6aaQRIROTIZHZaTRQWZWo3Jm92Bf94DSouAzlcC92wBJr4NhMbU9+ES2VxJWQne3fUubll5CxJyE9A1sit+nPAjJrSeUOn9g1Veh0TkeEXyMtWqadOm6uu//voLY8aMUX8gunbtiri48uZg1XD//ffj5ptvRufOnStdtnPnTnWZnoygtG/fXu2/7LLLTK5bXFxsMrIic9yIiOxVQkJC5Z1FecDWBcCm14GCDG1f20u1aVyNutX7MRLZizM5Z/D4hsexK3kX3OCmiuDv7nE3vNy9rP86JCLHHUFp164d1qxZgx07dqhPH4YNG6b279u3z2LYsGTx4sX477//8Pjjj1c5uiKhxFhYWJjab+6FF15QRTf6U0RERG1+LCKi+ldSBGxdCLzVA1g9WwsnzQcBt64Erv+e4YRc2vLjyzF58WQVTqL9o/HR6I/wQK8HLjicEJETBpSBAwfikksuwaBBgxASEqKmep06dUqNplx33XXnvb1MCbvnnnvw6aefwtPT8iCOFM1nZWWZ7JNwIvvNzZo1SxXq60+pqam1+bGIiOrXrm+Bd3oDvz8K5CQCjXoAN/wM3LwMaDaAvw1yWbnFuXhy05N4bMNjyCnOwcUxF+OnCT+hX6N+tj40IrLnPiifffaZOuk1aNAA27dvr9ayvocOHUJ8fDwGDx5s2Jebm4upU6fip59+wrfffotu3bqp6VzXX3+94fIjR46o/ea8vLzUiYjI7hmv7P7rndo2sp02lavjRKCW8+mp/leSSitIQ7hvOEJ8QvjwW9HelL2YuWEm4rLj4Ovhixl9Z+DqdlfXutaEiFy4UaO3t3e1r9uvX79KU7UaNmyIDz74AJMnT1bnb7/9djz00EO45pprVG2LjJLI1K3Ro0db65CJiOo3mBxbq3V/xwhtX0gzYMQTQLcpABvLOYS4rDjM3z4fa+PWogxlcIc7RjQbgYd7P4xmwc1sfXgOrUxXhk/3fop3dr6DEl0J2oW1w7yh89A6tLWtD42IHCWg/PHHHypQyOpdZWVlhv2yktcTTzxxztu6u7tbnKrl6+urTkJW8JK+KhJIsrOz0bNnTyxZssRwORGRw4jbAqx5DjixUTvvVh5Q7tsGePrY9NCoZuHk2mXXIq84T4UTIdt1p9Zh69mt+G7cdwwptZSYm4hZm2Zhy9kt6vwNHW/Ag70fhI8HXx9ErqhWneQPHDiA3r17q1W4ZGUt42FXOS81KjUlU7gkfHh4eFS6TFbpqskULnaSJyK7cHaPtmTw4RXaed9QYPCDWJLaAnD3VA1oyXE8uPZBFUZKdaWVLvNw88DwmOF4Y8QbNjk2R7Ymbg1m/z0bGYUZasrcc4Oew9CmQ+v8+8qHnoKvQ6L6UZP357UKKJ9//jl+//33GvU8qU8MKERkU6mxwNq5wN4ftfNeAcDAu4GB97Lzu4M6nnkck36dBB3O/S+zXWg7hPuFI9QnVNWmBHsHq63+vOHkHYJgn2CXXo2qoKQAr257FYsOae8lBjUehOcHP49Iv0hbHxoR2fj9ea2meDVv3lytxEVEREYyTwPr5wE7vwLkU3YPb6DPbcCQh4HAaD5UDiQ5LxnbErfh37P/qq0ElOo4nHEYKG9jUx2BXoEWg4ycNw418rUEGgk2ct7T3WolpDZZUOBQ2iFVCB+bGat+lod6PYQbOt0Ad7daLS5KRE6mViMocpNrr70WHTt2xNixY00K5CMjIw1NHG2FIyhEVK9yU4CN84F/PwJKCwF5k9XjemDYTIud32UVQ9G4cWP+ouxEUl4Stp3dhn8T/1XbE1knTC6X1aQKSgvOeR/y5vrDUR+itKxUvSmXKUuZRZnIKszSvi7MVOfVtjATWUVZqjC8NoyDjaXRGZOwY6NgU9WCAm1C26hi+KKyIrQIbqEK4TtGdER94+uQyMmmeBUVFanu8dKsUQrejWtQpk+fjnfffRe2xIBCRPWiIBP4+x3gn/eAohxtX+crgBGzgMi2Vd5szpw5ajt79mz+omzkbO5ZNTIiYUS2J7NOmlzu5+mHXtG90KdhH/Rp0AedIztjxvoZVq1BkXAiPT4yCyqCi6UgUxfBxjjIGJ8P9Q017Jdgo0ZuvINrHGyMFxQwfrykE7x+mtzkdpMxo88M+Hv5wxb4OiRysiley5cvx7Fjx1RfkjZt2tT2OImIHFNRHrB1AbDpda3zu2g7Wutl0qi7rY+Oqggk+ulasj2Vfcrkcn9Pf/Rs0BN9G/RF34Z91Sf65vUhspSwrNZl/qZbwom8yZbLa0JGXOTNv5xiUHmkrSoSTrKLstXITE2DjQQiOZ3JOXNBwcYw5cy4vsYo8Lzy7yuVHiehDyddI7ti9kAGdCKyYkApLCzEkCFDGE6IyLWUFAE7vwDWvwLknNX2NbsIuORpoHnNVy+kupOQk6Cma6lQcnYbTuecNrk8wCtAjZBIGJEREgkk5xslkD4nspSwybQlN3c1clKffVDke+qDwIUEG0OosRRsjPZdSLCpyr7Ufeq+2eSSiKwWUAYMGKCmJshQTXU6xxMRObSyUmDPD9rKXBnlU4FkpESCSetL2P3dDsgbZ1VDUj5KYv5GWkYAejXoZRghaR/evlb1GBJCZBqXI3aSr5NgYyHcpOSnID43/rz3KY+fozx2ROQAAeXkSe0fdJcuXTBs2DCTIvmhQ4fiuuuus94REhHZipToHVyq9TJJPqjti2ynTeXqOJHBxGa/Fp0KIPowIsHE/A1xkFcQejfordWQNOyDDmEd4OFeuc9Wbenf6LuCmgYbCSlDvxtqaGZZ1X1KuCMislpAkaL4Sy65xOJllhotEhE5XDA5tg7481kgfoe2L6QZMPxxoNsUwMNxlnh1lkAiU7T0IyQydUtqSowFeWuBRD9C0i6snVUDCVWfBBlZret8Cwq4SsAjopqr1X/ZxMRENGrUCLNmzarNzYmI7NeprVowObFROx8QDQydAfS+CfD0sfXRuUwgkSJ246L2xLxEk+tIYbnUjsjoiASStqFtGUjsiLUXFCAi11KrgBIQEIA9e/ZY/2iIiGzl7F5tKtfh5dp53xBg0INA/+mAd4BVv9Udd9xh1ftzhkASlx2njY6UhxLpS2JMVopSIyTlRe1tw9qyqZ8ds5cFBc6Fr0Mi+1WrPijZ2dlqFa+PP/4YvXv3hr1hHxQiqrbUWK34fe9PahFUSE+GAXcDF90H+IXygawD8m9HGiEa15Ak5yebXCfMJ0yNjuhDiTT3Y5dxx+SICwoQkYP2QTl79iz69u2LZs2aITAw0HDZlClT8NRTT9XmbomIrC8/Xev0HhAJ+IVV7M88A2yYB+z4EpApKB7eQJ9bgSGPAIHR/E1YOZAczzpussqWrPRkTN686sOI1JG0Cm3FQOIkXGlBASKyjloFFBk1eeMNy91y2biRiOxmZGTV08Ch3wHpuu3mDnQYp03b2vcLsHUhUFqo7e95AzBsJhBaP9NOlixZorYTJkyAswaSY5nHTEZIUgtSKwUS/XQt2bYKaaUWYCGqL87+OiRyuYDSunVrdSIisttwsnAEUJSrhRMh24PLgAPamxKl8xXA8P8DotrV6+Ht2LHDLt8Y1XYqjgSS2IxYQ2PE7Ynb1f0Yi/SLNIQRmbrVMrglAwnZlL2+DomoBgFFiuKTk5Nx8cUXq6///PNPi9fr1q2bug4Rkc2snq2Fk7IS0/36sCIrc93wo9ZskRCXFWdazAx3tUxsVcXM0mTvaMZRQxiREZL0wnST60T5RWk9SMpDSYvgFgwkRERk3YAizRljY2NV+Pjrr7/w6quvokOHDpWuJ0P0DChEZDMZccCBpVrBe1XyUuttOpcjhJNrl12rloPVN9aTrfSwkGViZSWmpkFNcST9iGHJXwkl0k3cWLRftGHJXzk1C2rGQEJERHUXUOLi4tC8eXOMHz/esE++/uCDD2r3XYmIrKG0BEjaD5zZBpzerm31Hd/PRYripXDeuGjeRcnIiXmvCiHnc4tycfOKm1FUVqSmfxlr4N/ApIYkJiiGgYSIiOovoMiqXTt37mQgISLbkRXRM08BZ7YDp7dp2/hdQEm+6fXcPAGd2dQuc24e2qpeLk5Ch35alyWyX7/8b8OAhoYu7TJS0jSwKQMJERHZLqC0bNkSb7/9Nvbt26c6yMs6xkVFRcjIMB3iFz4+Pudd25iI6LwKMoH4nRVhRLa5ps37lLCWQNM+QJM+2rZBF+Dn24FDyyvXoAh3T6D9GJccPZFAIrUjR9OP4kjGEexJ3lNlODG2cNRC9G/Un4GEiIjsJ6CMGjUKl112GQYMGICcnBzD/k8//bTSdadPn86RFiKqmdJiIHGfFkT0YSTlcOU6EgkVTXpXhBH52j+88v2NnAMc31C5UF7CiXSFl8ttSD7oqUsFJQVqmV8JI1I7ImFEtubd2atDmiN2jOjIcEJOp65fh0RUT53k5arp6elYsGCBGk158cUXK11HmjaGhtq2+zI7yRPZMfmTI4XsUi9yZocWRhJ2V56qJY0TG3Y1DSPhrWQljuovNSyrecnSwqoPigfQYawWTiKcY5n00rJSxGXHGYKIfiv7ZKUtc74evmgd2hptw9qqzuyy/XL/l9gcv7lSDYrwcPPA8JjheGOE5b5XREREdfH+vEYBRU+6yOfm5tptLxQGFCI7kp8BxEsQKR8dkWCSq9U1mAhvrYUQ/XSthl0AT5+66yTvQOTPdGJeYqUgIr1HpIDdUrBoHtzcEELUKbQtmgQ2gYe7R5WreBmHFLkPfy9/tYqXpaWGiYiI7Cqg2DsGFCJbTtXaW143skMLI2qqlhm/cNMw0qSX5alaLkhfJ2IcRGSKVnZRtsXrNwpoZBgRkVO7sHZoEdICPh4+te+D4uaOETFV90EhIiKqKQaUGiQ0IrqQqVonK4rY5aSmahVUnqolDRENtSO9tcL26k7VckJz5mg1MFffe3WlIFJVnUioT6jJ1CwZEZHpWkHeQTbvJE/kyK/D2bNn2/pQiOpcZl4xUnILERnggxB/L7t/f17tRo1E5OJkqpZxEbts81IqXy+ijWkYadAV8PSGqyopK8Gp7FMmQSQUWp3elKVTqlUnIqMiEb4RdV6oLqGEwYSIyHmcSMnFi8sPYNX+RJTpZOETYFSnBnhiTEe0iAyAvWJAIaLKSoq0qVrGYST1SOXr+UeUT9GS6Vq9gcauO1VLXydiHERka6lOZDImq22rkFaVRkWka7tMsSIiIrrQcDLxnU3ILSpV4UTIdvWBJGyOTcXiewfbbUhhQCFydTJVK/2EURiRVbX+A0oLTa8nNQ0yVUu/opacwlq45FQtmQplHkTOVSfSOKAx2oS1UQFEtttPbFf7f7v8t3o+ciIichUvLj+gwkmpPp2Uk/OyXy7/cGof2CMGFCJHdCErU+WlGa2qpZ+qlVr5ehFtTcOINEB0wKlaF1JXIf1EYjNjtcaGRoEkKb/6dSLydaB3oMn1tkMLKERERBciu6AYp9LycSo9D6fS8nA6PR9xaXlq9ORYSm6Vt5OQItO+pDbFVjUp58KAQuRIpLfHqqeBQ7+X9/ZwBzqMq7q3h5qqtacijMgISVps5ev5R5quqCUnB12St8qVqeCOEc0sr0wldSKqn0h5h3X9VmpHLPUT8fP0Q+uQ1iajIvVVJ0JERK6jqKQM8Rla6NBCSL4KIvpAkp5XXOv7loEVKZxnQCGiCwsnC0do3dH1b5ple2i51jX9jrXaPv3yvhJGzspULbM+GZ6+5atqlRexy+hIaHOnmqpl3NtDwomQ7bpT67AlYQse7fMoMosyDUHkWMaxKvuJVAoioe3QJKgJ60SIiOiClZXpkJxTqAUQddJGQ+T86bQ8nM0qMNSPWOLr5Y6mYf5oFu6PmDA/xIT7q/Nh/l7438J/znlbKZiXVb3sEUdQiByFdEWXcFJWYrpfzhdkAe/2B8osfJIS2c40jMhULQ/7G861plf+fQW5xbmVRj+kEWFOcQ6e2fzMeetEZNsypCW8ZZlkKxs/frzV75OIaoavQ6ovmfkyDas8gKSbhZD0fDVKcq4Q0SRUgodfeQjxVyFEO/khKtCnypF7Wa1LCuLNa1CEh7sbRnaMtsvRE8GAQmSvSkuA7AQg8xSQdAA4sFSGTKq4sk4LJ7KqVtN+5WGkD9C4J+CnLWnrTGRkJD4nHvG58TiTc0Z9rd+ezj6tRkfOZ3LbyegU2anKOpG61Lt373r7XkRkGV+HZC0FxaU4k5FvFEK0r/WjIlkFZh8smokI8EbTcNNRkJjyUZFGob7w8qjdyo6ylLCs1mVeKC/hJMDbQ11ur9hJnshWSgqBzNNARpwWQjJOlW/jtK+zzgC60prd5z3/AlHt4MwBRE7phekX/D0WX75YjZAQEZFjqq/mg/LmPjGroCJ0pOer6Vf6UZDELLNVL834e3uUj3xUhA/ZSgBpGuaHAB9Pl+iDks9GjUR2oDCnInhIx3WTEHIKyDl7/vsIbAiENgOCGpxnBEU+bvAAAqPgCgHE290bjQMbo0lgE7U1/jrYOxiX/3q5ofbEEukzIqt62cr27doqXvwEl8h2+Dp0XNZ+0y19rDLyig3TryoK0rUpWKfT81BcWvX/X093NzQun4ZlMgUrTJuWFR7gbbMFVFpEBqilhO2hk3xNcIoXUW17h8hSvxZHP8r3yeXnIoEipAkQ0gwIjQFCYrQwov86pCngaVS8tugGrSDevAZFuHsC7cfYzcpb1gogxuFDH0BkK+HiXM0MZbUuKYiXmhNLhe/DY4bbtGP60qUSNhlQiGyJr0PXaj6YX1SqgoZJCDGajpVTeO5pWFFBPobpV/pakKblgaRRiC88azkNq76E+Hs5RDDRY0AhsqSsDMhNKg8e5aHDePRDtkU553l1+WohwyR4GAWQoEaARw1egrKUsKzWZV4oL+HEO0C73IEDiBSp67+O8Iu4oFWyZCnhrWe3quM0DikSTvy9/NXlRETkZM0HC0sx48fduLp3jMkoiISQ5OxzT8MK8vFUdSAmIaQ8gMiqWH7eHnX8k5ExBhRy/MaDtS5AjzcLHnFG29OVl+c15x1kOuJh2DbXvg6Isu7SvdLnRJYSXj0bmYd/R5q7G8LLgJB2Y6rug+KkAeR8pM/Jd+O+M+2D4uauRk4s9UEhIiL7l5ZbhD/2J6pJDJaU6nT490S6Opnz8nBTQaOp2SiIPoSE+nuxj5UdYUAhx2o8WF3FBVrIUKMfxuGjPIxkxZ+/AF1WxDIEj2aVw4hvaL33Donz8sL86EisLWiKMujgDjeMiI7Ew15eaFbDAJKQm2ASOgxf58arzuvn4uXuVbn+ox4DSHVICHljxBsX1EmeiIjqX15RCY4l5yI2OQexSTmI1X+dnFNlODE2qmM0OjYOMVkVq0Gwr1q9ihwDAwrZd+PBqkKK9P0wr/0wFKTHadOzzslNm2JlXvchX+sDiEybstvmg9pfaNlKrYVMZ5IRA/3IgDUCiAofRqHDeBvpF2nzAFJdEkoYTIiI7IsUpkuDwtikXBw1BJEcFUxkyd7akgzy6tU9HKregipjQCH7bDwoK2AteQDoN8106V39iEhBxrnvW+oygpuYBg7jMCKXGRegOwCZrmReU2FoPliUg1tW3IJo/2iXCyBERGS/ikvLVD2IfiTkaHkQkVN2Ff1BZDpWy8gAtI4KVKc20dq2ZVQAHvl+l8M2H6TqY0Ah29WcHFxWMXJiTt6En9ionaosQDcPHkZhREZH3J2joK2gpADbE7djTdwa6KpYZlj2J+UnqZNgACEiovqUVVCsTcsyCiASRk6m5qHEQpgQIX5e5eGjIoy0jg5U07KqWhXLkZsPUvWxUSPVvaI8IOUQkHQQSD6gdUVP2APkJJz/ti2GANEdK9eCSDG9jdYUr0vFZcU4mn4U+1L3YW/KXrWV8yW6cy9/qDdvyDz0btibIyBERFQn07LOZhVooyBmtSFVNSuUf9VNQv1MRkJUIIkOVB3Ua9MfxJ6aD1LdNGpkQCHrdkZPOWwaROSUfuLcDQarfHZ6AI/F2k1vD2sr05XhRNYJ7EvRwsje1L04lHYIhaWmf+RlqlXzoOY4nnX8nPcn19swZQPrLYiI6IIUlpSqkQ8JIRVTsrQwkldkeYEZH093tNKHD+NpWZEBdbZEr6M1H3R1+ewkT3WqtBhIPaqFj+SDQNJ+LZSkHbO8MpbUg0S0AaI6aKMhcorqCPw5Bzi8wiEaD1rjUyepDVGjIhJIUvdif+p+5BbnVrpuTFAMukR0QefIzugS2QUdwzuq3h0Prn3QrpsPEhGRY8nIKypfKUsLH/owIjUjVczKUqMerc1GQtpEBapREvd6XiXL0ZoPUvWxBoXO3Ssk/XjlICLhpKy48vWlqNoQRDoB0R20ICL7PL0rX3/Us1qNiR00HrS2lPwUbVSkfGRkf8p+i71DpKhdwogEEQkknSM6Vxky2HzQeSxYsEBtp02bZutDIXJZ9vg6rIsRgbIynVoVq2KlrIrle1NzLff7kpzRIsLfdFpWdABaRQYiLMDC/3MiK2NAIa1resYJs6lZB7XpWmbTjTRuQFgLLXwYRkQ6AJHtAC/fWjUeNBTMy7Su9tZvPFiXpM+G1IrIyIi+diQxL7HS9UJ9QrVREX0gieiMKP+oan8fNh90HgkJ1ai/IiKXeR1ao6aioLhUFakbL9krYeRYcg4KSywvSOPv7VExEqIPI9GBaB7hDx9P51hohhwTA4orke5GsmSveY1I8iGgpIo1x6U43WRqloyKtLdejxAJIVO+qv9O8rUky/weSDtgmKYl27jsuErXC/AKQKeITiZTtWRJ39oUAxpj80EiIuci4WTiO5vUqlT6aVWylaV0ZbWqxfcONoQUmS4sox6WluyVUZKqmhhGB/lUKlCXrxuF+LJ7OtklBhRnJH+hshOMAkj5iIgEkaJsy7eRZXn1tSH6qVkSRHyD6+eYJZTYWTApKi3CkfQjhmlasj2WeUwVtxvzdvdGh4gOJiMjLUJa1GkfETYfJCJyDjJyYr5krpDzOYUlmPblNnRvGmoYEcnML7b8hs7dDc0jtWlZ+roQ2baKCkCwL+s0yLEwoDh6EMlNthBEDgAFmZZvExBlGkSkVkSCiJ2Fg/pWWlaqwod+aV/ZHk4/rJb9NS9G7xDeQYUQfRhpE9ZG9R0hIiKqLgkaBxKy8Me+xCrXuZTMcjgxR530gnw8K4rUoyumZjUL94dXFb1DiBwNA0pdsua0pby08iCyv7xgvbxoPb+KjuHy/VT4MFs5KyACrk6GyE9lnzKMjMg0LZm2lW82zc0NbmgZ0tIwTUvCiIQTX2kSSUREdA4y+nEqLQ+n0/NxOj0Pp9K0rZw/lZ5XZRd1S+6/pC0GtApXoyJRQT6clkVOz2YBJTc3F/Pnz8evv/6qGrb0798fc+bMQfPmzdXl77//vjpv7NZbb8XcuXNh91JjgVVPA4d+Ly/8dgc6jKte4beMfOjDhwoi5aMjuVqH8EpkxSc1Jcts5azAaKdsZFibMCIF6/qaEf0ISbaFqW5NApuYjIxIDUmgd6BNjpuIiOxbXlFJleFDthl5lqdi6fl5eaBxqK+atnUuUjB/26CWXE6XXIrNAsrLL7+sukl++umn6pOAZ555BqNGjcKhQ4fUeQkwnTp1wjfffGO4TUBAgGOEk4UjtKVz9bUKsj20HDi+QVu1SkJKYY5WE2IeRLLjLd+vvFGWqViGlbPKg0hwY6cIIrISVlpBGsJ9wy+ol0d6QbrJ0r6ylSV/zUX6RaqRkU6RFYXs8r2J6kOvXr34QBPZ2Pleh7IqliGAlG/V+fJRkaqW6DVuXNg0zA8x4f5q2zTMHzFh+q/9EF7eRX36l9tUQbx5DYrwcHfDyI7RDCfkcmzWSV6+rfGKRnv27EG3bt1w+vRpNGnSBK+++ipWr16NFStW1GmnSqtbdIMWRiw1H5TleaUGRKYIZVZe+Unx9AOi2lVewldW03J3vrmlcVlxmL99PtbGrUUZyuAOd4xoNkL1/JAVq84lpyhHNTvU14zI9kzOmUrXC/IOMoyM6MNIA/8GHCInInLxbunxGQWm07CMgkhytqVl9it4e7ijSXnYUOEjXNuqUBLmj8hALYDUZBUv45Ai4STA28NkFS8iR+YQneSNX7SlpaX44Ycf0L59ezRs2NCwf+vWrWjVqhVCQkJw8cUX48knn0RYWOVajuLiYpSUlJg8ADarOdH387BIVzFVy8Nb6xuiDyD6rfQXcXeNtcclnFy77Fq1dK+EEyFb6Za+9exWfDfuO0NIKSgpwKH0Qyad2E9knoDOrLTQz9NPdV437jcindkvdHlfIiJyLMWlZUiQAKICR/n0K0MYyUdidkGVy/LqV8UyBJBQswAS7o+oQB+rdE6X8CEhxLwPioyc1KQPCpEzsdkIij6ATJw4EZmZmYiOjsby5cvVtC4h6SorKwtlZWU4cuQIHnvsMXh7e2P9+vVwNxtJkOlh5vUq+vuo1xGUlCPAO33Of73rfwRajQA8XHuNggfXPqjCSKmutNJlskRvu7B2auRDRkaOph9Fic50VMrT3RPtw9obakZk2yqkFTxcJOCR44qP16ZyNm7c2NaHQuSQ3dFFiQSQzIIqp2GdzSow9BWxJMojT41yhEREl0+9qggfsm0Q7KtGMZzhsSJytBEUmwYUGflITU1FWloaFixYgEWLFmH37t0qrJg7duwYWrdujX379hlCzLlGUCIiIuo/oMgIyrxW5xhBkUfcA3gs1uWX9ZWak6HfDTWMnJyPBBYJH/ppWrJtG9YW3jISReRg9B+ozJ4929aHQmS33dFlulNilhZATKdhaV9LOLFUt6EnA+eNgn214FE++hFTPh1LAsgnb7+irsfXIVH9cIgpXsLLy0tN6ZLT66+/rkLKxo0bcdVVV1W6bnBwcJXTt+R+5GRzsrSvrNZVVQ2KuyfQfoxLhhMpgI/NiMWxjGOIzYxV07SqE05u63IbhjYdqpb39ffyr5djJSKiuu+OLn07knMKq1wFKz4jH8Wl5/4MtUGwj1Hhuek0rEYhfvD2dL7aTSJXYLOAMmPGDNx9991o2bKlGgH56KOP1ChIjx49DJdPmzYNbdu2RUZGBh544AG0aNECXbp0gV2TpYRltS5Zxcs4pEg48Q7QLndSMhgnK2ZJADEOI7JNL0yv8f3JqMktXW65oFW9iIjIvrqjS/+PsW9tREmZDkUl5/6gSnp+VKyAZVoDIkv0+nhySi+RM7JZQBk6dKiqP4mLi0NhYSE6duyIn3/+WU3jEsOGDcOVV16JkydPoqioSF1/2bJl8PHxgV2TJYRlKeHVsysK5mVal4ycVKcPigP1FpEQooJI5jHt68xYi/1FRIBXAFqHtEar0FaG7dcHvsaWhC0Wa1CkY/vwmOEMJ0REDvS/Qeo+/jqScs7u6LI/r0j7ux8R4K0FEJOleCuCiK8XAwiRK7JZQJkwYYI65eTkwNfXF56epocyfvx4dZLLZb6aeWG8XZMQMuUr63aSt4EyXRnic+IrAkh5GJFTbrHlxlLB3sFoHdpa1YvIVh9GLC3r2yK4hWEVL+OQIuFEpnPJUsNERGSfsgqKsed0JnadylCn3acykHSepXmNLbt/MDo35gg5EVVm82WkAgMDL+hyuyahxAGCSWlZKU7nnDYdDcmIxYmsE8gvsbxkszQ11IcQQxgJbY0I34hqL+krSwjLUsImfVDc3NXISXX6oBARUf2QqVgHz2apELLrlISSdIsd0IN9PdGpcTC2HEurcgRFSMG8LN1LRGSXAYXqT3FZMU5lnapUIyL9RIrKLHfEjfKLMkzL0ocROW+trusSQt4Y8YbVOskTEdGFT9U6mZpXMTJyOgP74rMq1YtIo0IJIz1iQtWpe0woWkT4szs6EV0wmy4zXFds2kneDhSVFqnRD30A0YeRk1knK/US0WsY0NCkRkTCSMuQlgwLRHWAfVDInqTmFKoQoo2MaFO1MvOLK12vVVRARRhpGoqOjYKrXCXLEbqj83VIVL8cpg9KXXGVgCLTr2T0Q79Sln6K1qnsUxYLz0WTwCYmtSGylSAS6O3AU+mIiKha8otKsTc+s3yqlnaSJX3NRQb6qCDSs5kWRro2DUGIn1e99kEhIufCgGInAcVa05akiNx4pSx9GDmTcwY6C7N8pY4jJiimUo2IFKWzlwgRkWuQkYujSTmqXkRGRySUHErMrrT0r7+3B7o2CTFM05JtoxDfatcTng+7oxORQzVqdFZxWXGmhd9wx4hmI85b+J1VlKXCh3kYSchNsHh9TzdPdX/GIUS2LUJawMfDzpdjJnJhS5YsUVtZyZDIGmQyhHRWVyMjMl0rLgN7zmQalvM1nmIlU7O0qVohKpC0jQ5S++tKiL+XOtkbvg6J7BcDSh2EE/3SufpO6bJdd2odtp7dqlatkqV4DbUh5WFEgkhSfpLF+/Ry91Khw7xGpFlQM3h52N8ffSI6tx07dqgtAwpdyBK//8moiKod0U7JFpb4lV4ialSkaSh6NAtF58bB8Pfmv36+DonsG/9KWZmMnJj39RByXpoYXv7b5Wo1LUtk1EO/SpZxGGka1BSe0omeiIhceonfneVF7FUt8SthpGf5VK1uTUNVJ3YiIkfDd71WrjnRT+uqioQTXw9ftAltowUQo4L1xgGN4eHOrrlERK48VetEap5JEft+WeK3tPpL/BIROToGFCuSgvhzhRO9ReMXqUBCRESuLUWW+C0fFdl1OtMqS/wSETk6BhQrktW6pCD+XCFFVtiK8Iuw5rclIqJ6VpuVqYyX+NVP1aqrJX6JiBwZA4oVyVLCslqXFMRb6kPi4eaB4THD2fyQiMhBVbe3hyzleyQpu3yqlu2W+CUickQMKFYmSwnLal3mhfISTqQHiVxORK6tUaNGtj4EqgXj7uj6nCHb1QeS8NfRVMy4tB3iMwpU3Yi9LPFLVePrkMh+sZN8ffRBcXPHiJjz90EhIiL7Nf3LbSqMmI+CVIVL/BIRVWAneSfrJE9ERLaTkJmPDYeTMfOnPee97rQhLdG/VYQaHZFaEiIi0rCTvJ2QUMJgQkTkOGR0RHqObD+Zjm0n0tX2TEblQvaqTOnXDK2jAuv0GImInB1rUIiI6tmcOXPUdvbs2XzsbSynsAQ74yrCiHwtNSbGgnw9VSH75thUnGtyl5SSyKpe5Bj4OiSyXwwoRETkMmQ0ZNuJNMMIiYyWmJeUxIT7oU/zcPRuHoY+LcIMheznqkGRy0d2jK72ksNERFQ1BhQiInJKJaVlOHg2WwWSbSe1EZKEzAKT63i6u6Frk2D0bh6uwkif5mGIDva1eH+ylLCMosgIi3FIkXAS4O2hLiciogvHgEJERE4hq6AYO+MysF1GSOJkulZGpaV+g3090UtGRpqHqVAiS/76eXtU6/6lz8niewdX6oMiIyfmfVCIiKj2GFCIiMjh6HQ61YVdTdU6maama0kjRJ3Z7KvmEf7aVK3yEZI2UYFwv4C+IxJCPpzap1ad5ImIqHoYUIiIyO4Vl5bhQEKWoZhdQkliVqHJdbw83NC5cYgaHZEwIiMl0UGWp2tdKAklDCZERHWDAYWIiOxOZn4xdsSlY0d5Mbt0Z88vNp2uFeLnpUZHtBGSMNV7xNeretO1iIjIfjGgEBHVs/Hjx/MxN5uudSotX5uqJcXsJ9JxOKnydK2WkQGGMCIjJK0iL2y6Frk2vg6J7JebTv4zOBl76SRPRESWp2vti8+qWO73ZDqSs02na3l7uKNLk2D0aaEt9ysndmYnInJc7CRPRER2QwrKZbqWvph99+kMFBSXmVwnzF8/XUsrZpfGiJyuRUTkmjjFi4ionm3fvl1te/fu7XSPvQzKn0zNK+87ogWSI0k5la7XKiqgfKlfLZS0jgqAmxuna1H9cebXIZGjY0AhIqpnS5cutcs3RrVZOreopAx74zNV3YiMkGw/mYGUnMrTtbo1DUFv1QhRm7IVHuBdRz8FkWO/DomIAYWIyOWdSMmt1HxwVKcGFpsPpucWlU/X0orZZbpWYYnpdK2IAG9DM0SZrtWlSQh8PLm6FhERVQ9HUIiIXDycTHxnE3KLSlU4EbJdfSAJm2NT8e51vZCQVWAYIYlNzq10H22iAw3TtaSovUWEP6drERFRrTGgEBG5MBk5kXBSqk8n5eR8VkEJpn6y1WS/j6c7ujcNLZ+uFYZezcIQxulaRERkRQwoREQuRmpNjibnYM/pDPyxLxHnW2v+4g5RGNgqUoWSLo1D4O3pXk9HSkRErogBhYjICZWV6XAmIx+xyTlqWtbRJNnm4FhyDlJyimp0X7PGdULrqMA6O1YiIiJjDChERA6soLgUx5Jzy4NIRRg5npJTqdeInp+XB1pHByAmzB8r9p495wiKFMzLql5ERET1hZ3kiYgcoLdIWm5R+SiIcRjJwen0fOiqSBhRQT5oExWowoiMgKhTdCAaBfvCXZIHgOlfblMF8eY1KMLD3Q0jO0bjw6l96vpHJCIiJ5efnw9/f3/k5eXBz8/vnNflCAoRkZ0oKS1TgUOCh35Klj6QZOQVW7yNhIjmkf4qfMhqWloQCUCrqECE+J2/l4ksJSyrdZkXysv9Bnh7qMuJiIjqE0dQiIjqWW5hicm0LH0YOZGSh6JSy9OyAn081eiHhA/jMNIs3P+Ci9Zr0geFiIiorkdQGFCIiOpoWlZSdiFizUZCJIz0KdihrrOksFOl2zUK8TUZCdFPy4oO8qnz3iK16SRP5KgWLFigttOmTbP1oRC5hHxO8SIiqh/FpWU4mZpnNCVLCyPHknKQXVhi8TaRfnlqO6ZLQ6MwEoiWUQFqpMRWJJQwmJCrSEhIsPUhEFEVWINCRE7NWqMCWQXF5aMhFUv2yikuNQ8lFgrMhdSAtLEwLevzd7epy9+/oXetj4eIiMhZMaAQkVOqTV2F9A5JyCowmpaVg9ikXNXUMDm70OJtZNZVTLhfxSpZ5VOzJIyEB3jX+bQsIiIiZ8OAQkROGU4mvrNJrUylH9yQrSynKytW/XDnQIkWZtOypIlhLvKKSi3ep4+nu1oZy3hERE3LigyAn7dH/f6ARERETowBhYiciiyV+9zS/cgtLEWpWYMQuSyroASXvrGxyttHBnqrIGI8EiJfNwn1M/QOISIiorrDgELkgJx1tSWZYpVbVILsAu0kdR/Z6iRflyArX/u6Yp/Z+fxiNWpSHbI8b7sGRtOyypsZhvp71/nPSURERFVjQCFyIPbcr0KW1c0vLjUEBtNAod9ndj7fLGQUllTZFd3aPr2lrwokttCrVy+bfF8iqsDXIZH9Yh8UIgesq7DU8XvxvYMvKKQUGIWLqkYnss4RNmRb1WpWNeHv7YFgXy8E+XqWn7wQ7FdxXi4LLt+vzhsu07alpTr0fn6VofbEEgl2O58a7VSjT0RERPaMfVCInJCMnJiHEyHnZf+zS/dj9oROhnAhoxP64GA+Xco8gEjwKCqx3MG8JqSQXAUKCQx++iChhQrjEGF+Xpbjla30APH0uLCu6EJGlaQg3vyx0ge6kR2jGU6IiIjsFKd4Edm5ktIy7E/Iwh/7ElHVoIC8EV9zMEmdasvT3a3SSIWlUBFcxciFnHw87WM1K5nyJqt1VTXaJJfbUnx8vNo2btzYpsdB5Mr4OiSyXwwoRHYiv6jUqPdGjuq9IcvgnkjJQ1Fp9UY3GgT7IDzApzxIWAgZRqEi2Gzr6+XuND07ZKqbTHkzr9eRkRN7qNdZuHCh2s6ePdumx0Hkyvg6JLJfDChE9Swtt0gFD30PDv3XZzLyq7xNw2AfnM2y3ChQT96A//HgME5dKich5MOpfZx2xTMiIiJnxYBCVEfL5UrgkFGQWLMgkp5XbPnF6O6m3lTre2/o+29ITw6pzZj+5TbWVdSChBIGEyIiIsdhs4BSWFiI9957D7/++ivy8vLQv39/zJo1C40aNTJcRy574403kJKSgoEDB2Lu3LmIioqy1SETVVJYUqqmYJmPhhxLyUFBseVpWVIDoQ8frY2CSPMIf3ido0Dc3usqiIiIiBw6oDz33HNq++KLL6p573J+1KhR2Lt3r9r/559/4tprr8Vbb72Fbt264dlnn8XYsWOxZcsWuLtf+Co/RDWRmV9sCCDGIyJxaXlVLmcbFeSDNuUNAGXbJjpIfd0w2LdWtR72XldBRERE5NABZc6cOfDwqFjx56WXXkL37t1x5swZNGnSBK+99hquv/56TJs2TV3++eefq9GV9evXY8SIEbY6bHJi0mjwbFYBYpNycTQpG7HJstWK1ZOzLdd/SEBoEeFfeUQkMrBOphWxroKIiIicnc0CinE4kTeGy5YtQ8uWLdGgQQO1799//8Urr7xiuI5M7erQoYPabx5QiouLUVJSYtIIhqgqxaVlauTDuFBdGxXJRU5hxfPImKxw1SqyYjqWvkZEpmX5etX/0rqsqyAiIiJnZdMi+e3bt2PKlClIT09HYGAgfv/9d3h6aock+yIiIkyuL+fT0tIq3c8LL7ygRmTIcdXFSku5hSU4JqMgydnlU7Pk6xycTM1FcanleVlh/l4mBepqRCQqEE1C/eAuwyVEVnDHHXfwcSSyMb4OieyXTQNK586dsWLFChU6ZD1yqTHZuXMnwsPD4efnh5ycHJPrZ2dnw9/fv9L9SHH9zJkzTUZQzMMN2acTKbmVaiqkC3h1aypk9C0lp8ikQF0/IhKfWVDl7ZqG+ZmMhOi/Dg/wtvJPSFQZGzQS2R5fh0T2y6YBxdfXF23atFFf9+3bFwEBAVi3bh2uvPJKdOrUyVAwr1/16+jRo2q/OS8vL3UixwsnE9/ZpFal0heay3b1gSS1WpUUhOtDiqxadTo9zyyIaDUiUsBuibeHO1rKsr3lReqt9aMiUYHw87aPjudEREREZCcB5ZlnnsHdd9+N6Oho9Sn4V199haKiIjWqIqZOnaqmbskQbIsWLVQ9io+PDy677DJbHTJZmYycmC+ZK+S81ILc9vm/6NAoWI2GHE/JRWGJ5WV7pTO6SW1IeRiJCfOD5zmW7SWylSVLlqjthAkT+Esg4uuQiOwloEjBu/Q+kZERmcolxfHffPMN2rdvry6X8LJv3z51XkZWpEblp59+UltybNkFxdgXn4U/9iWiihV61UiKjJDISU+W59WCiNbIUF8fIsv51mbZXiJb2bFjh9oyoBDZDl+HRPbLZgFFepzIKTExUdWbBAcHm1wuvU7ef/99zJs3D5mZmWquKPufOE4X9cTsApxMzVOrZcXpt+WntNyiat/XzMva46LWkWgVFYAgX07jIyIiInJ2Nq1BEfplhasSFBSkTmRf8otKcSo9zyiE5BoCyKn0fBRVMR1L+Hi6q1WxjqVUjI5YIgXz1/VrXif9RIiIiIjIPtk8oJB9krqg5JxCnEozDiEVoyBJVTQu1IsM9EGzcD80jwhATLg/moX7q54hso0K9FFL9k7/cpsqiDevQREe7m6qQzrDCREREZFrYUBxYYUlpTidnm8SPiSMSCiRr/OLS6u8rZeHG2LC/FX40AcPdYrwV/sDfM7/1JKlhGW1LvNCeQknAd4e6nIiIiIici0MKE4+CpKeV1xR/1E+DUsfQhKyCqCrqkodQKi/F5qHm4YQ7esAVbAuQeJCyBLCspSweR8UGTmpbh8UIiIiInIuDCgO1h3dXHFpGRIyCnAyLdfiSEh2YUmVt5WA0TjMF83DAyqNhMj5EL+6r/2QEPLh1D718lgR2YtGjRrZ+hCIXB5fh0T2y00nH7M7GekkLx3n8/Ly1AphjtYd3VxWQbFJ/Yc+fEgoic8osFjDoRfo42lS/9HMKIQ0DvWDF/uEEBEREZEdvT/nCIoNu6PrScA4m1VQHkJMp2GdTMtDRp7lTulC2n80DvE1HQGJCNBCSbi/mqbFHiFERERE5CgYUOqxO3puYSkeWrQL47o1MgkhUqheVFr1srx+Xh5G9R+mIyGyXK+vl4e1fwwiIiIiIptgQLEiqaPQT+uypFSnw85TGepkTrqhy4iHcfiQMBJTviwvR0GInMecOXPUdvbs2bY+FCKXxdchkf1iQLEiKfI+RzmIweU9GqNr01BDCGka5gd/b/4qiIiIiIj4rtiKZAUqKYg/V0iRy+dM7MKVqoiIiIiILHC3tJNqR5bHldW6quoPIvvlci6jS0RERERkGQOKlclSwtIF3TyksDs6EREREdH5MaBYmb47unRD12cUfXd0S0sMExERERFRBdag1AF2RyciIiIiqh0GlDoktSasNyEic+PHj+eDQmRjfB0S2S83nU5XjYVxHUt+fj78/f2Rl5cHPz8/Wx8OEREREZFLy6/B+3PWoBARERERkd1gQCEiqmfbt29XJyKyHb4OiewXa1CIiOrZ0qVL1bZ379587IlshK9DIvvFERQiIiIiIrIbDChERERERGQ3GFCIiIiIiMhuMKAQEREREZHdYEAhIiIiIiK74ZSreOl7T0pDGCIie1NcXKy2/BtFxNchkavIL39fXp0e8U7ZST4tLQ0RERG2PgwiIiIiIjKSmpqK8PBwuFxAKSsrQ0ZGBnx9feHm5mbTpChBSX4Rfn5+NjsOcj58bhGfV+Qo+PeK+NwiIZGjoKAAoaGhcHd3d70pXvJDny+Z1ScJJwwoxOcWOQr+zSI+r8iR8G+W4/D396/W9VgkT0REREREdoMBhYiIiIiI7AYDSh3y9PTE7Nmz1ZaIzy2yd/ybRXxekSPh3yzn5ZRF8kRERERE5Jg4gkJERERERHaDAYWIiIiIiOwGAwoREREREdkNVm9X05kzZ/Dnn3+qBjMDBgxAt27dTC4vLi7G4sWLERcXhy5dumDUqFGGy2JjY/HDDz8Yzv/vf/9D8+bNLX6fo0eP4scff8Tw4cPV9yHnJs+nP/74AydPnkTbtm0xevToSs2L/vnnH3WKiorCpEmTEBgYaLhs3rx5qjGp6N27t8nzTi8rKwu///470tLS1P23adOmHn4ysrXNmzdjx44dqifUmDFjVGMsY6dOncKyZcvU80cub9mypeGyn3/+GYcPH1Zfh4SE4K677qp0/3v37sXff/+tbj9w4EB07969Hn4qsrXjx49j7dq1quHaoEGD0KFDh0pNGX/77TecPXsWvXr1wtChQ616e3JO2dnZ6n9hQkICOnfujBEjRlS6zpo1a7B79240adJE/S/08fGp9u2rc/9kXziCUg2vvvqqCgwSULZs2aL+qD7++OMmbzKHDBmiVuw6ePAgbrnlFkydOtUkvEhn+/T0dDzxxBM4cuSIxe9TWlqKG264Ac8//zzWrVtnjd8v2TEJHV27dsUnn3yi3gzed9996N+/P3JycgzXeeaZZzB27Fjs27cP77zzjnoTmJSUZLg8MzNTPbc++ugj9U/d3L///quCz8KFC9Vz85prrlF/pMl55ebmqr9RM2bMwIEDB9TvXsLH9u3bDdfZsGGDemO4evVq9bX8w165cqXJfcjzSv4Ovfzyy5W+x/z589UHKPIc3rZtGwYPHowXXnih3n5Gso1Zs2bhsssuw19//aWeGxIgXnnlFcPl8pzp27ev2rd//35MnjwZDz74oNVuT85p+fLl6NmzJ7799lv1f0reP1166aXqvZPenXfeieuvv15dPnfuXPX3R/+/8ny3r879kx2SVbzo3NavX68rLCw0nF+6dKmsfKZLSkpS5998801d06ZNddnZ2er8sWPHdJ6enro1a9aY3E9xcbG63apVqyx+n+eff153xx136Lp376578cUX+Wtxcvv27dPFx8cbzmdmZuoiIiJ0CxYsMDyPPDw8dGvXrlXnS0pKdP3799fdf//9le5r3LhxunvuucdknzxnY2JidM8995xhX0FBgW7//v11+FORrcnfoc2bN5vsu/zyy3UTJ040nO/atavukUceMZyfPXu2rnXr1pXu6/3339c1b9680v6oqCjdBx98YDj/xRdf6AIDA3WlpaVW/EnI3sj/NPk7pPfZZ5/pvL291d8V8dRTT+k6depkOL9jxw6dm5ubbvfu3Va5PTmn7du361JTUw3n5f+il5eXbvHixer8li1b1PNA/78rLy9P16ZNG93cuXOrdfvzXU72iSMo1SBDzN7e3obzDRo0UNuioiK1lekzxlNv5NNK+QRT9lfXf//9h08//VSN1pBr6NSpExo1amQ4HxwcDD8/P8PzSj7Rlstl9E54eHjg2muvrfbzSm6fnJysRvQWLFignl8ybaJjx4519BORPZC/Q+bTQ+Vvlv55dfr0aezZs0eN1urJ1zIV9dChQ9X6HvI8Nf6bKFMtfH19K01PJOci02Lk75Dx80pG/ktKStR5+dt09dVXG6beyKfW8ndOPsG2xu3JOclImkxF1YuIiICXl5fJeyy5jv5/l/z9ueqqqwz/C893+/NdTvaJNSg1JPNmZQrWyJEj1TxI/Vzuiy++2OR6MTExan91yDDjjTfeiLffflu9SSXXJFO9ZJ7sFVdcoc7L80eeR7V9Xsn0nqCgIDWUfdFFF6npEzKN7LvvvsP48ePr5Gcg+yN1bTK1QUKq0D9/mjVrZriO/nkml7Vv3/689/nxxx/j0UcfVXUoEkpk2uDnn39eZz8D2R/5v/XSSy+pQBEQEGB4/hg/r871N+tCb0/OSz6olZo5fU1lTZ8X5rev6eVkHxhQahhO7rnnHvUp4/r16032u7m5mVxXzle3B+acOXNUbYEUqpJrkgUWHnroIbWYQuPGja3yvJJPJWUE5csvv1QhRTz11FN4+OGHGVBchCzaIb97mb89ZcoUtU///DF+bum/ru5zS+ropJhZArUEFKnDkzoqqZci5yd/W2Qev9Qqffjhh4b91f2bdaG3J+eln0kiMwD0H9jW5Hlh6fY1uZzsB8fjq0mGoW+99VZs2rRJhZPo6GjDZU2bNlWrfBmT8/oRlnORFZakCLVhw4bq0yQ5SRG0fA/5lJKc36JFi3DTTTeplZNklS1rPK/0txcyeqInqy3JVB55PpPzj5zI4h0yLdC40F3/vDB+bum/rs5zS0LPvffeq0ZMZFTmgw8+UMFagm9VC4CQ85BpMTLqIZ9eyyILxm/yqvM360JvT87r3XffxWOPPYZVq1apxRJq+ryo6vbVvZzsCwNKNchQ9HXXXadWUpKVR4zDiZBhQvkEXD5FFLKMnQQZ4zebVfH09MQjjzyiPg2QKThykjeP+k8nybnJpzmyhOuSJUtwySWXmFwm0wjlzaCsHCfk0yJ5I1id55WQ+5Pnl/HqTbLsbKtWrUzmgZPzkb9VUjsnIyfmq2vJVAmZxiXBWO/7779XUyaqU59UWFiolhY2XuJT6k/k+SmXkfPKy8vDhAkT1AdrMq1PlqA2/1/4008/GT4AkRWTpN5J/zfrQm9Pzks+RJHp87KUsCyZb/68kBUpZYlq/XuyX375xeR5ca7bV+dysj9uUilv64OwdzJy8tVXX6llO2VOv56EFvlnL0vdySfTMo9WCprlk3BZwlNCi5CgIcld/qnLMou33Xab6kUhf6hleU9zPXr0UJ96Gi9lTM5HlgWWehNZSlOK+PTkkx19WJFpX1IzItMhZP13+We9detWw6fg8im2BGLZhoWFYeLEieq5d/nll6vLn3vuObz11luqUF6WJP7mm2/w9ddfq+uRc5JpfRI0ZKqg/I3Sk+fH9OnT1dcrVqxQzxF5XklYleePPC+uvPJKdbl8wCInCcfyoczMmTNV2JW6E/mXIbeV4CvLfsoUL6lxke8pfVVYKO+85O+GLLcv/wsllOrdfvvtiIyMREpKivr71aJFC/Tr1089L+RvmXwQY43bk3OSpdCnTZum3mvJsvh6xv3gpH+cLGsuU1VlmerExET1v1BqSc53++rcP9kf1qBUg/yhlFET+VRHRjj09CuPyKo58sKRP6byibekdFlhQk/+oetvJ//ohZyvag1ueRGx6Znzk1VFZLhZGD+vZPRM7/XXX1efEsnzSwKtvImUf+R6En7ltrKKnP5+ZF63ntScyB9haYwmw+EygmL8B5qck7zhM39eScDQk14UO3fuxK+//qr+Psk/eunJoyejwXJbGWmRk3wtq94IGe2V28kcbrkPIR/ASA0dw4lzk78lsqqWPD/0MwaEfsRD/jbJc0L+F8qKgbLwi/GHIRd6e3JO8r/J+L2RnvGIrHy4JqMm8kGdrDooH77oPzA+3+2rc/9kfziCQkREREREdoM1KEREREREZDcYUIiIiIiIyG4woBARERERkd1gQCEiIiIiIrvBgEJERERERHaDAYWIiIiIiOwGAwoREREREdkNBhQiIiIiIrIbDChERERERGQ3GFCIiIiIiMhuMKAQEVG9+PTTTzF9+nSTffHx8ejbty8SEhLUeZ1Op6535ZVXYtSoUXj++edRVFRkuP4999yDPn36oH///rjmmmuwevVqk/ubPHkyfvzxRzz00EMYPnw41q9fz98uEZGDcdPJfwMiIqI6FhcXhzZt2uDw4cNo0aKF2jdnzhysWrUKmzZtUucfeOABrFmzBs888wxCQ0Px0ksvITw8HIsWLVKXy22zsrJQWlqKnTt34vHHH8fKlStVYBEdOnRAcnIynn32WRVk2rdvr+6HiIgcBwMKERHVm0mTJqFz586YO3euChkSVGSU5KabblKjKE2bNsXBgwfRtm1bdf2MjAxERUXh+PHj6jJzTz31FJKSkvDhhx8aAsrVV1+N5557jr9VIiIH5WnrAyAiItdx9913qzAiIye///47srOz1VQtceDAATXF63//+1+l2x05ckQFFBk1effdd3H06FHk5OSo0ZKOHTuaXLdLly719vMQEZH1MaAQEVG9GT16NIKCgvDLL7+oWpMbbrgBfn5+6jKZyuXh4YG3334bXl5eJrdr164dUlNTMXToUMyYMQPXX389AgMD8fXXX2PXrl0m15X7ICIix8WAQkRE9cbNzU0VyssUrP3792PHjh0mIx9SM7J8+XLMnj1bBY38/HzMmzdP1ZNIECksLFSjMJGRkUhLS8OGDRsQHBzM3yARkRPhKl5ERFSvbr31VjVFq3fv3ujevbthv6enJ37++WesXbsWDRo0QKdOndCkSRPD5V27dsW4cePQsmVL9bWcLNWlEBGRY2ORPBER1Sspjo+JiVF1KHfccYfF68joiBS/y6pfElyMnTp1CpmZmaqQXlb0kuvKyIvYt28fGjdujLCwsHr5WYiIyPoYUIiIqF798MMPapqXBI2AgAA++kREZII1KEREVG9kWpes1jV//nyGEyIisogjKEREVG+2b9+Ohg0bmtSWEBERGWNAISIiIiIiu8FVvIiIiIiIyG4woBARERERkd1gQCEiIiIiIrvBgEJERERERHaDAYWIiIiIiOwGAwoREREREdkNBhQiIiIiIrIbDChERERERAR78f+bbsa/UgpAdAAAAABJRU5ErkJggg=="></p>
+</figure>
+</div>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>version A: DiD 2005-&gt;2008 = -11.1   (truth -10)
-   event study: {2003: -0.8, 2004: -0.7, 2005: 0.0, 2006: -11.1, 2007: -10.4, 2008: -11.1}
-version B: DiD 2005-&gt;2008 = -20.1   (truth -10)
-   event study: {2003: 5.2, 2004: 2.3, 2005: 0.0, 2006: -14.1, 2007: -16.4, 2008: -20.1}</code></pre>
+<pre><code>      never  desk in 2018  desk in 2021
+year                                   
+2014   28.8          35.0          33.8
+2017   30.9          38.1          36.8
+2020   34.6          47.4          39.0
+2023   37.2          56.3          48.5</code></pre>
+</div>
+</div></div>
+<div class="step">
+<p>Two things to read. The lines are at <strong>different heights</strong> before any desk opens: that is selection, and it does not matter, because a DiD compares changes. The lines are <strong>parallel</strong> before each dashed line: that is what matters, and it is the only part of the assumption the data can show.</p>
+</div>
+</section>
+<section id="did-step-3-one-clean-22" class="slide level2 scrollable">
+<h2>DiD · Step 3 · One clean 2×2</h2>
+<div id="6c399c04" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="co"># DiD, step 3 · The 2018 cohort against the never-treated, 2017 against 2018</span></span>
+<span id="cb5-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-3"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb5-4"><a href></a></span>
+<span id="cb5-5"><a href></a>panel <span class="op">=</span> pd.read_csv(<span class="st">&quot;export_desks.csv&quot;</span>)</span>
+<span id="cb5-6"><a href></a>two <span class="op">=</span> panel[panel[<span class="st">&quot;opened&quot;</span>].isin([<span class="dv">0</span>, <span class="dv">2018</span>]) <span class="op">&amp;</span> panel[<span class="st">&quot;year&quot;</span>].isin([<span class="dv">2017</span>, <span class="dv">2018</span>])].copy()</span>
+<span id="cb5-7"><a href></a>two[<span class="st">&quot;treated&quot;</span>] <span class="op">=</span> (two[<span class="st">&quot;opened&quot;</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb5-8"><a href></a>two[<span class="st">&quot;post&quot;</span>] <span class="op">=</span> (two[<span class="st">&quot;year&quot;</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb5-9"><a href></a></span>
+<span id="cb5-10"><a href></a>means <span class="op">=</span> two.groupby([<span class="st">&quot;treated&quot;</span>, <span class="st">&quot;post&quot;</span>])[<span class="st">&quot;exporters&quot;</span>].mean().unstack()</span>
+<span id="cb5-11"><a href></a><span class="bu">print</span>(means.<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb5-12"><a href></a><span class="bu">print</span>(<span class="st">&quot;change, treated:&quot;</span>, <span class="bu">round</span>(means.loc[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">1</span>, <span class="dv">0</span>], <span class="dv">2</span>),</span>
+<span id="cb5-13"><a href></a>      <span class="st">&quot;  change, control:&quot;</span>, <span class="bu">round</span>(means.loc[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">-</span> means.loc[<span class="dv">0</span>, <span class="dv">0</span>], <span class="dv">2</span>))</span>
+<span id="cb5-14"><a href></a></span>
+<span id="cb5-15"><a href></a>did <span class="op">=</span> smf.ols(<span class="st">&quot;exporters ~ treated * post&quot;</span>, data<span class="op">=</span>two).fit(</span>
+<span id="cb5-16"><a href></a>    cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>, cov_kwds<span class="op">=</span>{<span class="st">&quot;groups&quot;</span>: two[<span class="st">&quot;region&quot;</span>]})      <span class="co"># each region is seen twice</span></span>
+<span id="cb5-17"><a href></a>low, high <span class="op">=</span> did.conf_int().loc[<span class="st">&quot;treated:post&quot;</span>]</span>
+<span id="cb5-18"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;DiD = </span><span class="sc">{</span>did<span class="sc">.</span>params[<span class="st">&#39;treated:post&#39;</span>]<span class="sc">:.2f}</span><span class="ss">   95% CI [</span><span class="sc">{</span>low<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.2f}</span><span class="ss">]   truth, first year: 2&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>post         0      1
+treated              
+0        30.93  31.89
+1        38.11  41.33
+change, treated: 3.23   change, control: 0.97
+DiD = 2.26   95% CI [0.80, 3.71]   truth, first year: 2</code></pre>
 </div>
 </div>
 <div class="step">
-<p><strong>Your turn.</strong> (1) In version B, compute the DiD from <strong>2003</strong> to 2008 instead of 2005: is it better or worse, and why? (2) Add the line <code>print(by_year.round(1))</code> and plot it with <code>by_year.plot()</code>: can you see the pre-trend by eye?</p>
+<p>Choose the comparison <strong>yourself</strong>: one cohort, a control group that is never treated, one year before and one after. The interaction <code>treated:post</code> is the difference of the two changes; clustering by region tells the standard error that a region’s two rows are not independent.</p>
 </div>
 </section>
-<section id="example-3-in-python-the-adoption-table" class="slide level2 scrollable">
-<h2>Example 3 in Python · The adoption table</h2>
-<div id="4cb46ee5" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href></a><span class="co"># Example 3 · Who adopted a national AI strategy, and when</span></span>
-<span id="cb7-2"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb7-3"><a href></a></span>
-<span id="cb7-4"><a href></a>Y, D <span class="op">=</span> <span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;has_ai_strategy&quot;</span></span>
-<span id="cb7-5"><a href></a>wide <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)</span>
-<span id="cb7-6"><a href></a></span>
-<span id="cb7-7"><a href></a><span class="co"># The adoption year comes from the full treatment series, not from the rows with an outcome</span></span>
-<span id="cb7-8"><a href></a>adopted <span class="op">=</span> wide[wide[D] <span class="op">==</span> <span class="dv">1</span>].groupby(<span class="st">&quot;geo&quot;</span>)[<span class="st">&quot;time&quot;</span>].<span class="bu">min</span>()</span>
-<span id="cb7-9"><a href></a>panel <span class="op">=</span> wide[(wide[<span class="st">&quot;time&quot;</span>] <span class="op">&gt;=</span> <span class="dv">2021</span>) <span class="op">&amp;</span> wide[Y].notna()].copy()</span>
-<span id="cb7-10"><a href></a>panel[<span class="st">&quot;cohort&quot;</span>] <span class="op">=</span> panel[<span class="st">&quot;geo&quot;</span>].<span class="bu">map</span>(adopted).fillna(<span class="dv">9999</span>).astype(<span class="bu">int</span>)    <span class="co"># 9999 = never</span></span>
-<span id="cb7-11"><a href></a></span>
-<span id="cb7-12"><a href></a>table <span class="op">=</span> panel.groupby(<span class="st">&quot;cohort&quot;</span>)[<span class="st">&quot;geo&quot;</span>].nunique()</span>
-<span id="cb7-13"><a href></a><span class="bu">print</span>(table.rename(index<span class="op">=</span>{<span class="dv">9999</span>: <span class="st">&quot;never&quot;</span>}))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="did-step-4-the-event-study-by-regression" class="slide level2 scrollable">
+<h2>DiD · Step 4 · The event study, by regression</h2>
+<div id="87f0934a" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="5">
+<div class="column">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href></a><span class="co"># DiD, step 4 · The same DiD for every year, each against 2017, the last year before the desks</span></span>
+<span id="cb7-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb7-3"><a href></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-4"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb7-5"><a href></a></span>
+<span id="cb7-6"><a href></a>panel <span class="op">=</span> pd.read_csv(<span class="st">&quot;export_desks.csv&quot;</span>)</span>
+<span id="cb7-7"><a href></a>clean <span class="op">=</span> panel[panel[<span class="st">&quot;opened&quot;</span>].isin([<span class="dv">0</span>, <span class="dv">2018</span>])].copy()</span>
+<span id="cb7-8"><a href></a>clean[<span class="st">&quot;treated&quot;</span>] <span class="op">=</span> (clean[<span class="st">&quot;opened&quot;</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb7-9"><a href></a></span>
+<span id="cb7-10"><a href></a>fit <span class="op">=</span> smf.ols(<span class="st">&quot;exporters ~ treated * C(year, Treatment(reference=2017))&quot;</span>, data<span class="op">=</span>clean).fit(</span>
+<span id="cb7-11"><a href></a>    cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>, cov_kwds<span class="op">=</span>{<span class="st">&quot;groups&quot;</span>: clean[<span class="st">&quot;region&quot;</span>]})</span>
+<span id="cb7-12"><a href></a>rows <span class="op">=</span> [name <span class="cf">for</span> name <span class="kw">in</span> fit.params.index <span class="cf">if</span> name.startswith(<span class="st">&quot;treated:&quot;</span>)]</span>
+<span id="cb7-13"><a href></a>study <span class="op">=</span> pd.DataFrame({<span class="st">&quot;year&quot;</span>: [<span class="bu">int</span>(name[<span class="op">-</span><span class="dv">5</span>:<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> name <span class="kw">in</span> rows],</span>
+<span id="cb7-14"><a href></a>                      <span class="st">&quot;effect&quot;</span>: fit.params[rows].values,</span>
+<span id="cb7-15"><a href></a>                      <span class="st">&quot;low&quot;</span>: fit.conf_int().loc[rows, <span class="dv">0</span>].values,</span>
+<span id="cb7-16"><a href></a>                      <span class="st">&quot;high&quot;</span>: fit.conf_int().loc[rows, <span class="dv">1</span>].values}).set_index(<span class="st">&quot;year&quot;</span>)</span>
+<span id="cb7-17"><a href></a><span class="bu">print</span>(study.<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb7-18"><a href></a></span>
+<span id="cb7-19"><a href></a>plt.errorbar(study.index, study[<span class="st">&quot;effect&quot;</span>], yerr<span class="op">=</span>[study[<span class="st">&quot;effect&quot;</span>] <span class="op">-</span> study[<span class="st">&quot;low&quot;</span>],</span>
+<span id="cb7-20"><a href></a>             study[<span class="st">&quot;high&quot;</span>] <span class="op">-</span> study[<span class="st">&quot;effect&quot;</span>]], fmt<span class="op">=</span><span class="st">&quot;o&quot;</span>, capsize<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb7-21"><a href></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">&quot;grey&quot;</span>)</span>
+<span id="cb7-22"><a href></a>plt.axvline(<span class="fl">2017.5</span>, color<span class="op">=</span><span class="st">&quot;grey&quot;</span>, linestyle<span class="op">=</span><span class="st">&quot;--&quot;</span>)</span>
+<span id="cb7-23"><a href></a>plt.ylabel(<span class="st">&quot;gap, relative to 2017&quot;</span>)</span>
+<span id="cb7-24"><a href></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
 <div class="cell-output cell-output-stdout">
-<pre><code>cohort
-2021      8
-2022      9
-2023      1
-never    12
-Name: geo, dtype: int64</code></pre>
+<pre><code>      effect    low   high
+year                      
+2014   -0.94  -2.12   0.25
+2015   -0.72  -2.34   0.89
+2016   -0.95  -2.39   0.49
+2018    2.26   0.79   3.72
+2019    3.87   2.26   5.47
+2020    5.55   4.16   6.94
+2021    7.87   6.37   9.38
+2022    9.37   8.20  10.53
+2023   11.93  10.56  13.31</code></pre>
 </div>
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img role="img" data-src="data:image/png;base64,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"></p>
+</figure>
+</div>
+</div>
+</div></div>
+<div class="step">
+<p><code>treated * C(year, ...)</code> gives one interaction per year: the gap between the groups in that year, minus the gap in 2017. <strong>Before</strong> the desks, the intervals should include zero: the groups were moving alike. <strong>After</strong>, the points are the effect, year by year, and here they grow, as the truth says they should.</p>
 </div>
 </section>
-<section id="example-3-in-python-twfe-against-callawaysantanna" class="slide level2 scrollable">
-<h2>Example 3 in Python · TWFE against Callaway–Sant’Anna</h2>
-<div id="bd0c77e1" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a><span class="co"># Example 3 · The regression two decades of papers used, and the staggered-robust estimator</span></span>
+<section id="did-step-5-all-cohorts-with-staggered-timing" class="slide level2 scrollable">
+<h2>DiD · Step 5 · All cohorts, with staggered timing</h2>
+<div id="79936ea4" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a><span class="co"># DiD, step 5 · The one big regression (TWFE) beside an estimator built for staggered adoption</span></span>
 <span id="cb9-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb9-3"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb9-4"><a href></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
-<span id="cb9-5"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb9-6"><a href></a></span>
-<span id="cb9-7"><a href></a>Y, D <span class="op">=</span> <span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;has_ai_strategy&quot;</span></span>
-<span id="cb9-8"><a href></a>wide <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)</span>
-<span id="cb9-9"><a href></a>adopted <span class="op">=</span> wide[wide[D] <span class="op">==</span> <span class="dv">1</span>].groupby(<span class="st">&quot;geo&quot;</span>)[<span class="st">&quot;time&quot;</span>].<span class="bu">min</span>()</span>
-<span id="cb9-10"><a href></a>panel <span class="op">=</span> wide[(wide[<span class="st">&quot;time&quot;</span>] <span class="op">&gt;=</span> <span class="dv">2021</span>) <span class="op">&amp;</span> wide[Y].notna()].copy()</span>
-<span id="cb9-11"><a href></a>panel[<span class="st">&quot;cohort&quot;</span>] <span class="op">=</span> panel[<span class="st">&quot;geo&quot;</span>].<span class="bu">map</span>(adopted).fillna(<span class="dv">9999</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb9-5"><a href></a></span>
+<span id="cb9-6"><a href></a>panel <span class="op">=</span> pd.read_csv(<span class="st">&quot;export_desks.csv&quot;</span>)</span>
+<span id="cb9-7"><a href></a></span>
+<span id="cb9-8"><a href></a>twfe <span class="op">=</span> smf.ols(<span class="st">&quot;exporters ~ desk + C(region) + C(year)&quot;</span>, data<span class="op">=</span>panel).fit(</span>
+<span id="cb9-9"><a href></a>    cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>, cov_kwds<span class="op">=</span>{<span class="st">&quot;groups&quot;</span>: panel[<span class="st">&quot;region&quot;</span>]})</span>
+<span id="cb9-10"><a href></a>cs <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">&quot;region&quot;</span>).fit(</span>
+<span id="cb9-11"><a href></a>    panel, outcome<span class="op">=</span><span class="st">&quot;exporters&quot;</span>, unit<span class="op">=</span><span class="st">&quot;region&quot;</span>, time<span class="op">=</span><span class="st">&quot;year&quot;</span>, first_treat<span class="op">=</span><span class="st">&quot;opened&quot;</span>)   <span class="co"># 0 = never</span></span>
 <span id="cb9-12"><a href></a></span>
-<span id="cb9-13"><a href></a>twfe <span class="op">=</span> smf.ols(<span class="ss">f&quot;</span><span class="sc">{</span>Y<span class="sc">}</span><span class="ss"> ~ </span><span class="sc">{</span>D<span class="sc">}</span><span class="ss"> + C(geo) + C(time)&quot;</span>, data<span class="op">=</span>panel).fit(</span>
-<span id="cb9-14"><a href></a>    cov_type<span class="op">=</span><span class="st">&quot;cluster&quot;</span>, cov_kwds<span class="op">=</span>{<span class="st">&quot;groups&quot;</span>: panel[<span class="st">&quot;geo&quot;</span>]})</span>
-<span id="cb9-15"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;TWFE:                </span><span class="sc">{</span>twfe<span class="sc">.</span>params[D]<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>twfe<span class="sc">.</span>bse[D]<span class="sc">:.2f}</span><span class="ss">)   truth 2.4&quot;</span>)</span>
-<span id="cb9-16"><a href></a></span>
-<span id="cb9-17"><a href></a>panel[<span class="st">&quot;g&quot;</span>] <span class="op">=</span> panel[<span class="st">&quot;cohort&quot;</span>].replace(<span class="dv">9999</span>, <span class="dv">0</span>)          <span class="co"># the package wants 0 for never-treated</span></span>
-<span id="cb9-18"><a href></a>cs <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">&quot;geo&quot;</span>).fit(panel, outcome<span class="op">=</span>Y, unit<span class="op">=</span><span class="st">&quot;geo&quot;</span>, time<span class="op">=</span><span class="st">&quot;time&quot;</span>, first_treat<span class="op">=</span><span class="st">&quot;g&quot;</span>)</span>
-<span id="cb9-19"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;Callaway-Sant&#39;Anna:  </span><span class="sc">{</span>cs<span class="sc">.</span>overall_att<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>cs<span class="sc">.</span>overall_se<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>cs<span class="sc">.</span>n_clusters<span class="sc">}</span><span class="ss"> clusters)&quot;</span>)</span>
-<span id="cb9-20"><a href></a><span class="bu">print</span>(cs.to_dataframe()[[<span class="st">&quot;group&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;effect&quot;</span>, <span class="st">&quot;se&quot;</span>, <span class="st">&quot;skip_reason&quot;</span>]].<span class="bu">round</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-13"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;two-way fixed effects:  </span><span class="sc">{</span>twfe<span class="sc">.</span>params[<span class="st">&#39;desk&#39;</span>]<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>twfe<span class="sc">.</span>bse[<span class="st">&#39;desk&#39;</span>]<span class="sc">:.2f}</span><span class="ss">)&quot;</span>)</span>
+<span id="cb9-14"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;Callaway-Sant&#39;Anna:     </span><span class="sc">{</span>cs<span class="sc">.</span>overall_att<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>cs<span class="sc">.</span>overall_se<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>cs<span class="sc">.</span>n_clusters<span class="sc">}</span><span class="ss"> clusters)&quot;</span>)</span>
+<span id="cb9-15"><a href></a><span class="bu">print</span>(<span class="st">&quot;truth, average over the treated years: 6.12&quot;</span>)</span>
+<span id="cb9-16"><a href></a><span class="bu">print</span>(cs.aggregate(<span class="st">&quot;event_study&quot;</span>).to_dataframe()[[<span class="st">&quot;event_time&quot;</span>, <span class="st">&quot;att&quot;</span>, <span class="st">&quot;se&quot;</span>]].<span class="bu">round</span>(<span class="dv">2</span>).to_string(index<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>TWFE:                2.81  (SE 0.83)   truth 2.4
-Callaway-Sant&#39;Anna:  2.20  (SE 0.78, 30 clusters)
-   group  time  effect    se           skip_reason
-0   2021  2021     NaN   NaN        missing_period
-1   2021  2022     NaN   NaN        missing_period
-2   2021  2023     NaN   NaN        missing_period
-3   2021  2024     NaN   NaN        missing_period
-4   2022  2022    1.74  1.13                   NaN
-5   2022  2023    2.75  0.84                   NaN
-6   2022  2024    2.14  0.98                   NaN
-7   2023  2022   -1.13  0.44                   NaN
-8   2023  2023    1.84  0.55                   NaN
-9   2023  2024     NaN   NaN  zero_treated_control</code></pre>
-</div>
-</div>
-</section>
-<section id="example-3-in-python-how-much-violation-does-it-survive" class="slide level2 scrollable">
-<h2>Example 3 in Python · How much violation does it survive?</h2>
-<div id="bcd89a3f" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># Example 3 · Rambachan-Roth sensitivity, from the Callaway-Sant&#39;Anna event study</span></span>
-<span id="cb11-2"><a href></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
-<span id="cb11-3"><a href></a><span class="im">import</span> qmib</span>
-<span id="cb11-4"><a href></a></span>
-<span id="cb11-5"><a href></a>Y, D <span class="op">=</span> <span class="st">&quot;ai_use_any&quot;</span>, <span class="st">&quot;has_ai_strategy&quot;</span></span>
-<span id="cb11-6"><a href></a>wide <span class="op">=</span> qmib.load(<span class="st">&quot;angle_c_country&quot;</span>)</span>
-<span id="cb11-7"><a href></a>adopted <span class="op">=</span> wide[wide[D] <span class="op">==</span> <span class="dv">1</span>].groupby(<span class="st">&quot;geo&quot;</span>)[<span class="st">&quot;time&quot;</span>].<span class="bu">min</span>()</span>
-<span id="cb11-8"><a href></a>panel <span class="op">=</span> wide[(wide[<span class="st">&quot;time&quot;</span>] <span class="op">&gt;=</span> <span class="dv">2021</span>) <span class="op">&amp;</span> wide[Y].notna()].copy()</span>
-<span id="cb11-9"><a href></a>panel[<span class="st">&quot;g&quot;</span>] <span class="op">=</span> panel[<span class="st">&quot;geo&quot;</span>].<span class="bu">map</span>(adopted).fillna(<span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb11-10"><a href></a></span>
-<span id="cb11-11"><a href></a>cs <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">&quot;geo&quot;</span>).fit(panel, outcome<span class="op">=</span>Y, unit<span class="op">=</span><span class="st">&quot;geo&quot;</span>, time<span class="op">=</span><span class="st">&quot;time&quot;</span>, first_treat<span class="op">=</span><span class="st">&quot;g&quot;</span>)</span>
-<span id="cb11-12"><a href></a>es <span class="op">=</span> cs.aggregate(<span class="st">&quot;event_study&quot;</span>)</span>
-<span id="cb11-13"><a href></a><span class="cf">for</span> M <span class="kw">in</span> (<span class="fl">0.0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>):</span>
-<span id="cb11-14"><a href></a>    h <span class="op">=</span> dd.HonestDiD(method<span class="op">=</span><span class="st">&quot;relative_magnitude&quot;</span>, M<span class="op">=</span>M).fit(es)</span>
-<span id="cb11-15"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;M = </span><span class="sc">{</span>M<span class="sc">:4.2f}</span><span class="ss">   95% robust interval [</span><span class="sc">{</span>h<span class="sc">.</span>ci_lb<span class="sc">:6.2f}</span><span class="ss">, </span><span class="sc">{</span>h<span class="sc">.</span>ci_ub<span class="sc">:6.2f}</span><span class="ss">]   &quot;</span></span>
-<span id="cb11-16"><a href></a>          <span class="ss">f&quot;rules out zero: </span><span class="sc">{</span><span class="st">&#39;yes&#39;</span> <span class="cf">if</span> h<span class="sc">.</span>is_significant <span class="cf">else</span> <span class="st">&#39;no&#39;</span><span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>M = 0.00   95% robust interval [  0.61,   3.81]   rules out zero: yes
-M = 0.25   95% robust interval [  0.05,   4.37]   rules out zero: yes
-M = 0.50   95% robust interval [ -0.51,   4.94]   rules out zero: no
-M = 1.00   95% robust interval [ -1.64,   6.06]   rules out zero: no</code></pre>
+<pre><code>two-way fixed effects:  5.18  (SE 0.49)
+Callaway-Sant&#39;Anna:     6.38  (SE 0.45, 40 clusters)
+truth, average over the treated years: 6.12
+ event_time   att   se
+         -6  0.18 0.72
+         -5  0.29 0.72
+         -4  0.40 0.71
+         -3  0.16 0.60
+         -2 -0.07 0.63
+         -1 -0.28 0.61
+          0  2.89 0.62
+          1  4.58 0.60
+          2  6.20 0.47
+          3  7.88 0.74
+          4  9.37 0.57
+          5 11.93 0.68</code></pre>
 </div>
 </div>
 <div class="step">
-<p><strong>Your turn.</strong> (1) In the TWFE cell, drop the 2021 cohort (<code>panel[panel[&quot;cohort&quot;] != 2021]</code>) and refit: how far does TWFE move? (2) Why does the one-country cohort report a <strong>smaller</strong> standard error than the nine-country one? Is it more precise?</p>
+<p><code>CallawaySantAnna</code> does step 3 for <strong>every</strong> cohort and year, always against regions not yet treated, then averages. Two-way fixed effects also uses the 2018 regions, whose effect is still growing, as controls for the 2021 regions, and so comes out too low. Report both: if they differ, the difference is a finding.</p>
 </div>
 </section>
-<section id="example-4-in-python-the-two-stages-by-hand" class="slide level2 scrollable">
-<h2>Example 4 in Python · The two stages, by hand</h2>
-<div id="0ac81a74" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Example 4 · 2,000 firms; exporting adds +5; management is never observed</span></span>
+<section id="did-step-6-how-wrong-could-parallel-trends-be" class="slide level2 scrollable">
+<h2>DiD · Step 6 · How wrong could parallel trends be?</h2>
+<div id="a5d25c61" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># DiD, step 6 · Rambachan-Roth: allow a violation up to M times the largest pre-period wobble</span></span>
+<span id="cb11-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb11-3"><a href></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
+<span id="cb11-4"><a href></a></span>
+<span id="cb11-5"><a href></a>panel <span class="op">=</span> pd.read_csv(<span class="st">&quot;export_desks.csv&quot;</span>)</span>
+<span id="cb11-6"><a href></a>cs <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">&quot;region&quot;</span>).fit(</span>
+<span id="cb11-7"><a href></a>    panel, outcome<span class="op">=</span><span class="st">&quot;exporters&quot;</span>, unit<span class="op">=</span><span class="st">&quot;region&quot;</span>, time<span class="op">=</span><span class="st">&quot;year&quot;</span>, first_treat<span class="op">=</span><span class="st">&quot;opened&quot;</span>)</span>
+<span id="cb11-8"><a href></a>study <span class="op">=</span> cs.aggregate(<span class="st">&quot;event_study&quot;</span>)</span>
+<span id="cb11-9"><a href></a></span>
+<span id="cb11-10"><a href></a><span class="cf">for</span> M <span class="kw">in</span> (<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>):</span>
+<span id="cb11-11"><a href></a>    honest <span class="op">=</span> dd.HonestDiD(method<span class="op">=</span><span class="st">&quot;relative_magnitude&quot;</span>, M<span class="op">=</span>M).fit(study)</span>
+<span id="cb11-12"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;M = </span><span class="sc">{</span>M<span class="sc">}</span><span class="ss">   95% robust interval [</span><span class="sc">{</span>honest<span class="sc">.</span>ci_lb<span class="sc">:5.2f}</span><span class="ss">, </span><span class="sc">{</span>honest<span class="sc">.</span>ci_ub<span class="sc">:5.2f}</span><span class="ss">]   &quot;</span></span>
+<span id="cb11-13"><a href></a>          <span class="ss">f&quot;rules out zero: </span><span class="sc">{</span><span class="st">&#39;yes&#39;</span> <span class="cf">if</span> honest<span class="sc">.</span>is_significant <span class="cf">else</span> <span class="st">&#39;no&#39;</span><span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>M = 0   95% robust interval [ 6.26,  8.02]   rules out zero: yes
+M = 1   95% robust interval [ 5.30,  8.98]   rules out zero: yes
+M = 2   95% robust interval [ 4.33,  9.95]   rules out zero: yes
+M = 4   95% robust interval [ 2.41, 11.88]   rules out zero: yes
+M = 8   95% robust interval [-1.45, 15.73]   rules out zero: no</code></pre>
+</div>
+</div>
+<div class="step">
+<p>A flat pre-period does not prove the trends would have <strong>stayed</strong> parallel. This asks: if they had drifted apart afterwards by up to <code>M</code> times the largest movement seen before, would the conclusion survive? <code>M = 0</code> is exact parallel trends. Report the largest <code>M</code> at which zero is still ruled out. (The interval is for the average effect over the six years after opening, whose true value is 7.)</p>
+</div>
+</section>
+<section id="your-turn-the-difference-in-differences" class="slide level2 scrollable">
+<h2>Your turn · The difference-in-differences</h2>
+<div class="step">
+<ol type="1">
+<li><strong>The wrong comparison.</strong> In step 3, compute the after-only gap (treated minus control, 2018) and the before-after change of the treated alone. How far is each from 2, and what does each mix in?</li>
+<li><strong>A pre-trend.</strong> In step 1, add <code>+ 0.8 * (opened == 2018) * (year - 2014)</code> to <code>exporters</code>, so that the 2018 regions were already pulling away. Rerun steps 2 to 4. Where do you see it first: the plot, the 2×2 or the event study? What does the 2×2 now say, against a truth of 2?</li>
+<li><strong>The comparison the big regression should not make.</strong> In step 3, estimate the first-year effect for the <strong>2021</strong> cohort (2020 against 2021), once with the never-treated as controls (<code>[0, 2021]</code>) and once with the <strong>2018</strong> regions as controls (<code>[2018, 2021]</code>, and <code>treated</code> is <code>opened == 2021</code>). By how much does the estimate fall, and what were the 2018 regions doing between 2020 and 2021?</li>
+</ol>
+</div>
+</section>
+<section id="solution-4-an-instrument-step-by-step" class="slide level2 scrollable">
+<h2>Solution 4 · An instrument, step by step</h2>
+<p><strong>The case.</strong> Does attending an international <strong>trade fair</strong> raise a firm’s export sales? Ambitious firms attend more and export more, and ambition is in no file; there is no before and after. But the trade agency once mailed a <strong>voucher</strong> for a free stand to 1,500 of 3,000 firms, <strong>drawn at random</strong>. Simulated data, so the truth is known: attending adds <strong>+12</strong> ($ thousand).</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>An instrument must be</th>
+<th>Here</th>
+<th>Checkable?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>relevant</strong>: it moves the treatment</td>
+<td>firms with a voucher attend more often</td>
+<td><strong>yes</strong>: the first stage</td>
+</tr>
+<tr class="even">
+<td><strong>independent</strong>: as good as random</td>
+<td>the vouchers were drawn</td>
+<td><strong>partly</strong>: balance on what was fixed before</td>
+</tr>
+<tr class="odd">
+<td><strong>excludable</strong>: it affects the outcome <strong>only through</strong> the treatment</td>
+<td>a voucher changes exports only by getting a firm to the fair</td>
+<td>no: an argument</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>What you do</th>
+<th>In Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>the file, and the naive answer</td>
+<td><code>.groupby(&quot;attends&quot;)[&quot;exports&quot;].mean()</code></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>check the instrument: <strong>balance</strong>, then the <strong>first stage</strong></td>
+<td><code>smf.ols(&quot;attends ~ voucher&quot;)</code>, its F</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>the <strong>reduced form</strong>, and the ratio</td>
+<td><code>smf.ols(&quot;exports ~ voucher&quot;)</code></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><strong>two-stage least squares</strong>, for the standard error</td>
+<td><code>IV2SLS</code></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>say <strong>whom</strong> the estimate describes, and argue exclusion</td>
+<td>on paper</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="instrument-step-1-the-file-and-the-naive-answer" class="slide level2 scrollable">
+<h2>Instrument · Step 1 · The file, and the naive answer</h2>
+<div id="79c31257" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># Instrument, step 1 · 3,000 firms; attending the fair adds exactly +12; ambition is never recorded</span></span>
 <span id="cb13-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb13-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-4"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb13-5"><a href></a></span>
-<span id="cb13-6"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">13</span>)</span>
-<span id="cb13-7"><a href></a>n <span class="op">=</span> <span class="dv">2000</span></span>
-<span id="cb13-8"><a href></a>management <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)                     <span class="co"># not in the data</span></span>
-<span id="cb13-9"><a href></a>distance <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">300</span>, n)                    <span class="co"># km to the nearest port: the instrument</span></span>
-<span id="cb13-10"><a href></a>exports <span class="op">=</span> (<span class="fl">0.8</span> <span class="op">*</span> management <span class="op">-</span> <span class="fl">0.01</span> <span class="op">*</span> distance <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n) <span class="op">&gt;</span> <span class="op">-</span><span class="fl">1.5</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb13-11"><a href></a>productivity <span class="op">=</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">5</span> <span class="op">*</span> exports <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> management <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">5</span>, n)</span>
-<span id="cb13-12"><a href></a>firms <span class="op">=</span> pd.DataFrame({<span class="st">&quot;exports&quot;</span>: exports, <span class="st">&quot;distance&quot;</span>: distance, <span class="st">&quot;productivity&quot;</span>: productivity})</span>
-<span id="cb13-13"><a href></a></span>
-<span id="cb13-14"><a href></a>naive <span class="op">=</span> firms.groupby(<span class="st">&quot;exports&quot;</span>)[<span class="st">&quot;productivity&quot;</span>].mean()</span>
-<span id="cb13-15"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;naive: exporters minus non-exporters = </span><span class="sc">{</span>naive[<span class="dv">1</span>] <span class="op">-</span> naive[<span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">   (truth 5)&quot;</span>)</span>
-<span id="cb13-16"><a href></a></span>
-<span id="cb13-17"><a href></a>first <span class="op">=</span> smf.ols(<span class="st">&quot;exports ~ distance&quot;</span>, data<span class="op">=</span>firms).fit()          <span class="co"># does distance move exporting?</span></span>
-<span id="cb13-18"><a href></a>reduced <span class="op">=</span> smf.ols(<span class="st">&quot;productivity ~ distance&quot;</span>, data<span class="op">=</span>firms).fit()  <span class="co"># does distance move productivity?</span></span>
-<span id="cb13-19"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;first stage:  </span><span class="sc">{</span>first<span class="sc">.</span>params[<span class="st">&#39;distance&#39;</span>]<span class="sc">:.4f}</span><span class="ss"> per km   F = </span><span class="sc">{</span>first<span class="sc">.</span>tvalues[<span class="st">&#39;distance&#39;</span>] <span class="op">**</span> <span class="dv">2</span><span class="sc">:.0f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb13-20"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;reduced form: </span><span class="sc">{</span>reduced<span class="sc">.</span>params[<span class="st">&#39;distance&#39;</span>]<span class="sc">:.4f}</span><span class="ss"> per km&quot;</span>)</span>
-<span id="cb13-21"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;IV = reduced / first = </span><span class="sc">{</span>reduced<span class="sc">.</span>params[<span class="st">&#39;distance&#39;</span>] <span class="op">/</span> first<span class="sc">.</span>params[<span class="st">&#39;distance&#39;</span>]<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-6"><a href></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">13</span>)                 <span class="co"># simulated here; in your project, the file you were given</span></span>
+<span id="cb13-7"><a href></a>n <span class="op">=</span> <span class="dv">3000</span></span>
+<span id="cb13-8"><a href></a>ambition <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)                                   <span class="co"># in no file</span></span>
+<span id="cb13-9"><a href></a>employees <span class="op">=</span> rng.lognormal(<span class="dv">3</span>, <span class="fl">0.7</span>, n).<span class="bu">round</span>() <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb13-10"><a href></a>voucher <span class="op">=</span> (rng.permutation(n) <span class="op">&lt;</span> n <span class="op">//</span> <span class="dv">2</span>).astype(<span class="bu">int</span>)              <span class="co"># the agency drew who received one</span></span>
+<span id="cb13-11"><a href></a>attends <span class="op">=</span> (<span class="fl">0.9</span> <span class="op">*</span> ambition <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> voucher <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n) <span class="op">&gt;</span> <span class="fl">0.8</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb13-12"><a href></a>exports <span class="op">=</span> (<span class="dv">40</span> <span class="op">+</span> <span class="dv">12</span> <span class="op">*</span> attends <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> ambition <span class="op">+</span> <span class="dv">5</span> <span class="op">*</span> np.log(employees) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">12</span>, n)).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb13-13"><a href></a>firms <span class="op">=</span> pd.DataFrame({<span class="st">&quot;employees&quot;</span>: employees, <span class="st">&quot;voucher&quot;</span>: voucher, <span class="st">&quot;attends&quot;</span>: attends, <span class="st">&quot;exports&quot;</span>: exports})</span>
+<span id="cb13-14"><a href></a>firms.to_csv(<span class="st">&quot;trade_fair.csv&quot;</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-15"><a href></a></span>
+<span id="cb13-16"><a href></a>naive <span class="op">=</span> firms.groupby(<span class="st">&quot;attends&quot;</span>)[<span class="st">&quot;exports&quot;</span>].mean()</span>
+<span id="cb13-17"><a href></a>controlled <span class="op">=</span> smf.ols(<span class="st">&quot;exports ~ attends + np.log(employees)&quot;</span>, data<span class="op">=</span>firms).fit()</span>
+<span id="cb13-18"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;naive: attenders minus the rest = </span><span class="sc">{</span>naive[<span class="dv">1</span>] <span class="op">-</span> naive[<span class="dv">0</span>]<span class="sc">:.1f}</span><span class="ss">   (truth 12)&quot;</span>)</span>
+<span id="cb13-19"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;regression, controlling for size: </span><span class="sc">{</span>controlled<span class="sc">.</span>params[<span class="st">&#39;attends&#39;</span>]<span class="sc">:.1f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>naive: exporters minus non-exporters = 9.96   (truth 5)
-first stage:  -0.0027 per km   F = 543
-reduced form: -0.0124 per km
-IV = reduced / first = 4.62</code></pre>
+<pre><code>naive: attenders minus the rest = 21.2   (truth 12)
+regression, controlling for size: 21.2</code></pre>
 </div>
-</div>
-</section>
-<section id="example-4-in-python-two-stage-least-squares-with-a-standard-error" class="slide level2 scrollable">
-<h2>Example 4 in Python · Two-stage least squares, with a standard error</h2>
-<div id="3f1e8580" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Example 4 · statsmodels&#39; IV2SLS: outcome, then [constant + treatment], then [constant + instrument]</span></span>
-<span id="cb15-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb15-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb15-4"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb15-5"><a href></a><span class="im">from</span> statsmodels.sandbox.regression.gmm <span class="im">import</span> IV2SLS</span>
-<span id="cb15-6"><a href></a></span>
-<span id="cb15-7"><a href></a><span class="cf">for</span> version, direct <span class="kw">in</span> [(<span class="st">&quot;A&quot;</span>, <span class="fl">0.0</span>), (<span class="st">&quot;B&quot;</span>, <span class="op">-</span><span class="fl">0.02</span>)]:   <span class="co"># B: distance also lowers productivity directly</span></span>
-<span id="cb15-8"><a href></a>    rng <span class="op">=</span> np.random.default_rng(<span class="dv">13</span>)</span>
-<span id="cb15-9"><a href></a>    n <span class="op">=</span> <span class="dv">2000</span></span>
-<span id="cb15-10"><a href></a>    management <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
-<span id="cb15-11"><a href></a>    distance <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">300</span>, n)</span>
-<span id="cb15-12"><a href></a>    exports <span class="op">=</span> (<span class="fl">0.8</span> <span class="op">*</span> management <span class="op">-</span> <span class="fl">0.01</span> <span class="op">*</span> distance <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n) <span class="op">&gt;</span> <span class="op">-</span><span class="fl">1.5</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb15-13"><a href></a>    productivity <span class="op">=</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">5</span> <span class="op">*</span> exports <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> management <span class="op">+</span> direct <span class="op">*</span> distance <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">5</span>, n)</span>
-<span id="cb15-14"><a href></a>    firms <span class="op">=</span> pd.DataFrame({<span class="st">&quot;exports&quot;</span>: exports, <span class="st">&quot;distance&quot;</span>: distance, <span class="st">&quot;productivity&quot;</span>: productivity})</span>
-<span id="cb15-15"><a href></a></span>
-<span id="cb15-16"><a href></a>    iv <span class="op">=</span> IV2SLS(firms[<span class="st">&quot;productivity&quot;</span>],</span>
-<span id="cb15-17"><a href></a>                sm.add_constant(firms[[<span class="st">&quot;exports&quot;</span>]]),</span>
-<span id="cb15-18"><a href></a>                sm.add_constant(firms[[<span class="st">&quot;distance&quot;</span>]])).fit()</span>
-<span id="cb15-19"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;version </span><span class="sc">{</span>version<span class="sc">}</span><span class="ss">: IV </span><span class="sc">{</span>iv<span class="sc">.</span>params[<span class="st">&#39;exports&#39;</span>]<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>iv<span class="sc">.</span>bse[<span class="st">&#39;exports&#39;</span>]<span class="sc">:.2f}</span><span class="ss">)   truth 5&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>version A: IV 4.62  (SE 0.76)   truth 5
-version B: IV 12.09  (SE 0.70)   truth 5</code></pre>
-</div>
-</div>
-<div class="warn">
-<p><strong>Do not run the second stage yourself with <code>smf.ols</code>.</strong> Regressing productivity on the <em>predicted</em> exports gives the right number and the <strong>wrong standard error</strong>: it ignores that the prediction was estimated. <code>IV2SLS</code> does both stages and corrects it.</p>
 </div>
 <div class="step">
-<p><strong>Your turn.</strong> (1) Weaken the instrument: change <code>- 0.01 * distance</code> to <code>- 0.001 * distance</code>. What happens to the F statistic, to the IV estimate and to its standard error? (2) In version B, is there anything in the output that tells you the exclusion fails?</p>
+<p>Controlling for what is in the file does not help, because the confounder is not in the file. Matching would fail for the same reason, and there is no “before” to difference away. This is the situation an instrument is for.</p>
+</div>
+</section>
+<section id="instrument-step-2-check-the-instrument" class="slide level2 scrollable">
+<h2>Instrument · Step 2 · Check the instrument</h2>
+<div id="f02f3801" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href></a><span class="co"># Instrument, step 2 · Is the voucher as good as random, and does it move attendance?</span></span>
+<span id="cb15-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb15-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb15-4"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb15-5"><a href></a></span>
+<span id="cb15-6"><a href></a>firms <span class="op">=</span> pd.read_csv(<span class="st">&quot;trade_fair.csv&quot;</span>)</span>
+<span id="cb15-7"><a href></a><span class="bu">print</span>(firms.groupby(<span class="st">&quot;voucher&quot;</span>)[[<span class="st">&quot;employees&quot;</span>, <span class="st">&quot;attends&quot;</span>]].mean().<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb15-8"><a href></a></span>
+<span id="cb15-9"><a href></a>balance <span class="op">=</span> smf.ols(<span class="st">&quot;np.log(employees) ~ voucher&quot;</span>, data<span class="op">=</span>firms).fit()</span>
+<span id="cb15-10"><a href></a>first <span class="op">=</span> smf.ols(<span class="st">&quot;attends ~ voucher&quot;</span>, data<span class="op">=</span>firms).fit()</span>
+<span id="cb15-11"><a href></a></span>
+<span id="cb15-12"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;does the voucher predict firm size?  p = </span><span class="sc">{</span>balance<span class="sc">.</span>pvalues[<span class="st">&#39;voucher&#39;</span>]<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb15-13"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;first stage: a voucher raises attendance by </span><span class="sc">{</span>first<span class="sc">.</span>params[<span class="st">&#39;voucher&#39;</span>]<span class="sc">:.2f}</span><span class="ss">   &quot;</span></span>
+<span id="cb15-14"><a href></a>      <span class="ss">f&quot;F = </span><span class="sc">{</span>first<span class="sc">.</span>tvalues[<span class="st">&#39;voucher&#39;</span>] <span class="op">**</span> <span class="dv">2</span><span class="sc">:.0f}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         employees  attends
+voucher                    
+0            26.56     0.29
+1            27.56     0.62
+does the voucher predict firm size?  p = 0.41
+first stage: a voucher raises attendance by 0.34   F = 383</code></pre>
+</div>
+</div>
+<div class="step">
+<p><strong>Independence</strong> can be checked only on what was fixed before: firms with and without a voucher should look alike, and they do. <strong>Relevance</strong> is the first stage: the voucher must move attendance, strongly. The usual rule asks for an F statistic above 10; a weak instrument gives an estimate that is noisy and biased.</p>
+</div>
+</section>
+<section id="instrument-step-3-the-reduced-form-and-the-ratio" class="slide level2 scrollable">
+<h2>Instrument · Step 3 · The reduced form, and the ratio</h2>
+<div id="f4169b37" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href></a><span class="co"># Instrument, step 3 · What the voucher did to exports, divided by what it did to attendance</span></span>
+<span id="cb17-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-3"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb17-4"><a href></a></span>
+<span id="cb17-5"><a href></a>firms <span class="op">=</span> pd.read_csv(<span class="st">&quot;trade_fair.csv&quot;</span>)</span>
+<span id="cb17-6"><a href></a>first <span class="op">=</span> smf.ols(<span class="st">&quot;attends ~ voucher&quot;</span>, data<span class="op">=</span>firms).fit().params[<span class="st">&quot;voucher&quot;</span>]</span>
+<span id="cb17-7"><a href></a>reduced <span class="op">=</span> smf.ols(<span class="st">&quot;exports ~ voucher&quot;</span>, data<span class="op">=</span>firms).fit().params[<span class="st">&quot;voucher&quot;</span>]</span>
+<span id="cb17-8"><a href></a></span>
+<span id="cb17-9"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;reduced form: a voucher raises exports by     </span><span class="sc">{</span>reduced<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb17-10"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;first stage:  a voucher raises attendance by  </span><span class="sc">{</span>first<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb17-11"><a href></a><span class="bu">print</span>(<span class="ss">f&quot;instrument estimate = reduced / first =       </span><span class="sc">{</span>reduced <span class="op">/</span> first<span class="sc">:.1f}</span><span class="ss">   (truth 12)&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>reduced form: a voucher raises exports by     3.86
+first stage:  a voucher raises attendance by  0.34
+instrument estimate = reduced / first =       11.5   (truth 12)</code></pre>
+</div>
+</div>
+<div class="step">
+<p>Both regressions compare firms by the <strong>draw</strong>, so both are free of selection. A voucher raised exports a little, and it did so by sending about a third of the firms to the fair. <strong>If</strong> that is the only way it acts, the effect of attending is the first number divided by the second.</p>
+</div>
+</section>
+<section id="instrument-step-4-two-stage-least-squares" class="slide level2 scrollable">
+<h2>Instrument · Step 4 · Two-stage least squares</h2>
+<div id="366a5571" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href></a><span class="co"># Instrument, step 4 · The same estimate with a correct standard error, then with a control</span></span>
+<span id="cb19-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb19-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb19-4"><a href></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb19-5"><a href></a><span class="im">from</span> statsmodels.sandbox.regression.gmm <span class="im">import</span> IV2SLS</span>
+<span id="cb19-6"><a href></a></span>
+<span id="cb19-7"><a href></a>firms <span class="op">=</span> pd.read_csv(<span class="st">&quot;trade_fair.csv&quot;</span>)</span>
+<span id="cb19-8"><a href></a>firms[<span class="st">&quot;log_employees&quot;</span>] <span class="op">=</span> np.log(firms[<span class="st">&quot;employees&quot;</span>])</span>
+<span id="cb19-9"><a href></a></span>
+<span id="cb19-10"><a href></a><span class="co"># IV2SLS(outcome, [constant + treatment + controls], [constant + instrument + controls])</span></span>
+<span id="cb19-11"><a href></a>iv <span class="op">=</span> IV2SLS(firms[<span class="st">&quot;exports&quot;</span>],</span>
+<span id="cb19-12"><a href></a>            sm.add_constant(firms[[<span class="st">&quot;attends&quot;</span>]]),</span>
+<span id="cb19-13"><a href></a>            sm.add_constant(firms[[<span class="st">&quot;voucher&quot;</span>]])).fit()</span>
+<span id="cb19-14"><a href></a>with_size <span class="op">=</span> IV2SLS(firms[<span class="st">&quot;exports&quot;</span>],</span>
+<span id="cb19-15"><a href></a>                   sm.add_constant(firms[[<span class="st">&quot;attends&quot;</span>, <span class="st">&quot;log_employees&quot;</span>]]),</span>
+<span id="cb19-16"><a href></a>                   sm.add_constant(firms[[<span class="st">&quot;voucher&quot;</span>, <span class="st">&quot;log_employees&quot;</span>]])).fit()</span>
+<span id="cb19-17"><a href></a></span>
+<span id="cb19-18"><a href></a><span class="cf">for</span> name, fit <span class="kw">in</span> [(<span class="st">&quot;instrument only&quot;</span>, iv), (<span class="st">&quot;with firm size&quot;</span>, with_size)]:</span>
+<span id="cb19-19"><a href></a>    low, high <span class="op">=</span> fit.conf_int().loc[<span class="st">&quot;attends&quot;</span>]</span>
+<span id="cb19-20"><a href></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:16s}</span><span class="ss"> </span><span class="sc">{</span>fit<span class="sc">.</span>params[<span class="st">&#39;attends&#39;</span>]<span class="sc">:5.1f}</span><span class="ss">   se </span><span class="sc">{</span>fit<span class="sc">.</span>bse[<span class="st">&#39;attends&#39;</span>]<span class="sc">:.1f}</span><span class="ss">   95% CI [</span><span class="sc">{</span>low<span class="sc">:.1f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.1f}</span><span class="ss">]&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>instrument only   11.5   se 1.7   95% CI [8.1, 14.9]
+with firm size    11.3   se 1.7   95% CI [7.9, 14.6]</code></pre>
+</div>
+</div>
+<div class="step">
+<p>A control goes in <strong>both</strong> lists: it is its own instrument. The interval is much wider than a regression’s would be: the instrument uses only the part of attendance that the voucher caused, about a third of it. That is the price of the design.</p>
+</div>
+<div class="warn">
+<p><strong>Do not run the second stage yourself with <code>smf.ols</code></strong> on predicted attendance: the number is right and the standard error is wrong. <code>IV2SLS</code> does both stages and corrects it.</p>
+</div>
+</section>
+<section id="instrument-step-5-what-the-number-means-and-what-could-break-it" class="slide level2 scrollable">
+<h2>Instrument · Step 5 · What the number means, and what could break it</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="check">
+<p><strong>Whom it describes.</strong> The estimate is the effect of the fair on firms that attended <strong>because of</strong> the voucher. Firms that would have gone anyway, and firms that would never go, contribute nothing: the voucher did not change what they did. Say so when you report it.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="warn">
+<p><strong>What could break it.</strong> Exclusion: does a voucher change exports in <strong>any other way</strong>? If the letter also advertised the agency’s export loans, it does, and the ratio is wrong by an amount no output shows. This step is written, not computed.</p>
+</div>
+</div></div>
+<div class="step">
+<p>The link with session 10: firms that refused the treatment in a trial. There, the <strong>draw</strong> was the instrument for <strong>taking</strong> the treatment. An encouragement, a lottery, a distance, an eligibility rule: every instrument is an attempt to find a draw that someone else made.</p>
+</div>
+</section>
+<section id="your-turn-the-instrument" class="slide level2 scrollable">
+<h2>Your turn · The instrument</h2>
+<div class="step">
+<ol type="1">
+<li><strong>A weak instrument.</strong> In step 1, change <code>1.2 * voucher</code> to <code>0.1 * voucher</code> and rerun steps 1, 2 and 4. What happens to the F statistic, to the estimate and to its interval?</li>
+<li><strong>Exclusion fails.</strong> Back at <code>1.2</code>, add <code>+ 3 * voucher</code> to <code>exports</code> in step 1: the letter helped firms directly. Rerun steps 2 to 4. Does any check in step 2 warn you? How far is the estimate from 12?</li>
+<li><strong>The second stage by hand.</strong> In step 4, save the first stage’s <code>.fittedvalues</code> as a column and run <code>smf.ols(&quot;exports ~ fitted&quot;)</code>. Compare the coefficient and the standard error with <code>IV2SLS</code>.</li>
+</ol>
 </div>
 </section>
 <section id="what-to-report" class="slide level2 scrollable">
 <h2>What to report</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>For a difference-in-differences</strong></p>
 <ol type="1">
 <li><strong>The adoption structure</strong>: units per cohort, years before and after, and which cohorts are unusable.</li>
 <li><strong>The parallel-trends argument</strong>, as an argument: why would the gap have stayed constant?</li>
-<li><strong>An event study</strong>, with the reference year marked; if there are too few pre-periods, say so.</li>
-<li><strong>A staggered-robust estimator beside TWFE.</strong> If they agree, show it; if they disagree, that is the finding.</li>
+<li><strong>The plot</strong> of each group over time, and <strong>an event study</strong> with the reference year marked.</li>
+<li><strong>A staggered-robust estimator beside TWFE.</strong> If they disagree, that is the finding.</li>
 <li><strong>Standard errors clustered by unit</strong>, with the number of clusters.</li>
-<li><strong>What else changed at the same time</strong>, and why it is not the explanation.</li>
-<li><strong>How much violation the result survives</strong>, when the pre-trend evidence is thin.</li>
-<li><strong>For an instrument:</strong> the first stage and its F statistic, and the <strong>argument</strong> for exclusion, in words.</li>
+<li><strong>What else changed at the same time</strong>, and <strong>how much violation</strong> the result survives.</li>
 </ol>
+</div><div class="column" style="width:50%;">
+<p><strong>For an instrument</strong></p>
+<ol type="1">
+<li><strong>The naive estimate</strong>, and why it cannot be trusted.</li>
+<li><strong>Why the instrument is as good as random</strong>, with balance on what was fixed before.</li>
+<li><strong>The first stage</strong> and its F statistic.</li>
+<li><strong>The reduced form</strong>, then the two-stage estimate with its interval.</li>
+<li><strong>Whom the estimate describes</strong>: the units the instrument moved.</li>
+<li><strong>The argument for exclusion</strong>, in words.</li>
+</ol>
+</div></div>
 <div class="warn">
-<p><strong>A flat pre-trend makes parallel trends plausible. It does not make it true.</strong></p>
+<p><strong>A flat pre-trend makes parallel trends plausible, and a strong first stage makes an instrument relevant. Neither makes the design true.</strong></p>
 </div>
 </section>
 <section id="before-the-next-session" class="slide level2 scrollable">
