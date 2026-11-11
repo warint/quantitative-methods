@@ -29,6 +29,10 @@ modern estimators earn their place and the assumption cannot be examined at all.
 And simulated exporting firms, where neither matching nor difference-in-differences
 can work and a third design, an instrument, can — until its key condition fails.
 
+The examples show the two designs at work. Two later sections then carry each
+one out from start to finish on new data: a staggered rollout analysed as a
+difference-in-differences, and a randomly drawn voucher used as an instrument.
+
 ::: {.plate}
 ![](images/session-11-snow.jpg){fig-alt="John Snow** · **1813–1858."}
 
@@ -756,6 +760,334 @@ on an assumption the data cannot test.
 Choose the design whose assumption can be argued best in the setting at hand, and
 say in words which assumption that is.
 
+## Doing it · A difference-in-differences study, from the panel to the sensitivity analysis
+
+The four examples showed the two designs of this chapter working, and failing.
+This section and the next carry each one out from the first file to the
+reported number, on data that appear nowhere else in the chapter, because the
+order of the steps is most of the method and it is easier to see on a clean
+case.
+
+A government opens **export desks**, one-stop offices for customs paperwork,
+in 12 regions in 2018 and in 10 more in 2021; 18 regions never get one. Does a
+desk raise the share of a region's firms that export? Regions with a desk
+already exported more, for reasons nobody recorded, which rules out matching.
+The data are simulated, so the truth is known: a desk adds 2 points for every
+year it has been open, which is 6.1 on average over the treated years observed.
+
+**Step 1 · The panel, and the adoption table.** A difference-in-differences
+needs a panel: the same units at several dates, one row per unit and date. The
+first thing to print from it is who was treated and when, because that table
+says which comparisons exist before any is made.
+
+```{python}
+#| label: check-desks-panel
+#| code-summary: "Run it: 40 regions over ten years, and who got a desk when"
+
+import matplotlib.pyplot as plt
+import diff_diff as dd
+
+rng = np.random.default_rng(11)
+n_regions = 40
+opened = np.r_[np.full(12, 2018), np.full(10, 2021), np.zeros(18)].astype(int)   # 0 = never
+level = rng.normal(30, 6, n_regions) + 4 * (opened > 0)     # regions with a desk exported more already
+rows = []
+for year in range(2014, 2024):
+    years_open = np.where((opened > 0) & (year >= opened), year - opened + 1, 0)
+    exporters = level + 1.0 * (year - 2014) + 2.0 * years_open + rng.normal(0, 1.5, n_regions)
+    rows.append(pd.DataFrame({"region": np.arange(n_regions), "year": year, "opened": opened,
+                              "desk": (years_open > 0).astype(int),
+                              "exporters": exporters.round(1)}))
+desks = pd.concat(rows, ignore_index=True)
+
+print(desks.head(3).to_string(index=False))
+print(desks.groupby("opened")["region"].nunique().rename(index={0: "never"}).to_string())
+```
+
+Both cohorts have years before their desk, four and seven, so a pre-period can
+be examined, and eighteen regions are never treated, so a clean control group
+exists at every date. That is a far better position than Example 3's, and the
+table is how one knows.
+
+**Step 2 · Look before estimating.**
+
+```{python}
+#| label: fig-desks-trends
+#| code-summary: "Run it: the average outcome of each cohort, year by year"
+#| fig-cap: "The share of firms exporting in the three groups of regions. The dashed lines mark the two openings. The groups sit at different heights before any desk opens, which is selection and does not matter; they move in parallel until their own desk opens, which is what does."
+
+by_year = desks.groupby(["year", "opened"])["exporters"].mean().unstack()
+by_year.columns = ["never", "desk in 2018", "desk in 2021"]
+
+by_year.plot(marker="o", figsize=(7, 3.6))
+plt.axvline(2017.5, color="grey", linestyle="--")
+plt.axvline(2020.5, color="grey", linestyle="--")
+plt.ylabel("firms exporting, %")
+plt.show()
+
+print(by_year.loc[[2014, 2017, 2020, 2023]].round(1).to_string())
+```
+
+The plot holds the whole design. The regions that would get a desk exported
+more from the start, by five or six points, and a comparison of levels would
+credit that to the desks. A difference-in-differences compares changes, so the
+gap in levels is harmless. What it needs is that the lines would have stayed
+parallel, and the only evidence the data can give is that they were parallel
+before.
+
+**Step 3 · One clean two-by-two.** Every difference-in-differences, however
+elaborate, is built from comparisons of this kind: one cohort, a control group
+that is not treated in the window, one date before and one after. Choosing the
+comparison by hand, once, is the best protection against an estimator choosing
+badly on one's behalf.
+
+```{python}
+#| label: check-desks-2x2
+#| code-summary: "Run it: the 2018 cohort against the never-treated, 2017 against 2018"
+
+two = desks[desks["opened"].isin([0, 2018]) & desks["year"].isin([2017, 2018])].copy()
+two["treated"] = (two["opened"] == 2018).astype(int)
+two["post"] = (two["year"] == 2018).astype(int)
+
+means = two.groupby(["treated", "post"])["exporters"].mean().unstack()
+print(means.round(2).to_string())
+print(f"change, treated: {means.loc[1, 1] - means.loc[1, 0]:.2f}   "
+      f"change, control: {means.loc[0, 1] - means.loc[0, 0]:.2f}")
+
+did_desks = smf.ols("exporters ~ treated * post", data=two).fit(
+    cov_type="cluster", cov_kwds={"groups": two["region"]})      # each region is seen twice
+low, high = did_desks.conf_int().loc["treated:post"]
+print(f"DiD = {did_desks.params['treated:post']:.2f}   95% CI [{low:.2f}, {high:.2f}]   "
+      f"truth, first year: 2")
+```
+
+The treated regions gained 3.23 points and the controls 0.97; the difference,
+2.26, is the estimate of a desk's effect in its first year, against a truth of
+2. The interaction coefficient is that same number, and the regression adds an
+interval. Clustering by region tells the standard error that a region's two
+rows are not independent observations.
+
+**Step 4 · The event study, by regression.** The same comparison can be made
+for every year at once, each against 2017, the last year before the desks. One
+interaction per year does it.
+
+```{python}
+#| label: fig-desks-event
+#| code-summary: "Run it: the gap between the groups in every year, relative to 2017"
+#| fig-cap: "The event study for the 2018 cohort against the never-treated regions, with 95% intervals. Before the desks open the intervals include zero; afterwards the effect grows by about two points a year, as the simulation says it should."
+
+clean = desks[desks["opened"].isin([0, 2018])].copy()
+clean["treated"] = (clean["opened"] == 2018).astype(int)
+
+fit = smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).fit(
+    cov_type="cluster", cov_kwds={"groups": clean["region"]})
+names = [name for name in fit.params.index if name.startswith("treated:")]
+study = pd.DataFrame({"year": [int(name[-5:-1]) for name in names],
+                      "effect": fit.params[names].values,
+                      "low": fit.conf_int().loc[names, 0].values,
+                      "high": fit.conf_int().loc[names, 1].values}).set_index("year")
+print(study.round(2).to_string())
+
+plt.figure(figsize=(7, 3.4))
+plt.errorbar(study.index, study["effect"], yerr=[study["effect"] - study["low"],
+             study["high"] - study["effect"]], fmt="o", capsize=3)
+plt.axhline(0, color="grey")
+plt.axvline(2017.5, color="grey", linestyle="--")
+plt.ylabel("gap, relative to 2017")
+plt.show()
+```
+
+Each coefficient is the gap between the two groups in that year minus the gap
+in 2017. The three before the desks all lie between −0.7 and −1, which says only
+that 2017 happened to be a good year for the treated regions; none of the
+intervals excludes zero, and there is no slope. After 2018 the points are the
+effect year by year, and they climb from 2.3 to 11.9. A single "the effect"
+would hide that the policy takes time to work, which the event study shows at
+a glance.
+
+**Step 5 · All cohorts, with staggered timing.** One regression with region
+and year effects, the two-way fixed effects of Example 3, uses every row. An
+estimator built for staggered adoption repeats step 3 for every cohort and
+year, always against regions not yet treated, and then averages.
+
+```{python}
+#| label: check-desks-cs
+#| code-summary: "Run it: two-way fixed effects beside Callaway–Sant'Anna"
+
+twfe_desks = smf.ols("exporters ~ desk + C(region) + C(year)", data=desks).fit(
+    cov_type="cluster", cov_kwds={"groups": desks["region"]})
+cs_desks = dd.CallawaySantAnna(cluster="region").fit(
+    desks, outcome="exporters", unit="region", time="year", first_treat="opened")   # 0 = never
+
+print(f"two-way fixed effects:  {twfe_desks.params['desk']:.2f}  (SE {twfe_desks.bse['desk']:.2f})")
+print(f"Callaway-Sant'Anna:     {cs_desks.overall_att:.2f}  "
+      f"(SE {cs_desks.overall_se:.2f}, {cs_desks.n_clusters} clusters)")
+print("truth, average over the treated years: 6.12")
+```
+
+Two-way fixed effects says 5.2 and the staggered estimator 6.4, against a truth
+of 6.1. The first is too low for the reason Example 3 gave, now visible in a
+case where the truth is known: between 2020 and 2021 the regression uses the
+2018 regions as controls for the 2021 ones, and the 2018 regions are not
+standing still. Their own effect is growing by two points a year, and that
+growth is subtracted from the newcomers' effect. Both numbers go in the report;
+when they differ, the difference is a finding about the design.
+
+**Step 6 · How wrong could parallel trends be?** A flat pre-period does not
+prove the trends would have stayed parallel afterwards. The sensitivity
+analysis of @rambachan2023 asks what happens to the conclusion if they had
+drifted apart by up to $M$ times the largest movement seen before the policy.
+
+```{python}
+#| label: check-desks-honest
+#| code-summary: "Run it: the robust interval as the allowed violation grows"
+
+study_cs = cs_desks.aggregate("event_study")
+for M in (0, 1, 2, 4, 8):
+    honest = dd.HonestDiD(method="relative_magnitude", M=M).fit(study_cs)
+    print(f"M = {M}   95% robust interval [{honest.ci_lb:5.2f}, {honest.ci_ub:5.2f}]   "
+          f"rules out zero: {'yes' if honest.is_significant else 'no'}")
+```
+
+The interval is for the average effect over the six years after opening, whose
+true value is 7. With exact parallel trends, $M = 0$, it runs from 6.3 to 8.0.
+It widens as larger violations are allowed, and still excludes zero when the
+post-period drift is allowed to be four times anything seen before; at eight
+times it no longer does. That breakdown value, somewhere between four and
+eight, is the sentence to report. It replaces "the pre-trends look flat" with a
+statement of how much of the assumption the finding needs.
+
+**The study in three sentences.** Print the adoption table and plot the groups
+before estimating anything. Make one clean comparison by hand, then the event
+study, clustered by unit, and let the years before the policy speak. With
+staggered timing, put an estimator built for it beside two-way fixed effects,
+and say how large a violation the result survives.
+
+## Doing it · An instrument, from the first stage to the estimate
+
+Does attending an international trade fair raise a firm's export sales?
+Ambitious firms attend more and export more, ambition is in no file, and there
+is no before and after. But suppose the trade agency once mailed a voucher for
+a free stand to 1,500 of 3,000 firms, drawn at random. The voucher is then a
+candidate instrument, and a better one than distance to a port: it is relevant
+if firms with a voucher attend more, which can be checked; it is independent of
+the firms' hidden traits because it was drawn; and it is excludable if a
+voucher changes exports only by getting a firm to the fair, which has to be
+argued. The data are simulated, with a true effect of attending of 12
+(\$ thousand).
+
+```{python}
+#| label: check-fair-naive
+#| code-summary: "Run it: 3,000 firms, and what the naive comparisons say"
+
+import statsmodels.api as sm
+from statsmodels.sandbox.regression.gmm import IV2SLS
+
+rng = np.random.default_rng(13)
+n_fair = 3000
+ambition = rng.normal(0, 1, n_fair)                              # in no file
+employees = rng.lognormal(3, 0.7, n_fair).round() + 1
+voucher = (rng.permutation(n_fair) < n_fair // 2).astype(int)    # the agency drew who received one
+attends = (0.9 * ambition + 1.2 * voucher + rng.normal(0, 1, n_fair) > 0.8).astype(int)
+exports = (40 + 12 * attends + 10 * ambition + 5 * np.log(employees)
+           + rng.normal(0, 12, n_fair)).round(1)
+fair = pd.DataFrame({"employees": employees, "voucher": voucher,
+                     "attends": attends, "exports": exports})
+fair["log_employees"] = np.log(fair["employees"])
+
+gap = fair.groupby("attends")["exports"].mean()
+controlled = smf.ols("exports ~ attends + log_employees", data=fair).fit()
+print(f"naive: attenders minus the rest = {gap[1] - gap[0]:.1f}   (truth 12)")
+print(f"regression, controlling for size: {controlled.params['attends']:.1f}")
+```
+
+The naive comparison says 21.2, and controlling for the one characteristic in
+the file leaves it at 21.2. A control can only remove confounding by something
+that was measured.
+
+**Step 1 · Check the instrument.** Two of the three conditions leave traces in
+the data. Independence can be examined on anything fixed before the vouchers
+went out: firms with and without one should look alike. Relevance is the first
+stage, a regression of the treatment on the instrument.
+
+**Step 2 · The reduced form, and the ratio.** The reduced form is the
+regression of the outcome on the instrument. Both it and the first stage
+compare firms by the draw, so both are free of selection.
+
+```{python}
+#| label: check-fair-stages
+#| code-summary: "Run it: balance, the first stage, the reduced form and their ratio"
+
+print(fair.groupby("voucher")[["employees", "attends", "exports"]].mean().round(2).to_string())
+
+balance_fair = smf.ols("log_employees ~ voucher", data=fair).fit()
+first = smf.ols("attends ~ voucher", data=fair).fit()
+reduced = smf.ols("exports ~ voucher", data=fair).fit()
+
+print(f"\ndoes the voucher predict firm size?  p = {balance_fair.pvalues['voucher']:.2f}")
+print(f"first stage:  a voucher raises attendance by {first.params['voucher']:.2f}   "
+      f"F = {first.tvalues['voucher'] ** 2:.0f}")
+print(f"reduced form: a voucher raises exports by    {reduced.params['voucher']:.2f}")
+print(f"ratio: {reduced.params['voucher'] / first.params['voucher']:.1f}   (truth 12)")
+```
+
+Firms with and without a voucher are the same size, as a draw implies. The
+voucher raised attendance from 29% to 62%, a first stage with an F statistic of
+383, far above the conventional bar of 10. And it raised exports by 3.86. If
+the voucher acts only through attendance, those 3.86 are the effect of sending
+an extra third of the firms to the fair, so the effect of attending is
+3.86 / 0.34 = 11.5.
+
+**Step 3 · Two-stage least squares.** The ratio has no standard error. A
+two-stage routine gives the same number with one, and takes controls. A control
+goes in both lists, the regressors and the instruments, since it serves as its
+own instrument.
+
+```{python}
+#| label: check-fair-iv
+#| code-summary: "Run it: the same estimate with a standard error, then with a control"
+
+iv_fair = IV2SLS(fair["exports"],
+                 sm.add_constant(fair[["attends"]]),
+                 sm.add_constant(fair[["voucher"]])).fit()
+iv_size = IV2SLS(fair["exports"],
+                 sm.add_constant(fair[["attends", "log_employees"]]),
+                 sm.add_constant(fair[["voucher", "log_employees"]])).fit()
+
+for name, result in [("instrument only", iv_fair), ("with firm size", iv_size)]:
+    low, high = result.conf_int().loc["attends"]
+    print(f"{name:16s} {result.params['attends']:5.1f}   se {result.bse['attends']:.1f}   "
+          f"95% CI [{low:.1f}, {high:.1f}]")
+```
+
+The estimate is 11.5 with an interval from 8.1 to 14.9, which contains the
+truth and excludes the naive 21. The interval is wide for 3,000 firms, and that
+is the price of the design: the instrument uses only the part of attendance
+that the voucher caused, about a third of it, and discards the rest as
+contaminated.
+
+**Step 4 · What the number means, and what could break it.** This step is
+written and not computed. The estimate describes the firms that attended
+*because of* the voucher, the compliers of @angrist1996. Firms that would have
+gone anyway and firms that would never go contribute nothing, since the voucher
+did not change what they did, and the report should say so. And the exclusion
+restriction has to be argued in words: does a voucher change exports in any
+other way? If the letter also advertised the agency's export loans, it does,
+and the ratio is wrong by an amount that no output shows, exactly as in
+version B of Example 4.
+
+The link with chapter 10 is worth making explicit. There, some firms drawn for
+a trial refused the treatment, and dividing the effect of the draw by the share
+that took it up recovered the effect of taking it. That was this estimator. An
+encouragement, a lottery, a distance, an eligibility rule: every instrument is
+an attempt to find a draw that someone else made.
+
+**The instrument in three sentences.** Check that the instrument is as good as
+random on what was fixed before, and that it moves the treatment strongly. The
+estimate is the reduced form divided by the first stage, with a standard error
+from a two-stage routine. Say whom it describes, and argue the exclusion in
+words, because nothing computed can.
+
 ## What difference-in-differences cannot fix
 
 **Anything that changes at the same time as treatment.** Fixed effects remove
@@ -815,6 +1147,8 @@ identifies is the effect on the units the instrument moves, not on everyone.
 
 ## What to report
 
+**For a difference-in-differences**
+
 1. **The adoption structure.** How many units in each cohort, how many periods
    before and after, and which cohorts are unusable. A table of this is worth
    more than a paragraph asserting the design is sound.
@@ -839,3 +1173,15 @@ identifies is the effect on the units the instrument moves, not on everyone.
    departure from parallel trends at which the finding stops holding — is worth
    more than a pre-trend $p$-value, and unlike the $p$-value it can be reported
    even when there is nothing to test.
+
+**For an instrument**
+
+1. **The naive estimate**, and why it cannot be trusted.
+2. **Why the instrument is as good as random**, with balance on what was fixed
+   before it was assigned.
+3. **The first stage** and its F statistic.
+4. **The reduced form**, then the two-stage estimate with its interval.
+5. **Whom the estimate describes**: the units whose treatment the instrument
+   moved.
+6. **The argument for exclusion**, in words. It is the condition the result
+   rests on and the one no output can support.

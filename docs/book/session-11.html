@@ -334,9 +334,11 @@ window.Quarto = {
   </ul></li>
   <li><a href="#example-4-does-exporting-raise-productivity" id="toc-example-4-does-exporting-raise-productivity" class="nav-link" data-scroll-target="#example-4-does-exporting-raise-productivity"><span class="header-section-number">11.7</span> Example 4 · Does exporting raise productivity?</a></li>
   <li><a href="#matching-difference-in-differences-or-an-instrument" id="toc-matching-difference-in-differences-or-an-instrument" class="nav-link" data-scroll-target="#matching-difference-in-differences-or-an-instrument"><span class="header-section-number">11.8</span> Matching, difference-in-differences or an instrument?</a></li>
-  <li><a href="#what-difference-in-differences-cannot-fix" id="toc-what-difference-in-differences-cannot-fix" class="nav-link" data-scroll-target="#what-difference-in-differences-cannot-fix"><span class="header-section-number">11.9</span> What difference-in-differences cannot fix</a></li>
-  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">11.10</span> A short review of the literature</a></li>
-  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">11.11</span> What to report</a></li>
+  <li><a href="#doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis" id="toc-doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis" class="nav-link" data-scroll-target="#doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis"><span class="header-section-number">11.9</span> Doing it · A difference-in-differences study, from the panel to the sensitivity analysis</a></li>
+  <li><a href="#doing-it-an-instrument-from-the-first-stage-to-the-estimate" id="toc-doing-it-an-instrument-from-the-first-stage-to-the-estimate" class="nav-link" data-scroll-target="#doing-it-an-instrument-from-the-first-stage-to-the-estimate"><span class="header-section-number">11.10</span> Doing it · An instrument, from the first stage to the estimate</a></li>
+  <li><a href="#what-difference-in-differences-cannot-fix" id="toc-what-difference-in-differences-cannot-fix" class="nav-link" data-scroll-target="#what-difference-in-differences-cannot-fix"><span class="header-section-number">11.11</span> What difference-in-differences cannot fix</a></li>
+  <li><a href="#a-short-review-of-the-literature" id="toc-a-short-review-of-the-literature" class="nav-link" data-scroll-target="#a-short-review-of-the-literature"><span class="header-section-number">11.12</span> A short review of the literature</a></li>
+  <li><a href="#what-to-report" id="toc-what-to-report" class="nav-link" data-scroll-target="#what-to-report"><span class="header-section-number">11.13</span> What to report</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/warint/quantitative-methods/blob/main/session-11.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/warint/quantitative-methods/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -368,6 +370,7 @@ window.Quarto = {
 <p>This chapter takes the opposite route. Rather than measuring the confounders, it uses <em>timing</em> to remove them: if a country’s unobserved characteristics are stable over a short window, then comparing that country to itself before and after differences them away. The remaining problem — that things change over time for everyone — is handled by a second comparison, against units that did not adopt.</p>
 <p>Two differences, hence the name.</p>
 <p>The chapter works through four examples, each adding one idea. A simulated affordable-housing policy observed in two periods, where the two differences can be seen doing their work against a known answer. The same city over six years, in two versions — one where the assumption holds and one where it fails — to show what an event study can and cannot reveal. And the course’s own data on national AI strategies, adopted by different countries in different years, where the modern estimators earn their place and the assumption cannot be examined at all. And simulated exporting firms, where neither matching nor difference-in-differences can work and a third design, an instrument, can — until its key condition fails.</p>
+<p>The examples show the two designs at work. Two later sections then carry each one out from start to finish on new data: a staggered rollout analysed as a difference-in-differences, and a randomly drawn voucher used as an instrument.</p>
 <div class="plate">
 <p><img src="images/session-11-snow.jpg" class="img-fluid" alt="John Snow** · **1813–1858."></p>
 <p><strong>John Snow</strong> · <strong>1813–1858</strong></p>
@@ -1002,15 +1005,301 @@ version B: naive 11.56   first stage -0.0027 (F 543)   reduced form -0.0324   IV
 </table>
 <p>Choose the design whose assumption can be argued best in the setting at hand, and say in words which assumption that is.</p>
 </section>
-<section id="what-difference-in-differences-cannot-fix" class="level2" data-number="11.9">
-<h2 data-number="11.9" class="anchored" data-anchor-id="what-difference-in-differences-cannot-fix"><span class="header-section-number">11.9</span> What difference-in-differences cannot fix</h2>
+<section id="doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis"><span class="header-section-number">11.9</span> Doing it · A difference-in-differences study, from the panel to the sensitivity analysis</h2>
+<p>The four examples showed the two designs of this chapter working, and failing. This section and the next carry each one out from the first file to the reported number, on data that appear nowhere else in the chapter, because the order of the steps is most of the method and it is easier to see on a clean case.</p>
+<p>A government opens <strong>export desks</strong>, one-stop offices for customs paperwork, in 12 regions in 2018 and in 10 more in 2021; 18 regions never get one. Does a desk raise the share of a region’s firms that export? Regions with a desk already exported more, for reasons nobody recorded, which rules out matching. The data are simulated, so the truth is known: a desk adds 2 points for every year it has been open, which is 6.1 on average over the treated years observed.</p>
+<p><strong>Step 1 · The panel, and the adoption table.</strong> A difference-in-differences needs a panel: the same units at several dates, one row per unit and date. The first thing to print from it is who was treated and when, because that table says which comparisons exist before any is made.</p>
+<div id="check-desks-panel" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Run it: 40 regions over ten years, and who got a desk when</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>n_regions <span class="op">=</span> <span class="dv">40</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>opened <span class="op">=</span> np.r_[np.full(<span class="dv">12</span>, <span class="dv">2018</span>), np.full(<span class="dv">10</span>, <span class="dv">2021</span>), np.zeros(<span class="dv">18</span>)].astype(<span class="bu">int</span>)   <span class="co"># 0 = never</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>level <span class="op">=</span> rng.normal(<span class="dv">30</span>, <span class="dv">6</span>, n_regions) <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> (opened <span class="op">&gt;</span> <span class="dv">0</span>)     <span class="co"># regions with a desk exported more already</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> year <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2014</span>, <span class="dv">2024</span>):</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    years_open <span class="op">=</span> np.where((opened <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (year <span class="op">&gt;=</span> opened), year <span class="op">-</span> opened <span class="op">+</span> <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    exporters <span class="op">=</span> level <span class="op">+</span> <span class="fl">1.0</span> <span class="op">*</span> (year <span class="op">-</span> <span class="dv">2014</span>) <span class="op">+</span> <span class="fl">2.0</span> <span class="op">*</span> years_open <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.5</span>, n_regions)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    rows.append(pd.DataFrame({<span class="st">"region"</span>: np.arange(n_regions), <span class="st">"year"</span>: year, <span class="st">"opened"</span>: opened,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"desk"</span>: (years_open <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>),</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"exporters"</span>: exporters.<span class="bu">round</span>(<span class="dv">1</span>)}))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>desks <span class="op">=</span> pd.concat(rows, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(desks.head(<span class="dv">3</span>).to_string(index<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(desks.groupby(<span class="st">"opened"</span>)[<span class="st">"region"</span>].nunique().rename(index<span class="op">=</span>{<span class="dv">0</span>: <span class="st">"never"</span>}).to_string())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> region  year  opened  desk  exporters
+      0  2014    2018     0       34.7
+      1  2014    2018     0       42.5
+      2  2014    2018     0       43.0
+opened
+never    18
+2018     12
+2021     10</code></pre>
+</div>
+</div>
+<p>Both cohorts have years before their desk, four and seven, so a pre-period can be examined, and eighteen regions are never treated, so a clean control group exists at every date. That is a far better position than Example 3’s, and the table is how one knows.</p>
+<p><strong>Step 2 · Look before estimating.</strong></p>
+<div id="cell-fig-desks-trends" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Run it: the average outcome of each cohort, year by year</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>by_year <span class="op">=</span> desks.groupby([<span class="st">"year"</span>, <span class="st">"opened"</span>])[<span class="st">"exporters"</span>].mean().unstack()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>by_year.columns <span class="op">=</span> [<span class="st">"never"</span>, <span class="st">"desk in 2018"</span>, <span class="st">"desk in 2021"</span>]</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>by_year.plot(marker<span class="op">=</span><span class="st">"o"</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.6</span>))</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">2017.5</span>, color<span class="op">=</span><span class="st">"grey"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">2020.5</span>, color<span class="op">=</span><span class="st">"grey"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"firms exporting, %"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(by_year.loc[[<span class="dv">2014</span>, <span class="dv">2017</span>, <span class="dv">2020</span>, <span class="dv">2023</span>]].<span class="bu">round</span>(<span class="dv">1</span>).to_string())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-desks-trends" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-desks-trends-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="session-11_files/figure-html/fig-desks-trends-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-desks-trends-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.2: The share of firms exporting in the three groups of regions. The dashed lines mark the two openings. The groups sit at different heights before any desk opens, which is selection and does not matter; they move in parallel until their own desk opens, which is what does.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      never  desk in 2018  desk in 2021
+year                                   
+2014   28.8          35.0          33.8
+2017   30.9          38.1          36.8
+2020   34.6          47.4          39.0
+2023   37.2          56.3          48.5</code></pre>
+</div>
+</div>
+<p>The plot holds the whole design. The regions that would get a desk exported more from the start, by five or six points, and a comparison of levels would credit that to the desks. A difference-in-differences compares changes, so the gap in levels is harmless. What it needs is that the lines would have stayed parallel, and the only evidence the data can give is that they were parallel before.</p>
+<p><strong>Step 3 · One clean two-by-two.</strong> Every difference-in-differences, however elaborate, is built from comparisons of this kind: one cohort, a control group that is not treated in the window, one date before and one after. Choosing the comparison by hand, once, is the best protection against an estimator choosing badly on one’s behalf.</p>
+<div id="check-desks-2x2" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Run it: the 2018 cohort against the never-treated, 2017 against 2018</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>two <span class="op">=</span> desks[desks[<span class="st">"opened"</span>].isin([<span class="dv">0</span>, <span class="dv">2018</span>]) <span class="op">&amp;</span> desks[<span class="st">"year"</span>].isin([<span class="dv">2017</span>, <span class="dv">2018</span>])].copy()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>two[<span class="st">"treated"</span>] <span class="op">=</span> (two[<span class="st">"opened"</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>two[<span class="st">"post"</span>] <span class="op">=</span> (two[<span class="st">"year"</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> two.groupby([<span class="st">"treated"</span>, <span class="st">"post"</span>])[<span class="st">"exporters"</span>].mean().unstack()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(means.<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"change, treated: </span><span class="sc">{</span>means<span class="sc">.</span>loc[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">-</span> means<span class="sc">.</span>loc[<span class="dv">1</span>, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">   "</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"change, control: </span><span class="sc">{</span>means<span class="sc">.</span>loc[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">-</span> means<span class="sc">.</span>loc[<span class="dv">0</span>, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>did_desks <span class="op">=</span> smf.ols(<span class="st">"exporters ~ treated * post"</span>, data<span class="op">=</span>two).fit(</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    cov_type<span class="op">=</span><span class="st">"cluster"</span>, cov_kwds<span class="op">=</span>{<span class="st">"groups"</span>: two[<span class="st">"region"</span>]})      <span class="co"># each region is seen twice</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>low, high <span class="op">=</span> did_desks.conf_int().loc[<span class="st">"treated:post"</span>]</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"DiD = </span><span class="sc">{</span>did_desks<span class="sc">.</span>params[<span class="st">'treated:post'</span>]<span class="sc">:.2f}</span><span class="ss">   95% CI [</span><span class="sc">{</span>low<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.2f}</span><span class="ss">]   "</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"truth, first year: 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>post         0      1
+treated              
+0        30.93  31.89
+1        38.11  41.33
+change, treated: 3.23   change, control: 0.97
+DiD = 2.26   95% CI [0.80, 3.71]   truth, first year: 2</code></pre>
+</div>
+</div>
+<p>The treated regions gained 3.23 points and the controls 0.97; the difference, 2.26, is the estimate of a desk’s effect in its first year, against a truth of 2. The interaction coefficient is that same number, and the regression adds an interval. Clustering by region tells the standard error that a region’s two rows are not independent observations.</p>
+<p><strong>Step 4 · The event study, by regression.</strong> The same comparison can be made for every year at once, each against 2017, the last year before the desks. One interaction per year does it.</p>
+<div id="cell-fig-desks-event" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Run it: the gap between the groups in every year, relative to 2017</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>clean <span class="op">=</span> desks[desks[<span class="st">"opened"</span>].isin([<span class="dv">0</span>, <span class="dv">2018</span>])].copy()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>clean[<span class="st">"treated"</span>] <span class="op">=</span> (clean[<span class="st">"opened"</span>] <span class="op">==</span> <span class="dv">2018</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>fit <span class="op">=</span> smf.ols(<span class="st">"exporters ~ treated * C(year, Treatment(reference=2017))"</span>, data<span class="op">=</span>clean).fit(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    cov_type<span class="op">=</span><span class="st">"cluster"</span>, cov_kwds<span class="op">=</span>{<span class="st">"groups"</span>: clean[<span class="st">"region"</span>]})</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [name <span class="cf">for</span> name <span class="kw">in</span> fit.params.index <span class="cf">if</span> name.startswith(<span class="st">"treated:"</span>)]</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>study <span class="op">=</span> pd.DataFrame({<span class="st">"year"</span>: [<span class="bu">int</span>(name[<span class="op">-</span><span class="dv">5</span>:<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> name <span class="kw">in</span> names],</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"effect"</span>: fit.params[names].values,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"low"</span>: fit.conf_int().loc[names, <span class="dv">0</span>].values,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"high"</span>: fit.conf_int().loc[names, <span class="dv">1</span>].values}).set_index(<span class="st">"year"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(study.<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.4</span>))</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>plt.errorbar(study.index, study[<span class="st">"effect"</span>], yerr<span class="op">=</span>[study[<span class="st">"effect"</span>] <span class="op">-</span> study[<span class="st">"low"</span>],</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>             study[<span class="st">"high"</span>] <span class="op">-</span> study[<span class="st">"effect"</span>]], fmt<span class="op">=</span><span class="st">"o"</span>, capsize<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"grey"</span>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">2017.5</span>, color<span class="op">=</span><span class="st">"grey"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"gap, relative to 2017"</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>      effect    low   high
+year                      
+2014   -0.94  -2.12   0.25
+2015   -0.72  -2.34   0.89
+2016   -0.95  -2.39   0.49
+2018    2.26   0.79   3.72
+2019    3.87   2.26   5.47
+2020    5.55   4.16   6.94
+2021    7.87   6.37   9.38
+2022    9.37   8.20  10.53
+2023   11.93  10.56  13.31</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-desks-event" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-desks-event-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="session-11_files/figure-html/fig-desks-event-output-2.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-desks-event-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.3: The event study for the 2018 cohort against the never-treated regions, with 95% intervals. Before the desks open the intervals include zero; afterwards the effect grows by about two points a year, as the simulation says it should.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Each coefficient is the gap between the two groups in that year minus the gap in 2017. The three before the desks all lie between −0.7 and −1, which says only that 2017 happened to be a good year for the treated regions; none of the intervals excludes zero, and there is no slope. After 2018 the points are the effect year by year, and they climb from 2.3 to 11.9. A single “the effect” would hide that the policy takes time to work, which the event study shows at a glance.</p>
+<p><strong>Step 5 · All cohorts, with staggered timing.</strong> One regression with region and year effects, the two-way fixed effects of Example 3, uses every row. An estimator built for staggered adoption repeats step 3 for every cohort and year, always against regions not yet treated, and then averages.</p>
+<div id="check-desks-cs" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Run it: two-way fixed effects beside Callaway–Sant’Anna</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>twfe_desks <span class="op">=</span> smf.ols(<span class="st">"exporters ~ desk + C(region) + C(year)"</span>, data<span class="op">=</span>desks).fit(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    cov_type<span class="op">=</span><span class="st">"cluster"</span>, cov_kwds<span class="op">=</span>{<span class="st">"groups"</span>: desks[<span class="st">"region"</span>]})</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>cs_desks <span class="op">=</span> dd.CallawaySantAnna(cluster<span class="op">=</span><span class="st">"region"</span>).fit(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    desks, outcome<span class="op">=</span><span class="st">"exporters"</span>, unit<span class="op">=</span><span class="st">"region"</span>, time<span class="op">=</span><span class="st">"year"</span>, first_treat<span class="op">=</span><span class="st">"opened"</span>)   <span class="co"># 0 = never</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"two-way fixed effects:  </span><span class="sc">{</span>twfe_desks<span class="sc">.</span>params[<span class="st">'desk'</span>]<span class="sc">:.2f}</span><span class="ss">  (SE </span><span class="sc">{</span>twfe_desks<span class="sc">.</span>bse[<span class="st">'desk'</span>]<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Callaway-Sant'Anna:     </span><span class="sc">{</span>cs_desks<span class="sc">.</span>overall_att<span class="sc">:.2f}</span><span class="ss">  "</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"(SE </span><span class="sc">{</span>cs_desks<span class="sc">.</span>overall_se<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>cs_desks<span class="sc">.</span>n_clusters<span class="sc">}</span><span class="ss"> clusters)"</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"truth, average over the treated years: 6.12"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>two-way fixed effects:  5.18  (SE 0.49)
+Callaway-Sant'Anna:     6.38  (SE 0.45, 40 clusters)
+truth, average over the treated years: 6.12</code></pre>
+</div>
+</div>
+<p>Two-way fixed effects says 5.2 and the staggered estimator 6.4, against a truth of 6.1. The first is too low for the reason Example 3 gave, now visible in a case where the truth is known: between 2020 and 2021 the regression uses the 2018 regions as controls for the 2021 ones, and the 2018 regions are not standing still. Their own effect is growing by two points a year, and that growth is subtracted from the newcomers’ effect. Both numbers go in the report; when they differ, the difference is a finding about the design.</p>
+<p><strong>Step 6 · How wrong could parallel trends be?</strong> A flat pre-period does not prove the trends would have stayed parallel afterwards. The sensitivity analysis of <span class="citation" data-cites="rambachan2023">Rambachan and Roth (<a href="#ref-rambachan2023" role="doc-biblioref">2023</a>)</span> asks what happens to the conclusion if they had drifted apart by up to <span class="math inline">\(M\)</span> times the largest movement seen before the policy.</p>
+<div id="check-desks-honest" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Run it: the robust interval as the allowed violation grows</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>study_cs <span class="op">=</span> cs_desks.aggregate(<span class="st">"event_study"</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> M <span class="kw">in</span> (<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>):</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    honest <span class="op">=</span> dd.HonestDiD(method<span class="op">=</span><span class="st">"relative_magnitude"</span>, M<span class="op">=</span>M).fit(study_cs)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"M = </span><span class="sc">{</span>M<span class="sc">}</span><span class="ss">   95% robust interval [</span><span class="sc">{</span>honest<span class="sc">.</span>ci_lb<span class="sc">:5.2f}</span><span class="ss">, </span><span class="sc">{</span>honest<span class="sc">.</span>ci_ub<span class="sc">:5.2f}</span><span class="ss">]   "</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"rules out zero: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> honest<span class="sc">.</span>is_significant <span class="cf">else</span> <span class="st">'no'</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>M = 0   95% robust interval [ 6.26,  8.02]   rules out zero: yes
+M = 1   95% robust interval [ 5.30,  8.98]   rules out zero: yes
+M = 2   95% robust interval [ 4.33,  9.95]   rules out zero: yes
+M = 4   95% robust interval [ 2.41, 11.88]   rules out zero: yes
+M = 8   95% robust interval [-1.45, 15.73]   rules out zero: no</code></pre>
+</div>
+</div>
+<p>The interval is for the average effect over the six years after opening, whose true value is 7. With exact parallel trends, <span class="math inline">\(M = 0\)</span>, it runs from 6.3 to 8.0. It widens as larger violations are allowed, and still excludes zero when the post-period drift is allowed to be four times anything seen before; at eight times it no longer does. That breakdown value, somewhere between four and eight, is the sentence to report. It replaces “the pre-trends look flat” with a statement of how much of the assumption the finding needs.</p>
+<p><strong>The study in three sentences.</strong> Print the adoption table and plot the groups before estimating anything. Make one clean comparison by hand, then the event study, clustered by unit, and let the years before the policy speak. With staggered timing, put an estimator built for it beside two-way fixed effects, and say how large a violation the result survives.</p>
+</section>
+<section id="doing-it-an-instrument-from-the-first-stage-to-the-estimate" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="doing-it-an-instrument-from-the-first-stage-to-the-estimate"><span class="header-section-number">11.10</span> Doing it · An instrument, from the first stage to the estimate</h2>
+<p>Does attending an international trade fair raise a firm’s export sales? Ambitious firms attend more and export more, ambition is in no file, and there is no before and after. But suppose the trade agency once mailed a voucher for a free stand to 1,500 of 3,000 firms, drawn at random. The voucher is then a candidate instrument, and a better one than distance to a port: it is relevant if firms with a voucher attend more, which can be checked; it is independent of the firms’ hidden traits because it was drawn; and it is excludable if a voucher changes exports only by getting a firm to the fair, which has to be argued. The data are simulated, with a true effect of attending of 12 ($ thousand).</p>
+<div id="check-fair-naive" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Run it: 3,000 firms, and what the naive comparisons say</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.sandbox.regression.gmm <span class="im">import</span> IV2SLS</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">13</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>n_fair <span class="op">=</span> <span class="dv">3000</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>ambition <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n_fair)                              <span class="co"># in no file</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>employees <span class="op">=</span> rng.lognormal(<span class="dv">3</span>, <span class="fl">0.7</span>, n_fair).<span class="bu">round</span>() <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>voucher <span class="op">=</span> (rng.permutation(n_fair) <span class="op">&lt;</span> n_fair <span class="op">//</span> <span class="dv">2</span>).astype(<span class="bu">int</span>)    <span class="co"># the agency drew who received one</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>attends <span class="op">=</span> (<span class="fl">0.9</span> <span class="op">*</span> ambition <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> voucher <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n_fair) <span class="op">&gt;</span> <span class="fl">0.8</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>exports <span class="op">=</span> (<span class="dv">40</span> <span class="op">+</span> <span class="dv">12</span> <span class="op">*</span> attends <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> ambition <span class="op">+</span> <span class="dv">5</span> <span class="op">*</span> np.log(employees)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>           <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">12</span>, n_fair)).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>fair <span class="op">=</span> pd.DataFrame({<span class="st">"employees"</span>: employees, <span class="st">"voucher"</span>: voucher,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"attends"</span>: attends, <span class="st">"exports"</span>: exports})</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>fair[<span class="st">"log_employees"</span>] <span class="op">=</span> np.log(fair[<span class="st">"employees"</span>])</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>gap <span class="op">=</span> fair.groupby(<span class="st">"attends"</span>)[<span class="st">"exports"</span>].mean()</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>controlled <span class="op">=</span> smf.ols(<span class="st">"exports ~ attends + log_employees"</span>, data<span class="op">=</span>fair).fit()</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"naive: attenders minus the rest = </span><span class="sc">{</span>gap[<span class="dv">1</span>] <span class="op">-</span> gap[<span class="dv">0</span>]<span class="sc">:.1f}</span><span class="ss">   (truth 12)"</span>)</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"regression, controlling for size: </span><span class="sc">{</span>controlled<span class="sc">.</span>params[<span class="st">'attends'</span>]<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>naive: attenders minus the rest = 21.2   (truth 12)
+regression, controlling for size: 21.2</code></pre>
+</div>
+</div>
+<p>The naive comparison says 21.2, and controlling for the one characteristic in the file leaves it at 21.2. A control can only remove confounding by something that was measured.</p>
+<p><strong>Step 1 · Check the instrument.</strong> Two of the three conditions leave traces in the data. Independence can be examined on anything fixed before the vouchers went out: firms with and without one should look alike. Relevance is the first stage, a regression of the treatment on the instrument.</p>
+<p><strong>Step 2 · The reduced form, and the ratio.</strong> The reduced form is the regression of the outcome on the instrument. Both it and the first stage compare firms by the draw, so both are free of selection.</p>
+<div id="check-fair-stages" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Run it: balance, the first stage, the reduced form and their ratio</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(fair.groupby(<span class="st">"voucher"</span>)[[<span class="st">"employees"</span>, <span class="st">"attends"</span>, <span class="st">"exports"</span>]].mean().<span class="bu">round</span>(<span class="dv">2</span>).to_string())</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>balance_fair <span class="op">=</span> smf.ols(<span class="st">"log_employees ~ voucher"</span>, data<span class="op">=</span>fair).fit()</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> smf.ols(<span class="st">"attends ~ voucher"</span>, data<span class="op">=</span>fair).fit()</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>reduced <span class="op">=</span> smf.ols(<span class="st">"exports ~ voucher"</span>, data<span class="op">=</span>fair).fit()</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">does the voucher predict firm size?  p = </span><span class="sc">{</span>balance_fair<span class="sc">.</span>pvalues[<span class="st">'voucher'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"first stage:  a voucher raises attendance by </span><span class="sc">{</span>first<span class="sc">.</span>params[<span class="st">'voucher'</span>]<span class="sc">:.2f}</span><span class="ss">   "</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"F = </span><span class="sc">{</span>first<span class="sc">.</span>tvalues[<span class="st">'voucher'</span>] <span class="op">**</span> <span class="dv">2</span><span class="sc">:.0f}</span><span class="ss">"</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"reduced form: a voucher raises exports by    </span><span class="sc">{</span>reduced<span class="sc">.</span>params[<span class="st">'voucher'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"ratio: </span><span class="sc">{</span>reduced<span class="sc">.</span>params[<span class="st">'voucher'</span>] <span class="op">/</span> first<span class="sc">.</span>params[<span class="st">'voucher'</span>]<span class="sc">:.1f}</span><span class="ss">   (truth 12)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         employees  attends  exports
+voucher                             
+0            26.56     0.29    58.88
+1            27.56     0.62    62.74
+
+does the voucher predict firm size?  p = 0.41
+first stage:  a voucher raises attendance by 0.34   F = 383
+reduced form: a voucher raises exports by    3.86
+ratio: 11.5   (truth 12)</code></pre>
+</div>
+</div>
+<p>Firms with and without a voucher are the same size, as a draw implies. The voucher raised attendance from 29% to 62%, a first stage with an F statistic of 383, far above the conventional bar of 10. And it raised exports by 3.86. If the voucher acts only through attendance, those 3.86 are the effect of sending an extra third of the firms to the fair, so the effect of attending is 3.86 / 0.34 = 11.5.</p>
+<p><strong>Step 3 · Two-stage least squares.</strong> The ratio has no standard error. A two-stage routine gives the same number with one, and takes controls. A control goes in both lists, the regressors and the instruments, since it serves as its own instrument.</p>
+<div id="check-fair-iv" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Run it: the same estimate with a standard error, then with a control</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>iv_fair <span class="op">=</span> IV2SLS(fair[<span class="st">"exports"</span>],</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                 sm.add_constant(fair[[<span class="st">"attends"</span>]]),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                 sm.add_constant(fair[[<span class="st">"voucher"</span>]])).fit()</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>iv_size <span class="op">=</span> IV2SLS(fair[<span class="st">"exports"</span>],</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>                 sm.add_constant(fair[[<span class="st">"attends"</span>, <span class="st">"log_employees"</span>]]),</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>                 sm.add_constant(fair[[<span class="st">"voucher"</span>, <span class="st">"log_employees"</span>]])).fit()</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, result <span class="kw">in</span> [(<span class="st">"instrument only"</span>, iv_fair), (<span class="st">"with firm size"</span>, iv_size)]:</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    low, high <span class="op">=</span> result.conf_int().loc[<span class="st">"attends"</span>]</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:16s}</span><span class="ss"> </span><span class="sc">{</span>result<span class="sc">.</span>params[<span class="st">'attends'</span>]<span class="sc">:5.1f}</span><span class="ss">   se </span><span class="sc">{</span>result<span class="sc">.</span>bse[<span class="st">'attends'</span>]<span class="sc">:.1f}</span><span class="ss">   "</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"95% CI [</span><span class="sc">{</span>low<span class="sc">:.1f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.1f}</span><span class="ss">]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>instrument only   11.5   se 1.7   95% CI [8.1, 14.9]
+with firm size    11.3   se 1.7   95% CI [7.9, 14.6]</code></pre>
+</div>
+</div>
+<p>The estimate is 11.5 with an interval from 8.1 to 14.9, which contains the truth and excludes the naive 21. The interval is wide for 3,000 firms, and that is the price of the design: the instrument uses only the part of attendance that the voucher caused, about a third of it, and discards the rest as contaminated.</p>
+<p><strong>Step 4 · What the number means, and what could break it.</strong> This step is written and not computed. The estimate describes the firms that attended <em>because of</em> the voucher, the compliers of <span class="citation" data-cites="angrist1996">Angrist, Imbens, and Rubin (<a href="#ref-angrist1996" role="doc-biblioref">1996</a>)</span>. Firms that would have gone anyway and firms that would never go contribute nothing, since the voucher did not change what they did, and the report should say so. And the exclusion restriction has to be argued in words: does a voucher change exports in any other way? If the letter also advertised the agency’s export loans, it does, and the ratio is wrong by an amount that no output shows, exactly as in version B of Example 4.</p>
+<p>The link with chapter 10 is worth making explicit. There, some firms drawn for a trial refused the treatment, and dividing the effect of the draw by the share that took it up recovered the effect of taking it. That was this estimator. An encouragement, a lottery, a distance, an eligibility rule: every instrument is an attempt to find a draw that someone else made.</p>
+<p><strong>The instrument in three sentences.</strong> Check that the instrument is as good as random on what was fixed before, and that it moves the treatment strongly. The estimate is the reduced form divided by the first stage, with a standard error from a two-stage routine. Say whom it describes, and argue the exclusion in words, because nothing computed can.</p>
+</section>
+<section id="what-difference-in-differences-cannot-fix" class="level2" data-number="11.11">
+<h2 data-number="11.11" class="anchored" data-anchor-id="what-difference-in-differences-cannot-fix"><span class="header-section-number">11.11</span> What difference-in-differences cannot fix</h2>
 <p><strong>Anything that changes at the same time as treatment.</strong> Fixed effects remove what is constant; the second difference removes what is common. A shock hitting only the treated group in the treatment year is indistinguishable from the treatment, and no amount of data separates them. Countries that adopt an AI strategy in a given year may be doing several other things that year.</p>
 <p><strong>Anticipation.</strong> If units change behaviour before adoption because they know it is coming, the pre-period is already contaminated and the “before” is not a clean baseline. This shows as a non-zero pre-trend, when there are enough pre-periods to see one.</p>
 <p><strong>Composition change.</strong> If the units in the panel change — countries entering or leaving the sample, or a survey changing who it asks — the first difference is comparing different populations rather than the same one over time.</p>
 <p><strong>Spillovers.</strong> The control group must be unaffected. If a national strategy in one country shifts behaviour in its neighbours, the controls are partially treated and the estimate is attenuated toward zero.</p>
 </section>
-<section id="a-short-review-of-the-literature" class="level2" data-number="11.10">
-<h2 data-number="11.10" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">11.10</span> A short review of the literature</h2>
+<section id="a-short-review-of-the-literature" class="level2" data-number="11.12">
+<h2 data-number="11.12" class="anchored" data-anchor-id="a-short-review-of-the-literature"><span class="header-section-number">11.12</span> A short review of the literature</h2>
 <div class="lit">
 <p>The design is older than its name: <span class="citation" data-cites="wing2018">Wing, Simon, and Bello-Gomez (<a href="#ref-wing2018" role="doc-biblioref">2018</a>)</span> traces it to Snow’s 1855 water study and sets out the modern practice, including the pre-trend examination and the sensitivity checks a credible paper is expected to show.</p>
 <p>The last decade has been dominated by a single discovery about staggered adoption. <span class="citation" data-cites="goodmanbacon2021">Goodman-Bacon (<a href="#ref-goodmanbacon2021" role="doc-biblioref">2021</a>)</span> decomposed the two-way fixed effects estimator into the underlying two-by-two comparisons and showed that some of them use already-treated units as controls; <span class="citation" data-cites="dechaisemartin2020">Chaisemartin and D’Haultfœuille (<a href="#ref-dechaisemartin2020" role="doc-biblioref">2020</a>)</span> showed that the implied weights can be negative, so the estimand may lie outside the range of every underlying effect. Neither paper is a curiosity — between them they called into question a large body of published work.</p>
@@ -1020,8 +1309,9 @@ version B: naive 11.56   first stage -0.0027 (F 543)   reduced form -0.0324   IV
 <p>For the case where neither design applies, <span class="citation" data-cites="angrist1996">Angrist, Imbens, and Rubin (<a href="#ref-angrist1996" role="doc-biblioref">1996</a>)</span> set out the conditions under which an instrument identifies a causal effect, and showed that what it identifies is the effect on the units the instrument moves, not on everyone.</p>
 </div>
 </section>
-<section id="what-to-report" class="level2" data-number="11.11">
-<h2 data-number="11.11" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">11.11</span> What to report</h2>
+<section id="what-to-report" class="level2" data-number="11.13">
+<h2 data-number="11.13" class="anchored" data-anchor-id="what-to-report"><span class="header-section-number">11.13</span> What to report</h2>
+<p><strong>For a difference-in-differences</strong></p>
 <ol type="1">
 <li><strong>The adoption structure.</strong> How many units in each cohort, how many periods before and after, and which cohorts are unusable. A table of this is worth more than a paragraph asserting the design is sound.</li>
 <li><strong>The parallel-trends argument</strong>, as an argument. Why should the gap have stayed constant? Institutional reasoning, not a citation to the assumption.</li>
@@ -1031,6 +1321,15 @@ version B: naive 11.56   first stage -0.0027 (F 543)   reduced form -0.0324   IV
 <li><strong>The scale.</strong> Levels or logs is part of the assumption, because parallel trends in one is not parallel trends in the other.</li>
 <li><strong>What could have moved at the same time.</strong> The most credible DiD papers name the confounding events they considered and explain why each is implausible — which is the modern version of Snow pointing out that nobody chose their water company.</li>
 <li><strong>How much violation the result survives.</strong> A breakdown value — the size of departure from parallel trends at which the finding stops holding — is worth more than a pre-trend <span class="math inline">\(p\)</span>-value, and unlike the <span class="math inline">\(p\)</span>-value it can be reported even when there is nothing to test.</li>
+</ol>
+<p><strong>For an instrument</strong></p>
+<ol type="1">
+<li><strong>The naive estimate</strong>, and why it cannot be trusted.</li>
+<li><strong>Why the instrument is as good as random</strong>, with balance on what was fixed before it was assigned.</li>
+<li><strong>The first stage</strong> and its F statistic.</li>
+<li><strong>The reduced form</strong>, then the two-stage estimate with its interval.</li>
+<li><strong>Whom the estimate describes</strong>: the units whose treatment the instrument moved.</li>
+<li><strong>The argument for exclusion</strong>, in words. It is the condition the result rests on and the one no output can support.</li>
 </ol>
 
 

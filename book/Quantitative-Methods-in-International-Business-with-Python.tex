@@ -9731,6 +9731,11 @@ all. And simulated exporting firms, where neither matching nor
 difference-in-differences can work and a third design, an instrument,
 can --- until its key condition fails.
 
+The examples show the two designs at work. Two later sections then carry
+each one out from start to finish on new data: a staggered rollout
+analysed as a difference-in-differences, and a randomly drawn voucher
+used as an instrument.
+
 \begin{qmibplate}
 
 \pandocbounded{\includegraphics[keepaspectratio]{images/session-11-snow.jpg}}
@@ -10814,6 +10819,456 @@ the outcome \\
 Choose the design whose assumption can be argued best in the setting at
 hand, and say in words which assumption that is.
 
+\section{Doing it · A difference-in-differences study, from the panel to
+the sensitivity
+analysis}\label{doing-it-a-difference-in-differences-study-from-the-panel-to-the-sensitivity-analysis}
+
+The four examples showed the two designs of this chapter working, and
+failing. This section and the next carry each one out from the first
+file to the reported number, on data that appear nowhere else in the
+chapter, because the order of the steps is most of the method and it is
+easier to see on a clean case.
+
+A government opens \textbf{export desks}, one-stop offices for customs
+paperwork, in 12 regions in 2018 and in 10 more in 2021; 18 regions
+never get one. Does a desk raise the share of a region's firms that
+export? Regions with a desk already exported more, for reasons nobody
+recorded, which rules out matching. The data are simulated, so the truth
+is known: a desk adds 2 points for every year it has been open, which is
+6.1 on average over the treated years observed.
+
+\textbf{Step 1 · The panel, and the adoption table.} A
+difference-in-differences needs a panel: the same units at several
+dates, one row per unit and date. The first thing to print from it is
+who was treated and when, because that table says which comparisons
+exist before any is made.
+
+\phantomsection\label{check-desks-panel}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ matplotlib.pyplot }\ImportTok{as}\NormalTok{ plt}
+\ImportTok{import}\NormalTok{ diff\_diff }\ImportTok{as}\NormalTok{ dd}
+
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{11}\NormalTok{)}
+\NormalTok{n\_regions }\OperatorTok{=} \DecValTok{40}
+\NormalTok{opened }\OperatorTok{=}\NormalTok{ np.r\_[np.full(}\DecValTok{12}\NormalTok{, }\DecValTok{2018}\NormalTok{), np.full(}\DecValTok{10}\NormalTok{, }\DecValTok{2021}\NormalTok{), np.zeros(}\DecValTok{18}\NormalTok{)].astype(}\BuiltInTok{int}\NormalTok{)   }\CommentTok{\# 0 = never}
+\NormalTok{level }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{30}\NormalTok{, }\DecValTok{6}\NormalTok{, n\_regions) }\OperatorTok{+} \DecValTok{4} \OperatorTok{*}\NormalTok{ (opened }\OperatorTok{\textgreater{}} \DecValTok{0}\NormalTok{)     }\CommentTok{\# regions with a desk exported more already}
+\NormalTok{rows }\OperatorTok{=}\NormalTok{ []}
+\ControlFlowTok{for}\NormalTok{ year }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{2014}\NormalTok{, }\DecValTok{2024}\NormalTok{):}
+\NormalTok{    years\_open }\OperatorTok{=}\NormalTok{ np.where((opened }\OperatorTok{\textgreater{}} \DecValTok{0}\NormalTok{) }\OperatorTok{\&}\NormalTok{ (year }\OperatorTok{\textgreater{}=}\NormalTok{ opened), year }\OperatorTok{{-}}\NormalTok{ opened }\OperatorTok{+} \DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{    exporters }\OperatorTok{=}\NormalTok{ level }\OperatorTok{+} \FloatTok{1.0} \OperatorTok{*}\NormalTok{ (year }\OperatorTok{{-}} \DecValTok{2014}\NormalTok{) }\OperatorTok{+} \FloatTok{2.0} \OperatorTok{*}\NormalTok{ years\_open }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\FloatTok{1.5}\NormalTok{, n\_regions)}
+\NormalTok{    rows.append(pd.DataFrame(\{}\StringTok{"region"}\NormalTok{: np.arange(n\_regions), }\StringTok{"year"}\NormalTok{: year, }\StringTok{"opened"}\NormalTok{: opened,}
+                              \StringTok{"desk"}\NormalTok{: (years\_open }\OperatorTok{\textgreater{}} \DecValTok{0}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{),}
+                              \StringTok{"exporters"}\NormalTok{: exporters.}\BuiltInTok{round}\NormalTok{(}\DecValTok{1}\NormalTok{)\}))}
+\NormalTok{desks }\OperatorTok{=}\NormalTok{ pd.concat(rows, ignore\_index}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(desks.head(}\DecValTok{3}\NormalTok{).to\_string(index}\OperatorTok{=}\VariableTok{False}\NormalTok{))}
+\BuiltInTok{print}\NormalTok{(desks.groupby(}\StringTok{"opened"}\NormalTok{)[}\StringTok{"region"}\NormalTok{].nunique().rename(index}\OperatorTok{=}\NormalTok{\{}\DecValTok{0}\NormalTok{: }\StringTok{"never"}\NormalTok{\}).to\_string())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ region  year  opened  desk  exporters
+      0  2014    2018     0       34.7
+      1  2014    2018     0       42.5
+      2  2014    2018     0       43.0
+opened
+never    18
+2018     12
+2021     10
+\end{verbatim}
+
+Both cohorts have years before their desk, four and seven, so a
+pre-period can be examined, and eighteen regions are never treated, so a
+clean control group exists at every date. That is a far better position
+than Example 3's, and the table is how one knows.
+
+\textbf{Step 2 · Look before estimating.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{by\_year }\OperatorTok{=}\NormalTok{ desks.groupby([}\StringTok{"year"}\NormalTok{, }\StringTok{"opened"}\NormalTok{])[}\StringTok{"exporters"}\NormalTok{].mean().unstack()}
+\NormalTok{by\_year.columns }\OperatorTok{=}\NormalTok{ [}\StringTok{"never"}\NormalTok{, }\StringTok{"desk in 2018"}\NormalTok{, }\StringTok{"desk in 2021"}\NormalTok{]}
+
+\NormalTok{by\_year.plot(marker}\OperatorTok{=}\StringTok{"o"}\NormalTok{, figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{7}\NormalTok{, }\FloatTok{3.6}\NormalTok{))}
+\NormalTok{plt.axvline(}\FloatTok{2017.5}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{plt.axvline(}\FloatTok{2020.5}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{plt.ylabel(}\StringTok{"firms exporting, \%"}\NormalTok{)}
+\NormalTok{plt.show()}
+
+\BuiltInTok{print}\NormalTok{(by\_year.loc[[}\DecValTok{2014}\NormalTok{, }\DecValTok{2017}\NormalTok{, }\DecValTok{2020}\NormalTok{, }\DecValTok{2023}\NormalTok{]].}\BuiltInTok{round}\NormalTok{(}\DecValTok{1}\NormalTok{).to\_string())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[htbp]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{session-11_files/figure-pdf/fig-desks-trends-output-1.png}}
+
+}
+
+\caption{\label{fig-desks-trends}The share of firms exporting in the
+three groups of regions. The dashed lines mark the two openings. The
+groups sit at different heights before any desk opens, which is
+selection and does not matter; they move in parallel until their own
+desk opens, which is what does.}
+
+\end{figure}%
+
+\begin{verbatim}
+      never  desk in 2018  desk in 2021
+year                                   
+2014   28.8          35.0          33.8
+2017   30.9          38.1          36.8
+2020   34.6          47.4          39.0
+2023   37.2          56.3          48.5
+\end{verbatim}
+
+The plot holds the whole design. The regions that would get a desk
+exported more from the start, by five or six points, and a comparison of
+levels would credit that to the desks. A difference-in-differences
+compares changes, so the gap in levels is harmless. What it needs is
+that the lines would have stayed parallel, and the only evidence the
+data can give is that they were parallel before.
+
+\textbf{Step 3 · One clean two-by-two.} Every difference-in-differences,
+however elaborate, is built from comparisons of this kind: one cohort, a
+control group that is not treated in the window, one date before and one
+after. Choosing the comparison by hand, once, is the best protection
+against an estimator choosing badly on one's behalf.
+
+\phantomsection\label{check-desks-2x2}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{two }\OperatorTok{=}\NormalTok{ desks[desks[}\StringTok{"opened"}\NormalTok{].isin([}\DecValTok{0}\NormalTok{, }\DecValTok{2018}\NormalTok{]) }\OperatorTok{\&}\NormalTok{ desks[}\StringTok{"year"}\NormalTok{].isin([}\DecValTok{2017}\NormalTok{, }\DecValTok{2018}\NormalTok{])].copy()}
+\NormalTok{two[}\StringTok{"treated"}\NormalTok{] }\OperatorTok{=}\NormalTok{ (two[}\StringTok{"opened"}\NormalTok{] }\OperatorTok{==} \DecValTok{2018}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{two[}\StringTok{"post"}\NormalTok{] }\OperatorTok{=}\NormalTok{ (two[}\StringTok{"year"}\NormalTok{] }\OperatorTok{==} \DecValTok{2018}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+
+\NormalTok{means }\OperatorTok{=}\NormalTok{ two.groupby([}\StringTok{"treated"}\NormalTok{, }\StringTok{"post"}\NormalTok{])[}\StringTok{"exporters"}\NormalTok{].mean().unstack()}
+\BuiltInTok{print}\NormalTok{(means.}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"change, treated: }\SpecialCharTok{\{}\NormalTok{means}\SpecialCharTok{.}\NormalTok{loc[}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ means}\SpecialCharTok{.}\NormalTok{loc[}\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{   "}
+      \SpecialStringTok{f"change, control: }\SpecialCharTok{\{}\NormalTok{means}\SpecialCharTok{.}\NormalTok{loc[}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ means}\SpecialCharTok{.}\NormalTok{loc[}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+
+\NormalTok{did\_desks }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exporters \textasciitilde{} treated * post"}\NormalTok{, data}\OperatorTok{=}\NormalTok{two).fit(}
+\NormalTok{    cov\_type}\OperatorTok{=}\StringTok{"cluster"}\NormalTok{, cov\_kwds}\OperatorTok{=}\NormalTok{\{}\StringTok{"groups"}\NormalTok{: two[}\StringTok{"region"}\NormalTok{]\})      }\CommentTok{\# each region is seen twice}
+\NormalTok{low, high }\OperatorTok{=}\NormalTok{ did\_desks.conf\_int().loc[}\StringTok{"treated:post"}\NormalTok{]}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"DiD = }\SpecialCharTok{\{}\NormalTok{did\_desks}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}treated:post\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{   95\% CI [}\SpecialCharTok{\{}\NormalTok{low}\SpecialCharTok{:.2f\}}\SpecialStringTok{, }\SpecialCharTok{\{}\NormalTok{high}\SpecialCharTok{:.2f\}}\SpecialStringTok{]   "}
+      \SpecialStringTok{f"truth, first year: 2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+post         0      1
+treated              
+0        30.93  31.89
+1        38.11  41.33
+change, treated: 3.23   change, control: 0.97
+DiD = 2.26   95% CI [0.80, 3.71]   truth, first year: 2
+\end{verbatim}
+
+The treated regions gained 3.23 points and the controls 0.97; the
+difference, 2.26, is the estimate of a desk's effect in its first year,
+against a truth of 2. The interaction coefficient is that same number,
+and the regression adds an interval. Clustering by region tells the
+standard error that a region's two rows are not independent
+observations.
+
+\textbf{Step 4 · The event study, by regression.} The same comparison
+can be made for every year at once, each against 2017, the last year
+before the desks. One interaction per year does it.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clean }\OperatorTok{=}\NormalTok{ desks[desks[}\StringTok{"opened"}\NormalTok{].isin([}\DecValTok{0}\NormalTok{, }\DecValTok{2018}\NormalTok{])].copy()}
+\NormalTok{clean[}\StringTok{"treated"}\NormalTok{] }\OperatorTok{=}\NormalTok{ (clean[}\StringTok{"opened"}\NormalTok{] }\OperatorTok{==} \DecValTok{2018}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+
+\NormalTok{fit }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exporters \textasciitilde{} treated * C(year, Treatment(reference=2017))"}\NormalTok{, data}\OperatorTok{=}\NormalTok{clean).fit(}
+\NormalTok{    cov\_type}\OperatorTok{=}\StringTok{"cluster"}\NormalTok{, cov\_kwds}\OperatorTok{=}\NormalTok{\{}\StringTok{"groups"}\NormalTok{: clean[}\StringTok{"region"}\NormalTok{]\})}
+\NormalTok{names }\OperatorTok{=}\NormalTok{ [name }\ControlFlowTok{for}\NormalTok{ name }\KeywordTok{in}\NormalTok{ fit.params.index }\ControlFlowTok{if}\NormalTok{ name.startswith(}\StringTok{"treated:"}\NormalTok{)]}
+\NormalTok{study }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"year"}\NormalTok{: [}\BuiltInTok{int}\NormalTok{(name[}\OperatorTok{{-}}\DecValTok{5}\NormalTok{:}\OperatorTok{{-}}\DecValTok{1}\NormalTok{]) }\ControlFlowTok{for}\NormalTok{ name }\KeywordTok{in}\NormalTok{ names],}
+                      \StringTok{"effect"}\NormalTok{: fit.params[names].values,}
+                      \StringTok{"low"}\NormalTok{: fit.conf\_int().loc[names, }\DecValTok{0}\NormalTok{].values,}
+                      \StringTok{"high"}\NormalTok{: fit.conf\_int().loc[names, }\DecValTok{1}\NormalTok{].values\}).set\_index(}\StringTok{"year"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(study.}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
+
+\NormalTok{plt.figure(figsize}\OperatorTok{=}\NormalTok{(}\DecValTok{7}\NormalTok{, }\FloatTok{3.4}\NormalTok{))}
+\NormalTok{plt.errorbar(study.index, study[}\StringTok{"effect"}\NormalTok{], yerr}\OperatorTok{=}\NormalTok{[study[}\StringTok{"effect"}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ study[}\StringTok{"low"}\NormalTok{],}
+\NormalTok{             study[}\StringTok{"high"}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ study[}\StringTok{"effect"}\NormalTok{]], fmt}\OperatorTok{=}\StringTok{"o"}\NormalTok{, capsize}\OperatorTok{=}\DecValTok{3}\NormalTok{)}
+\NormalTok{plt.axhline(}\DecValTok{0}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{)}
+\NormalTok{plt.axvline(}\FloatTok{2017.5}\NormalTok{, color}\OperatorTok{=}\StringTok{"grey"}\NormalTok{, linestyle}\OperatorTok{=}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{plt.ylabel(}\StringTok{"gap, relative to 2017"}\NormalTok{)}
+\NormalTok{plt.show()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      effect    low   high
+year                      
+2014   -0.94  -2.12   0.25
+2015   -0.72  -2.34   0.89
+2016   -0.95  -2.39   0.49
+2018    2.26   0.79   3.72
+2019    3.87   2.26   5.47
+2020    5.55   4.16   6.94
+2021    7.87   6.37   9.38
+2022    9.37   8.20  10.53
+2023   11.93  10.56  13.31
+\end{verbatim}
+
+\begin{figure}[htbp]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{session-11_files/figure-pdf/fig-desks-event-output-2.png}}
+
+}
+
+\caption{\label{fig-desks-event}The event study for the 2018 cohort
+against the never-treated regions, with 95\% intervals. Before the desks
+open the intervals include zero; afterwards the effect grows by about
+two points a year, as the simulation says it should.}
+
+\end{figure}%
+
+Each coefficient is the gap between the two groups in that year minus
+the gap in 2017. The three before the desks all lie between −0.7 and −1,
+which says only that 2017 happened to be a good year for the treated
+regions; none of the intervals excludes zero, and there is no slope.
+After 2018 the points are the effect year by year, and they climb from
+2.3 to 11.9. A single ``the effect'' would hide that the policy takes
+time to work, which the event study shows at a glance.
+
+\textbf{Step 5 · All cohorts, with staggered timing.} One regression
+with region and year effects, the two-way fixed effects of Example 3,
+uses every row. An estimator built for staggered adoption repeats step 3
+for every cohort and year, always against regions not yet treated, and
+then averages.
+
+\phantomsection\label{check-desks-cs}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{twfe\_desks }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exporters \textasciitilde{} desk + C(region) + C(year)"}\NormalTok{, data}\OperatorTok{=}\NormalTok{desks).fit(}
+\NormalTok{    cov\_type}\OperatorTok{=}\StringTok{"cluster"}\NormalTok{, cov\_kwds}\OperatorTok{=}\NormalTok{\{}\StringTok{"groups"}\NormalTok{: desks[}\StringTok{"region"}\NormalTok{]\})}
+\NormalTok{cs\_desks }\OperatorTok{=}\NormalTok{ dd.CallawaySantAnna(cluster}\OperatorTok{=}\StringTok{"region"}\NormalTok{).fit(}
+\NormalTok{    desks, outcome}\OperatorTok{=}\StringTok{"exporters"}\NormalTok{, unit}\OperatorTok{=}\StringTok{"region"}\NormalTok{, time}\OperatorTok{=}\StringTok{"year"}\NormalTok{, first\_treat}\OperatorTok{=}\StringTok{"opened"}\NormalTok{)   }\CommentTok{\# 0 = never}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"two{-}way fixed effects:  }\SpecialCharTok{\{}\NormalTok{twfe\_desks}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}desk\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{  (SE }\SpecialCharTok{\{}\NormalTok{twfe\_desks}\SpecialCharTok{.}\NormalTok{bse[}\StringTok{\textquotesingle{}desk\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{)"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Callaway{-}Sant\textquotesingle{}Anna:     }\SpecialCharTok{\{}\NormalTok{cs\_desks}\SpecialCharTok{.}\NormalTok{overall\_att}\SpecialCharTok{:.2f\}}\SpecialStringTok{  "}
+      \SpecialStringTok{f"(SE }\SpecialCharTok{\{}\NormalTok{cs\_desks}\SpecialCharTok{.}\NormalTok{overall\_se}\SpecialCharTok{:.2f\}}\SpecialStringTok{, }\SpecialCharTok{\{}\NormalTok{cs\_desks}\SpecialCharTok{.}\NormalTok{n\_clusters}\SpecialCharTok{\}}\SpecialStringTok{ clusters)"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"truth, average over the treated years: 6.12"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+two-way fixed effects:  5.18  (SE 0.49)
+Callaway-Sant'Anna:     6.38  (SE 0.45, 40 clusters)
+truth, average over the treated years: 6.12
+\end{verbatim}
+
+Two-way fixed effects says 5.2 and the staggered estimator 6.4, against
+a truth of 6.1. The first is too low for the reason Example 3 gave, now
+visible in a case where the truth is known: between 2020 and 2021 the
+regression uses the 2018 regions as controls for the 2021 ones, and the
+2018 regions are not standing still. Their own effect is growing by two
+points a year, and that growth is subtracted from the newcomers' effect.
+Both numbers go in the report; when they differ, the difference is a
+finding about the design.
+
+\textbf{Step 6 · How wrong could parallel trends be?} A flat pre-period
+does not prove the trends would have stayed parallel afterwards. The
+sensitivity analysis of Rambachan and Roth
+(\citeproc{ref-rambachan2023}{2023}) asks what happens to the conclusion
+if they had drifted apart by up to \(M\) times the largest movement seen
+before the policy.
+
+\phantomsection\label{check-desks-honest}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{study\_cs }\OperatorTok{=}\NormalTok{ cs\_desks.aggregate(}\StringTok{"event\_study"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ M }\KeywordTok{in}\NormalTok{ (}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{8}\NormalTok{):}
+\NormalTok{    honest }\OperatorTok{=}\NormalTok{ dd.HonestDiD(method}\OperatorTok{=}\StringTok{"relative\_magnitude"}\NormalTok{, M}\OperatorTok{=}\NormalTok{M).fit(study\_cs)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"M = }\SpecialCharTok{\{}\NormalTok{M}\SpecialCharTok{\}}\SpecialStringTok{   95\% robust interval [}\SpecialCharTok{\{}\NormalTok{honest}\SpecialCharTok{.}\NormalTok{ci\_lb}\SpecialCharTok{:5.2f\}}\SpecialStringTok{, }\SpecialCharTok{\{}\NormalTok{honest}\SpecialCharTok{.}\NormalTok{ci\_ub}\SpecialCharTok{:5.2f\}}\SpecialStringTok{]   "}
+          \SpecialStringTok{f"rules out zero: }\SpecialCharTok{\{}\StringTok{\textquotesingle{}yes\textquotesingle{}} \ControlFlowTok{if}\NormalTok{ honest}\SpecialCharTok{.}\NormalTok{is\_significant }\ControlFlowTok{else} \StringTok{\textquotesingle{}no\textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+M = 0   95% robust interval [ 6.26,  8.02]   rules out zero: yes
+M = 1   95% robust interval [ 5.30,  8.98]   rules out zero: yes
+M = 2   95% robust interval [ 4.33,  9.95]   rules out zero: yes
+M = 4   95% robust interval [ 2.41, 11.88]   rules out zero: yes
+M = 8   95% robust interval [-1.45, 15.73]   rules out zero: no
+\end{verbatim}
+
+The interval is for the average effect over the six years after opening,
+whose true value is 7. With exact parallel trends, \(M = 0\), it runs
+from 6.3 to 8.0. It widens as larger violations are allowed, and still
+excludes zero when the post-period drift is allowed to be four times
+anything seen before; at eight times it no longer does. That breakdown
+value, somewhere between four and eight, is the sentence to report. It
+replaces ``the pre-trends look flat'' with a statement of how much of
+the assumption the finding needs.
+
+\textbf{The study in three sentences.} Print the adoption table and plot
+the groups before estimating anything. Make one clean comparison by
+hand, then the event study, clustered by unit, and let the years before
+the policy speak. With staggered timing, put an estimator built for it
+beside two-way fixed effects, and say how large a violation the result
+survives.
+
+\section{Doing it · An instrument, from the first stage to the
+estimate}\label{doing-it-an-instrument-from-the-first-stage-to-the-estimate}
+
+Does attending an international trade fair raise a firm's export sales?
+Ambitious firms attend more and export more, ambition is in no file, and
+there is no before and after. But suppose the trade agency once mailed a
+voucher for a free stand to 1,500 of 3,000 firms, drawn at random. The
+voucher is then a candidate instrument, and a better one than distance
+to a port: it is relevant if firms with a voucher attend more, which can
+be checked; it is independent of the firms' hidden traits because it was
+drawn; and it is excludable if a voucher changes exports only by getting
+a firm to the fair, which has to be argued. The data are simulated, with
+a true effect of attending of 12 (\$ thousand).
+
+\phantomsection\label{check-fair-naive}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ statsmodels.api }\ImportTok{as}\NormalTok{ sm}
+\ImportTok{from}\NormalTok{ statsmodels.sandbox.regression.gmm }\ImportTok{import}\NormalTok{ IV2SLS}
+
+\NormalTok{rng }\OperatorTok{=}\NormalTok{ np.random.default\_rng(}\DecValTok{13}\NormalTok{)}
+\NormalTok{n\_fair }\OperatorTok{=} \DecValTok{3000}
+\NormalTok{ambition }\OperatorTok{=}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n\_fair)                              }\CommentTok{\# in no file}
+\NormalTok{employees }\OperatorTok{=}\NormalTok{ rng.lognormal(}\DecValTok{3}\NormalTok{, }\FloatTok{0.7}\NormalTok{, n\_fair).}\BuiltInTok{round}\NormalTok{() }\OperatorTok{+} \DecValTok{1}
+\NormalTok{voucher }\OperatorTok{=}\NormalTok{ (rng.permutation(n\_fair) }\OperatorTok{\textless{}}\NormalTok{ n\_fair }\OperatorTok{//} \DecValTok{2}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)    }\CommentTok{\# the agency drew who received one}
+\NormalTok{attends }\OperatorTok{=}\NormalTok{ (}\FloatTok{0.9} \OperatorTok{*}\NormalTok{ ambition }\OperatorTok{+} \FloatTok{1.2} \OperatorTok{*}\NormalTok{ voucher }\OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, n\_fair) }\OperatorTok{\textgreater{}} \FloatTok{0.8}\NormalTok{).astype(}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{exports }\OperatorTok{=}\NormalTok{ (}\DecValTok{40} \OperatorTok{+} \DecValTok{12} \OperatorTok{*}\NormalTok{ attends }\OperatorTok{+} \DecValTok{10} \OperatorTok{*}\NormalTok{ ambition }\OperatorTok{+} \DecValTok{5} \OperatorTok{*}\NormalTok{ np.log(employees)}
+           \OperatorTok{+}\NormalTok{ rng.normal(}\DecValTok{0}\NormalTok{, }\DecValTok{12}\NormalTok{, n\_fair)).}\BuiltInTok{round}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{fair }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"employees"}\NormalTok{: employees, }\StringTok{"voucher"}\NormalTok{: voucher,}
+                     \StringTok{"attends"}\NormalTok{: attends, }\StringTok{"exports"}\NormalTok{: exports\})}
+\NormalTok{fair[}\StringTok{"log\_employees"}\NormalTok{] }\OperatorTok{=}\NormalTok{ np.log(fair[}\StringTok{"employees"}\NormalTok{])}
+
+\NormalTok{gap }\OperatorTok{=}\NormalTok{ fair.groupby(}\StringTok{"attends"}\NormalTok{)[}\StringTok{"exports"}\NormalTok{].mean()}
+\NormalTok{controlled }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exports \textasciitilde{} attends + log\_employees"}\NormalTok{, data}\OperatorTok{=}\NormalTok{fair).fit()}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"naive: attenders minus the rest = }\SpecialCharTok{\{}\NormalTok{gap[}\DecValTok{1}\NormalTok{] }\OperatorTok{{-}}\NormalTok{ gap[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{:.1f\}}\SpecialStringTok{   (truth 12)"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"regression, controlling for size: }\SpecialCharTok{\{}\NormalTok{controlled}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}attends\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+naive: attenders minus the rest = 21.2   (truth 12)
+regression, controlling for size: 21.2
+\end{verbatim}
+
+The naive comparison says 21.2, and controlling for the one
+characteristic in the file leaves it at 21.2. A control can only remove
+confounding by something that was measured.
+
+\textbf{Step 1 · Check the instrument.} Two of the three conditions
+leave traces in the data. Independence can be examined on anything fixed
+before the vouchers went out: firms with and without one should look
+alike. Relevance is the first stage, a regression of the treatment on
+the instrument.
+
+\textbf{Step 2 · The reduced form, and the ratio.} The reduced form is
+the regression of the outcome on the instrument. Both it and the first
+stage compare firms by the draw, so both are free of selection.
+
+\phantomsection\label{check-fair-stages}
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{print}\NormalTok{(fair.groupby(}\StringTok{"voucher"}\NormalTok{)[[}\StringTok{"employees"}\NormalTok{, }\StringTok{"attends"}\NormalTok{, }\StringTok{"exports"}\NormalTok{]].mean().}\BuiltInTok{round}\NormalTok{(}\DecValTok{2}\NormalTok{).to\_string())}
+
+\NormalTok{balance\_fair }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"log\_employees \textasciitilde{} voucher"}\NormalTok{, data}\OperatorTok{=}\NormalTok{fair).fit()}
+\NormalTok{first }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"attends \textasciitilde{} voucher"}\NormalTok{, data}\OperatorTok{=}\NormalTok{fair).fit()}
+\NormalTok{reduced }\OperatorTok{=}\NormalTok{ smf.ols(}\StringTok{"exports \textasciitilde{} voucher"}\NormalTok{, data}\OperatorTok{=}\NormalTok{fair).fit()}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{does the voucher predict firm size?  p = }\SpecialCharTok{\{}\NormalTok{balance\_fair}\SpecialCharTok{.}\NormalTok{pvalues[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"first stage:  a voucher raises attendance by }\SpecialCharTok{\{}\NormalTok{first}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{   "}
+      \SpecialStringTok{f"F = }\SpecialCharTok{\{}\NormalTok{first}\SpecialCharTok{.}\NormalTok{tvalues[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{] }\OperatorTok{**} \DecValTok{2}\SpecialCharTok{:.0f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"reduced form: a voucher raises exports by    }\SpecialCharTok{\{}\NormalTok{reduced}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"ratio: }\SpecialCharTok{\{}\NormalTok{reduced}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{] }\OperatorTok{/}\NormalTok{ first}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}voucher\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.1f\}}\SpecialStringTok{   (truth 12)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         employees  attends  exports
+voucher                             
+0            26.56     0.29    58.88
+1            27.56     0.62    62.74
+
+does the voucher predict firm size?  p = 0.41
+first stage:  a voucher raises attendance by 0.34   F = 383
+reduced form: a voucher raises exports by    3.86
+ratio: 11.5   (truth 12)
+\end{verbatim}
+
+Firms with and without a voucher are the same size, as a draw implies.
+The voucher raised attendance from 29\% to 62\%, a first stage with an F
+statistic of 383, far above the conventional bar of 10. And it raised
+exports by 3.86. If the voucher acts only through attendance, those 3.86
+are the effect of sending an extra third of the firms to the fair, so
+the effect of attending is 3.86 / 0.34 = 11.5.
+
+\textbf{Step 3 · Two-stage least squares.} The ratio has no standard
+error. A two-stage routine gives the same number with one, and takes
+controls. A control goes in both lists, the regressors and the
+instruments, since it serves as its own instrument.
+
+\phantomsection\label{check-fair-iv}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{iv\_fair }\OperatorTok{=}\NormalTok{ IV2SLS(fair[}\StringTok{"exports"}\NormalTok{],}
+\NormalTok{                 sm.add\_constant(fair[[}\StringTok{"attends"}\NormalTok{]]),}
+\NormalTok{                 sm.add\_constant(fair[[}\StringTok{"voucher"}\NormalTok{]])).fit()}
+\NormalTok{iv\_size }\OperatorTok{=}\NormalTok{ IV2SLS(fair[}\StringTok{"exports"}\NormalTok{],}
+\NormalTok{                 sm.add\_constant(fair[[}\StringTok{"attends"}\NormalTok{, }\StringTok{"log\_employees"}\NormalTok{]]),}
+\NormalTok{                 sm.add\_constant(fair[[}\StringTok{"voucher"}\NormalTok{, }\StringTok{"log\_employees"}\NormalTok{]])).fit()}
+
+\ControlFlowTok{for}\NormalTok{ name, result }\KeywordTok{in}\NormalTok{ [(}\StringTok{"instrument only"}\NormalTok{, iv\_fair), (}\StringTok{"with firm size"}\NormalTok{, iv\_size)]:}
+\NormalTok{    low, high }\OperatorTok{=}\NormalTok{ result.conf\_int().loc[}\StringTok{"attends"}\NormalTok{]}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{:16s\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{result}\SpecialCharTok{.}\NormalTok{params[}\StringTok{\textquotesingle{}attends\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:5.1f\}}\SpecialStringTok{   se }\SpecialCharTok{\{}\NormalTok{result}\SpecialCharTok{.}\NormalTok{bse[}\StringTok{\textquotesingle{}attends\textquotesingle{}}\NormalTok{]}\SpecialCharTok{:.1f\}}\SpecialStringTok{   "}
+          \SpecialStringTok{f"95\% CI [}\SpecialCharTok{\{}\NormalTok{low}\SpecialCharTok{:.1f\}}\SpecialStringTok{, }\SpecialCharTok{\{}\NormalTok{high}\SpecialCharTok{:.1f\}}\SpecialStringTok{]"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+instrument only   11.5   se 1.7   95% CI [8.1, 14.9]
+with firm size    11.3   se 1.7   95% CI [7.9, 14.6]
+\end{verbatim}
+
+The estimate is 11.5 with an interval from 8.1 to 14.9, which contains
+the truth and excludes the naive 21. The interval is wide for 3,000
+firms, and that is the price of the design: the instrument uses only the
+part of attendance that the voucher caused, about a third of it, and
+discards the rest as contaminated.
+
+\textbf{Step 4 · What the number means, and what could break it.} This
+step is written and not computed. The estimate describes the firms that
+attended \emph{because of} the voucher, the compliers of Joshua D.
+Angrist, Imbens, and Rubin (\citeproc{ref-angrist1996}{1996}). Firms
+that would have gone anyway and firms that would never go contribute
+nothing, since the voucher did not change what they did, and the report
+should say so. And the exclusion restriction has to be argued in words:
+does a voucher change exports in any other way? If the letter also
+advertised the agency's export loans, it does, and the ratio is wrong by
+an amount that no output shows, exactly as in version B of Example 4.
+
+The link with chapter 10 is worth making explicit. There, some firms
+drawn for a trial refused the treatment, and dividing the effect of the
+draw by the share that took it up recovered the effect of taking it.
+That was this estimator. An encouragement, a lottery, a distance, an
+eligibility rule: every instrument is an attempt to find a draw that
+someone else made.
+
+\textbf{The instrument in three sentences.} Check that the instrument is
+as good as random on what was fixed before, and that it moves the
+treatment strongly. The estimate is the reduced form divided by the
+first stage, with a standard error from a two-stage routine. Say whom it
+describes, and argue the exclusion in words, because nothing computed
+can.
+
 \section{What difference-in-differences cannot
 fix}\label{what-difference-in-differences-cannot-fix}
 
@@ -10889,6 +11344,8 @@ on everyone.
 
 \section{What to report}\label{what-to-report-9}
 
+\textbf{For a difference-in-differences}
+
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
@@ -10926,6 +11383,29 @@ on everyone.
   the size of departure from parallel trends at which the finding stops
   holding --- is worth more than a pre-trend \(p\)-value, and unlike the
   \(p\)-value it can be reported even when there is nothing to test.
+\end{enumerate}
+
+\textbf{For an instrument}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{The naive estimate}, and why it cannot be trusted.
+\item
+  \textbf{Why the instrument is as good as random}, with balance on what
+  was fixed before it was assigned.
+\item
+  \textbf{The first stage} and its F statistic.
+\item
+  \textbf{The reduced form}, then the two-stage estimate with its
+  interval.
+\item
+  \textbf{Whom the estimate describes}: the units whose treatment the
+  instrument moved.
+\item
+  \textbf{The argument for exclusion}, in words. It is the condition the
+  result rests on and the one no output can support.
 \end{enumerate}
 
 \bookmarksetup{startatroot}
