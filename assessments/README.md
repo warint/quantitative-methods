@@ -79,6 +79,9 @@ it does not license.
   [worked solutions](midterm/SOLUTIONS.md). Printable: [paper](https://warint.github.io/quantitative-methods/midterm-sample.pdf)
   · [answer key](https://warint.github.io/quantitative-methods/midterm-sample-answers.pdf) (PDF). The [six-page summary](https://warint.github.io/quantitative-methods/midterm-summary.pdf)
   covers every session examined.
+- **The paper sat on 28 October 2026**: [the midterm](midterm/MIDTERM-A2026.docx) and its
+  [proposed answer key and marking scheme](midterm/MIDTERM-A2026-ANSWER-KEY.docx) (Word), with the
+  lecture slides and practice questions each answer rests on.
 - **Train with the [practice questions](midterm/PRACTICE.md)**: 85 questions in the exam's six
   parts, 40 of them multiple choice, sorted by session, with an [answer key](midterm/PRACTICE-ANSWERS.md) to open only after
   answering on paper. Printable: [questions](https://warint.github.io/quantitative-methods/midterm-practice.pdf)
