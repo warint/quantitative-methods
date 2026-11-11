@@ -31,17 +31,21 @@ establishes that the reading is load-bearing rather than decorative.
 | **30–50** | Example 2, LaLonde: −\$8,498 → balance → score → overlap → love plot → +\$2,001 against +\$1,794. |
 | **50–60** | Example 3, the HR course: matching works (5.3), then fails with perfect balance (9.0). Ask the room what is missing *before* showing the motivation plot. |
 | **60–65** | Matching or regression; what matching does not fix. |
-| **65–90** | In class: the code behind the three examples, then the PSID exercise. Circulate; hand off to the practice. |
+| **65–70** | One problem, two solutions: a trial removes selection by design, matching by assumption. |
+| **70–80** | Solution 1 in Python, a trial from start to finish: baseline file, power, the draw, balance, the estimate, firms that refuse. |
+| **80–90** | Solution 2 in Python, a match from start to finish: score, overlap, caliper, balance, ATT with a bootstrap interval, robustness. The real-data *Your turn* (LaLonde as a trial, then with the PSID) goes home or into the practice. Hand off. |
 
 ---
 
 ## Run the code live
 
-The examples are taught from pictures and tables; the code waits until minute 65. Then open the
-VS Codium terminal, activate `.venv`, and run the first cell of each example in front of them before
-they run the rest themselves. Type the mistakes as well as the fixes: matching on `re78`, a score
-fitted after looking at the ATT. Watching an error appear and be read is worth more than a slide
-saying errors happen.
+The examples are taught from pictures and tables; the code waits until minute 65, and it does not
+replay them. The students carry out each solution on new data: a trial they design and analyse, then
+a match they build and check. Open the VS Codium terminal, activate `.venv`, and run the first cell
+of each solution in front of them (it writes the data file the later cells read) before they run the
+rest themselves. Before each cell, ask what the step is **for**. Type the mistakes as well as the
+fixes: a draw replaced by a choice, `exports_after` in the score, a score changed after looking at
+the ATT. Watching an error appear and be read is worth more than a slide saying errors happen.
 
 ---
 

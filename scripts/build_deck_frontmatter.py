@@ -206,6 +206,12 @@ TOOLKIT = {
     "plt.yscale": ("10", "Plot", "`\"log\"` when one group dwarfs the other"),
     ".boxplot": ("10", "Plot", "balance at a glance: one box per group"),
     "rng.uniform": ("10", "Load and shape", "a number between 0 and 1: compare it with a probability to draw who is treated"),
+    "TTestIndPower": ("10", "Choose and validate", "before a trial: the sample each group needs, or the power you have"),
+    "rng.permutation": ("10", "Load and shape", "shuffle the list and treat the first half: the random draw of a trial"),
+    ".transform": ("10", "Load and shape", "apply a function within each group and keep one value per row: a draw within strata"),
+    ".to_csv": ("10", "Load and shape", "save a table: the draw of a trial is saved once and never redrawn"),
+    ".conf_int": ("10", "Read the fit", "the 95% confidence interval of every coefficient"),
+    "np.percentile": ("10", "Read the fit", "a bootstrap interval: the 2.5th and 97.5th percentiles of the draws"),
 
     # ---- Session 11 · difference-in-differences, and an instrument -------------
     ".unstack()": ("11", "Describe", "the four means as a table: groups in rows, periods in columns"),

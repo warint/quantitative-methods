@@ -231,6 +231,13 @@ SNIPPETS = {
     "plt.yscale": 'plt.yscale("log")',
     ".boxplot": 'firms.boxplot(column="productivity", by="applies")   # balance at a glance',
     "rng.uniform": "treat = (rng.uniform(size=n) < probability).astype(int)   # 1 with that probability",
+    "TTestIndPower": "from statsmodels.stats.power import TTestIndPower\n"
+                     "TTestIndPower().solve_power(effect_size=0.3, alpha=0.05, power=0.8)   # firms per group",
+    "rng.permutation": "treat = (rng.permutation(n) < n // 2).astype(int)   # exactly half, at random",
+    ".transform": 'firms["treat"] = firms.groupby("sector")["firm"].transform(half).astype(int)   # half of each sector',
+    ".to_csv": 'firms.to_csv("trial_assigned.csv", index=False)   # the draw, saved once',
+    ".conf_int": 'low, high = fit.conf_int().loc["treat"]   # 95% interval of the effect',
+    "np.percentile": "low, high = np.percentile(draws, [2.5, 97.5])   # bootstrap 95% interval",
 
     # ---- Session 11 -------------------------------------------------------
     ".unstack()": 'means = houses.groupby(["near", "post"])["price"].mean().unstack()',

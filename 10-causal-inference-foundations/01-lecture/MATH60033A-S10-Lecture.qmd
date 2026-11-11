@@ -40,15 +40,19 @@ format:
      self-selection), LaLonde's job-training data (matching tested against an
      experiment), and a simulated HR training scheme (matching that works, then
      fails on an unmeasured confounder). The code comes last, in the in-class
-     part, where every cell is live: it executes at render time, so the output
-     on the slides is the output the students' own machines produce. Every
-     visible cell is plain Python — numpy, pandas, statsmodels, scikit-learn,
-     matplotlib — and either simulates its data or reads it straight from
-     Rajeev Dehejia's NBER page with pd.read_stata, so a student can copy any
-     one cell into a file and run it.
-     The diagrams and charts are drawn by economist-assets/build_causal_figures.py,
-     from the same simulations and the same data, so every number on a picture
-     is the number the matching cell prints. -->
+     part, and does not replay those examples: it explains the two solutions
+     and has the students carry each one out on new simulated data. A trial:
+     baseline file, power, a stratified draw, balance, the estimate with and
+     without baseline controls, non-compliance. A match: score, overlap, a
+     caliper, balance, the ATT with a bootstrap interval, robustness. Every
+     cell is live: it executes at render time, so the output on the slides is
+     the output the students' own machines produce. The first cell of each
+     solution writes a small CSV (trial_baseline.csv, certification.csv; the
+     draw is saved as trial_assigned.csv) and the later cells read it, so each
+     runs on its own once the first has run; the CSVs are git-ignored.
+     The diagrams and charts of the three examples are drawn by
+     economist-assets/build_causal_figures.py, from the examples' own
+     simulations and data. -->
 ```{python}
 #| label: setup
 #| echo: false
@@ -70,7 +74,7 @@ pd.set_option("display.max_columns", 10)
 3. Example 2 · LaLonde's test
 4. Example 3 · Does analytics training raise performance?
 5. Wrapping up · What matching does not fix
-6. In class · The code behind the three examples
+6. In class · The two solutions, done in Python
 
 ## What session 10 is for {.scrollable}
 ::::: columns
@@ -91,11 +95,11 @@ pd.set_option("display.max_columns", 10)
 
 ### The Python
 
-- Simulate both potential outcomes and watch a coin flip recover the effect
-- Fit a propensity score with `smf.logit` and match with `NearestNeighbors`
+- Size a trial with `TTestIndPower`, then draw the treated within strata with a seeded `rng.permutation`
+- Estimate a trial's effect with `smf.ols`, its confidence interval, and baseline controls for precision
+- Fit a propensity score with `smf.logit` and match with `NearestNeighbors`, within a caliper
 - Check **overlap** and **balance** (standardised differences) before reading any estimate
-- Score the naive, regression and matched estimates against an experimental benchmark
-- Simulate an **unmeasured confounder** and watch a perfect balance check miss it
+- Bootstrap the ATT, and show that it survives other reasonable choices
 
 ::::
 
@@ -725,242 +729,302 @@ estimator: sessions 11 (difference-in-differences) and beyond.
 | 6 | balance: every standardised difference inside ±0.1 | `.mean()`, `.var()`, `plt.scatter` |
 | 7 | the ATT, **last** | `treated["y"].mean() - matched["y"].mean()` |
 
-## In class · The code behind the three examples {.center}
+## In class · The two solutions, done in Python {.center}
+
+## One problem, two solutions {.scrollable}
+
+The three examples showed **one problem**: the treated and the untreated differed **before** the
+treatment, so their difference in outcomes mixes the effect with selection. There are two ways out.
+
+| | **Solution 1 · Randomised controlled trial** | **Solution 2 · Propensity-score matching** |
+|---|---|---|
+| When | **you** decide who is treated, before it happens | treatment has **already been chosen** by the units |
+| The idea | let **chance** pick the treated: nothing about a firm can influence the draw | for each treated unit, find untreated units that were **as likely to be treated** |
+| Why it removes selection | the two groups are alike on **everything**, measured or not | the two groups are alike on **what you measured** |
+| What you must assume | that the draw was respected | that nothing **unmeasured** drives both treatment and outcome |
+| What you check | balance (a check of the draw) | overlap, then balance (a check of the match) |
+| The estimate | a difference in means | treated mean minus matched-control mean (the ATT) |
+
+::: {.step}
+A trial solves the problem **by design**; matching solves it **by assumption**. Use the first whenever
+you can; the second is for the many questions where nobody will let you draw.
+:::
 
 ## How this part works {.scrollable}
 
 ::: columns
 ::: {.column width="50%"}
-Every cell that follows **runs on its own**: copy it into a new file in VS Codium, run it, and you
-should see exactly the numbers from the lecture. The packages, by name: `numpy`, `pandas`,
-`statsmodels`, `scikit-learn`, `matplotlib`. Examples 1 and 3 simulate their data in the cell;
-Example 2 reads it from Rajeev Dehejia's page with `pd.read_stata`.
+You now **do** each solution from start to finish, on **new data**, not the lecture's examples. The
+packages, by name: `numpy`, `pandas`, `statsmodels`, `scikit-learn`, `matplotlib`.
+
+Each solution is one short piece of work in steps. Its **first cell writes a small data file** in your
+folder; every later cell starts by reading that file, so each cell runs on its own once the first has run.
 :::
 
 ::: {.column width="50%"}
 ::: {.step}
-**For each example:**
+**For each solution:**
 
-1. run the cells and check you get the numbers from the lecture;
-2. do the **Your turn** task under the last cell, changing one thing at a time.
+1. run the cells in order, and say what each step is **for** before reading its output;
+2. do the **Your turn** task under the last cell;
+3. keep the file: it is the template for your project.
 :::
 :::
 :::
 
-## Example 1 in Python · Simulate 1,000 firms, with both outcomes {.scrollable}
+## Solution 1 · A trial, step by step {.scrollable}
+
+**The case.** An export agency can place foreign orders with **200 of the 400** small workshops that
+applied. Does receiving export orders raise a workshop's monthly profit? This is the design of the
+article you read for today (Atkin, Khandelwal and Osman, 2017), here on simulated data so that the
+true effect, **+\$150 a month**, is known.
+
+| Step | What you do | Why | In Python |
+|---|---|---|---|
+| 1 | assemble the **baseline file** | everything known before treatment: for the draw, the check, the precision | `pd.DataFrame`, `.to_csv` |
+| 2 | **power**: are 400 firms enough? | a trial too small to see the effect is wasted | `TTestIndPower().solve_power` |
+| 3 | **randomise**, once, with a seed | chance, not the firms or you, picks the treated | `rng.permutation`, `.groupby().transform` |
+| 4 | **check balance** | confirms the draw worked as a draw | standardised differences |
+| 5 | **estimate** when the follow-up arrives | difference in means, with a confidence interval | `smf.ols("y ~ treat")`, `.conf_int()` |
+| 6 | handle firms that **refuse** | compare by what was **drawn**, not by what was taken | `smf.ols("y ~ treat")` again |
+
+## Trial · Step 1 · The baseline file {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 1 · 1,000 firms; the programme adds exactly +2 points to every one
+# Trial, step 1 · Everything you know about the applicants BEFORE anyone is treated
 import numpy as np
 import pandas as pd
 
-rng = np.random.default_rng(10)
-n = 1000
-productivity = rng.normal(0, 1, n)                        # nobody in the ministry sees this
-sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
-sales_with = sales_without + 2                            # the true effect: +2
+rng = np.random.default_rng(10)                 # simulated here; in a real trial, your applicant list
+n = 400
+firms = pd.DataFrame({"firm": np.arange(1, n + 1),
+                      "sector": rng.choice(["rugs", "garments", "ceramics"], n),
+                      "employees": rng.integers(2, 40, n),
+                      "profit_before": rng.gamma(4, 250, n).round()})   # dollars a month
+firms.to_csv("trial_baseline.csv", index=False)
 
-firms = pd.DataFrame({"productivity": productivity,
-                      "sales_without": sales_without, "sales_with": sales_with})
-print(firms.head().round(2))
-print("true effect, every firm:", (firms["sales_with"] - firms["sales_without"]).mean())
-```
-
-## Example 1 in Python · Let a coin decide {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 1 · Randomise: a coin flip decides; we then see only one outcome per firm
-import numpy as np
-import pandas as pd
-
-rng = np.random.default_rng(10)
-n = 1000
-productivity = rng.normal(0, 1, n)
-sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
-sales_with = sales_without + 2
-
-coin = rng.integers(0, 2, n)                                    # 1 = joins, 0 = does not
-observed = np.where(coin == 1, sales_with, sales_without)       # the column you would get
-
-print("difference in means:", round(observed[coin == 1].mean() - observed[coin == 0].mean(), 2))
-print("mean productivity, joined vs not:",
-      round(productivity[coin == 1].mean(), 2), round(productivity[coin == 0].mean(), 2))
-```
-
-## Example 1 in Python · Flip the coin 1,000 times {.scrollable}
-
-```{python}
-#| echo: true
-#| output-location: column
-#| fig-width: 5.4
-#| fig-height: 4.0
-
-# Example 1 · Rerun the experiment: is the coin right on average?
-import numpy as np
-import matplotlib.pyplot as plt
-
-rng = np.random.default_rng(10)
-n = 1000
-productivity = rng.normal(0, 1, n)
-sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
-sales_with = sales_without + 2
-
-estimates = []
-for draw in range(1000):
-    coin = rng.integers(0, 2, n)
-    observed = np.where(coin == 1, sales_with, sales_without)
-    estimates.append(observed[coin == 1].mean() - observed[coin == 0].mean())
-
-print("mean of the estimates:", round(np.mean(estimates), 2))
-print("their spread (sd):    ", round(np.std(estimates), 2))
-plt.hist(estimates, bins=30)
-plt.axvline(2, color="red")
-plt.xlabel("difference in means, one coin each")
-plt.show()
-```
-
-## Example 1 in Python · Let the firms choose {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 1 · Self-selection: productive firms are more likely to join
-import numpy as np
-
-rng = np.random.default_rng(10)
-n = 1000
-productivity = rng.normal(0, 1, n)
-sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
-sales_with = sales_without + 2
-
-applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
-observed = np.where(applies == 1, sales_with, sales_without)
-
-naive = observed[applies == 1].mean() - observed[applies == 0].mean()
-bias = sales_without[applies == 1].mean() - sales_without[applies == 0].mean()
-print(f"share that joined:     {applies.mean():.2f}")
-print(f"naive difference:      {naive:.2f}")
-print(f"selection bias:        {bias:.2f}   (needs the column you never see)")
-print(f"naive minus bias:      {naive - bias:.2f}")
-```
-
-## Example 1 in Python · The balance check {.scrollable}
-
-```{python}
-#| echo: true
-#| output-location: column
-#| fig-width: 5.0
-#| fig-height: 4.0
-
-# Example 1 · Compare the groups BEFORE treatment
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-rng = np.random.default_rng(10)
-n = 1000
-productivity = rng.normal(0, 1, n)
-sales_without = 10 + 3 * productivity + rng.normal(0, 2, n)
-applies = (productivity + rng.normal(0, 1, n) > 0.5).astype(int)
-
-firms = pd.DataFrame({"productivity": productivity, "applies": applies})
-print(firms.groupby("applies")["productivity"].mean().round(2))
-
-firms.boxplot(column="productivity", by="applies")
-plt.suptitle("")
-plt.title("Productivity, before the programme")
-plt.show()
+print(firms.head())
+print(firms["profit_before"].describe().round(0))
 ```
 
 ::: {.step}
-**Your turn.** In the self-selection cell, change `> 0.5` to `> 1.5` so that only the most productive
-firms join. What happens to the naive difference and to the selection bias? Then make selection depend
-on noise only: `rng.normal(0, 1, n) > 0.5`. What do you get, and why?
+Collect the baseline **before** the draw. You will use it three times: to randomise within sectors,
+to check balance, and to make the estimate more precise.
 :::
 
-## Example 2 in Python · The experiment's answer {.scrollable}
+## Trial · Step 2 · Are 400 firms enough? {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 2 · The lottery's estimate: our benchmark
-import pandas as pd
-import statsmodels.formula.api as smf
+# Trial, step 2 · Power: the chance of detecting the effect if it is really there
+from statsmodels.stats.power import TTestIndPower
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")            # Dehejia & Wahba's version of the experiment
+power = TTestIndPower()
+effect_size = 150 / 500            # the effect you hope for, in standard deviations of the outcome
 
-print(nsw["treat"].value_counts())
-experiment = smf.ols("re78 ~ treat", data=nsw).fit()
-print(experiment.summary().tables[1])
+needed = power.solve_power(effect_size=effect_size, alpha=0.05, power=0.80)
+have = power.solve_power(effect_size=effect_size, nobs1=200, alpha=0.05)
+smallest = power.solve_power(nobs1=200, alpha=0.05, power=0.80)
+
+print(f"firms needed per group for 80% power:  {needed:.0f}")
+print(f"power with 200 per group:              {have:.2f}")
+print(f"smallest effect 200 per group detects: {smallest:.2f} sd = {smallest * 500:.0f} dollars")
 ```
 
-## Example 2 in Python · The naive estimate {.scrollable}
+::: {.step}
+`solve_power` takes three of *effect size, sample per group, significance level, power* and returns the
+fourth. Do this **before** the trial: afterwards, the sample size can no longer be changed.
+:::
+
+## Trial · Step 3 · Randomise, once {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 2 · The 185 trainees against 15,992 people from the Current Population Survey
-import pandas as pd
-
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-
-print(data["treat"].value_counts())
-print(data.groupby("treat")["re78"].mean().round(0))
-naive = data.loc[data["treat"] == 1, "re78"].mean() - data.loc[data["treat"] == 0, "re78"].mean()
-print(f"naive estimate: {naive:,.0f} dollars")
-```
-
-## Example 2 in Python · Balance before matching {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 2 · Means and standardised differences, before matching
+# Trial, step 3 · Chance picks 200 firms: half of each sector
 import numpy as np
 import pandas as pd
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
+firms = pd.read_csv("trial_baseline.csv")
+rng = np.random.default_rng(2026)              # write the seed down: anyone can redo your draw
 
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
-balance = pd.DataFrame({"treated": treated[X].mean(), "control": control[X].mean()})
-balance["std. diff."] = (treated[X].mean() - control[X].mean()) / sd
-print(balance.astype(float).round(2))
+
+def half(group):                               # shuffle one sector, treat the first half
+    return rng.permutation(len(group)) < len(group) // 2
+
+
+firms["treat"] = firms.groupby("sector")["firm"].transform(half).astype(int)
+firms.to_csv("trial_assigned.csv", index=False)   # saved once, never redrawn
+
+print(pd.crosstab(firms["sector"], firms["treat"]))
 ```
 
-## Example 2 in Python · The propensity score {.scrollable}
+::: {.step}
+`rng.permutation(n) < n // 2` shuffles the list and treats exactly half. Doing it **within each sector**
+(stratifying) guarantees that sectors are split evenly, which a single shuffle only does on average.
+:::
+
+::: {.warn}
+One draw, saved. Redrawing until the groups "look right" is choosing the treated yourself.
+:::
+
+## Trial · Step 4 · Check the draw {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 2 · A logit of treatment on the pre-training characteristics
+# Trial, step 4 · Balance: are the two groups alike BEFORE treatment?
+import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
+firms = pd.read_csv("trial_assigned.csv")
+X = ["employees", "profit_before"]
 
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
-print(data.groupby("treat")["pscore"].describe().round(3))
+treated, control = firms[firms["treat"] == 1], firms[firms["treat"] == 0]
+sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
+balance = pd.DataFrame({"treated": treated[X].mean(), "control": control[X].mean()})
+balance["std. diff."] = (treated[X].mean() - control[X].mean()) / sd
+print(balance.round(2))
+
+joint = smf.ols("treat ~ employees + profit_before + C(sector)", data=firms).fit()
+print(f"do the characteristics predict the draw?  p = {joint.f_pvalue:.2f}")
 ```
 
-## Example 2 in Python · Overlap {.scrollable}
+::: {.step}
+The same standardised difference as in the lecture, with the same reading: inside ±0.1 is balanced.
+The regression asks the question for all characteristics at once: a **large** p-value means they do not
+predict who was drawn. In a trial this checks that the draw was carried out; it is not an assumption.
+:::
+
+## Trial · Step 5 · The estimate, and its precision {.scrollable}
+
+```{python}
+#| echo: true
+
+# Trial, step 5 · The follow-up arrives: difference in means, then the same with baseline controls
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+firms = pd.read_csv("trial_assigned.csv")
+rng = np.random.default_rng(11)                # stands in for the follow-up survey; true effect +150
+firms["profit_after"] = (300 + 0.8 * firms["profit_before"] + 150 * firms["treat"]
+                         + rng.normal(0, 300, len(firms))).round()
+
+simple = smf.ols("profit_after ~ treat", data=firms).fit(cov_type="HC2")
+adjusted = smf.ols("profit_after ~ treat + profit_before + employees + C(sector)",
+                   data=firms).fit(cov_type="HC2")
+
+for name, fit in [("difference in means", simple), ("with baseline controls", adjusted)]:
+    low, high = fit.conf_int().loc["treat"]
+    print(f"{name:23s} {fit.params['treat']:5.0f}   se {fit.bse['treat']:3.0f}   95% CI [{low:.0f}, {high:.0f}]")
+```
+
+::: {.step}
+`profit_after ~ treat` **is** the difference in means; the regression adds its standard error and
+confidence interval (`cov_type="HC2"` lets the two groups have different variances). Adding baseline
+variables is **not** needed to remove bias, the draw did that: it removes noise, so the interval narrows.
+:::
+
+## Trial · Step 6 · When firms refuse {.scrollable}
+
+```{python}
+#| echo: true
+
+# Trial, step 6 · Some drawn firms decline the orders: compare by the DRAW, not by who took them
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+firms = pd.read_csv("trial_assigned.csv")
+rng = np.random.default_rng(11)
+ready = firms["profit_before"] + rng.normal(0, 400, len(firms)) > 800     # stronger firms accept
+firms["took_up"] = ((firms["treat"] == 1) & ready).astype(int)
+firms["profit_after"] = (300 + 0.8 * firms["profit_before"] + 150 * firms["took_up"]
+                         + rng.normal(0, 300, len(firms))).round()
+
+share = firms.loc[firms["treat"] == 1, "took_up"].mean()
+offered = smf.ols("profit_after ~ treat", data=firms).fit().params["treat"]
+took = smf.ols("profit_after ~ took_up", data=firms).fit().params["took_up"]
+
+print(f"share of drawn firms that took the orders:  {share:.2f}")
+print(f"by who took the orders (selection is back): {took:5.0f}")
+print(f"by the draw (effect of being OFFERED):      {offered:5.0f}")
+print(f"draw effect / share (effect of TAKING):     {offered / share:5.0f}   truth 150")
+```
+
+::: {.step}
+Taking up the orders is a **choice**, so comparing takers with everyone else brings selection back.
+The draw is still random: comparing by the draw gives the effect of the **offer** (the *intention to
+treat*). Dividing by the take-up share recovers the effect on those who took it: that is next
+session's instrument.
+:::
+
+## Your turn · The trial {.scrollable}
+
+::: {.step}
+1. **Too small a trial.** In step 2, how many firms per group would a true effect of \$75 need? Then set
+   the effect to `75` in step 5: does the difference-in-means interval still exclude zero?
+2. **A bad draw.** In step 3, replace the draw by a choice:
+   `firms["treat"] = (firms["profit_before"] > firms["profit_before"].median()).astype(int)`.
+   Rerun steps 4 and 5. What does the balance table say, and what happens to the difference in means?
+   What happens to the estimate with baseline controls, and why can you not count on that in real data?
+3. **No stratification.** Replace the draw by `(rng.permutation(len(firms)) < 200).astype(int)`. Is each
+   sector still split evenly? The draw is still random: what exactly did stratifying add?
+:::
+
+## Solution 2 · Matching, step by step {.scrollable}
+
+**The case.** Of 4,000 manufacturing firms, some **chose** to obtain a quality certification (ISO 9001).
+Does certification raise export sales two years later? Nobody drew anything: larger, foreign-owned and
+already-exporting firms certify more often. Simulated data again, so the true effect, **+8**
+(\$ thousand), is known, and so is the fact that only recorded variables drive the choice.
+
+| Step | What you do | Why | In Python |
+|---|---|---|---|
+| 1 | list the **pre-treatment** variables that drive the choice | this list *is* the assumption | on paper, then a list `X` |
+| 2 | estimate the **propensity score** | one number per firm: its probability of being treated | `smf.logit(...).fit()`, `.predict()` |
+| 3 | look at **overlap** | a treated firm with no similar control cannot be matched | `plt.hist` |
+| 4 | **match**, within a caliper | each treated firm gets its closest control, or is set aside | `NearestNeighbors`, `.kneighbors()` |
+| 5 | check **balance** | the matched groups must look alike; if not, back to step 2 | standardised differences |
+| 6 | the **ATT**, with a bootstrap interval, **last** | the estimate, and how sure you are | `.sample(replace=True)`, `np.percentile` |
+| 7 | **robustness** | a result that changes with every choice is not a result | change the caliper, the neighbours |
+
+## Matching · Step 1 · The data, and the naive answer {.scrollable}
+
+```{python}
+#| echo: true
+
+# Matching, step 1 · 4,000 firms that chose for themselves; certification adds exactly +8
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(10)                 # simulated here; in your project, the file you were given
+n = 4000
+firms = pd.DataFrame({"employees": rng.lognormal(3.5, 0.8, n).round() + 1,
+                      "age": rng.integers(1, 40, n),
+                      "foreign": rng.binomial(1, 0.2, n),
+                      "exports_before": rng.gamma(2, 20, n).round()})
+choice = -14 + 3 * np.log(firms["employees"]) + 0.8 * firms["foreign"] + 0.02 * firms["exports_before"]
+firms["certified"] = (rng.uniform(size=n) < 1 / (1 + np.exp(-choice))).astype(int)
+firms["exports_after"] = (5 + 0.6 * firms["exports_before"] + 4 * np.log(firms["employees"])
+                          + 6 * firms["foreign"] + 8 * firms["certified"] + rng.normal(0, 8, n)).round()
+firms.to_csv("certification.csv", index=False)
+
+print(firms["certified"].value_counts())
+print(firms.groupby("certified")[["employees", "foreign", "exports_before", "exports_after"]].mean().round(1))
+```
+
+::: {.step}
+The naive answer is the gap in `exports_after`. The other three columns say why it cannot be trusted:
+the certified firms were larger, more often foreign-owned, and exported more **before** certifying.
+:::
+
+## Matching · Steps 2 and 3 · The score, and overlap {.scrollable}
 
 ```{python}
 #| echo: true
@@ -968,126 +1032,107 @@ print(data.groupby("treat")["pscore"].describe().round(3))
 #| fig-width: 5.4
 #| fig-height: 4.0
 
-# Example 2 · The two distributions of the score
+# Matching, steps 2-3 · Each firm's probability of certifying, given what it looked like before
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
+firms = pd.read_csv("certification.csv")
+score = smf.logit("certified ~ np.log(employees) + age + foreign + exports_before",
+                  data=firms).fit(disp=0)
+firms["pscore"] = score.predict(firms)
 
-bins = np.linspace(0, 0.5, 26)
-plt.hist(data.loc[data["treat"] == 0, "pscore"], bins=bins, alpha=0.6, label="survey (control)")
-plt.hist(data.loc[data["treat"] == 1, "pscore"], bins=bins, alpha=0.6, label="trained")
+treated, control = firms[firms["certified"] == 1], firms[firms["certified"] == 0]
+bins = np.linspace(0, 1, 26)
+plt.hist(control["pscore"], bins=bins, alpha=0.6, label="not certified")
+plt.hist(treated["pscore"], bins=bins, alpha=0.6, label="certified")
 plt.yscale("log")
 plt.xlabel("propensity score")
 plt.legend()
 plt.show()
 
-print("controls with a score above 0.05:", (data.loc[data["treat"] == 0, "pscore"] > 0.05).sum())
+print("highest score, not certified:", round(control["pscore"].max(), 3))
+print("certified firms above it:    ", (treated["pscore"] > control["pscore"].max()).sum())
 ```
 
-## Example 2 in Python · Match {.scrollable}
+::: {.step}
+Only **pre-treatment** variables go in the score: never `exports_after`, never anything certification
+could have changed. Where the two histograms overlap, comparable firms exist; a certified firm far to
+the right of every uncertified one has nobody to be compared with.
+:::
+
+## Matching · Step 4 · Match, within a caliper {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 2 · 1:1 nearest-neighbour matching on the score, with replacement
-import pandas as pd
-import statsmodels.formula.api as smf
-from sklearn.neighbors import NearestNeighbors
-
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
-
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-distance, index = nn.kneighbors(treated[["pscore"]])
-matched = control.iloc[index.ravel()]
-
-print(f"{len(treated)} trainees matched to {matched.index.nunique()} different controls")
-print(f"largest gap in score between a pair: {distance.max():.4f}")
-```
-
-## Example 2 in Python · Balance after matching {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 2 · Standardised differences, before and after matching
+# Matching, step 4 · Closest control for each certified firm; set aside those with none close enough
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn.neighbors import NearestNeighbors
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree + re74 + re75",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
+firms = pd.read_csv("certification.csv")
+p = smf.logit("certified ~ np.log(employees) + age + foreign + exports_before",
+              data=firms).fit(disp=0).predict(firms)
+firms["logit"] = np.log(p / (1 - p))           # match on the logit of the score: it spreads out the tails
 
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-distance, index = nn.kneighbors(treated[["pscore"]])
-matched = control.iloc[index.ravel()]
+treated, control = firms[firms["certified"] == 1], firms[firms["certified"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["logit"]])
+distance, index = nn.kneighbors(treated[["logit"]])
 
-sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
-balance = pd.DataFrame({"before": (treated[X].mean() - control[X].mean()) / sd,
-                        "after": (treated[X].mean() - matched[X].mean()) / sd})
-print(balance.round(2))
+caliper = 0.2 * firms["logit"].std()           # "close enough": a fifth of a standard deviation
+keep = distance.ravel() <= caliper
+kept, matched = treated[keep], control.iloc[index.ravel()[keep]]
+
+print(f"certified firms: {len(treated)}   matched: {keep.sum()}   set aside: {(~keep).sum()}")
+print(f"different controls used: {matched.index.nunique()}")
+print("employees, matched firms:  ", round(kept["employees"].mean()))
+print("employees, set-aside firms:", round(treated[~keep]["employees"].mean()))
 ```
 
-## Example 2 in Python · Improve the score: the love plot {.scrollable}
+::: {.step}
+Without a caliper every treated firm gets a match, however far away. With one, a firm with no control
+within reach is **set aside**, and you say so: the estimate then describes the certified firms **that
+have a comparable firm**, here all but the very largest.
+:::
+
+## Matching · Step 5 · Balance, before the outcome {.scrollable}
 
 ```{python}
 #| echo: true
 #| output-location: column
 #| fig-width: 5.0
-#| fig-height: 4.2
+#| fig-height: 4.0
 
-# Example 2 · Add age squared and "earned nothing" indicators to the score
+# Matching, step 5 · Standardised differences: before, matched with no caliper, matched within it
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 from sklearn.neighbors import NearestNeighbors
 
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree"
-                  " + re74 + re75 + I(age**2) + I(re74 == 0) + I(re75 == 0)",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
+firms = pd.read_csv("certification.csv")
+X = ["employees", "age", "foreign", "exports_before"]
+p = smf.logit("certified ~ np.log(employees) + age + foreign + exports_before",
+              data=firms).fit(disp=0).predict(firms)
+firms["logit"] = np.log(p / (1 - p))
 
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-distance, index = nn.kneighbors(treated[["pscore"]])
-matched = control.iloc[index.ravel()]
+treated, control = firms[firms["certified"] == 1], firms[firms["certified"] == 0]
+nn = NearestNeighbors(n_neighbors=1).fit(control[["logit"]])
+distance, index = nn.kneighbors(treated[["logit"]])
+keep = distance.ravel() <= 0.2 * firms["logit"].std()
 
 sd = np.sqrt((treated[X].var() + control[X].var()) / 2)
-before = (treated[X].mean() - control[X].mean()) / sd
-after = (treated[X].mean() - matched[X].mean()) / sd
-print(after.round(2))
+balance = pd.DataFrame({
+    "before": (treated[X].mean() - control[X].mean()) / sd,
+    "no caliper": (treated[X].mean() - control.iloc[index.ravel()][X].mean()) / sd,
+    "caliper": (treated[keep][X].mean() - control.iloc[index.ravel()[keep]][X].mean()) / sd})
+print(balance.round(2))
 
-plt.scatter(before, X, label="before")
-plt.scatter(after, X, label="after")
+plt.scatter(balance["before"], X, label="before")
+plt.scatter(balance["caliper"], X, label="matched, caliper")
 plt.axvline(-0.1, color="grey", linestyle="--")
 plt.axvline(0.1, color="grey", linestyle="--")
 plt.xlabel("standardised difference")
@@ -1095,129 +1140,124 @@ plt.legend()
 plt.show()
 ```
 
-## Example 2 in Python · Only now, the outcome {.scrollable}
+::: {.step}
+This is the only check matching offers, so it comes **before** the outcome. If a difference stays outside
+±0.1, go back: tighten the caliper, or add terms to the score (a square, a log, an interaction), and
+check again. The outcome column has not been touched yet.
+:::
+
+## Matching · Step 6 · The ATT, and how sure you are {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Example 2 · The ATT: trainees' 1978 earnings minus their matches'
-import pandas as pd
-import statsmodels.formula.api as smf
-from sklearn.neighbors import NearestNeighbors
-
-url = "https://users.nber.org/~rdehejia/data/"
-nsw = pd.read_stata(url + "nsw_dw.dta")
-cps = pd.read_stata(url + "cps_controls.dta")
-data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
-score = smf.logit("treat ~ age + education + black + hispanic + married + nodegree"
-                  " + re74 + re75 + I(age**2) + I(re74 == 0) + I(re75 == 0)",
-                  data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
-
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-distance, index = nn.kneighbors(treated[["pscore"]])
-matched = control.iloc[index.ravel()]
-
-att = treated["re78"].mean() - matched["re78"].mean()
-print(f"trained, 1978:          {treated['re78'].mean():8,.0f}")
-print(f"their matches, 1978:    {matched['re78'].mean():8,.0f}")
-print(f"ATT (matching):         {att:+8,.0f}   experiment: +1,794")
-```
-
-## Example 3 in Python · Simulate the HR file, then match {.scrollable}
-
-```{python}
-#| echo: true
-
-# Example 3 · 800 employees; the course adds exactly +5 to everyone
+# Matching, step 6 · The estimate, then a bootstrap: redo score AND match on 200 resampled files
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn.neighbors import NearestNeighbors
 
-rng = np.random.default_rng(10)
-n = 800
-age = rng.normal(40, 10, n).round()
-education = rng.normal(14, 2, n).round()
-experience = np.clip(age - 6 - education + rng.normal(0, 3, n), 0, None).round()
-motivation = rng.normal(0, 1, n)                                 # never in the HR file
-perf_without = 50 + 0.3 * experience + 1.5 * (education - 14) + 4 * motivation + rng.normal(0, 5, n)
-perf_with = perf_without + 5                                     # the truth: +5
+firms = pd.read_csv("certification.csv")
 
-records = -1 + 0.05 * (age - 40) + 0.4 * (education - 14) + 0.03 * (experience - 20)
-for version, index in [("A", records), ("B", records + 1.2 * motivation)]:
-    draw = np.random.default_rng(11)
-    treat = (draw.uniform(size=n) < 1 / (1 + np.exp(-index))).astype(int)
-    staff = pd.DataFrame({"age": age, "education": education, "experience": experience,
-                          "treat": treat,
-                          "performance": np.where(treat == 1, perf_with, perf_without)})
 
-    staff["pscore"] = smf.logit("treat ~ age + education + experience",
-                                data=staff).fit(disp=0).predict(staff)
-    treated, control = staff[staff["treat"] == 1], staff[staff["treat"] == 0]
-    nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
-    distance, index_ = nn.kneighbors(treated[["pscore"]])
-    matched = control.iloc[index_.ravel()]
+def att(data, neighbours=1, caliper=0.2):
+    p = smf.logit("certified ~ np.log(employees) + age + foreign + exports_before",
+                  data=data).fit(disp=0).predict(data)
+    data = data.assign(logit=np.log(p / (1 - p)))
+    treated, control = data[data["certified"] == 1], data[data["certified"] == 0]
+    nn = NearestNeighbors(n_neighbors=neighbours).fit(control[["logit"]])
+    distance, index = nn.kneighbors(treated[["logit"]])
+    keep = distance[:, 0] <= caliper * data["logit"].std()
+    return treated[keep]["exports_after"].mean() - control.iloc[index[keep].ravel()]["exports_after"].mean()
 
-    naive = treated["performance"].mean() - control["performance"].mean()
-    att = treated["performance"].mean() - matched["performance"].mean()
-    hidden = motivation[treated.index].mean() - motivation[matched.index].mean()
-    print(f"version {version}: naive {naive:5.2f}   matched {att:5.2f}   (truth 5)"
-          f"   motivation gap after matching {hidden:+.2f}")
+
+naive = firms.groupby("certified")["exports_after"].mean().diff().iloc[-1]
+draws = [att(firms.sample(len(firms), replace=True, random_state=draw)) for draw in range(200)]
+low, high = np.percentile(draws, [2.5, 97.5])
+
+print(f"naive difference:  {naive:5.1f}")
+print(f"ATT (matching):    {att(firms):5.1f}   truth 8")
+print(f"bootstrap 95% CI:  [{low:.1f}, {high:.1f}]   se {np.std(draws):.1f}")
 ```
 
 ::: {.step}
-**Your turn.** (1) Change `1.2 * motivation` to `0.6` and then `2.4`: how does the matched estimate move?
-(2) In version A, fit `smf.ols("performance ~ treat + age + education + experience", data=staff)`: what
-does regression say, and why is it close here when it was not in Example 2?
+Wrapping the steps in a function, `att(data)`, lets you rerun **all** of them on each resampled file:
+the score is re-estimated and the match redone every time, which a plain OLS standard error on the
+matched sample ignores. Report the interval as **approximate**: it is a guide to precision, not a proof.
 :::
 
-## The whole recipe, in one cell to copy {.scrollable}
+## Matching · Step 7 · Does it survive other reasonable choices? {.scrollable}
 
 ```{python}
 #| echo: true
 
-# Propensity-score matching, start to finish: change the data, X and the formula for your project
+# Matching, step 7 · The same estimate under other defensible choices, and regression beside it
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn.neighbors import NearestNeighbors
 
-url = "https://users.nber.org/~rdehejia/data/"                    # 1 · data: treated + candidate controls
-data = pd.concat([pd.read_stata(url + "nsw_dw.dta").query("treat == 1"),
-                  pd.read_stata(url + "cps_controls.dta")], ignore_index=True)
-X = ["age", "education", "black", "hispanic", "married", "nodegree", "re74", "re75"]
-y = "re78"
+firms = pd.read_csv("certification.csv")
 
-naive = data.loc[data["treat"] == 1, y].mean() - data.loc[data["treat"] == 0, y].mean()
 
-score = smf.logit("treat ~ " + " + ".join(X) +                    # 2 · the score
-                  " + I(age**2) + I(re74 == 0) + I(re75 == 0)", data=data).fit(disp=0)
-data["pscore"] = score.predict(data)
+def att(data, neighbours=1, caliper=0.2):
+    p = smf.logit("certified ~ np.log(employees) + age + foreign + exports_before",
+                  data=data).fit(disp=0).predict(data)
+    data = data.assign(logit=np.log(p / (1 - p)))
+    treated, control = data[data["certified"] == 1], data[data["certified"] == 0]
+    nn = NearestNeighbors(n_neighbors=neighbours).fit(control[["logit"]])
+    distance, index = nn.kneighbors(treated[["logit"]])
+    keep = distance[:, 0] <= caliper * data["logit"].std()
+    return treated[keep]["exports_after"].mean() - control.iloc[index[keep].ravel()]["exports_after"].mean()
 
-treated, control = data[data["treat"] == 1], data[data["treat"] == 0]
-nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])   # 3 · match
-distance, index = nn.kneighbors(treated[["pscore"]])
-matched = control.iloc[index.ravel()]
 
-sd = np.sqrt((treated[X].var() + control[X].var()) / 2)          # 4 · balance, before the outcome
-print(((treated[X].mean() - matched[X].mean()) / sd).round(2))
+ols = smf.ols("exports_after ~ certified + np.log(employees) + age + foreign + exports_before",
+              data=firms).fit()
 
-att = treated[y].mean() - matched[y].mean()                       # 5 · the ATT, last
-print(f"naive {naive:,.0f}   ATT {att:,.0f}")
+print(f"1 neighbour, caliper 0.2:   {att(firms):5.1f}")
+print(f"1 neighbour, caliper 0.1:   {att(firms, caliper=0.1):5.1f}")
+print(f"1 neighbour, no caliper:    {att(firms, caliper=np.inf):5.1f}")
+print(f"5 neighbours, caliper 0.2:  {att(firms, neighbours=5):5.1f}")
+print(f"regression, same variables: {ols.params['certified']:5.1f}")
 ```
 
-## Your turn · A second survey {.scrollable}
+::: {.step}
+Report the main estimate **and** this table. Estimates that stay inside the bootstrap interval say the
+conclusion does not hang on one choice. None of them tests the assumption itself: a firm
+characteristic you did not record (Example 3, version B) would move every line together.
+:::
 
-Apply the recipe to LaLonde's **other** survey: replace `cps_controls.dta` by **`psid_controls.dta`**
-(2,490 people from the Panel Study of Income Dynamics) in the cell above.
+## Your turn · The match {.scrollable}
 
-1. What is the naive estimate? Why is it even further from \$1,794 than with the CPS (Current Population Survey)?
-2. With the first score (no squares), is every standardised difference inside ±0.1? Which is not?
-3. Improve the score for balance **without printing the ATT**. If some difference stays above 0.1,
-   say which, and what it means. Then print the ATT once.
-4. How far is your ATT from the experiment? How many distinct controls did you use?
+::: {.step}
+1. **A variable left out.** Remove `np.log(employees)` from the score in steps 5 and 6. Which
+   standardised difference gives it away? How far does the ATT move from 8?
+2. **A bad control.** Add `+ exports_after` to the score in step 6. What happens to the ATT? Which rule
+   from the lecture did you break?
+3. **A hidden cause.** In step 1, add `ambition = rng.normal(0, 1, n)`, then `+ 1.5 * ambition` to
+   `choice` and `+ 6 * ambition` to `exports_after`, without saving `ambition`. Rerun steps 5 to 7. Does
+   any check warn you?
+:::
+
+## Your turn · Both solutions on real data {.scrollable}
+
+LaLonde's job-training data from Example 2 holds both designs. Load it with:
+
+```python
+import pandas as pd
+url = "https://users.nber.org/~rdehejia/data/"
+trial = pd.read_stata(url + "nsw_dw.dta")                  # the lottery: 185 trained, 260 controls
+survey = pd.concat([trial[trial["treat"] == 1],            # the trainees, with a second survey
+                    pd.read_stata(url + "psid_controls.dta")], ignore_index=True)
+```
+
+1. **As a trial** (`trial`): run steps 4 and 5 with `re78` as the outcome and `age`, `education`, `re74`,
+   `re75` as baseline. Is the lottery balanced? What is the effect, and its 95% interval? Does adding the
+   baseline narrow it?
+2. **As a match** (`survey`): the 2,490 controls come from the Panel Study of Income Dynamics, not the
+   CPS (Current Population Survey) of the lecture. Run steps 2 to 7 with `treat` as the treatment.
+   How many trainees does the caliper set aside? Fix balance **before** printing the ATT.
+3. How far is your ATT from the trial's answer in 1? Is the trial's answer inside your bootstrap interval?
 
 ::: {.muted}
 Work in pairs; one shares their screen at the end. The point is the order of work, not the number.
@@ -1225,16 +1265,31 @@ Work in pairs; one shares their screen at the end. The point is the order of wor
 
 ## What to report {.scrollable}
 
-1. **The estimand**, named: ATT or ATE.
-2. **The identifying assumption, in words**: which variables you claim explain who was treated, and why
-   nothing else does. An argument, not a table (Example 3).
-3. **The naive estimate** beside the matched one: the distance between them is the size of the problem.
-4. **Overlap**: the score's range in both groups, and what you did with units outside it.
-5. **Balance before and after**, every covariate, as standardised differences (the love plot).
-6. **That every control is pre-treatment**, and the score was fixed before the outcome was looked at.
+::: columns
+::: {.column width="50%"}
+**For a trial**
+
+1. **How the draw was made**: the unit, the strata, the seed, and that it was made once.
+2. **The sample size, and the power** it gave for the effect you expected.
+3. **Balance at baseline**, as standardised differences.
+4. **The difference in means** with its confidence interval; the adjusted estimate beside it.
+5. **Who dropped out or refused**, and that the comparison is by the draw.
+:::
+
+::: {.column width="50%"}
+**For a match**
+
+1. **The estimand**, named: ATT, and for which treated units (after the caliper).
+2. **The assumption, in words**: which variables explain who was treated, and why nothing else does.
+3. **The naive estimate** beside the matched one.
+4. **Overlap**, and how many units were set aside.
+5. **Balance before and after**, every covariate (the love plot), fixed **before** the outcome was read.
+6. **The ATT with an interval**, and the table of other choices.
+:::
+:::
 
 ::: {.warn}
-**A balanced match makes the comparison fair on what you measured. It says nothing about what you did not.**
+**A trial is balanced on everything. A match is balanced on what you measured, and says nothing about what you did not.**
 :::
 
 ## Before the next session {.scrollable}

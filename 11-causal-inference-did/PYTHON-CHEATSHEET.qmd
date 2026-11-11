@@ -388,15 +388,24 @@ url = "https://users.nber.org/~rdehejia/data/"
 nsw = pd.read_stata(url + "nsw_dw.dta")
 data = pd.concat([nsw[nsw["treat"] == 1], cps], ignore_index=True)
 treat = (rng.uniform(size=n) < probability).astype(int)   # 1 with that probability
+treat = (rng.permutation(n) < n // 2).astype(int)   # exactly half, at random
+firms["treat"] = firms.groupby("sector")["firm"].transform(half).astype(int)   # half of each sector
+firms.to_csv("trial_assigned.csv", index=False)   # the draw, saved once
 
 # -- Describe ------------------------------------------------------
 data.groupby("treat")["re78"].mean()   # the naive comparison
+
+# -- Read the fit --------------------------------------------------
+low, high = fit.conf_int().loc["treat"]   # 95% interval of the effect
+low, high = np.percentile(draws, [2.5, 97.5])   # bootstrap 95% interval
 
 # -- Choose and validate -------------------------------------------
 from sklearn.neighbors import NearestNeighbors
 nn = NearestNeighbors(n_neighbors=1).fit(control[["pscore"]])
 distance, index = nn.kneighbors(treated[["pscore"]])
 matched = control.iloc[index.ravel()]   # one control per treated unit
+from statsmodels.stats.power import TTestIndPower
+TTestIndPower().solve_power(effect_size=0.3, alpha=0.05, power=0.8)   # firms per group
 
 # -- Plot ----------------------------------------------------------
 plt.hist(control["pscore"], bins=25, alpha=0.6, label="control")   # overlap
