@@ -28,8 +28,10 @@ AI strategies, adopted by different countries in different years, where the
 modern estimators earn their place and the assumption cannot be examined at all.
 
 The examples show the design at work. A later section then carries it out from
-start to finish on new data: a staggered rollout analysed as a
-difference-in-differences.
+start to finish on new data, a staggered rollout analysed as a
+difference-in-differences, and the one after it takes the same steps to a
+published paper and to a project's own file: read the design, map the data onto
+it, break one assumption on purpose, and write the result down.
 
 {{portrait}}
 
@@ -812,6 +814,28 @@ standing still. Their own effect is growing by two points a year, and that
 growth is subtracted from the newcomers' effect. Both numbers go in the report;
 when they differ, the difference is a finding about the design.
 
+That explanation can be checked rather than asserted. @goodmanbacon2021 showed
+that the two-way coefficient is a weighted average of every two-by-two
+comparison in the panel, and the decomposition lists them.
+
+```{python}
+#| label: check-desks-bacon
+#| code-summary: "Run it: the two-by-two comparisons inside two-way fixed effects"
+
+bacon = dd.BaconDecomposition().fit(
+    desks, outcome="exporters", unit="region", time="year", first_treat="opened")
+pieces = bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]
+print(pieces.round(2).to_string(index=False))
+print(f"weighted sum: {(pieces['estimate'] * pieces['weight']).sum():.2f}")
+```
+
+Four comparisons. Each cohort against the never-treated regions (7.5 and 4.3,
+78% of the weight) and the 2018 cohort against the not-yet-treated 2021 regions
+(4.5) are clean. The fourth uses the 2018 regions as controls for the 2021
+regions and gives $-1.6$: a negative "effect" of a desk that adds two points a
+year, produced entirely by the control group's own growing effect. It carries
+9% of the weight, and it is the comparison Callaway–Sant'Anna never makes.
+
 **Step 6 · How wrong could parallel trends be?** A flat pre-period does not
 prove the trends would have stayed parallel afterwards. The sensitivity
 analysis of @rambachan2023 asks what happens to the conclusion if they had
@@ -841,6 +865,87 @@ before estimating anything. Make one clean comparison by hand, then the event
 study, clustered by unit, and let the years before the policy speak. With
 staggered timing, put an estimator built for it beside two-way fixed effects,
 and say how large a violation the result survives.
+
+## Doing it on your own data · Read, map, break, write
+
+The study above ran on data built to be clean. A real one starts from someone
+else's paper or from a project's own file, and it ends in a paragraph rather than
+a printout. The steps that connect the two are the same in every project, and
+each has one objective.
+
+**Read · Find the design inside a paper.** The objective is to recognise a
+difference-in-differences when someone else has built it, and to see which
+choices its authors had to defend. Five questions do it, and they can be put to
+any empirical paper: what is treated, and what is the control group; what are
+the dates, and is adoption staggered; which coefficient is the estimate, and in
+what units; what evidence is shown for parallel trends, whether an event study,
+a pre-period or an institutional argument; and what else could have changed at
+the same time as the treatment. Put to @cavallo2021, the session's reading, the
+answers locate the design before a single line of the replication package is run,
+and they say which number is worth reproducing.
+
+**Map · Fit a project onto the design.** The objective is to decide whether a
+project's data can support the design at all. Every estimator used in this
+chapter asks for the same four columns: a **unit**, a **time**, an **outcome**,
+and an **adoption year**, set to 0 for units never treated. The adoption year is
+read from the full record of the policy, not from the rows where the outcome
+happens to be observed, for the reason Example 3 gave. Three findings stop the
+analysis, and each removes one of the two differences: no unit is ever treated;
+no unit stays untreated, or not yet treated, over the years that matter; or no
+cohort is observed before its treatment. Saying which one applies is a complete
+answer, and a more useful one than an estimate the data cannot support.
+
+**Break · Find what the estimate leans on.** The objective is to learn which
+choice the answer depends on most, by changing it on purpose. Four choices sit
+under every difference-in-differences: the **dates**, that the policy started
+when the analyst says it did; the **controls**, that the comparison group stands
+for what time alone would have done; the **scale**, that the trends are parallel
+in the units chosen; and the **trends** themselves, which the sensitivity
+analysis already varied. The cell below breaks the first three on the AI-strategy
+panel of Example 3, where the true effect is 2.4, and reports every version in
+one table, computed the same way, so that only the broken choice differs.
+
+```{python}
+#| label: check-break
+#| code-summary: "Run it: the estimate as specified, and with one choice broken at a time"
+
+ai = qmib.load("angle_c_country")
+start = ai[ai["has_ai_strategy"] == 1].groupby("geo")["time"].min()   # from the full policy series
+ai = ai[ai["ai_use_any"].notna()].copy()
+ai["g"] = ai["geo"].map(start).fillna(0).astype(int)
+
+def att(data, outcome="ai_use_any", **options):
+    fit = dd.CallawaySantAnna(cluster="geo", **options).fit(
+        data, outcome=outcome, unit="geo", time="time", first_treat="g")
+    return round(fit.overall_att, 2), round(fit.overall_se, 2)
+
+seen = ai[ai["has_ai_strategy"] == 1].groupby("geo")["time"].min()    # from the analysis sample
+versions = {
+    "as specified":                  att(ai),
+    "dates read from the sample":    att(ai.assign(g=ai["geo"].map(seen).fillna(0).astype(int))),
+    "not-yet-treated as controls":   att(ai, control_group="not_yet_treated"),
+    "outcome in logs":               att(ai.assign(log_y=np.log(ai["ai_use_any"])), "log_y"),
+}
+print(pd.DataFrame(versions, index=["estimate", "SE"]).T)
+```
+
+As specified, the estimate is 2.2 with a standard error of 0.8. Reading the
+adoption dates from the rows with an outcome moves two countries from the 2022
+cohort to the 2023 one and the estimate to 2.4; using not-yet-treated countries
+as controls leaves it at 2.2. In logs the estimate is 0.07, about 7%, with a
+standard error twice its size: the conclusion that does not survive is the one
+about the scale. Parallel trends in levels and parallel trends in logs are
+different assumptions, and on these data only the first supports a finding. A
+report that showed only the first row would not be wrong, but its reader could
+not know how much it rested on a choice the author never discussed.
+
+**Write · Turn the numbers into a claim.** The objective is a paragraph a reader
+can check, and an order that serves it: the design in one line, with the adoption
+table; the estimate in units, with its interval and two-way fixed effects beside
+it; the evidence on parallel trends, meaning the pre-period and the breakdown
+value; the assumption that was broken, and what it did to the number; and what
+the result does not license anyone to claim. Each sentence answers one of the
+steps above, which is why none of them can be skipped.
 
 ## What difference-in-differences cannot fix
 
