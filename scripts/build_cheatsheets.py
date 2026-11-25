@@ -251,6 +251,9 @@ SNIPPETS = {
                            "cs.overall_att, cs.overall_se",
     "dd.HonestDiD": 'es = cs.aggregate("event_study")\n'
                     'dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb',
+    "dd.BaconDecomposition": 'bacon = dd.BaconDecomposition().fit(panel, outcome="exporters", unit="region",\n'
+                             '    time="year", first_treat="opened")\n'
+                             'bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]',
     "IV2SLS": "from statsmodels.sandbox.regression.gmm import IV2SLS\n"
               'iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),\n'
               '            sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument',

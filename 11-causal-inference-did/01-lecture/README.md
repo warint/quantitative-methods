@@ -33,28 +33,34 @@ The lecture is built on **four examples**, with no code on screen while they are
 comes at the end and does not replay the examples: it explains the two designs,
 difference-in-differences and an instrument, and has you carry each one out on new data.
 
-1. **The language of difference-in-differences (DiD)** — the two differences, the interaction
-   regression, the words you will need, and parallel trends stated exactly
+1. **The language of difference-in-differences (DiD)** — the two differences and why one is not
+   enough, the canonical real case (Card and Krueger's minimum wage, New Jersey against Pennsylvania),
+   the interaction regression cell by cell, the words you will need, and parallel trends stated exactly
 2. **Example 1 · Did affordable housing lower nearby prices?** — 1,000 simulated houses, two periods:
    after-only, before-after and DiD against a known effect, the four means and the counterfactual
 3. **Example 2 · Were the trends parallel?** — the same city over six years, in two versions: the event
    study is flat when the trends were parallel and slopes when they were not
 4. **Example 3 · Do national AI strategies raise firms' AI use?** — the course data, adopted in different
-   years: the adoption table, two-way fixed effects against Callaway–Sant'Anna, and how much violation of
-   parallel trends the result survives
+   years: the adoption table; why two-way fixed effects can mislead (the forbidden comparison, in
+   numbers; when it matters, with Goodman-Bacon's divorce-law case); Callaway–Sant'Anna and the other
+   repairs (stacked DiD, Wooldridge's extended TWFE); and how much violation of parallel trends the
+   result survives
 5. **Example 4 · Does exporting raise productivity?** — 2,000 simulated firms, management unobserved:
    distance to the nearest port as an instrument, the first stage and the reduced form, two-stage least
    squares against the truth, and what happens when the exclusion fails
 6. **Wrapping up** — matching, DiD or an instrument; what DiD cannot fix; the seven steps
 7. **In class · The two designs, done in Python** — what each design is and why it removes
-   selection, then:
+   selection, then each step on one slide in the same four parts: the **objective** (the question the
+   step answers), **the code**, **what the code does** (each instruction and how it serves the
+   objective) and **read the output** (the numbers you should see, and the conclusion):
    - **a difference-in-differences study, step by step** (export desks opened in 40 regions, in two
      waves): the panel and the adoption table, the plot, one clean 2×2, an event study by regression,
-     two-way fixed effects against Callaway–Sant'Anna, and a sensitivity analysis
+     two-way fixed effects against Callaway–Sant'Anna, the big regression opened up into its 2×2
+     comparisons (`dd.BaconDecomposition`), and a sensitivity analysis
    - **an instrument, step by step** (a randomly drawn voucher for a trade fair): the naive answer,
      balance and the first stage, the reduced form and the ratio, two-stage least squares, and whom
      the estimate describes
-   - a *Your turn* for each
+   - a *Your turn* for each, every task with its objective
 
 ---
 

@@ -31,6 +31,8 @@ format:
         .reveal section img.mid{max-height:400px;}
         .reveal section img.wide{max-height:250px;}
         .reveal section img.short{max-height:190px;}
+        .reveal .how table{font-size:0.8em;}
+        .reveal .how table code{white-space:nowrap;}
         </style>
     footer: "MATH60033A · Session 11 · Thierry Warin, PhD · HEC Montréal"
 ---
@@ -93,7 +95,7 @@ pd.set_option("display.max_columns", 10)
 - Set up a **difference-in-differences** design and identify the four cells
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
-- Explain why **two-way fixed effects** can mislead under staggered adoption
+- {'Explain why **two-way fixed effects** can mislead under staggered adoption': 'the **forbidden comparison**'}
 - Say what an **instrument** must satisfy, and why good ones are rare
 
 ::::
@@ -105,7 +107,7 @@ pd.set_option("display.max_columns", 10)
 - Print the adoption table and plot each cohort before estimating anything
 - Build the four cells, then get the same number from an interaction in `smf.ols`, clustered by unit
 - Estimate an event study by regression and let the pre-period speak for the design
-- Handle staggered adoption with `diff_diff.CallawaySantAnna`, and test its sturdiness with `HonestDiD`
+- Handle staggered adoption with `diff_diff.CallawaySantAnna`, open up TWFE with `BaconDecomposition`, and test sturdiness with `HonestDiD`
 - Check an instrument's first stage, then estimate with `IV2SLS`
 
 ::::
@@ -168,6 +170,12 @@ course's own data), and exporting firms, where neither matching nor DiD can work
 does, until its key condition fails.
 :::
 
+::: {.muted}
+**Why a whole session on it:** difference-in-differences is the fastest-growing quasi-experimental method
+in economics, from about 5% of NBER working papers around 2000 to about 25% around 2024
+(Goldsmith-Pinkham, 2024). Every such study answers one question: *what would have happened otherwise?*
+:::
+
 ## The two differences {.scrollable}
 
 Let $\bar Y_{g,t}$ be the average outcome of group $g$ (treated or control) in period $t$ (pre or post):
@@ -179,6 +187,32 @@ $$
 -
 \underbrace{\big(\bar Y_{\text{control, post}} - \bar Y_{\text{control, pre}}\big)}_{\text{change among the controls}}
 $$
+
+::: columns
+::: {.column width="50%"}
+::: {.step}
+**Why one difference is not enough.**
+
+- **After only** (treated minus control, after): mixes the effect with how different the groups **always**
+  were.
+- **Before–after** (treated, after minus before): mixes the effect with everything else that happened
+  **over the same period**.
+:::
+:::
+::: {.column width="50%"}
+::: {.check}
+**Why two differences work.** The first difference compares each group with **itself**, so what is fixed
+about it cancels. The second subtracts the controls' change, which stands for **what time alone did**.
+What is left is the change that only the treated experienced: the effect, *if* time alone would have moved
+both groups alike.
+:::
+:::
+:::
+
+::: {.muted}
+Four numbers, two subtractions: that is the whole estimator. Everything that follows in this session is
+about when those two subtractions can be trusted.
+:::
 
 ## The two differences, drawn {.scrollable}
 
@@ -203,6 +237,47 @@ business cycle.
 :::
 :::
 
+## The canonical real case: the minimum wage {.scrollable}
+
+On 1 April 1992 **New Jersey** raised its minimum wage from \$4.25 to \$5.05; next door, **Pennsylvania**
+did not. Card and Krueger (1994) phoned the same 410 fast-food restaurants (331 in New Jersey, 79 in eastern
+Pennsylvania) **before** (February–March) and **after** (November–December).
+
+::: {.muted}
+**Predict first:** the textbook says a higher price of labour means fewer workers hired. What sign do you
+expect for the effect on employment?
+:::
+
+::: columns
+::: {.column width="56%"}
+| Full-time-equivalent staff per restaurant | Before | After | Change |
+|---|---|---|---|
+| New Jersey (treated) | 20.44 | 21.03 | **+0.59** |
+| Pennsylvania (control) | 23.33 | 21.17 | **−2.16** |
+| Difference | −2.89 | −0.14 | **+2.76** (s.e. 1.36) |
+
+$$
+\text{DiD} = 0.59 - (-2.16) = +2.76
+$$
+:::
+::: {.column width="44%"}
+::: {.check}
+**Read it like the picture.** Employment in New Jersey barely moved. The estimate is positive because
+Pennsylvania **fell**: had New Jersey followed it, it would have ended at $20.44 - 2.16 = 18.28$, and it
+ended at 21.03.
+:::
+
+::: {.warn}
+**What carries the result** is not the data but the assumption: without the rise, New Jersey would have
+moved like Pennsylvania. The control group's change is half of every DiD.
+:::
+:::
+:::
+
+::: {.muted}
+Means from Card and Krueger (1994), Table 3; the change in the difference is computed on unrounded means.
+:::
+
 ## As a regression: the interaction is the estimate {.scrollable}
 
 $$
@@ -214,10 +289,26 @@ $$
 | $\beta_0$ | $\bar Y_{\text{control, pre}}$ | the control group, before |
 | $\beta_1$ | $\bar Y_{\text{treated, pre}} - \bar Y_{\text{control, pre}}$ | how different the groups were **before**: allowed to be anything |
 | $\beta_2$ | $\bar Y_{\text{control, post}} - \bar Y_{\text{control, pre}}$ | what happened to everyone over time |
-| $\beta_3$ | the DiD | **the effect**: the extra change among the treated |
+| $\beta_3$ | $(\bar Y_{\text{tr, post}} - \bar Y_{\text{tr, pre}}) - (\bar Y_{\text{co, post}} - \bar Y_{\text{co, pre}})$ | **the effect**: the extra change among the treated, the DiD |
 
 ::: {.muted}
-`Treated × Post` is 1 only for treated units after the policy. The counterfactual for the treated after is
+`Treated` is 1 for units in the treated group, in **every** period; `Post` is 1 for **every** unit after
+the policy date. Why a regression, if four means suffice? It gives the same number **plus** a standard
+error, and it accepts control variables and more than two periods.
+:::
+
+**`Treated × Post` is a product of two 0/1 dummies**, so it equals 1 in **one cell only**, and 0 in the other three:
+
+| | Treated | Post | Treated × Post | Expected $Y$ in this cell |
+|---|---|---|---|---|
+| control, before | 0 | 0 | **0** | $\beta_0$ |
+| control, after | 0 | 1 | **0** | $\beta_0 + \beta_2$ |
+| treated, before | 1 | 0 | **0** | $\beta_0 + \beta_1$ |
+| treated, after | 1 | 1 | **1** | $\beta_0 + \beta_1 + \beta_2 + \beta_3$ |
+
+::: {.check}
+Change among the treated: $\beta_2 + \beta_3$. Change among the controls: $\beta_2$. Their difference is
+$\beta_3$: the difference in differences. The counterfactual for the treated after is
 $\beta_0 + \beta_1 + \beta_2$; what they actually reached is that plus $\beta_3$.
 :::
 
@@ -247,6 +338,13 @@ $$
 $$
 :::
 
+::: {.muted}
+**Reading the notation** (session 10): $Y(0)$ is the outcome a unit would have **without** the treatment,
+$Y(1)$ the outcome **with** it. For the treated after the policy we see only $Y(1)$; their $Y(0)$ is the
+counterfactual, the dashed line. The assumption is about that unseen quantity, which is why no test can
+prove it.
+:::
+
 ![](economist-assets/parallel-idea.png){.wide fig-alt="Left: two lines 25 apart, both rising by 4 a year: the gap never moves. Right: the treated line rises more slowly, so the gap shrinks from 25 to 13 with no policy at all."}
 
 ::: columns
@@ -263,6 +361,12 @@ about the years **after** the policy, which nobody sees: it is **untestable**. W
 whether the trends were parallel **before**.
 :::
 :::
+:::
+
+::: {.muted}
+**What the estimate contains:** $\widehat{\text{DiD}} = \text{ATT} + (\text{the difference in the two groups' changes had nobody been treated})$.
+Parallel trends says the second term is zero. Two companions travel with it: **no anticipation** (nobody
+reacts before the policy starts) and **no spillovers** (the policy does not reach the controls).
 :::
 
 ## Example 1 · Did affordable housing lower nearby prices? {.center}
@@ -431,12 +535,19 @@ adds the slide that was already under way to the policy.
 :::
 :::
 
+::: {.muted}
+**The estimate, taken apart:** DiD = effect + trend difference. Here about −11 (what the same comparison
+measured in city A) plus −9 (three more years of the \$3,000 slide) gives the −20.
+:::
+
 ## Example 2 · Plain summary {.scrollable}
 
 - When the trends were parallel, the DiD finds the effect, and the years **before** the policy are flat.
 - When the treated group was already on a different path, the DiD **doubles** the effect, and the years before
   the policy show it.
 - A flat pre-trend is **evidence**, not proof: parallel trends is about the years *after*, which nobody sees.
+- So the pre-period is a **falsification test**: a slope refutes the assumption; a flat line only survives
+  the test, and with few or noisy pre-years it can miss a slope that is there (Roth, 2022).
 
 ::: {.step}
 **What this example teaches:** with several pre-periods, plot them first. Example 3 shows what to do when
@@ -527,8 +638,65 @@ even flip its sign when effects grow over time.
 :::
 :::
 
+## The forbidden comparison, in numbers {.scrollable}
+
+$$
+Y_{it} = \alpha_i + \lambda_t + \beta\, D_{it} + \varepsilon_{it}
+$$
+
 ::: {.muted}
-**Predict first:** will TWFE land above or below the truth of 2.4 here? And Callaway–Sant'Anna?
+Two-way fixed effects: $\alpha_i$ is a dummy per unit (everything constant about it), $\lambda_t$ a dummy per
+year (what hit everyone), $D_{it} = 1$ once unit $i$ is treated. With two groups and two periods, $\beta$ is
+exactly the interaction $\beta_3$.
+:::
+
+::: {.check}
+**Goodman-Bacon (2021):** with several adoption dates, $\widehat\beta$ is a **weighted average of every
+2×2 comparison in the data**, including the one in panel 3: a late adopter against an early one.
+:::
+
+A late adopter goes from 2 to 5: its true effect is **+3**. Its "control" adopted years ago. Nothing else
+moves, so parallel trends holds exactly:
+
+| The early adopter's own effect is | Its outcome over the same window | The 2×2: late's change − early's change | |
+|---|---|---|---|
+| **constant** | 4 → 4 | $(5-2) - (4-4) = +3$ | right |
+| **still growing** | 4 → 8 | $(5-2) - (8-4) = -1$ | **wrong sign** |
+
+::: {.warn}
+The early adopter's growing effect is subtracted **as if it were a trend**. This is not a failure of
+parallel trends: it is a failure of the control group.
+:::
+
+## When does it matter? {.scrollable}
+
+| Treatment timing | Treatment effects | One TWFE coefficient |
+|---|---|---|
+| everyone treated on the same date | anything | fine |
+| staggered | constant over time **and** the same for every cohort | fine |
+| staggered | changing with time since treatment, **or** different across cohorts | **biased** |
+
+::: columns
+::: {.column width="50%"}
+::: {.check}
+**A real case.** Unilateral-divorce laws, 37 US states, 1969–85, and female suicide (Stevenson and Wolfers,
+2006). TWFE says **−3.08** per million. A quarter of its weight sits on late-against-early comparisons,
+which average **+3.51**; without them, **−5.44**. The forbidden comparisons hid about 40% of the effect
+(Goodman-Bacon, 2021).
+:::
+:::
+::: {.column width="50%"}
+::: {.step}
+**How often?** Re-estimating some 300 staggered TWFE estimates from 24 papers in five leading journals,
+Hull (2026) finds 8% to 14% of point estimates significantly different under a robust estimator, with
+standard errors 26% to 49% larger. Often the same answer with a wider interval; you only know by running both.
+:::
+:::
+:::
+
+::: {.muted}
+Table condensed from Baker, Larcker and Wang (2022). **Predict first:** will TWFE land above or below the
+truth of 2.4 here? And Callaway–Sant'Anna?
 :::
 
 ## The estimates, against the truth {.scrollable}
@@ -552,6 +720,36 @@ narrow interval is not precision: there is no variation left to measure.
 :::
 :::
 
+## Callaway–Sant'Anna is one repair among several {.scrollable}
+
+$$
+ATT(g,t) = \mathrm{E}[\,Y_t - Y_{g-1} \mid \text{cohort } g\,] - \mathrm{E}[\,Y_t - Y_{g-1} \mid \text{clean controls}\,]
+$$
+
+::: {.muted}
+One 2×2 for each cohort $g$ and each year $t$, from the cohort's last untreated year $g-1$, against units
+never or not yet treated. Then average the blocks: overall, by cohort, or by years since treatment.
+:::
+
+| Route | The idea | Reach for it when | What it costs |
+|---|---|---|---|
+| **Stacked DiD** (Cengiz et al., 2019) | **restrict the data**: one stack per cohort with its clean controls, then ordinary least squares | you want your own event window or hand-picked controls | duplicated rows; the default weights need care |
+| **Extended TWFE** (Wooldridge, 2021) | **free the model**: one coefficient per cohort and post-year, averaged afterwards | the outcome is a count or a yes/no; the panel is small or noisy | many coefficients; a stronger baseline assumption |
+| **Callaway and Sant'Anna** (2021) | **build from the blocks**: every $ATT(g,t)$, then aggregate | the default benchmark; covariates; arguing pre-trends cohort by cohort | wider standard errors; treatment must be on/off and permanent |
+
+::: {.step}
+All three do the same thing: **keep already-treated units out of the control group**. They differ in how,
+and in which average they report by default. `diff_diff` has each (`StackedDiD`, `WooldridgeDiD`,
+`CallawaySantAnna`), and also Sun and Abraham (2021), de Chaisemartin and D'Haultfœuille (2020) for
+treatments that switch off, and Borusyak, Jaravel and Spiess (2024).
+:::
+
+::: {.muted}
+A **different** question is whether to believe parallel trends at all, whatever the estimator: next slide.
+One reference for all of it: Baker, Callaway, Cunningham, Goodman-Bacon and Sant'Anna (2026),
+"Difference-in-Differences Designs: A Practitioner's Guide", *Journal of Economic Literature*.
+:::
+
 ## One pre-period: how much violation does the result survive? {.scrollable}
 
 ![](economist-assets/ai-honest.png){.mid fig-alt="Robust 95% intervals widening with M; they exclude zero at M = 0 and 0.25 and include it from M = 0.5."}
@@ -570,6 +768,14 @@ pre-treatment one. The effect stays positive up to $M = 0.25$, not at $0.5$. Tha
 point**, and it should be: it rests on one country's single year.
 :::
 :::
+:::
+
+::: {.step}
+**How to read $M$.** The data show one departure from parallel trends **before** adoption: 1.13 points.
+$M = 1$ says "after adoption, the trends could drift apart by as much as that". $M = 0.5$, by half of it.
+For each $M$ the interval is widened to cover every such drift. The **breakdown value** is the largest $M$
+at which the interval still excludes zero: the larger it is, the less the conclusion depends on parallel
+trends holding exactly.
 :::
 
 ## Example 3 · Plain summary {.scrollable}
@@ -663,6 +869,13 @@ $$
 Two-stage least squares gives the same number, with a standard error: **4.6 (0.76)**.
 :::
 :::
+:::
+
+::: {.muted}
+**The F statistic** measures how strongly the instrument moves the treatment; with one instrument it is the
+square of the first stage's t statistic. Below about 10 the instrument is called **weak**, and the ratio
+becomes unstable: a small first stage in the denominator magnifies every error in the numerator. The ratio
+uses both slopes **per km** (−1.24 and −27 per 100 km); the units cancel either way.
 :::
 
 ## The results, against the truth, and when exclusion fails {.scrollable}
@@ -768,22 +981,35 @@ assumption, and each assumption is an **argument**, with one part you can check.
 
 ## How this part works {.scrollable}
 
-::: columns
-::: {.column width="50%"}
-You now **do** each design from start to finish, on **new data**, not the lecture's examples. The
-packages, by name: `numpy`, `pandas`, `statsmodels`, `matplotlib`, `diff_diff`.
+You now **do** each design from start to finish, on **new data**, not the lecture's examples. The packages,
+by name: `numpy`, `pandas`, `statsmodels`, `matplotlib`, `diff_diff`.
 
-Each design is one short piece of work in steps. Its **first cell writes a small data file** in your
-folder; every later cell starts by reading that file, so each cell runs on its own once the first has run.
+::: columns
+::: {.column width="52%"}
+**Every step is one slide, always in the same four parts:**
+
+| Part | What it tells you |
+|---|---|
+| **Objective** | the question this step must answer, and why the study needs the answer |
+| **The code** | one cell, short enough to type |
+| **What the code does** | each instruction, and how it serves the objective |
+| **Read the output** | the numbers you should see, and what they let you conclude |
 :::
 
-::: {.column width="50%"}
+::: {.column width="48%"}
 ::: {.step}
-**For each design:**
+**How to work through a step:**
 
-1. run the cells in order, and say what each step is **for** before reading its output;
-2. do the **Your turn** task under the last cell;
-3. keep the file: it is the template for your project.
+1. read the **objective**, and say what output would answer it;
+2. run the cell;
+3. match each line to its row in **what the code does**;
+4. check your output against **read the output**, then say the conclusion in one sentence.
+:::
+
+::: {.check}
+The **first cell** of each design writes a small data file in your folder; every later cell starts by
+reading it, so each cell runs on its own once the first has run. Keep the file: it is the template for
+your project.
 :::
 :::
 :::
@@ -795,16 +1021,30 @@ folder; every later cell starts by reading that file, so each cell runs on its o
 export? Regions with a desk already exported more, for reasons nobody recorded. Simulated data, so the truth
 is known: a desk adds **2 points for every year it has been open**, 6.1 on average over the years observed.
 
-| Step | What you do | Why | In Python |
-|---|---|---|---|
-| 1 | the **panel file** and the **adoption table** | who was treated, when, and how many years before | `.groupby("opened")["region"].nunique()` |
-| 2 | **plot** the outcome by group over time | the design, and its assumption, are visible before any regression | `.groupby([...]).mean().unstack().plot()` |
-| 3 | one **clean 2×2**: four means, then the interaction | every DiD is this comparison underneath | `smf.ols("y ~ treated * post")`, clustered |
-| 4 | the **event study** | the checkable part: were the groups moving alike before? | `treated * C(year, Treatment(reference=2017))` |
-| 5 | **all cohorts**, with an estimator built for staggered timing | one big regression mixes in comparisons it should not make | `dd.CallawaySantAnna` beside TWFE |
-| 6 | **sensitivity** | how wrong could parallel trends be before the result goes? | `dd.HonestDiD` |
+::: {.how}
+| Step | Objective: the question it answers | What the code does | You are done when |
+|----|------------|------------|----------|
+| 1 | **Who** was treated, **when**, and how many years do I see before? | builds the panel, prints the adoption table | you can name each cohort, its size and its years before |
+| 2 | Does the design **look** right, before any estimate? | averages by cohort and year, draws the lines | you have judged the levels, the pre-trends and the break |
+| 3 | What is **one** effect I can compute by hand? | four means, then the interaction regression | the subtraction and `treated:post` give the same number |
+| 4 | Were the groups **moving alike before**, and how does the effect evolve? | one DiD per year, each against the last year before | the pre-years include zero, the post-years tell a story |
+| 5 | What is the effect over the **whole rollout**? | Callaway–Sant'Anna beside two-way fixed effects, then the big regression opened up | you can say why the two numbers differ |
+| 6 | How **wrong** could parallel trends be before the result goes? | Rambachan–Roth robust intervals | you can report a breakdown value |
+:::
+
+::: {.step}
+**The whole study's objective:** one sentence you can defend, of the form *"a desk raised the share of
+exporting firms by … points (interval …); the groups moved alike before; the conclusion survives a violation
+of parallel trends up to …"*. Each step supplies one piece of it.
+:::
 
 ## DiD · Step 1 · The panel, and the adoption table {.scrollable}
+
+::: {.step}
+**Objective.** Before estimating anything, establish **who was treated, when, and how many years you observe
+each group before its treatment**. A cohort with no year before has no first difference; a study with no
+untreated units has no second. This step decides which comparisons exist.
+:::
 
 ```{python}
 #| echo: true
@@ -830,13 +1070,35 @@ print(panel.head(3))
 print(panel.groupby("opened")["region"].nunique().rename(index={0: "never"}))
 ```
 
-::: {.step}
-A DiD needs a **panel**: the same units, several dates, one row per unit and date. The adoption table is
-the first thing to print: it says which comparisons exist. Here both cohorts have years before their desk
-(four and seven), and 18 regions are never treated, so there is always a clean control group.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| gives every region its opening year: 12 in 2018, 10 in 2021, 18 never (coded 0) | `opened = np.r_[...]` | defines the **cohorts**, the groups the whole design compares |
+| starts regions that will get a desk 4 points higher | `level = ... + 4 * (opened > 0)` | builds in the **selection** a naive comparison would mistake for an effect |
+| adds +1 a year for everyone, and +2 for each year a desk has been open | `exporters = level + 1.0 * ... + 2.0 * years_open` | the common trend (parallel trends hold by construction) and the **truth** to recover |
+| stacks the ten yearly tables into one long table and saves it | `pd.concat(rows)`, `.to_csv(...)` | the **panel**: one row per region and year, the shape every later step reads |
+| counts the distinct regions for each opening year | `.groupby("opened")["region"].nunique()` | the **adoption table**: the answer to this step's question |
+:::
+
+::: {.check}
+**Read the output.** 400 rows: 40 regions × 10 years. Three groups: **18** never, **12** in 2018, **10** in
+2021. The 2018 cohort has **four** years before its desk (2014–17) and six after; the 2021 cohort **seven**
+before and three after; the 18 never-treated regions are a clean control throughout. Every comparison this
+study needs exists. `desk` is the $D_{it}$ of the two-way regression: 1 once a region's desk is open.
+:::
+
+::: {.muted}
+In your project the simulation lines disappear: you start at `pd.read_csv(...)`, and the adoption table is
+the first thing you print.
 :::
 
 ## DiD · Step 2 · Look before you estimate {.scrollable}
+
+::: {.step}
+**Objective.** **See** the design before any regression. Three things to judge by eye: are the groups at
+different **levels** (selection)? Were they **moving alike before** the desks (the only part of parallel
+trends the data can show)? Is there a **break** when a desk opens?
+:::
 
 ```{python}
 #| echo: true
@@ -861,13 +1123,31 @@ plt.show()
 print(by_year.loc[[2014, 2017, 2020, 2023]].round(1))
 ```
 
-::: {.step}
-Two things to read. The lines are at **different heights** before any desk opens: that is selection, and it
-does not matter, because a DiD compares changes. The lines are **parallel** before each dashed line: that
-is what matters, and it is the only part of the assumption the data can show.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| averages the outcome for each cohort in each year: 30 means | `.groupby(["year", "opened"])["exporters"].mean()` | group means over time are the raw material of every DiD |
+| turns the cohorts into columns: one row per year, one column per cohort | `.unstack()` | one column becomes one line on the plot |
+| draws the three lines | `by_year.plot(marker="o")` | levels, slopes and breaks become visible at once |
+| marks the gap between the last year without a desk and the first year with one | `plt.axvline(2017.5)`, `plt.axvline(2020.5)` | separates **before** from **after** for each cohort |
+| prints four of the ten rows | `by_year.loc[[2014, 2017, 2020, 2023]]` | numbers to check the picture against |
+:::
+
+::: {.check}
+**Read the output.** **Levels:** desk regions start 5 to 6 points above the others (35.0 and 33.8 against
+28.8): selection, and it does not matter, because a DiD compares changes. **Before:** from 2014 to 2017 the
+three groups rise by +2.1, +3.1 and +3.0: alike, give or take a point, and step 4 will put an interval on
+that point. **Break:** by 2020 the 2018 cohort has gained 9.3 where the never-treated gained 3.7; the 2021
+cohort follows the never-treated until 2020, then jumps.
 :::
 
 ## DiD · Step 3 · One clean 2×2 {.scrollable}
+
+::: {.step}
+**Objective.** Compute **one** effect you understand completely: what the first year of a desk did to the
+2018 cohort. First by subtraction, from four means; then by a regression, which gives the same number and
+adds what subtraction cannot: a **confidence interval**.
+:::
 
 ```{python}
 #| echo: true
@@ -892,13 +1172,36 @@ low, high = did.conf_int().loc["treated:post"]
 print(f"DiD = {did.params['treated:post']:.2f}   95% CI [{low:.2f}, {high:.2f}]   truth, first year: 2")
 ```
 
-::: {.step}
-Choose the comparison **yourself**: one cohort, a control group that is never treated, one year before
-and one after. The interaction `treated:post` is the difference of the two changes; clustering by region
-tells the standard error that a region's two rows are not independent.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| keeps two groups and two years: 30 regions × 2 = 60 rows | `panel[... .isin([0, 2018]) & ... .isin([2017, 2018])]` | a **clean** comparison: the control is never treated, and the 2021 cohort is left out |
+| makes the two 0/1 columns: which group, which period | `two["treated"]`, `two["post"]` | the two dummies of the 2×2 |
+| computes the four means, groups in rows, periods in columns | `.groupby(["treated", "post"]).mean().unstack()` | the DiD **by subtraction**: you can check it with a pencil |
+| fits `treated`, `post` and their product | `smf.ols("exporters ~ treated * post")` | the coefficient on `treated:post` **is** the difference of the two changes |
+| lets a region's two rows be correlated | `cov_type="cluster"`, `cov_kwds={"groups": two["region"]}` | an honest standard error: 30 regions, not 60 independent rows |
+| reads the interval of the interaction | `did.conf_int().loc["treated:post"]` | the uncertainty the four means cannot give |
+:::
+
+::: {.check}
+**Read the output.** Treated regions rose by **3.23**, controls by **0.97**: the DiD is $3.23 - 0.97 =$
+**2.26**, and the regression prints the same 2.26 with an interval of **[0.80, 3.71]**: it covers the truth
+of 2 and excludes zero. The gap **before**, $38.11 - 30.93 = 7.2$, appears nowhere in the estimate: it
+cancelled.
+:::
+
+::: {.muted}
+Choose the comparison **yourself**: one cohort, a control group that is never treated, one year before and
+one after. Every larger DiD is built from blocks like this one.
 :::
 
 ## DiD · Step 4 · The event study, by regression {.scrollable}
+
+::: {.step}
+**Objective.** Two questions, one picture. **Before** the desks: were the two groups moving alike? That is
+the checkable part of parallel trends. **After**: is the effect immediate, constant, growing? The tool is
+step 3 repeated for **every** year, each compared with 2017, the last year before.
+:::
 
 ```{python}
 #| echo: true
@@ -932,13 +1235,36 @@ plt.ylabel("gap, relative to 2017")
 plt.show()
 ```
 
-::: {.step}
-`treated * C(year, ...)` gives one interaction per year: the gap between the groups in that year, minus the
-gap in 2017. **Before** the desks, the intervals should include zero: the groups were moving alike. **After**,
-the points are the effect, year by year, and here they grow, as the truth says they should.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| keeps the 2018 cohort and the never-treated, all ten years | `clean = panel[... .isin([0, 2018])]` | the clean comparison of step 3, with every year |
+| makes a dummy for each year except 2017, and multiplies each by `treated` | `treated * C(year, Treatment(reference=2017))` | one coefficient per year: the gap between the groups that year **minus the gap in 2017** |
+| picks the nine interaction coefficients out of the results | `[name ... if name.startswith("treated:")]` | these nine numbers are the event study |
+| reads the year at the end of each coefficient's name | `int(name[-5:-1])` | the horizontal axis |
+| gathers estimate and interval, year by year | `study = pd.DataFrame({...})` | the table behind the plot |
+| draws points with their intervals, a line at zero, a line at the opening | `plt.errorbar`, `plt.axhline(0)`, `plt.axvline(2017.5)` | before and after, read at a glance |
+:::
+
+::: {.check}
+**Read the output.** **Before** (2014–16): −0.94, −0.72, −0.95, and every interval includes zero: nothing
+here contradicts parallel trends. **After**: 2.26 in 2018 (step 3's number), then 3.87, 5.55, 7.87, 9.37,
+11.93: about 2 more each year, as the truth says (2, 4, …, 12). 2017 has no point: it is the reference,
+zero by construction.
+:::
+
+::: {.warn}
+A flat pre-period is a test the design **survived**, not a proof: it says nothing about what the groups
+would have done after 2017. Step 6 takes up that objection.
 :::
 
 ## DiD · Step 5 · All cohorts, with staggered timing {.scrollable}
+
+::: {.step}
+**Objective.** **One number for the whole rollout**: both cohorts, every year, with a standard error, and
+without ever using an already-treated region as a control. Beside it, the regression most studies run, to
+see whether the shortcut would have mattered.
+:::
 
 ```{python}
 #| echo: true
@@ -961,13 +1287,75 @@ print("truth, average over the treated years: 6.12")
 print(cs.aggregate("event_study").to_dataframe()[["event_time", "att", "se"]].round(2).to_string(index=False))
 ```
 
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| fits one coefficient on `desk`, with a dummy per region and per year | `smf.ols("exporters ~ desk + C(region) + C(year)")` | **two-way fixed effects**, $Y_{it} = \alpha_i + \lambda_t + \beta D_{it}$: the usual shortcut, kept as the benchmark |
+| names the four columns the estimator needs; `opened` = 0 means never treated | `.fit(panel, outcome=, unit=, time=, first_treat=)` | computes an $ATT(g,t)$ for **each cohort and year**, against the regions that never get a desk: step 3, repeated |
+| clusters by region | `dd.CallawaySantAnna(cluster="region")` | the same honest standard errors as steps 3 and 4 |
+| averages those blocks over all treated cohort-years | `cs.overall_att`, `cs.overall_se` | **the number this step is for** |
+| averages them by years since opening instead | `cs.aggregate("event_study")` | step 4's picture, for both cohorts together |
+:::
+
+::: {.check}
+**Read the output.** Callaway–Sant'Anna: **6.38** (SE 0.45), next to the truth of 6.12. Two-way fixed
+effects: **5.18** (SE 0.49), almost two standard errors too low. The event study agrees with step 4: the
+six years before are within one standard error of zero (−0.28 to 0.40), and the effect then climbs from 2.9
+to 11.9. Report both numbers: when they differ, the difference is a finding, and the next slide explains it.
+:::
+
+## DiD · Step 5, continued · Open up the big regression {.scrollable}
+
 ::: {.step}
-`CallawaySantAnna` does step 3 for **every** cohort and year, always against regions not yet treated, then
-averages. Two-way fixed effects also uses the 2018 regions, whose effect is still growing, as controls for
-the 2021 regions, and so comes out too low. Report both: if they differ, the difference is a finding.
+**Objective.** Explain **why** two-way fixed effects came out low. Its single coefficient is a weighted
+average of every 2×2 comparison in the panel (Goodman-Bacon, 2021). List them, with their weights, and find
+the one that should not be there.
+:::
+
+```{python}
+#| echo: true
+
+# DiD, step 5, continued · The 2x2 comparisons inside the two-way fixed effects coefficient
+import pandas as pd
+import diff_diff as dd
+
+panel = pd.read_csv("export_desks.csv")
+bacon = dd.BaconDecomposition().fit(
+    panel, outcome="exporters", unit="region", time="year", first_treat="opened")
+
+table = bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]
+print(table.round(2).to_string(index=False))
+print(f"weighted sum: {(table['estimate'] * table['weight']).sum():.2f}   = the two-way fixed effects coefficient")
+```
+
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| splits the panel into every pair of groups with different opening dates | `dd.BaconDecomposition().fit(...)` | makes visible the comparisons the regression made silently |
+| lists, for each pair, who plays treated, who plays control, the 2×2 estimate and its weight | `bacon.to_dataframe()[[...]]` | lets you judge each comparison on its merits |
+| multiplies each estimate by its weight and adds them up | `(table["estimate"] * table["weight"]).sum()` | proves the four pieces **are** the 5.18 of step 5 |
+:::
+
+::: {.check}
+**Read the output.** Four comparisons. Each cohort against the never-treated (**7.46** and **4.28**, 78% of
+the weight) and the 2018 cohort against the not-yet-treated 2021 regions (**4.45**): all clean. The fourth
+uses the **2018 regions as controls for the 2021 regions** and gives **−1.60**: a negative "effect" of a
+desk that adds 2 points a year, because the 2018 regions' own effect was still growing and was subtracted
+as if it were a trend. It carries 9% of the weight, and helps drag the coefficient down to 5.18, below
+the truth of 6.12.
+:::
+
+::: {.muted}
+This is the −1 of *The forbidden comparison, in numbers*, found in data. Callaway–Sant'Anna never makes it.
 :::
 
 ## DiD · Step 6 · How wrong could parallel trends be? {.scrollable}
+
+::: {.step}
+**Objective.** Answer the objection that survives step 4: *"flat before does not mean parallel after."* Find
+**how large** a departure from parallel trends, after the desks open, it would take to overturn the
+conclusion, measured against the largest movement seen before.
+:::
 
 ```{python}
 #| echo: true
@@ -987,25 +1375,37 @@ for M in (0, 1, 2, 4, 8):
           f"rules out zero: {'yes' if honest.is_significant else 'no'}")
 ```
 
-::: {.step}
-A flat pre-period does not prove the trends would have **stayed** parallel. This asks: if they had drifted
-apart afterwards by up to `M` times the largest movement seen before, would the conclusion survive? `M = 0`
-is exact parallel trends. Report the largest `M` at which zero is still ruled out. (The interval is for the
-average effect over the six years after opening, whose true value is 7.)
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| recomputes step 5's event study | `study = cs.aggregate("event_study")` | supplies both ingredients: how much the groups wobbled **before**, and the effects **after** |
+| tries five sizes of violation | `for M in (0, 1, 2, 4, 8)` | `M` is a multiple of the largest pre-period movement; `M = 0` is exact parallel trends |
+| builds an interval that stays valid if the post-period violation is at most `M` times that movement | `dd.HonestDiD(method="relative_magnitude", M=M).fit(study)` | turns "what if the trends had diverged?" into a number |
+| prints the bounds, and whether they exclude zero | `honest.ci_lb`, `honest.ci_ub`, `honest.is_significant` | the largest `M` that still says "yes" is the **breakdown value** to report |
+:::
+
+::: {.check}
+**Read the output.** At `M = 0` the interval is **[6.26, 8.02]**; it widens as `M` grows, still excludes
+zero at `M = 4` (**[2.41, 11.88]**) and includes it at `M = 8`. The conclusion survives trends diverging,
+after the desks, by **four times** anything seen before them. Compare Example 3, where the result was gone
+by `M = 0.5`: same method, far less evidence behind it.
+:::
+
+::: {.muted}
+The interval is for the average effect over the six years after opening, whose true value is 7.
 :::
 
 ## Your turn · The difference-in-differences {.scrollable}
 
+| | Objective | What to change | What to look for |
+|--|--------|-----------|-----------|
+| **1** | **See the two wrong comparisons fail.** | In step 3, compute the after-only gap (treated minus control, 2018) and the before-after change of the treated alone, from `means`. | How far is each from 2, and what does each mix in? |
+| **2** | **Recognise a pre-trend.** | In step 1, add `+ 0.8 * (opened == 2018) * (year - 2014)` to `exporters`, so that the 2018 regions were already pulling away. Rerun steps 2 to 4. | Where do you see it first: the plot, the 2×2 or the event study? What does the 2×2 now say, against a truth of 2? |
+| **3** | **Make the forbidden comparison yourself.** | In step 3, estimate the first-year effect for the **2021** cohort (2020 against 2021), once with the never-treated as controls (`[0, 2021]`) and once with the **2018** regions (`[2018, 2021]`, and `treated` is `opened == 2021`). | By how much does the estimate fall, and what were the 2018 regions doing between 2020 and 2021? |
+| **4** | **Check when the shortcut is safe.** | In step 1, replace `2.0 * years_open` by `6.0 * (years_open > 0)`: a constant effect. Rerun both step 5 cells. | Do the two estimators still disagree? What has become of the fourth comparison? |
+
 ::: {.step}
-1. **The wrong comparison.** In step 3, compute the after-only gap (treated minus control, 2018) and the
-   before-after change of the treated alone. How far is each from 2, and what does each mix in?
-2. **A pre-trend.** In step 1, add `+ 0.8 * (opened == 2018) * (year - 2014)` to `exporters`, so that the
-   2018 regions were already pulling away. Rerun steps 2 to 4. Where do you see it first: the plot, the
-   2×2 or the event study? What does the 2×2 now say, against a truth of 2?
-3. **The comparison the big regression should not make.** In step 3, estimate the first-year effect for the
-   **2021** cohort (2020 against 2021), once with the never-treated as controls (`[0, 2021]`) and once with
-   the **2018** regions as controls (`[2018, 2021]`, and `treated` is `opened == 2021`). By how much does the
-   estimate fall, and what were the 2018 regions doing between 2020 and 2021?
+For each task, write one sentence beginning *"This shows that …"* before moving to the next.
 :::
 
 ## Solution 4 · An instrument, step by step {.scrollable}
@@ -1021,15 +1421,23 @@ data, so the truth is known: attending adds **+12** (\$ thousand).
 | **independent**: as good as random | the vouchers were drawn | **partly**: balance on what was fixed before |
 | **excludable**: it affects the outcome **only through** the treatment | a voucher changes exports only by getting a firm to the fair | no: an argument |
 
-| Step | What you do | In Python |
-|---|---|---|
-| 1 | the file, and the naive answer | `.groupby("attends")["exports"].mean()` |
-| 2 | check the instrument: **balance**, then the **first stage** | `smf.ols("attends ~ voucher")`, its F |
-| 3 | the **reduced form**, and the ratio | `smf.ols("exports ~ voucher")` |
-| 4 | **two-stage least squares**, for the standard error | `IV2SLS` |
-| 5 | say **whom** the estimate describes, and argue exclusion | on paper |
+::: {.how}
+| Step | Objective: the question it answers | What the code does | You are done when |
+|----|------------|------------|----------|
+| 1 | Is the **naive** answer wrong, and can a control repair it? | compares attenders with the rest, then adds firm size | you can say why neither number can be trusted |
+| 2 | Does the voucher pass the **two checks** the data allow? | balance on firm size; the first stage and its F | you have a p-value and an F to report |
+| 3 | Where does the estimate **come from**? | the reduced form, divided by the first stage | you can explain the division in words |
+| 4 | What is its **uncertainty**? | two-stage least squares, with and without a control | you have an interval |
+| 5 | **Whom** does it describe, and what could break it? | nothing: this step is written | you have the sentence, and the exclusion argument |
+:::
 
 ## Instrument · Step 1 · The file, and the naive answer {.scrollable}
+
+::: {.step}
+**Objective.** Establish the **problem** before the solution: show that comparing attenders with the rest
+gives a wrong answer, and that controlling for what is in the file does not repair it. If a regression could
+fix this, no instrument would be needed.
+:::
 
 ```{python}
 #| echo: true
@@ -1055,13 +1463,31 @@ print(f"naive: attenders minus the rest = {naive[1] - naive[0]:.1f}   (truth 12)
 print(f"regression, controlling for size: {controlled.params['attends']:.1f}")
 ```
 
-::: {.step}
-Controlling for what is in the file does not help, because the confounder is not in the file. Matching
-would fail for the same reason, and there is no "before" to difference away. This is the situation an
-instrument is for.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| draws a trait for each firm that is never saved | `ambition = rng.normal(0, 1, n)` | the **unmeasured confounder** |
+| sends a voucher to a random half of the firms | `voucher = (rng.permutation(n) < n // 2)` | the **instrument**: a draw, so unrelated to ambition |
+| lets a firm attend if it is ambitious enough **or** pushed by a voucher | `attends = (0.9 * ambition + 1.2 * voucher + ... > 0.8)` | selection into treatment, and the voucher's pull on it |
+| makes exports depend on attending (+12) **and** on ambition directly | `exports = 40 + 12 * attends + 10 * ambition + ...` | the **truth** to recover, and the reason a naive comparison is confounded |
+| saves four columns; `ambition` is not one of them | `firms = pd.DataFrame({...})`, `.to_csv(...)` | you now hold what an analyst would hold |
+| compares average exports of attenders and non-attenders | `firms.groupby("attends")["exports"].mean()` | the **naive** answer |
+| adds the only control available | `smf.ols("exports ~ attends + np.log(employees)")` | tests whether a control can repair it |
+:::
+
+::: {.check}
+**Read the output.** Naive: **21.2**. With firm size controlled: **21.2**. Truth: 12. Nine points of the
+gap are ambition, and no column can remove them. Matching would fail for the same reason, and there is no
+"before" to difference away. This is the situation an instrument is for.
 :::
 
 ## Instrument · Step 2 · Check the instrument {.scrollable}
+
+::: {.step}
+**Objective.** Run the **two checks the data allow**. *Independence*: was the voucher really unrelated to
+what firms were like? Look for balance on a trait fixed before the draw. *Relevance*: did the voucher change
+who attended, and strongly enough? That is the first stage.
+:::
 
 ```{python}
 #| echo: true
@@ -1082,13 +1508,34 @@ print(f"first stage: a voucher raises attendance by {first.params['voucher']:.2f
       f"F = {first.tvalues['voucher'] ** 2:.0f}")
 ```
 
-::: {.step}
-**Independence** can be checked only on what was fixed before: firms with and without a voucher should
-look alike, and they do. **Relevance** is the first stage: the voucher must move attendance, strongly. The
-usual rule asks for an F statistic above 10; a weak instrument gives an estimate that is noisy and biased.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| compares firms with and without a voucher, on size and on attendance | `firms.groupby("voucher")[["employees", "attends"]].mean()` | both checks, in one table, before any test |
+| asks whether the voucher "predicts" a trait fixed before the draw | `smf.ols("np.log(employees) ~ voucher")` | **balance**: with a real draw it should not |
+| measures the difference in attendance between the two groups | `smf.ols("attends ~ voucher")` | the **first stage**: the voucher's effect on the treatment |
+| squares the t statistic | `first.tvalues["voucher"] ** 2` | with one instrument this is the first-stage **F**, the usual measure of strength |
+:::
+
+::: {.check}
+**Read the output.** **Balance:** 26.6 employees without a voucher, 27.6 with, p = 0.41: no sign the draw
+was anything but a draw. **First stage:** 29% attend without a voucher, 62% with: the voucher raises
+attendance by **0.34**, F = **383**, far above the usual threshold of 10. The voucher changed the behaviour
+of about one firm in three.
+:::
+
+::: {.warn}
+A weak instrument (a small F) gives an estimate that is noisy **and** biased. Neither check says anything
+about exclusion: that is step 5.
 :::
 
 ## Instrument · Step 3 · The reduced form, and the ratio {.scrollable}
+
+::: {.step}
+**Objective.** Build the estimate **by hand**, to see where it comes from. Two comparisons, both made
+**by the draw** and therefore both free of selection: what the voucher did to exports, and what it did to
+attendance. Their ratio is the effect of attending.
+:::
 
 ```{python}
 #| echo: true
@@ -1106,13 +1553,27 @@ print(f"first stage:  a voucher raises attendance by  {first:.2f}")
 print(f"instrument estimate = reduced / first =       {reduced / first:.1f}   (truth 12)")
 ```
 
-::: {.step}
-Both regressions compare firms by the **draw**, so both are free of selection. A voucher raised exports a
-little, and it did so by sending about a third of the firms to the fair. **If** that is the only way it
-acts, the effect of attending is the first number divided by the second.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| measures the voucher's effect on attendance, and keeps the coefficient | `smf.ols("attends ~ voucher") ... .params["voucher"]` | the **first stage**, again: the share of firms the voucher moved |
+| measures the voucher's effect on exports | `smf.ols("exports ~ voucher") ... .params["voucher"]` | the **reduced form**: what the draw did to the outcome, over all firms |
+| divides one by the other | `reduced / first` | rescales the effect from "per voucher sent" to "per firm that attended because of it" |
+:::
+
+::: {.check}
+**Read the output.** A voucher raised exports by **3.86** on average. But it changed what only **34 firms
+in 100** did; the other 66 contribute zero to that average. **If** the voucher acts only by sending firms to
+the fair, the 3.86 is the fair's effect diluted over everyone: $3.86 / 0.34 =$ **11.5** per firm that went
+because of it (the division uses unrounded numbers). Truth: 12. Naive: 21.2.
 :::
 
 ## Instrument · Step 4 · Two-stage least squares {.scrollable}
+
+::: {.step}
+**Objective.** Get the **same estimate with a correct standard error**, so that it can be reported with an
+interval, and learn where a control variable goes. The ratio of step 3 is a number without uncertainty.
+:::
 
 ```{python}
 #| echo: true
@@ -1139,10 +1600,22 @@ for name, fit in [("instrument only", iv), ("with firm size", with_size)]:
     print(f"{name:16s} {fit.params['attends']:5.1f}   se {fit.bse['attends']:.1f}   95% CI [{low:.1f}, {high:.1f}]")
 ```
 
-::: {.step}
-A control goes in **both** lists: it is its own instrument. The interval is much wider than a regression's
-would be: the instrument uses only the part of attendance that the voucher caused, about a third of it.
-That is the price of the design.
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| stores the control as a column | `firms["log_employees"] = np.log(...)` | `IV2SLS` takes tables of columns, not a formula |
+| second argument: a constant and the **treatment** | `sm.add_constant(firms[["attends"]])` | the equation you want to estimate |
+| third argument: a constant and the **instrument** | `sm.add_constant(firms[["voucher"]])` | what stands in for the treatment in the first stage |
+| runs both stages and corrects the standard error | `IV2SLS(outcome, ..., ...).fit()` | **the interval this step is for** |
+| puts the control in **both** lists | `[["attends", "log_employees"]]`, `[["voucher", "log_employees"]]` | a control is its own instrument |
+| prints estimate, standard error and interval for each version | the `for` loop | the two lines to compare |
+:::
+
+::: {.check}
+**Read the output.** **11.5**, standard error 1.7, interval **[8.1, 14.9]**: the step 3 ratio, now with its
+uncertainty. It covers the truth of 12 and excludes the naive 21.2. Adding firm size gives 11.3: it barely
+moves, as it should when the instrument was drawn at random. The interval is wide because the instrument
+uses only the part of attendance the voucher caused, about a third of it. That is the price of the design.
 :::
 
 ::: {.warn}
@@ -1151,6 +1624,12 @@ the standard error is wrong. `IV2SLS` does both stages and corrects it.
 :::
 
 ## Instrument · Step 5 · What the number means, and what could break it {.scrollable}
+
+::: {.step}
+**Objective.** Turn the number into a **sentence you can defend**. No code: this step is written, and it is
+the one a reader will press you on. Two things to state: **whom** the estimate describes, and **why** the
+voucher could not have reached exports by any other road.
+:::
 
 ::: columns
 ::: {.column width="50%"}
@@ -1164,12 +1643,17 @@ did not change what they did. Say so when you report it.
 ::: {.warn}
 **What could break it.** Exclusion: does a voucher change exports in **any other way**? If the letter
 also advertised the agency's export loans, it does, and the ratio is wrong by an amount no output shows.
-This step is written, not computed.
 :::
 :::
 :::
 
-::: {.step}
+::: {.check}
+**The sentence.** *"Among firms that attend a fair only when offered a free stand, about a third of all
+firms, attending raises export sales by about \$11,500 (95% interval \$8,100 to \$14,900). This rests on the
+voucher affecting exports only through attendance: the letter offered nothing else."*
+:::
+
+::: {.muted}
 The link with session 10: firms that refused the treatment in a trial. There, the **draw** was the
 instrument for **taking** the treatment. An encouragement, a lottery, a distance, an eligibility rule:
 every instrument is an attempt to find a draw that someone else made.
@@ -1177,13 +1661,14 @@ every instrument is an attempt to find a draw that someone else made.
 
 ## Your turn · The instrument {.scrollable}
 
+| | Objective | What to change | What to look for |
+|--|--------|-----------|-----------|
+| **1** | **See what a weak instrument does.** | In step 1, change `1.2 * voucher` to `0.1 * voucher`; rerun steps 1, 2 and 4. | What happens to the F statistic, to the estimate and to its interval? |
+| **2** | **See that a failed exclusion is silent.** | Back at `1.2`, add `+ 3 * voucher` to `exports` in step 1: the letter helped firms directly. Rerun steps 2 to 4. | Does any check in step 2 warn you? How far is the estimate from 12? |
+| **3** | **See why the second stage is not run by hand.** | In step 4, save the first stage's `.fittedvalues` as a column `fitted` and run `smf.ols("exports ~ fitted")`. | Compare the coefficient and the standard error with `IV2SLS`. |
+
 ::: {.step}
-1. **A weak instrument.** In step 1, change `1.2 * voucher` to `0.1 * voucher` and rerun steps 1, 2 and 4.
-   What happens to the F statistic, to the estimate and to its interval?
-2. **Exclusion fails.** Back at `1.2`, add `+ 3 * voucher` to `exports` in step 1: the letter helped firms
-   directly. Rerun steps 2 to 4. Does any check in step 2 warn you? How far is the estimate from 12?
-3. **The second stage by hand.** In step 4, save the first stage's `.fittedvalues` as a column and run
-   `smf.ols("exports ~ fitted")`. Compare the coefficient and the standard error with `IV2SLS`.
+For each task, write one sentence beginning *"This shows that …"* before moving to the next.
 :::
 
 ## What to report {.scrollable}

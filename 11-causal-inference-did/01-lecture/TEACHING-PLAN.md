@@ -25,15 +25,15 @@ establishes that the reading is load-bearing rather than decorative.
 
 | Minutes | |
 |---|---|
-| **0–8** | The question, and the paper they read. Part 1: why time can replace measurement; the two differences. |
-| **8–15** | The interaction regression, the words, parallel trends stated exactly. |
+| **0–8** | The question, and the paper they read. Part 1: why time can replace measurement; the two differences, and why one is not enough. |
+| **8–15** | Card and Krueger: ask for the sign before showing it; the +2.76 comes from Pennsylvania falling. The interaction regression cell by cell (`Treated × Post` is 1 in one cell only), the words, parallel trends stated exactly. |
 | **15–25** | Example 1, housing: after-only −25, before-after +20, DiD −10.5. Ask the room what each naive comparison mixes in. No code on screen. |
 | **25–33** | Example 2: six years, two cities; the event study catches B. Ask them to read the pre-years *before* showing the estimate. |
-| **33–45** | Example 3, AI strategies: the adoption table first, then TWFE 2.81 against Callaway–Sant'Anna 2.20, then the sensitivity plot. |
+| **33–45** | Example 3, AI strategies: the adoption table first; the forbidden comparison (+3 becomes −1) and when it matters; TWFE 2.81 against Callaway–Sant'Anna 2.20 and the other repairs in one table; then the sensitivity plot, reading $M$ aloud. |
 | **45–57** | Example 4, exporters: why neither design applies; the three conditions; the ratio 4.6; then version B at 12.1 with the same F. Ask which condition failed *before* showing the diagram. |
 | **57–62** | Matching, DiD or an instrument; what DiD cannot fix. |
 | **62–66** | Two more solutions: differencing removes what is constant, an instrument uses only what an outside push caused. |
-| **66–80** | Solution 3 in Python, a DiD from start to finish: panel and adoption table, the plot, one clean 2×2, the event study, all cohorts, sensitivity. |
+| **66–80** | Solution 3 in Python, a DiD from start to finish: panel and adoption table, the plot, one clean 2×2, the event study, all cohorts, the Bacon decomposition (the −1.60 comparison), sensitivity. Read each **objective** aloud before running the cell. |
 | **80–90** | Solution 4 in Python, an instrument from start to finish: naive, balance and first stage, reduced form and ratio, two-stage least squares, whom it describes. Hand off to the practice. |
 
 ---

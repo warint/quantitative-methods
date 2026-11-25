@@ -437,6 +437,9 @@ smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).
 # -- Choose and validate -------------------------------------------
 es = cs.aggregate("event_study")
 dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb
+bacon = dd.BaconDecomposition().fit(panel, outcome="exporters", unit="region",
+    time="year", first_treat="opened")
+bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]
 
 # -- Plot ----------------------------------------------------------
 plt.errorbar(study.index, study["effect"], yerr=1.96 * study["se"], fmt="o", capsize=3)

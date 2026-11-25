@@ -219,6 +219,7 @@ TOOLKIT = {
     "C(region)": ("11", "Fit", "a dummy per category in a formula: `C(region) + C(year)` is two-way fixed effects"),
     "dd.CallawaySantAnna": ("11", "Fit", "DiD with staggered adoption: each cohort against clean controls, then averaged"),
     "dd.HonestDiD": ("11", "Choose and validate", "how large a violation of parallel trends the result survives"),
+    "dd.BaconDecomposition": ("11", "Choose and validate", "open up two-way fixed effects: every 2x2 comparison inside it, with its weight"),
     "IV2SLS": ("11", "Fit", "two-stage least squares: the instrument's effect, with a correct standard error"),
     "Treatment(reference=2017)": ("11", "Fit", "in `C(year, ...)`: the year every other year is compared with, in an event study"),
     "plt.errorbar": ("11", "Plot", "points with their confidence intervals: an event study, year by year"),
