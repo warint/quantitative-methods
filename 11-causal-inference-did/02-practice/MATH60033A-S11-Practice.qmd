@@ -21,8 +21,16 @@ format:
     height: 760
     margin: 0.06
     smaller: true
+    include-in-header:
+      text: |
+        <style>
+        .reveal .how table{font-size:0.8em;}
+        .reveal .how table code{white-space:nowrap;}
+        </style>
     footer: "MATH60033A · Session 11 practice · Thierry Warin, PhD · HEC Montréal"
 ---
+
+<!-- authored: do not regenerate -->
 
 <!-- BEGIN deck-frontmatter · scripts/build_deck_frontmatter.py -->
 
@@ -30,15 +38,20 @@ format:
 
 1. Ninety minutes
 2. Before you start
-3. Reproduce — 20 min
-4. Apply to your own angle — 35 min
-5. Break one assumption — 15 min
-6. Report it as one table
-7. Write it down — 20 min
-8. Submitting
-9. What loses marks
-10. Two-minute report
-11. After class, if you want it
+3. The workshop in one table
+4. Reproduce — 20 min
+5. Known ground — 20 min
+6. The panel, and the adoption table
+7. Look, then estimate
+8. The years before, and how much the result needs them
+9. Your project — 15 min
+10. Break one assumption — 15 min
+11. Report it as one table
+12. Write it down — 20 min
+13. Submitting
+14. What loses marks
+15. Two-minute report
+16. After class, if you want it
 
 ## What session 11 is for {.scrollable}
 ::::: columns
@@ -50,7 +63,7 @@ format:
 - Set up a **difference-in-differences** design and identify the four cells
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
-- {'Explain why **two-way fixed effects** can mislead under staggered adoption': 'the **forbidden comparison**'}
+- Explain why **two-way fixed effects** can mislead under staggered adoption (the **forbidden comparison**)
 - Say what difference-in-differences **cannot** fix, and what to report
 
 ::::
@@ -106,10 +119,11 @@ assumed.
 
 | | | |
 |---|---|---|
-| **00–20** | Reproduce | one result from the paper you read |
-| **20–55** | Apply | the method, to **your own angle** |
-| **55–70** | Break | one assumption, deliberately |
-| **70–90** | Write, and report | 250 words, then two minutes to the room |
+| **00–20** | 1 · Reproduce | find the difference-in-differences inside the paper you read |
+| **20–40** | 2 · Known ground | the whole study on the course data, where the true effect is known |
+| **40–55** | 3 · Your project | the same study on **your** data, or a reasoned "not with these data" |
+| **55–70** | 4 · Break one assumption | deliberately, and record what moves |
+| **70–90** | 5 · Write, and report | 250 words, then two minutes to the room |
 
 ::: {.warn}
 The presenter is drawn **at random** when your group is called. All three of you prepare.
@@ -131,93 +145,310 @@ mkdir groups/A2026/group-XX/session-11         # Windows — no -p
 
 ::: {.muted}
 PowerShell's `mkdir` creates the intermediate folders already, and rejects `-p`.
-The git log is the participation record. It is not a formality.
+The git log is the participation record. It is not a formality. Work inside
+`groups/A2026/group-XX/session-11/`: the code below writes a small file there.
 :::
 
-## 1 · Reproduce — 20 min
+## The workshop in one table {.scrollable}
 
-Take the result the paper rests on, and reproduce it. The package you downloaded is at
-`11-causal-inference-did/data/replication/`.
+The lecture taught the study in steps. This workshop runs the same steps three times: **in a paper**,
+**on known ground**, then **on your project**. Each step has one objective.
 
-```python
-import qmib
-
-data = qmib.load("core")     # the session's own data
-```
-
-::: {.muted}
-Paper: Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1) · [10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH)
+::: {.how}
+| Step | Objective: the question it answers | What you do | You are done when |
+|----|------------|------------|----------|
+| 1 | Where is the difference-in-differences **in the paper**? | read the paper against five questions, reproduce one number | you can name its treated, its controls, its dates and its estimate |
+| 2a | **Who** was treated, **when**, and what can be compared? | build the panel and the adoption table | you can say which cohorts are usable |
+| 2b | What is the **effect**, and does the shortcut agree? | plot the cohorts, then TWFE beside Callaway–Sant'Anna | you can explain why the two numbers differ |
+| 2c | Were the groups **moving alike before**, and how much does the result need it? | the event study, then Rambachan–Roth | you can report a breakdown value |
+| 3 | Can **your** project support this design at all? | map your data onto four columns, rerun 2a–2c | you have an estimate, or the reason there is none |
+| 4 | How **fragile** is the answer? | change one assumption on purpose | the two estimates sit side by side in one table |
+| 5 | What can you **claim**? | 250 words | a reader knows the number, its evidence and its limit |
 :::
 
 ::: {.check}
-A failed reproduction that you **diagnose** earns full marks. One you do not attempt earns none.
+**The objective of the whole session:** one sentence you can defend, of the form *"the policy changed the
+outcome by … (interval …); the groups moved alike before; the conclusion survives a violation of parallel
+trends up to …; it does not license …"*.
+:::
+
+## 1 · Reproduce — 20 min {.scrollable}
+
+::: {.step}
+**Objective.** Find the difference-in-differences **inside a published paper**, so that you can recognise
+the design when someone else builds it, and see which choices the authors had to defend.
+:::
+
+The paper: Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store:
+Evidence from US Trade Policy*, American Economic Review: Insights 3(1) ·
+[10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH). The package you downloaded is at
+`11-causal-inference-did/data/replication/`.
+
+::: {.how}
+| Question to answer from the paper | Why it matters |
+|----------|----------|
+| What is **treated**, and what is the **control** group? | the second difference is only as good as the controls |
+| What are the **dates**: before, after, and is adoption staggered? | decides which comparisons exist, and whether TWFE is safe |
+| Which **coefficient** is the estimate, and in what **units**? | the number you will reproduce |
+| What evidence do they show for **parallel trends**? | an event study, a pre-period, an argument? |
+| What could **change at the same time** as the treatment? | the threat a referee would raise first |
+:::
+
+::: {.check}
+Then reproduce **one** number from the package. A failed reproduction that you **diagnose** earns full
+marks. One you do not attempt earns none.
 :::
 
 ::: {.muted}
 "It did not work" is not a diagnosis. Where did it stop, and what did you check?
 :::
 
-## 2 · Apply to your own angle — 35 min
+## 2 · Known ground — 20 min {.center}
 
-```python
-core = qmib.load("core")
-mine = qmib.load("angle_c_country")     # your angle — see your dictionary
-df   = core.merge(mine, on=["geo", "time"], how="inner")
-```
-
-Fit the session's method on **your** data, and report what the lecture said to report — in the
-units of your own variables.
-
-::: {.warn}
-A coefficient without units is not a finding.
+::: {.muted}
+Get the study working where the answer is known, before trusting it where it is not. The course data on
+national AI strategies are generated with a true effect of **+2.4 points** of firms using AI: lecture
+Example 3, now run by you.
 :::
 
-## 3 · Break one assumption — 15 min
-
-Every method in this course rests on something.
+## 2a · The panel, and the adoption table {.scrollable}
 
 ::: {.step}
-Find the assumption this one leans on hardest. Break it **deliberately**. Record what happened to
-your answer.
+**Objective.** Establish **who was treated, when, and how many years you observe before** each adoption.
+That decides which comparisons exist, before any estimate.
 :::
-
-::: {.check}
-This is the part that carries the marks. A group that shows how its result falls apart understands
-it; a group that only shows it holding does not yet know.
-:::
-
-## Report it as one table
-
-Step 3 left you with two fits: the model as specified, and the model after you
-broke something. Put them in one table rather than two blocks of output — the
-comparison is the finding.
 
 ```python
+# Step 2a · The panel, and the adoption table
+import pandas as pd
 import qmib
 
-print(qmib.regtable([before, after],
-                    names=["as specified", "assumption broken"]))
+Y, D = "ai_use_any", "has_ai_strategy"            # outcome, and the 0/1 policy column
+wide = qmib.load("angle_c_country")               # 30 countries, 2014-2024
+
+adopted = wide[wide[D] == 1].groupby("geo")["time"].min()   # first year with a strategy
+panel = wide[wide[Y].notna()].copy()                         # keep years with an outcome
+panel["g"] = panel["geo"].map(adopted).fillna(0).astype(int) # adoption year; 0 = never
+
+print("outcome observed:", panel["time"].min(), "to", panel["time"].max())
+print(panel.groupby("g")["geo"].nunique().rename(index={0: "never"}))
+panel.to_csv("ai_panel.csv", index=False)
 ```
 
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| names the outcome and the policy column once | `Y, D = ...` | the only two lines you change for your project |
+| finds each country's first year with a strategy, from the **full** policy series | `wide[wide[D] == 1].groupby("geo")["time"].min()` | the adoption year; reading it from the full series, not the rows with an outcome, avoids misdating it |
+| keeps the years where the outcome exists | `wide[wide[Y].notna()]` | the analysis sample |
+| gives every row its cohort, 0 for never | `panel["g"] = ...fillna(0)` | the column every DiD estimator asks for |
+| counts countries per cohort | `.groupby("g")["geo"].nunique()` | **the adoption table** |
+:::
+
 ::: {.check}
-Read **across** the row, not down the column: what happened to the coefficient
-you care about, in its own units, and what happened to its standard error.
+**Read the output.** The outcome exists only from **2021**. Cohorts: **12** never, **8** in 2021, **9** in
+2022, **1** in 2023. The 2021 cohort has **no** year before: unusable. The 2023 cohort is one country. The
+2022 cohort has one year before: enough to estimate, not enough to see a trend.
+:::
+
+## 2b · Look, then estimate {.scrollable}
+
+::: {.step}
+**Objective.** **See** the cohorts before estimating, then get **one number for the whole rollout**, and
+check whether the regression most papers run would have given the same.
+:::
+
+```python
+# Step 2b · Look, then estimate
+import pandas as pd
+import statsmodels.formula.api as smf
+import diff_diff as dd
+
+panel = pd.read_csv("ai_panel.csv")
+print(panel.groupby(["time", "g"])["ai_use_any"].mean().unstack().round(1))
+
+panel["treated_now"] = ((panel["g"] > 0) & (panel["time"] >= panel["g"])).astype(int)
+twfe = smf.ols("ai_use_any ~ treated_now + C(geo) + C(time)", data=panel).fit(
+    cov_type="cluster", cov_kwds={"groups": panel["geo"]})
+cs = dd.CallawaySantAnna(cluster="geo").fit(
+    panel, outcome="ai_use_any", unit="geo", time="time", first_treat="g")
+
+print(f"two-way fixed effects: {twfe.params['treated_now']:.2f} (SE {twfe.bse['treated_now']:.2f})")
+print(f"Callaway-Sant'Anna:    {cs.overall_att:.2f} (SE {cs.overall_se:.2f}, {cs.n_clusters} clusters)")
+```
+
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| the mean outcome of each cohort in each year | `.groupby(["time", "g"])[...].mean().unstack()` | levels, and changes, at a glance |
+| 1 for a country-year once its strategy is in force | `panel["treated_now"] = ...` | the $D_{it}$ of two-way fixed effects |
+| a dummy per country and per year, clustered by country | `smf.ols("... ~ treated_now + C(geo) + C(time)")` | **TWFE**: the shortcut, as a benchmark |
+| each cohort against clean controls, then averaged | `dd.CallawaySantAnna(cluster="geo").fit(...)` | **the estimate** |
+:::
+
+::: {.check}
+**Read the output.** Adopters use about twice as much AI as never-adopters in **every** year: a level gap,
+which DiD allows. The 2022 cohort jumps from 10.9 to 13.8 in its adoption year while the never-adopters
+move by 1.1. TWFE: **2.81** (SE 0.83). Callaway–Sant'Anna: **2.20** (SE 0.78, 30 clusters). Truth: 2.4.
+:::
+
+## 2c · The years before, and how much the result needs them {.scrollable}
+
+::: {.step}
+**Objective.** Look at the only evidence on parallel trends the data hold, then ask **how large a
+violation** of parallel trends would overturn the result.
+:::
+
+```python
+# Step 2c · The years before, and how much violation the result survives
+import pandas as pd
+import diff_diff as dd
+
+panel = pd.read_csv("ai_panel.csv")
+cs = dd.CallawaySantAnna(cluster="geo").fit(
+    panel, outcome="ai_use_any", unit="geo", time="time", first_treat="g")
+study = cs.aggregate("event_study")
+print(study.to_dataframe()[["event_time", "att", "se"]].round(2).to_string(index=False))
+
+for M in (0, 0.25, 0.5, 1):
+    honest = dd.HonestDiD(method="relative_magnitude", M=M).fit(study)
+    print(f"M = {M:<4}  [{honest.ci_lb:5.2f}, {honest.ci_ub:5.2f}]  rules out zero: "
+          f"{'yes' if honest.is_significant else 'no'}")
+```
+
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| averages the cohort-year effects by years since adoption | `cs.aggregate("event_study")` | negative event times are the **pre-period**; zero and after are the effect |
+| widens the interval to allow post-period drift up to `M` times the pre-period one | `dd.HonestDiD(method="relative_magnitude", M=M)` | turns "what if the trends had diverged?" into a number |
+| prints whether each interval still excludes zero | `honest.is_significant` | the largest `M` that says yes is the **breakdown value** |
+:::
+
+::: {.check}
+**Read the output.** One pre-period estimate: **−1.13** at event time −1, from a single country. After
+adoption: 1.75, 2.75, 2.14. The interval excludes zero at `M = 0.25`, not at `M = 0.5`: a **low**
+breakdown value, because the pre-treatment evidence is one country's single year. Report that, in those
+words.
+:::
+
+## 3 · Your project — 15 min {.scrollable}
+
+::: {.step}
+**Objective.** Decide whether **your** data can support a difference-in-differences, and if so, run steps
+2a to 2c on them. Saying precisely why it cannot is a full answer
+([`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md), section 5).
+:::
+
+::: {.how}
+| You need a column for | On the course data | On your project |
+|----------|----------|----------|
+| the **unit** | `geo` | the firm, region, country, product… |
+| the **time** | `time` | the year, quarter, month… |
+| the **outcome** | `ai_use_any` | what the policy should move, in its units |
+| the **adoption year**, 0 if never | `g`, built from `has_ai_strategy` | when **each** unit was first treated |
+:::
+
+```python
+panel = pd.read_csv("my_project.csv")                    # your file: one row per unit and date
+first_year = panel[panel["treated"] == 1].groupby("unit")["date"].min()   # from the full policy series
+panel["g"] = panel["unit"].map(first_year).fillna(0).astype(int)
+cs = dd.CallawaySantAnna(cluster="unit").fit(
+    panel, outcome="my_outcome", unit="unit", time="date", first_treat="g")
+```
+
+::: {.warn}
+**Stop and write it down if:** no unit is ever treated; no unit stays untreated (or not yet treated) over
+the years you need; or no cohort has a year **before** its treatment. Each one removes a difference. Then
+report the design on the course data, and say what data would make it possible.
+:::
+
+## 4 · Break one assumption — 15 min {.scrollable}
+
+::: {.step}
+**Objective.** Find which choice your estimate leans on hardest, by changing it **on purpose** and
+recording what moves. Pick **one**; the code on the next slide does all four on the course data.
+:::
+
+::: {.how}
+| Break this | The assumption it tests | What to change | What to look for |
+|----------|----------|----------|----------|
+| **The dates** | the policy started when you say it did | read the adoption year from the rows **with** an outcome | do units change cohort? does the estimate move? |
+| **The controls** | the never-treated stand for what time alone did | `control_group="not_yet_treated"` | do the controls you chose matter? |
+| **The scale** | parallel trends holds in **levels** | the outcome in logs | parallel in levels is not parallel in logs |
+| **The trends** | the groups would have kept moving alike | raise `M` in step 2c | where the interval first reaches zero |
+:::
+
+::: {.check}
+This is the part that carries the marks. A group that shows how its result falls apart understands it; a
+group that only shows it holding does not yet know.
+:::
+
+## Report it as one table {.scrollable}
+
+::: {.step}
+**Objective.** Put the estimate as specified and the estimate with the assumption broken **side by side**,
+so that the comparison, which is the finding, is read across one row.
+:::
+
+```python
+# Report it as one table
+import numpy as np
+import pandas as pd
+import diff_diff as dd
+
+panel = pd.read_csv("ai_panel.csv")
+
+def att(data, outcome="ai_use_any", **options):
+    fit = dd.CallawaySantAnna(cluster="geo", **options).fit(
+        data, outcome=outcome, unit="geo", time="time", first_treat="g")
+    return round(fit.overall_att, 2), round(fit.overall_se, 2)
+
+seen = panel[panel["has_ai_strategy"] == 1].groupby("geo")["time"].min()
+misdated = panel.assign(g=panel["geo"].map(seen).fillna(0).astype(int))
+
+rows = {"as specified":               att(panel),
+        "adoption read from the sample": att(misdated),
+        "not-yet-treated as controls":   att(panel, control_group="not_yet_treated"),
+        "in logs (x 100 = %)":           att(panel.assign(log_y=np.log(panel["ai_use_any"])), "log_y")}
+print(pd.DataFrame(rows, index=["estimate", "SE"]).T)
+```
+
+::: {.how}
+| What the code does | Instruction | How it serves the objective |
+|-----------|-----------|-----------|
+| one function that returns the estimate and its SE for any data and options | `def att(data, outcome=..., **options)` | every row is computed the same way, so only the broken choice differs |
+| the adoption year read from the analysis sample: the mistake | `misdated = panel.assign(g=...)` | breaks **the dates** |
+| the controls changed, then the scale | `control_group="not_yet_treated"`, `np.log(...)` | breaks **the controls**, then **the scale** |
+| one row per version | `pd.DataFrame(rows, index=[...]).T` | the table you paste into the write-up |
+:::
+
+::: {.check}
+**Read the output.** As specified **2.20** (0.78). Misdated **2.39**: two countries move from the 2022 to
+the 2023 cohort. Not-yet-treated controls **2.23**: the controls barely matter here. In logs **0.07**
+(0.15): about +7%, no longer distinguishable from zero. On the course data, the **scale** is the fragile
+choice.
 :::
 
 ::: {.muted}
-Coefficients too small to read at one decimal — a logit's usually are? `digits=3`.
-`.as_latex()` if you would rather paste it into the write-up than screenshot it.
-Pass `stats=` to change the rows at the foot.
+For your project keep two rows, as specified and the one you broke. Statsmodels fits go into
+`qmib.regtable([before, after], names=["as specified", "assumption broken"])` instead.
 :::
 
-## 4 · Write it down — 20 min
+## 5 · Write it down — 20 min {.scrollable}
 
-250 words in your submissions folder:
+::: {.step}
+**Objective.** Turn the numbers into a claim a reader can check: the estimate, the evidence behind it,
+and where it stops.
+:::
+
+250 words in your submissions folder, in this order:
 
 ::: {.tight}
-- What you found, **in units**
-- Which assumption you broke, and what it did
-- What this result does **not** license you to claim
+1. **The design:** treated, controls, dates, and the adoption table in one line
+2. **What you found, in units**, with its interval, and TWFE beside it
+3. **The parallel-trends evidence**: the pre-period, and the breakdown value
+4. **Which assumption you broke**, and what it did to the number
+5. **What this result does not license you to claim**
 :::
 
 ::: {.muted}

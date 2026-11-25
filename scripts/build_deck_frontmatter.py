@@ -506,6 +506,15 @@ def main():
     plans = yaml.safe_load(PLAN.read_text())
     plans = {f"{int(k):02d}": v for k, v in plans.items()}
 
+    # An unquoted list item containing ": " is read by YAML as a one-key mapping,
+    # and would land on the slide as a Python dict. Refuse it rather than print it.
+    for sess, plan in plans.items():
+        for part, items in (plan or {}).items():
+            for item in items if isinstance(items, list) else []:
+                if not isinstance(item, str):
+                    sys.exit(f"deck-plan.yml, session {sess}, {part}: {item!r} is not a string; "
+                             "quote the line, it contains ': '")
+
     if check:
         real = surface()
         cumulative, unknown = set(), {}

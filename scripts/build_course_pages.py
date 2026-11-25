@@ -22,6 +22,8 @@ from course_spec import (COHORT, package_sheet_links, LAB_URL, lab_url, SESSIONS
                          generated, MIDTERM_AFTER, MIDTERM_COVERS, DATES, ASYNCHRONOUS,
                          UNSCHEDULED, WHEN, ROOM)
 
+AUTHORED = "<!-- authored: do not regenerate -->"
+
 PREV_NEXT = {k: (f"{int(k)-1:02d}", f"{int(k)+1:02d}") for k in SESSIONS}
 
 
@@ -450,7 +452,11 @@ def main():
         (d / "00-pre-session").mkdir(exist_ok=True)
         (d / "00-pre-session/README.md").write_text(pre_session(num, s), encoding="utf-8")
         (d / "02-practice").mkdir(exist_ok=True)
-        (d / "02-practice/README.md").write_text(practice(num, s), encoding="utf-8")
+        brief = d / "02-practice/README.md"
+        # A practice brief rewritten by hand carries the same marker as an
+        # authored deck (scripts/build_session_decks.py) and is left alone.
+        if not (brief.exists() and AUTHORED in brief.read_text(encoding="utf-8")):
+            brief.write_text(practice(num, s), encoding="utf-8")
         (d / "data").mkdir(exist_ok=True)
         (d / "data/README.md").write_text(data_page(num, s), encoding="utf-8")
         written += 4

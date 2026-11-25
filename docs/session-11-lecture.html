@@ -1097,7 +1097,7 @@ Thierry Warin, PhD
 <li>Set up a <strong>difference-in-differences</strong> design and identify the four cells</li>
 <li>Read the <strong>interaction coefficient</strong> as the estimate</li>
 <li>State the <strong>parallel-trends</strong> assumption and how you would probe it</li>
-<li>{‘Explain why <strong>two-way fixed effects</strong> can mislead under staggered adoption’: ‘the <strong>forbidden comparison</strong>’}</li>
+<li>Explain why <strong>two-way fixed effects</strong> can mislead under staggered adoption (the <strong>forbidden comparison</strong>)</li>
 <li>Say what difference-in-differences <strong>cannot</strong> fix, and what to report</li>
 </ul>
 </div><div class="column" style="width:33%;">
@@ -1294,7 +1294,10 @@ Y = \beta_0 + \beta_1\,\text{Treated} + \beta_2\,\text{Post} + \beta_3\,(\text{T
 </tbody>
 </table>
 <div class="muted">
-<p><code>Treated</code> is 1 for units in the treated group, in <strong>every</strong> period; <code>Post</code> is 1 for <strong>every</strong> unit after the policy date. Why a regression, if four means suffice? It gives the same number <strong>plus</strong> a standard error, and it accepts control variables and more than two periods.</p>
+<p><code>Post</code> is 1 for <strong>every</strong> unit after the policy date. Why a regression, if four means suffice? It gives the same number <strong>plus</strong> a standard error, and it accepts control variables and more than two periods.</p>
+</div>
+<div class="warn">
+<p><strong><code>Treated</code>, not “treatment”.</strong> <code>Treated</code> labels the <strong>group</strong>: it is 1 for those units in <strong>every</strong> period, even before the policy, when nothing has happened to them yet. Being <strong>under</strong> treatment is <code>Treated × Post</code>: 1 only for the treated group after the policy. That product is the <span class="math inline">\(D_{it}\)</span> of two-way fixed effects later in the session.</p>
 </div>
 <p><strong><code>Treated × Post</code> is a product of two 0/1 dummies</strong>, so it equals 1 in <strong>one cell only</strong>, and 0 in the other three:</p>
 <table class="caption-top">
@@ -2192,7 +2195,7 @@ ATT(g,t) = \mathrm{E}[\,Y_t - Y_{g-1} \mid \text{cohort } g\,] - \mathrm{E}[\,Y_
 <div class="step">
 <p><strong>Objective.</strong> Before estimating anything, establish <strong>who was treated, when, and how many years you observe each group before its treatment</strong>. A cohort with no year before has no first difference; a study with no untreated units has no second. This step decides which comparisons exist.</p>
 </div>
-<div id="5a73b9f5" class="cell" data-execution_count="2">
+<div id="26c3e29b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href></a><span class="co"># DiD, step 1 · 40 regions, 2014-2023: one row per region and year</span></span>
 <span id="cb1-2"><a href></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -2279,7 +2282,7 @@ Name: region, dtype: int64</code></pre>
 <div class="step">
 <p><strong>Objective.</strong> <strong>See</strong> the design before any regression. Three things to judge by eye: are the groups at different <strong>levels</strong> (selection)? Were they <strong>moving alike before</strong> the desks (the only part of parallel trends the data can show)? Is there a <strong>break</strong> when a desk opens?</p>
 </div>
-<div id="0efb9cba" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="3">
+<div id="15c392ab" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="3">
 <div class="column">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href></a><span class="co"># DiD, step 2 · The average outcome of each cohort, year by year</span></span>
 <span id="cb3-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -2365,7 +2368,7 @@ year
 <div class="step">
 <p><strong>Objective.</strong> Compute <strong>one</strong> effect you understand completely: what the first year of a desk did to the 2018 cohort. First by subtraction, from four means; then by a regression, which gives the same number and adds what subtraction cannot: a <strong>confidence interval</strong>.</p>
 </div>
-<div id="6ea1a8df" class="cell" data-execution_count="4">
+<div id="cd9af50e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href></a><span class="co"># DiD, step 3 · The 2018 cohort against the never-treated, 2017 against 2018</span></span>
 <span id="cb5-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb5-3"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -2453,7 +2456,7 @@ DiD = 2.26   95% CI [0.80, 3.71]   truth, first year: 2</code></pre>
 <div class="step">
 <p><strong>Objective.</strong> Two questions, one picture. <strong>Before</strong> the desks: were the two groups moving alike? That is the checkable part of parallel trends. <strong>After</strong>: is the effect immediate, constant, growing? The tool is step 3 repeated for <strong>every</strong> year, each compared with 2017, the last year before.</p>
 </div>
-<div id="eb06871d" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="5">
+<div id="c71f8d32" class="cell columns column-output-location" data-fig-height="4" data-fig-width="5.4" data-execution_count="5">
 <div class="column">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href></a><span class="co"># DiD, step 4 · The same DiD for every year, each against 2017, the last year before the desks</span></span>
 <span id="cb7-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -2561,7 +2564,7 @@ year
 <div class="step">
 <p><strong>Objective.</strong> <strong>One number for the whole rollout</strong>: both cohorts, every year, with a standard error, and without ever using an already-treated region as a control. Beside it, the regression most studies run, to see whether the shortcut would have mattered.</p>
 </div>
-<div id="8359bf4b" class="cell" data-execution_count="6">
+<div id="2f9c9971" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href></a><span class="co"># DiD, step 5 · The one big regression (TWFE) beside an estimator built for staggered adoption</span></span>
 <span id="cb9-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb9-3"><a href></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -2649,7 +2652,7 @@ truth, average over the treated years: 6.12
 <div class="step">
 <p><strong>Objective.</strong> Explain <strong>why</strong> two-way fixed effects came out low. Its single coefficient is a weighted average of every 2×2 comparison in the panel (Goodman-Bacon, 2021). List them, with their weights, and find the one that should not be there.</p>
 </div>
-<div id="6b7a1925" class="cell" data-execution_count="7">
+<div id="658c4fe8" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href></a><span class="co"># DiD, step 5, continued · The 2x2 comparisons inside the two-way fixed effects coefficient</span></span>
 <span id="cb11-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb11-3"><a href></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
@@ -2715,7 +2718,7 @@ weighted sum: 5.18   = the two-way fixed effects coefficient</code></pre>
 <div class="step">
 <p><strong>Objective.</strong> Answer the objection that survives step 4: <em>“flat before does not mean parallel after.”</em> Find <strong>how large</strong> a departure from parallel trends, after the desks open, it would take to overturn the conclusion, measured against the largest movement seen before.</p>
 </div>
-<div id="61007f4d" class="cell" data-execution_count="8">
+<div id="0faeabec" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href></a><span class="co"># DiD, step 6 · Rambachan-Roth: allow a violation up to M times the largest pre-period wobble</span></span>
 <span id="cb13-2"><a href></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-3"><a href></a><span class="im">import</span> diff_diff <span class="im">as</span> dd</span>
