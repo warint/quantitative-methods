@@ -251,6 +251,11 @@ SNIPPETS = {
                            "cs.overall_att, cs.overall_se",
     "dd.HonestDiD": 'es = cs.aggregate("event_study")\n'
                     'dd.HonestDiD(method="relative_magnitude", M=0.5).fit(es).ci_lb',
+    ".map": 'adopted = wide[wide["has_ai_strategy"] == 1].groupby("geo")["time"].min()   # full series\n'
+            'panel["g"] = panel["geo"].map(adopted).fillna(0).astype(int)   # adoption year; 0 = never',
+    ".assign": 'misdated = panel.assign(g=panel["geo"].map(seen).fillna(0).astype(int))   # one choice changed',
+    'control_group="not_yet_treated"': 'dd.CallawaySantAnna(cluster="geo", control_group="not_yet_treated").fit(\n'
+                                       '    panel, outcome="ai_use_any", unit="geo", time="time", first_treat="g")',
     "dd.BaconDecomposition": 'bacon = dd.BaconDecomposition().fit(panel, outcome="exporters", unit="region",\n'
                              '    time="year", first_treat="opened")\n'
                              'bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]',
@@ -467,6 +472,50 @@ def papers_section():
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# Session 11 only: the practice's study, in its own code
+#
+# The workshop runs one difference-in-differences study in four cells. The sheet
+# carries them read from the practice deck at build time, each under the
+# objective the deck gives it, so the sheet cannot drift from what the room runs.
+
+PRACTICE_11 = ROOT / "11-causal-inference-did/02-practice/MATH60033A-S11-Practice.qmd"
+STUDY_STEPS = ["2a · The panel, and the adoption table",
+               "2b · Look, then estimate",
+               "2c · The years before, and how much the result needs them",
+               "Report it as one table"]
+
+
+def practice_step(text, title):
+    """The objective and the first Python block of one slide of the practice deck."""
+    import re
+    start = text.index(f"## {title}")
+    end = text.find("\n## ", start + 4)
+    slide = text[start:end if end > 0 else None]
+    objective = re.search(r"\*\*Objective\.\*\*\s*(.*?)\n:::", slide, re.S)
+    code = re.search(r"```python\n(.*?)```", slide, re.S)
+    if not (objective and code):
+        raise SystemExit(f"practice slide {title!r} has lost its objective or its code")
+    return " ".join(objective.group(1).split()), code.group(1).rstrip()
+
+
+def study_section():
+    text = PRACTICE_11.read_text(encoding="utf-8")
+    parts = ["## The study, step by step\n",
+             "The practice runs one difference-in-differences study on the course data, where the "
+             "true effect is +2.4 points. These are its four cells, as on the slides: the first "
+             "writes `ai_panel.csv` and the others read it. For your project, change the two names "
+             "on the line `Y, D = ...`, or map your file onto four columns: unit, time, outcome, "
+             "adoption year (0 if never).\n"]
+    for title in STUDY_STEPS:
+        objective, code = practice_step(text, title)
+        parts.append(f"### {title}\n\n**Objective.** {objective}\n\n```python\n{code}\n```\n")
+    parts.append("**Break one assumption** by changing one choice and keeping the rest: the dates "
+                 "(`.assign`), the controls (`control_group=\"not_yet_treated\"`), the scale "
+                 "(`np.log`) or the trends (raise `M`). Report both rows side by side.\n")
+    return "\n".join(parts)
+
+
 # Session 07 is worked in a fresh folder of the student's own, with plain Python
 # and four packages installed by name — no clone, no requirements.txt, no qmib —
 # so its sheet opens with that set-up instead of GETTING_STARTED.
@@ -609,6 +658,9 @@ def sheet(num, s):
     if num == "07":
         lead = ("Everything you need to type, in one place: today's set-up in a folder of your own, "
                 "every name from sessions 1 to 7, and every step of the four papers' scripts.")
+    if num == "11":
+        lead = ("Everything you need to type, in one place: the four sections that are the same every "
+                "week, every name from sessions 1 to 11, and the practice's study, step by step.")
     return f"""---
 title: "Python Cheatsheet"
 subtitle: "MATH60033A · Session {num} · {s['short']}"
@@ -634,7 +686,7 @@ format:
 
 {GETTING_STARTED_07 if num == '07' else GETTING_STARTED.replace('SESSIONNUM', num)}
 {recap(num)}
-{papers_section() if num == "07" else ""}"""
+{papers_section() if num == "07" else ""}{study_section() if num == "11" else ""}"""
 
 
 # LaTeX picks a random six-letter tag for every embedded font subset, seeded
