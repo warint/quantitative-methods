@@ -241,14 +241,13 @@ PAGES = [[
              dict(code="1 - m.llf / null.llf", text="McFadden's pseudo-R² for a logit; 0.2–0.4 is already good."),
          ]),
 ], [
-    dict(title="11 · Causal designs: DiD and an instrument",
+    dict(title="11 · Causal designs: difference-in-differences",
          intro="Sessions 10 and 11.",
          items=[
              dict(code='smf.ols("y ~ treated * post", data=d)', text="difference-in-differences: the coefficient on `treated:post` is the estimate."),
              dict(code='.fit(cov_type="cluster", cov_kwds={"groups": d["unit"]})', text="each unit is seen several times: cluster its standard errors."),
              dict(code='"y ~ D + C(unit) + C(year)"', text="two-way fixed effects. With staggered adoption, check it against `diff_diff`."),
-             dict(code="from statsmodels.sandbox.regression.gmm import IV2SLS", text="two-stage least squares, for an instrument:",
-                  ex='IV2SLS(d["y"], sm.add_constant(d[["D"]]), sm.add_constant(d[["Z"]])).fit()'),
+             dict(code='"y ~ treated * C(year, Treatment(reference=2017))"', text="an event study: one interaction per year, each against the last year before."),
          ],
-         warn="Never run the second stage yourself with `smf.ols` on fitted values: right estimate, **wrong** standard error."),
+         warn="A flat pre-period is a test the design **survived**, not a proof of parallel trends."),
 ]]

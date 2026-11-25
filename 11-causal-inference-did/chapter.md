@@ -19,19 +19,17 @@ not adopt.
 
 Two differences, hence the name.
 
-The chapter works through four examples, each adding one idea. A simulated
+The chapter works through three examples, each adding one idea. A simulated
 affordable-housing policy observed in two periods, where the two differences can
 be seen doing their work against a known answer. The same city over six years, in
 two versions — one where the assumption holds and one where it fails — to show
 what an event study can and cannot reveal. And the course's own data on national
 AI strategies, adopted by different countries in different years, where the
 modern estimators earn their place and the assumption cannot be examined at all.
-And simulated exporting firms, where neither matching nor difference-in-differences
-can work and a third design, an instrument, can — until its key condition fails.
 
-The examples show the two designs at work. Two later sections then carry each
-one out from start to finish on new data: a staggered rollout analysed as a
-difference-in-differences, and a randomly drawn voucher used as an instrument.
+The examples show the design at work. A later section then carries it out from
+start to finish on new data: a staggered rollout analysed as a
+difference-in-differences.
 
 {{portrait}}
 
@@ -626,136 +624,26 @@ estimator 2.20 with a standard error of 0.78, covering the truth. Parallel trend
 cannot be examined here, and the sensitivity analysis says how little violation
 the result can absorb.
 
-## Example 4 · Does exporting raise productivity?
+## Matching or difference-in-differences?
 
-Exporters are more productive than non-exporters in almost every economy where
-the comparison has been made, and the question that follows is the one
-@bernard1999 posed: is exporting the cause of the gap, its effect, or both? Firms
-may learn from foreign buyers and competitors; or the better firms may be the
-ones that export. The selection runs through something rarely measured well —
-the quality of management — and in a single cross-section there is no before and
-after to difference. Matching cannot see the confounder and difference-in-
-differences has nothing to difference. A third design is needed.
+The designs of chapters 10 and 11 answer different worries, and each rests on an
+assumption the data cannot test.
 
-![Management quality by export status, visible only because the data are simulated. Exporters are about 0.8 standard deviations better managed; that gap is what the naive comparison mistakes for an effect of exporting.](01-lecture/economist-assets/iv-management.png){fig-alt="Histograms of management quality for exporters and non-exporters."}
-
-The remaining route is a variable that moves treatment from outside the system:
-an **instrumental variable** $Z$. It identifies an effect when it satisfies three
-conditions [@angrist1996].
-
-::: {.definition}
-[**Relevance**]{.term} — $Z$ actually moves the treatment. This is the first
-stage, and it is the only one of the three conditions the data can check.
-:::
-
-::: {.definition}
-[**Independence**]{.term} — $Z$ is as good as randomly assigned, unrelated to the
-unmeasured causes of the outcome.
-:::
-
-::: {.definition}
-[**Exclusion**]{.term} — $Z$ affects the outcome *only through* the treatment.
-:::
-
-Here the candidate is distance to the nearest port. Firms far from a port export
-less, because shipping costs more; where a firm sits was settled by history, not
-by its managers; and — the claim that carries everything — distance matters for
-productivity only by changing who exports. The data are simulated, 2,000 firms,
-so the truth is known: exporting adds 5. In version A all three conditions hold.
-In version B remote firms also pay more for their inputs, so distance lowers
-productivity directly and the exclusion fails.
-
-![The instrument. Distance moves exporting; management, never observed, drives both exporting and productivity. In B, distance also reaches productivity directly.](01-lecture/economist-assets/iv-diagram.png){fig-alt="Distance to port → exports → productivity, with unobserved management affecting both; in B a red arrow from distance to productivity."}
-
-If distance touches productivity only through exporting, its effect on
-productivity (the **reduced form**) must be its effect on exporting (the **first
-stage**) multiplied by the effect of exporting. So the effect is a ratio,
-
-$$
-\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}}
-= \frac{\widehat{\operatorname{Cov}}(Y, Z)}{\widehat{\operatorname{Cov}}(D, Z)} ,
-$$
-
-and two-stage least squares computes the same number with a correct standard
-error.
-
-```{python}
-#| label: check-iv
-#| code-summary: "Run it: naive, the two stages by hand, and two-stage least squares"
-
-import statsmodels.api as sm
-from statsmodels.sandbox.regression.gmm import IV2SLS
-
-for version, direct in [("A", 0.0), ("B", -0.02)]:
-    rng = np.random.default_rng(13)
-    n_firms = 2000
-    management = rng.normal(0, 1, n_firms)                     # never in the data
-    distance = rng.uniform(0, 300, n_firms)                    # km to the nearest port
-    exports = (0.8 * management - 0.01 * distance + rng.normal(0, 1, n_firms) > -1.5).astype(int)
-    productivity = (100 + 5 * exports + 6 * management + direct * distance
-                    + rng.normal(0, 5, n_firms))
-    firms = pd.DataFrame({"exports": exports, "distance": distance, "productivity": productivity})
-
-    gap = firms.groupby("exports")["productivity"].mean()
-    first = smf.ols("exports ~ distance", data=firms).fit()
-    reduced = smf.ols("productivity ~ distance", data=firms).fit()
-    iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),
-                sm.add_constant(firms[["distance"]])).fit()
-    print(f"version {version}: naive {gap[1] - gap[0]:5.2f}   "
-          f"first stage {first.params['distance']:.4f} (F {first.tvalues['distance'] ** 2:.0f})   "
-          f"reduced form {reduced.params['distance']:.4f}   "
-          f"IV {iv.params['exports']:.2f} (SE {iv.bse['exports']:.2f})   truth 5")
-```
-
-![The two regressions behind the ratio, in version A. Each extra 100 km cuts the share of firms exporting by 27 points and productivity by 1.24; the ratio is 4.6.](01-lecture/economist-assets/iv-two-stages.png){fig-alt="Binned scatter plots: exporting share and productivity both falling with distance to port."}
-
-![Naive and instrumental-variable estimates in both versions, against the truth.](01-lecture/economist-assets/iv-estimates.png){fig-alt="Version A: naive 10.0, IV 4.6 covering 5; version B: naive 11.6, IV 12.1."}
-
-In version A the naive comparison says 10, double the truth, because exporters
-are about 0.8 standard deviations better managed; the instrument gives 4.6 with
-a standard error of 0.76, covering the truth. In version B the first stage is
-exactly as strong — the F statistic of 543 is far above any conventional bar —
-and the estimate is 12.1, *further* from the truth than the naive comparison.
-Nothing in the output distinguishes the two versions, because the condition that
-failed is the one the data cannot test.
-
-Two practical warnings. Running the second stage by hand — regressing the
-outcome on the *fitted* treatment with `smf.ols` — gives the right coefficient
-and the wrong standard error, since it ignores that the fitted values were
-estimated; use a two-stage routine. And what IV identifies is the effect on the
-units whose treatment the instrument actually moved — the *compliers*, here the
-firms whose export decision depends on their distance to a port — not on every
-firm. A weak first stage makes everything worse: the estimate becomes noisy and
-biased toward the naive one, which is why the F statistic is reported.
-
-**Example 4 in three sentences.** When the confounder is unmeasured and there is
-no before and after, a variable that moves treatment from outside can still
-identify the effect, as the ratio of the reduced form to the first stage. With a
-valid instrument it recovers the truth where the naive gap was double. Good
-instruments are rare because the exclusion restriction is an argument, and when
-it fails the estimate can be worse than doing nothing.
-
-## Matching, difference-in-differences or an instrument?
-
-The three designs of chapters 10 and 11 answer different worries, and each rests
-on an assumption the data cannot test.
-
-| | Matching (chapter 10) | Difference-in-differences | Instrumental variable |
-|---|---|---|---|
-| **Uses** | comparisons on what was measured | changes within units over time | only the variation in treatment the instrument causes |
-| **Assumes** | conditional independence | parallel trends | relevance, independence, exclusion |
-| **Needs** | rich pre-treatment covariates, overlap | observations before and after | a variable that moves treatment from outside |
-| **Checkable part** | balance, overlap | pre-trends, with several pre-periods | the first stage |
-| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path | the instrument has its own path to the outcome |
+| | Matching (chapter 10) | Difference-in-differences |
+|---|---|---|
+| **Uses** | comparisons on what was measured | changes within units over time |
+| **Assumes** | conditional independence | parallel trends |
+| **Needs** | rich pre-treatment covariates, overlap | observations before and after |
+| **Checkable part** | balance, overlap | pre-trends, with several pre-periods |
+| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path |
 
 Choose the design whose assumption can be argued best in the setting at hand, and
 say in words which assumption that is.
 
 ## Doing it · A difference-in-differences study, from the panel to the sensitivity analysis
 
-The four examples showed the two designs of this chapter working, and failing.
-This section and the next carry each one out from the first file to the
-reported number, on data that appear nowhere else in the chapter, because the
+The three examples showed the design working, and failing. This section carries
+it out from the first file to the reported number, on data that appear nowhere else in the chapter, because the
 order of the steps is most of the method and it is easier to see on a clean
 case.
 
@@ -954,131 +842,6 @@ study, clustered by unit, and let the years before the policy speak. With
 staggered timing, put an estimator built for it beside two-way fixed effects,
 and say how large a violation the result survives.
 
-## Doing it · An instrument, from the first stage to the estimate
-
-Does attending an international trade fair raise a firm's export sales?
-Ambitious firms attend more and export more, ambition is in no file, and there
-is no before and after. But suppose the trade agency once mailed a voucher for
-a free stand to 1,500 of 3,000 firms, drawn at random. The voucher is then a
-candidate instrument, and a better one than distance to a port: it is relevant
-if firms with a voucher attend more, which can be checked; it is independent of
-the firms' hidden traits because it was drawn; and it is excludable if a
-voucher changes exports only by getting a firm to the fair, which has to be
-argued. The data are simulated, with a true effect of attending of 12
-(\$ thousand).
-
-```{python}
-#| label: check-fair-naive
-#| code-summary: "Run it: 3,000 firms, and what the naive comparisons say"
-
-import statsmodels.api as sm
-from statsmodels.sandbox.regression.gmm import IV2SLS
-
-rng = np.random.default_rng(13)
-n_fair = 3000
-ambition = rng.normal(0, 1, n_fair)                              # in no file
-employees = rng.lognormal(3, 0.7, n_fair).round() + 1
-voucher = (rng.permutation(n_fair) < n_fair // 2).astype(int)    # the agency drew who received one
-attends = (0.9 * ambition + 1.2 * voucher + rng.normal(0, 1, n_fair) > 0.8).astype(int)
-exports = (40 + 12 * attends + 10 * ambition + 5 * np.log(employees)
-           + rng.normal(0, 12, n_fair)).round(1)
-fair = pd.DataFrame({"employees": employees, "voucher": voucher,
-                     "attends": attends, "exports": exports})
-fair["log_employees"] = np.log(fair["employees"])
-
-gap = fair.groupby("attends")["exports"].mean()
-controlled = smf.ols("exports ~ attends + log_employees", data=fair).fit()
-print(f"naive: attenders minus the rest = {gap[1] - gap[0]:.1f}   (truth 12)")
-print(f"regression, controlling for size: {controlled.params['attends']:.1f}")
-```
-
-The naive comparison says 21.2, and controlling for the one characteristic in
-the file leaves it at 21.2. A control can only remove confounding by something
-that was measured.
-
-**Step 1 · Check the instrument.** Two of the three conditions leave traces in
-the data. Independence can be examined on anything fixed before the vouchers
-went out: firms with and without one should look alike. Relevance is the first
-stage, a regression of the treatment on the instrument.
-
-**Step 2 · The reduced form, and the ratio.** The reduced form is the
-regression of the outcome on the instrument. Both it and the first stage
-compare firms by the draw, so both are free of selection.
-
-```{python}
-#| label: check-fair-stages
-#| code-summary: "Run it: balance, the first stage, the reduced form and their ratio"
-
-print(fair.groupby("voucher")[["employees", "attends", "exports"]].mean().round(2).to_string())
-
-balance_fair = smf.ols("log_employees ~ voucher", data=fair).fit()
-first = smf.ols("attends ~ voucher", data=fair).fit()
-reduced = smf.ols("exports ~ voucher", data=fair).fit()
-
-print(f"\ndoes the voucher predict firm size?  p = {balance_fair.pvalues['voucher']:.2f}")
-print(f"first stage:  a voucher raises attendance by {first.params['voucher']:.2f}   "
-      f"F = {first.tvalues['voucher'] ** 2:.0f}")
-print(f"reduced form: a voucher raises exports by    {reduced.params['voucher']:.2f}")
-print(f"ratio: {reduced.params['voucher'] / first.params['voucher']:.1f}   (truth 12)")
-```
-
-Firms with and without a voucher are the same size, as a draw implies. The
-voucher raised attendance from 29% to 62%, a first stage with an F statistic of
-383, far above the conventional bar of 10. And it raised exports by 3.86. If
-the voucher acts only through attendance, those 3.86 are the effect of sending
-an extra third of the firms to the fair, so the effect of attending is
-3.86 / 0.34 = 11.5.
-
-**Step 3 · Two-stage least squares.** The ratio has no standard error. A
-two-stage routine gives the same number with one, and takes controls. A control
-goes in both lists, the regressors and the instruments, since it serves as its
-own instrument.
-
-```{python}
-#| label: check-fair-iv
-#| code-summary: "Run it: the same estimate with a standard error, then with a control"
-
-iv_fair = IV2SLS(fair["exports"],
-                 sm.add_constant(fair[["attends"]]),
-                 sm.add_constant(fair[["voucher"]])).fit()
-iv_size = IV2SLS(fair["exports"],
-                 sm.add_constant(fair[["attends", "log_employees"]]),
-                 sm.add_constant(fair[["voucher", "log_employees"]])).fit()
-
-for name, result in [("instrument only", iv_fair), ("with firm size", iv_size)]:
-    low, high = result.conf_int().loc["attends"]
-    print(f"{name:16s} {result.params['attends']:5.1f}   se {result.bse['attends']:.1f}   "
-          f"95% CI [{low:.1f}, {high:.1f}]")
-```
-
-The estimate is 11.5 with an interval from 8.1 to 14.9, which contains the
-truth and excludes the naive 21. The interval is wide for 3,000 firms, and that
-is the price of the design: the instrument uses only the part of attendance
-that the voucher caused, about a third of it, and discards the rest as
-contaminated.
-
-**Step 4 · What the number means, and what could break it.** This step is
-written and not computed. The estimate describes the firms that attended
-*because of* the voucher, the compliers of @angrist1996. Firms that would have
-gone anyway and firms that would never go contribute nothing, since the voucher
-did not change what they did, and the report should say so. And the exclusion
-restriction has to be argued in words: does a voucher change exports in any
-other way? If the letter also advertised the agency's export loans, it does,
-and the ratio is wrong by an amount that no output shows, exactly as in
-version B of Example 4.
-
-The link with chapter 10 is worth making explicit. There, some firms drawn for
-a trial refused the treatment, and dividing the effect of the draw by the share
-that took it up recovered the effect of taking it. That was this estimator. An
-encouragement, a lottery, a distance, an eligibility rule: every instrument is
-an attempt to find a draw that someone else made.
-
-**The instrument in three sentences.** Check that the instrument is as good as
-random on what was fixed before, and that it moves the treatment strongly. The
-estimate is the reduced form divided by the first stage, with a standard error
-from a two-stage routine. Say whom it describes, and argue the exclusion in
-words, because nothing computed can.
-
 ## What difference-in-differences cannot fix
 
 **Anything that changes at the same time as treatment.** Fixed effects remove
@@ -1130,15 +893,9 @@ assumption the finding actually needs rather than being told it holds.
 On inference, the reference remains Bertrand, Duflo and Mullainathan, discussed
 in chapter 3: DiD data are serially correlated panels, and standard errors that
 ignore it reject true nulls at many times the nominal rate.
-
-For the case where neither design applies, @angrist1996 set out the conditions
-under which an instrument identifies a causal effect, and showed that what it
-identifies is the effect on the units the instrument moves, not on everyone.
 :::
 
 ## What to report
-
-**For a difference-in-differences**
 
 1. **The adoption structure.** How many units in each cohort, how many periods
    before and after, and which cohorts are unusable. A table of this is worth
@@ -1164,15 +921,3 @@ identifies is the effect on the units the instrument moves, not on everyone.
    departure from parallel trends at which the finding stops holding — is worth
    more than a pre-trend $p$-value, and unlike the $p$-value it can be reported
    even when there is nothing to test.
-
-**For an instrument**
-
-1. **The naive estimate**, and why it cannot be trusted.
-2. **Why the instrument is as good as random**, with balance on what was fixed
-   before it was assigned.
-3. **The first stage** and its F statistic.
-4. **The reduced form**, then the two-stage estimate with its interval.
-5. **Whom the estimate describes**: the units whose treatment the instrument
-   moved.
-6. **The argument for exclusion**, in words. It is the condition the result
-   rests on and the one no output can support.

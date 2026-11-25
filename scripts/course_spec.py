@@ -335,15 +335,14 @@ SESSIONS = {
         title="Causal Inference II: Difference-in-Differences",
         short="Causal inference (2/2)",
         question="What would have happened otherwise?",
-        methods="parallel trends, the interaction as the estimate, instrumental variables",
+        methods="parallel trends, the interaction as the estimate, staggered adoption",
         theme="What is your counterfactual, and would anyone believe it?",
         objectives=[
             "Set up a **difference-in-differences** design and identify the four cells",
             "Read the **interaction coefficient** as the estimate",
             "State the **parallel-trends** assumption and how you would probe it",
             "Explain why **two-way fixed effects** can mislead under staggered adoption",
-            "Explain what an **instrument** must satisfy, and why good ones are rare",
-            "Say what neither design can rescue",
+            "Say what difference-in-differences cannot rescue",
         ],
         reading=("Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at "
                  "the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)"),
@@ -359,7 +358,7 @@ SESSIONS = {
         loses_marks=[
             "A DiD with no evidence on parallel trends",
             "Reading the post-treatment dummy as the effect",
-            "An instrument justified only by its first stage",
+            "Two-way fixed effects alone under staggered adoption",
             "Claiming a causal effect the design cannot deliver",
         ],
     ),

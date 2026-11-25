@@ -106,7 +106,7 @@ Everyone pushes at least once. The log is the record of participation.
 
 - A DiD with no evidence on parallel trends
 - Reading the post-treatment dummy as the effect
-- An instrument justified only by its first stage
+- Two-way fixed effects alone under staggered adoption
 - Claiming a causal effect the design cannot deliver
 
 ---

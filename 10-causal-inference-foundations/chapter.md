@@ -754,8 +754,8 @@ firms offered them took nothing. It is an honest answer to a slightly different
 question, and often the one a policy-maker needs, since a programme can only
 offer. Dividing it by the take-up share gives \$175, an estimate of the effect
 on the firms that took the orders. That division is an instrumental-variables
-estimate with the draw as the instrument [@angrist1996], and chapter 11 returns
-to it.
+estimate with the draw as the instrument [@angrist1996], a design this book
+does not develop further.
 
 **The trial in three sentences.** Size it before it starts, draw once with a
 seed, and check the draw on the baseline file. The estimate is a difference in

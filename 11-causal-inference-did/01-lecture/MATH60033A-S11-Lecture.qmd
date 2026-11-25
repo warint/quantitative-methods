@@ -37,25 +37,21 @@ format:
     footer: "MATH60033A · Session 11 · Thierry Warin, PhD · HEC Montréal"
 ---
 
-<!-- The deck teaches through four examples first, with no code on screen: a
+<!-- The deck teaches through three examples first, with no code on screen: a
      simulated affordable-housing policy in two periods (the two differences),
      the same city over six years (parallel trends, and an event study that
      catches its failure), and the course's own data on national AI strategies
      adopted in different years (TWFE against Callaway-Sant'Anna, and a
-     Rambachan-Roth sensitivity analysis), and simulated exporters where neither
-     design applies and an instrument does, then fails its exclusion. The code
-     comes last, in the in-class part, and does not replay those examples: it
-     explains the two designs and has the students carry each one out on new
-     simulated data. A difference-in-differences: a staggered rollout of export
-     desks across 40 regions (panel and adoption table, the plot, one clean
-     2x2, an event study by regression, TWFE against Callaway-Sant'Anna,
-     sensitivity). An instrument: a randomly drawn trade-fair voucher (naive,
-     balance and first stage, reduced form and ratio, IV2SLS, whom the estimate
-     describes). Every cell is live: it executes at render time. The first cell
-     of each design writes a small CSV (export_desks.csv, trade_fair.csv) and
-     the later cells read it, so each runs on its own once the first has run;
-     the CSVs are git-ignored.
-     The charts of the four examples are drawn by
+     Rambachan-Roth sensitivity analysis). The code comes last, in the in-class
+     part, and does not replay those examples: the students carry out a
+     difference-in-differences from start to finish on new simulated data, a
+     staggered rollout of export desks across 40 regions (panel and adoption
+     table, the plot, one clean 2x2, an event study by regression, TWFE against
+     Callaway-Sant'Anna, the Bacon decomposition, sensitivity). Every cell is
+     live: it executes at render time. The first cell writes a small CSV
+     (export_desks.csv) and the later cells read it, so each runs on its own
+     once the first has run; the CSV is git-ignored.
+     The charts of the three examples are drawn by
      economist-assets/build_did_figures.py, from the examples' own simulations
      and data. -->
 ```{python}
@@ -81,9 +77,8 @@ pd.set_option("display.max_columns", 10)
 2. Example 1 · Did affordable housing lower nearby prices?
 3. Example 2 · Were the trends parallel?
 4. Example 3 · Do national AI strategies raise firms' AI use?
-5. Example 4 · Does exporting raise productivity?
-6. Wrapping up · What the design cannot fix
-7. In class · The two designs, done in Python
+5. Wrapping up · What the design cannot fix
+6. In class · A difference-in-differences, done in Python
 
 ## What session 11 is for {.scrollable}
 ::::: columns
@@ -96,7 +91,7 @@ pd.set_option("display.max_columns", 10)
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
 - {'Explain why **two-way fixed effects** can mislead under staggered adoption': 'the **forbidden comparison**'}
-- Say what an **instrument** must satisfy, and why good ones are rare
+- Say what difference-in-differences **cannot** fix, and what to report
 
 ::::
 
@@ -108,7 +103,7 @@ pd.set_option("display.max_columns", 10)
 - Build the four cells, then get the same number from an interaction in `smf.ols`, clustered by unit
 - Estimate an event study by regression and let the pre-period speak for the design
 - Handle staggered adoption with `diff_diff.CallawaySantAnna`, open up TWFE with `BaconDecomposition`, and test sturdiness with `HonestDiD`
-- Check an instrument's first stage, then estimate with `IV2SLS`
+- Write up the estimate with its objective, its evidence and its breakdown value
 
 ::::
 
@@ -164,10 +159,9 @@ among units that were **not** treated. Two differences, hence the name.
 :::
 
 ::: {.check}
-**Four examples:** a housing policy in two periods (the idea), the same city over six years (the
-assumption, and how it fails), national AI strategies adopted in different years (the method, on the
-course's own data), and exporting firms, where neither matching nor DiD can work and an **instrument**
-does, until its key condition fails.
+**Three examples:** a housing policy in two periods (the idea), the same city over six years (the
+assumption, and how it fails), and national AI strategies adopted in different years (the method, on the
+course's own data).
 :::
 
 ::: {.muted}
@@ -325,8 +319,6 @@ $\beta_0 + \beta_1 + \beta_2$; what they actually reached is that plus $\beta_3$
 | **Staggered adoption** · **cohort** | units treated in different years; a cohort is the units first treated in the same year | the AI strategies, 2021–2023 |
 | **TWFE** · two-way fixed effects | a regression with a dummy per unit and per year, plus the treatment | Example 3 |
 | **ATT** · average treatment effect on the treated | the effect on those who got the policy (session 10) | what DiD estimates |
-| **Instrument** · IV, instrumental variable | a variable that moves the treatment and touches the outcome **only through it** | distance to port, Example 4 |
-| **First stage** / **reduced form** | the instrument's effect on the treatment / on the outcome; IV = their ratio | Example 4 |
 
 ## The assumption, stated exactly {.scrollable}
 
@@ -791,144 +783,17 @@ trends holding exactly.
 the adoption structure, a staggered-robust estimate beside TWFE, and how much violation the result survives.
 :::
 
-## Example 4 · Does exporting raise productivity? {.center}
-
-## The case: learning by exporting {.scrollable}
-
-Exporters are more productive than non-exporters, everywhere it has been measured. Does **exporting make
-firms more productive** (they learn from foreign buyers and competitors), or do the **better firms export**?
-
-| Column | Meaning |
-|---|---|
-| `exports` | 1 = the firm exports |
-| `productivity` | a productivity index |
-| `distance` | km from the firm to the nearest port |
-| `management` | the quality of management: **not in the data** |
-
-::: {.step .question}
-**The question:** how much does exporting itself raise a firm's productivity, when the firms that export
-are the better-managed ones?
-:::
-
-::: {.muted}
-**Simulated**, 2,000 firms, so we know the truth: exporting adds **+5**. Well-managed firms export more *and*
-are more productive anyway.
-:::
-
-## Why neither matching nor DiD can help {.scrollable}
-
-::: columns
-::: {.column width="50%"}
-::: {.warn}
-**Matching** (session 10) needs the confounder in the data. Management is not: exporters are 0.8 standard
-deviations better managed, and no score built from what we have can see it.
-:::
-:::
-::: {.column width="50%"}
-::: {.warn}
-**DiD** needs a before and an after. This is one year of data: no firm is seen switching, so there is no
-first difference to take.
-:::
-:::
-:::
-
-![](economist-assets/iv-management.png){.wide fig-alt="Histograms of management quality: exporters average +0.40, non-exporters −0.39."}
-
-::: {.check}
-**The naive comparison** of exporters and non-exporters says **+10.0**: double the truth. Half of it is
-management: the gap in the picture, which real data never record.
-:::
-
-## The instrument: distance to the nearest port {.scrollable}
-
-![](economist-assets/iv-diagram.png){.wide fig-alt="Distance to port causes exports, which cause productivity; management, unobserved, causes both. In B, distance also affects productivity directly."}
-
-| An instrument must be | Here | Testable? |
-|---|---|---|
-| **relevant**: it moves the treatment | firms far from a port export less: shipping costs more | **yes**: the first stage |
-| **independent**: as good as random | where a firm sits was decided by history, not by its managers | no: an argument |
-| **excludable**: it affects the outcome **only through** the treatment | distance matters for productivity only by changing who exports | no: an argument |
-
-## Two regressions and a ratio {.scrollable}
-
-![](economist-assets/iv-two-stages.png){fig-alt="Left: the share exporting falls by 27 points per 100 km. Right: average productivity falls by 1.24 per 100 km."}
-
-::: columns
-::: {.column width="50%"}
-**First stage:** each extra 100 km cuts the share of firms exporting by **27 points** (F = 543: strong).
-
-**Reduced form:** each extra 100 km cuts productivity by **1.24**.
-:::
-::: {.column width="50%"}
-::: {.check}
-**If distance touches productivity only through exporting**, the 1.24 is the effect of 27 points of
-exporting, so
-$$
-\widehat{\beta}_{\text{IV}} = \frac{\text{reduced form}}{\text{first stage}} = \frac{-0.0124}{-0.0027} = 4.6 .
-$$
-Two-stage least squares gives the same number, with a standard error: **4.6 (0.76)**.
-:::
-:::
-:::
-
-::: {.muted}
-**The F statistic** measures how strongly the instrument moves the treatment; with one instrument it is the
-square of the first stage's t statistic. Below about 10 the instrument is called **weak**, and the ratio
-becomes unstable: a small first stage in the denominator magnifies every error in the numerator. The ratio
-uses both slopes **per km** (−1.24 and −27 per 100 km); the units cancel either way.
-:::
-
-## The results, against the truth, and when exclusion fails {.scrollable}
-
-::: {.muted}
-**Predict first:** in version B the first stage is exactly as strong. Will IV be closer to the truth than
-the naive 10, or further?
-:::
-
-
-![](economist-assets/iv-estimates.png){.mid fig-alt="Version A: naive 10.0, IV 4.6 with interval covering 5. Version B: naive 11.6, IV 12.1."}
-
-::: columns
-::: {.column width="50%"}
-::: {.check}
-**Version A:** the instrument is valid, and IV gives **4.6**, its interval covering the truth of 5. The
-naive comparison said 10.0.
-:::
-:::
-::: {.column width="50%"}
-::: {.warn}
-**Version B:** remote firms also pay more for their inputs, so distance lowers productivity **directly**.
-The first stage is just as strong (F = 543), and IV says **12.1**: worse than the naive comparison. Nothing
-in the output warns you.
-:::
-:::
-:::
-
-## Example 4 · Plain summary {.scrollable}
-
-- When the confounder is not measured and there is no before and after, a variable that moves the
-  treatment **from outside** can still identify the effect.
-- IV is the reduced form divided by the first stage: **4.6** against a truth of 5, where the naive gap said 10.
-- The only checkable condition is the first stage. **Exclusion is an argument**, and when it fails, IV can be
-  further from the truth than the naive comparison.
-
-::: {.step}
-**What this example teaches:** instruments are rare because the conditions that matter most cannot be tested.
-Lotteries, distances, rainfall and birth dates have all been used, and each has been argued to fail the
-exclusion. Optional practice: [an IV example (R, RPubs)](https://rpubs.com/Sternonyos/913599).
-:::
-
 ## Wrapping up · What the design cannot fix {.center}
 
-## Matching, DiD or an instrument? {.scrollable}
+## Matching or difference-in-differences? {.scrollable}
 
-| | Matching (session 10) | Difference-in-differences | Instrumental variable |
-|---|---|---|---|
-| **Removes** | differences in what you **measured** | everything **constant** about a unit | it uses **only** the variation in treatment the instrument causes |
-| **Assumes** | no unmeasured confounder | parallel trends | relevance, independence, **exclusion** |
-| **Needs** | rich covariates, overlap | data before and after | a variable that moves treatment from outside |
-| **Checkable part** | balance, overlap | pre-trends, with several pre-periods | the first stage |
-| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path (Ex. 2B) | the instrument has its own path to the outcome (Ex. 4B) |
+| | Matching (session 10) | Difference-in-differences |
+|---|---|---|
+| **Removes** | differences in what you **measured** | everything **constant** about a unit, measured or not |
+| **Assumes** | no unmeasured confounder | parallel trends |
+| **Needs** | rich covariates, overlap | data before and after |
+| **Checkable part** | balance, overlap | pre-trends, with several pre-periods |
+| **Fails when** | an unmeasured trait drives selection | the treated were already on a different path (Ex. 2B) |
 
 ::: {.check}
 **They answer different worries**, and each rests on an assumption the data cannot test. Choose the design
@@ -958,30 +823,30 @@ whose assumption you can **argue** best for your setting, and say which assumpti
 | 6 | the event study: is the pre-period flat? | the DiD year by year |
 | 7 | staggered timing: a robust estimator beside TWFE; then sensitivity | `diff_diff.CallawaySantAnna`, `HonestDiD` |
 
-## In class · The two designs, done in Python {.center}
+## In class · A difference-in-differences, done in Python {.center}
 
-## Two more solutions to the same problem {.scrollable}
+## A third solution to the same problem {.scrollable}
 
-Session 10 gave two solutions to selection: a trial, and matching on what you measured. Today's two are for
-when the reason units were treated is **not measured** and you could not draw.
+Session 10 gave two solutions to selection: a trial, and matching on what you measured. Today's is for when
+the reason units were treated is **not measured** and you could not draw.
 
-| | **Solution 3 · Difference-in-differences** | **Solution 4 · An instrument** |
-|---|---|---|
-| When | you observe treated and untreated units **before and after** | no before and after, but something **outside** pushed some units into treatment |
-| The idea | compare **changes**, not levels: the control group's change stands in for what the treated would have done | use **only** the part of treatment that the outside push caused |
-| Why it removes selection | anything **constant** about a unit cancels in its own change | the push is unrelated to the unit's hidden traits |
-| What you must assume | **parallel trends**: without the policy, both groups would have changed alike | **exclusion**: the push affects the outcome only through the treatment |
-| What you check | the years **before** the policy | the **first stage**: does the push move the treatment? |
-| The estimate | the interaction of *treated* and *after* | reduced form divided by first stage |
+| | **Solution 3 · Difference-in-differences** |
+|---|---|
+| When | you observe treated and untreated units **before and after** the policy |
+| The idea | compare **changes**, not levels: the control group's change stands in for what the treated would have done |
+| Why it removes selection | anything **constant** about a unit cancels in its own change |
+| What you must assume | **parallel trends**: without the policy, both groups would have changed alike |
+| What you check | the years **before** the policy |
+| The estimate | the interaction of *treated* and *after* |
 
 ::: {.step}
-Neither needs the confounder to be measured. Each replaces "nothing unmeasured matters" with a different
-assumption, and each assumption is an **argument**, with one part you can check.
+It does not need the confounder to be measured. It replaces "nothing unmeasured matters" with a different
+assumption, **parallel trends**, which is an **argument**, with one part you can check.
 :::
 
 ## How this part works {.scrollable}
 
-You now **do** each design from start to finish, on **new data**, not the lecture's examples. The packages,
+You now **do** the design from start to finish, on **new data**, not the lecture's examples. The packages,
 by name: `numpy`, `pandas`, `statsmodels`, `matplotlib`, `diff_diff`.
 
 ::: columns
@@ -1007,7 +872,7 @@ by name: `numpy`, `pandas`, `statsmodels`, `matplotlib`, `diff_diff`.
 :::
 
 ::: {.check}
-The **first cell** of each design writes a small data file in your folder; every later cell starts by
+The **first cell** writes a small data file in your folder; every later cell starts by
 reading it, so each cell runs on its own once the first has run. Keep the file: it is the template for
 your project.
 :::
@@ -1408,273 +1273,8 @@ The interval is for the average effect over the six years after opening, whose t
 For each task, write one sentence beginning *"This shows that …"* before moving to the next.
 :::
 
-## Solution 4 · An instrument, step by step {.scrollable}
-
-**The case.** Does attending an international **trade fair** raise a firm's export sales? Ambitious firms
-attend more and export more, and ambition is in no file; there is no before and after. But the trade
-agency once mailed a **voucher** for a free stand to 1,500 of 3,000 firms, **drawn at random**. Simulated
-data, so the truth is known: attending adds **+12** (\$ thousand).
-
-| An instrument must be | Here | Checkable? |
-|---|---|---|
-| **relevant**: it moves the treatment | firms with a voucher attend more often | **yes**: the first stage |
-| **independent**: as good as random | the vouchers were drawn | **partly**: balance on what was fixed before |
-| **excludable**: it affects the outcome **only through** the treatment | a voucher changes exports only by getting a firm to the fair | no: an argument |
-
-::: {.how}
-| Step | Objective: the question it answers | What the code does | You are done when |
-|----|------------|------------|----------|
-| 1 | Is the **naive** answer wrong, and can a control repair it? | compares attenders with the rest, then adds firm size | you can say why neither number can be trusted |
-| 2 | Does the voucher pass the **two checks** the data allow? | balance on firm size; the first stage and its F | you have a p-value and an F to report |
-| 3 | Where does the estimate **come from**? | the reduced form, divided by the first stage | you can explain the division in words |
-| 4 | What is its **uncertainty**? | two-stage least squares, with and without a control | you have an interval |
-| 5 | **Whom** does it describe, and what could break it? | nothing: this step is written | you have the sentence, and the exclusion argument |
-:::
-
-## Instrument · Step 1 · The file, and the naive answer {.scrollable}
-
-::: {.step}
-**Objective.** Establish the **problem** before the solution: show that comparing attenders with the rest
-gives a wrong answer, and that controlling for what is in the file does not repair it. If a regression could
-fix this, no instrument would be needed.
-:::
-
-```{python}
-#| echo: true
-
-# Instrument, step 1 · 3,000 firms; attending the fair adds exactly +12; ambition is never recorded
-import numpy as np
-import pandas as pd
-import statsmodels.formula.api as smf
-
-rng = np.random.default_rng(13)                 # simulated here; in your project, the file you were given
-n = 3000
-ambition = rng.normal(0, 1, n)                                   # in no file
-employees = rng.lognormal(3, 0.7, n).round() + 1
-voucher = (rng.permutation(n) < n // 2).astype(int)              # the agency drew who received one
-attends = (0.9 * ambition + 1.2 * voucher + rng.normal(0, 1, n) > 0.8).astype(int)
-exports = (40 + 12 * attends + 10 * ambition + 5 * np.log(employees) + rng.normal(0, 12, n)).round(1)
-firms = pd.DataFrame({"employees": employees, "voucher": voucher, "attends": attends, "exports": exports})
-firms.to_csv("trade_fair.csv", index=False)
-
-naive = firms.groupby("attends")["exports"].mean()
-controlled = smf.ols("exports ~ attends + np.log(employees)", data=firms).fit()
-print(f"naive: attenders minus the rest = {naive[1] - naive[0]:.1f}   (truth 12)")
-print(f"regression, controlling for size: {controlled.params['attends']:.1f}")
-```
-
-::: {.how}
-| What the code does | Instruction | How it serves the objective |
-|-----------|-----------|-----------|
-| draws a trait for each firm that is never saved | `ambition = rng.normal(0, 1, n)` | the **unmeasured confounder** |
-| sends a voucher to a random half of the firms | `voucher = (rng.permutation(n) < n // 2)` | the **instrument**: a draw, so unrelated to ambition |
-| lets a firm attend if it is ambitious enough **or** pushed by a voucher | `attends = (0.9 * ambition + 1.2 * voucher + ... > 0.8)` | selection into treatment, and the voucher's pull on it |
-| makes exports depend on attending (+12) **and** on ambition directly | `exports = 40 + 12 * attends + 10 * ambition + ...` | the **truth** to recover, and the reason a naive comparison is confounded |
-| saves four columns; `ambition` is not one of them | `firms = pd.DataFrame({...})`, `.to_csv(...)` | you now hold what an analyst would hold |
-| compares average exports of attenders and non-attenders | `firms.groupby("attends")["exports"].mean()` | the **naive** answer |
-| adds the only control available | `smf.ols("exports ~ attends + np.log(employees)")` | tests whether a control can repair it |
-:::
-
-::: {.check}
-**Read the output.** Naive: **21.2**. With firm size controlled: **21.2**. Truth: 12. Nine points of the
-gap are ambition, and no column can remove them. Matching would fail for the same reason, and there is no
-"before" to difference away. This is the situation an instrument is for.
-:::
-
-## Instrument · Step 2 · Check the instrument {.scrollable}
-
-::: {.step}
-**Objective.** Run the **two checks the data allow**. *Independence*: was the voucher really unrelated to
-what firms were like? Look for balance on a trait fixed before the draw. *Relevance*: did the voucher change
-who attended, and strongly enough? That is the first stage.
-:::
-
-```{python}
-#| echo: true
-
-# Instrument, step 2 · Is the voucher as good as random, and does it move attendance?
-import numpy as np
-import pandas as pd
-import statsmodels.formula.api as smf
-
-firms = pd.read_csv("trade_fair.csv")
-print(firms.groupby("voucher")[["employees", "attends"]].mean().round(2))
-
-balance = smf.ols("np.log(employees) ~ voucher", data=firms).fit()
-first = smf.ols("attends ~ voucher", data=firms).fit()
-
-print(f"does the voucher predict firm size?  p = {balance.pvalues['voucher']:.2f}")
-print(f"first stage: a voucher raises attendance by {first.params['voucher']:.2f}   "
-      f"F = {first.tvalues['voucher'] ** 2:.0f}")
-```
-
-::: {.how}
-| What the code does | Instruction | How it serves the objective |
-|-----------|-----------|-----------|
-| compares firms with and without a voucher, on size and on attendance | `firms.groupby("voucher")[["employees", "attends"]].mean()` | both checks, in one table, before any test |
-| asks whether the voucher "predicts" a trait fixed before the draw | `smf.ols("np.log(employees) ~ voucher")` | **balance**: with a real draw it should not |
-| measures the difference in attendance between the two groups | `smf.ols("attends ~ voucher")` | the **first stage**: the voucher's effect on the treatment |
-| squares the t statistic | `first.tvalues["voucher"] ** 2` | with one instrument this is the first-stage **F**, the usual measure of strength |
-:::
-
-::: {.check}
-**Read the output.** **Balance:** 26.6 employees without a voucher, 27.6 with, p = 0.41: no sign the draw
-was anything but a draw. **First stage:** 29% attend without a voucher, 62% with: the voucher raises
-attendance by **0.34**, F = **383**, far above the usual threshold of 10. The voucher changed the behaviour
-of about one firm in three.
-:::
-
-::: {.warn}
-A weak instrument (a small F) gives an estimate that is noisy **and** biased. Neither check says anything
-about exclusion: that is step 5.
-:::
-
-## Instrument · Step 3 · The reduced form, and the ratio {.scrollable}
-
-::: {.step}
-**Objective.** Build the estimate **by hand**, to see where it comes from. Two comparisons, both made
-**by the draw** and therefore both free of selection: what the voucher did to exports, and what it did to
-attendance. Their ratio is the effect of attending.
-:::
-
-```{python}
-#| echo: true
-
-# Instrument, step 3 · What the voucher did to exports, divided by what it did to attendance
-import pandas as pd
-import statsmodels.formula.api as smf
-
-firms = pd.read_csv("trade_fair.csv")
-first = smf.ols("attends ~ voucher", data=firms).fit().params["voucher"]
-reduced = smf.ols("exports ~ voucher", data=firms).fit().params["voucher"]
-
-print(f"reduced form: a voucher raises exports by     {reduced:.2f}")
-print(f"first stage:  a voucher raises attendance by  {first:.2f}")
-print(f"instrument estimate = reduced / first =       {reduced / first:.1f}   (truth 12)")
-```
-
-::: {.how}
-| What the code does | Instruction | How it serves the objective |
-|-----------|-----------|-----------|
-| measures the voucher's effect on attendance, and keeps the coefficient | `smf.ols("attends ~ voucher") ... .params["voucher"]` | the **first stage**, again: the share of firms the voucher moved |
-| measures the voucher's effect on exports | `smf.ols("exports ~ voucher") ... .params["voucher"]` | the **reduced form**: what the draw did to the outcome, over all firms |
-| divides one by the other | `reduced / first` | rescales the effect from "per voucher sent" to "per firm that attended because of it" |
-:::
-
-::: {.check}
-**Read the output.** A voucher raised exports by **3.86** on average. But it changed what only **34 firms
-in 100** did; the other 66 contribute zero to that average. **If** the voucher acts only by sending firms to
-the fair, the 3.86 is the fair's effect diluted over everyone: $3.86 / 0.34 =$ **11.5** per firm that went
-because of it (the division uses unrounded numbers). Truth: 12. Naive: 21.2.
-:::
-
-## Instrument · Step 4 · Two-stage least squares {.scrollable}
-
-::: {.step}
-**Objective.** Get the **same estimate with a correct standard error**, so that it can be reported with an
-interval, and learn where a control variable goes. The ratio of step 3 is a number without uncertainty.
-:::
-
-```{python}
-#| echo: true
-
-# Instrument, step 4 · The same estimate with a correct standard error, then with a control
-import numpy as np
-import pandas as pd
-import statsmodels.api as sm
-from statsmodels.sandbox.regression.gmm import IV2SLS
-
-firms = pd.read_csv("trade_fair.csv")
-firms["log_employees"] = np.log(firms["employees"])
-
-# IV2SLS(outcome, [constant + treatment + controls], [constant + instrument + controls])
-iv = IV2SLS(firms["exports"],
-            sm.add_constant(firms[["attends"]]),
-            sm.add_constant(firms[["voucher"]])).fit()
-with_size = IV2SLS(firms["exports"],
-                   sm.add_constant(firms[["attends", "log_employees"]]),
-                   sm.add_constant(firms[["voucher", "log_employees"]])).fit()
-
-for name, fit in [("instrument only", iv), ("with firm size", with_size)]:
-    low, high = fit.conf_int().loc["attends"]
-    print(f"{name:16s} {fit.params['attends']:5.1f}   se {fit.bse['attends']:.1f}   95% CI [{low:.1f}, {high:.1f}]")
-```
-
-::: {.how}
-| What the code does | Instruction | How it serves the objective |
-|-----------|-----------|-----------|
-| stores the control as a column | `firms["log_employees"] = np.log(...)` | `IV2SLS` takes tables of columns, not a formula |
-| second argument: a constant and the **treatment** | `sm.add_constant(firms[["attends"]])` | the equation you want to estimate |
-| third argument: a constant and the **instrument** | `sm.add_constant(firms[["voucher"]])` | what stands in for the treatment in the first stage |
-| runs both stages and corrects the standard error | `IV2SLS(outcome, ..., ...).fit()` | **the interval this step is for** |
-| puts the control in **both** lists | `[["attends", "log_employees"]]`, `[["voucher", "log_employees"]]` | a control is its own instrument |
-| prints estimate, standard error and interval for each version | the `for` loop | the two lines to compare |
-:::
-
-::: {.check}
-**Read the output.** **11.5**, standard error 1.7, interval **[8.1, 14.9]**: the step 3 ratio, now with its
-uncertainty. It covers the truth of 12 and excludes the naive 21.2. Adding firm size gives 11.3: it barely
-moves, as it should when the instrument was drawn at random. The interval is wide because the instrument
-uses only the part of attendance the voucher caused, about a third of it. That is the price of the design.
-:::
-
-::: {.warn}
-**Do not run the second stage yourself with `smf.ols`** on predicted attendance: the number is right and
-the standard error is wrong. `IV2SLS` does both stages and corrects it.
-:::
-
-## Instrument · Step 5 · What the number means, and what could break it {.scrollable}
-
-::: {.step}
-**Objective.** Turn the number into a **sentence you can defend**. No code: this step is written, and it is
-the one a reader will press you on. Two things to state: **whom** the estimate describes, and **why** the
-voucher could not have reached exports by any other road.
-:::
-
-::: columns
-::: {.column width="50%"}
-::: {.check}
-**Whom it describes.** The estimate is the effect of the fair on firms that attended **because of** the
-voucher. Firms that would have gone anyway, and firms that would never go, contribute nothing: the voucher
-did not change what they did. Say so when you report it.
-:::
-:::
-::: {.column width="50%"}
-::: {.warn}
-**What could break it.** Exclusion: does a voucher change exports in **any other way**? If the letter
-also advertised the agency's export loans, it does, and the ratio is wrong by an amount no output shows.
-:::
-:::
-:::
-
-::: {.check}
-**The sentence.** *"Among firms that attend a fair only when offered a free stand, about a third of all
-firms, attending raises export sales by about \$11,500 (95% interval \$8,100 to \$14,900). This rests on the
-voucher affecting exports only through attendance: the letter offered nothing else."*
-:::
-
-::: {.muted}
-The link with session 10: firms that refused the treatment in a trial. There, the **draw** was the
-instrument for **taking** the treatment. An encouragement, a lottery, a distance, an eligibility rule:
-every instrument is an attempt to find a draw that someone else made.
-:::
-
-## Your turn · The instrument {.scrollable}
-
-| | Objective | What to change | What to look for |
-|--|--------|-----------|-----------|
-| **1** | **See what a weak instrument does.** | In step 1, change `1.2 * voucher` to `0.1 * voucher`; rerun steps 1, 2 and 4. | What happens to the F statistic, to the estimate and to its interval? |
-| **2** | **See that a failed exclusion is silent.** | Back at `1.2`, add `+ 3 * voucher` to `exports` in step 1: the letter helped firms directly. Rerun steps 2 to 4. | Does any check in step 2 warn you? How far is the estimate from 12? |
-| **3** | **See why the second stage is not run by hand.** | In step 4, save the first stage's `.fittedvalues` as a column `fitted` and run `smf.ols("exports ~ fitted")`. | Compare the coefficient and the standard error with `IV2SLS`. |
-
-::: {.step}
-For each task, write one sentence beginning *"This shows that …"* before moving to the next.
-:::
-
 ## What to report {.scrollable}
 
-::: columns
-::: {.column width="50%"}
 **For a difference-in-differences**
 
 1. **The adoption structure**: units per cohort, years before and after, and which cohorts are unusable.
@@ -1683,22 +1283,9 @@ For each task, write one sentence beginning *"This shows that …"* before movin
 4. **A staggered-robust estimator beside TWFE.** If they disagree, that is the finding.
 5. **Standard errors clustered by unit**, with the number of clusters.
 6. **What else changed at the same time**, and **how much violation** the result survives.
-:::
-
-::: {.column width="50%"}
-**For an instrument**
-
-1. **The naive estimate**, and why it cannot be trusted.
-2. **Why the instrument is as good as random**, with balance on what was fixed before.
-3. **The first stage** and its F statistic.
-4. **The reduced form**, then the two-stage estimate with its interval.
-5. **Whom the estimate describes**: the units the instrument moved.
-6. **The argument for exclusion**, in words.
-:::
-:::
 
 ::: {.warn}
-**A flat pre-trend makes parallel trends plausible, and a strong first stage makes an instrument relevant. Neither makes the design true.**
+**A flat pre-trend makes parallel trends plausible. It does not make the design true.**
 :::
 
 ## Before the next session {.scrollable}

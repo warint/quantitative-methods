@@ -254,9 +254,6 @@ SNIPPETS = {
     "dd.BaconDecomposition": 'bacon = dd.BaconDecomposition().fit(panel, outcome="exporters", unit="region",\n'
                              '    time="year", first_treat="opened")\n'
                              'bacon.to_dataframe()[["treated_group", "control_group", "estimate", "weight"]]',
-    "IV2SLS": "from statsmodels.sandbox.regression.gmm import IV2SLS\n"
-              'iv = IV2SLS(firms["productivity"], sm.add_constant(firms[["exports"]]),\n'
-              '            sm.add_constant(firms[["distance"]])).fit()   # outcome, treatment, instrument',
     "Treatment(reference=2017)": 'smf.ols("exporters ~ treated * C(year, Treatment(reference=2017))", data=clean).fit()\n'
                                  "# one interaction per year: the gap that year minus the gap in 2017",
     "plt.errorbar": 'plt.errorbar(study.index, study["effect"], yerr=1.96 * study["se"], fmt="o", capsize=3)',

@@ -177,7 +177,7 @@ Full brief: **[`RESEARCH-MANDATES.md`](RESEARCH-MANDATES.md)**.
 | 08 | K-Nearest Neighbours and the Bias–Variance Trade-off | nearest neighbours, distance, choosing $k$ by cross-validation | Does flexibility buy you anything on your own data? |
 | 09 | Structural Equation Modelling | measurement and structural models, latent variables, fit indices | What is the construct behind your indicators? |
 | 10 | Causal Inference I: Counterfactuals, Randomisation, Matching | potential outcomes, randomisation, propensity scores, matching | Can your project support a causal claim at all? |
-| 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, instrumental variables | What is your counterfactual, and would anyone believe it? |
+| 11 | Causal Inference II: Difference-in-Differences | parallel trends, the interaction as the estimate, staggered adoption | What is your counterfactual, and would anyone believe it? |
 | 12 | Final Group Presentations | Closing address | What the twelve weeks established |
 | 13 | One More Thing: Principal Component and Factor Analyses | eigenvalues, loadings, scree plots, rotation, FAMD | *(self-study, after the course, not examined)* |
 

@@ -21,7 +21,7 @@ The lecture is delivered from the slides:
 > source: [`MATH60033A-S11-Lecture.qmd`](MATH60033A-S11-Lecture.qmd)
 
 This page is the companion: what the session covers, what you should be able to do afterwards, and
-what loses marks. Every code example in the deck is **Python**. The first cell of each design
+what loses marks. Every code example in the deck is **Python**. The first cell
 simulates its data and writes a small CSV in your folder; every later cell starts from that file, so
 each runs on its own once the first has run.
 
@@ -29,9 +29,9 @@ each runs on its own once the first has run.
 
 ## What the lecture covers
 
-The lecture is built on **four examples**, with no code on screen while they are taught. The code
-comes at the end and does not replay the examples: it explains the two designs,
-difference-in-differences and an instrument, and has you carry each one out on new data.
+The lecture is built on **three examples**, with no code on screen while they are taught. The code
+comes at the end and does not replay the examples: you carry out a difference-in-differences from start
+to finish on new data.
 
 1. **The language of difference-in-differences (DiD)** — the two differences and why one is not
    enough, the canonical real case (Card and Krueger's minimum wage, New Jersey against Pennsylvania),
@@ -45,11 +45,8 @@ difference-in-differences and an instrument, and has you carry each one out on n
    numbers; when it matters, with Goodman-Bacon's divorce-law case); Callaway–Sant'Anna and the other
    repairs (stacked DiD, Wooldridge's extended TWFE); and how much violation of parallel trends the
    result survives
-5. **Example 4 · Does exporting raise productivity?** — 2,000 simulated firms, management unobserved:
-   distance to the nearest port as an instrument, the first stage and the reduced form, two-stage least
-   squares against the truth, and what happens when the exclusion fails
-6. **Wrapping up** — matching, DiD or an instrument; what DiD cannot fix; the seven steps
-7. **In class · The two designs, done in Python** — what each design is and why it removes
+5. **Wrapping up** — matching or DiD; what DiD cannot fix; the seven steps
+6. **In class · A difference-in-differences, done in Python** — what the design is and why it removes
    selection, then each step on one slide in the same four parts: the **objective** (the question the
    step answers), **the code**, **what the code does** (each instruction and how it serves the
    objective) and **read the output** (the numbers you should see, and the conclusion):
@@ -57,10 +54,7 @@ difference-in-differences and an instrument, and has you carry each one out on n
      waves): the panel and the adoption table, the plot, one clean 2×2, an event study by regression,
      two-way fixed effects against Callaway–Sant'Anna, the big regression opened up into its 2×2
      comparisons (`dd.BaconDecomposition`), and a sensitivity analysis
-   - **an instrument, step by step** (a randomly drawn voucher for a trade fair): the naive answer,
-     balance and the first stage, the reduced form and the ratio, two-stage least squares, and whom
-     the estimate describes
-   - a *Your turn* for each, every task with its objective
+   - a *Your turn*, every task with its objective
 
 ---
 
@@ -72,30 +66,27 @@ By the end of the session you should be able to:
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
 - Explain why **two-way fixed effects** can mislead under staggered adoption
-- Explain what an **instrument** must satisfy, and why good ones are rare
-- Say what neither design can rescue
+- Say what difference-in-differences cannot rescue
 
 ---
 
 ## The data
 
-**The four examples: three simulations, and the course data on national AI strategies**
+**The three examples: two simulations, and the course data on national AI strategies**
 
 ```python
 import qmib
 wide = qmib.load("angle_c_country")    # Example 3: AI use and AI strategies, by country and year
 ```
 
-The lecture's charts are drawn from these. Examples 1, 2 and 4 are simulated.
+The lecture's charts are drawn from these. Examples 1 and 2 are simulated.
 
-**The in-class code: two new simulations, each with a known effect**
+**The in-class code: a new simulation, with a known effect**
 
 - `export_desks.csv` — 40 regions, 2014–2023; export desks open in 12 regions in 2018 and 10 more in
   2021 (true effect: 2 points of exporting firms per year open)
-- `trade_fair.csv` — 3,000 firms, half of which were sent a voucher for a trade fair at random (true
-  effect of attending: +12, \$ thousand of exports)
 
-The first cell of each design writes its file; nothing is downloaded.
+The first cell writes the file; nothing is downloaded.
 
 ---
 
@@ -116,7 +107,7 @@ If a package is missing, `pip install -r requirements.txt` from the repository r
 
 - A DiD with no evidence on parallel trends
 - Reading the post-treatment dummy as the effect
-- An instrument justified only by its first stage
+- Two-way fixed effects alone under staggered adoption
 - Claiming a causal effect the design cannot deliver
 
 ---

@@ -12,7 +12,7 @@ function does or produces. Only the functions this course uses — or the ones y
 | [`pandas.pdf`](pandas.pdf) | tables: load, look, select, clean, summarise, combine | 2 to 13 |
 | [`numpy.pdf`](numpy.pdf) | arrays, logs and exponentials, grids, linear algebra, random numbers | 2 to 13 |
 | [`matplotlib.pdf`](matplotlib.pdf) | the anatomy of a figure, and the plots the course draws | 3 to 13 |
-| [`statsmodels.pdf`](statsmodels.pdf) | OLS from a formula, diagnostics, binary, ordinal and multinomial logits, DiD, clustering and instrumental variables | 2 to 7, 9 to 11, 13 |
+| [`statsmodels.pdf`](statsmodels.pdf) | OLS from a formula, diagnostics, binary, ordinal and multinomial logits, DiD and clustering | 2 to 7, 9 to 11, 13 |
 | [`sklearn.pdf`](sklearn.pdf) | scikit-learn: fit and predict, pipelines, ridge, lasso, elastic net, cross-validation, KNN | 5 to 8, 10, 13 |
 | [`scipy.pdf`](scipy.pdf) | `scipy.stats`: shape statistics, tests, distributions | 2, 4, 5, 6, 9, 10 |
 | [`linearmodels.pdf`](linearmodels.pdf) | panel data: fixed and random effects | 6 |

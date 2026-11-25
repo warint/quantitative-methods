@@ -213,14 +213,13 @@ TOOLKIT = {
     ".conf_int": ("10", "Read the fit", "the 95% confidence interval of every coefficient"),
     "np.percentile": ("10", "Read the fit", "a bootstrap interval: the 2.5th and 97.5th percentiles of the draws"),
 
-    # ---- Session 11 · difference-in-differences, and an instrument -------------
+    # ---- Session 11 · difference-in-differences --------------------------------
     ".unstack()": ("11", "Describe", "the four means as a table: groups in rows, periods in columns"),
     'cov_type="cluster"': ("11", "Fit", "standard errors clustered by unit: each unit is seen several times"),
     "C(region)": ("11", "Fit", "a dummy per category in a formula: `C(region) + C(year)` is two-way fixed effects"),
     "dd.CallawaySantAnna": ("11", "Fit", "DiD with staggered adoption: each cohort against clean controls, then averaged"),
     "dd.HonestDiD": ("11", "Choose and validate", "how large a violation of parallel trends the result survives"),
     "dd.BaconDecomposition": ("11", "Choose and validate", "open up two-way fixed effects: every 2x2 comparison inside it, with its weight"),
-    "IV2SLS": ("11", "Fit", "two-stage least squares: the instrument's effect, with a correct standard error"),
     "Treatment(reference=2017)": ("11", "Fit", "in `C(year, ...)`: the year every other year is compared with, in an event study"),
     "plt.errorbar": ("11", "Plot", "points with their confidence intervals: an event study, year by year"),
 }

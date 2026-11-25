@@ -31,8 +31,7 @@ By the end of this session you should be able to:
 - Read the **interaction coefficient** as the estimate
 - State the **parallel-trends** assumption and how you would probe it
 - Explain why **two-way fixed effects** can mislead under staggered adoption
-- Explain what an **instrument** must satisfy, and why good ones are rare
-- Say what neither design can rescue
+- Say what difference-in-differences cannot rescue
 
 ---
 
@@ -41,7 +40,7 @@ By the end of this session you should be able to:
 | Phase | When | What | Where |
 |---|---|---|---|
 | **Pre-session** | Before class | The reading, and the data it uses | [`00-pre-session/`](00-pre-session/README.md) |
-| **First half** (~90 min) | In class | Lecture: parallel trends, the interaction as the estimate, instrumental variables | [`01-lecture/`](01-lecture/README.md) |
+| **First half** (~90 min) | In class | Lecture: parallel trends, the interaction as the estimate, staggered adoption | [`01-lecture/`](01-lecture/README.md) |
 | **Second half** (~90 min) | In class | Group work in VS Codium with your local LLM | [`02-practice/`](02-practice/README.md) |
 | **After class** | At home, optional | The **QMIB Lab** — a knowledge check on this session | [warin.ca/qmib-labs](https://warin.ca/qmib-labs/qmib-lab-11.html) |
 
