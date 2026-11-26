@@ -1,3 +1,5 @@
+<!-- authored: do not regenerate -->
+
 # Session 11 — Pre-session preparation
 
 > **What would have happened otherwise?**
@@ -5,13 +7,14 @@
 > **[Open the pre-session slides](https://warint.github.io/quantitative-methods/session-11-pre-session.html)** ·
 > source: [`MATH60033A-S11-Pre-Session.qmd`](MATH60033A-S11-Pre-Session.qmd)
 
-Two things to do before class, and they are the two halves of the practice.
-Budget **60–90 minutes**.
+Three things to do before class, and each one is a step of the practice.
+Budget **75–90 minutes**.
 
-| | Before class | Used in the practice for |
-|---|---|---|
-| **1** | Read the paper | reproducing one of its results |
-| **2** | Get both datasets | that, and applying the method to your own angle |
+| | Before class | Objective | Used in the practice for |
+|---|---|---|---|
+| **1** | Read the paper | find the difference-in-differences inside it | step 1, reproducing its number |
+| **2** | Get the data, map your project | have everything run, and know your four columns | steps 2 and 3 |
+| **3** | Self-check | know what the lecture will build on | the lecture |
 
 ---
 
@@ -20,30 +23,30 @@ Budget **60–90 minutes**.
 **Cavallo, Gopinath, Neiman & Tang (2021), *Tariff Passthrough at the Border and at the Store: Evidence from US Trade Policy*, American Economic Review: Insights 3(1)**
 [Read the article](https://doi.org/10.1257/aeri.20190536)
 
-Read for the **argument**, not for coverage:
+**Objective:** find the difference-in-differences inside the paper. Read for the **argument**, not for
+coverage, and annotate the answers to five questions; the practice opens with them.
 
-| | What to look for |
-|---|---|
-| **1** | The research question, in one sentence |
-| **2** | The method or design, and why they chose it |
-| **3** | The strongest single piece of evidence |
-| **4** | One limitation you would raise as a referee |
+| | Question | Why it matters |
+|---|---|---|
+| **1** | What is **treated**, and what is the **control** group? | the second difference is only as good as the controls |
+| **2** | What are the **dates**: before, after, and is adoption staggered? | decides which comparisons exist |
+| **3** | Which **coefficient** is the estimate, and in what **units**? | the number you will reproduce |
+| **4** | What evidence do they show for **parallel trends**? | an event study, a pre-period, an argument? |
+| **5** | What could **change at the same time** as the treatment? | the first objection a referee would raise |
 
-**Annotate as you go.** You will be asked what you underlined and why.
+A question the paper leaves open is a finding: write it down.
 
 ---
 
-## 2. The data — 10 min
-
-You need **two** datasets in the practice, and both should be on your machine before you arrive.
+## 2. The data, and your project — 15 min
 
 ### a) The paper's data
 
-This is what you work against in the first twenty minutes of the practice.
+**Objective:** spend the first twenty minutes of the practice reproducing a number, not downloading one.
 
 **Harvard Dataverse: [10.7910/DVN/JV7FCH](https://doi.org/10.7910/DVN/JV7FCH)**
 
-Download it once, and unzip it here — the folder is git-ignored, so nothing large is committed:
+Unzip it here — the folder is git-ignored, so nothing large is committed:
 
 ```text
 11-causal-inference-did/data/replication/
@@ -51,29 +54,42 @@ Download it once, and unzip it here — the folder is git-ignored, so nothing la
 
 Keep the authors' own folder structure and README.
 
-> **Note.** This deposit sits behind a Dataverse **guestbook**, so the `curl` recipe above returns an error for this session. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, accept the terms once, and unzip it to the same folder. Everything after that is identical.
+> **Note.** This deposit sits behind a Dataverse **guestbook**, so a scripted download returns an
+> error. Open the DOI in a browser, click **Access Dataset -> Download ZIP**, accept the terms once,
+> and unzip it to the folder above.
 
-### b) The course data, for your own angle
+### b) The course data, and the estimators
 
-This is what you apply the method to in the second half.
+**Objective:** check that the practice's data and estimators run on your machine.
 
 ```python
 import qmib
+import diff_diff as dd
 
-data = qmib.load("core")      # what the lecture uses
-core = qmib.load("core")                 # shared by every group
-mine = qmib.load("angle_c_country")      # YOUR angle — see your dictionary
-
-print(data.shape, core.shape, mine.shape)
+ai = qmib.load("angle_c_country")           # the practice ground: AI strategies, 30 countries
+print(ai.shape, ai["has_ai_strategy"].sum(), "country-years with a strategy")
+print("diff-diff", dd.__version__)          # the estimators of the lecture and the practice
 ```
 
-The spine's post-2021 structural break, treated as a policy change.
+You should see `(330, 33) 61 country-years with a strategy` and `diff-diff` 3.11 or later. It
+downloads once and caches as parquet. `ModuleNotFoundError: diff_diff` means
+`pip install -r requirements.txt` from the repository root, with the environment active.
 
-> Run this **before** class. It downloads once and caches as parquet, so the practice works
-> whatever the room's wifi is doing. `qmib.catalog()` lists everything available.
+### c) Your project, on paper
 
-Your group's file, columns, units and traps are in your
-[data dictionary](../../data/spine/dictionaries/).
+**Objective:** know whether a difference-in-differences can apply to your project before the practice
+asks. Every estimator needs four columns:
+
+| Column | On the course data | On your project |
+|---|---|---|
+| **unit** | `geo`, the country | ? |
+| **time** | `time`, the year | ? |
+| **outcome** | `ai_use_any`, % of firms using AI | ? |
+| **adoption year**, 0 if never | from `has_ai_strategy` | which policy, which date, for which units? |
+
+If no unit is ever treated, none stays untreated, or none is observed **before** its treatment, the
+design cannot apply. Knowing that is a full answer ([`RESEARCH-MANDATES.md`](../../RESEARCH-MANDATES.md),
+section 5).
 
 ---
 
@@ -81,17 +97,25 @@ Your group's file, columns, units and traps are in your
 
 Answer on paper. If you cannot, that is what the lecture is for.
 
-1. In one sentence: what does this session's method let you claim that the previous one did not?
-2. What must be true of your data for it to apply?
-3. Which claim in the paper rests on this method — and how hard does it lean on it?
+1. **Compute one.** Full-time staff per fast-food restaurant: New Jersey went from 20.44 to 21.03 after
+   its minimum wage rose; Pennsylvania, which did not change its wage, from 23.33 to 21.17. What is the
+   difference-in-differences, and what would New Jersey have reached without the rise?
+2. **Name the differences.** Which of the two subtractions removes what is **constant** about the
+   treated group, and which removes what happened to **everyone**?
+3. **The assumption.** Parallel trends is about which years: before the policy, or after? Why can no
+   test prove it?
+4. **Session 10 against session 11.** Matching needed every confounder measured. What does
+   difference-in-differences need instead?
+5. **The paper.** Which claim rests on the difference-in-differences, and how hard does it lean on it?
 
 ---
 
 ## Arrive with
 
-- [ ] The paper read and annotated
+- [ ] The paper annotated against the five questions
 - [ ] The replication package downloaded and unzipped
-- [ ] `qmib.load()` run at least once, so the cache exists
+- [ ] The check in 2b run once, so the cache exists
+- [ ] Your project mapped onto four columns, or the reason it cannot be
 - [ ] Your self-check answers, on paper
 
 ---

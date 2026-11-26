@@ -450,11 +450,14 @@ def main():
         d = ROOT / s["dir"]
         (d / "README.md").write_text(session_readme(num, s), encoding="utf-8")
         (d / "00-pre-session").mkdir(exist_ok=True)
-        (d / "00-pre-session/README.md").write_text(pre_session(num, s), encoding="utf-8")
+        pre = d / "00-pre-session/README.md"
+        if not (pre.exists() and AUTHORED in pre.read_text(encoding="utf-8")):
+            pre.write_text(pre_session(num, s), encoding="utf-8")
         (d / "02-practice").mkdir(exist_ok=True)
         brief = d / "02-practice/README.md"
-        # A practice brief rewritten by hand carries the same marker as an
-        # authored deck (scripts/build_session_decks.py) and is left alone.
+        # A practice brief (or a pre-session page, above) rewritten by hand carries
+        # the same marker as an authored deck (scripts/build_session_decks.py) and
+        # is left alone.
         if not (brief.exists() and AUTHORED in brief.read_text(encoding="utf-8")):
             brief.write_text(practice(num, s), encoding="utf-8")
         (d / "data").mkdir(exist_ok=True)
